@@ -1,0 +1,74 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/Overlay.gd" id="1_gd"]
+
+[node name="Overlay" type="Control"]
+anchors_preset = 16
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("1_gd")
+
+[node name="PausePanel" type="Panel" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120
+offset_top = -80
+offset_right = 120
+offset_bottom = 80
+visible = false
+
+[node name="ResumeButton" type="Button" parent="PausePanel"]
+offset_left = 20
+offset_top = 10
+offset_right = 220
+offset_bottom = 45
+text = "继续"
+
+[node name="QuitButton" type="Button" parent="PausePanel"]
+offset_left = 20
+offset_top = 55
+offset_right = 220
+offset_bottom = 90
+text = "退出"
+
+[node name="GameOverPanel" type="Panel" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150
+offset_top = -100
+offset_right = 150
+offset_bottom = 100
+visible = false
+
+[node name="FinalScoreLabel" type="Label" parent="GameOverPanel"]
+offset_left = 20
+offset_top = 20
+offset_right = 280
+offset_bottom = 55
+theme_override_font_sizes/font_size = 24
+text = "最终分数: 0"
+horizontal_alignment = 1
+
+[node name="NewHighScoreLabel" type="Label" parent="GameOverPanel"]
+offset_left = 20
+offset_top = 65
+offset_right = 280
+offset_bottom = 85
+theme_override_font_sizes/font_size = 18
+text = "新纪录!"
+horizontal_alignment = 1
+visible = false
+
+[node name="RestartButton" type="Button" parent="GameOverPanel"]
+offset_left = 60
+offset_top = 110
+offset_right = 240
+offset_bottom = 150
+text = "重新开始"

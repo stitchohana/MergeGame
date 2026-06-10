@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/Main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/grid/GridView.tscn" id="2_grid"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TopBar.tscn" id="3_top"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BottomPanel.tscn" id="4_bottom"]
+[ext_resource type="PackedScene" path="res://scenes/ui/Overlay.tscn" id="5_overlay"]
+
+[node name="Main" type="Control"]
+anchors_preset = 16
+script = ExtResource("1_main")
+
+[node name="TopBar" parent="." instance=ExtResource("3_top")]
+
+[node name="GridView" parent="." instance=ExtResource("2_grid")]
+
+[node name="BottomPanel" parent="." instance=ExtResource("4_bottom")]
+
+[node name="Overlay" parent="." instance=ExtResource("5_overlay")]

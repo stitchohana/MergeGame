@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/BottomPanel.gd" id="1_gd"]
+
+[node name="BottomPanel" type="Control"]
+size = Vector2(390, 40)
+script = ExtResource("1_gd")
+
+[node name="ItemCountLabel" type="Label" parent="."]
+offset_top = 8
+offset_bottom = 36
+theme_override_font_sizes/font_size = 14
+text = "物品: 0/63"
+horizontal_alignment = 1
