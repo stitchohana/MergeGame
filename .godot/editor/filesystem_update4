@@ -1,8 +1,0 @@
-res://scenes/grid/GridView.gd
-res://scenes/Main.gd
-res://scenes/items/GridItem.tscn
-res://scripts/utils/Constants.gd
-res://scenes/items/GridItem.gd
-res://autoload/MergeService.gd
-res://autoload/ConfigDatabase.gd
-res://autoload/GridManager.gd
