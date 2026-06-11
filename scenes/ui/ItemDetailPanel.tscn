@@ -85,8 +85,9 @@ theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 13
 text = "已放入材料"
 
-
-[node name="StatusLabel" type="Label" parent="."]
+[node name="StatusLabel" type="Label" parent="." unique_id=1845956393]
+visible = false
+layout_mode = 0
 offset_left = 140.0
 offset_top = 204.0
 offset_right = 760.0
@@ -94,7 +95,7 @@ offset_bottom = 240.0
 theme_override_colors/font_color = Color(0.9, 0.9, 0.2, 1)
 theme_override_font_sizes/font_size = 16
 vertical_alignment = 1
-visible = false
+
 [node name="MaterialsContainer" type="FlowContainer" parent="." unique_id=334365544]
 layout_mode = 0
 offset_left = 140.0

@@ -11,6 +11,7 @@ const DRAG_THRESHOLD := 10.0  # pixels before drag starts
 @export var grid_item_scene: PackedScene
 
 signal item_clicked(item_data: Dictionary, grid_pos: Vector2i)
+signal pill_dropped_outside(item_data: Dictionary)
 
 var _item_nodes: Dictionary = {}  # "col,row" -> GridItem
 var _cell_nodes: Dictionary = {}  # "col,row" -> GridCell
@@ -125,7 +126,7 @@ func _input(event: InputEvent) -> void:
 		elif _is_dragging:
 			_finish_drag(cell_pos)
 		elif _pressed_has_moved == false and not _pressed_item.is_empty():
-			# Click without drag → launcher spawns
+			# Click without drag
 			item_clicked.emit(_pressed_item, _press_start_pos)
 
 			# Check for READY crafting table click -- retrieve result
@@ -262,6 +263,12 @@ func _finish_drag(target_pos: Vector2i) -> void:
 	_clear_highlights()
 
 	if not GridManager.is_valid_pos(target_pos):
+		# Cultivation pill dropped outside grid -> consume and apply buff
+		if _drag_item_data.get("pill_type") == "cultivation":
+			GridManager.remove_item(_drag_source_pos)
+			pill_dropped_outside.emit(_drag_item_data)
+			GameState.set_phase(GameState.GamePhase.IDLE)
+			return
 		_snap_back()
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return

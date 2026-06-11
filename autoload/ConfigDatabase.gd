@@ -6,6 +6,7 @@ var _game_config: Dictionary = {}
 var _items_data: Dictionary = {}        # item_id -> item_data Dictionary
 var _items_by_type_level: Dictionary = {}  # type -> { level -> Array[item_data] }
 var _initial_setup: Dictionary = {}
+var _cultivation_config: Dictionary = {}
 
 func _ready() -> void:
 	load_all()
@@ -14,6 +15,7 @@ func load_all() -> void:
 	_game_config = _load_json("res://config/game_config.json")
 	_initial_setup = _load_json("res://config/initial_setup.json")
 	_load_items("res://config/items.json")
+	_cultivation_config = _load_json("res://config/cultivation.json")
 	print("[ConfigDatabase] Loaded all configs: ", _items_data.size(), " items defined")
 
 func _load_json(path: String) -> Dictionary:
@@ -170,3 +172,27 @@ func get_game_config(key: String) -> Variant:
 		else:
 			return null
 	return current
+
+# --- Cultivation config ---
+
+func get_cultivation_config() -> Dictionary:
+	return _cultivation_config
+
+func get_realm_config(realm_id: int) -> Dictionary:
+	var realms: Array = _cultivation_config.get("realms", [])
+	for r in realms:
+		if r.get("id", -1) == realm_id:
+			return r
+	return {}
+
+func get_passive_exp_per_second() -> int:
+	return _cultivation_config.get("passive_exp_per_second", 3)
+
+func get_initial_qi() -> int:
+	return _cultivation_config.get("initial_qi", 100)
+
+func get_qi_recovery_per_level() -> int:
+	return _cultivation_config.get("qi_recovery_per_level", 5)
+
+func get_qi_breakthrough_bonus() -> int:
+	return _cultivation_config.get("qi_breakthrough_bonus", 50)

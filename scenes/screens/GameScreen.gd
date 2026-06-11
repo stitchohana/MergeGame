@@ -3,6 +3,7 @@ class_name GameScreen extends BaseScreen
 @onready var overlay: Overlay = $Overlay
 @onready var detail_panel: ItemDetailPanel = $ItemDetailPanel
 @onready var grid_view: GridView = $GridView
+@onready var cultivation_panel: CultivationPanel = $CultivationPanel
 
 func _ready() -> void:
 	randomize()
@@ -10,6 +11,9 @@ func _ready() -> void:
 	# Game initialization
 	GridManager.grid_updated.connect(GameState.check_game_over)
 	_load_initial_setup()
+	# Override with autosave if exists
+	if FileAccess.file_exists("user://autosave.json"):
+		SaveManager.load_autosave()
 	GameState.set_phase(GameState.GamePhase.IDLE)
 
 	# EventBus action handlers
@@ -21,6 +25,10 @@ func _ready() -> void:
 	# Material remove from crafting table
 	detail_panel.material_clicked.connect(_on_material_clicked)
 	grid_view.item_clicked.connect(_on_item_clicked)
+
+	# Cultivation panel
+	cultivation_panel.cultivation_clicked.connect(_on_cultivation_clicked)
+	grid_view.pill_dropped_outside.connect(_on_pill_dropped_outside)
 
 	print("[GameScreen] Game initialized!")
 
@@ -52,6 +60,13 @@ func _on_material_clicked(item_id: int) -> void:
 	if spawn_pos != Vector2i(-1, -1):
 		GridManager.add_item(removed.duplicate(true), spawn_pos)
 	detail_panel._refresh_materials()
+func _on_cultivation_clicked() -> void:
+	var detail := preload("res://scenes/ui/CultivationDetail.tscn").instantiate()
+	UIManager.show_popup(detail)
+
+func _on_pill_dropped_outside(pill_data: Dictionary) -> void:
+	CultivationService.apply_buff(pill_data)
+
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)
 

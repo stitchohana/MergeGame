@@ -1,0 +1,17 @@
+{
+  "passive_exp_per_second": 10,
+  "initial_qi": 100,
+  "qi_recovery_per_level": 5,
+  "qi_breakthrough_bonus": 50,
+  "realms": [
+	{ "id": 0, "name": "凡人", "levels": 1, "base_exp": 20, "growth": 1.0, "qi_bonus": 0, "breakthrough_pill": 0 },
+	{ "id": 1, "name": "练气", "levels": 9, "base_exp": 100, "growth": 1.15, "qi_bonus": 10, "breakthrough_pill": 31 },
+	{ "id": 2, "name": "筑基", "levels": 9, "base_exp": 500, "growth": 1.20, "qi_bonus": 25, "breakthrough_pill": 32 },
+	{ "id": 3, "name": "金丹", "levels": 9, "base_exp": 2000, "growth": 1.25, "qi_bonus": 50, "breakthrough_pill": 33 },
+	{ "id": 4, "name": "元婴", "levels": 9, "base_exp": 10000, "growth": 1.30, "qi_bonus": 100, "breakthrough_pill": 34 },
+	{ "id": 5, "name": "化神", "levels": 9, "base_exp": 50000, "growth": 1.35, "qi_bonus": 200, "breakthrough_pill": 35 },
+	{ "id": 6, "name": "合体", "levels": 9, "base_exp": 200000, "growth": 1.40, "qi_bonus": 500, "breakthrough_pill": 36 },
+	{ "id": 7, "name": "大乘", "levels": 9, "base_exp": 1000000, "growth": 1.45, "qi_bonus": 1000, "breakthrough_pill": 37 },
+	{ "id": 8, "name": "渡劫", "levels": 9, "base_exp": 5000000, "growth": 1.50, "qi_bonus": 2000, "breakthrough_pill": 0 }
+  ]
+}

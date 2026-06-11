@@ -1,0 +1,124 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/CultivationDetail.gd" id="1_gd"]
+
+[node name="CultivationDetail" type="Control"]
+layout_mode = 3
+size = Vector2(780, 1688)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+script = ExtResource("1_gd")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.5)
+mouse_filter = 1
+
+[node name="Panel" type="Panel" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -280.0
+offset_right = 300.0
+offset_bottom = 280.0
+
+[node name="FigureBg" type="ColorRect" parent="Panel"]
+offset_left = 30.0
+offset_top = 30.0
+offset_right = 130.0
+offset_bottom = 130.0
+color = Color(0.15, 0.15, 0.22, 1)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_left = 30
+corner_radius_bottom_right = 30
+
+[node name="Head" type="ColorRect" parent="Panel/FigureBg"]
+offset_left = 30.0
+offset_top = 15.0
+offset_right = 70.0
+offset_bottom = 55.0
+color = Color(0.9, 0.8, 0.7, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_left = 20
+corner_radius_bottom_right = 20
+
+[node name="Body" type="ColorRect" parent="Panel/FigureBg"]
+offset_left = 20.0
+offset_top = 55.0
+offset_right = 80.0
+offset_bottom = 90.0
+color = Color(0.3, 0.5, 0.8, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_left = 5
+corner_radius_bottom_right = 5
+
+[node name="RealmLabel" type="Label" parent="Panel"]
+offset_left = 150.0
+offset_top = 30.0
+offset_right = 570.0
+offset_bottom = 75.0
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 28
+text = "境界名称"
+vertical_alignment = 1
+
+[node name="ExpBar" type="ProgressBar" parent="Panel"]
+offset_left = 150.0
+offset_top = 90.0
+offset_right = 570.0
+offset_bottom = 115.0
+show_percentage = false
+
+[node name="ExpLabel" type="Label" parent="Panel"]
+offset_left = 150.0
+offset_top = 120.0
+offset_right = 570.0
+offset_bottom = 145.0
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "修为: 0/100"
+
+[node name="QiLabel" type="Label" parent="Panel"]
+offset_left = 150.0
+offset_top = 155.0
+offset_right = 570.0
+offset_bottom = 185.0
+theme_override_colors/font_color = Color(0.5, 0.8, 1.0, 1)
+theme_override_font_sizes/font_size = 18
+text = "灵力: 100/100"
+
+[node name="BreakthroughLabel" type="Label" parent="Panel"]
+offset_left = 30.0
+offset_top = 200.0
+offset_right = 570.0
+offset_bottom = 235.0
+theme_override_colors/font_color = Color(1, 0.6, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "需丹药突破"
+visible = false
+
+
+[node name="BuffLabel" type="Label" parent="Panel"]
+offset_left = 30.0
+offset_top = 235.0
+offset_right = 570.0
+offset_bottom = 265.0
+theme_override_colors/font_color = Color(0.3, 1.0, 0.5, 1)
+theme_override_font_sizes/font_size = 14
+text = ""
+visible = false
+[node name="CloseButton" type="Button" parent="Panel"]
+offset_left = 200.0
+offset_top = 250.0
+offset_right = 400.0
+offset_bottom = 280.0
+theme_override_font_sizes/font_size = 16
+text = "关闭"
