@@ -3,7 +3,7 @@ class_name GridView extends Control
 # GridView: Visual 7x9 grid. Handles all input, item visuals, and drag-and-drop.
 
 # Grid dimensions (mirrors Constants.gd — keep in sync)
-const CELL_SIZE := 50
+const CELL_SIZE := 100
 const GRID_COLS := 7
 const GRID_ROWS := 9
 const DRAG_THRESHOLD := 10.0  # pixels before drag starts

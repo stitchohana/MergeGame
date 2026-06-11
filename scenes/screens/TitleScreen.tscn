@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://c5a6l3a3hp2rb"]
+
+[ext_resource type="Script" uid="uid://cg76cjqh23tub" path="res://scenes/screens/TitleScreen.gd" id="1_ts"]
+
+[node name="TitleScreen" type="Control" unique_id=1204287650]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_ts")
+
+[node name="TitleLabel" type="Label" parent="." unique_id=1836287499]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 562.0
+offset_right = 555.0
+offset_bottom = 632.0
+theme_override_font_sizes/font_size = 36
+text = "Merge Game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StartButton" type="Button" parent="." unique_id=586672542]
+layout_mode = 0
+offset_left = 301.0
+offset_top = 699.0
+offset_right = 501.0
+offset_bottom = 759.0
+theme_override_font_sizes/font_size = 20
+text = "开始游戏"
+
+[node name="SettingsButton" type="Button" parent="." unique_id=992073999]
+layout_mode = 0
+offset_left = 302.0
+offset_top = 815.0
+offset_right = 502.0
+offset_bottom = 875.0
+theme_override_font_sizes/font_size = 20
+text = "设置"

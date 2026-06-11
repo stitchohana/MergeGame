@@ -4,7 +4,7 @@ class_name Constants
 # Game dimensions — phone portrait (390×844)
 const GRID_COLS := 7
 const GRID_ROWS := 9
-const CELL_SIZE := 50
+const CELL_SIZE := 100
 const GRID_WIDTH := GRID_COLS * CELL_SIZE
 const GRID_HEIGHT := GRID_ROWS * CELL_SIZE
 

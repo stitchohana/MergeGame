@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://dh7pcck0eqawn"]
+
+[ext_resource type="Script" uid="uid://bhdqr1v0puvbh" path="res://scenes/screens/GameScreen.gd" id="1_gs"]
+[ext_resource type="PackedScene" path="res://scenes/grid/GridView.tscn" id="2_grid"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TopBar.tscn" id="3_top"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BottomPanel.tscn" id="4_bottom"]
+[ext_resource type="PackedScene" path="res://scenes/ui/Overlay.tscn" id="5_overlay"]
+
+[node name="GameScreen" type="Control" unique_id=1938900574]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_gs")
+
+[node name="TopBar" parent="." unique_id=1324420132 instance=ExtResource("3_top")]
+anchors_preset = 0
+anchor_right = 1.0
+offset_bottom = 100.0
+
+[node name="GridView" parent="." unique_id=644218555 instance=ExtResource("2_grid")]
+anchors_preset = 0
+offset_left = 40.0
+offset_top = 404.0
+offset_right = 740.0
+offset_bottom = 1304.0
+
+[node name="BottomPanel" parent="." unique_id=2140314355 instance=ExtResource("4_bottom")]
+anchors_preset = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -80.0
+
+[node name="Overlay" parent="." unique_id=170101279 instance=ExtResource("5_overlay")]
+anchors_preset = 0

@@ -5,8 +5,8 @@
 [ext_resource type="PackedScene" path="res://scenes/items/GridItem.tscn" id="3_item"]
 
 [node name="GridView" type="Control"]
-custom_minimum_size = Vector2(504, 648)
-size = Vector2(504, 648)
+custom_minimum_size = Vector2(700, 900)
+size = Vector2(700, 900)
 script = ExtResource("1_gd")
 grid_cell_scene = ExtResource("2_cell")
 grid_item_scene = ExtResource("3_item")

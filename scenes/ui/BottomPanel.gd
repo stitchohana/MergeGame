@@ -1,4 +1,4 @@
-class_name BottomPanel extends Control
+class_name BottomPanel extends BaseHUD
 
 @onready var item_count_label: Label = $ItemCountLabel
 
