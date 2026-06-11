@@ -42,7 +42,7 @@ func _update_visuals() -> void:
 			_:
 				color = Color(0.5, 0.5, 0.5, 1)
 	else:
-		var level = item_data.get("level", 0)
+		var level: int = item_data.get("level", 0)
 		var hue := 0.0
 		match group_id:
 			1:
@@ -70,7 +70,7 @@ func _update_visuals() -> void:
 		name_label.visible = true
 
 	# Level label
-	var level = item_data.get("level", 0)
+	var level: int = item_data.get("level", 0)
 	if level_label:
 		level_label.text = str(level)
 		level_label.visible = true
@@ -83,6 +83,18 @@ func set_drag_active(active: bool) -> void:
 	else:
 		modulate = Color.WHITE
 		scale = Vector2(1, 1)
+
+func set_crafting_state(state: int) -> void:
+	# state: 0=IDLE, 1=HAS_ITEMS, 2=CRAFTING, 3=READY
+	match state:
+		1:  # HAS_ITEMS — slight glow
+			modulate = Color(1.0, 1.0, 0.8, 1)
+		2:  # CRAFTING — dim with progress pulse
+			modulate = Color(0.6, 0.6, 0.7, 1)
+		3:  # READY — bright glow
+			modulate = Color(1.0, 1.0, 0.6, 1)
+		_:  # IDLE or unknown — reset
+			modulate = Color.WHITE
 
 func set_visual_position(pos: Vector2) -> void:
 	position = pos

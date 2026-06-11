@@ -36,31 +36,48 @@ func _load_items(path: String) -> void:
 
 	# Load regular items
 	var regular: Array = data.get("regular", [])
-	for item in regular:
-		var id: int = item.id
-		item.type = "regular"
-		_items_data[id] = item
+	for reg_item in regular:
+		var id: int = reg_item.id
+		reg_item.type = "regular"
+		_items_data[id] = reg_item
 
-		var level: int = item.level
+		var level: int = reg_item.level
 		if not _items_by_type_level.has("regular"):
 			_items_by_type_level["regular"] = {}
 		if not _items_by_type_level["regular"].has(level):
 			_items_by_type_level["regular"][level] = []
-		_items_by_type_level["regular"][level].append(item)
+		_items_by_type_level["regular"][level].append(reg_item)
 
 	# Load launcher items
 	var launchers: Array = data.get("launcher", [])
-	for item in launchers:
-		var id: int = item.id
-		item.type = "launcher"
-		_items_data[id] = item
+	for laun_item in launchers:
+		var id: int = laun_item.id
+		laun_item.type = "launcher"
+		_items_data[id] = laun_item
 
-		var level: int = item.level
+		var level: int = laun_item.level
 		if not _items_by_type_level.has("launcher"):
 			_items_by_type_level["launcher"] = {}
 		if not _items_by_type_level["launcher"].has(level):
 			_items_by_type_level["launcher"][level] = []
-		_items_by_type_level["launcher"][level].append(item)
+		_items_by_type_level["launcher"][level].append(laun_item)
+
+	# Load crafting items
+	var craftings: Array = data.get("crafting", [])
+	for craft_item in craftings:
+		var id: int = craft_item.id
+		craft_item.type = "crafting"
+		_items_data[id] = craft_item
+
+		var level: int = craft_item.level
+		if not _items_by_type_level.has("crafting"):
+			_items_by_type_level["crafting"] = {}
+		if not _items_by_type_level["crafting"].has(level):
+			_items_by_type_level["crafting"][level] = []
+		_items_by_type_level["crafting"][level].append(craft_item)
+
+	# Store recipes for CraftingService
+	_items_data["_recipes"] = data.get("recipes", [])
 
 # Get item data by numeric ID
 func get_item_data(item_id: int) -> Dictionary:
@@ -118,12 +135,33 @@ func get_all_items_of_type(type: String) -> Array:
 			result.append(item)
 	return result
 
+# Get recipes list
+func get_recipes() -> Array:
+	return _items_data.get("_recipes", [])
+
+# Get recipes allowed for a specific crafting table item
+func get_recipes_for_item(item_id: int) -> Array:
+	var item_data := get_item_data(item_id)
+	if item_data.is_empty():
+		return []
+	var recipe_ids: Array = item_data.get("recipes", [])
+	if recipe_ids.is_empty():
+		return []
+	var all_recipes: Array = get_recipes()
+	var result: Array = []
+	for rid in recipe_ids:
+		for r in all_recipes:
+			if r.get("id", 0) == rid:
+				result.append(r)
+				break
+	return result
+
 # Reload all configs at runtime
 func reload() -> void:
 	load_all()
 
 # Get game config value by key path (e.g., "game.grid_cols")
-func get_game_config(key: String):
+func get_game_config(key: String) -> Variant:
 	var keys := key.split(".")
 	var current = _game_config
 	for k in keys:

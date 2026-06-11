@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://bhdqr1v0puvbh" path="res://scenes/screens/GameScreen.gd" id="1_gs"]
 [ext_resource type="PackedScene" path="res://scenes/grid/GridView.tscn" id="2_grid"]
 [ext_resource type="PackedScene" path="res://scenes/ui/TopBar.tscn" id="3_top"]
-[ext_resource type="PackedScene" path="res://scenes/ui/BottomPanel.tscn" id="4_bottom"]
-[ext_resource type="PackedScene" path="res://scenes/ui/Overlay.tscn" id="5_overlay"]
+[ext_resource type="PackedScene" uid="uid://bi0a8egfjafco" path="res://scenes/ui/Overlay.tscn" id="5_overlay"]
+[ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/ItemDetailPanel.tscn" id="6_detail"]
 
 [node name="GameScreen" type="Control" unique_id=1938900574]
 layout_mode = 3
@@ -12,9 +12,14 @@ anchors_preset = 0
 script = ExtResource("1_gs")
 
 [node name="TopBar" parent="." unique_id=1324420132 instance=ExtResource("3_top")]
-anchors_preset = 0
+layout_mode = 1
+anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 100.0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 781.0
+offset_bottom = 101.0
+grow_horizontal = 2
 
 [node name="GridView" parent="." unique_id=644218555 instance=ExtResource("2_grid")]
 anchors_preset = 0
@@ -23,12 +28,19 @@ offset_top = 404.0
 offset_right = 740.0
 offset_bottom = 1304.0
 
-[node name="BottomPanel" parent="." unique_id=2140314355 instance=ExtResource("4_bottom")]
-anchors_preset = 0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -80.0
+[node name="ItemDetailPanel" parent="." unique_id=1129761759 instance=ExtResource("6_detail")]
+layout_mode = 0
+offset_left = -6.0
+offset_top = 1314.0
+offset_right = 774.0
+offset_bottom = 1594.0
 
 [node name="Overlay" parent="." unique_id=170101279 instance=ExtResource("5_overlay")]
+layout_mode = 0
 anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 385.0
+offset_top = 799.0
+offset_right = 385.0
+offset_bottom = 799.0

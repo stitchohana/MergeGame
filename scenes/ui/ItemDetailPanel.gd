@@ -1,0 +1,212 @@
+class_name ItemDetailPanel extends BaseHUD
+signal material_clicked(item_id: int)
+
+@onready var default_label: Label = $DefaultLabel
+@onready var icon_rect: TextureRect = $IconRect
+@onready var name_label: Label = $NameLabel
+@onready var level_label: Label = $LevelLabel
+@onready var desc_label: Label = $DescLabel
+@onready var recipe_btn: Button = $RecipeButton
+@onready var materials_label: Label = $MaterialsLabel
+@onready var status_label: Label = $StatusLabel
+@onready var materials_container: FlowContainer = $MaterialsContainer
+
+var _current_item_data: Dictionary = {}
+var _current_recipes: Array = []
+var _current_grid_pos: Vector2i = Vector2i(-1, -1)
+
+func _ready() -> void:
+	clear()
+	recipe_btn.pressed.connect(_on_recipe_btn_pressed)
+	CraftingService.table_state_changed.connect(_on_table_state_changed)
+
+func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> void:
+	_current_item_data = item_data
+	_current_grid_pos = grid_pos
+	var item_name: String = item_data.get("name", "")
+	var item_level: int = item_data.get("level", 0)
+	var item_desc: String = item_data.get("describe", "")
+	var item_type: String = item_data.get("type", "regular")
+	var icon_path: String = item_data.get("icon", "")
+
+	default_label.hide()
+
+	# Icon
+	if icon_path and icon_rect:
+		var tex := load(icon_path) as Texture2D
+		if tex:
+			icon_rect.texture = tex
+			icon_rect.show()
+		else:
+			icon_rect.hide()
+	else:
+		icon_rect.hide()
+
+	# Name
+	if name_label:
+		name_label.text = item_name
+		name_label.show()
+
+	# Level
+	if level_label:
+		var type_name := ""
+		match item_type:
+			"launcher": type_name = "发射器"
+			"crafting": type_name = "制作台"
+			_: type_name = "物品"
+		level_label.text = "Lv.%d  %s" % [item_level, type_name]
+		level_label.show()
+
+	# Description
+	if desc_label:
+		desc_label.text = item_desc if item_desc else "暂无描述"
+		desc_label.show()
+
+	# Recipe button and materials (only for crafting tables)
+	if item_type == "crafting":
+		_current_recipes = ConfigDatabase.get_recipes_for_item(item_data.get("id", 0))
+		recipe_btn.visible = not _current_recipes.is_empty()
+		_refresh_materials()
+	else:
+		_current_recipes = []
+		recipe_btn.hide()
+		_hide_materials()
+
+func _refresh_materials() -> void:
+	if _current_item_data.is_empty():
+		_hide_materials()
+		return
+	var state: int = _current_item_data.get("_craft_state", CraftingService.TableState.IDLE)
+	if state == CraftingService.TableState.CRAFTING:
+		status_label.text = "制作中..."
+		status_label.show()
+		materials_label.hide()
+		materials_container.hide()
+		for child in materials_container.get_children():
+			child.queue_free()
+		return
+	if state == CraftingService.TableState.READY:
+		status_label.text = "制作完成！点击取出"
+		status_label.show()
+		materials_label.hide()
+		materials_container.hide()
+		for child in materials_container.get_children():
+			child.queue_free()
+		return
+	status_label.hide()
+	var stored: Array = CraftingService.get_stored_items(_current_item_data)
+	materials_label.visible = true
+	materials_container.visible = true
+	_populate_materials(stored)
+
+func _populate_materials(items: Array) -> void:
+	for child in materials_container.get_children():
+		child.queue_free()
+
+	if items.is_empty():
+		var hint := Label.new()
+		hint.text = "拖动物品到制作台放入材料"
+		hint.add_theme_font_size_override("font_size", 12)
+		hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1))
+		materials_container.add_child(hint)
+		return
+
+	# Group items by id and show count
+	var count_map: Dictionary = {}
+	for item in items:
+		var iid: int = item.get("id", 0)
+		count_map[iid] = count_map.get(iid, 0) + 1
+
+	for iid in count_map:
+		var count: int = count_map[iid]
+		var data := ConfigDatabase.get_item_data(iid)
+		var entry := _build_material_icon(data, count)
+		materials_container.add_child(entry)
+
+func _build_material_icon(item_data: Dictionary, count: int) -> Button:
+	var entry := Button.new()
+	entry.flat = true
+	entry.custom_minimum_size = Vector2(60, 60)
+	entry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+	# Colored square representing the item
+	var rect := ColorRect.new()
+	rect.custom_minimum_size = Vector2(36, 36)
+	rect.size = Vector2(36, 36)
+	rect.position = Vector2(12, 0)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var group_id: int = item_data.get("group_id", 0)
+	var level: int = item_data.get("level", 0)
+	if item_data.get("type", "") == "launcher":
+		match group_id:
+			1: rect.color = Color(0.6, 0.3, 0.8, 1)
+			2: rect.color = Color(1.0, 0.6, 0.2, 1)
+			_: rect.color = Color(0.5, 0.5, 0.5, 1)
+	else:
+		var hue := 0.0
+		match group_id:
+			1: hue = float(level - 1) / 8.0
+			2: hue = 0.25 + float(level - 1) / 6.0 * 0.15
+			_: hue = float(level - 1) / 8.0
+		rect.color = Color.from_hsv(hue, 0.6, 0.7)
+
+	var name_label := Label.new()
+	name_label.text = item_data.get("name", "")
+	name_label.position = Vector2(0, 38)
+	name_label.size = Vector2(60, 12)
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override("font_size", 10)
+	name_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8, 1))
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var count_label := Label.new()
+	count_label.text = "x%d" % count
+	count_label.position = Vector2(0, 50)
+	count_label.size = Vector2(60, 12)
+	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	count_label.add_theme_font_size_override("font_size", 10)
+	count_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	entry.add_child(rect)
+	entry.add_child(name_label)
+	entry.add_child(count_label)
+	var iid: int = item_data.get("id", 0)
+	entry.pressed.connect(func(): material_clicked.emit(iid))
+	return entry
+
+func get_current_craft_table() -> Dictionary:
+	return _current_item_data
+
+func get_current_craft_pos() -> Vector2i:
+	return _current_grid_pos
+func _hide_materials() -> void:
+	status_label.hide()
+	materials_label.hide()
+	materials_container.hide()
+	for child in materials_container.get_children():
+		child.queue_free()
+
+func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
+	# Refresh if currently viewing this crafting table
+	if not _current_item_data.is_empty() and _current_item_data == table_item:
+		_refresh_materials()
+
+func _on_recipe_btn_pressed() -> void:
+	if _current_recipes.is_empty():
+		return
+	var popup := preload("res://scenes/ui/RecipePopup.tscn").instantiate() as RecipePopup
+	UIManager.show_popup(popup)
+	popup.setup(_current_recipes, _current_item_data.get("name", ""))
+
+func clear() -> void:
+	_current_item_data = {}
+	_current_recipes = []
+	_current_grid_pos = Vector2i(-1, -1)
+	default_label.show()
+	icon_rect.hide()
+	name_label.hide()
+	level_label.hide()
+	desc_label.hide()
+	recipe_btn.hide()
+	_hide_materials()

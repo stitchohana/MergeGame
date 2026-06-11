@@ -1,6 +1,8 @@
 class_name GameScreen extends BaseScreen
 
-@onready var overlay = $Overlay
+@onready var overlay: Overlay = $Overlay
+@onready var detail_panel: ItemDetailPanel = $ItemDetailPanel
+@onready var grid_view: GridView = $GridView
 
 func _ready() -> void:
 	randomize()
@@ -14,6 +16,11 @@ func _ready() -> void:
 	EventBus.resume_requested.connect(_on_resume)
 	EventBus.restart_requested.connect(_on_restart)
 	EventBus.pause_requested.connect(_on_pause_requested)
+
+	# Item detail panel
+	# Material remove from crafting table
+	detail_panel.material_clicked.connect(_on_material_clicked)
+	grid_view.item_clicked.connect(_on_item_clicked)
 
 	print("[GameScreen] Game initialized!")
 
@@ -34,11 +41,26 @@ func _load_initial_setup() -> void:
 		if not item_data.is_empty():
 			GridManager.add_item(item_data.duplicate(true), Vector2i(entry.col, entry.row))
 
+func _on_material_clicked(item_id: int) -> void:
+	var table_item := detail_panel.get_current_craft_table()
+	if table_item.is_empty():
+		return
+	var removed := CraftingService.remove_ingredient(table_item, item_id)
+	if removed.is_empty():
+		return
+	var spawn_pos := GridManager.find_nearest_empty(detail_panel.get_current_craft_pos())
+	if spawn_pos != Vector2i(-1, -1):
+		GridManager.add_item(removed.duplicate(true), spawn_pos)
+	detail_panel._refresh_materials()
+func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
+	detail_panel.show_item(item_data, grid_pos)
+
 func _on_restart() -> void:
 	GameState.reset()
 	GridManager.init_grid()
 	_load_initial_setup()
 	GameState.set_phase(GameState.GamePhase.IDLE)
+	detail_panel.clear()
 
 func _on_resume() -> void:
 	GameState.set_phase(GameState.GamePhase.IDLE)

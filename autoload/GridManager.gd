@@ -4,8 +4,8 @@ extends Node
 # All item placement, movement, and lookup operations go through this singleton.
 
 # Grid dimensions (mirrors Constants.gd — keep in sync)
-const GRID_COLS := 7
-const GRID_ROWS := 9
+const GRID_COLS := Constants.GRID_COLS
+const GRID_ROWS := Constants.GRID_ROWS
 
 # _grid[row][col] = { "id": int, "level": int, "type": str } or null
 var _grid: Array[Array] = []
@@ -49,7 +49,7 @@ func is_empty(pos: Vector2i) -> bool:
 		return false
 	return _grid[pos.y][pos.x] == null
 
-func get_item(pos: Vector2i):
+func get_item(pos: Vector2i) -> Variant:
 	if not is_valid_pos(pos):
 		return null
 	return _grid[pos.y][pos.x]
@@ -57,6 +57,7 @@ func get_item(pos: Vector2i):
 # --- Mutations ---
 
 func add_item(item_data: Dictionary, pos: Vector2i) -> bool:
+	item_data = item_data.duplicate(true)
 	if not is_valid_pos(pos) or not is_empty(pos):
 		return false
 	_grid[pos.y][pos.x] = item_data
@@ -140,8 +141,8 @@ func swap_items(pos_a: Vector2i, pos_b: Vector2i) -> void:
 
 # --- Queries ---
 
-func get_neighbors(pos: Vector2i) -> Array:
-	var result: Array = []
+func get_neighbors(pos: Vector2i) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
 	var candidates := [
 		Vector2i(pos.x + 1, pos.y),
 		Vector2i(pos.x - 1, pos.y),
@@ -153,8 +154,8 @@ func get_neighbors(pos: Vector2i) -> Array:
 			result.append(c)
 	return result
 
-func get_occupied_neighbors(pos: Vector2i) -> Array:
-	var result: Array = []
+func get_occupied_neighbors(pos: Vector2i) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
 	for n in get_neighbors(pos):
 		if not is_empty(n):
 			result.append(n)
@@ -193,12 +194,12 @@ func is_grid_full() -> bool:
 	return count_empty_cells() == 0
 
 # Get all positions that have a specific item_id
-func get_positions_by_item_id(item_id: int) -> Array:
+func get_positions_by_item_id(item_id: int) -> Array[Vector2i]:
 	return _item_positions.get(item_id, []).duplicate()
 
 # Get all items on the grid
-func get_all_items() -> Array:
-	var result: Array = []
+func get_all_items() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
 	for row in range(GRID_ROWS):
 		for col in range(GRID_COLS):
 			if _grid[row][col] != null:
@@ -209,8 +210,8 @@ func get_all_items() -> Array:
 	return result
 
 # Get all items of a specific type
-func get_all_items_of_type(type: String) -> Array:
-	var result: Array = []
+func get_all_items_of_type(type: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
 	for row in range(GRID_ROWS):
 		for col in range(GRID_COLS):
 			var item = _grid[row][col]

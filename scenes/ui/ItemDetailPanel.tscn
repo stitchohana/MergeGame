@@ -1,0 +1,103 @@
+[gd_scene format=3 uid="uid://ofi2ei6no4yy"]
+
+[ext_resource type="Script" uid="uid://dc7vlvwt75dgk" path="res://scenes/ui/ItemDetailPanel.gd" id="1_gd"]
+
+[node name="ItemDetailPanel" type="Control" unique_id=607450120]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 780.0
+offset_bottom = 280.0
+script = ExtResource("1_gd")
+
+[node name="Bg" type="ColorRect" parent="." unique_id=98878704]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.1, 0.1, 0.14, 1)
+
+[node name="DefaultLabel" type="Label" parent="." unique_id=1604343573]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 18
+text = "点击物品查看详情"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IconRect" type="TextureRect" parent="." unique_id=1075651916]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 120.0
+offset_bottom = 120.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="." unique_id=849360258]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 20.0
+offset_right = 760.0
+offset_bottom = 55.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 1
+
+[node name="LevelLabel" type="Label" parent="." unique_id=1221540825]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 60.0
+offset_right = 760.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 16
+vertical_alignment = 1
+
+[node name="DescLabel" type="Label" parent="." unique_id=1583989582]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 95.0
+offset_right = 760.0
+offset_bottom = 140.0
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+vertical_alignment = 1
+
+[node name="RecipeButton" type="Button" parent="." unique_id=33481762]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 145.0
+offset_right = 300.0
+offset_bottom = 175.0
+theme_override_font_sizes/font_size = 14
+text = "查看配方"
+
+[node name="MaterialsLabel" type="Label" parent="." unique_id=1916841941]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 182.0
+offset_right = 400.0
+offset_bottom = 200.0
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "已放入材料"
+
+
+[node name="StatusLabel" type="Label" parent="."]
+offset_left = 140.0
+offset_top = 204.0
+offset_right = 760.0
+offset_bottom = 240.0
+theme_override_colors/font_color = Color(0.9, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+vertical_alignment = 1
+visible = false
+[node name="MaterialsContainer" type="FlowContainer" parent="." unique_id=334365544]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 204.0
+offset_right = 760.0
+offset_bottom = 270.0

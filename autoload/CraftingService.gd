@@ -1,0 +1,176 @@
+extends Node
+
+# CraftingService: Manages crafting table state, recipes, and timers.
+# All state is stored directly in the crafting table's item data Dictionary
+# on the grid, so it moves with the item automatically.
+
+enum TableState { IDLE, HAS_ITEMS, CRAFTING, READY }
+
+signal table_state_changed(table_item: Dictionary, state: int)
+
+var _recipes: Array = []
+
+func _ready() -> void:
+	load_recipes()
+
+func load_recipes() -> void:
+	_recipes = ConfigDatabase.get_recipes()
+
+func get_recipes() -> Array:
+	return _recipes
+
+# --- Helpers ---
+
+func _init_craft_data(table_item: Dictionary) -> void:
+	if table_item.has("_craft_init"):
+		return
+	table_item["_craft_init"] = true
+	table_item["_craft_state"] = TableState.IDLE
+	table_item["_craft_stored"] = []
+	table_item["_craft_recipe"] = {}
+	table_item["_craft_progress"] = 0.0
+	table_item["_craft_result_id"] = -1
+
+func _get_state(table_item: Dictionary) -> int:
+	return table_item.get("_craft_state", TableState.IDLE)
+
+func _set_state(table_item: Dictionary, state: int) -> void:
+	table_item["_craft_state"] = state
+
+# --- Public API ---
+
+func add_ingredient(table_item: Dictionary, ingredient_data: Dictionary) -> bool:
+	_init_craft_data(table_item)
+	var stored: Array = table_item["_craft_stored"]
+	stored.append(ingredient_data.duplicate())
+	_set_state(table_item, TableState.HAS_ITEMS)
+
+	var table_id: int = table_item.get("id", 0)
+	var allowed_recipes: Array = ConfigDatabase.get_recipes_for_item(table_id)
+	var recipe := _match_recipe(stored, allowed_recipes)
+	if not recipe.is_empty():
+		table_item["_craft_recipe"] = recipe
+		table_state_changed.emit(table_item, TableState.HAS_ITEMS)
+		return true
+	else:
+		table_item.erase("_craft_recipe")
+
+	table_state_changed.emit(table_item, TableState.HAS_ITEMS)
+	return false
+
+func start_craft(table_item: Dictionary) -> bool:
+	if _get_state(table_item) == TableState.CRAFTING:
+		return false
+	var recipe: Dictionary = table_item.get("_craft_recipe", {})
+	if recipe.is_empty():
+		return false
+
+	_set_state(table_item, TableState.CRAFTING)
+	table_item["_craft_progress"] = 0.0
+	table_item["_craft_stored"] = []
+	table_item["_craft_result_id"] = recipe.get("result", 0)
+
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.wait_time = recipe.get("craft_time", 3.0)
+	timer.timeout.connect(_on_craft_timeout.bind(table_item))
+	add_child(timer)
+	timer.start()
+	table_item["_craft_timer"] = timer
+
+	table_state_changed.emit(table_item, TableState.CRAFTING)
+	return true
+
+func _on_craft_timeout(table_item: Dictionary) -> void:
+	_set_state(table_item, TableState.READY)
+	table_item["_craft_progress"] = 1.0
+	var timer: Timer = table_item.get("_craft_timer")
+	if timer:
+		timer.queue_free()
+		table_item.erase("_craft_timer")
+	table_state_changed.emit(table_item, TableState.READY)
+
+func retrieve(table_item: Dictionary) -> int:
+	if _get_state(table_item) != TableState.READY:
+		return -1
+	var result_id: int = table_item.get("_craft_result_id", -1)
+	_clear_craft_data(table_item)
+	return result_id
+
+func get_stored_items(table_item: Dictionary) -> Array:
+	return table_item.get("_craft_stored", [])
+
+func get_current_recipe(table_item: Dictionary) -> Dictionary:
+	return table_item.get("_craft_recipe", {})
+
+func _clear_craft_data(table_item: Dictionary) -> void:
+	var timer: Timer = table_item.get("_craft_timer")
+	if timer:
+		timer.queue_free()
+	for key in ["_craft_init", "_craft_state", "_craft_stored", "_craft_recipe",
+			"_craft_progress", "_craft_result_id", "_craft_timer"]:
+		table_item.erase(key)
+
+func reset_all() -> void:
+	for child in get_children():
+		if child is Timer:
+			child.queue_free()
+
+# Remove one ingredient by ID. Returns the removed item data, or empty dict if not found.
+func remove_ingredient(table_item: Dictionary, item_id: int) -> Dictionary:
+	var stored: Array = table_item.get("_craft_stored", [])
+	for i in range(stored.size()):
+		if stored[i].get("id", 0) == item_id:
+			var removed: Dictionary = stored[i]
+			stored.remove_at(i)
+			_recheck_recipe(table_item)
+			table_state_changed.emit(table_item, TableState.HAS_ITEMS)
+			return removed
+	return {}
+
+func _recheck_recipe(table_item: Dictionary) -> void:
+	var stored: Array = table_item.get("_craft_stored", [])
+	if stored.is_empty():
+		table_item.erase("_craft_recipe")
+		return
+	var table_id: int = table_item.get("id", 0)
+	var allowed_recipes: Array = ConfigDatabase.get_recipes_for_item(table_id)
+	var recipe := _match_recipe(stored, allowed_recipes)
+	if not recipe.is_empty():
+		table_item["_craft_recipe"] = recipe
+	else:
+		table_item.erase("_craft_recipe")
+
+# --- Recipe matching ---
+
+func _match_recipe(stored: Array, recipes: Array) -> Dictionary:
+	var stored_counts := _count_items(stored)
+	for recipe in recipes:
+		var ingredients: Array = recipe.get("ingredients", [])
+		var required: Dictionary = {}
+		var total_required := 0
+		for req in ingredients:
+			var req_id: int = req.get("id", 0)
+			var req_count: int = req.get("count", 1)
+			required[req_id] = required.get(req_id, 0) + req_count
+			total_required += req_count
+
+		if stored.size() != total_required:
+			continue
+
+		var matched := true
+		for rid in required:
+			if stored_counts.get(rid, 0) != required[rid]:
+				matched = false
+				break
+
+		if matched:
+			return recipe
+	return {}
+
+func _count_items(items: Array) -> Dictionary:
+	var result: Dictionary = {}
+	for item in items:
+		var item_id: int = item.get("id", 0)
+		result[item_id] = result.get(item_id, 0) + 1
+	return result

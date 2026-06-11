@@ -2,14 +2,15 @@ class_name GridView extends Control
 
 # GridView: Visual 7x9 grid. Handles all input, item visuals, and drag-and-drop.
 
-# Grid dimensions (mirrors Constants.gd — keep in sync)
-const CELL_SIZE := 100
-const GRID_COLS := 7
-const GRID_ROWS := 9
+const CELL_SIZE := Constants.CELL_SIZE
+const GRID_COLS := Constants.GRID_COLS
+const GRID_ROWS := Constants.GRID_ROWS
 const DRAG_THRESHOLD := 10.0  # pixels before drag starts
 
 @export var grid_cell_scene: PackedScene
 @export var grid_item_scene: PackedScene
+
+signal item_clicked(item_data: Dictionary, grid_pos: Vector2i)
 
 var _item_nodes: Dictionary = {}  # "col,row" -> GridItem
 var _cell_nodes: Dictionary = {}  # "col,row" -> GridCell
@@ -25,12 +26,19 @@ var _pressed_has_moved: bool = false
 
 var _drag_ghost
 
+# Crafting
+var _craft_button: CraftButton = null
+var _craft_table_pos: Vector2i = Vector2i(-1, -1)
+var _craft_table_item: Dictionary = {}
+var _is_launcher_spawning: bool = false
+
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_create_grid()
 	_create_ghost()
 	_connect_signals()
 	_sync_all_items()
+	_setup_crafting()
 
 func _create_grid() -> void:
 	var bg := ColorRect.new()
@@ -118,6 +126,24 @@ func _input(event: InputEvent) -> void:
 			_finish_drag(cell_pos)
 		elif _pressed_has_moved == false and not _pressed_item.is_empty():
 			# Click without drag → launcher spawns
+			item_clicked.emit(_pressed_item, _press_start_pos)
+
+			# Check for READY crafting table click -- retrieve result
+			if _pressed_item.get("type") == "crafting":
+				if _pressed_item.get("_craft_state", CraftingService.TableState.IDLE) == CraftingService.TableState.READY:
+					_handle_crafting_retrieve(_pressed_item, _press_start_pos)
+					_pressed_item = {}
+					return
+				# If recipe matched and not currently crafting, show craft button
+				if _pressed_item.get("_craft_state", CraftingService.TableState.IDLE) != CraftingService.TableState.CRAFTING and not _pressed_item.get("_craft_recipe", {}).is_empty():
+					_craft_table_pos = _press_start_pos
+					_craft_table_item = _pressed_item
+					_craft_button.show_for_recipe(_pressed_item["_craft_recipe"])
+					_craft_button.set_table_pos(position, _press_start_pos, CELL_SIZE)
+					_pressed_item = {}
+					return
+
+			_hide_craft_button()
 			if _pressed_item.get("type") == "launcher":
 				_handle_launcher_click(_press_start_pos)
 			_pressed_item = {}
@@ -161,7 +187,9 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		return
 
 	var new_item = spawn_data.duplicate(true)
+	_is_launcher_spawning = true
 	GridManager.add_item(new_item, spawn_pos)
+	_is_launcher_spawning = false
 
 	# Fly from launcher to target
 	var fly_key := "%d,%d" % [spawn_pos.x, spawn_pos.y]
@@ -212,12 +240,13 @@ func _start_drag(pos: Vector2i) -> void:
 		_drag_ghost.color = Color.from_hsv(hue, 0.6, 0.7)
 
 	# Ghost label text (item name)
-	var gl = _drag_ghost.get_node_or_null("GhostLabel")
+	var gl: Label = _drag_ghost.get_node_or_null("GhostLabel") as Label
 	if gl:
 		gl.text = item.get("name", "")
 
 	_drag_ghost.modulate = Color(1, 1, 1, 0.7)
 	_drag_ghost.visible = true
+	_hide_craft_button()
 
 func _finish_drag(target_pos: Vector2i) -> void:
 	_is_dragging = false
@@ -239,10 +268,19 @@ func _finish_drag(target_pos: Vector2i) -> void:
 	if target_pos == _drag_source_pos:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
-	# No distance limit — any valid cell is a valid drop target
+	# No distance limit -- any valid cell is a valid drop target
 	var target = GridManager.get_item(target_pos)
+
+	# Check for crafting table drop
+	if target != null and target.get("type") == "crafting":
+		_handle_crafting_drop(target_pos, target)
+		if GameState.phase in [GameState.GamePhase.DRAGGING, GameState.GamePhase.MERGING]:
+			GameState.set_phase(GameState.GamePhase.IDLE)
+		return
 	if target == null:
 		_place_dragged_item(target_pos)
+		if _drag_item_data.get("type") == "crafting":
+			item_clicked.emit(_drag_item_data, target_pos)
 	elif not MergeService.try_merge(_drag_source_pos, target_pos):
 		var push_pos = GridManager.find_nearest_empty(target_pos)
 		if push_pos != Vector2i(-1, -1):
@@ -278,11 +316,11 @@ func _update_highlights(local_pos: Vector2) -> void:
 	# Highlight any valid drop target (no distance limit)
 	var target = GridManager.get_item(hover)
 	if target != null and target.get("id") == _drag_item_data.get("id"):
-		_set_cell_highlight(hover, 2)  # MERGE_TARGET
+		_set_cell_highlight(hover, GridCell.HighlightType.MERGE_TARGET)
 	elif target == null:
-		_set_cell_highlight(hover, 1)  # VALID_DROP
+		_set_cell_highlight(hover, GridCell.HighlightType.VALID_DROP)
 	else:
-		_set_cell_highlight(hover, 3)  # INVALID
+		_set_cell_highlight(hover, GridCell.HighlightType.INVALID)
 
 # --- Item Visual Management ---
 
@@ -293,7 +331,8 @@ func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
 	if layer:
 		layer.add_child(item)
 	item.setup(item_data, pos, CELL_SIZE)
-	item.play_spawn_animation()
+	if not _is_launcher_spawning:
+		item.play_spawn_animation()
 	_item_nodes["%d,%d" % [pos.x, pos.y]] = item
 
 func _on_item_removed(item_data: Dictionary, pos: Vector2i) -> void:
@@ -346,9 +385,9 @@ func _clear_all_item_nodes() -> void:
 
 func _clear_highlights() -> void:
 	for key in _cell_nodes:
-		_cell_nodes[key].set_highlight(0)
+		_cell_nodes[key].set_highlight(GridCell.HighlightType.NONE)
 
-func _set_cell_highlight(pos: Vector2i, type: int) -> void:
+func _set_cell_highlight(pos: Vector2i, type: GridCell.HighlightType) -> void:
 	var cell = _cell_nodes.get("%d,%d" % [pos.x, pos.y])
 	if cell:
 		cell.set_highlight(type)
@@ -358,3 +397,104 @@ func _get_items_layer() -> Control:
 		if child.name == "ItemsLayer":
 			return child as Control
 	return null
+
+# --- Crafting ---
+
+func _setup_crafting() -> void:
+	CraftingService.table_state_changed.connect(_on_table_state_changed)
+	_craft_button = preload("res://scenes/ui/CraftButton.tscn").instantiate() as CraftButton
+	add_child(_craft_button)
+	_craft_button.hide()
+	_craft_button.craft_pressed.connect(_on_craft_button_pressed)
+
+func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
+	# Block drop if table is crafting or ready
+	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
+	if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
+		_snap_back()
+		return
+	var dragged_item = GridManager.get_item(_drag_source_pos)
+
+	if dragged_item == null:
+		_snap_back()
+		return
+
+	# Remove dragged item from grid (consumed as ingredient)
+	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
+	var src_node = _item_nodes.get(src_key)
+	if src_node and is_instance_valid(src_node):
+		src_node.queue_free()
+	_item_nodes.erase(src_key)
+	GridManager.remove_item(_drag_source_pos)
+
+	# Add to crafting service -- data stored directly in table_item on the grid
+	var matched := CraftingService.add_ingredient(table_item, dragged_item)
+	if matched:
+		_craft_table_pos = table_pos
+		_craft_table_item = table_item
+		var recipe := CraftingService.get_current_recipe(table_item)
+		if not recipe.is_empty():
+			_craft_button.show_for_recipe(recipe)
+			_craft_button.set_table_pos(position, table_pos, CELL_SIZE)
+	else:
+		_hide_craft_button()
+
+	# Update table visual
+	var table_key := "%d,%d" % [table_pos.x, table_pos.y]
+	var table_node = _item_nodes.get(table_key)
+	if table_node and is_instance_valid(table_node):
+		table_node.set_crafting_state(CraftingService.TableState.HAS_ITEMS)
+
+func _handle_crafting_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
+	if table_item.is_empty():
+		return
+	var result_id := CraftingService.retrieve(table_item)
+	if result_id <= 0:
+		return
+
+	var result_data := ConfigDatabase.get_item_data(result_id)
+	if result_data.is_empty():
+		return
+	var spawn_pos := GridManager.find_nearest_empty(table_pos)
+	if spawn_pos == Vector2i(-1, -1):
+		return
+
+	var new_item = result_data.duplicate(true)
+	_is_launcher_spawning = true
+	GridManager.add_item(new_item, spawn_pos)
+	_is_launcher_spawning = false
+
+	var table_key := "%d,%d" % [table_pos.x, table_pos.y]
+	var table_node = _item_nodes.get(table_key)
+	if table_node and is_instance_valid(table_node):
+		table_node.set_crafting_state(CraftingService.TableState.IDLE)
+
+	_hide_craft_button()
+
+func _on_craft_button_pressed() -> void:
+	if _craft_table_item.is_empty():
+		return
+	CraftingService.start_craft(_craft_table_item)
+
+func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
+	# Update visual for the affected grid item
+	for key in _item_nodes:
+		var node = _item_nodes[key]
+		if node and is_instance_valid(node) and node.item_data == table_item:
+			node.set_crafting_state(state)
+			break
+
+	if state == CraftingService.TableState.CRAFTING:
+		_hide_craft_button()
+
+func _show_craft_button(table_pos: Vector2i) -> void:
+	_craft_table_pos = table_pos
+	var recipe := CraftingService.get_current_recipe(_craft_table_item)
+	if not recipe.is_empty():
+		_craft_button.show_for_recipe(recipe)
+		_craft_button.set_table_pos(position, table_pos, CELL_SIZE)
+
+func _hide_craft_button() -> void:
+	_craft_button.hide()
+	_craft_table_pos = Vector2i(-1, -1)
+	_craft_table_item = {}

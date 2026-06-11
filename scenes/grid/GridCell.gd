@@ -18,18 +18,18 @@ func setup(pos: Vector2i, cell_size: int) -> void:
 	size = Vector2(cell_size, cell_size)
 	position = Vector2(pos.x * cell_size, pos.y * cell_size)
 
-func set_highlight(type: int) -> void:
+func set_highlight(type: HighlightType) -> void:
 	if highlight_rect == null:
 		return
 	match type:
-		0:  # NONE
+		HighlightType.NONE:  # NONE
 			highlight_rect.hide()
-		1:  # VALID_DROP
+		HighlightType.VALID_DROP:  # VALID_DROP
 			highlight_rect.color = Color(0, 1, 0, 0.2)
 			highlight_rect.show()
-		2:  # MERGE_TARGET
+		HighlightType.MERGE_TARGET:  # MERGE_TARGET
 			highlight_rect.color = Color(1, 1, 0, 0.35)
 			highlight_rect.show()
-		3:  # INVALID
+		HighlightType.INVALID:  # INVALID
 			highlight_rect.color = Color(1, 0, 0, 0.2)
 			highlight_rect.show()
