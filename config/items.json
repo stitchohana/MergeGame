@@ -78,7 +78,7 @@
 	  "result": 37, "craft_time": 8.0, "crafting_level": 1 },
 	{ "id": 10, "name": "炼聚气丹",
 	  "ingredients": [{"id": 21, "count": 3}],
-	  "result": 41, "craft_time": 2.0, "crafting_level": 1 },
+	  "result": 41, "craft_time": 60.0, "crafting_level": 1 },
 	{ "id": 11, "name": "炼培元丹",
 	  "ingredients": [{"id": 21, "count": 2}, {"id": 22, "count": 1}],
 	  "result": 42, "craft_time": 2.0, "crafting_level": 1 },

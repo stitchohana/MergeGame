@@ -27,22 +27,29 @@ func _restore_from_server(state: Dictionary) -> void:
 	# Grid
 	GridManager.init_grid()
 	var grid_data: Array = state.get("grid", [])
+	print("[Save] restore: ", grid_data.size(), " items from server")
 	for entry in grid_data:
 		var item_data := ConfigDatabase.get_item_data(entry.get("id", 0))
 		if not item_data.is_empty():
 			var pos := Vector2i(entry.get("col", 0), entry.get("row", 0))
 			var new_item := item_data.duplicate(true)
 			# Restore crafting state
-			var craft_data: Dictionary = entry.get("craft", {})
-			if not craft_data.is_empty():
+			var craft_data: Variant = entry.get("craft", {})
+			if craft_data is Dictionary and not craft_data.is_empty():
+				print("[Save]   table #", entry.get("id", 0), " has craft: ", craft_data.get("_craft_state", -1))
 				for key in craft_data:
 					new_item[key] = craft_data[key]
 			GridManager.add_item(new_item, pos)
+		else:
+			print("[Save]   unknown item id: ", entry.get("id", 0))
 
 	# Cultivation
 	var cultivation_data: Dictionary = state.get("cultivation", {})
 	if not cultivation_data.is_empty():
 		CultivationService.deserialize(cultivation_data)
+
+	# Restore crafting timers for in-progress crafts
+	CraftingService.restore_craft_timers()
 
 # --- Collect current state (for server submission if needed) ---
 

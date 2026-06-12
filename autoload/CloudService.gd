@@ -24,6 +24,8 @@ signal breakthrough_rejected(reason: String)
 signal craft_add_rejected(reason: String)
 signal craft_start_confirmed(result: Dictionary)
 signal craft_start_rejected(reason: String)
+signal craft_remove_confirmed(result: Dictionary)
+signal craft_remove_rejected(reason: String)
 signal craft_retrieve_confirmed(result: Dictionary)
 signal craft_retrieve_rejected(reason: String)
 signal state_loaded(state: Dictionary)
@@ -32,12 +34,14 @@ signal state_load_failed(reason: String)
 var online: bool = false
 var token: String = ""
 var base_url: String = ""
+var cultivation_url: String = ""
 
 var _http: HTTPRequest = null
 var _timeout: float = 10.0
 var _max_retries: int = 2
 var _busy: bool = false
 var _callbacks: Dictionary = {}
+var _current_tag: String = ""
 
 func _ready() -> void:
 	_load_config()
@@ -52,6 +56,7 @@ func _load_config() -> void:
 		if json.parse(text) == OK:
 			var data: Dictionary = json.data
 			base_url = data.get("base_url", "http://localhost:3000")
+			cultivation_url = data.get("cultivation_url", base_url)
 			_timeout = data.get("timeout", 10.0)
 			_max_retries = data.get("max_retries", 2)
 			print("[CloudService] Configured: ", base_url)
@@ -150,15 +155,15 @@ func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version
 
 func submit_cultivate_tick(version: int) -> void:
 	var body := JSON.stringify({"version": version})
-	_send_authed_request("cultivate_tick", "/api/game/cultivate/tick", HTTPClient.METHOD_POST, body)
+	_send_cultivation("cultivate_tick", "/api/cultivation/tick", HTTPClient.METHOD_POST, body)
 
 func submit_consume_pill(pill_id: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "version": version})
-	_send_authed_request("consume_pill", "/api/game/cultivate/consume", HTTPClient.METHOD_POST, body)
+	_send_cultivation("consume_pill", "/api/cultivation/consume", HTTPClient.METHOD_POST, body)
 
 func submit_breakthrough(pill_id: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "version": version})
-	_send_authed_request("breakthrough", "/api/game/cultivate/breakthrough", HTTPClient.METHOD_POST, body)
+	_send_cultivation("breakthrough", "/api/cultivation/breakthrough", HTTPClient.METHOD_POST, body)
 
 func _on_cultivate_tick_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -180,8 +185,10 @@ func _on_breakthrough_response(data: Dictionary) -> void:
 
 # --- Craft ---
 
-func submit_craft_add(table_col: int, table_row: int, ingredient_id: int, version: int) -> void:
+func submit_craft_add(from_col: int, from_row: int, table_col: int, table_row: int, ingredient_id: int, version: int) -> void:
 	var body := JSON.stringify({
+		"from_col": from_col,
+		"from_row": from_row,
 		"table_col": table_col,
 		"table_row": table_row,
 		"ingredient_id": ingredient_id,
@@ -209,6 +216,17 @@ func _on_craft_start_response(data: Dictionary) -> void:
 	else:
 		craft_start_rejected.emit(data.get("error", "unknown_error"))
 
+func submit_craft_remove(table_col: int, table_row: int, ingredient_id: int, target_col: int, target_row: int, version: int) -> void:
+	var body := JSON.stringify({
+		"table_col": table_col,
+		"table_row": table_row,
+		"ingredient_id": ingredient_id,
+		"target_col": target_col,
+		"target_row": target_row,
+		"version": version,
+	})
+	_send_authed_request("craft_remove", "/api/game/craft/remove", HTTPClient.METHOD_POST, body)
+
 func submit_craft_retrieve(table_col: int, table_row: int, version: int) -> void:
 	var body := JSON.stringify({
 		"table_col": table_col,
@@ -216,6 +234,12 @@ func submit_craft_retrieve(table_col: int, table_row: int, version: int) -> void
 		"version": version,
 	})
 	_send_authed_request("craft_retrieve", "/api/game/craft/retrieve", HTTPClient.METHOD_POST, body)
+
+func _on_craft_remove_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		craft_remove_confirmed.emit(data)
+	else:
+		craft_remove_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_craft_retrieve_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -232,6 +256,9 @@ func get_leaderboard(limit: int = 50) -> void:
 
 var _request_counter: int = 0
 
+func _is_priority(tag: String) -> bool:
+	return tag != "cultivate_tick"
+
 func _reject(tag: String, reason: String) -> void:
 	match tag:
 		"spawn": spawn_rejected.emit(reason)
@@ -246,18 +273,27 @@ func _send_request(tag: String, path: String, method: int, body: String = "") ->
 	_request_counter += 1
 	_callbacks[req_id] = {"tag": tag, "retries": 0}
 
+	if _busy:
+		if _is_priority(tag):
+			# Priority request cancels any in-flight request
+			_http.cancel_request()
+			_callbacks.clear()
+			_busy = false
+		else:
+			# Low-priority: silent skip (ticks retry on next timer)
+			_callbacks.erase(req_id)
+			return -1
+
 	var full_url := base_url + path
 	var headers: PackedStringArray = ["Content-Type: application/json", "Accept: application/json"]
 
-	if _busy:
-		_callbacks.erase(req_id)
-		_reject(tag, "busy")
-		return -1
 	_busy = true
+	_current_tag = tag
 
 	var err := _http.request(full_url, headers, method, body)
 	if err != OK:
 		_busy = false
+		_current_tag = ""
 		if err == ERR_CANT_OPEN or err == ERR_CANT_CONNECT:
 			if online:
 				online = false
@@ -274,6 +310,17 @@ func _send_authed_request(tag: String, path: String, method: int, body: String =
 	_request_counter += 1
 	_callbacks[req_id] = {"tag": tag, "retries": 0}
 
+	if _busy:
+		if _is_priority(tag):
+			# Priority request cancels any in-flight request
+			_http.cancel_request()
+			_callbacks.clear()
+			_busy = false
+		else:
+			# Low-priority: silent skip (ticks retry on next timer)
+			_callbacks.erase(req_id)
+			return -1
+
 	var full_url := base_url + path
 	var headers: PackedStringArray = [
 		"Content-Type: application/json",
@@ -281,15 +328,52 @@ func _send_authed_request(tag: String, path: String, method: int, body: String =
 		"Authorization: Bearer " + token,
 	]
 
-	if _busy:
-		_callbacks.erase(req_id)
-		_reject(tag, "busy")
-		return -1
 	_busy = true
+	_current_tag = tag
 
 	var err := _http.request(full_url, headers, method, body)
 	if err != OK:
 		_busy = false
+		_current_tag = ""
+		if err == ERR_CANT_OPEN or err == ERR_CANT_CONNECT:
+			if online:
+				online = false
+				disconnected.emit()
+				kicked.emit()
+		_callbacks.erase(req_id)
+		_reject(tag, "network_error")
+		return -1
+
+	return req_id
+
+func _send_cultivation(tag: String, path: String, method: int, body: String = "") -> int:
+	var req_id := _request_counter
+	_request_counter += 1
+	_callbacks[req_id] = {"tag": tag, "retries": 0}
+
+	if _busy:
+		if _is_priority(tag):
+			_http.cancel_request()
+			_callbacks.clear()
+			_busy = false
+		else:
+			_callbacks.erase(req_id)
+			return -1
+
+	var full_url := cultivation_url + path
+	var headers: PackedStringArray = [
+		"Content-Type: application/json",
+		"Accept: application/json",
+		"Authorization: Bearer " + token,
+	]
+
+	_busy = true
+	_current_tag = tag
+
+	var err := _http.request(full_url, headers, method, body)
+	if err != OK:
+		_busy = false
+		_current_tag = ""
 		if err == ERR_CANT_OPEN or err == ERR_CANT_CONNECT:
 			if online:
 				online = false
@@ -303,7 +387,7 @@ func _send_authed_request(tag: String, path: String, method: int, body: String =
 
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
 	_busy = false
-
+	_current_tag = ""
 	var req_id := -1
 	var callback: Dictionary = {}
 	for id in _callbacks:
@@ -345,6 +429,10 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				craft_add_rejected.emit(error_msg)
 			"craft_start":
 				craft_start_rejected.emit(error_msg)
+			"craft_remove":
+				craft_remove_rejected.emit(error_msg)
+			"craft_remove":
+				craft_remove_rejected.emit(error_msg)
 			"craft_retrieve":
 				craft_retrieve_rejected.emit(error_msg)
 			"fetch_state":
@@ -379,6 +467,8 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_craft_add_response(data)
 		"craft_start":
 			_on_craft_start_response(data)
+		"craft_remove":
+			_on_craft_remove_response(data)
 		"craft_retrieve":
 			_on_craft_retrieve_response(data)
 

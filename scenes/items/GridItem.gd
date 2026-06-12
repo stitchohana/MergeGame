@@ -54,6 +54,10 @@ func _update_visuals() -> void:
 			_:
 				hue = float(level - 1) / 8.0
 		color = Color.from_hsv(hue, 0.6, 0.7)
+		# Apply crafting state visual if present (restored from server)
+		var cs: int = item_data.get("_craft_state", -1)
+		if cs >= 0 and cs <= 3:
+			set_crafting_state(cs)
 
 	# Optional icon overlay
 	var icon_path: String = item_data.get("icon", "")

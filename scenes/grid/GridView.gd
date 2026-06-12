@@ -40,6 +40,7 @@ func _ready() -> void:
 	_connect_signals()
 	_sync_all_items()
 	_setup_crafting()
+	_sync_crafting_states()
 
 func _create_grid() -> void:
 	var bg := ColorRect.new()
@@ -105,6 +106,12 @@ func _connect_signals() -> void:
 	CloudService.move_rejected.connect(_on_move_rejected)
 	CloudService.spawn_confirmed.connect(_on_spawn_confirmed)
 	CloudService.spawn_rejected.connect(_on_spawn_rejected)
+	CloudService.craft_add_confirmed.connect(_on_craft_add_confirmed)
+	CloudService.craft_add_rejected.connect(_on_craft_add_rejected)
+	CloudService.craft_start_confirmed.connect(_on_craft_start_confirmed)
+	CloudService.craft_start_rejected.connect(_on_craft_start_rejected)
+	CloudService.craft_retrieve_confirmed.connect(_on_craft_retrieve_confirmed)
+	CloudService.craft_retrieve_rejected.connect(_on_craft_retrieve_rejected)
 
 # --- Input: press on any item, then drag or click dispatch ---
 
@@ -133,20 +140,26 @@ func _input(event: InputEvent) -> void:
 			# Click without drag
 			item_clicked.emit(_pressed_item, _press_start_pos)
 
-			# Check for READY crafting table click -- retrieve result
+			# Check crafting table state
 			if _pressed_item.get("type") == "crafting":
-				if _pressed_item.get("_craft_state", CraftingService.TableState.IDLE) == CraftingService.TableState.READY:
+				var cstate: int = _pressed_item.get("_craft_state", CraftingService.TableState.IDLE)
+				if cstate == CraftingService.TableState.READY:
+					_craft_table_item = _pressed_item
+					_craft_table_pos = _press_start_pos
 					_handle_crafting_retrieve(_pressed_item, _press_start_pos)
 					_pressed_item = {}
 					return
-				# If recipe matched and not currently crafting, show craft button
-				if _pressed_item.get("_craft_state", CraftingService.TableState.IDLE) != CraftingService.TableState.CRAFTING and not _pressed_item.get("_craft_recipe", {}).is_empty():
-					_craft_table_pos = _press_start_pos
-					_craft_table_item = _pressed_item
-					_craft_button.show_for_recipe(_pressed_item["_craft_recipe"])
-					_craft_button.set_table_pos(position, _press_start_pos, CELL_SIZE)
-					_pressed_item = {}
-					return
+				# CRAFTING or HAS_ITEMS: show detail panel
+				item_clicked.emit(_pressed_item, _press_start_pos)
+				if cstate == CraftingService.TableState.HAS_ITEMS:
+					var recipe: Dictionary = _pressed_item.get("_craft_recipe", {})
+					if not recipe.is_empty():
+						_craft_table_pos = _press_start_pos
+						_craft_table_item = _pressed_item
+						_craft_button.show_for_recipe(recipe)
+						_craft_button.set_table_pos(position, _press_start_pos, CELL_SIZE)
+				_pressed_item = {}
+				return
 
 			_hide_craft_button()
 			if _pressed_item.get("type") == "launcher":
@@ -507,6 +520,8 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 		_snap_back()
 		return
 
+	var ingredient_id: int = dragged_item.get("id", 0)
+
 	# Remove dragged item from grid (consumed as ingredient)
 	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 	var src_node = _item_nodes.get(src_key)
@@ -527,42 +542,99 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 	else:
 		_hide_craft_button()
 
+	# Sync to server
+	if CloudService.online:
+		CloudService.submit_craft_add(_drag_source_pos.x, _drag_source_pos.y, table_pos.x, table_pos.y, ingredient_id, GameState.version)
+
 	# Update table visual
 	var table_key := "%d,%d" % [table_pos.x, table_pos.y]
 	var table_node = _item_nodes.get(table_key)
 	if table_node and is_instance_valid(table_node):
 		table_node.set_crafting_state(CraftingService.TableState.HAS_ITEMS)
 
+var _last_craft_ingredient_id: int = -1
+var _last_craft_ingredient_pos: Vector2i = Vector2i(-1, -1)
+
 func _handle_crafting_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 	if table_item.is_empty():
 		return
+	if CloudService.online:
+		CloudService.submit_craft_retrieve(table_pos.x, table_pos.y, GameState.version)
+	else:
+		_do_local_retrieve(table_item, table_pos)
+
+func _do_local_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 	var result_id := CraftingService.retrieve(table_item)
 	if result_id <= 0:
 		return
-
 	var result_data := ConfigDatabase.get_item_data(result_id)
 	if result_data.is_empty():
 		return
 	var spawn_pos := GridManager.find_nearest_empty(table_pos)
 	if spawn_pos == Vector2i(-1, -1):
 		return
-
 	var new_item: Dictionary = result_data.duplicate(true)
 	_is_launcher_spawning = true
 	GridManager.add_item(new_item, spawn_pos)
 	_is_launcher_spawning = false
-
 	var table_key := "%d,%d" % [table_pos.x, table_pos.y]
 	var table_node = _item_nodes.get(table_key)
 	if table_node and is_instance_valid(table_node):
 		table_node.set_crafting_state(CraftingService.TableState.IDLE)
-
 	_hide_craft_button()
 
 func _on_craft_button_pressed() -> void:
 	if _craft_table_item.is_empty():
 		return
 	CraftingService.start_craft(_craft_table_item)
+	var table_pos: Vector2i = _get_table_grid_pos(_craft_table_item)
+	if CloudService.online:
+		CloudService.submit_craft_start(table_pos.x, table_pos.y, GameState.version)
+
+func _on_craft_add_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	print("[GridView] Craft add confirmed v", GameState.version)
+
+func _on_craft_add_rejected(reason: String) -> void:
+	print("[GridView] Craft add rejected: ", reason)
+	EventBus.show_toast.emit("放入材料失败：" + reason)
+
+func _on_craft_start_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	print("[GridView] Craft start confirmed v", GameState.version)
+
+func _on_craft_start_rejected(reason: String) -> void:
+	print("[GridView] Craft start rejected: ", reason)
+	EventBus.show_toast.emit("开始制作失败：" + reason)
+
+func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	var result_id: int = result.get("result_id", 0)
+	if result_id <= 0: return
+	var result_data := ConfigDatabase.get_item_data(result_id)
+	if result_data.is_empty(): return
+	if not _craft_table_item.is_empty():
+		CraftingService.retrieve(_craft_table_item)
+		_craft_table_item = {}
+	var spawn_pos := GridManager.find_nearest_empty(_craft_table_pos)
+	if spawn_pos == Vector2i(-1, -1):
+		EventBus.show_toast.emit("棋盘已满，无法取出制作结果")
+		return
+	var new_item: Dictionary = result_data.duplicate(true)
+	_is_launcher_spawning = true
+	GridManager.add_item(new_item, spawn_pos)
+	_is_launcher_spawning = false
+	print("[GridView] Craft retrieve OK: v", GameState.version, " result=#", result_id)
+
+func _on_craft_retrieve_rejected(reason: String) -> void:
+	print("[GridView] Craft retrieve rejected: ", reason)
+	EventBus.show_toast.emit("取件失败：" + reason)
+
+func _get_table_grid_pos(table_item: Dictionary) -> Vector2i:
+	for entry in GridManager.get_all_items():
+		if entry.data == table_item:
+			return entry.pos
+	return Vector2i(-1, -1)
 
 func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
 	# Update visual for the affected grid item
@@ -581,6 +653,16 @@ func _show_craft_button(table_pos: Vector2i) -> void:
 	if not recipe.is_empty():
 		_craft_button.show_for_recipe(recipe)
 		_craft_button.set_table_pos(position, table_pos, CELL_SIZE)
+
+func _sync_crafting_states() -> void:
+	for entry in GridManager.get_all_items():
+		var item: Dictionary = entry.data
+		var cs: int = item.get("_craft_state", CraftingService.TableState.IDLE)
+		if cs != CraftingService.TableState.IDLE:
+			var key := "%d,%d" % [entry.pos.x, entry.pos.y]
+			var node = _item_nodes.get(key)
+			if node and is_instance_valid(node):
+				node.set_crafting_state(cs)
 
 func _hide_craft_button() -> void:
 	_craft_button.hide()

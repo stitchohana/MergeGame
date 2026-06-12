@@ -41,6 +41,7 @@ MergeGame/
 - **Language**: GDScript (`.gd` files)
 - **Naming**: snake_case for variables/functions, PascalCase for enums and class names
 - **Indentation**: tabs (Godot default)
+- **Strict typing**: Never use `var x := dict.get(...)` because `Dictionary.get()` returns `Variant`, which triggers "variable type inferred from Variant" error in strict mode. Always annotate explicitly: `var x: Type = dict.get(...)`.
 
 ## Commands
 

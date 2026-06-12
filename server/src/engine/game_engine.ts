@@ -499,6 +499,53 @@ export class GameEngine {
     return { ok: true, newVersion: state.version };
   }
 
+  removeIngredientFromTable(
+    state: GameState,
+    tableCol: number,
+    tableRow: number,
+    ingredientId: number,
+    targetCol: number,
+    targetRow: number
+  ): { ok: true; newVersion: number } | { ok: false; reason: string } {
+    const tableItem = state.grid.find(
+      (item) => item.col === tableCol && item.row === tableRow
+    );
+    if (!tableItem?.craft) return { ok: false, reason: "table_not_found" };
+
+    const craft = tableItem.craft;
+    if (craft._craft_state === TableState.CRAFTING || craft._craft_state === TableState.READY) {
+      return { ok: false, reason: "busy" };
+    }
+
+    const stored: Record<string, unknown>[] = craft._craft_stored;
+    const idx = stored.findIndex((s: any) => s.id === ingredientId);
+    if (idx < 0) return { ok: false, reason: "ingredient_not_in_table" };
+
+    const removed = stored[idx];
+    stored.splice(idx, 1);
+
+    const ingName = this.getItemData(ingredientId)?.name ?? ("#" + ingredientId);
+    console.log(`[engine] craft remove: ${ingName} from table -> grid (${targetCol},${targetRow}) | stored=${stored.length}`);
+
+    if (!GameEngine.isInBounds(targetCol, targetRow)) {
+      return { ok: false, reason: "target_out_of_bounds" };
+    }
+    const targetKey = GameEngine.posKey(targetCol, targetRow);
+    if (state.grid.some((item) => GameEngine.posKey(item.col, item.row) === targetKey)) {
+      return { ok: false, reason: "target_occupied" };
+    }
+
+    state.grid.push({ id: ingredientId, col: targetCol, row: targetRow });
+    state.version += 1;
+
+    // Re-check recipe after removal
+    const allowedRecipes = this.getRecipesForTable(tableItem.id);
+    const matched = this.matchRecipe(craft._craft_stored, allowedRecipes);
+    craft._craft_recipe = (matched as unknown as Record<string, unknown>) ?? {};
+
+    return { ok: true, newVersion: state.version };
+  }
+
   // --- Crafting ---
 
   validateCraftStart(
@@ -506,10 +553,17 @@ export class GameEngine {
     tableCol: number,
     tableRow: number
   ): { valid: true; recipe: RecipeDef } | { valid: false; reason: string } {
-    const tableItem = state.grid.find(
+    let tableItem = state.grid.find(
       (item) => item.col === tableCol && item.row === tableRow
     );
-    if (!tableItem) return { valid: false, reason: "table_not_found" };
+    // If not at the expected position, search whole grid for a table with craft data
+    if (!tableItem) {
+      tableItem = state.grid.find((item) => item.craft && item.craft._craft_state === TableState.HAS_ITEMS) ?? undefined;
+    }
+    if (!tableItem) {
+      console.log(`[engine] craft start rejected: table_not_found at (${tableCol},${tableRow}), grid has ${state.grid.length} items, tables with craft: ${state.grid.filter(i => i.craft).length}`);
+      return { valid: false, reason: "table_not_found" };
+    }
 
     const craft = tableItem.craft;
     if (!craft) return { valid: false, reason: "no_ingredients" };
@@ -534,15 +588,21 @@ export class GameEngine {
     const validation = this.validateCraftStart(state, tableCol, tableRow);
     if (!validation.valid) return { ok: false, reason: validation.reason };
 
-    const tableItem = state.grid.find(
+    // Use the table found by validateCraftStart (may be at different position via fallback)
+    let tableItem = state.grid.find(
       (item) => item.col === tableCol && item.row === tableRow
-    )!;
-    const craft = tableItem.craft!;
+    );
+    if (!tableItem) {
+      tableItem = state.grid.find((item) => item.craft && item.craft._craft_state === TableState.HAS_ITEMS);
+    }
+    if (!tableItem?.craft) return { ok: false, reason: "table_not_found" };
+    const craft = tableItem.craft;
 
     craft._craft_state = TableState.CRAFTING;
     craft._craft_progress = 0;
     craft._craft_stored = [];
     craft._craft_result_id = validation.recipe.result;
+    craft._craft_start_time = Date.now();
     state.version += 1;
 
     const resultItem = this.getItemData(validation.recipe.result);
@@ -557,9 +617,13 @@ export class GameEngine {
     tableCol: number,
     tableRow: number
   ): { ok: true; resultId: number; newVersion: number } | { ok: false; reason: string } {
-    const tableItem = state.grid.find(
+    let tableItem = state.grid.find(
       (item) => item.col === tableCol && item.row === tableRow
     );
+    // Fallback: search whole grid for a table with craft data
+    if (!tableItem?.craft) {
+      tableItem = state.grid.find((item) => item.craft && (item.craft._craft_state === TableState.CRAFTING || item.craft._craft_state === TableState.READY));
+    }
     if (!tableItem?.craft) return { ok: false, reason: "table_not_found" };
 
     const craft = tableItem.craft;
@@ -567,8 +631,27 @@ export class GameEngine {
       return { ok: false, reason: "not_crafting" };
     }
 
+    // Check if enough time has elapsed (server-authoritative timer)
+    if (craft._craft_state === TableState.CRAFTING) {
+      const recipe = craft._craft_recipe as unknown as RecipeDef | undefined;
+      const craftTime = (recipe?.craft_time ?? 0) * 1000;
+      const startTime = craft._craft_start_time ?? 0;
+      const elapsed = Date.now() - startTime;
+      if (elapsed < craftTime) {
+        const remaining = Math.ceil((craftTime - elapsed) / 1000);
+        return { ok: false, reason: `crafting_not_done remaining=${remaining}s` };
+      }
+    }
+
     const resultId = craft._craft_result_id;
     if (resultId <= 0) return { ok: false, reason: "no_result" };
+
+    // Place result item on grid near the table
+    const map = this.gridToMap(state.grid);
+    const target = this.findNearestEmpty(map, tableItem.col, tableItem.row);
+    if (target) {
+      state.grid.push({ id: resultId, col: target.col, row: target.row });
+    }
 
     // Clear craft state
     delete tableItem.craft;
@@ -576,7 +659,7 @@ export class GameEngine {
 
     const retrievedItem = this.getItemData(resultId);
     const retrievedName = retrievedItem?.name ?? `#${resultId}`;
-    console.log(`[engine] craft retrieve: -> ${retrievedName} | v${state.version}`);
+    console.log(`[engine] craft retrieve: -> ${retrievedName} at (${target?.col ?? -1},${target?.row ?? -1}) | v${state.version}`);
 
     return { ok: true, resultId, newVersion: state.version };
   }
@@ -585,8 +668,24 @@ export class GameEngine {
     state: GameState,
     tableCol: number,
     tableRow: number,
-    ingredientId: number
+    ingredientId: number,
+    fromCol: number,
+    fromRow: number
   ): { ok: true; matched: boolean; newVersion: number } | { ok: false; reason: string } {
+    // Remove ingredient from grid (quantity conservation)
+    const fromKey = GameEngine.posKey(fromCol, fromRow);
+    const gridItem = state.grid.find(
+      (item) => GameEngine.posKey(item.col, item.row) === fromKey
+    );
+    if (!gridItem) return { ok: false, reason: "ingredient_not_found" };
+    if (gridItem.id !== ingredientId) return { ok: false, reason: "ingredient_id_mismatch" };
+
+    state.grid = state.grid.filter(
+      (item) => GameEngine.posKey(item.col, item.row) !== fromKey
+    );
+    const ingName = this.getItemData(ingredientId)?.name ?? ("#" + ingredientId);
+    console.log(`[engine] craft add: removed ${ingName} from grid (${fromCol},${fromRow})`);
+
     const tableItem = state.grid.find(
       (item) => item.col === tableCol && item.row === tableRow
     );
@@ -607,6 +706,7 @@ export class GameEngine {
         _craft_recipe: {},
         _craft_progress: 0,
         _craft_result_id: -1,
+        _craft_start_time: 0,
       };
     }
 
@@ -786,8 +886,31 @@ export class GameEngine {
       console.log(`[engine] cultivation tick: max cultivation reached`);
     }
 
+    // Tick crafting tables (auto-transition CRAFTING -> READY)
+    this.tickCraftingState(state);
+
     c.last_tick_time = now;
     state.version += 1;
+  }
+
+  tickCraftingState(state: GameState): boolean {
+    const now = Date.now();
+    let changed = false;
+    for (const item of state.grid) {
+      if (!item.craft || item.craft._craft_state !== TableState.CRAFTING) continue;
+      const recipe = item.craft._craft_recipe as unknown as RecipeDef | undefined;
+      const craftTime = ((recipe?.craft_time ?? 0) * 1000);
+      const startTime = item.craft._craft_start_time ?? 0;
+      if (now - startTime >= craftTime) {
+        item.craft._craft_state = TableState.READY;
+        item.craft._craft_progress = 1.0;
+        changed = true;
+        const resultItem = this.getItemData(item.craft._craft_result_id);
+        const resultName = resultItem?.name ?? ("#" + item.craft._craft_result_id);
+        console.log(`[engine] craft ready: ${resultName} | table at (${item.col},${item.row})`);
+      }
+    }
+    return changed;
   }
 
   consumePill(

@@ -14,6 +14,7 @@ export interface CraftState {
   _craft_recipe: Record<string, unknown>;
   _craft_progress: number;
   _craft_result_id: number;
+  _craft_start_time: number;
 }
 
 export interface CultivationData {

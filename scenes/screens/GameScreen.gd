@@ -28,6 +28,8 @@ func _ready() -> void:
 	# Cultivation panel
 	cultivation_panel.cultivation_clicked.connect(_on_cultivation_clicked)
 	grid_view.pill_dropped_outside.connect(_on_pill_dropped_outside)
+	CloudService.craft_remove_confirmed.connect(_on_craft_remove_confirmed)
+	CloudService.craft_remove_rejected.connect(_on_craft_remove_rejected)
 
 	print("[GameScreen] Game initialized!")
 
@@ -52,16 +54,38 @@ func _on_material_clicked(item_id: int) -> void:
 	var table_item := detail_panel.get_current_craft_table()
 	if table_item.is_empty():
 		return
+	var table_pos := detail_panel.get_current_craft_pos()
+	var spawn_pos := GridManager.find_nearest_empty(table_pos)
+	if spawn_pos == Vector2i(-1, -1):
+		EventBus.show_toast.emit("棋盘已满，无法取出材料")
+		return
+
+	# Optimistic: remove from table + add to grid locally
 	var removed := CraftingService.remove_ingredient(table_item, item_id)
 	if removed.is_empty():
 		return
-	var spawn_pos := GridManager.find_nearest_empty(detail_panel.get_current_craft_pos())
-	if spawn_pos != Vector2i(-1, -1):
+	# Enrich with full item data from config (server stores only {id} in craft_stored)
+	var full_data := ConfigDatabase.get_item_data(removed.get("id", 0))
+	if not full_data.is_empty():
+		GridManager.add_item(full_data.duplicate(true), spawn_pos)
+	else:
 		GridManager.add_item(removed.duplicate(true), spawn_pos)
 	detail_panel._refresh_materials()
+
+	# Sync to server
+	if CloudService.online:
+		CloudService.submit_craft_remove(table_pos.x, table_pos.y, item_id, spawn_pos.x, spawn_pos.y, GameState.version)
 func _on_cultivation_clicked() -> void:
 	var detail := preload("res://scenes/ui/CultivationDetail.tscn").instantiate()
 	UIManager.show_popup(detail)
+
+func _on_craft_remove_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	print("[GameScreen] Craft remove confirmed v", GameState.version)
+
+func _on_craft_remove_rejected(reason: String) -> void:
+	print("[GameScreen] Craft remove rejected: ", reason)
+	EventBus.show_toast.emit("取出材料失败：" + reason)
 
 func _on_pill_dropped_outside(pill_data: Dictionary) -> void:
 	CultivationService.apply_buff(pill_data)

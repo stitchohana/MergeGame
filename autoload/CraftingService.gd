@@ -81,6 +81,47 @@ func start_craft(table_item: Dictionary) -> bool:
 	table_state_changed.emit(table_item, TableState.CRAFTING)
 	return true
 
+func restore_craft_timers() -> void:
+	# Called after server state restore — recreates local timers for CRAFTING tables
+	print("[Crafting] restore_craft_timers: grid has ", GridManager.count_items(), " items")
+	for entry in GridManager.get_all_items():
+		var cs: int = entry.data.get("_craft_state", -1)
+		if cs != -1:
+			print("[Crafting]   item #", entry.data.get("id", 0), " at (", entry.pos.x, ",", entry.pos.y, ") craft_state=", cs)
+	for entry in GridManager.get_all_items():
+		var item: Dictionary = entry.data
+		if item.get("_craft_state", TableState.IDLE) != TableState.CRAFTING:
+			continue
+		var recipe: Dictionary = item.get("_craft_recipe", {})
+		if recipe.is_empty():
+			continue
+		var total_time: float = recipe.get("craft_time", 3.0)
+		var start_time: float = item.get("_craft_start_time", 0)
+		var elapsed: float = (Time.get_unix_time_from_system() * 1000 - start_time) / 1000.0
+		var remaining: float = maxf(0, total_time - elapsed)
+
+		if remaining <= 0:
+			_set_state(item, TableState.READY)
+			item["_craft_progress"] = 1.0
+			table_state_changed.emit(item, TableState.READY)
+			continue
+
+		# Create timer for remaining time
+		var timer := Timer.new()
+		timer.one_shot = true
+		timer.wait_time = remaining
+		timer.timeout.connect(_on_craft_timeout.bind(item))
+		add_child(timer)
+		timer.start()
+		item["_craft_timer"] = timer
+		table_state_changed.emit(item, TableState.CRAFTING)
+
+func get_remaining_craft_seconds(table_item: Dictionary) -> float:
+	var timer: Timer = table_item.get("_craft_timer")
+	if not is_instance_valid(timer) or not timer.is_inside_tree():
+		return 0.0
+	return timer.time_left
+
 func _on_craft_timeout(table_item: Dictionary) -> void:
 	_set_state(table_item, TableState.READY)
 	table_item["_craft_progress"] = 1.0

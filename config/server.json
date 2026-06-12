@@ -1,6 +1,7 @@
 {
   "base_url": "http://localhost:3000",
+  "cultivation_url": "http://localhost:3001",
   "timeout": 10,
   "max_retries": 2,
-  "cultivation_tick_interval": 1
+  "cultivation_tick_interval": 10
 }

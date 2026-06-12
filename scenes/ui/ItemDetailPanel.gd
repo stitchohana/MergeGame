@@ -14,6 +14,7 @@ signal material_clicked(item_id: int)
 var _current_item_data: Dictionary = {}
 var _current_recipes: Array = []
 var _current_grid_pos: Vector2i = Vector2i(-1, -1)
+var _countdown_timer: Timer = null
 
 func _ready() -> void:
 	clear()
@@ -21,6 +22,9 @@ func _ready() -> void:
 	CraftingService.table_state_changed.connect(_on_table_state_changed)
 
 func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> void:
+	if item_data.is_empty():
+		clear()
+		return
 	_current_item_data = item_data
 	_current_grid_pos = grid_pos
 	var item_name: String = item_data.get("name", "")
@@ -31,7 +35,6 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 
 	default_label.hide()
 
-	# Icon
 	if icon_path and icon_rect:
 		var tex := load(icon_path) as Texture2D
 		if tex:
@@ -42,12 +45,10 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 	else:
 		icon_rect.hide()
 
-	# Name
 	if name_label:
 		name_label.text = item_name
 		name_label.show()
 
-	# Level
 	if level_label:
 		var type_name := ""
 		match item_type:
@@ -57,12 +58,10 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 		level_label.text = "Lv.%d  %s" % [item_level, type_name]
 		level_label.show()
 
-	# Description
 	if desc_label:
 		desc_label.text = item_desc if item_desc else "暂无描述"
 		desc_label.show()
 
-	# Recipe button and materials (only for crafting tables)
 	if item_type == "crafting":
 		_current_recipes = ConfigDatabase.get_recipes_for_item(item_data.get("id", 0))
 		recipe_btn.visible = not _current_recipes.is_empty()
@@ -78,14 +77,20 @@ func _refresh_materials() -> void:
 		return
 	var state: int = _current_item_data.get("_craft_state", CraftingService.TableState.IDLE)
 	if state == CraftingService.TableState.CRAFTING:
-		status_label.text = "制作中..."
+		var remaining := CraftingService.get_remaining_craft_seconds(_current_item_data)
+		if remaining > 0:
+			status_label.text = "制作中... %d秒" % int(ceil(remaining))
+		else:
+			status_label.text = "制作中..."
 		status_label.show()
 		materials_label.hide()
 		materials_container.hide()
 		for child in materials_container.get_children():
 			child.queue_free()
+		_start_countdown_timer()
 		return
 	if state == CraftingService.TableState.READY:
+		_stop_countdown_timer()
 		status_label.text = "制作完成！点击取出"
 		status_label.show()
 		materials_label.hide()
@@ -93,6 +98,7 @@ func _refresh_materials() -> void:
 		for child in materials_container.get_children():
 			child.queue_free()
 		return
+	_stop_countdown_timer()
 	status_label.hide()
 	var stored: Array = CraftingService.get_stored_items(_current_item_data)
 	materials_label.visible = true
@@ -111,7 +117,6 @@ func _populate_materials(items: Array) -> void:
 		materials_container.add_child(hint)
 		return
 
-	# Group items by id and show count
 	var count_map: Dictionary = {}
 	for item in items:
 		var iid: int = item.get("id", 0)
@@ -129,7 +134,6 @@ func _build_material_icon(item_data: Dictionary, count: int) -> Button:
 	entry.custom_minimum_size = Vector2(60, 60)
 	entry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
-	# Colored square representing the item
 	var rect := ColorRect.new()
 	rect.custom_minimum_size = Vector2(36, 36)
 	rect.size = Vector2(36, 36)
@@ -171,8 +175,7 @@ func _build_material_icon(item_data: Dictionary, count: int) -> Button:
 	entry.add_child(rect)
 	entry.add_child(name_label)
 	entry.add_child(count_label)
-	var iid: int = item_data.get("id", 0)
-	entry.pressed.connect(func(): material_clicked.emit(iid))
+	entry.pressed.connect(func(): material_clicked.emit(item_data.get("id", 0)))
 	return entry
 
 func get_current_craft_table() -> Dictionary:
@@ -180,7 +183,39 @@ func get_current_craft_table() -> Dictionary:
 
 func get_current_craft_pos() -> Vector2i:
 	return _current_grid_pos
+
+func _start_countdown_timer() -> void:
+	_stop_countdown_timer()
+	_countdown_timer = Timer.new()
+	_countdown_timer.wait_time = 1.0
+	_countdown_timer.one_shot = false
+	_countdown_timer.timeout.connect(_on_countdown_tick)
+	add_child(_countdown_timer)
+	_countdown_timer.start()
+
+func _stop_countdown_timer() -> void:
+	if _countdown_timer and is_instance_valid(_countdown_timer):
+		_countdown_timer.stop()
+		_countdown_timer.queue_free()
+		_countdown_timer = null
+
+func _on_countdown_tick() -> void:
+	if _current_item_data.is_empty():
+		_stop_countdown_timer()
+		return
+	var state: int = _current_item_data.get("_craft_state", CraftingService.TableState.IDLE)
+	if state != CraftingService.TableState.CRAFTING:
+		_stop_countdown_timer()
+		status_label.text = "制作完成！点击取出"
+		return
+	var remaining := CraftingService.get_remaining_craft_seconds(_current_item_data)
+	if remaining > 0:
+		status_label.text = "制作中... %d秒" % int(ceil(remaining))
+	else:
+		status_label.text = "制作中..."
+
 func _hide_materials() -> void:
+	_stop_countdown_timer()
 	status_label.hide()
 	materials_label.hide()
 	materials_container.hide()
@@ -188,7 +223,6 @@ func _hide_materials() -> void:
 		child.queue_free()
 
 func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
-	# Refresh if currently viewing this crafting table
 	if not _current_item_data.is_empty() and _current_item_data == table_item:
 		_refresh_materials()
 
@@ -200,6 +234,7 @@ func _on_recipe_btn_pressed() -> void:
 	popup.setup(_current_recipes, _current_item_data.get("name", ""))
 
 func clear() -> void:
+	_stop_countdown_timer()
 	_current_item_data = {}
 	_current_recipes = []
 	_current_grid_pos = Vector2i(-1, -1)
