@@ -41,6 +41,8 @@ var _timeout: float = 10.0
 var _max_retries: int = 2
 var _busy: bool = false
 var _callbacks: Dictionary = {}
+var _request_queue: Array[Dictionary] = []
+const QUEUE_MAX := 10
 var _current_tag: String = ""
 
 func _ready() -> void:
@@ -256,8 +258,14 @@ func get_leaderboard(limit: int = 50) -> void:
 
 var _request_counter: int = 0
 
-func _is_priority(tag: String) -> bool:
-	return tag != "cultivate_tick"
+func _flush_queue() -> void:
+	if _busy or _request_queue.is_empty():
+		return
+	var req: Dictionary = _request_queue.pop_front()
+	if req.get("authed", false):
+		_send_authed_request(req.tag, req.path, req.method, req.body)
+	else:
+		_send_request(req.tag, req.path, req.method, req.body)
 
 func _reject(tag: String, reason: String) -> void:
 	match tag:
@@ -267,6 +275,12 @@ func _reject(tag: String, reason: String) -> void:
 		"cultivate_tick": cultivate_tick_rejected.emit(reason)
 		"consume_pill": pill_consume_rejected.emit(reason)
 		"breakthrough": breakthrough_rejected.emit(reason)
+		"craft_add": craft_add_rejected.emit(reason)
+		"craft_start": craft_start_rejected.emit(reason)
+		"craft_remove": craft_remove_rejected.emit(reason)
+		"craft_retrieve": craft_retrieve_rejected.emit(reason)
+		"fetch_state": state_load_failed.emit(reason)
+		"leaderboard": pass
 
 func _send_request(tag: String, path: String, method: int, body: String = "") -> int:
 	var req_id := _request_counter
@@ -274,15 +288,10 @@ func _send_request(tag: String, path: String, method: int, body: String = "") ->
 	_callbacks[req_id] = {"tag": tag, "retries": 0}
 
 	if _busy:
-		if _is_priority(tag):
-			# Priority request cancels any in-flight request
-			_http.cancel_request()
-			_callbacks.clear()
-			_busy = false
-		else:
-			# Low-priority: silent skip (ticks retry on next timer)
-			_callbacks.erase(req_id)
-			return -1
+		if _request_queue.size() < QUEUE_MAX:
+			_request_queue.push_back({"tag": tag, "path": path, "method": method, "body": body, "authed": false})
+		_callbacks.erase(req_id)
+		return -1
 
 	var full_url := base_url + path
 	var headers: PackedStringArray = ["Content-Type: application/json", "Accept: application/json"]
@@ -311,15 +320,10 @@ func _send_authed_request(tag: String, path: String, method: int, body: String =
 	_callbacks[req_id] = {"tag": tag, "retries": 0}
 
 	if _busy:
-		if _is_priority(tag):
-			# Priority request cancels any in-flight request
-			_http.cancel_request()
-			_callbacks.clear()
-			_busy = false
-		else:
-			# Low-priority: silent skip (ticks retry on next timer)
-			_callbacks.erase(req_id)
-			return -1
+		if _request_queue.size() < QUEUE_MAX:
+			_request_queue.push_back({"tag": tag, "path": path, "method": method, "body": body, "authed": true})
+		_callbacks.erase(req_id)
+		return -1
 
 	var full_url := base_url + path
 	var headers: PackedStringArray = [
@@ -352,13 +356,8 @@ func _send_cultivation(tag: String, path: String, method: int, body: String = ""
 	_callbacks[req_id] = {"tag": tag, "retries": 0}
 
 	if _busy:
-		if _is_priority(tag):
-			_http.cancel_request()
-			_callbacks.clear()
-			_busy = false
-		else:
-			_callbacks.erase(req_id)
-			return -1
+		_callbacks.erase(req_id)
+		return -1
 
 	var full_url := cultivation_url + path
 	var headers: PackedStringArray = [
@@ -388,6 +387,7 @@ func _send_cultivation(tag: String, path: String, method: int, body: String = ""
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
 	_busy = false
 	_current_tag = ""
+	_flush_queue()
 	var req_id := -1
 	var callback: Dictionary = {}
 	for id in _callbacks:
@@ -429,8 +429,6 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				craft_add_rejected.emit(error_msg)
 			"craft_start":
 				craft_start_rejected.emit(error_msg)
-			"craft_remove":
-				craft_remove_rejected.emit(error_msg)
 			"craft_remove":
 				craft_remove_rejected.emit(error_msg)
 			"craft_retrieve":
@@ -496,6 +494,8 @@ func _handle_network_error(tag: String) -> void:
 			craft_add_rejected.emit("network_error")
 		"craft_start":
 			craft_start_rejected.emit("network_error")
+		"craft_remove":
+			craft_remove_rejected.emit("network_error")
 		"craft_retrieve":
 			craft_retrieve_rejected.emit("network_error")
 		"fetch_state":
@@ -521,6 +521,8 @@ func _handle_parse_error(tag: String) -> void:
 			craft_add_rejected.emit("invalid_response")
 		"craft_start":
 			craft_start_rejected.emit("invalid_response")
+		"craft_remove":
+			craft_remove_rejected.emit("invalid_response")
 		"craft_retrieve":
 			craft_retrieve_rejected.emit("invalid_response")
 		"fetch_state":

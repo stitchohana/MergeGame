@@ -177,15 +177,15 @@ export class GameEngine {
 
   // --- Grid helpers ---
 
-  static isInBounds(col: number, row: number): boolean {
-    return col >= 0 && col < 7 && row >= 0 && row < 9;
+  isInBounds(col: number, row: number): boolean {
+    return col >= 0 && col < this.GRID_COLS && row >= 0 && row < this.GRID_ROWS;
   }
 
-  static posKey(col: number, row: number): string {
+  posKey(col: number, row: number): string {
     return `${col},${row}`;
   }
 
-  static getNeighbors(col: number, row: number): [number, number][] {
+  getNeighbors(col: number, row: number): [number, number][] {
     const result: [number, number][] = [];
     const candidates: [number, number][] = [
       [col + 1, row],
@@ -194,7 +194,7 @@ export class GameEngine {
       [col, row - 1],
     ];
     for (const [c, r] of candidates) {
-      if (GameEngine.isInBounds(c, r)) result.push([c, r]);
+      if (this.isInBounds(c, r)) result.push([c, r]);
     }
     return result;
   }
@@ -206,15 +206,15 @@ export class GameEngine {
   ): { col: number; row: number } | null {
     const visited = new Set<string>();
     const queue: [number, number][] = [[startCol, startRow]];
-    visited.add(GameEngine.posKey(startCol, startRow));
+    visited.add(this.posKey(startCol, startRow));
 
     while (queue.length > 0) {
       const [c, r] = queue.shift()!;
-      const key = GameEngine.posKey(c, r);
+      const key = this.posKey(c, r);
       if (!grid.has(key)) return { col: c, row: r };
 
-      for (const [nc, nr] of GameEngine.getNeighbors(c, r)) {
-        const nk = GameEngine.posKey(nc, nr);
+      for (const [nc, nr] of this.getNeighbors(c, r)) {
+        const nk = this.posKey(nc, nr);
         if (!visited.has(nk)) {
           visited.add(nk);
           queue.push([nc, nr]);
@@ -258,7 +258,7 @@ export class GameEngine {
   private buildGridMap(grid: GridItem[]): Map<string, GridItem> {
     const map = new Map<string, GridItem>();
     for (const item of grid) {
-      map.set(GameEngine.posKey(item.col, item.row), item);
+      map.set(this.posKey(item.col, item.row), item);
     }
     return map;
   }
@@ -285,27 +285,27 @@ export class GameEngine {
     toRow: number
   ): { valid: true; resultItem: ItemDef; scoreGain: number; fromItem: GridItem; toItem: GridItem } | { valid: false; reason: string } {
     const map = this.gridToMap(state.grid);
-    const fromKey = GameEngine.posKey(fromCol, fromRow);
-    const toKey = GameEngine.posKey(toCol, toRow);
+    const fromKey = this.posKey(fromCol, fromRow);
+    const toKey = this.posKey(toCol, toRow);
 
     let itemA: GridItem | undefined;
     let itemB: GridItem | undefined;
 
     // Try exact position lookup first (skip if out of bounds)
-    if (GameEngine.isInBounds(fromCol, fromRow)) {
+    if (this.isInBounds(fromCol, fromRow)) {
       itemA = map.get(fromKey);
     }
-    if (GameEngine.isInBounds(toCol, toRow)) {
+    if (this.isInBounds(toCol, toRow)) {
       itemB = map.get(toKey);
     }
 
     // If either not found, search full grid by item ID
     // (handles position drift and out-of-bounds positions from client)
     if (!itemA && itemB) {
-      itemA = state.grid.find((g) => g.id === itemB!.id && GameEngine.posKey(g.col, g.row) !== toKey);
+      itemA = state.grid.find((g) => g.id === itemB!.id && this.posKey(g.col, g.row) !== toKey);
     }
     if (!itemB && itemA) {
-      itemB = state.grid.find((g) => g.id === itemA!.id && GameEngine.posKey(g.col, g.row) !== fromKey);
+      itemB = state.grid.find((g) => g.id === itemA!.id && this.posKey(g.col, g.row) !== fromKey);
     }
     // If still no match and we don't have either, search all items by finding pairs
     if (!itemA && !itemB) {
@@ -370,15 +370,15 @@ export class GameEngine {
       return { ok: false, reason: result.reason };
     }
 
-    const actualFromKey = GameEngine.posKey(result.fromItem.col, result.fromItem.row);
-    const actualToKey = GameEngine.posKey(result.toItem.col, result.toItem.row);
+    const actualFromKey = this.posKey(result.fromItem.col, result.fromItem.row);
+    const actualToKey = this.posKey(result.toItem.col, result.toItem.row);
     const fromId = result.fromItem.id;
 
     // Remove both items using their actual positions from the server's grid
     state.grid = state.grid.filter(
       (item) =>
-        GameEngine.posKey(item.col, item.row) !== actualFromKey &&
-        GameEngine.posKey(item.col, item.row) !== actualToKey
+        this.posKey(item.col, item.row) !== actualFromKey &&
+        this.posKey(item.col, item.row) !== actualToKey
     );
 
     // Add merged item at the target position (where itemB was)
@@ -417,7 +417,7 @@ export class GameEngine {
   ): { ok: true; spawnedId: number; targetCol: number; targetRow: number; newVersion: number }
     | { ok: false; reason: string } {
     const map = this.gridToMap(state.grid);
-    const launcherKey = GameEngine.posKey(launcherCol, launcherRow);
+    const launcherKey = this.posKey(launcherCol, launcherRow);
     const launcherItem = map.get(launcherKey);
 
     if (!launcherItem) return { ok: false, reason: "launcher_not_found" };
@@ -468,22 +468,22 @@ export class GameEngine {
     toCol: number,
     toRow: number
   ): { ok: true; newVersion: number } | { ok: false; reason: string } {
-    const fromKey = GameEngine.posKey(fromCol, fromRow);
-    const toKey = GameEngine.posKey(toCol, toRow);
+    const fromKey = this.posKey(fromCol, fromRow);
+    const toKey = this.posKey(toCol, toRow);
 
     if (fromCol === toCol && fromRow === toRow) {
       return { ok: false, reason: "same_position" };
     }
 
     const existsAtTarget = state.grid.some(
-      (item) => GameEngine.posKey(item.col, item.row) === toKey
+      (item) => this.posKey(item.col, item.row) === toKey
     );
     if (existsAtTarget) {
       return { ok: false, reason: "target_occupied" };
     }
 
     const targetItem = state.grid.find(
-      (item) => GameEngine.posKey(item.col, item.row) === fromKey
+      (item) => this.posKey(item.col, item.row) === fromKey
     );
     if (!targetItem) {
       return { ok: false, reason: "source_item_not_found" };
@@ -527,11 +527,11 @@ export class GameEngine {
     const ingName = this.getItemData(ingredientId)?.name ?? ("#" + ingredientId);
     console.log(`[engine] craft remove: ${ingName} from table -> grid (${targetCol},${targetRow}) | stored=${stored.length}`);
 
-    if (!GameEngine.isInBounds(targetCol, targetRow)) {
+    if (!this.isInBounds(targetCol, targetRow)) {
       return { ok: false, reason: "target_out_of_bounds" };
     }
-    const targetKey = GameEngine.posKey(targetCol, targetRow);
-    if (state.grid.some((item) => GameEngine.posKey(item.col, item.row) === targetKey)) {
+    const targetKey = this.posKey(targetCol, targetRow);
+    if (state.grid.some((item) => this.posKey(item.col, item.row) === targetKey)) {
       return { ok: false, reason: "target_occupied" };
     }
 
@@ -673,15 +673,15 @@ export class GameEngine {
     fromRow: number
   ): { ok: true; matched: boolean; newVersion: number } | { ok: false; reason: string } {
     // Remove ingredient from grid (quantity conservation)
-    const fromKey = GameEngine.posKey(fromCol, fromRow);
+    const fromKey = this.posKey(fromCol, fromRow);
     const gridItem = state.grid.find(
-      (item) => GameEngine.posKey(item.col, item.row) === fromKey
+      (item) => this.posKey(item.col, item.row) === fromKey
     );
     if (!gridItem) return { ok: false, reason: "ingredient_not_found" };
     if (gridItem.id !== ingredientId) return { ok: false, reason: "ingredient_id_mismatch" };
 
     state.grid = state.grid.filter(
-      (item) => GameEngine.posKey(item.col, item.row) !== fromKey
+      (item) => this.posKey(item.col, item.row) !== fromKey
     );
     const ingName = this.getItemData(ingredientId)?.name ?? ("#" + ingredientId);
     console.log(`[engine] craft add: removed ${ingName} from grid (${fromCol},${fromRow})`);

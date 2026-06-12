@@ -79,7 +79,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     if (!Array.isArray(launcher_pos) || launcher_pos.length !== 2 || typeof rolled_id !== "number" || typeof version !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
-    if (!GameEngine.isInBounds(launcher_pos[0], launcher_pos[1])) {
+    if (!engine.isInBounds(launcher_pos[0], launcher_pos[1])) {
       res.status(400).json({ error: "out_of_bounds" }); return;
     }
     const state = await getOrCreateState(userId);
@@ -138,6 +138,9 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
+    if (state.version !== version) {
+      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
+    }
     const result = engine.removeIngredientFromTable(state, table_col, table_row, ingredient_id, target_col, target_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);

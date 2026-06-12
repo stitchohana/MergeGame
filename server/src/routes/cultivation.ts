@@ -3,6 +3,28 @@ import { IStorage } from "../storage/interface";
 import { authRequired } from "../middleware/auth";
 import { GameEngine } from "../engine/game_engine";
 
+// Per-user operation queue — sequential execution per user
+const userQueues = new Map<string, Promise<void>>();
+
+function enqueue(userId: string, fn: () => Promise<void>): Promise<void> {
+  const prev = userQueues.get(userId) ?? Promise.resolve();
+  const next = prev.then(fn, fn);
+  userQueues.set(userId, next);
+  return next;
+}
+
+function op(handler: (req: Request, res: Response, userId: string) => Promise<void>) {
+  return async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.auth!.userId;
+      await enqueue(userId, () => handler(req, res, userId));
+    } catch (err) {
+      console.error("[cult] op error:", err);
+      if (!res.headersSent) res.status(500).json({ error: "internal_error" });
+    }
+  };
+}
+
 export function createCultivationRouter(storage: IStorage, engine: GameEngine): Router {
   const router = Router();
   router.use(authRequired);
@@ -22,96 +44,56 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
   }
 
   // POST /api/cultivation/tick
-  router.post("/tick", async (req: Request, res: Response) => {
-    try {
-      const { version } = req.body;
-      if (typeof version !== "number") {
-        res.status(400).json({ error: "invalid_params" });
-        return;
-      }
-
-      const userId = req.auth!.userId;
-      const state = await getOrCreateState(userId);
-      if (state.version !== version) {
-        res.status(409).json({ error: "version_mismatch", server_version: state.version });
-        return;
-      }
-
-      engine.tickCultivation(state);
-      await storage.saveState(userId, state);
-
-      res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });
-    } catch (err) {
-      console.error("[cult] tick error:", err);
-      res.status(500).json({ error: "internal_error" });
+  router.post("/tick", op(async (req, res, userId) => {
+    const { version } = req.body;
+    if (typeof version !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
     }
-  });
+    const state = await getOrCreateState(userId);
+    if (state.version !== version) {
+      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
+    }
+    engine.tickCultivation(state);
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });
+  }));
 
   // POST /api/cultivation/consume
-  router.post("/consume", async (req: Request, res: Response) => {
-    try {
-      const { pill_id, version } = req.body;
-      if (typeof pill_id !== "number" || typeof version !== "number") {
-        res.status(400).json({ error: "invalid_params" });
-        return;
-      }
-
-      const userId = req.auth!.userId;
-      const state = await getOrCreateState(userId);
-      if (state.version !== version) {
-        res.status(409).json({ error: "version_mismatch", server_version: state.version });
-        return;
-      }
-
-      const result = engine.consumePill(state, pill_id);
-      if (!result.ok) {
-        res.status(400).json({ error: result.reason });
-        return;
-      }
-
-      await storage.saveState(userId, state);
-      res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });
-    } catch (err) {
-      console.error("[cult] consume error:", err);
-      res.status(500).json({ error: "internal_error" });
+  router.post("/consume", op(async (req, res, userId) => {
+    const { pill_id, version } = req.body;
+    if (typeof pill_id !== "number" || typeof version !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
     }
-  });
+    const state = await getOrCreateState(userId);
+    if (state.version !== version) {
+      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
+    }
+    const result = engine.consumePill(state, pill_id);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });
+  }));
 
   // POST /api/cultivation/breakthrough
-  router.post("/breakthrough", async (req: Request, res: Response) => {
-    try {
-      const { pill_id, version } = req.body;
-      if (typeof pill_id !== "number" || typeof version !== "number") {
-        res.status(400).json({ error: "invalid_params" });
-        return;
-      }
-
-      const userId = req.auth!.userId;
-      const state = await getOrCreateState(userId);
-      if (state.version !== version) {
-        res.status(409).json({ error: "version_mismatch", server_version: state.version });
-        return;
-      }
-
-      const result = engine.executeTryBreakthrough(
-        state, pill_id,
-        state.cultivation.current_realm_id,
-        state.cultivation.current_level,
-        state.cultivation.current_exp
-      );
-
-      if (!result.ok) {
-        res.status(400).json({ error: result.reason });
-        return;
-      }
-
-      await storage.saveState(userId, state);
-      res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });
-    } catch (err) {
-      console.error("[cult] breakthrough error:", err);
-      res.status(500).json({ error: "internal_error" });
+  router.post("/breakthrough", op(async (req, res, userId) => {
+    const { pill_id, version } = req.body;
+    if (typeof pill_id !== "number" || typeof version !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
     }
-  });
+    const state = await getOrCreateState(userId);
+    if (state.version !== version) {
+      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
+    }
+    const result = engine.executeTryBreakthrough(
+      state, pill_id,
+      state.cultivation.current_realm_id,
+      state.cultivation.current_level,
+      state.cultivation.current_exp
+    );
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });
+  }));
 
   return router;
 }

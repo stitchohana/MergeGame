@@ -242,25 +242,13 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 
 func _on_spawn_confirmed(result: Dictionary) -> void:
-	var target_pos := _pending_spawn_target
-	var my_rolled_id := _pending_spawn_id
+	# Use server position to locate the item (request queue may cause _pending values to be stale)
+	var target_pos: Vector2i = Vector2i(result.get("target_col", -1), result.get("target_row", -1))
 	_pending_spawn_pos = Vector2i(-1, -1)
 	_pending_spawn_id = -1
 	_pending_spawn_target = Vector2i(-1, -1)
 
 	GameState.version = result.get("new_version", GameState.version)
-	var server_id: int = result.get("spawned_id", 0)
-
-	# If server spawned different item, replace locally
-	if server_id != 0 and server_id != my_rolled_id:
-		var server_data := ConfigDatabase.get_item_data(server_id)
-		if not server_data.is_empty():
-			# Remove old item, add new one
-			var old_item = GridManager.get_item(target_pos)
-			if old_item != null:
-				GridManager.remove_item(target_pos)
-			GridManager.add_item(server_data.duplicate(true), target_pos)
-			print("[GridView] Spawn corrected: #", _pending_spawn_id, " -> #", server_id)
 
 	if GameState.phase == GameState.GamePhase.SPAWNING:
 		GameState.set_phase(GameState.GamePhase.IDLE)
@@ -612,7 +600,9 @@ func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
 	var result_id: int = result.get("result_id", 0)
 	if result_id <= 0: return
 	var result_data := ConfigDatabase.get_item_data(result_id)
-	if result_data.is_empty(): return
+	if result_data.is_empty():
+		EventBus.show_toast.emit("制作完成，但找不到物品配置 #%d" % result_id)
+		return
 	if not _craft_table_item.is_empty():
 		CraftingService.retrieve(_craft_table_item)
 		_craft_table_item = {}
@@ -624,6 +614,8 @@ func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
 	_is_launcher_spawning = true
 	GridManager.add_item(new_item, spawn_pos)
 	_is_launcher_spawning = false
+	item_clicked.emit({}, Vector2i(-1, -1))
+	EventBus.show_toast.emit("制作完成：%s" % result_data.get("name", "未知"))
 	print("[GridView] Craft retrieve OK: v", GameState.version, " result=#", result_id)
 
 func _on_craft_retrieve_rejected(reason: String) -> void:

@@ -69,8 +69,9 @@ func _update_visuals() -> void:
 
 	# Item name
 	var item_name: String = item_data.get("name", "")
+	var item_id: int = item_data.get("id", 0)
 	if name_label:
-		name_label.text = item_name
+		name_label.text = item_name + (" [#%d]" % item_id if item_id > 0 else "")
 		name_label.visible = true
 
 	# Level label
