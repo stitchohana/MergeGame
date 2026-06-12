@@ -25,7 +25,7 @@ var _press_screen_pos: Vector2 = Vector2.ZERO
 var _pressed_item: Dictionary = {}
 var _pressed_has_moved: bool = false
 
-var _drag_ghost
+var _drag_ghost: ColorRect = null
 
 # Crafting
 var _craft_button: CraftButton = null
@@ -103,6 +103,8 @@ func _connect_signals() -> void:
 	GridManager.grid_updated.connect(_on_grid_updated)
 	CloudService.move_confirmed.connect(_on_move_confirmed)
 	CloudService.move_rejected.connect(_on_move_rejected)
+	CloudService.spawn_confirmed.connect(_on_spawn_confirmed)
+	CloudService.spawn_rejected.connect(_on_spawn_rejected)
 
 # --- Input: press on any item, then drag or click dispatch ---
 
@@ -169,10 +171,14 @@ func _local_to_grid(local_pos: Vector2) -> Vector2i:
 	return Vector2i(int(local_pos.x / CELL_SIZE), int(local_pos.y / CELL_SIZE))
 
 var _pending_spawn_pos: Vector2i = Vector2i(-1, -1)
+var _pending_spawn_id: int = -1
+var _pending_spawn_target: Vector2i = Vector2i(-1, -1)
 
 func _handle_launcher_click(pos: Vector2i) -> void:
 	if GameState.phase != GameState.GamePhase.IDLE:
 		return
+	if _pending_spawn_id != -1:
+		return  # Previous spawn still pending
 	_pressed_item = {}
 
 	GameState.set_phase(GameState.GamePhase.SPAWNING)
@@ -181,81 +187,25 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
-	# Submit to server for authoritative spawn
-	if CloudService.online:
-		_pending_spawn_pos = pos
-		CloudService.spawn_confirmed.connect(_on_spawn_confirmed, CONNECT_ONE_SHOT)
-		CloudService.spawn_rejected.connect(_on_spawn_rejected, CONNECT_ONE_SHOT)
-		CloudService.submit_spawn(pos.x, pos.y, GameState.version)
-	else:
-		# Fallback: local spawn only when offline
-		_do_local_spawn(pos)
-		GameState.set_phase(GameState.GamePhase.IDLE)
-
-func _on_spawn_confirmed(result: Dictionary) -> void:
-	var launcher_pos := _pending_spawn_pos
-	_pending_spawn_pos = Vector2i(-1, -1)
-
-	GameState.version = result.get("new_version", GameState.version)
-	var spawned_id: int = result.get("spawned_id", 0)
-	var target_col: int = result.get("target_col", -1)
-	var target_row: int = result.get("target_row", -1)
-
-	if spawned_id <= 0 or target_col < 0 or target_row < 0:
-		GameState.set_phase(GameState.GamePhase.IDLE)
-		return
-
-	var spawn_data := ConfigDatabase.get_item_data(spawned_id)
+	# Roll locally for optimistic UI
+	var spawn_data: Dictionary = ConfigDatabase.roll_spawn(item.get("id", 0))
 	if spawn_data.is_empty():
 		GameState.set_phase(GameState.GamePhase.IDLE)
-		return
-
-	var spawn_pos := Vector2i(target_col, target_row)
-	var new_item := spawn_data.duplicate(true)
-	_is_launcher_spawning = true
-	GridManager.add_item(new_item, spawn_pos)
-	_is_launcher_spawning = false
-
-	# Fly animation from launcher to target
-	var fly_key := "%d,%d" % [spawn_pos.x, spawn_pos.y]
-	var fly_node = _item_nodes.get(fly_key)
-	if fly_node and is_instance_valid(fly_node):
-		fly_node.position = Vector2(launcher_pos.x * CELL_SIZE, launcher_pos.y * CELL_SIZE)
-		fly_node.scale = Vector2(0.7, 0.7)
-		var tween := create_tween()
-		tween.set_parallel(true)
-		tween.tween_property(fly_node, "position", Vector2(spawn_pos.x * CELL_SIZE, spawn_pos.y * CELL_SIZE), 0.35).set_trans(Tween.TRANS_CUBIC)
-		tween.tween_property(fly_node, "scale", Vector2(1, 1), 0.35).set_trans(Tween.TRANS_BOUNCE)
-
-	if GameState.phase == GameState.GamePhase.SPAWNING:
-		GameState.set_phase(GameState.GamePhase.IDLE)
-
-func _on_spawn_rejected(reason: String) -> void:
-	_pending_spawn_pos = Vector2i(-1, -1)
-	print("[GridView] Spawn rejected: ", reason)
-	if GameState.phase == GameState.GamePhase.SPAWNING:
-		GameState.set_phase(GameState.GamePhase.IDLE)
-
-func _do_local_spawn(pos: Vector2i) -> void:
-	var item = GridManager.get_item(pos)
-	if item == null:
-		return
-
-	var spawn_data = ConfigDatabase.roll_spawn(item.get("id", 0))
-	if spawn_data.is_empty():
 		return
 
 	var spawn_pos := GridManager.find_nearest_empty(pos)
 	if spawn_pos == Vector2i(-1, -1):
+		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
-	var new_item = spawn_data.duplicate(true)
+	# Optimistic: add item + play animation immediately
+	var new_item: Dictionary = spawn_data.duplicate(true)
 	_is_launcher_spawning = true
 	GridManager.add_item(new_item, spawn_pos)
 	_is_launcher_spawning = false
 
 	var fly_key := "%d,%d" % [spawn_pos.x, spawn_pos.y]
-	var fly_node = _item_nodes.get(fly_key)
+	var fly_node: GridItem = _item_nodes.get(fly_key)
 	if fly_node and is_instance_valid(fly_node):
 		fly_node.position = Vector2(pos.x * CELL_SIZE, pos.y * CELL_SIZE)
 		fly_node.scale = Vector2(0.7, 0.7)
@@ -263,6 +213,68 @@ func _do_local_spawn(pos: Vector2i) -> void:
 		tween.set_parallel(true)
 		tween.tween_property(fly_node, "position", Vector2(spawn_pos.x * CELL_SIZE, spawn_pos.y * CELL_SIZE), 0.35).set_trans(Tween.TRANS_CUBIC)
 		tween.tween_property(fly_node, "scale", Vector2(1, 1), 0.35).set_trans(Tween.TRANS_BOUNCE)
+
+	# Submit to server for validation
+	_pending_spawn_pos = pos
+	_pending_spawn_id = spawn_data.get("id", 0)
+	_pending_spawn_target = spawn_pos
+
+	if CloudService.online:
+		CloudService.submit_spawn(pos.x, pos.y, _pending_spawn_id, GameState.version)
+	else:
+		# Offline: keep local spawn, don't validate
+		_pending_spawn_pos = Vector2i(-1, -1)
+		_pending_spawn_id = -1
+		_pending_spawn_target = Vector2i(-1, -1)
+		GameState.set_phase(GameState.GamePhase.IDLE)
+
+func _on_spawn_confirmed(result: Dictionary) -> void:
+	var target_pos := _pending_spawn_target
+	var my_rolled_id := _pending_spawn_id
+	_pending_spawn_pos = Vector2i(-1, -1)
+	_pending_spawn_id = -1
+	_pending_spawn_target = Vector2i(-1, -1)
+
+	GameState.version = result.get("new_version", GameState.version)
+	var server_id: int = result.get("spawned_id", 0)
+
+	# If server spawned different item, replace locally
+	if server_id != 0 and server_id != my_rolled_id:
+		var server_data := ConfigDatabase.get_item_data(server_id)
+		if not server_data.is_empty():
+			# Remove old item, add new one
+			var old_item = GridManager.get_item(target_pos)
+			if old_item != null:
+				GridManager.remove_item(target_pos)
+			GridManager.add_item(server_data.duplicate(true), target_pos)
+			print("[GridView] Spawn corrected: #", _pending_spawn_id, " -> #", server_id)
+
+	if GameState.phase == GameState.GamePhase.SPAWNING:
+		GameState.set_phase(GameState.GamePhase.IDLE)
+
+func _on_spawn_rejected(reason: String) -> void:
+	var target_pos := _pending_spawn_target
+	_pending_spawn_pos = Vector2i(-1, -1)
+	_pending_spawn_id = -1
+	_pending_spawn_target = Vector2i(-1, -1)
+
+	print("[GridView] Spawn rejected: ", reason)
+	# Remove the optimistically spawned item
+	GridManager.remove_item(target_pos)
+	EventBus.show_toast.emit(_spawn_error_text(reason))
+
+	if GameState.phase == GameState.GamePhase.SPAWNING:
+		GameState.set_phase(GameState.GamePhase.IDLE)
+
+func _spawn_error_text(reason: String) -> String:
+	match reason:
+		"invalid_spawn_id": return "生成失败：物品不合法"
+		"launcher_not_found": return "生成失败：发射器不存在"
+		"not_a_launcher": return "生成失败：不是发射器"
+		"no_empty_cell": return "生成失败：棋盘已满"
+		"network_error": return "生成失败：网络错误"
+		"version_mismatch": return "生成失败：数据过期，请重试"
+		_: return "生成失败：" + reason
 
 func _start_drag(pos: Vector2i) -> void:
 	if GameState.phase != GameState.GamePhase.IDLE:
@@ -371,6 +383,7 @@ func _on_move_confirmed(result: Dictionary) -> void:
 
 func _on_move_rejected(reason: String) -> void:
 	print("[GridView] Move rejected: ", reason)
+	EventBus.show_toast.emit("移动失败：" + reason)
 func _snap_back() -> void:
 
 	var key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
@@ -534,7 +547,7 @@ func _handle_crafting_retrieve(table_item: Dictionary, table_pos: Vector2i) -> v
 	if spawn_pos == Vector2i(-1, -1):
 		return
 
-	var new_item = result_data.duplicate(true)
+	var new_item: Dictionary = result_data.duplicate(true)
 	_is_launcher_spawning = true
 	GridManager.add_item(new_item, spawn_pos)
 	_is_launcher_spawning = false

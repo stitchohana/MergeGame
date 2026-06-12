@@ -92,10 +92,11 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
   // POST /api/game/spawn — launch an item from a launcher
   router.post("/spawn", async (req: Request, res: Response) => {
     try {
-      const { launcher_pos, version } = req.body;
+      const { launcher_pos, rolled_id, version } = req.body;
 
       if (
         !Array.isArray(launcher_pos) || launcher_pos.length !== 2 ||
+        typeof rolled_id !== "number" ||
         typeof version !== "number"
       ) {
         res.status(400).json({ error: "invalid_params" });
@@ -118,7 +119,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
         return;
       }
 
-      const result = engine.executeSpawn(state, launcherCol, launcherRow);
+      const result = engine.executeSpawn(state, launcherCol, launcherRow, rolled_id);
 
       if (!result.ok) {
         console.log(`[game] spawn: rejected (${result.reason})`);

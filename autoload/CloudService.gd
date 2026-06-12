@@ -5,6 +5,7 @@ extends Node
 
 signal connected()
 signal disconnected()
+signal kicked()
 signal login_success(user_id: String)
 signal login_failed(reason: String)
 signal merge_confirmed(result: Dictionary)
@@ -33,11 +34,9 @@ var token: String = ""
 var base_url: String = ""
 
 var _http: HTTPRequest = null
-var _pending_requests: Array[Dictionary] = []
 var _timeout: float = 10.0
 var _max_retries: int = 2
-
-# Map request_id -> callback function
+var _busy: bool = false
 var _callbacks: Dictionary = {}
 
 func _ready() -> void:
@@ -117,9 +116,10 @@ func _on_merge_response(data: Dictionary) -> void:
 
 # --- Spawn ---
 
-func submit_spawn(launcher_col: int, launcher_row: int, version: int) -> void:
+func submit_spawn(launcher_col: int, launcher_row: int, rolled_id: int, version: int) -> void:
 	var body := JSON.stringify({
 		"launcher_pos": [launcher_col, launcher_row],
+		"rolled_id": rolled_id,
 		"version": version,
 	})
 	_send_authed_request("spawn", "/api/game/spawn", HTTPClient.METHOD_POST, body)
@@ -232,6 +232,15 @@ func get_leaderboard(limit: int = 50) -> void:
 
 var _request_counter: int = 0
 
+func _reject(tag: String, reason: String) -> void:
+	match tag:
+		"spawn": spawn_rejected.emit(reason)
+		"merge": merge_rejected.emit(reason)
+		"move": move_rejected.emit(reason)
+		"cultivate_tick": cultivate_tick_rejected.emit(reason)
+		"consume_pill": pill_consume_rejected.emit(reason)
+		"breakthrough": breakthrough_rejected.emit(reason)
+
 func _send_request(tag: String, path: String, method: int, body: String = "") -> int:
 	var req_id := _request_counter
 	_request_counter += 1
@@ -240,10 +249,22 @@ func _send_request(tag: String, path: String, method: int, body: String = "") ->
 	var full_url := base_url + path
 	var headers: PackedStringArray = ["Content-Type: application/json", "Accept: application/json"]
 
+	if _busy:
+		_callbacks.erase(req_id)
+		_reject(tag, "busy")
+		return -1
+	_busy = true
+
 	var err := _http.request(full_url, headers, method, body)
 	if err != OK:
-		push_error("[CloudService] Request failed: ", path, " error: ", err)
+		_busy = false
+		if err == ERR_CANT_OPEN or err == ERR_CANT_CONNECT:
+			if online:
+				online = false
+				disconnected.emit()
+				kicked.emit()
 		_callbacks.erase(req_id)
+		_reject(tag, "network_error")
 		return -1
 
 	return req_id
@@ -260,16 +281,29 @@ func _send_authed_request(tag: String, path: String, method: int, body: String =
 		"Authorization: Bearer " + token,
 	]
 
+	if _busy:
+		_callbacks.erase(req_id)
+		_reject(tag, "busy")
+		return -1
+	_busy = true
+
 	var err := _http.request(full_url, headers, method, body)
 	if err != OK:
-		push_error("[CloudService] Authed request failed: ", path, " error: ", err)
+		_busy = false
+		if err == ERR_CANT_OPEN or err == ERR_CANT_CONNECT:
+			if online:
+				online = false
+				disconnected.emit()
+				kicked.emit()
 		_callbacks.erase(req_id)
+		_reject(tag, "network_error")
 		return -1
 
 	return req_id
 
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
-	# Map to the most recent pending callback (HTTPRequest reuses one node)
+	_busy = false
+
 	var req_id := -1
 	var callback: Dictionary = {}
 	for id in _callbacks:
@@ -279,11 +313,6 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 	_callbacks.erase(req_id)
 
 	if result != HTTPRequest.RESULT_SUCCESS:
-		var retries: int = callback.get("retries", 0)
-		if retries < _max_retries:
-			# Retry - but we don't have the original request params stored
-			# For now, just mark as disconnected
-			pass
 		_handle_network_error(callback.get("tag", ""))
 		return
 

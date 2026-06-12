@@ -412,7 +412,8 @@ export class GameEngine {
   executeSpawn(
     state: GameState,
     launcherCol: number,
-    launcherRow: number
+    launcherRow: number,
+    clientRolledId: number
   ): { ok: true; spawnedId: number; targetCol: number; targetRow: number; newVersion: number }
     | { ok: false; reason: string } {
     const map = this.gridToMap(state.grid);
@@ -426,7 +427,15 @@ export class GameEngine {
       return { ok: false, reason: "not_a_launcher" };
     }
 
-    const spawnResult = this.rollSpawn(launcherItem.id);
+    // Validate client's rolled item is in the launcher's spawn list
+    const spawns = launcherData.spawns;
+    if (!spawns || !spawns.some((s: any) => s.id === clientRolledId)) {
+      console.log(`[engine] spawn rejected: #${clientRolledId} not in launcher #${launcherItem.id} spawn list`);
+      return { ok: false, reason: "invalid_spawn_id" };
+    }
+
+    // Use the client's rolled item (already validated as legal)
+    const spawnResult = this.getItemData(clientRolledId);
     if (!spawnResult) return { ok: false, reason: "spawn_failed" };
 
     const target = this.findNearestEmpty(map, launcherCol, launcherRow);

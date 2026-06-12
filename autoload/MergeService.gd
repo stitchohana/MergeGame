@@ -99,6 +99,7 @@ func _on_merge_confirmed(result: Dictionary) -> void:
 
 func _on_merge_rejected(reason: String) -> void:
 	print("[MergeService] Merge rejected: ", reason)
+	EventBus.show_toast.emit(_merge_error_text(reason))
 	if _pending_from_data.is_empty():
 		return
 
@@ -123,3 +124,14 @@ func _on_merge_rejected(reason: String) -> void:
 
 	if GameState.phase == GameState.GamePhase.MERGING:
 		GameState.set_phase(GameState.GamePhase.IDLE)
+
+func _merge_error_text(reason: String) -> String:
+	match reason:
+		"source_item_not_found": return "合并失败：物品不存在"
+		"target_item_not_found": return "合并失败：目标物品不存在"
+		"group_id_mismatch": return "合并失败：物品类型不同"
+		"item_id_mismatch": return "合并失败：物品不同"
+		"already_max_level": return "合并失败：已达最高等级"
+		"network_error": return "合并失败：网络错误"
+		"version_mismatch": return "合并失败：数据过期，请重试"
+		_: return "合并失败：" + reason

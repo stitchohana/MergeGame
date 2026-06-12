@@ -92,6 +92,8 @@ func _on_breakthrough_confirmed(result: Dictionary) -> void:
 
 func _on_tick_rejected(reason: String) -> void:
 	print("[Cultivation] Tick rejected: ", reason)
+	if reason != "version_mismatch":
+		EventBus.show_toast.emit("修炼同步失败：" + reason)
 
 # --- Public operations (submit to server) ---
 

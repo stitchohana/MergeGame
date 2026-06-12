@@ -20,3 +20,6 @@ signal resume_requested()
 signal pause_requested()
 signal quit_requested()
 signal settings_requested()
+
+# Toast notification
+signal show_toast(message: String)

@@ -127,6 +127,17 @@ func replace_top_screen(screen: BaseScreen, transition: Transition = Transition.
 func get_current_screen() -> BaseScreen:
 	return _screen_stack.back() if _screen_stack.size() > 0 else null
 
+func clear_all_screens() -> void:
+	var screens_to_clear := _screen_stack.duplicate()
+	for screen: BaseScreen in screens_to_clear:
+		screen.on_exit()
+		_screen_stack.erase(screen)
+		screen.queue_free()
+
+	var popups_to_clear := _active_popups.duplicate()
+	for popup: BasePopup in popups_to_clear:
+		hide_popup(popup)
+
 func _on_screen_removed(screen: BaseScreen) -> void:
 	screen.on_exit()
 	_screen_stack.erase(screen)
