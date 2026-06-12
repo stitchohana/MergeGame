@@ -14,6 +14,7 @@ enum GamePhase {
 
 var score: int = 0
 var high_score: int = 0
+var version: int = 0
 var phase: GamePhase = GamePhase.INIT
 
 signal score_changed(new_score: int)

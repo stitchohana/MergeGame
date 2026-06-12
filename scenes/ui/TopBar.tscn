@@ -25,3 +25,10 @@ offset_top = 25
 offset_right = 770
 offset_bottom = 75
 text = "..."
+
+[node name="StatusIndicator" type="ColorRect" parent="."]
+offset_left = 10.0
+offset_top = 80.0
+offset_right = 26.0
+offset_bottom = 96.0
+color = Color(0.8, 0.2, 0.2, 1)

@@ -23,6 +23,7 @@ CultivationService="*res://autoload/CultivationService.gd"
 MergeService="*res://autoload/MergeService.gd"
 SaveManager="*res://autoload/SaveManager.gd"
 EventBus="*res://autoload/EventBus.gd"
+CloudService="*res://autoload/CloudService.gd"
 CraftingService="*res://autoload/CraftingService.gd"
 UIManager="*res://autoload/UIManager.gd"
 

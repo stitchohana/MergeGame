@@ -10,10 +10,9 @@ func _ready() -> void:
 
 	# Game initialization
 	GridManager.grid_updated.connect(GameState.check_game_over)
-	_load_initial_setup()
-	# Override with autosave if exists
-	if FileAccess.file_exists("user://autosave.json"):
-		SaveManager.load_autosave()
+	# Only load initial setup for a fresh game (server state already restored if logged in)
+	if GridManager.count_items() == 0:
+		_load_initial_setup()
 	GameState.set_phase(GameState.GamePhase.IDLE)
 
 	# EventBus action handlers

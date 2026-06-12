@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://cpq61w6j6i33a"]
+
+[ext_resource type="Script" path="res://scenes/screens/LoginScreen.gd" id="1_ls"]
+
+[node name="LoginScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+script = ExtResource("1_ls")
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 265.0
+offset_top = 400.0
+offset_right = 515.0
+offset_bottom = 460.0
+theme_override_font_sizes/font_size = 28
+text = "登录游戏"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DeviceLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 165.0
+offset_top = 520.0
+offset_right = 615.0
+offset_bottom = 550.0
+theme_override_font_sizes/font_size = 16
+text = "设备ID"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DeviceInput" type="LineEdit" parent="."]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 560.0
+offset_right = 640.0
+offset_bottom = 600.0
+theme_override_font_sizes/font_size = 16
+
+[node name="LoginButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 660.0
+offset_right = 490.0
+offset_bottom = 720.0
+theme_override_font_sizes/font_size = 20
+text = "登录"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 760.0
+offset_right = 640.0
+offset_bottom = 820.0
+theme_override_font_sizes/font_size = 14
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 880.0
+offset_right = 490.0
+offset_bottom = 940.0
+theme_override_font_sizes/font_size = 18
+text = "返回"

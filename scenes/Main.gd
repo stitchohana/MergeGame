@@ -8,12 +8,15 @@ func _ready() -> void:
 	# Register screen navigation
 	EventBus.screen_change_requested.connect(_on_screen_change_requested)
 
-	# Push the title screen
-	var title := preload("res://scenes/screens/TitleScreen.tscn").instantiate()
-	UIManager.push_screen(title, UIManager.Transition.FADE)
+	# Push the login screen first
+	var login := preload("res://scenes/screens/LoginScreen.tscn").instantiate()
+	UIManager.push_screen(login, UIManager.Transition.FADE)
 
 func _on_screen_change_requested(screen_name: String) -> void:
 	match screen_name:
+		"login":
+			var login := preload("res://scenes/screens/LoginScreen.tscn").instantiate()
+			UIManager.push_screen(login, UIManager.Transition.FADE)
 		"game":
 			var game := preload("res://scenes/screens/GameScreen.tscn").instantiate()
 			UIManager.replace_top_screen(game, UIManager.Transition.FADE)

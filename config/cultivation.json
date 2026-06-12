@@ -1,5 +1,5 @@
 {
-  "passive_exp_per_second": 10,
+  "passive_exp_per_second": 1,
   "initial_qi": 100,
   "qi_recovery_per_level": 5,
   "qi_breakthrough_bonus": 50,

@@ -15,6 +15,7 @@ func _ready() -> void:
 	CultivationService.realm_changed.connect(_on_realm_changed)
 	CultivationService.qi_changed.connect(_on_qi_changed)
 	CultivationService.buff_changed.connect(_on_buff_changed)
+	CultivationService.breakthrough_pill_needed.connect(_on_breakthrough_pill_needed)
 	_refresh()
 
 func _on_click_area_input(event: InputEvent) -> void:
@@ -51,6 +52,13 @@ func _on_buff_changed(buffs: Array) -> void:
 			names.append("%s x%.1f %ds" % [b.name, b.multiplier, b.remaining])
 		buff_label.text = "加成: %s" % ", ".join(names)
 		buff_label.show()
+
+func _on_breakthrough_pill_needed(pill_id: int) -> void:
+	var pill_data := ConfigDatabase.get_item_data(pill_id)
+	if pill_data.is_empty():
+		return
+	exp_label.text = "需要突破丹: %s" % pill_data.get("name", str(pill_id))
+	exp_bar.value = 100.0
 
 func _refresh() -> void:
 	_on_realm_changed(CultivationService.current_realm_id, CultivationService.get_realm_name(), CultivationService.current_level)
