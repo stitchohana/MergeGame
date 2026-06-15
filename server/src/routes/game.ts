@@ -38,6 +38,12 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       await storage.saveState(userId, state);
       console.log(`[game] new player ${userId}, init with ${state.grid.length} items | v0`);
     } else {
+      // Offline cultivation tick — applies EXP for elapsed time since last_tick_time
+      const oldVer = state.version;
+      engine.tickCultivation(state);
+      if (state.version !== oldVer) {
+        await storage.saveState(userId, state);
+      }
       if (engine.tickCraftingState(state)) {
         await storage.saveState(userId, state);
       }
@@ -64,9 +70,6 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    if (state.version !== version) {
-      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
-    }
     const result = engine.executeMerge(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
@@ -75,17 +78,14 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
 
   // POST /api/game/spawn
   router.post("/spawn", op(async (req, res, userId) => {
-    const { launcher_pos, rolled_id, version } = req.body;
-    if (!Array.isArray(launcher_pos) || launcher_pos.length !== 2 || typeof rolled_id !== "number" || typeof version !== "number") {
+    const { launcher_pos, rolled_id } = req.body;
+    if (!Array.isArray(launcher_pos) || launcher_pos.length !== 2 || typeof rolled_id !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     if (!engine.isInBounds(launcher_pos[0], launcher_pos[1])) {
       res.status(400).json({ error: "out_of_bounds" }); return;
     }
     const state = await getOrCreateState(userId);
-    if (state.version !== version) {
-      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
-    }
     const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1], rolled_id);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
@@ -133,14 +133,11 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
 
   // POST /api/game/craft/remove
   router.post("/craft/remove", op(async (req, res, userId) => {
-    const { table_col, table_row, ingredient_id, target_col, target_row, version } = req.body;
-    if (typeof table_col !== "number" || typeof table_row !== "number" || typeof ingredient_id !== "number" || typeof target_col !== "number" || typeof target_row !== "number" || typeof version !== "number") {
+    const { table_col, table_row, ingredient_id, target_col, target_row } = req.body;
+    if (typeof table_col !== "number" || typeof table_row !== "number" || typeof ingredient_id !== "number" || typeof target_col !== "number" || typeof target_row !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    if (state.version !== version) {
-      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
-    }
     const result = engine.removeIngredientFromTable(state, table_col, table_row, ingredient_id, target_col, target_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);

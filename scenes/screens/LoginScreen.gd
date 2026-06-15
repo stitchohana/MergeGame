@@ -73,17 +73,47 @@ func _on_state_loaded(state: Dictionary) -> void:
 	print("[LoginScreen] Game state loaded, version: ", state.get("version", 0))
 	_disconnect_state_signals()
 
-	# Restore game state
-	SaveManager._restore_from_server(state)
+	var old_realm := CultivationService.current_realm_id
+	var old_level := CultivationService.current_level
+	var old_total := CultivationService.total_exp
 
-	# Transition to title screen
+	SaveManager._restore_from_server(state)
+	_show_offline_gains(old_realm, old_level, old_total)
+
 	UIManager.replace_top_screen(preload("res://scenes/screens/TitleScreen.tscn").instantiate())
 
 func _on_state_loaded_for_skip(state: Dictionary) -> void:
 	print("[LoginScreen] Auto-login, game state version: ", state.get("version", 0))
 	_disconnect_state_signals()
+
+	var old_realm := CultivationService.current_realm_id
+	var old_level := CultivationService.current_level
+	var old_total := CultivationService.total_exp
+
 	SaveManager._restore_from_server(state)
+	_show_offline_gains(old_realm, old_level, old_total)
+
 	UIManager.replace_top_screen(preload("res://scenes/screens/TitleScreen.tscn").instantiate())
+
+func _show_offline_gains(old_realm: int, old_level: int, old_total: int) -> void:
+	var exp_gained := CultivationService.total_exp - old_total
+	var realm_up := CultivationService.current_realm_id > old_realm
+	var level_up := CultivationService.current_level > old_level and CultivationService.current_realm_id == old_realm
+
+	if not exp_gained > 0 and not realm_up and not level_up:
+		return
+
+	var parts: PackedStringArray = []
+	if realm_up:
+		parts.append("突破至%s" % CultivationService.get_realm_name())
+	if level_up:
+		parts.append("升至%s Lv%d" % [CultivationService.get_realm_name(), CultivationService.current_level])
+	if exp_gained > 0:
+		parts.append("获得%d经验" % exp_gained)
+
+	var msg: String = "离线修炼：%s" % ", ".join(parts)
+	print("[LoginScreen] ", msg)
+	EventBus.show_toast.emit(msg)
 
 func _on_state_load_failed(reason: String) -> void:
 	print("[LoginScreen] State load failed: ", reason)

@@ -36,6 +36,12 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
       await storage.saveState(userId, state);
       console.log(`[cult] new player ${userId}, init with ${state.grid.length} items`);
     } else {
+      // Offline cultivation tick
+      const oldVer = state.version;
+      engine.tickCultivation(state);
+      if (state.version !== oldVer) {
+        await storage.saveState(userId, state);
+      }
       if (engine.tickCraftingState(state)) {
         await storage.saveState(userId, state);
       }
@@ -45,14 +51,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
 
   // POST /api/cultivation/tick
   router.post("/tick", op(async (req, res, userId) => {
-    const { version } = req.body;
-    if (typeof version !== "number") {
-      res.status(400).json({ error: "invalid_params" }); return;
-    }
     const state = await getOrCreateState(userId);
-    if (state.version !== version) {
-      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
-    }
     engine.tickCultivation(state);
     await storage.saveState(userId, state);
     res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });
@@ -60,14 +59,11 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
 
   // POST /api/cultivation/consume
   router.post("/consume", op(async (req, res, userId) => {
-    const { pill_id, version } = req.body;
-    if (typeof pill_id !== "number" || typeof version !== "number") {
+    const { pill_id } = req.body;
+    if (typeof pill_id !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    if (state.version !== version) {
-      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
-    }
     const result = engine.consumePill(state, pill_id);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
@@ -76,14 +72,11 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
 
   // POST /api/cultivation/breakthrough
   router.post("/breakthrough", op(async (req, res, userId) => {
-    const { pill_id, version } = req.body;
-    if (typeof pill_id !== "number" || typeof version !== "number") {
+    const { pill_id } = req.body;
+    if (typeof pill_id !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    if (state.version !== version) {
-      res.status(409).json({ error: "version_mismatch", server_version: state.version }); return;
-    }
     const result = engine.executeTryBreakthrough(
       state, pill_id,
       state.cultivation.current_realm_id,
