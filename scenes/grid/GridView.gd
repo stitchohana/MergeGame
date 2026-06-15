@@ -200,6 +200,12 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
+	# Check stamina locally before optimistic spawn
+	if GameState.stamina < 1:
+		EventBus.show_toast.emit("体力不足")
+		GameState.set_phase(GameState.GamePhase.IDLE)
+		return
+
 	# Roll locally for optimistic UI
 	var spawn_data: Dictionary = ConfigDatabase.roll_spawn(item.get("id", 0))
 	if spawn_data.is_empty():
@@ -208,11 +214,15 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 
 	var spawn_pos := GridManager.find_nearest_empty(pos)
 	if spawn_pos == Vector2i(-1, -1):
+		EventBus.show_toast.emit("棋盘已满")
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
 	# Optimistic: add item + play animation immediately
 	var new_item: Dictionary = spawn_data.duplicate(true)
+	# Init charges for spawned launchers
+	if new_item.get("type", "") == "launcher":
+		new_item["charges"] = new_item.get("max_charges", 3)
 	_is_launcher_spawning = true
 	GridManager.add_item(new_item, spawn_pos)
 	_is_launcher_spawning = false
@@ -244,11 +254,39 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 func _on_spawn_confirmed(result: Dictionary) -> void:
 	# Use server position to locate the item (request queue may cause _pending values to be stale)
 	var target_pos: Vector2i = Vector2i(result.get("target_col", -1), result.get("target_row", -1))
+	var launcher_pos: Vector2i = _pending_spawn_pos
 	_pending_spawn_pos = Vector2i(-1, -1)
 	_pending_spawn_id = -1
 	_pending_spawn_target = Vector2i(-1, -1)
 
 	GameState.version = result.get("new_version", GameState.version)
+	# Update stamina from server (if present)
+	var stamina: Variant = result.get("stamina", null)
+	if stamina != null:
+		GameState.stamina = stamina
+		GameState.max_stamina = result.get("max_stamina", GameState.max_stamina)
+		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	# Update charges display from spawn response
+	var charges_val: Variant = result.get("charges", null)
+	if charges_val != null:
+		# Update launcher item in GridManager
+		if launcher_pos.x >= 0 and launcher_pos.y >= 0:
+			var launcher_item = GridManager.get_item(launcher_pos)
+			if launcher_item != null:
+				launcher_item["charges"] = charges_val
+				# Update GridItem visual
+				var launcher_key := "%d,%d" % [launcher_pos.x, launcher_pos.y]
+				var launcher_node = _item_nodes.get(launcher_key)
+				if launcher_node and is_instance_valid(launcher_node):
+					if charges_val <= 0:
+						launcher_node.charge_label.text = "空"
+						launcher_node.charge_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3, 1))
+					else:
+						var max_c: int = result.get("max_charges", 3)
+						launcher_node.charge_label.text = "%d/%d" % [charges_val, max_c]
+						launcher_node.charge_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
+		if charges_val <= 0:
+			EventBus.show_toast.emit("发射器次数用尽，等待冷却")
 
 	if GameState.phase == GameState.GamePhase.SPAWNING:
 		GameState.set_phase(GameState.GamePhase.IDLE)
@@ -273,6 +311,8 @@ func _spawn_error_text(reason: String) -> String:
 		"launcher_not_found": return "生成失败：发射器不存在"
 		"not_a_launcher": return "生成失败：不是发射器"
 		"no_empty_cell": return "生成失败：棋盘已满"
+		"insufficient_stamina": return "体力不足"
+		"no_charges": return "发射器次数用尽"
 		"network_error": return "生成失败：网络错误"
 		"version_mismatch": return "生成失败：数据过期，请重试"
 		_: return "生成失败：" + reason

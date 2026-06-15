@@ -21,8 +21,11 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.score = state.get("score", 0)
 	GameState.high_score = state.get("high_score", 0)
 	GameState.version = state.get("version", 0)
+	GameState.stamina = state.get("stamina", 100)
+	GameState.max_stamina = state.get("max_stamina", 100)
 	GameState.score_changed.emit(GameState.score)
 	GameState.high_score_changed.emit(GameState.high_score)
+	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 
 	# Grid
 	GridManager.init_grid()
@@ -39,6 +42,10 @@ func _restore_from_server(state: Dictionary) -> void:
 				print("[Save]   table #", entry.get("id", 0), " has craft: ", craft_data.get("_craft_state", -1))
 				for key in craft_data:
 					new_item[key] = craft_data[key]
+			# Restore launcher charges
+			var entry_charges: Variant = entry.get("charges", null)
+			if entry_charges != null:
+				new_item["charges"] = entry_charges
 			GridManager.add_item(new_item, pos)
 		else:
 			print("[Save]   unknown item id: ", entry.get("id", 0))

@@ -16,10 +16,13 @@ var score: int = 0
 var high_score: int = 0
 var version: int = 0
 var phase: GamePhase = GamePhase.INIT
+var stamina: int = 100
+var max_stamina: int = 100
 
 signal score_changed(new_score: int)
 signal high_score_changed(new_high: int)
 signal phase_changed(old_phase: GamePhase, new_phase: GamePhase)
+signal stamina_changed(current: int, max: int)
 signal game_over()
 
 func _ready() -> void:

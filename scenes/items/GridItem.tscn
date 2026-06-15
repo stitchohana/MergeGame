@@ -1,39 +1,51 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://dbfaocwrurvis"]
 
-[ext_resource type="Script" path="res://scenes/items/GridItem.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://b5cg0ovhunghs" path="res://scenes/items/GridItem.gd" id="1_gd"]
 
-[node name="GridItem" type="ColorRect"]
+[node name="GridItem" type="ColorRect" unique_id=140265477]
 custom_minimum_size = Vector2(100, 100)
-size = Vector2(100, 100)
+offset_right = 100.0
+offset_bottom = 100.0
 mouse_filter = 1
-script = ExtResource("1_gd")
 color = Color(0.3, 0.3, 0.4, 1)
+script = ExtResource("1_gd")
 
-[node name="IconRect" type="TextureRect" parent="."]
+[node name="IconRect" type="TextureRect" parent="." unique_id=252949918]
+visible = false
+layout_mode = 0
 mouse_filter = 2
-anchors_preset = 16
 expand_mode = 1
 stretch_mode = 5
-visible = false
 
-[node name="NameLabel" type="Label" parent="."]
-anchor_left = 0.0
+[node name="NameLabel" type="Label" parent="." unique_id=2576373]
+layout_mode = 0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 4
-offset_top = 4
-offset_right = -4
-offset_bottom = -4
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
 text = "道具名"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LevelLabel" type="Label" parent="."]
-offset_left = 4
-offset_top = 4
+[node name="ChargeLabel" type="Label" parent="." unique_id=1099883731]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 2.0
+offset_right = 98.0
+offset_bottom = 18.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 2
+
+[node name="LevelLabel" type="Label" parent="." unique_id=1183002610]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 text = "1"

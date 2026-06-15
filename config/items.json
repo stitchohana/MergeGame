@@ -26,6 +26,7 @@
 		{ "id": 22, "weight": 25 },
 		{ "id": 501, "weight": 5 }
 	  ],
+	  "max_charges": 30, "recharge_time": 60,
 	  "merge_score": 0, "describe": "产出凡草，小概率出灵草或自身"
 	},
 	{
@@ -35,6 +36,7 @@
 		{ "id": 23, "weight": 30 },
 		{ "id": 502, "weight": 10 }
 	  ],
+	  "max_charges": 40, "recharge_time": 50,
 	  "merge_score": 30, "describe": "产出灵草，概率出仙草或自身"
 	},
 	{
@@ -44,6 +46,7 @@
 		{ "id": 24, "weight": 35 },
 		{ "id": 503, "weight": 15 }
 	  ],
+	  "max_charges": 50, "recharge_time": 40,
 	  "merge_score": 90, "describe": "产出仙草，概率出圣草或自身"
 	}
   ],

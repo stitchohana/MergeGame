@@ -4,6 +4,8 @@ class_name TopBar extends BaseHUD
 @onready var high_score_label: Label = $HighScoreLabel
 @onready var settings_btn: Button = $SettingsBtn
 @onready var status_indicator: ColorRect = $StatusIndicator
+@onready var stamina_bar: ProgressBar = $StaminaBar
+@onready var stamina_label: Label = $StaminaLabel
 
 func _ready() -> void:
 	GameState.score_changed.connect(_on_score_changed)
@@ -13,8 +15,10 @@ func _ready() -> void:
 	if settings_btn:
 		settings_btn.pressed.connect(func(): EventBus.pause_requested.emit())
 	_update_status_indicator()
+	_update_stamina()
 	CloudService.connected.connect(_update_status_indicator)
 	CloudService.disconnected.connect(_update_status_indicator)
+	GameState.stamina_changed.connect(_on_stamina_changed)
 
 func _on_score_changed(new_score: int) -> void:
 	if score_label:
@@ -23,6 +27,23 @@ func _on_score_changed(new_score: int) -> void:
 func _on_high_score_changed(new_high: int) -> void:
 	if high_score_label:
 		high_score_label.text = "最高: %d" % new_high
+
+func _on_stamina_changed(current: int, max_stam: int) -> void:
+	_update_stamina()
+
+func _update_stamina() -> void:
+	if stamina_bar:
+		stamina_bar.max_value = GameState.max_stamina
+		stamina_bar.value = GameState.stamina
+		var ratio := float(GameState.stamina) / float(GameState.max_stamina) if GameState.max_stamina > 0 else 0.0
+		if ratio > 0.5:
+			stamina_bar.modulate = Color(0.2, 0.8, 0.2, 1)
+		elif ratio > 0.2:
+			stamina_bar.modulate = Color(0.8, 0.8, 0.2, 1)
+		else:
+			stamina_bar.modulate = Color(0.8, 0.2, 0.2, 1)
+	if stamina_label:
+		stamina_label.text = "体力 %d/%d" % [GameState.stamina, GameState.max_stamina]
 
 func _update_status_indicator() -> void:
 	if not status_indicator:

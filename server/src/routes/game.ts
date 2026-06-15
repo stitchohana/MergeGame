@@ -56,7 +56,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     try {
       const userId = req.auth!.userId;
       const state = await getOrCreateState(userId);
-      res.json({ score: state.score, high_score: state.high_score, grid: state.grid, cultivation: state.cultivation, version: state.version });
+      res.json({ score: state.score, high_score: state.high_score, grid: state.grid, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, version: state.version });
     } catch (err) {
       console.error("[game] state error:", err);
       res.status(500).json({ error: "internal_error" });
@@ -89,7 +89,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1], rolled_id);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spawned_id: result.spawnedId, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion });
+    res.json({ ok: true, spawned_id: result.spawnedId, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges });
   }));
 
   // POST /api/game/craft/add

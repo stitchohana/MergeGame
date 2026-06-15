@@ -74,6 +74,9 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	GridManager.remove_item(to_pos)
 
 	var merged_item = next_level_data.duplicate(true)
+	# Init charges for merged launchers
+	if merged_item.get("type", "") == "launcher":
+		merged_item["charges"] = merged_item.get("max_charges", 3)
 	GridManager.add_item(merged_item, merge_pos)
 
 	# Add score optimistically

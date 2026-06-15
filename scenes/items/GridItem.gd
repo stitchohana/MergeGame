@@ -13,6 +13,7 @@ var _orig_scale: Vector2
 @onready var name_label: Label = $NameLabel
 @onready var level_label: Label = $LevelLabel
 @onready var icon_rect: TextureRect = $IconRect
+@onready var charge_label: Label = $ChargeLabel
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -79,6 +80,25 @@ func _update_visuals() -> void:
 	if level_label:
 		level_label.text = str(level)
 		level_label.visible = true
+
+	# Charge indicator for launchers (uses node from scene)
+	if charge_label:
+		if is_launcher:
+			var item_charges: int = item_data.get("charges", -1)
+			var config := ConfigDatabase.get_item_data(item_data.get("id", 0))
+			var max_c: int = config.get("max_charges", 0) if not config.is_empty() else 0
+			if item_charges >= 0 and max_c > 0:
+				charge_label.visible = true
+				if item_charges <= 0:
+					charge_label.text = "空"
+					charge_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3, 1))
+				else:
+					charge_label.text = "%d/%d" % [item_charges, max_c]
+					charge_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
+			else:
+				charge_label.visible = false
+		else:
+			charge_label.visible = false
 
 # Called by GridView during drag
 func set_drag_active(active: bool) -> void:

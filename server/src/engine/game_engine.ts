@@ -19,6 +19,8 @@ interface ItemDef {
   buff_duration?: number;
   buff_multiplier?: number;
   recipes?: number[];
+  max_charges?: number;
+  recharge_time?: number;
 }
 
 interface RecipeDef {
@@ -70,7 +72,9 @@ export class GameEngine {
   private recipesByTable = new Map<number, RecipeDef[]>();
   private cultivation: CultivationConfig | null = null;
   private initialSetup: { id: number; col: number; row: number }[] = [];
+  private staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
 
+  // Cooldown tracking per launcher position
   constructor(configDir: string) {
     this.loadConfigs(configDir);
   }
@@ -81,7 +85,24 @@ export class GameEngine {
     this.loadItems(path.join(configDir, "items.json"));
     this.loadCultivation(path.join(configDir, "cultivation.json"));
     this.loadInitialSetup(path.join(configDir, "initial_setup.json"));
+    this.loadGameConfig(path.join(configDir, "game_config.json"));
     console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.realms.length ?? 0} realms`);
+  }
+
+  private loadGameConfig(filePath: string): void {
+    try {
+      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      const s = data.stamina;
+      if (s) {
+        this.staminaConfig = {
+          max: s.max ?? 100,
+          spawnCost: s.spawn_cost ?? 10,
+          regenInterval: s.regen_interval ?? 120,
+          regenAmount: s.regen_amount ?? 1,
+        };
+        console.log(`[engine] Stamina config: max=${this.staminaConfig.max} cost=${this.staminaConfig.spawnCost} regen=${this.staminaConfig.regenAmount}/${this.staminaConfig.regenInterval}s`);
+      }
+    } catch { /* ignore */ }
   }
 
   private loadItems(filePath: string): void {
@@ -175,6 +196,14 @@ export class GameEngine {
     return this.initialSetup;
   }
 
+  getMaxCharges(itemId: number): number {
+    return this.getItemData(itemId)?.max_charges ?? 3;
+  }
+
+  getRechargeTime(itemId: number): number {
+    return this.getItemData(itemId)?.recharge_time ?? 60;
+  }
+
   // --- Grid helpers ---
 
   isInBounds(col: number, row: number): boolean {
@@ -227,6 +256,7 @@ export class GameEngine {
   // --- State initialization ---
 
   createInitialState(): GameState {
+    const now = Date.now();
     const state: GameState = {
       score: 0,
       high_score: 0,
@@ -239,15 +269,23 @@ export class GameEngine {
         current_qi: this.cultivation?.initial_qi ?? 100,
         max_qi: this.cultivation?.initial_qi ?? 100,
         buffs: [],
-        last_tick_time: Date.now(),
+        last_tick_time: now,
       },
+      stamina: 100,
+      max_stamina: 100,
+      last_stamina_tick: now,
       version: 0,
     };
 
     for (const entry of this.initialSetup) {
-      const item = this.getItemData(entry.id);
-      if (item) {
-        state.grid.push({ id: entry.id, col: entry.col, row: entry.row });
+      const itemDef = this.getItemData(entry.id);
+      if (itemDef) {
+        const gitem: GridItem = { id: entry.id, col: entry.col, row: entry.row };
+        if (itemDef.type === "launcher") {
+          gitem.charges = this.getMaxCharges(entry.id);
+          gitem.last_charge_time = now;
+        }
+        state.grid.push(gitem);
       }
     }
     return state;
@@ -382,11 +420,14 @@ export class GameEngine {
     );
 
     // Add merged item at the target position (where itemB was)
-    state.grid.push({
-      id: result.resultItem.id,
-      col: result.toItem.col,
-      row: result.toItem.row,
-    });
+    {
+      const mergedItem: GridItem = { id: result.resultItem.id, col: result.toItem.col, row: result.toItem.row };
+      if (result.resultItem.type === "launcher") {
+        mergedItem.charges = this.getMaxCharges(result.resultItem.id);
+        mergedItem.last_charge_time = Date.now();
+      }
+      state.grid.push(mergedItem);
+    }
 
     state.score += result.scoreGain;
     if (state.score > state.high_score) {
@@ -414,7 +455,7 @@ export class GameEngine {
     launcherCol: number,
     launcherRow: number,
     clientRolledId: number
-  ): { ok: true; spawnedId: number; targetCol: number; targetRow: number; newVersion: number }
+  ): { ok: true; spawnedId: number; targetCol: number; targetRow: number; newVersion: number; charges: number; maxCharges: number }
     | { ok: false; reason: string } {
     const map = this.gridToMap(state.grid);
     const launcherKey = this.posKey(launcherCol, launcherRow);
@@ -434,6 +475,18 @@ export class GameEngine {
       return { ok: false, reason: "invalid_spawn_id" };
     }
 
+    // Stamina check (global)
+    if (state.stamina < this.staminaConfig.spawnCost) {
+      return { ok: false, reason: "insufficient_stamina" };
+    }
+
+    // Launcher charges check (per-launcher)
+    const maxC = launcherData.max_charges ?? 3;
+    const charges = launcherItem.charges ?? maxC;
+    if (charges <= 0) {
+      return { ok: false, reason: "no_charges" };
+    }
+
     // Use the client's rolled item (already validated as legal)
     const spawnResult = this.getItemData(clientRolledId);
     if (!spawnResult) return { ok: false, reason: "spawn_failed" };
@@ -441,11 +494,17 @@ export class GameEngine {
     const target = this.findNearestEmpty(map, launcherCol, launcherRow);
     if (!target) return { ok: false, reason: "no_empty_cell" };
 
-    state.grid.push({
-      id: spawnResult.id,
-      col: target.col,
-      row: target.row,
-    });
+    // Deduct stamina and launcher charge
+    state.stamina = Math.max(0, state.stamina - this.staminaConfig.spawnCost);
+    launcherItem.charges = charges - 1;
+    launcherItem.last_charge_time = Date.now();
+
+    const newItem: GridItem = { id: spawnResult.id, col: target.col, row: target.row };
+    if (spawnResult.type === "launcher") {
+      newItem.charges = this.getMaxCharges(spawnResult.id);
+      newItem.last_charge_time = Date.now();
+    }
+    state.grid.push(newItem);
     state.version += 1;
 
     console.log(`[engine] spawn: launcher #${launcherItem.id} -> ${spawnResult.name} at (${target.col},${target.row}) | v${state.version}`);
@@ -456,6 +515,8 @@ export class GameEngine {
       targetCol: target.col,
       targetRow: target.row,
       newVersion: state.version,
+      charges: launcherItem.charges,
+      maxCharges: this.getMaxCharges(launcherItem.id),
     };
   }
 
@@ -886,11 +947,54 @@ export class GameEngine {
       console.log(`[engine] cultivation tick: max cultivation reached`);
     }
 
+    // Tick stamina regen
+    this.tickStamina(state);
+
+    // Tick launcher charge recharge
+    this.tickLauncherCharges(state);
+
     // Tick crafting tables (auto-transition CRAFTING -> READY)
     this.tickCraftingState(state);
 
     c.last_tick_time = now;
     state.version += 1;
+  }
+
+  tickLauncherCharges(state: GameState): void {
+    const now = Date.now();
+    for (const item of state.grid) {
+      if (item.charges === undefined) continue;
+      const maxC = this.getMaxCharges(item.id);
+      if (item.charges >= maxC) continue;
+      const rechargeTime = this.getRechargeTime(item.id) * 1000;
+      const lastTime = item.last_charge_time ?? 0;
+      if (now - lastTime >= rechargeTime) {
+        item.charges = maxC;
+        const launcherName = this.getItemData(item.id)?.name ?? ("#" + item.id);
+        console.log(`[engine] launcher recharge: ${launcherName} at (${item.col},${item.row}) -> ${maxC} charges`);
+      }
+    }
+  }
+
+  tickStamina(state: GameState): void {
+    const now = Date.now();
+    const elapsed = Math.floor((now - state.last_stamina_tick) / 1000);
+    if (elapsed <= 0) return;
+    if (state.stamina >= state.max_stamina) {
+      state.last_stamina_tick = now;
+      return;
+    }
+    // Interval-based regen: every regenInterval seconds, gain regenAmount
+    const interval = this.staminaConfig.regenInterval;
+    const count = Math.floor(elapsed / interval);
+    if (count > 0) {
+      const gain = Math.min(count * this.staminaConfig.regenAmount, state.max_stamina - state.stamina);
+      if (gain > 0) {
+        state.stamina += gain;
+        console.log(`[engine] stamina regen: +${gain} (${elapsed}s / ${interval}s intervals) | ${state.stamina}/${state.max_stamina}`);
+      }
+      state.last_stamina_tick += count * interval * 1000;
+    }
   }
 
   tickCraftingState(state: GameState): boolean {

@@ -5,6 +5,8 @@ export interface GridItem {
   col: number;
   row: number;
   craft?: CraftState;
+  charges?: number;
+  last_charge_time?: number;
 }
 
 export interface CraftState {
@@ -33,6 +35,9 @@ export interface GameState {
   high_score: number;
   grid: GridItem[];
   cultivation: CultivationData;
+  stamina: number;
+  max_stamina: number;
+  last_stamina_tick: number;
   version: number;
 }
 

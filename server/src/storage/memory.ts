@@ -12,11 +12,15 @@ const defaultCultivation = {
 };
 
 export function defaultGameState(): GameState {
+  const now = Date.now();
   return {
     score: 0,
     high_score: 0,
     grid: [],
     cultivation: { ...defaultCultivation },
+    stamina: 100,
+    max_stamina: 100,
+    last_stamina_tick: now,
     version: 0,
   };
 }
