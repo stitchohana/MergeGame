@@ -40,7 +40,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     } else {
       // Offline cultivation tick — applies EXP for elapsed time since last_tick_time
       const oldVer = state.version;
-      engine.tickCultivation(state);
+      engine.tickCultivation(state, true);
       if (state.version !== oldVer) {
         await storage.saveState(userId, state);
       }
@@ -56,7 +56,8 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     try {
       const userId = req.auth!.userId;
       const state = await getOrCreateState(userId);
-      res.json({ score: state.score, high_score: state.high_score, grid: state.grid, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, version: state.version });
+      const offlineExp = (state.cultivation as any)._offline_exp_gained || 0;
+      res.json({ score: state.score, high_score: state.high_score, grid: state.grid, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, version: state.version, offline_exp_gained: offlineExp });
     } catch (err) {
       console.error("[game] state error:", err);
       res.status(500).json({ error: "internal_error" });

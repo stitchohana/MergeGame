@@ -76,11 +76,12 @@ func _on_state_loaded(state: Dictionary) -> void:
 	var old_realm := CultivationService.current_realm_id
 	var old_level := CultivationService.current_level
 	var old_total := CultivationService.total_exp
+	var offline_exp : float = state.get("offline_exp_gained", 0)
 
 	SaveManager._restore_from_server(state)
-	_show_offline_gains(old_realm, old_level, old_total)
+	_show_offline_gains(old_realm, old_level, old_total, offline_exp)
 
-	UIManager.replace_top_screen(preload("res://scenes/screens/TitleScreen.tscn").instantiate())
+	UIManager.replace_top_screen(preload("res://scenes/screens/GameScreen.tscn").instantiate())
 
 func _on_state_loaded_for_skip(state: Dictionary) -> void:
 	print("[LoginScreen] Auto-login, game state version: ", state.get("version", 0))
@@ -89,21 +90,25 @@ func _on_state_loaded_for_skip(state: Dictionary) -> void:
 	var old_realm := CultivationService.current_realm_id
 	var old_level := CultivationService.current_level
 	var old_total := CultivationService.total_exp
+	var offline_exp : float = state.get("offline_exp_gained", 0)
+	var old_tick: float = CultivationService.last_tick_time
 
 	SaveManager._restore_from_server(state)
-	_show_offline_gains(old_realm, old_level, old_total)
+	_show_offline_gains(old_realm, old_level, old_total, offline_exp)
 
-	UIManager.replace_top_screen(preload("res://scenes/screens/TitleScreen.tscn").instantiate())
+	UIManager.replace_top_screen(preload("res://scenes/screens/GameScreen.tscn").instantiate())
 
-func _show_offline_gains(old_realm: int, old_level: int, old_total: int) -> void:
-	var exp_gained := CultivationService.total_exp - old_total
+func _show_offline_gains(old_realm: int, old_level: int, old_total: int, offline_exp: int = 0) -> void:
+	var exp_gained := offline_exp
 	var realm_up := CultivationService.current_realm_id > old_realm
 	var level_up := CultivationService.current_level > old_level and CultivationService.current_realm_id == old_realm
 
-	if not exp_gained > 0 and not realm_up and not level_up:
-		return
-
 	var parts: PackedStringArray = []
+
+	# Always show current realm/level
+	var fmt_lv: String = CultivationService.get_formatted_realm_level()
+	parts.append("当前：%s" % fmt_lv)
+
 	if realm_up:
 		parts.append("突破至%s" % CultivationService.get_realm_name())
 	if level_up:
@@ -111,7 +116,7 @@ func _show_offline_gains(old_realm: int, old_level: int, old_total: int) -> void
 	if exp_gained > 0:
 		parts.append("获得%d经验" % exp_gained)
 
-	var msg: String = "离线修炼：%s" % ", ".join(parts)
+	var msg: String = "、".join(parts)
 	print("[LoginScreen] ", msg)
 	EventBus.show_toast.emit(msg)
 
@@ -126,7 +131,7 @@ func _on_state_load_failed(reason: String) -> void:
 	else:
 		# Already had token but state load failed — still allow entering title
 		_status("存档加载失败，进入离线模式")
-		UIManager.replace_top_screen(preload("res://scenes/screens/TitleScreen.tscn").instantiate())
+		UIManager.replace_top_screen(preload("res://scenes/screens/GameScreen.tscn").instantiate())
 
 func _on_state_load_failed_skip(reason: String) -> void:
 	_on_state_load_failed(reason)

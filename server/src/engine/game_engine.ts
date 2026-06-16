@@ -916,11 +916,13 @@ export class GameEngine {
 
   // --- Cultivation tick & pill ---
 
-  tickCultivation(state: GameState): void {
+  tickCultivation(state: GameState, trackGain = false): void {
     const c = state.cultivation;
     const now = Date.now();
     const elapsed = Math.floor((now - c.last_tick_time) / 1000);
     if (elapsed <= 0 || !this.cultivation) return;
+
+    let totalGained = 0;
 
     // Tick buffs
     this._tickBuffs(c, elapsed);
@@ -937,6 +939,7 @@ export class GameEngine {
         const baseExp = this.cultivation.passive_exp_per_second;
         const mult = this._getExpMultiplier(c);
         const gained = Math.ceil(baseExp * elapsed * mult);
+        totalGained = gained;
         if (gained > 0) {
           this._addExp(c, gained);
           const realmName = this.cultivation.realms[c.current_realm_id]?.name ?? "?";
@@ -945,6 +948,11 @@ export class GameEngine {
       }
     } else {
       console.log(`[engine] cultivation tick: max cultivation reached`);
+    }
+
+    // Store gained EXP for the response
+    if (trackGain) {
+      (c as any)._offline_exp_gained = totalGained;
     }
 
     // Tick stamina regen
