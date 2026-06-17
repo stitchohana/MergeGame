@@ -5,8 +5,18 @@ export interface GridItem {
   col: number;
   row: number;
   craft?: CraftState;
+  storage?: StorageData;
   charges?: number;
   last_charge_time?: number;
+}
+
+export interface StorageSlot {
+  id: number;
+}
+
+export interface StorageData {
+  items: StorageSlot[];
+  max_slots: number;
 }
 
 export interface CraftState {

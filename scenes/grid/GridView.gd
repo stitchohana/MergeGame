@@ -140,7 +140,12 @@ func _input(event: InputEvent) -> void:
 			# Click without drag
 			item_clicked.emit(_pressed_item, _press_start_pos)
 
-			# Check crafting table state
+			# Check crafting table or storage click
+			if _pressed_item.get("id") == 603:
+				item_clicked.emit(_pressed_item, _press_start_pos)
+				_handle_storage_click(_press_start_pos)
+				_pressed_item = {}
+				return
 			if _pressed_item.get("type") == "crafting":
 				var cstate: int = _pressed_item.get("_craft_state", CraftingService.TableState.IDLE)
 				if cstate == CraftingService.TableState.READY:
@@ -389,6 +394,12 @@ func _finish_drag(target_pos: Vector2i) -> void:
 	# No distance limit -- any valid cell is a valid drop target
 	var target = GridManager.get_item(target_pos)
 
+	# Check storage drop
+	if target != null and target.get("id") == 603:
+		_handle_storage_drop(target_pos, target)
+		if GameState.phase in [GameState.GamePhase.DRAGGING, GameState.GamePhase.MERGING]:
+			GameState.set_phase(GameState.GamePhase.IDLE)
+		return
 	# Check for crafting table drop
 	if target != null and target.get("type") == "crafting":
 		_handle_crafting_drop(target_pos, target)
@@ -424,7 +435,6 @@ func _on_move_confirmed(result: Dictionary) -> void:
 
 func _on_move_rejected(reason: String) -> void:
 	print("[GridView] Move rejected: ", reason)
-	EventBus.show_toast.emit("移动失败：" + reason)
 func _snap_back() -> void:
 
 	var key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
@@ -582,6 +592,36 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 
 var _last_craft_ingredient_id: int = -1
 var _last_craft_ingredient_pos: Vector2i = Vector2i(-1, -1)
+
+func _handle_storage_click(storage_pos: Vector2i) -> void:
+	CloudService.fetch_state()
+	CloudService.state_loaded.connect(func(data):
+		var items: Array = []
+		for entry in data.grid:
+			if entry.col == storage_pos.x and entry.row == storage_pos.y and entry.has("storage"):
+				items = entry.storage.items
+				break
+		var popup := preload("res://scenes/ui/StoragePopup.tscn").instantiate() as StoragePopup
+		popup.setup(storage_pos, items)
+		UIManager.show_popup(popup)
+	, CONNECT_ONE_SHOT)
+
+func _handle_storage_drop(storage_pos: Vector2i, storage_item: Dictionary) -> void:
+	var dragged_item = GridManager.get_item(_drag_source_pos)
+	if dragged_item == null:
+		_snap_back()
+		return
+
+	var item_id: int = dragged_item.get("id", 0)
+	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
+	var src_node = _item_nodes.get(src_key)
+	if src_node and is_instance_valid(src_node):
+		src_node.queue_free()
+	_item_nodes.erase(src_key)
+	GridManager.remove_item(_drag_source_pos)
+
+	if CloudService.online:
+		CloudService.submit_storage_deposit(storage_pos.x, storage_pos.y, item_id, _drag_source_pos.x, _drag_source_pos.y)
 
 func _handle_crafting_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 	if table_item.is_empty():

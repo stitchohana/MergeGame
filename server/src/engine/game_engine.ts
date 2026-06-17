@@ -21,6 +21,7 @@ interface ItemDef {
   recipes?: number[];
   max_charges?: number;
   recharge_time?: number;
+  storage_slots?: number;
 }
 
 interface RecipeDef {
@@ -1131,6 +1132,60 @@ export class GameEngine {
       const realmName = this.cultivation.realms[c.current_realm_id]?.name ?? "?";
       console.log(`[engine] level up: ${realmName} Lv${c.current_level}`);
     }
+  }
+
+  // --- Storage ---
+
+  initStorage(item: GridItem): void {
+    if (!item.storage) {
+      const itemDef = this.getItemData(item.id);
+      item.storage = { items: [], max_slots: itemDef?.storage_slots ?? 20 };
+    }
+  }
+
+  depositItem(state: GameState, storageCol: number, storageRow: number, itemId: number, fromCol: number, fromRow: number): { ok: true; newVersion: number } | { ok: false; reason: string } {
+    const fromKey = this.posKey(fromCol, fromRow);
+    const sourceItem = state.grid.find(i => this.posKey(i.col, i.row) === fromKey);
+    if (!sourceItem) return { ok: false, reason: "item_not_found" };
+
+    const storageItem = state.grid.find(i => i.col === storageCol && i.row === storageRow);
+    if (!storageItem) return { ok: false, reason: "storage_not_found" };
+
+    this.initStorage(storageItem);
+    const s = storageItem.storage!;
+
+    if (s.items.length >= s.max_slots) return { ok: false, reason: "storage_full" };
+
+    // Remove from grid
+    state.grid = state.grid.filter(i => this.posKey(i.col, i.row) !== fromKey);
+
+    // Add to storage (no stacking — one slot per item)
+    s.items.push({ id: itemId });
+
+    state.version += 1;
+    console.log(`[engine] deposit: #${itemId} -> storage at (${storageCol},${storageRow}) | slots=${s.items.length}/${s.max_slots}`);
+    return { ok: true, newVersion: state.version };
+  }
+
+  withdrawItem(state: GameState, storageCol: number, storageRow: number, itemId: number, targetCol: number, targetRow: number): { ok: true; newVersion: number } | { ok: false; reason: string } {
+    const storageItem = state.grid.find(i => i.col === storageCol && i.row === storageRow);
+    if (!storageItem?.storage) return { ok: false, reason: "storage_not_found" };
+
+    const targetKey = this.posKey(targetCol, targetRow);
+    if (state.grid.some(i => this.posKey(i.col, i.row) === targetKey)) return { ok: false, reason: "target_occupied" };
+
+    const idx = storageItem.storage.items.findIndex(s => s.id === itemId);
+    if (idx < 0) return { ok: false, reason: "item_not_in_storage" };
+
+    // Remove one slot (no stacking)
+    storageItem.storage.items.splice(idx, 1);
+
+    state.grid.push({ id: itemId, col: targetCol, row: targetRow });
+    state.version += 1;
+
+    const itemName = this.getItemData(itemId)?.name ?? ("#" + itemId);
+    console.log();
+    return { ok: true, newVersion: state.version };
   }
 
   getGridHash(state: GameState): number {

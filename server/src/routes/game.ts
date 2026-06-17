@@ -158,6 +158,33 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     res.json({ ok: true, new_version: result.newVersion });
   }));
 
+  // POST /api/game/storage/deposit
+  router.post("/storage/deposit", op(async (req, res, userId) => {
+    const { storage_col, storage_row, item_id, from_col, from_row } = req.body;
+    if (typeof storage_col !== "number" || typeof storage_row !== "number" || typeof item_id !== "number" || typeof from_col !== "number" || typeof from_row !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.depositItem(state, storage_col, storage_row, item_id, from_col, from_row);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: result.newVersion });
+  }));
+
+  // POST /api/game/storage/withdraw
+  router.post("/storage/withdraw", op(async (req, res, userId) => {
+    const { storage_col, storage_row, item_id, target_col, target_row } = req.body;
+    if (typeof storage_col !== "number" || typeof storage_row !== "number" || typeof item_id !== "number" || typeof target_col !== "number" || typeof target_row !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.withdrawItem(state, storage_col, storage_row, item_id, target_col, target_row);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    const storageItem = state.grid.find(i => i.col === storage_col && i.row === storage_row);
+    res.json({ ok: true, new_version: result.newVersion, storage: storageItem?.storage ?? null });
+  }));
+
   // GET /api/leaderboard
   router.get("/leaderboard", async (_req: Request, res: Response) => {
     try {

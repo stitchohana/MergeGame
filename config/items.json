@@ -1,98 +1,653 @@
 {
   "regular": [
-	{ "id": 21, "level": 1, "name": "凡草",    "icon": "", "group_id": 3, "merge_score": 0,    "describe": "最普通的草药" },
-	{ "id": 22, "level": 2, "name": "灵草",    "icon": "", "group_id": 3, "merge_score": 10,   "describe": "蕴含灵气的草药" },
-	{ "id": 23, "level": 3, "name": "仙草",    "icon": "", "group_id": 3, "merge_score": 30,   "describe": "罕见的仙品草药" },
-	{ "id": 24, "level": 4, "name": "圣草",    "icon": "", "group_id": 3, "merge_score": 80,   "describe": "传说中的圣药" },
-	{ "id": 31, "level": 1, "name": "筑基丹",  "icon": "", "group_id": 3, "merge_score": 0,    "pill_type": "breakthrough", "describe": "筑基必备丹药，突破至筑基期所需" },
-	{ "id": 32, "level": 2, "name": "金丹丹",  "icon": "", "group_id": 3, "merge_score": 30,   "pill_type": "breakthrough", "describe": "凝结金丹的丹药，突破至金丹期所需" },
-	{ "id": 33, "level": 3, "name": "元婴丹",  "icon": "", "group_id": 3, "merge_score": 80,   "pill_type": "breakthrough", "describe": "孕育元婴的丹药，突破至元婴期所需" },
-	{ "id": 34, "level": 4, "name": "化神丹",  "icon": "", "group_id": 3, "merge_score": 200,  "pill_type": "breakthrough", "describe": "化神所需丹药，突破至化神期所需" },
-	{ "id": 35, "level": 5, "name": "合体丹",  "icon": "", "group_id": 3, "merge_score": 480,  "pill_type": "breakthrough", "describe": "合体期丹药，突破至合体期所需" },
-	{ "id": 36, "level": 6, "name": "大乘丹",  "icon": "", "group_id": 3, "merge_score": 1120, "pill_type": "breakthrough", "describe": "大乘期丹药，突破至大乘期所需" },
-	{ "id": 37, "level": 7, "name": "渡劫丹",  "icon": "", "group_id": 3, "merge_score": 2560, "pill_type": "breakthrough", "describe": "渡劫飞升丹药，突破至渡劫期所需" },
-	{ "id": 41, "level": 1, "name": "聚气丹",  "icon": "", "group_id": 4, "exp_gain": 30,    "merge_score": 0,   "pill_type": "cultivation", "buff_duration": 30, "buff_multiplier": 1.5, "describe": "微增修为，持续30秒1.5倍修炼速度" },
-	{ "id": 42, "level": 2, "name": "培元丹",  "icon": "", "group_id": 4, "exp_gain": 80,    "merge_score": 10,  "pill_type": "cultivation", "buff_duration": 45, "buff_multiplier": 2.0, "describe": "固本培元，持续45秒2倍修炼速度" },
-	{ "id": 43, "level": 3, "name": "凝神丹",  "icon": "", "group_id": 4, "exp_gain": 200,   "merge_score": 30,  "pill_type": "cultivation", "buff_duration": 60, "buff_multiplier": 2.5, "describe": "凝神聚气，持续60秒2.5倍修炼速度" },
-	{ "id": 44, "level": 4, "name": "增元丹",  "icon": "", "group_id": 4, "exp_gain": 500,   "merge_score": 80,  "pill_type": "cultivation", "buff_duration": 90, "buff_multiplier": 3.0, "describe": "大增修为，持续90秒3倍修炼速度" },
-	{ "id": 45, "level": 5, "name": "玄天丹",  "icon": "", "group_id": 4, "exp_gain": 1500,  "merge_score": 200, "pill_type": "cultivation", "buff_duration": 120, "buff_multiplier": 4.0, "describe": "玄天之力，持续120秒4倍修炼速度" }
-  ],
-
-  "launcher": [
 	{
-	  "id": 501, "level": 1, "name": "小药田", "icon": "", "group_id": 3,
-	  "spawns": [
-		{ "id": 21, "weight": 70 },
-		{ "id": 22, "weight": 25 },
-		{ "id": 501, "weight": 5 }
-	  ],
-	  "max_charges": 30, "recharge_time": 60,
-	  "merge_score": 0, "describe": "产出凡草，小概率出灵草或自身"
+	  "id": 21,
+	  "level": 1,
+	  "name": "凡草",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 0,
+	  "describe": "最普通的草药"
 	},
 	{
-	  "id": 502, "level": 2, "name": "中药田", "icon": "", "group_id": 3,
-	  "spawns": [
-		{ "id": 22, "weight": 60 },
-		{ "id": 23, "weight": 30 },
-		{ "id": 502, "weight": 10 }
-	  ],
-	  "max_charges": 40, "recharge_time": 50,
-	  "merge_score": 30, "describe": "产出灵草，概率出仙草或自身"
+	  "id": 22,
+	  "level": 2,
+	  "name": "灵草",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 10,
+	  "describe": "蕴含灵气的草药"
 	},
 	{
-	  "id": 503, "level": 3, "name": "大药田", "icon": "", "group_id": 3,
-	  "spawns": [
-		{ "id": 23, "weight": 50 },
-		{ "id": 24, "weight": 35 },
-		{ "id": 503, "weight": 15 }
-	  ],
-	  "max_charges": 50, "recharge_time": 40,
-	  "merge_score": 90, "describe": "产出仙草，概率出圣草或自身"
+	  "id": 23,
+	  "level": 3,
+	  "name": "仙草",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 30,
+	  "describe": "罕见的仙品草药"
+	},
+	{
+	  "id": 24,
+	  "level": 4,
+	  "name": "圣草",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 80,
+	  "describe": "传说中的圣药"
+	},
+	{
+	  "id": 31,
+	  "level": 1,
+	  "name": "筑基丹",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 0,
+	  "pill_type": "breakthrough",
+	  "describe": "筑基必备丹药，突破至筑基期所需"
+	},
+	{
+	  "id": 32,
+	  "level": 2,
+	  "name": "金丹丹",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 30,
+	  "pill_type": "breakthrough",
+	  "describe": "凝结金丹的丹药，突破至金丹期所需"
+	},
+	{
+	  "id": 33,
+	  "level": 3,
+	  "name": "元婴丹",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 80,
+	  "pill_type": "breakthrough",
+	  "describe": "孕育元婴的丹药，突破至元婴期所需"
+	},
+	{
+	  "id": 34,
+	  "level": 4,
+	  "name": "化神丹",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 200,
+	  "pill_type": "breakthrough",
+	  "describe": "化神所需丹药，突破至化神期所需"
+	},
+	{
+	  "id": 35,
+	  "level": 5,
+	  "name": "合体丹",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 480,
+	  "pill_type": "breakthrough",
+	  "describe": "合体期丹药，突破至合体期所需"
+	},
+	{
+	  "id": 36,
+	  "level": 6,
+	  "name": "大乘丹",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 1120,
+	  "pill_type": "breakthrough",
+	  "describe": "大乘期丹药，突破至大乘期所需"
+	},
+	{
+	  "id": 37,
+	  "level": 7,
+	  "name": "渡劫丹",
+	  "icon": "",
+	  "group_id": 3,
+	  "merge_score": 2560,
+	  "pill_type": "breakthrough",
+	  "describe": "渡劫飞升丹药，突破至渡劫期所需"
+	},
+	{
+	  "id": 41,
+	  "level": 1,
+	  "name": "聚气丹",
+	  "icon": "",
+	  "group_id": 4,
+	  "exp_gain": 30,
+	  "merge_score": 0,
+	  "pill_type": "cultivation",
+	  "buff_duration": 30,
+	  "buff_multiplier": 1.5,
+	  "describe": "微增修为，持续30秒1.5倍修炼速度"
+	},
+	{
+	  "id": 42,
+	  "level": 2,
+	  "name": "培元丹",
+	  "icon": "",
+	  "group_id": 4,
+	  "exp_gain": 80,
+	  "merge_score": 10,
+	  "pill_type": "cultivation",
+	  "buff_duration": 45,
+	  "buff_multiplier": 2,
+	  "describe": "固本培元，持续45秒2倍修炼速度"
+	},
+	{
+	  "id": 43,
+	  "level": 3,
+	  "name": "凝神丹",
+	  "icon": "",
+	  "group_id": 4,
+	  "exp_gain": 200,
+	  "merge_score": 30,
+	  "pill_type": "cultivation",
+	  "buff_duration": 60,
+	  "buff_multiplier": 2.5,
+	  "describe": "凝神聚气，持续60秒2.5倍修炼速度"
+	},
+	{
+	  "id": 44,
+	  "level": 4,
+	  "name": "增元丹",
+	  "icon": "",
+	  "group_id": 4,
+	  "exp_gain": 500,
+	  "merge_score": 80,
+	  "pill_type": "cultivation",
+	  "buff_duration": 90,
+	  "buff_multiplier": 3,
+	  "describe": "大增修为，持续90秒3倍修炼速度"
+	},
+	{
+	  "id": 45,
+	  "level": 5,
+	  "name": "玄天丹",
+	  "icon": "",
+	  "group_id": 4,
+	  "exp_gain": 1500,
+	  "merge_score": 200,
+	  "pill_type": "cultivation",
+	  "buff_duration": 120,
+	  "buff_multiplier": 4,
+	  "describe": "玄天之力，持续120秒4倍修炼速度"
+	},
+	{
+	  "id": 61,
+	  "level": 1,
+	  "name": "铜矿",
+	  "icon": "",
+	  "group_id": 5,
+	  "merge_score": 0,
+	  "describe": "普通的铜矿石"
+	},
+	{
+	  "id": 62,
+	  "level": 2,
+	  "name": "铁矿",
+	  "icon": "",
+	  "group_id": 5,
+	  "merge_score": 10,
+	  "describe": "坚硬的铁矿石"
+	},
+	{
+	  "id": 63,
+	  "level": 3,
+	  "name": "银矿",
+	  "icon": "",
+	  "group_id": 5,
+	  "merge_score": 30,
+	  "describe": "珍贵的银矿石"
+	},
+	{
+	  "id": 64,
+	  "level": 4,
+	  "name": "金矿",
+	  "icon": "",
+	  "group_id": 5,
+	  "merge_score": 80,
+	  "describe": "稀有的金矿石"
+	},
+	{
+	  "id": 65,
+	  "level": 1,
+	  "name": "铜锭",
+	  "icon": "",
+	  "group_id": 5,
+	  "merge_score": 0,
+	  "describe": "提炼好的铜锭"
+	},
+	{
+	  "id": 66,
+	  "level": 2,
+	  "name": "铁锭",
+	  "icon": "",
+	  "group_id": 5,
+	  "merge_score": 10,
+	  "describe": "提炼好的铁锭"
+	},
+	{
+	  "id": 67,
+	  "level": 3,
+	  "name": "银锭",
+	  "icon": "",
+	  "group_id": 5,
+	  "merge_score": 30,
+	  "describe": "提炼好的银锭"
+	},
+	{
+	  "id": 68,
+	  "level": 4,
+	  "name": "金锭",
+	  "icon": "",
+	  "group_id": 5,
+	  "merge_score": 80,
+	  "describe": "提炼好的金锭"
 	}
   ],
-
-  "crafting": [
-	{ "id": 601, "level": 1, "name": "基础炼丹炉", "group_id": 3,
-	  "icon": "", "merge_score": 0, "describe": "可以炼制丹药",
-	  "recipes": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] }
+  "launcher": [
+	{
+	  "id": 501,
+	  "level": 1,
+	  "name": "小药田",
+	  "icon": "",
+	  "group_id": 3,
+	  "spawns": [
+		{
+		  "id": 21,
+		  "weight": 70
+		},
+		{
+		  "id": 22,
+		  "weight": 25
+		},
+		{
+		  "id": 501,
+		  "weight": 5
+		}
+	  ],
+	  "max_charges": 30,
+	  "recharge_time": 60,
+	  "merge_score": 0,
+	  "describe": "产出凡草，小概率出灵草或自身"
+	},
+	{
+	  "id": 502,
+	  "level": 2,
+	  "name": "中药田",
+	  "icon": "",
+	  "group_id": 3,
+	  "spawns": [
+		{
+		  "id": 22,
+		  "weight": 60
+		},
+		{
+		  "id": 23,
+		  "weight": 30
+		},
+		{
+		  "id": 502,
+		  "weight": 10
+		}
+	  ],
+	  "max_charges": 40,
+	  "recharge_time": 50,
+	  "merge_score": 30,
+	  "describe": "产出灵草，概率出仙草或自身"
+	},
+	{
+	  "id": 503,
+	  "level": 3,
+	  "name": "大药田",
+	  "icon": "",
+	  "group_id": 3,
+	  "spawns": [
+		{
+		  "id": 23,
+		  "weight": 50
+		},
+		{
+		  "id": 24,
+		  "weight": 35
+		},
+		{
+		  "id": 503,
+		  "weight": 15
+		}
+	  ],
+	  "max_charges": 50,
+	  "recharge_time": 40,
+	  "merge_score": 90,
+	  "describe": "产出仙草，概率出圣草或自身"
+	},
+	{
+	  "id": 504,
+	  "level": 1,
+	  "name": "矿山",
+	  "icon": "",
+	  "group_id": 5,
+	  "spawns": [
+		{
+		  "id": 61,
+		  "weight": 70
+		},
+		{
+		  "id": 62,
+		  "weight": 25
+		},
+		{
+		  "id": 504,
+		  "weight": 5
+		}
+	  ],
+	  "max_charges": 3,
+	  "recharge_time": 60,
+	  "merge_score": 0,
+	  "describe": "产出铜矿，概率出铁矿或自身"
+	}
   ],
-
+  "crafting": [
+	{
+	  "id": 601,
+	  "level": 1,
+	  "name": "基础炼丹炉",
+	  "group_id": 3,
+	  "icon": "",
+	  "merge_score": 0,
+	  "describe": "可以炼制丹药",
+	  "recipes": [
+		3,
+		4,
+		5,
+		6,
+		7,
+		8,
+		9,
+		10,
+		11,
+		12,
+		13,
+		14
+	  ]
+	},
+	{
+	  "id": 602,
+	  "level": 1,
+	  "name": "炼器室",
+	  "group_id": 5,
+	  "icon": "",
+	  "merge_score": 0,
+	  "describe": "可以将矿物炼制成锭",
+	  "recipes": [
+		15,
+		16,
+		17,
+		18
+	  ]
+	},
+	{
+	  "id": 603,
+	  "level": 1,
+	  "name": "仓库",
+	  "group_id": 5,
+	  "icon": "",
+	  "merge_score": 0,
+	  "describe": "可以存放物品",
+	  "storage_slots": 20
+	}
+  ],
   "recipes": [
-	{ "id": 3, "name": "炼筑基丹",
-	  "ingredients": [{"id": 21, "count": 2}, {"id": 22, "count": 1}],
-	  "result": 31, "craft_time": 3.0, "crafting_level": 1 },
-	{ "id": 4, "name": "炼金丹丹",
-	  "ingredients": [{"id": 22, "count": 2}, {"id": 23, "count": 1}],
-	  "result": 32, "craft_time": 4.0, "crafting_level": 1 },
-	{ "id": 5, "name": "炼元婴丹",
-	  "ingredients": [{"id": 23, "count": 2}, {"id": 24, "count": 1}],
-	  "result": 33, "craft_time": 4.0, "crafting_level": 1 },
-	{ "id": 6, "name": "炼化神丹",
-	  "ingredients": [{"id": 24, "count": 2}, {"id": 21, "count": 3}],
-	  "result": 34, "craft_time": 5.0, "crafting_level": 1 },
-	{ "id": 7, "name": "炼合体丹",
-	  "ingredients": [{"id": 23, "count": 3}, {"id": 24, "count": 2}],
-	  "result": 35, "craft_time": 5.0, "crafting_level": 1 },
-	{ "id": 8, "name": "炼大乘丹",
-	  "ingredients": [{"id": 24, "count": 3}, {"id": 23, "count": 3}],
-	  "result": 36, "craft_time": 6.0, "crafting_level": 1 },
-	{ "id": 9, "name": "炼渡劫丹",
-	  "ingredients": [{"id": 24, "count": 4}, {"id": 22, "count": 4}],
-	  "result": 37, "craft_time": 8.0, "crafting_level": 1 },
-	{ "id": 10, "name": "炼聚气丹",
-	  "ingredients": [{"id": 21, "count": 3}],
-	  "result": 41, "craft_time": 60.0, "crafting_level": 1 },
-	{ "id": 11, "name": "炼培元丹",
-	  "ingredients": [{"id": 21, "count": 2}, {"id": 22, "count": 1}],
-	  "result": 42, "craft_time": 2.0, "crafting_level": 1 },
-	{ "id": 12, "name": "炼凝神丹",
-	  "ingredients": [{"id": 22, "count": 2}, {"id": 23, "count": 1}],
-	  "result": 43, "craft_time": 3.0, "crafting_level": 1 },
-	{ "id": 13, "name": "炼增元丹",
-	  "ingredients": [{"id": 23, "count": 2}, {"id": 24, "count": 1}],
-	  "result": 44, "craft_time": 3.0, "crafting_level": 1 },
-	{ "id": 14, "name": "炼玄天丹",
-	  "ingredients": [{"id": 24, "count": 3}, {"id": 22, "count": 2}],
-	  "result": 45, "craft_time": 5.0, "crafting_level": 1 }
+	{
+	  "id": 3,
+	  "name": "炼筑基丹",
+	  "ingredients": [
+		{
+		  "id": 21,
+		  "count": 2
+		},
+		{
+		  "id": 22,
+		  "count": 1
+		}
+	  ],
+	  "result": 31,
+	  "craft_time": 3,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 4,
+	  "name": "炼金丹丹",
+	  "ingredients": [
+		{
+		  "id": 22,
+		  "count": 2
+		},
+		{
+		  "id": 23,
+		  "count": 1
+		}
+	  ],
+	  "result": 32,
+	  "craft_time": 4,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 5,
+	  "name": "炼元婴丹",
+	  "ingredients": [
+		{
+		  "id": 23,
+		  "count": 2
+		},
+		{
+		  "id": 24,
+		  "count": 1
+		}
+	  ],
+	  "result": 33,
+	  "craft_time": 4,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 6,
+	  "name": "炼化神丹",
+	  "ingredients": [
+		{
+		  "id": 24,
+		  "count": 2
+		},
+		{
+		  "id": 21,
+		  "count": 3
+		}
+	  ],
+	  "result": 34,
+	  "craft_time": 5,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 7,
+	  "name": "炼合体丹",
+	  "ingredients": [
+		{
+		  "id": 23,
+		  "count": 3
+		},
+		{
+		  "id": 24,
+		  "count": 2
+		}
+	  ],
+	  "result": 35,
+	  "craft_time": 5,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 8,
+	  "name": "炼大乘丹",
+	  "ingredients": [
+		{
+		  "id": 24,
+		  "count": 3
+		},
+		{
+		  "id": 23,
+		  "count": 3
+		}
+	  ],
+	  "result": 36,
+	  "craft_time": 6,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 9,
+	  "name": "炼渡劫丹",
+	  "ingredients": [
+		{
+		  "id": 24,
+		  "count": 4
+		},
+		{
+		  "id": 22,
+		  "count": 4
+		}
+	  ],
+	  "result": 37,
+	  "craft_time": 8,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 10,
+	  "name": "炼聚气丹",
+	  "ingredients": [
+		{
+		  "id": 21,
+		  "count": 3
+		}
+	  ],
+	  "result": 41,
+	  "craft_time": 60,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 11,
+	  "name": "炼培元丹",
+	  "ingredients": [
+		{
+		  "id": 21,
+		  "count": 2
+		},
+		{
+		  "id": 22,
+		  "count": 1
+		}
+	  ],
+	  "result": 42,
+	  "craft_time": 2,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 12,
+	  "name": "炼凝神丹",
+	  "ingredients": [
+		{
+		  "id": 22,
+		  "count": 2
+		},
+		{
+		  "id": 23,
+		  "count": 1
+		}
+	  ],
+	  "result": 43,
+	  "craft_time": 3,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 13,
+	  "name": "炼增元丹",
+	  "ingredients": [
+		{
+		  "id": 23,
+		  "count": 2
+		},
+		{
+		  "id": 24,
+		  "count": 1
+		}
+	  ],
+	  "result": 44,
+	  "craft_time": 3,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 14,
+	  "name": "炼玄天丹",
+	  "ingredients": [
+		{
+		  "id": 24,
+		  "count": 3
+		},
+		{
+		  "id": 22,
+		  "count": 2
+		}
+	  ],
+	  "result": 45,
+	  "craft_time": 5,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 15,
+	  "name": "炼铜锭",
+	  "ingredients": [
+		{
+		  "id": 61,
+		  "count": 3
+		}
+	  ],
+	  "result": 65,
+	  "craft_time": 3,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 16,
+	  "name": "炼铁锭",
+	  "ingredients": [
+		{
+		  "id": 62,
+		  "count": 3
+		}
+	  ],
+	  "result": 66,
+	  "craft_time": 3,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 17,
+	  "name": "炼银锭",
+	  "ingredients": [
+		{
+		  "id": 63,
+		  "count": 3
+		}
+	  ],
+	  "result": 67,
+	  "craft_time": 4,
+	  "crafting_level": 1
+	},
+	{
+	  "id": 18,
+	  "name": "炼金锭",
+	  "ingredients": [
+		{
+		  "id": 64,
+		  "count": 3
+		}
+	  ],
+	  "result": 68,
+	  "craft_time": 5,
+	  "crafting_level": 1
+	}
   ]
 }

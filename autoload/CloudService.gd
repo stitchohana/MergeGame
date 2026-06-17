@@ -528,6 +528,37 @@ func _handle_parse_error(tag: String) -> void:
 		"fetch_state":
 			state_load_failed.emit("invalid_response")
 
+signal storage_withdraw_confirmed(result: Dictionary)
+
+# --- Storage ---
+
+func submit_storage_deposit(storage_col: int, storage_row: int, item_id: int, from_col: int, from_row: int) -> void:
+	var body := JSON.stringify({
+		"storage_col": storage_col,
+		"storage_row": storage_row,
+		"item_id": item_id,
+		"from_col": from_col,
+		"from_row": from_row,
+	})
+	_send_authed_request("storage_deposit", "/api/game/storage/deposit", HTTPClient.METHOD_POST, body)
+
+func submit_storage_withdraw(storage_col: int, storage_row: int, item_id: int, target_col: int, target_row: int) -> void:
+	var body := JSON.stringify({
+		"storage_col": storage_col,
+		"storage_row": storage_row,
+		"item_id": item_id,
+		"target_col": target_col,
+		"target_row": target_row,
+	})
+	_send_authed_request("storage_withdraw", "/api/game/storage/withdraw", HTTPClient.METHOD_POST, body)
+
+func _on_storage_withdraw_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		storage_withdraw_confirmed.emit(data)
+		EventBus.show_toast.emit("取出成功")
+	else:
+		EventBus.show_toast.emit("取出失败：" + data.get("error", "unknown"))
+
 # --- Token persistence ---
 
 func _save_token() -> void:
