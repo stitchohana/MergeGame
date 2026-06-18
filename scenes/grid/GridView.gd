@@ -116,6 +116,8 @@ func _connect_signals() -> void:
 # --- Input: press on any item, then drag or click dispatch ---
 
 func _input(event: InputEvent) -> void:
+	if UIManager.is_input_blocked():
+		return
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index != MOUSE_BUTTON_LEFT:
@@ -205,13 +207,18 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
-	# Check stamina locally before optimistic spawn
+	# Check stamina and charges before optimistic spawn
 	if GameState.stamina < 1:
 		EventBus.show_toast.emit("体力不足")
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
+	var item_charges: int = item.get("charges", -1)
+	if item_charges == 0:
+		EventBus.show_toast.emit("发射器次数用尽，等待冷却")
+		GameState.set_phase(GameState.GamePhase.IDLE)
+		return
 
-	# Roll locally for optimistic UI
+	# Roll locally for optimistic UI	# Roll locally for optimistic UI
 	var spawn_data: Dictionary = ConfigDatabase.roll_spawn(item.get("id", 0))
 	if spawn_data.is_empty():
 		GameState.set_phase(GameState.GamePhase.IDLE)

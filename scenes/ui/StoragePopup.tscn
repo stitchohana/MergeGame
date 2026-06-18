@@ -11,7 +11,7 @@ script = ExtResource("1_sp")
 layout_mode = 1
 anchors_preset = 15
 color = Color(0, 0, 0, 0.5)
-mouse_filter = 1
+mouse_filter = 2
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 0
