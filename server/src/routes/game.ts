@@ -57,7 +57,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       const userId = req.auth!.userId;
       const state = await getOrCreateState(userId);
       const offlineExp = (state.cultivation as any)._offline_exp_gained || 0;
-      res.json({ score: state.score, high_score: state.high_score, grid: state.grid, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, version: state.version, offline_exp_gained: offlineExp });
+      res.json({ score: state.score, high_score: state.high_score, grid: state.grid, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, offline_exp_gained: offlineExp });
     } catch (err) {
       console.error("[game] state error:", err);
       res.status(500).json({ error: "internal_error" });
@@ -157,6 +157,47 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     await storage.saveState(userId, state);
     res.json({ ok: true, new_version: result.newVersion });
   }));
+
+  // POST /api/game/shop/sell
+  router.post("/shop/sell", op(async (req, res, userId) => {
+    const { col, row } = req.body;
+    if (typeof col !== "number" || typeof row !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.sellItem(state, col, row);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, spirit_stones: result.stones });
+  }));
+
+  // POST /api/game/shop/buy
+  router.post("/shop/buy", op(async (req, res, userId) => {
+    const { item_id, target_col, target_row } = req.body;
+    if (typeof item_id !== "number" || typeof target_col !== "number" || typeof target_row !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.buyItem(state, item_id, target_col, target_row);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, spirit_stones: result.stones });
+  }));
+
+  // GET /api/game/shop/items
+  router.get("/shop/items", async (req: Request, res: Response) => {
+    try {
+      const items = engine.getShopItems().map(id => ({
+        id,
+        name: engine.getItemData(id)?.name ?? ("#" + id),
+        price: engine.getBuyPrice(id),
+      })).filter(i => i.price > 0);
+      res.json({ items });
+    } catch (err) {
+      console.error("[game] shop items error:", err);
+      res.status(500).json({ error: "internal_error" });
+    }
+  });
 
   // POST /api/game/storage/deposit
   router.post("/storage/deposit", op(async (req, res, userId) => {

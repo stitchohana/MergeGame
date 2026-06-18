@@ -15,6 +15,7 @@ func load_all() -> void:
 	_game_config = _load_json("res://config/game_config.json")
 	_initial_setup = _load_json("res://config/initial_setup.json")
 	_load_items("res://config/items.json")
+	_load_recipes("res://config/recipes.json")
 	_cultivation_config = _load_json("res://config/cultivation.json")
 	print("[ConfigDatabase] Loaded all configs: ", _items_data.size(), " items defined")
 
@@ -78,10 +79,16 @@ func _load_items(path: String) -> void:
 			_items_by_type_level["crafting"][level] = []
 		_items_by_type_level["crafting"][level].append(craft_item)
 
-	# Store recipes for CraftingService
-	_items_data["_recipes"] = data.get("recipes", [])
+	# Recipes now loaded from separate file
 
 # Get item data by numeric ID
+func _load_recipes(path: String) -> void:
+	var data := _load_json(path)
+	if data.is_empty():
+		return
+	_items_data["_recipes"] = data.get("recipes", [])
+	print("[ConfigDatabase] Loaded ", _items_data["_recipes"].size(), " recipes")
+
 func get_item_data(item_id: int) -> Dictionary:
 	return _items_data.get(item_id, {})
 

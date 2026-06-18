@@ -48,6 +48,7 @@ export interface GameState {
   stamina: number;
   max_stamina: number;
   last_stamina_tick: number;
+  spirit_stones: number;
   version: number;
 }
 

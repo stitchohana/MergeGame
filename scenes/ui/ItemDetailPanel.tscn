@@ -102,3 +102,25 @@ offset_left = 140.0
 offset_top = 204.0
 offset_right = 760.0
 offset_bottom = 270.0
+
+[node name="SellPriceLabel" type="Label" parent="." unique_id=1374639230]
+visible = false
+layout_mode = 0
+offset_left = 620.0
+offset_top = 150.0
+offset_right = 760.0
+offset_bottom = 175.0
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "灵石 10"
+horizontal_alignment = 2
+
+[node name="SellButton" type="Button" parent="." unique_id=1661140912]
+visible = false
+layout_mode = 0
+offset_left = 620.0
+offset_top = 176.0
+offset_right = 760.0
+offset_bottom = 210.0
+theme_override_font_sizes/font_size = 14
+text = "出售"

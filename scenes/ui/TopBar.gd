@@ -6,6 +6,8 @@ class_name TopBar extends BaseHUD
 @onready var status_indicator: ColorRect = $StatusIndicator
 @onready var stamina_bar: ProgressBar = $StaminaBar
 @onready var stamina_label: Label = $StaminaLabel
+@onready var stones_label: Label = $StonesLabel
+@onready var shop_btn: Button = $ShopButton
 
 func _ready() -> void:
 	GameState.score_changed.connect(_on_score_changed)
@@ -14,11 +16,15 @@ func _ready() -> void:
 	_on_high_score_changed(GameState.high_score)
 	if settings_btn:
 		settings_btn.pressed.connect(func(): EventBus.pause_requested.emit())
+	if shop_btn:
+		shop_btn.pressed.connect(_on_shop_pressed)
 	_update_status_indicator()
 	_update_stamina()
+	_update_stones()
 	CloudService.connected.connect(_update_status_indicator)
 	CloudService.disconnected.connect(_update_status_indicator)
 	GameState.stamina_changed.connect(_on_stamina_changed)
+	GameState.spirit_stones_changed.connect(_on_stones_changed)
 
 func _on_score_changed(new_score: int) -> void:
 	if score_label:
@@ -30,6 +36,17 @@ func _on_high_score_changed(new_high: int) -> void:
 
 func _on_stamina_changed(current: int, max_stam: int) -> void:
 	_update_stamina()
+
+func _on_stones_changed(amount: int) -> void:
+	_update_stones()
+
+func _update_stones() -> void:
+	if stones_label:
+		stones_label.text = "灵石 %d" % GameState.spirit_stones
+
+func _on_shop_pressed() -> void:
+	var popup := preload("res://scenes/ui/ShopPopup.tscn").instantiate() as ShopPopup
+	UIManager.show_popup(popup)
 
 func _update_stamina() -> void:
 	if stamina_bar:

@@ -6,7 +6,7 @@ if (!jwtSecret) {
 export const config = {
   port: parseInt(process.env.PORT || "3000", 10),
   jwtSecret: jwtSecret || "mergegame-dev-secret-change-in-production",
-  jwtExpiresIn: "2h",
+  jwtExpiresIn: process.env.JWT_EXPIRES || "30d",
   dbType: process.env.DB_TYPE || "json_file",
   jsonDbPath: process.env.JSON_DB_PATH || "./data",
   game: {

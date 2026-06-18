@@ -21,6 +21,7 @@ export function defaultGameState(): GameState {
     stamina: 100,
     max_stamina: 100,
     last_stamina_tick: now,
+    spirit_stones: 0,
     version: 0,
   };
 }

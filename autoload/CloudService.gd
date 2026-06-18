@@ -275,6 +275,7 @@ func _reject(tag: String, reason: String) -> void:
 		"cultivate_tick": cultivate_tick_rejected.emit(reason)
 		"consume_pill": pill_consume_rejected.emit(reason)
 		"breakthrough": breakthrough_rejected.emit(reason)
+		"sell": sell_rejected.emit(reason)
 		"craft_add": craft_add_rejected.emit(reason)
 		"craft_start": craft_start_rejected.emit(reason)
 		"craft_remove": craft_remove_rejected.emit(reason)
@@ -469,6 +470,12 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_craft_remove_response(data)
 		"craft_retrieve":
 			_on_craft_retrieve_response(data)
+		"sell":
+			_on_sell_response(data)
+		"shop_items":
+			_on_shop_items_response(data)
+		"buy":
+			_on_buy_response(data)
 
 func _handle_network_error(tag: String) -> void:
 	if online:
@@ -490,6 +497,8 @@ func _handle_network_error(tag: String) -> void:
 			pill_consume_rejected.emit("network_error")
 		"breakthrough":
 			breakthrough_rejected.emit("network_error")
+		"sell":
+			sell_rejected.emit("network_error")
 		"craft_add":
 			craft_add_rejected.emit("network_error")
 		"craft_start":
@@ -517,6 +526,8 @@ func _handle_parse_error(tag: String) -> void:
 			pill_consume_rejected.emit("invalid_response")
 		"breakthrough":
 			breakthrough_rejected.emit("invalid_response")
+		"sell":
+			sell_rejected.emit("invalid_response")
 		"craft_add":
 			craft_add_rejected.emit("invalid_response")
 		"craft_start":
@@ -558,6 +569,45 @@ func _on_storage_withdraw_response(data: Dictionary) -> void:
 		EventBus.show_toast.emit("取出成功")
 	else:
 		EventBus.show_toast.emit("取出失败：" + data.get("error", "unknown"))
+
+# --- Shop ---
+
+func fetch_shop_items() -> void:
+	_send_authed_request("shop_items", "/api/game/shop/items", HTTPClient.METHOD_GET)
+
+func _on_shop_items_response(data: Dictionary) -> void:
+	if data.has("items"):
+		shop_items_loaded.emit(data.items)
+
+func submit_buy(item_id: int, target_col: int, target_row: int) -> void:
+	var body := JSON.stringify({"item_id": item_id, "target_col": target_col, "target_row": target_row})
+	_send_authed_request("buy", "/api/game/shop/buy", HTTPClient.METHOD_POST, body)
+
+func _on_buy_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		buy_confirmed.emit()
+		EventBus.show_toast.emit("购买成功")
+	else:
+		EventBus.show_toast.emit("购买失败：" + data.get("error", "unknown"))
+
+func submit_sell(col: int, row: int) -> void:
+	var body := JSON.stringify({"col": col, "row": row})
+	_send_authed_request("sell", "/api/game/shop/sell", HTTPClient.METHOD_POST, body)
+
+signal sell_confirmed(spirit_stones: int)
+signal sell_rejected(reason: String)
+signal shop_items_loaded(items: Array)
+signal buy_confirmed()
+
+func _on_sell_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		GameState.spirit_stones = data.get("spirit_stones", GameState.spirit_stones)
+		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+		sell_confirmed.emit(GameState.spirit_stones)
+		EventBus.show_toast.emit("出售成功")
+	else:
+		sell_rejected.emit(data.get("error", "unknown"))
+		EventBus.show_toast.emit("出售失败：" + data.get("error", "unknown"))
 
 # --- Token persistence ---
 

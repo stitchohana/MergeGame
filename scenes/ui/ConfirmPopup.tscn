@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://confirm_popup_001"]
+
+[ext_resource type="Script" path="res://scenes/ui/ConfirmPopup.gd" id="1_cp"]
+
+[node name="ConfirmPopup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+script = ExtResource("1_cp")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+color = Color(0, 0, 0, 0.5)
+mouse_filter = 1
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 190
+offset_top = 640
+offset_right = 590
+offset_bottom = 780
+
+[node name="MessageLabel" type="Label" parent="Panel"]
+offset_left = 20
+offset_top = 20
+offset_right = 380
+offset_bottom = 60
+theme_override_font_sizes/font_size = 16
+text = "确定要执行此操作吗？"
+
+[node name="ConfirmButton" type="Button" parent="Panel"]
+offset_left = 60
+offset_top = 80
+offset_right = 190
+offset_bottom = 115
+text = "确认"
+
+[node name="CancelButton" type="Button" parent="Panel"]
+offset_left = 210
+offset_top = 80
+offset_right = 340
+offset_bottom = 115
+text = "取消"

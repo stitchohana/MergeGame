@@ -26,6 +26,8 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.score_changed.emit(GameState.score)
 	GameState.high_score_changed.emit(GameState.high_score)
 	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	GameState.spirit_stones = state.get("spirit_stones", 0)
+	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 
 	# Grid
 	GridManager.init_grid()
@@ -70,6 +72,7 @@ func _collect_all_data() -> Dictionary:
 		"game": {
 			"score": GameState.score,
 			"high_score": GameState.high_score,
+		"spirit_stones": GameState.spirit_stones,
 		},
 		"grid": _collect_grid_data(),
 		"cultivation": CultivationService.serialize(),

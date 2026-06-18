@@ -74,8 +74,8 @@ export class GameEngine {
   private cultivation: CultivationConfig | null = null;
   private initialSetup: { id: number; col: number; row: number }[] = [];
   private staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
+  private shopConfig = { shopItems: [] as number[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
 
-  // Cooldown tracking per launcher position
   constructor(configDir: string) {
     this.loadConfigs(configDir);
   }
@@ -86,7 +86,9 @@ export class GameEngine {
     this.loadItems(path.join(configDir, "items.json"));
     this.loadCultivation(path.join(configDir, "cultivation.json"));
     this.loadInitialSetup(path.join(configDir, "initial_setup.json"));
+    this.loadRecipes(path.join(configDir, "recipes.json"));
     this.loadGameConfig(path.join(configDir, "game_config.json"));
+    this.loadShopConfig(path.join(configDir, "shop.json"));
     console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.realms.length ?? 0} realms`);
   }
 
@@ -104,6 +106,30 @@ export class GameEngine {
         console.log(`[engine] Stamina config: max=${this.staminaConfig.max} cost=${this.staminaConfig.spawnCost} regen=${this.staminaConfig.regenAmount}/${this.staminaConfig.regenInterval}s`);
       }
     } catch { /* ignore */ }
+  }
+
+  private loadShopConfig(filePath: string): void {
+    try {
+      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      this.shopConfig = {
+        shopItems: data.shop_items ?? [],
+        sellPrices: data.sell_prices ?? {},
+        buyPrices: data.buy_prices ?? {},
+      };
+      console.log(`[engine] Shop config: ${this.shopConfig.shopItems.length} items, ${Object.keys(this.shopConfig.sellPrices).length} sellable prices`);
+    } catch { /* ignore */ }
+  }
+
+  getSellPrice(itemId: number): number {
+    return this.shopConfig.sellPrices[String(itemId)] ?? 0;
+  }
+
+  getBuyPrice(itemId: number): number {
+    return this.shopConfig.buyPrices[String(itemId)] ?? 0;
+  }
+
+  getShopItems(): number[] {
+    return this.shopConfig.shopItems;
   }
 
   private loadItems(filePath: string): void {
@@ -125,20 +151,20 @@ export class GameEngine {
         byLevel.get(item.level)!.push(item);
       }
     }
+  }
 
+  private loadRecipes(filePath: string): void {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     this.recipes = data.recipes || [];
     this.recipesByTable.clear();
     for (const recipe of this.recipes) {
-      // Index recipes by crafting table items that can use them
-      for (const cat of categories) {
-        for (const item of data[cat] || []) {
-          const recipeIds: number[] = item.recipes || [];
-          if (recipeIds.includes(recipe.id)) {
-            if (!this.recipesByTable.has(item.id)) {
-              this.recipesByTable.set(item.id, []);
-            }
-            this.recipesByTable.get(item.id)!.push(recipe);
+      for (const [, item] of this.itemsById) {
+        const recipeIds: number[] = item.recipes || [];
+        if (recipeIds.includes(recipe.id)) {
+          if (!this.recipesByTable.has(item.id)) {
+            this.recipesByTable.set(item.id, []);
           }
+          this.recipesByTable.get(item.id)!.push(recipe);
         }
       }
     }
@@ -275,6 +301,7 @@ export class GameEngine {
       stamina: 100,
       max_stamina: 100,
       last_stamina_tick: now,
+      spirit_stones: 0,
       version: 0,
     };
 
@@ -1186,6 +1213,54 @@ export class GameEngine {
     const itemName = this.getItemData(itemId)?.name ?? ("#" + itemId);
     console.log();
     return { ok: true, newVersion: state.version };
+  }
+
+  // --- Shop ---
+
+  sellItem(state: GameState, col: number, row: number): { ok: true; stones: number } | { ok: false; reason: string } {
+    const item = state.grid.find(i => i.col === col && i.row === row);
+    if (!item) return { ok: false, reason: "item_not_found" };
+
+    const data = this.getItemData(item.id);
+    if (!data) return { ok: false, reason: "item_data_not_found" };
+
+    if (data.type === "launcher" || data.type === "crafting") {
+      return { ok: false, reason: "cannot_sell" };
+    }
+
+    const price = this.getSellPrice(item.id);
+    if (price <= 0) return { ok: false, reason: "cannot_sell" };
+
+    state.grid = state.grid.filter(i => !(i.col === col && i.row === row));
+    state.spirit_stones += price;
+    state.version += 1;
+
+    const itemName = data.name ?? ("#" + item.id);
+    console.log(`[engine] sell: ${itemName} at (${col},${row}) -> +${price} stones | total=${state.spirit_stones}`);
+    return { ok: true, stones: state.spirit_stones };
+  }
+
+  buyItem(state: GameState, itemId: number, targetCol: number, targetRow: number): { ok: true; stones: number } | { ok: false; reason: string } {
+    if (!this.isInBounds(targetCol, targetRow)) return { ok: false, reason: "out_of_bounds" };
+    const targetKey = this.posKey(targetCol, targetRow);
+    if (state.grid.some(i => this.posKey(i.col, i.row) === targetKey)) return { ok: false, reason: "target_occupied" };
+
+    const price = this.getBuyPrice(itemId);
+    if (price <= 0) return { ok: false, reason: "cannot_buy" };
+
+    if (!this.shopConfig.shopItems.includes(itemId)) return { ok: false, reason: "not_in_shop" };
+
+    if (state.spirit_stones < price) return { ok: false, reason: "insufficient_stones" };
+
+    const itemData = this.getItemData(itemId);
+    if (!itemData) return { ok: false, reason: "item_data_not_found" };
+
+    state.spirit_stones -= price;
+    state.grid.push({ id: itemId, col: targetCol, row: targetRow });
+    state.version += 1;
+
+    console.log(`[engine] buy: ${itemData.name} at (${targetCol},${targetRow}) -> -${price} stones | total=${state.spirit_stones}`);
+    return { ok: true, stones: state.spirit_stones };
   }
 
   getGridHash(state: GameState): number {

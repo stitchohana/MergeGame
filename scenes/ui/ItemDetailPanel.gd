@@ -10,15 +10,20 @@ signal material_clicked(item_id: int)
 @onready var materials_label: Label = $MaterialsLabel
 @onready var status_label: Label = $StatusLabel
 @onready var materials_container: FlowContainer = $MaterialsContainer
+@onready var sell_btn: Button = $SellButton
+@onready var sell_price_label: Label = $SellPriceLabel
 
 var _current_item_data: Dictionary = {}
 var _current_recipes: Array = []
 var _current_grid_pos: Vector2i = Vector2i(-1, -1)
 var _countdown_timer: Timer = null
+var _sell_prices: Dictionary = {}
 
 func _ready() -> void:
 	clear()
 	recipe_btn.pressed.connect(_on_recipe_btn_pressed)
+	if sell_btn:
+		sell_btn.pressed.connect(_on_sell_pressed)
 	CraftingService.table_state_changed.connect(_on_table_state_changed)
 
 func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> void:
@@ -27,6 +32,7 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 		return
 	_current_item_data = item_data
 	_current_grid_pos = grid_pos
+	_update_sell_btn()
 	var item_name: String = item_data.get("name", "")
 	var item_level: int = item_data.get("level", 0)
 	var item_desc: String = item_data.get("describe", "")
@@ -233,6 +239,59 @@ func _on_recipe_btn_pressed() -> void:
 	UIManager.show_popup(popup)
 	popup.setup(_current_recipes, _current_item_data.get("name", ""))
 
+func _on_sell_pressed() -> void:
+	var item_id: int = _current_item_data.get("id", 0)
+	var price: int = _sell_prices.get(str(item_id), 0)
+	if price <= 0 or _current_grid_pos == Vector2i(-1, -1):
+		return
+	var item_name: String = _current_item_data.get("name", "")
+	var popup := preload("res://scenes/ui/ConfirmPopup.tscn").instantiate() as ConfirmPopup
+	popup.setup("确定出售 %s？获得 %d 灵石" % [item_name, price])
+	popup.confirmed.connect(_on_sell_confirmed.bind(item_id), CONNECT_ONE_SHOT)
+	UIManager.show_popup(popup)
+
+func _on_sell_confirmed(item_id: int) -> void:
+	if CloudService.online:
+		var sell_pos := _current_grid_pos
+		GridManager.remove_item(sell_pos)
+		clear()
+		CloudService.submit_sell(sell_pos.x, sell_pos.y)
+	else:
+		EventBus.show_toast.emit("离线无法出售")
+
+func _load_sell_prices() -> void:
+	if not _sell_prices.is_empty():
+		return
+	var file := FileAccess.open("res://config/shop.json", FileAccess.READ)
+	if file:
+		var text := file.get_as_text()
+		file.close()
+		var json := JSON.new()
+		if json.parse(text) == OK:
+			_sell_prices = json.data.get("sell_prices", {})
+			print("[Shop] Loaded ", _sell_prices.size(), " prices")
+			return
+	print("[Shop] Failed to load sell prices from res://config/shop.json")
+
+func _update_sell_btn() -> void:
+	if not sell_btn or not sell_price_label:
+		return
+	var item_type: String = _current_item_data.get("type", "")
+	if item_type != "regular":
+		sell_btn.hide()
+		sell_price_label.hide()
+		return
+	_load_sell_prices()
+	var item_id: int = _current_item_data.get("id", 0)
+	var price: int = _sell_prices.get(str(item_id), 0)
+	if price <= 0:
+		sell_btn.hide()
+		sell_price_label.hide()
+		return
+	sell_price_label.text = "灵石 x%d" % price
+	sell_price_label.show()
+	sell_btn.show()
+
 func clear() -> void:
 	_stop_countdown_timer()
 	_current_item_data = {}
@@ -244,4 +303,8 @@ func clear() -> void:
 	level_label.hide()
 	desc_label.hide()
 	recipe_btn.hide()
+	if sell_btn:
+		sell_btn.hide()
+	if sell_price_label:
+		sell_price_label.hide()
 	_hide_materials()
