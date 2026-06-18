@@ -379,8 +379,9 @@ func _finish_drag(target_pos: Vector2i) -> void:
 	_clear_highlights()
 
 	if not GridManager.is_valid_pos(target_pos):
-		# Cultivation pill dropped outside grid -> consume and apply buff
-		if _drag_item_data.get("pill_type") == "cultivation":
+		# Pill dropped outside grid -> consume buff or breakthrough
+		var ptype: String = _drag_item_data.get("pill_type", "")
+		if ptype == "cultivation" or ptype == "breakthrough":
 			GridManager.remove_item(_drag_source_pos)
 			pill_dropped_outside.emit(_drag_item_data)
 			GameState.set_phase(GameState.GamePhase.IDLE)

@@ -88,7 +88,12 @@ func _on_craft_remove_rejected(reason: String) -> void:
 	EventBus.show_toast.emit("取出材料失败：" + reason)
 
 func _on_pill_dropped_outside(pill_data: Dictionary) -> void:
-	CultivationService.apply_buff(pill_data)
+	var pill_type: String = pill_data.get("pill_type", "")
+	if pill_type == "breakthrough":
+		var pill_id: int = pill_data.get("id", 0)
+		CultivationService.try_breakthrough(pill_id)
+	else:
+		CultivationService.apply_buff(pill_data)
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)
