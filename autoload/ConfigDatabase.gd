@@ -7,6 +7,7 @@ var _items_data: Dictionary = {}        # item_id -> item_data Dictionary
 var _items_by_type_level: Dictionary = {}  # type -> { level -> Array[item_data] }
 var _initial_setup: Dictionary = {}
 var _cultivation_config: Dictionary = {}
+var _effects_data: Dictionary = {}  # effect_id -> effect_data
 
 func _ready() -> void:
 	load_all()
@@ -17,7 +18,8 @@ func load_all() -> void:
 	_load_items("res://config/items.json")
 	_load_recipes("res://config/recipes.json")
 	_cultivation_config = _load_json("res://config/cultivation.json")
-	print("[ConfigDatabase] Loaded all configs: ", _items_data.size(), " items defined")
+	_load_effects("res://config/effects.json")
+	print("[ConfigDatabase] Loaded all configs: ", _items_data.size(), " items, ", _effects_data.size(), " effects")
 
 func _load_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -130,9 +132,15 @@ func roll_spawn(launcher_id: int) -> Dictionary:
 			return get_item_data(s.id)
 	return get_item_data(spawns[-1].id)
 
-# Get initial setup data
-func get_initial_setup() -> Array:
-	return _initial_setup.get("items", [])
+# Get initial setup data for a specific board type
+func get_initial_setup(board_type: int = Constants.BoardType.MAIN) -> Array:
+	var key := _board_type_key(board_type)
+	return _initial_setup.get(key, {}).get("items", [])
+
+func _board_type_key(board_type: int) -> String:
+	match board_type:
+		Constants.BoardType.BATTLE: return "battle"
+		_: return "main"
 
 # Get all item IDs grouped by type
 func get_all_items_of_type(type: String) -> Array:
@@ -164,6 +172,18 @@ func get_recipes_for_item(item_id: int) -> Array:
 				result.append(r)
 				break
 	return result
+
+func _load_effects(path: String) -> void:
+	var data := _load_json(path)
+	if data.is_empty():
+		return
+	var effects: Array = data.get("effects", [])
+	for e in effects:
+		var id: int = e.id
+		_effects_data[id] = e
+
+func get_effect(effect_id: int) -> Dictionary:
+	return _effects_data.get(effect_id, {})
 
 # Reload all configs at runtime
 func reload() -> void:

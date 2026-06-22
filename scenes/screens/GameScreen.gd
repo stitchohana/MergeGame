@@ -4,12 +4,14 @@ class_name GameScreen extends BaseScreen
 @onready var detail_panel: ItemDetailPanel = $ItemDetailPanel
 @onready var grid_view: GridView = $GridView
 @onready var cultivation_panel: CultivationPanel = $CultivationPanel
+@onready var battle_btn: Button = $BattleButton
 
 func _ready() -> void:
 	randomize()
 
 	# Game initialization
-	GridManager.grid_updated.connect(GameState.check_game_over)
+	if not GridManager.grid_updated.is_connected(GameState.check_game_over):
+		GridManager.grid_updated.connect(GameState.check_game_over)
 	# Only load initial setup for a fresh game (server state already restored if logged in)
 	if GridManager.count_items() == 0:
 		_load_initial_setup()
@@ -31,7 +33,40 @@ func _ready() -> void:
 	CloudService.craft_remove_confirmed.connect(_on_craft_remove_confirmed)
 	CloudService.craft_remove_rejected.connect(_on_craft_remove_rejected)
 
+	battle_btn.pressed.connect(_on_battle_pressed)
+
 	print("[GameScreen] Game initialized!")
+
+func on_enter() -> void:
+	if GameState.current_board_type != Constants.BoardType.MAIN:
+		GameState.current_board_type = Constants.BoardType.MAIN
+		if CloudService.online:
+			CloudService.board_switch_confirmed.connect(_on_main_board_switch_confirmed, CONNECT_ONE_SHOT)
+			CloudService.board_switch_rejected.connect(_on_main_board_switch_rejected, CONNECT_ONE_SHOT)
+			CloudService.submit_board_switch("main")
+		else:
+			_sync_main_grid_local()
+
+func _on_main_board_switch_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	GridManager.init_grid(Constants.BoardType.MAIN)
+	var server_grid: Array = result.get("grid", [])
+	for entry in server_grid:
+		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
+		if not item_data.is_empty():
+			var item := item_data.duplicate(true)
+			if entry.has("charges"): item["charges"] = entry.charges
+			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	print("[GameScreen] Board switched to main: ", server_grid.size(), " items")
+
+func _on_main_board_switch_rejected(reason: String) -> void:
+	print("[GameScreen] Board switch rejected: ", reason)
+	_sync_main_grid_local()
+
+func _sync_main_grid_local() -> void:
+	if GridManager.count_items() == 0:
+		GameState.current_board_type = Constants.BoardType.MAIN
+		_load_initial_setup()
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -41,7 +76,7 @@ func _input(event: InputEvent) -> void:
 			_on_resume()
 
 func _load_initial_setup() -> void:
-	var setup = ConfigDatabase.get_initial_setup()
+	var setup = ConfigDatabase.get_initial_setup(GameState.current_board_type)
 	for entry in setup:
 		if not entry.has("id") or not entry.has("col") or not entry.has("row"):
 			push_error("[GameScreen] Invalid initial_setup entry: ", entry)
@@ -88,8 +123,12 @@ func _on_craft_remove_rejected(reason: String) -> void:
 	EventBus.show_toast.emit("取出材料失败：" + reason)
 
 func _on_pill_dropped_outside(pill_data: Dictionary) -> void:
-	var pill_type: String = pill_data.get("pill_type", "")
-	if pill_type == "breakthrough":
+	var effect_id: int = pill_data.get("use_effect_id", 0)
+	if effect_id <= 0:
+		return
+	var effect: Dictionary = ConfigDatabase.get_effect(effect_id)
+	var effect_type: String = effect.get("type", "")
+	if effect_type == "breakthrough":
 		var pill_id: int = pill_data.get("id", 0)
 		CultivationService.try_breakthrough(pill_id)
 	else:
@@ -97,6 +136,9 @@ func _on_pill_dropped_outside(pill_data: Dictionary) -> void:
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)
+
+func _on_battle_pressed() -> void:
+	EventBus.screen_change_requested.emit("battle")
 
 func _on_restart() -> void:
 	GameState.reset()

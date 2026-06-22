@@ -50,6 +50,7 @@ export interface GameState {
   last_stamina_tick: number;
   spirit_stones: number;
   version: number;
+  saved_grid?: GridItem[];
 }
 
 export interface User {

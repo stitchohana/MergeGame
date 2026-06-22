@@ -113,16 +113,58 @@ func pop_screen(transition: Transition = Transition.NONE) -> void:
 		_on_screen_removed(screen)
 
 func replace_top_screen(screen: BaseScreen, transition: Transition = Transition.NONE) -> void:
+	if is_inside_tree() and _transition_tween and _transition_tween.is_valid():
+		_transition_tween.kill()
+
+	var old: BaseScreen = null
 	if _screen_stack.size() > 0:
-		var old = _screen_stack.back()
-		if is_instance_valid(old):
-			old.on_exit()
-			_screen_stack.erase(old)
-			old.queue_free()
+		old = _screen_stack.back()
+
 	_layers[Layer.GAME].add_child(screen)
 	_screen_stack.append(screen)
+
+	if transition != Transition.NONE and is_instance_valid(old):
+		pre_screen_changed.emit(old.name if old else "", "replacing")
+		_play_replace_transition(old, screen, transition)
+	else:
+		_finish_replace(old, screen)
+
+func _finish_replace(old: BaseScreen, screen: BaseScreen) -> void:
+	if is_instance_valid(old):
+		old.on_exit()
+		_screen_stack.erase(old)
+		old.queue_free()
 	screen.on_enter()
 	post_screen_changed.emit(screen.name if screen else "", "replaced")
+
+func _play_replace_transition(old: BaseScreen, screen: BaseScreen, transition: Transition) -> void:
+	screen.modulate = Color.TRANSPARENT
+
+	_transition_tween = create_tween().set_parallel(true).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+
+	match transition:
+		Transition.FADE:
+			_transition_tween.tween_property(screen, "modulate", Color.WHITE, transition_duration)
+			_transition_tween.tween_property(old, "modulate", Color.TRANSPARENT, transition_duration)
+		Transition.SLIDE_LEFT:
+			screen.position = Vector2(screen.size.x, 0)
+			_transition_tween.tween_property(screen, "position", Vector2.ZERO, transition_duration)
+			_transition_tween.tween_property(old, "position", Vector2(-old.size.x, 0), transition_duration)
+		Transition.SLIDE_RIGHT:
+			screen.position = Vector2(-screen.size.x, 0)
+			_transition_tween.tween_property(screen, "position", Vector2.ZERO, transition_duration)
+			_transition_tween.tween_property(old, "position", Vector2(old.size.x, 0), transition_duration)
+		Transition.SCALE:
+			screen.scale = Vector2.ZERO
+			_transition_tween.tween_property(screen, "scale", Vector2.ONE, transition_duration)
+			_transition_tween.tween_property(old, "scale", Vector2.ZERO, transition_duration)
+		_:
+			_finish_replace(old, screen)
+			return
+
+	_transition_tween.tween_callback(func():
+		_finish_replace(old, screen)
+	)
 
 func get_current_screen() -> BaseScreen:
 	return _screen_stack.back() if _screen_stack.size() > 0 else null

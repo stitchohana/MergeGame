@@ -79,7 +79,7 @@ function main(): void {
     console.log(`  POST /api/game/craft/start`);
     console.log(`  POST /api/game/craft/retrieve`);
     console.log(`  POST /api/game/cultivate`);
-    console.log(`  GET  /api/leaderboard`);
+    console.log(`  GET  /api/game/leaderboard`);
   });
 }
 

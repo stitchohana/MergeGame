@@ -1,11 +1,13 @@
 extends Node
 
-# GridManager: Core grid data structure for the 7x9 merge board.
+# GridManager: Core grid data structure for the merge board.
 # All item placement, movement, and lookup operations go through this singleton.
 
 # Grid dimensions (mirrors Constants.gd — keep in sync)
 const GRID_COLS := Constants.GRID_COLS
 const GRID_ROWS := Constants.GRID_ROWS
+
+var current_board_type: int = Constants.BoardType.MAIN
 
 # _grid[row][col] = { "id": int, "level": int, "type": str } or null
 var _grid: Array[Array] = []
@@ -19,9 +21,10 @@ signal item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i)
 signal grid_updated()
 
 func _ready() -> void:
-	init_grid()
+	init_grid(current_board_type)
 
-func init_grid() -> void:
+func init_grid(board_type: int = Constants.BoardType.MAIN) -> void:
+	current_board_type = board_type
 	# Emit removal signals for all existing items before clearing
 	if not _grid.is_empty():
 		for row in range(GRID_ROWS):

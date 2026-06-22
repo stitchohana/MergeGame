@@ -1,6 +1,8 @@
 extends RefCounted
 class_name Constants
 
+enum BoardType { MAIN = 0, BATTLE = 1 }
+
 # Game dimensions — phone portrait (390×844)
 const GRID_COLS := 7
 const GRID_ROWS := 9

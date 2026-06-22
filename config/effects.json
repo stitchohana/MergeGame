@@ -1,0 +1,10 @@
+{
+  "effects": [
+    {"id": 1, "type": "breakthrough", "describe": "突破境界"},
+    {"id": 2, "type": "buff", "exp_gain": 30, "duration": 30, "multiplier": 1.5, "describe": "修炼速度x1.5，持续30秒"},
+    {"id": 3, "type": "buff", "exp_gain": 80, "duration": 45, "multiplier": 2.0, "describe": "修炼速度x2，持续45秒"},
+    {"id": 4, "type": "buff", "exp_gain": 200, "duration": 60, "multiplier": 2.5, "describe": "修炼速度x2.5，持续60秒"},
+    {"id": 5, "type": "buff", "exp_gain": 500, "duration": 90, "multiplier": 3.0, "describe": "修炼速度x3，持续90秒"},
+    {"id": 6, "type": "buff", "exp_gain": 1500, "duration": 120, "multiplier": 4.0, "describe": "修炼速度x4，持续120秒"}
+  ]
+}

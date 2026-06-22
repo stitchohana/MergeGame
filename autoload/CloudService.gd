@@ -21,6 +21,8 @@ signal pill_consume_confirmed(result: Dictionary)
 signal pill_consume_rejected(reason: String)
 signal breakthrough_confirmed(result: Dictionary)
 signal breakthrough_rejected(reason: String)
+signal board_switch_confirmed(result: Dictionary)
+signal board_switch_rejected(reason: String)
 signal craft_add_rejected(reason: String)
 signal craft_start_confirmed(result: Dictionary)
 signal craft_start_rejected(reason: String)
@@ -166,6 +168,16 @@ func submit_consume_pill(pill_id: int, version: int) -> void:
 func submit_breakthrough(pill_id: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "version": version})
 	_send_cultivation("breakthrough", "/api/cultivation/breakthrough", HTTPClient.METHOD_POST, body)
+
+func submit_board_switch(board_type: String) -> void:
+	var body := JSON.stringify({"board_type": board_type})
+	_send_authed_request("board_switch", "/api/game/board/switch", HTTPClient.METHOD_POST, body)
+
+func _on_board_switch_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		board_switch_confirmed.emit(data)
+	else:
+		board_switch_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_cultivate_tick_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -426,6 +438,8 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				pill_consume_rejected.emit(error_msg)
 			"breakthrough":
 				breakthrough_rejected.emit(error_msg)
+			"board_switch":
+				board_switch_rejected.emit(error_msg)
 			"craft_add":
 				craft_add_rejected.emit(error_msg)
 			"craft_start":
@@ -462,6 +476,8 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_consume_pill_response(data)
 		"breakthrough":
 			_on_breakthrough_response(data)
+		"board_switch":
+			_on_board_switch_response(data)
 		"craft_add":
 			_on_craft_add_response(data)
 		"craft_start":
@@ -497,6 +513,8 @@ func _handle_network_error(tag: String) -> void:
 			pill_consume_rejected.emit("network_error")
 		"breakthrough":
 			breakthrough_rejected.emit("network_error")
+		"board_switch":
+			board_switch_rejected.emit("network_error")
 		"sell":
 			sell_rejected.emit("network_error")
 		"craft_add":
@@ -526,6 +544,8 @@ func _handle_parse_error(tag: String) -> void:
 			pill_consume_rejected.emit("invalid_response")
 		"breakthrough":
 			breakthrough_rejected.emit("invalid_response")
+		"board_switch":
+			board_switch_rejected.emit("invalid_response")
 		"sell":
 			sell_rejected.emit("invalid_response")
 		"craft_add":

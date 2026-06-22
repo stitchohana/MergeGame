@@ -226,6 +226,28 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     res.json({ ok: true, new_version: result.newVersion, storage: storageItem?.storage ?? null });
   }));
 
+  // POST /api/game/board/switch
+  router.post("/board/switch", op(async (req, res, userId) => {
+    const { board_type } = req.body;
+    if (typeof board_type !== "string") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    // Clean up crafting state before switching (clear table states from grid)
+    for (const item of state.grid) {
+      delete (item as any)._craft_state;
+      delete (item as any)._craft_stored;
+      delete (item as any)._craft_recipe;
+      delete (item as any)._craft_start_time;
+      delete (item as any)._craft_duration;
+      delete (item as any).storage;
+    }
+    const result = engine.switchBoard(state, board_type);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
+  }));
+
   // GET /api/leaderboard
   router.get("/leaderboard", async (_req: Request, res: Response) => {
     try {

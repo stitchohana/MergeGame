@@ -14,10 +14,7 @@ interface ItemDef {
   describe: string;
   type: string;
   spawns?: { id: number; weight: number }[];
-  pill_type?: string;
-  exp_gain?: number;
-  buff_duration?: number;
-  buff_multiplier?: number;
+  use_effect_id?: number;
   recipes?: number[];
   max_charges?: number;
   recharge_time?: number;
@@ -72,9 +69,10 @@ export class GameEngine {
   private recipes: RecipeDef[] = [];
   private recipesByTable = new Map<number, RecipeDef[]>();
   private cultivation: CultivationConfig | null = null;
-  private initialSetup: { id: number; col: number; row: number }[] = [];
+  private initialSetups = new Map<string, { id: number; col: number; row: number }[]>();
   private staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
   private shopConfig = { shopItems: [] as number[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
+  private effectsById = new Map<number, { id: number; type: string; exp_gain?: number; duration?: number; multiplier?: number; amount?: number; describe?: string }>();
 
   constructor(configDir: string) {
     this.loadConfigs(configDir);
@@ -89,7 +87,8 @@ export class GameEngine {
     this.loadRecipes(path.join(configDir, "recipes.json"));
     this.loadGameConfig(path.join(configDir, "game_config.json"));
     this.loadShopConfig(path.join(configDir, "shop.json"));
-    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.realms.length ?? 0} realms`);
+    this.loadEffects(path.join(configDir, "effects.json"));
+    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.realms.length ?? 0} realms, ${this.effectsById.size} effects`);
   }
 
   private loadGameConfig(filePath: string): void {
@@ -174,9 +173,29 @@ export class GameEngine {
     this.cultivation = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   }
 
+  private loadEffects(filePath: string): void {
+    try {
+      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      for (const e of data.effects || []) {
+        this.effectsById.set(e.id, e);
+      }
+    } catch { /* effects.json optional */ }
+  }
+
+  getEffect(effectId: number) {
+    return this.effectsById.get(effectId) ?? null;
+  }
+
   private loadInitialSetup(filePath: string): void {
     const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    this.initialSetup = data.items || [];
+    // Support both old flat format and new board-type format
+    if (data.items) {
+      this.initialSetups.set("main", data.items);
+    } else {
+      for (const key of Object.keys(data)) {
+        this.initialSetups.set(key, data[key].items || []);
+      }
+    }
   }
 
   // --- Config queries ---
@@ -219,8 +238,8 @@ export class GameEngine {
     return this.cultivation;
   }
 
-  getInitialSetup() {
-    return this.initialSetup;
+  getInitialSetup(boardType: string = "main") {
+    return this.initialSetups.get(boardType) || this.initialSetups.get("main") || [];
   }
 
   getMaxCharges(itemId: number): number {
@@ -282,7 +301,7 @@ export class GameEngine {
 
   // --- State initialization ---
 
-  createInitialState(): GameState {
+  createInitialState(boardType: string = "main"): GameState {
     const now = Date.now();
     const state: GameState = {
       score: 0,
@@ -305,7 +324,8 @@ export class GameEngine {
       version: 0,
     };
 
-    for (const entry of this.initialSetup) {
+    const setup = this.getInitialSetup(boardType);
+    for (const entry of setup) {
       const itemDef = this.getItemData(entry.id);
       if (itemDef) {
         const gitem: GridItem = { id: entry.id, col: entry.col, row: entry.row };
@@ -317,6 +337,56 @@ export class GameEngine {
       }
     }
     return state;
+  }
+
+  switchBoard(state: GameState, boardType: string): { ok: true; newVersion: number } | { ok: false; reason: string } {
+    if (boardType === "battle") {
+      // Save current grid and switch to battle setup
+      state.saved_grid = state.grid;
+      state.grid = [];
+      const setup = this.getInitialSetup("battle");
+      const now = Date.now();
+      for (const entry of setup) {
+        const itemDef = this.getItemData(entry.id);
+        if (itemDef) {
+          const gitem: GridItem = { id: entry.id, col: entry.col, row: entry.row };
+          if (itemDef.type === "launcher") {
+            gitem.charges = this.getMaxCharges(entry.id);
+            gitem.last_charge_time = now;
+          }
+          state.grid.push(gitem);
+        }
+      }
+      state.version += 1;
+      console.log(`[engine] board switched to battle: saved ${state.saved_grid.length} items, battle has ${state.grid.length} items | v${state.version}`);
+    } else {
+      // Restore saved main grid (or use initial setup for new players)
+      state.grid = state.saved_grid && state.saved_grid.length > 0
+        ? state.saved_grid
+        : this._buildInitialGrid("main");
+      state.saved_grid = undefined;
+      state.version += 1;
+      console.log(`[engine] board switched to main: restored ${state.grid.length} items | v${state.version}`);
+    }
+    return { ok: true, newVersion: state.version };
+  }
+
+  private _buildInitialGrid(boardType: string): GridItem[] {
+    const setup = this.getInitialSetup(boardType);
+    const now = Date.now();
+    const grid: GridItem[] = [];
+    for (const entry of setup) {
+      const itemDef = this.getItemData(entry.id);
+      if (itemDef) {
+        const gitem: GridItem = { id: entry.id, col: entry.col, row: entry.row };
+        if (itemDef.type === "launcher") {
+          gitem.charges = this.getMaxCharges(entry.id);
+          gitem.last_charge_time = now;
+        }
+        grid.push(gitem);
+      }
+    }
+    return grid;
   }
 
   // --- Grid helpers ---
@@ -1062,19 +1132,23 @@ export class GameEngine {
 
     const pillData = this.getItemData(pillId);
     if (!pillData) return { ok: false, reason: "invalid_pill" };
-    if (pillData.pill_type !== "cultivation") return { ok: false, reason: "not_cultivation_pill" };
+
+    const effectId: number = pillData.use_effect_id ?? 0;
+    const effect = this.getEffect(effectId);
+    if (!effect) return { ok: false, reason: "invalid_effect" };
+    if (effect.type !== "buff" && effect.type !== "exp") return { ok: false, reason: "not_consumable" };
 
     const c = state.cultivation;
 
     // Apply instant EXP
-    const expGain: number = pillData.exp_gain ?? 0;
+    const expGain: number = effect.exp_gain ?? 0;
     if (expGain > 0) {
       this._addExp(c, expGain);
     }
 
     // Apply buff
-    const duration: number = pillData.buff_duration ?? 0;
-    const multiplier: number = pillData.buff_multiplier ?? 1.0;
+    const duration: number = effect.duration ?? 0;
+    const multiplier: number = effect.multiplier ?? 1.0;
     if (duration > 0) {
       c.buffs.push({
         pill_id: pillId,
@@ -1086,7 +1160,7 @@ export class GameEngine {
     }
 
     const pillName = pillData.name;
-    console.log(`[engine] consume pill: ${pillName} | exp +${expGain} | buff x${multiplier} ${duration}s | realm=${c.current_realm_id} lv=${c.current_level}`);
+    console.log(`[engine] consume pill: ${pillName} | effect=${effectId} | exp +${expGain} | buff x${multiplier} ${duration}s | realm=${c.current_realm_id} lv=${c.current_level}`);
 
     state.version += 1;
     return { ok: true, cultivation: c };

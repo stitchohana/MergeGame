@@ -79,9 +79,13 @@ func _on_state_loaded(state: Dictionary) -> void:
 	var offline_exp : float = state.get("offline_exp_gained", 0)
 
 	SaveManager._restore_from_server(state)
-	_show_offline_gains(old_realm, old_level, old_total, offline_exp)
+	var offline_msg := _format_offline_gains(old_realm, old_level, old_total, offline_exp)
 
-	UIManager.replace_top_screen(preload("res://scenes/screens/GameScreen.tscn").instantiate())
+	SceneTransitionManager.load_scene_and_replace(
+		"res://scenes/screens/GameScreen.tscn",
+		UIManager.Transition.FADE,
+		func(): EventBus.show_toast.emit(offline_msg)
+	)
 
 func _on_state_loaded_for_skip(state: Dictionary) -> void:
 	print("[LoginScreen] Auto-login, game state version: ", state.get("version", 0))
@@ -94,11 +98,15 @@ func _on_state_loaded_for_skip(state: Dictionary) -> void:
 	var old_tick: float = CultivationService.last_tick_time
 
 	SaveManager._restore_from_server(state)
-	_show_offline_gains(old_realm, old_level, old_total, offline_exp)
+	var offline_msg := _format_offline_gains(old_realm, old_level, old_total, offline_exp)
 
-	UIManager.replace_top_screen(preload("res://scenes/screens/GameScreen.tscn").instantiate())
+	SceneTransitionManager.load_scene_and_replace(
+		"res://scenes/screens/GameScreen.tscn",
+		UIManager.Transition.FADE,
+		func(): EventBus.show_toast.emit(offline_msg)
+	)
 
-func _show_offline_gains(old_realm: int, old_level: int, old_total: int, offline_exp: int = 0) -> void:
+func _format_offline_gains(old_realm: int, old_level: int, old_total: int, offline_exp: int = 0) -> String:
 	var exp_gained := offline_exp
 	var realm_up := CultivationService.current_realm_id > old_realm
 	var level_up := CultivationService.current_level > old_level and CultivationService.current_realm_id == old_realm
@@ -118,7 +126,7 @@ func _show_offline_gains(old_realm: int, old_level: int, old_total: int, offline
 
 	var msg: String = "、".join(parts)
 	print("[LoginScreen] ", msg)
-	EventBus.show_toast.emit(msg)
+	return msg
 
 func _on_state_load_failed(reason: String) -> void:
 	print("[LoginScreen] State load failed: ", reason)
@@ -131,7 +139,7 @@ func _on_state_load_failed(reason: String) -> void:
 	else:
 		# Already had token but state load failed — still allow entering title
 		_status("存档加载失败，进入离线模式")
-		UIManager.replace_top_screen(preload("res://scenes/screens/GameScreen.tscn").instantiate())
+		SceneTransitionManager.load_scene_and_replace("res://scenes/screens/GameScreen.tscn")
 
 func _on_state_load_failed_skip(reason: String) -> void:
 	_on_state_load_failed(reason)

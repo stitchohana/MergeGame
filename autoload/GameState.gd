@@ -19,6 +19,7 @@ var phase: GamePhase = GamePhase.INIT
 var stamina: int = 100
 var max_stamina: int = 100
 var spirit_stones: int = 0
+var current_board_type: int = Constants.BoardType.MAIN
 
 signal score_changed(new_score: int)
 signal high_score_changed(new_high: int)

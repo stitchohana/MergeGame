@@ -26,6 +26,7 @@ EventBus="*res://autoload/EventBus.gd"
 CloudService="*res://autoload/CloudService.gd"
 CraftingService="*res://autoload/CraftingService.gd"
 UIManager="*res://autoload/UIManager.gd"
+SceneTransitionManager="*res://autoload/SceneTransitionManager.gd"
 
 [display]
 

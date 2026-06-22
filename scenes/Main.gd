@@ -44,8 +44,9 @@ func _on_screen_change_requested(screen_name: String) -> void:
 			var login := preload("res://scenes/screens/LoginScreen.tscn").instantiate()
 			UIManager.push_screen(login, UIManager.Transition.FADE)
 		"game":
-			var game := preload("res://scenes/screens/GameScreen.tscn").instantiate()
-			UIManager.replace_top_screen(game, UIManager.Transition.FADE)
+			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/GameScreen.tscn", UIManager.Transition.FADE)
+		"battle":
+			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/BattleScreen.tscn", UIManager.Transition.FADE)
 		"settings":
 			var settings := preload("res://scenes/screens/SettingsScreen.tscn").instantiate()
 			UIManager.push_screen(settings, UIManager.Transition.SLIDE_LEFT)
