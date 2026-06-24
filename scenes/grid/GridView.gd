@@ -11,7 +11,8 @@ const DRAG_THRESHOLD := 10.0  # pixels before drag starts
 @export var grid_item_scene: PackedScene
 
 signal item_clicked(item_data: Dictionary, grid_pos: Vector2i)
-signal pill_dropped_outside(item_data: Dictionary)
+signal pill_dropped_outside(item_data: Dictionary, drop_position: Vector2)
+signal item_use_requested(item_data: Dictionary, grid_pos: Vector2i)
 
 var _item_nodes: Dictionary = {}  # "col,row" -> GridItem
 var _cell_nodes: Dictionary = {}  # "col,row" -> GridCell
@@ -32,6 +33,7 @@ var _craft_button: CraftButton = null
 var _craft_table_pos: Vector2i = Vector2i(-1, -1)
 var _craft_table_item: Dictionary = {}
 var _is_launcher_spawning: bool = false
+var _selected_key: String = ""
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -95,7 +97,11 @@ func _create_ghost() -> void:
 	gl.vertical_alignment = 1
 	_drag_ghost.add_child(gl)
 
-	add_child(_drag_ghost)
+	var ghost_layer := CanvasLayer.new()
+	ghost_layer.name = "DragGhostLayer"
+	ghost_layer.layer = 100
+	add_child(ghost_layer)
+	ghost_layer.add_child(_drag_ghost)
 
 func _connect_signals() -> void:
 	GridManager.item_added.connect(_on_item_added)
@@ -140,6 +146,7 @@ func _input(event: InputEvent) -> void:
 			_finish_drag(cell_pos)
 		elif _pressed_has_moved == false and not _pressed_item.is_empty():
 			# Click without drag
+			_select_item(_press_start_pos)
 			item_clicked.emit(_pressed_item, _press_start_pos)
 
 			# Check crafting table or storage click
@@ -176,7 +183,7 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion:
 		if _is_dragging:
 			var local_pos := _to_local(event.position)
-			_drag_ghost.position = local_pos - Vector2(CELL_SIZE * 0.5, CELL_SIZE * 0.5)
+			_drag_ghost.position = get_global_mouse_position() - Vector2(CELL_SIZE * 0.5, CELL_SIZE * 0.5)
 			_update_highlights(local_pos)
 		elif not _pressed_item.is_empty() and not _pressed_has_moved:
 			var local_pos := _to_local(event.position)
@@ -332,6 +339,7 @@ func _spawn_error_text(reason: String) -> String:
 func _start_drag(pos: Vector2i) -> void:
 	if GameState.phase != GameState.GamePhase.IDLE:
 		return
+	_deselect_all()
 	var item = GridManager.get_item(pos)
 	if item == null:
 		return
@@ -373,6 +381,7 @@ func _start_drag(pos: Vector2i) -> void:
 	_hide_craft_button()
 
 func _finish_drag(target_pos: Vector2i) -> void:
+	print("[GridView] _finish_drag target=", target_pos, " item=", _drag_item_data.get("name", ""), " effect=", _drag_item_data.get("use_effect_id", 0))
 	_is_dragging = false
 	_pressed_item = {}
 	_drag_ghost.visible = false
@@ -385,14 +394,7 @@ func _finish_drag(target_pos: Vector2i) -> void:
 			src_node.set_drag_active(false)
 	_clear_highlights()
 
-	if not GridManager.is_valid_pos(target_pos):
-		# Pill dropped outside grid -> consume buff or breakthrough
-		var use_effect_id: int = _drag_item_data.get("use_effect_id", 0)
-		if use_effect_id > 0:
-			GridManager.remove_item(_drag_source_pos)
-			pill_dropped_outside.emit(_drag_item_data)
-			GameState.set_phase(GameState.GamePhase.IDLE)
-			return
+	if not GridManager.is_valid_pos(target_pos) or not Rect2(global_position, size).has_point(get_global_mouse_position()):
 		_snap_back()
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
@@ -743,6 +745,27 @@ func _sync_crafting_states() -> void:
 			var node = _item_nodes.get(key)
 			if node and is_instance_valid(node):
 				node.set_crafting_state(cs)
+
+func _select_item(pos: Vector2i) -> void:
+	var key := "%d,%d" % [pos.x, pos.y]
+	if key == _selected_key and not _selected_key.is_empty():
+		# Second click on selected item → use
+		var item: Dictionary = GridManager.get_item(pos)
+		if item != null:
+			item_use_requested.emit(item, pos)
+		return
+	_deselect_all()
+	var node := _item_nodes.get(key) as GridItem
+	if node and is_instance_valid(node):
+		node.set_selected(true)
+		_selected_key = key
+
+func _deselect_all() -> void:
+	if not _selected_key.is_empty():
+		var node := _item_nodes.get(_selected_key) as GridItem
+		if node and is_instance_valid(node):
+			node.set_selected(false)
+		_selected_key = ""
 
 func _hide_craft_button() -> void:
 	_craft_button.hide()

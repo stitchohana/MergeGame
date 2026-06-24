@@ -29,7 +29,7 @@ func _ready() -> void:
 
 	# Cultivation panel
 	cultivation_panel.cultivation_clicked.connect(_on_cultivation_clicked)
-	grid_view.pill_dropped_outside.connect(_on_pill_dropped_outside)
+	grid_view.item_use_requested.connect(_on_item_use_requested)
 	CloudService.craft_remove_confirmed.connect(_on_craft_remove_confirmed)
 	CloudService.craft_remove_rejected.connect(_on_craft_remove_rejected)
 
@@ -122,17 +122,22 @@ func _on_craft_remove_rejected(reason: String) -> void:
 	print("[GameScreen] Craft remove rejected: ", reason)
 	EventBus.show_toast.emit("取出材料失败：" + reason)
 
-func _on_pill_dropped_outside(pill_data: Dictionary) -> void:
-	var effect_id: int = pill_data.get("use_effect_id", 0)
+func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
+	var effect_id: int = int(item_data.get("use_effect_id", 0))
 	if effect_id <= 0:
 		return
 	var effect: Dictionary = ConfigDatabase.get_effect(effect_id)
+	if effect.is_empty():
+		return
 	var effect_type: String = effect.get("type", "")
-	if effect_type == "breakthrough":
-		var pill_id: int = pill_data.get("id", 0)
-		CultivationService.try_breakthrough(pill_id)
-	else:
-		CultivationService.apply_buff(pill_data)
+	match effect_type:
+		"breakthrough":
+			var pill_id: int = item_data.get("id", 0)
+			CultivationService.try_breakthrough(pill_id)
+		"buff":
+			CultivationService.apply_buff(item_data)
+		_:
+			EventBus.show_toast.emit("此物品无法在此使用")
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)

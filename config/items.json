@@ -24,7 +24,7 @@
 	{"id": 66, "level": 2, "name": "铁锭", "icon": "", "group_id": 5, "merge_score": 10, "describe": "提炼好的铁锭"},
 	{"id": 67, "level": 3, "name": "银锭", "icon": "", "group_id": 5, "merge_score": 30, "describe": "提炼好的银锭"},
 	{"id": 68, "level": 4, "name": "金锭", "icon": "", "group_id": 5, "merge_score": 80, "describe": "提炼好的金锭"},
-	{"id": 81, "level": 1, "name": "剑气", "icon": "", "group_id": 6, "merge_score": 0, "describe": "飞剑凝聚的剑气"}
+	{"id": 81, "level": 1, "name": "剑气", "icon": "", "group_id": 6, "merge_score": 0, "use_effect_id": 7, "describe": "飞剑凝聚的剑气，造成15点伤害"}
   ],
   "launcher": [
 	{"id": 501, "level": 1, "name": "小药田", "icon": "", "group_id": 3, "max_charges": 30, "recharge_time": 60, "merge_score": 0, "describe": "产出凡草，小概率出灵草或自身", "spawns": [{"id": 21, "weight": 70}, {"id": 22, "weight": 25}, {"id": 501, "weight": 5}]},

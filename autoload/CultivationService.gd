@@ -63,8 +63,7 @@ func _on_tick_timer() -> void:
 	if not CloudService.online:
 		print("[Cultivation] Tick skipped: offline")
 		return
-	print("[Cultivation] Sending tick v", GameState.version)
-	CloudService.submit_cultivate_tick(GameState.version)
+		CloudService.submit_cultivate_tick(GameState.version)
 
 func _on_game_phase_changed(old: int, new: int) -> void:
 	_paused = (new == GameState.GamePhase.PAUSED or new == GameState.GamePhase.GAME_OVER)
@@ -76,8 +75,7 @@ func _on_tick_confirmed(result: Dictionary) -> void:
 	var c: Dictionary = result.get("cultivation", {})
 	var old_exp := current_exp
 	_apply_cultivation_state(c)
-	print("[Cultivation] Tick OK: v", GameState.version, " exp ", old_exp, " -> ", current_exp, " realm=", current_realm_id, " lv=", current_level)
-
+	
 func _on_consume_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 	var c: Dictionary = result.get("cultivation", {})

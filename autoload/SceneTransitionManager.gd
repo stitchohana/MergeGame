@@ -107,7 +107,7 @@ func _finish_loading(resource: Resource) -> void:
 	fade_out.tween_callback(func():
 		_remove_loading_screen()
 		if resource:
-			var new_screen: BaseScreen = resource.instantiate()
+			var new_screen := resource.instantiate() as BaseScreen
 			if not new_screen is BaseScreen:
 				printerr("[SceneTransitionManager] Loaded resource is not a BaseScreen: ", _target_scene_path)
 				return

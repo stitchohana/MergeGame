@@ -15,10 +15,30 @@ var _orig_scale: Vector2
 @onready var icon_rect: TextureRect = $IconRect
 @onready var charge_label: Label = $ChargeLabel
 
+var _is_selected: bool = false
+
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_orig_modulate = modulate
 	_orig_scale = scale
+	_setup_selection_overlay()
+
+func _setup_selection_overlay() -> void:
+	var border := ColorRect.new()
+	border.name = "SelectionBorder"
+	border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	border.anchors_preset = Control.PRESET_FULL_RECT
+	border.anchor_right = 1.0
+	border.anchor_bottom = 1.0
+	border.color = Color(1.0, 0.85, 0.2, 0.5)
+	border.visible = false
+	add_child(border)
+
+func set_selected(active: bool) -> void:
+	_is_selected = active
+	var border := get_node_or_null("SelectionBorder") as ColorRect
+	if border:
+		border.visible = active
 
 func setup(data: Dictionary, pos: Vector2i, cell_size: int) -> void:
 	item_data = data
@@ -33,7 +53,35 @@ func setup(data: Dictionary, pos: Vector2i, cell_size: int) -> void:
 
 func _update_visuals() -> void:
 	# Background color by type and group
+	var item_type: String = item_data.get("type", "")
 	var group_id: int = item_data.get("group_id", 0)
+
+	# Character rendering
+	if item_type == "character":
+		color = Color(0.15, 0.5, 0.75, 1)
+		if name_label:
+			name_label.text = item_data.get("name", "")
+			name_label.visible = true
+		var hp: int = item_data.get("hp", 0)
+		var max_hp: int = item_data.get("max_hp", 0)
+		if level_label:
+			level_label.text = "HP %d/%d" % [hp, max_hp]
+			level_label.visible = true
+		return
+
+	# Monster rendering
+	if item_type == "monster":
+		color = Color(0.8, 0.15, 0.15, 1)
+		if name_label:
+			name_label.text = item_data.get("name", "")
+			name_label.visible = true
+		var hp: int = item_data.get("hp", 0)
+		var max_hp: int = item_data.get("max_hp", 0)
+		if level_label:
+			level_label.text = "HP %d/%d" % [hp, max_hp]
+			level_label.visible = true
+		return
+
 	if is_launcher:
 		match group_id:
 			1:

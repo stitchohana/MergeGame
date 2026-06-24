@@ -5,6 +5,8 @@
     {"id": 3, "type": "buff", "exp_gain": 80, "duration": 45, "multiplier": 2.0, "describe": "修炼速度x2，持续45秒"},
     {"id": 4, "type": "buff", "exp_gain": 200, "duration": 60, "multiplier": 2.5, "describe": "修炼速度x2.5，持续60秒"},
     {"id": 5, "type": "buff", "exp_gain": 500, "duration": 90, "multiplier": 3.0, "describe": "修炼速度x3，持续90秒"},
-    {"id": 6, "type": "buff", "exp_gain": 1500, "duration": 120, "multiplier": 4.0, "describe": "修炼速度x4，持续120秒"}
+    {"id": 6, "type": "buff", "exp_gain": 1500, "duration": 120, "multiplier": 4.0, "describe": "修炼速度x4，持续120秒"},
+    {"id": 7, "type": "damage", "amount": 15, "describe": "造成15点伤害"},
+    {"id": 8, "type": "heal", "amount": 20, "describe": "恢复20点生命"}
   ]
 }

@@ -8,6 +8,8 @@ var _items_by_type_level: Dictionary = {}  # type -> { level -> Array[item_data]
 var _initial_setup: Dictionary = {}
 var _cultivation_config: Dictionary = {}
 var _effects_data: Dictionary = {}  # effect_id -> effect_data
+var _expedition_maps: Dictionary = {}
+var _monsters_data: Dictionary = {}
 
 func _ready() -> void:
 	load_all()
@@ -19,7 +21,8 @@ func load_all() -> void:
 	_load_recipes("res://config/recipes.json")
 	_cultivation_config = _load_json("res://config/cultivation.json")
 	_load_effects("res://config/effects.json")
-	print("[ConfigDatabase] Loaded all configs: ", _items_data.size(), " items, ", _effects_data.size(), " effects")
+	_load_expedition("res://config/expedition.json")
+	print("[ConfigDatabase] Loaded all configs: ", _items_data.size(), " items, ", _effects_data.size(), " effects, ", _expedition_maps.size(), " maps")
 
 func _load_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -184,6 +187,26 @@ func _load_effects(path: String) -> void:
 
 func get_effect(effect_id: int) -> Dictionary:
 	return _effects_data.get(effect_id, {})
+
+func _load_expedition(path: String) -> void:
+	var data := _load_json(path)
+	if data.is_empty():
+		print("[ConfigDatabase] Expedition data is empty or failed to load: ", path)
+		return
+	var maps: Array = data.get("maps", [])
+	print("[ConfigDatabase] Loaded ", maps.size(), " expedition maps")
+	for m in maps:
+		_expedition_maps[int(m.id)] = m
+	var monsters: Array = data.get("monsters", [])
+	print("[ConfigDatabase] Loaded ", monsters.size(), " monsters")
+	for mo in monsters:
+		_monsters_data[int(mo.id)] = mo
+
+func get_expedition_map(map_id: int) -> Dictionary:
+	return _expedition_maps.get(map_id, {})
+
+func get_monster(monster_id: int) -> Dictionary:
+	return _monsters_data.get(monster_id, {})
 
 # Reload all configs at runtime
 func reload() -> void:

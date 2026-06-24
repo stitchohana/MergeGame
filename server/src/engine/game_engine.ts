@@ -1032,8 +1032,7 @@ export class GameEngine {
         const pillId = realm?.breakthrough_pill ?? 0;
         const pillData = this.getItemData(pillId);
         const pillName = pillData?.name ?? `#${pillId}`;
-        console.log(`[engine] cultivation tick: blocked — needs ${pillName} to breakthrough from ${realm?.name} Lv${c.current_level}`);
-      } else {
+              } else {
         const baseExp = this.cultivation.passive_exp_per_second;
         const mult = this._getExpMultiplier(c);
         const gained = Math.ceil(baseExp * elapsed * mult);
@@ -1041,12 +1040,10 @@ export class GameEngine {
         if (gained > 0) {
           this._addExp(c, gained);
           const realmName = this.cultivation.realms[c.current_realm_id]?.name ?? "?";
-          console.log(`[engine] cultivation tick: +${gained}exp (${elapsed}s x${baseExp}/s x${mult}) | ${realmName} Lv${c.current_level} exp=${c.current_exp}/${this.getExpToNextLevel(c.current_realm_id, c.current_level)}`);
-        }
+                  }
       }
     } else {
-      console.log(`[engine] cultivation tick: max cultivation reached`);
-    }
+          }
 
     // Store gained EXP for the response
     if (trackGain) {

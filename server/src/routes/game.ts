@@ -38,7 +38,6 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       await storage.saveState(userId, state);
       console.log(`[game] new player ${userId}, init with ${state.grid.length} items | v0`);
     } else {
-      // Offline cultivation tick — applies EXP for elapsed time since last_tick_time
       const oldVer = state.version;
       engine.tickCultivation(state, true);
       if (state.version !== oldVer) {
@@ -56,6 +55,14 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     try {
       const userId = req.auth!.userId;
       const state = await getOrCreateState(userId);
+      // Restore main grid if returning from battle after reconnect
+      if (state.saved_grid && state.saved_grid.length > 0) {
+        state.grid = state.saved_grid;
+        state.saved_grid = undefined;
+        state.version += 1;
+        await storage.saveState(userId, state);
+        console.log(`[game] restored main grid for ${userId}: ${state.grid.length} items`);
+      }
       const offlineExp = (state.cultivation as any)._offline_exp_gained || 0;
       res.json({ score: state.score, high_score: state.high_score, grid: state.grid, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, offline_exp_gained: offlineExp });
     } catch (err) {

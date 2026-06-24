@@ -15,21 +15,86 @@ script = ExtResource("1_script")
 [node name="GridView" parent="." instance=ExtResource("2_grid")]
 layout_mode = 0
 offset_left = 40.0
+offset_top = 210.0
+offset_right = 740.0
+offset_bottom = 1110.0
+
+[node name="MapHeader" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 15.0
+offset_right = 740.0
+offset_bottom = 55.0
+color = Color(0.1, 0.1, 0.15, 1)
+
+[node name="MapLabel" type="Label" parent="MapHeader"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CharPanel" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 70.0
+offset_right = 340.0
+offset_bottom = 195.0
+color = Color(0.1, 0.15, 0.25, 1)
+
+[node name="CharLabel" type="Label" parent="CharPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = 292.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="CharHpLabel" type="Label" parent="CharPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 34.0
+offset_right = 292.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(0.3, 1, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+
+[node name="MonsterPanel" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 360.0
 offset_top = 70.0
 offset_right = 740.0
-offset_bottom = 970.0
+offset_bottom = 195.0
+color = Color(0.25, 0.1, 0.1, 1)
+
+[node name="MonsterLabel" type="Label" parent="MonsterPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = 372.0
+offset_bottom = 119.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="ItemDetailPanel" parent="." instance=ExtResource("3_detail")]
 layout_mode = 0
 offset_left = 0.0
-offset_top = 990.0
+offset_top = 1130.0
 offset_right = 780.0
-offset_bottom = 1270.0
+offset_bottom = 1410.0
 
 [node name="LeaveButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 660.0
-offset_top = 15.0
+offset_left = 690.0
+offset_top = 18.0
 offset_right = 770.0
-offset_bottom = 55.0
+offset_bottom = 52.0
 text = "离去"
