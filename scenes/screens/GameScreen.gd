@@ -5,6 +5,7 @@ class_name GameScreen extends BaseScreen
 @onready var grid_view: GridView = $GridView
 @onready var cultivation_panel: CultivationPanel = $CultivationPanel
 @onready var battle_btn: Button = $BattleButton
+@onready var home_btn: Button = $HomeButton
 
 func _ready() -> void:
 	randomize()
@@ -34,6 +35,7 @@ func _ready() -> void:
 	CloudService.craft_remove_rejected.connect(_on_craft_remove_rejected)
 
 	battle_btn.pressed.connect(_on_battle_pressed)
+	home_btn.pressed.connect(_on_home_pressed)
 
 	print("[GameScreen] Game initialized!")
 
@@ -141,6 +143,9 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)
+
+func _on_home_pressed() -> void:
+	EventBus.screen_change_requested.emit("home")
 
 func _on_battle_pressed() -> void:
 	EventBus.screen_change_requested.emit("battle")

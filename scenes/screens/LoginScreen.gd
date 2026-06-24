@@ -82,7 +82,7 @@ func _on_state_loaded(state: Dictionary) -> void:
 	var offline_msg := _format_offline_gains(old_realm, old_level, old_total, offline_exp)
 
 	SceneTransitionManager.load_scene_and_replace(
-		"res://scenes/screens/GameScreen.tscn",
+		"res://scenes/screens/HomeScreen.tscn",
 		UIManager.Transition.FADE,
 		func(): EventBus.show_toast.emit(offline_msg)
 	)
@@ -101,7 +101,7 @@ func _on_state_loaded_for_skip(state: Dictionary) -> void:
 	var offline_msg := _format_offline_gains(old_realm, old_level, old_total, offline_exp)
 
 	SceneTransitionManager.load_scene_and_replace(
-		"res://scenes/screens/GameScreen.tscn",
+		"res://scenes/screens/HomeScreen.tscn",
 		UIManager.Transition.FADE,
 		func(): EventBus.show_toast.emit(offline_msg)
 	)
@@ -139,7 +139,7 @@ func _on_state_load_failed(reason: String) -> void:
 	else:
 		# Already had token but state load failed — still allow entering title
 		_status("存档加载失败，进入离线模式")
-		SceneTransitionManager.load_scene_and_replace("res://scenes/screens/GameScreen.tscn")
+		SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn")
 
 func _on_state_load_failed_skip(reason: String) -> void:
 	_on_state_load_failed(reason)

@@ -186,7 +186,7 @@ func _refresh_map_header() -> void:
 	map_label.text = "%s — 第%d关 %s" % [map_data.get("name", ""), _current_stage + 1, stage_name]
 
 func _on_leave_pressed() -> void:
-	EventBus.screen_change_requested.emit("game")
+	EventBus.screen_change_requested.emit("home")
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)

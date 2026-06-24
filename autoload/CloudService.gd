@@ -15,8 +15,6 @@ signal spawn_rejected(reason: String)
 signal craft_add_confirmed(result: Dictionary)
 signal move_confirmed(result: Dictionary)
 signal move_rejected(reason: String)
-signal cultivate_tick_confirmed(result: Dictionary)
-signal cultivate_tick_rejected(reason: String)
 signal pill_consume_confirmed(result: Dictionary)
 signal pill_consume_rejected(reason: String)
 signal breakthrough_confirmed(result: Dictionary)
@@ -157,9 +155,6 @@ func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version
 
 # --- Cultivation ---
 
-func submit_cultivate_tick(version: int) -> void:
-	var body := JSON.stringify({"version": version})
-	_send_cultivation("cultivate_tick", "/api/cultivation/tick", HTTPClient.METHOD_POST, body)
 
 func submit_consume_pill(pill_id: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "version": version})
@@ -178,13 +173,6 @@ func _on_board_switch_response(data: Dictionary) -> void:
 		board_switch_confirmed.emit(data)
 	else:
 		board_switch_rejected.emit(data.get("error", "unknown_error"))
-
-func _on_cultivate_tick_response(data: Dictionary) -> void:
-	if data.get("ok", false):
-		cultivate_tick_confirmed.emit(data)
-	else:
-		cultivate_tick_rejected.emit(data.get("error", "unknown_error"))
-
 func _on_consume_pill_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		pill_consume_confirmed.emit(data)
@@ -284,7 +272,6 @@ func _reject(tag: String, reason: String) -> void:
 		"spawn": spawn_rejected.emit(reason)
 		"merge": merge_rejected.emit(reason)
 		"move": move_rejected.emit(reason)
-		"cultivate_tick": cultivate_tick_rejected.emit(reason)
 		"consume_pill": pill_consume_rejected.emit(reason)
 		"breakthrough": breakthrough_rejected.emit(reason)
 		"sell": sell_rejected.emit(reason)
@@ -432,8 +419,6 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				spawn_rejected.emit(error_msg)
 			"move":
 				move_rejected.emit(error_msg)
-			"cultivate_tick":
-				cultivate_tick_rejected.emit(error_msg)
 			"consume_pill":
 				pill_consume_rejected.emit(error_msg)
 			"breakthrough":
@@ -470,8 +455,6 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_spawn_response(data)
 		"move":
 			_on_move_response(data)
-		"cultivate_tick":
-			_on_cultivate_tick_response(data)
 		"consume_pill":
 			_on_consume_pill_response(data)
 		"breakthrough":
@@ -507,8 +490,6 @@ func _handle_network_error(tag: String) -> void:
 			spawn_rejected.emit("network_error")
 		"move":
 			move_rejected.emit("network_error")
-		"cultivate_tick":
-			cultivate_tick_rejected.emit("network_error")
 		"consume_pill":
 			pill_consume_rejected.emit("network_error")
 		"breakthrough":
@@ -538,8 +519,6 @@ func _handle_parse_error(tag: String) -> void:
 			spawn_rejected.emit("invalid_response")
 		"move":
 			move_rejected.emit("invalid_response")
-		"cultivate_tick":
-			cultivate_tick_rejected.emit("invalid_response")
 		"consume_pill":
 			pill_consume_rejected.emit("invalid_response")
 		"breakthrough":

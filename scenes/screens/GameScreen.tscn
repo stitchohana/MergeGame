@@ -51,6 +51,14 @@ offset_top = 799.0
 offset_right = 385.0
 offset_bottom = 799.0
 
+[node name="HomeButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 5.0
+offset_right = 90.0
+offset_bottom = 50.0
+text = "返回"
+
 [node name="BattleButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 640.0

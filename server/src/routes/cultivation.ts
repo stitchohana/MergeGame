@@ -36,12 +36,6 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
       await storage.saveState(userId, state);
       console.log(`[cult] new player ${userId}, init with ${state.grid.length} items`);
     } else {
-      // Offline cultivation tick
-      const oldVer = state.version;
-      engine.tickCultivation(state);
-      if (state.version !== oldVer) {
-        await storage.saveState(userId, state);
-      }
       if (engine.tickCraftingState(state)) {
         await storage.saveState(userId, state);
       }
@@ -49,13 +43,6 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
     return state;
   }
 
-  // POST /api/cultivation/tick
-  router.post("/tick", op(async (req, res, userId) => {
-    const state = await getOrCreateState(userId);
-    engine.tickCultivation(state);
-    await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });
-  }));
 
   // POST /api/cultivation/consume
   router.post("/consume", op(async (req, res, userId) => {

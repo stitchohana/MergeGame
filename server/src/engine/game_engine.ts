@@ -1012,93 +1012,6 @@ export class GameEngine {
     return { ok: true, newCultivation };
   }
 
-  // --- Cultivation tick & pill ---
-
-  tickCultivation(state: GameState, trackGain = false): void {
-    const c = state.cultivation;
-    const now = Date.now();
-    const elapsed = Math.floor((now - c.last_tick_time) / 1000);
-    if (elapsed <= 0 || !this.cultivation) return;
-
-    let totalGained = 0;
-
-    // Tick buffs
-    this._tickBuffs(c, elapsed);
-
-    // Passive EXP gain
-    if (!this.isMaxCultivation(c.current_realm_id, c.current_level)) {
-      if (this.needsBreakthroughPill(c.current_realm_id, c.current_level)) {
-        const realm = this.cultivation.realms[c.current_realm_id];
-        const pillId = realm?.breakthrough_pill ?? 0;
-        const pillData = this.getItemData(pillId);
-        const pillName = pillData?.name ?? `#${pillId}`;
-              } else {
-        const baseExp = this.cultivation.passive_exp_per_second;
-        const mult = this._getExpMultiplier(c);
-        const gained = Math.ceil(baseExp * elapsed * mult);
-        totalGained = gained;
-        if (gained > 0) {
-          this._addExp(c, gained);
-          const realmName = this.cultivation.realms[c.current_realm_id]?.name ?? "?";
-                  }
-      }
-    } else {
-          }
-
-    // Store gained EXP for the response
-    if (trackGain) {
-      (c as any)._offline_exp_gained = totalGained;
-    }
-
-    // Tick stamina regen
-    this.tickStamina(state);
-
-    // Tick launcher charge recharge
-    this.tickLauncherCharges(state);
-
-    // Tick crafting tables (auto-transition CRAFTING -> READY)
-    this.tickCraftingState(state);
-
-    c.last_tick_time = now;
-    state.version += 1;
-  }
-
-  tickLauncherCharges(state: GameState): void {
-    const now = Date.now();
-    for (const item of state.grid) {
-      if (item.charges === undefined) continue;
-      const maxC = this.getMaxCharges(item.id);
-      if (item.charges >= maxC) continue;
-      const rechargeTime = this.getRechargeTime(item.id) * 1000;
-      const lastTime = item.last_charge_time ?? 0;
-      if (now - lastTime >= rechargeTime) {
-        item.charges = maxC;
-        const launcherName = this.getItemData(item.id)?.name ?? ("#" + item.id);
-        console.log(`[engine] launcher recharge: ${launcherName} at (${item.col},${item.row}) -> ${maxC} charges`);
-      }
-    }
-  }
-
-  tickStamina(state: GameState): void {
-    const now = Date.now();
-    const elapsed = Math.floor((now - state.last_stamina_tick) / 1000);
-    if (elapsed <= 0) return;
-    if (state.stamina >= state.max_stamina) {
-      state.last_stamina_tick = now;
-      return;
-    }
-    // Interval-based regen: every regenInterval seconds, gain regenAmount
-    const interval = this.staminaConfig.regenInterval;
-    const count = Math.floor(elapsed / interval);
-    if (count > 0) {
-      const gain = Math.min(count * this.staminaConfig.regenAmount, state.max_stamina - state.stamina);
-      if (gain > 0) {
-        state.stamina += gain;
-        console.log(`[engine] stamina regen: +${gain} (${elapsed}s / ${interval}s intervals) | ${state.stamina}/${state.max_stamina}`);
-      }
-      state.last_stamina_tick += count * interval * 1000;
-    }
-  }
 
   tickCraftingState(state: GameState): boolean {
     const now = Date.now();
@@ -1124,8 +1037,6 @@ export class GameEngine {
     state: GameState,
     pillId: number
   ): { ok: true; cultivation: CultivationData } | { ok: false; reason: string } {
-    // Tick first to apply elapsed time
-    this.tickCultivation(state);
 
     const pillData = this.getItemData(pillId);
     if (!pillData) return { ok: false, reason: "invalid_pill" };
@@ -1161,24 +1072,6 @@ export class GameEngine {
 
     state.version += 1;
     return { ok: true, cultivation: c };
-  }
-
-  private _tickBuffs(c: CultivationData, seconds: number): void {
-    let changed = false;
-    let i = 0;
-    while (i < c.buffs.length) {
-      const b = c.buffs[i] as any;
-      b.remaining -= seconds;
-      if (b.remaining <= 0) {
-        c.buffs.splice(i, 1);
-        changed = true;
-      } else {
-        i++;
-      }
-    }
-    if (changed) {
-      console.log(`[engine] buff expired, ${c.buffs.length} remaining`);
-    }
   }
 
   private _getExpMultiplier(c: CultivationData): number {

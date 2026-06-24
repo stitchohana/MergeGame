@@ -3,6 +3,7 @@ extends Node
 # CultivationService: Client-side display layer for cultivation.
 # All logic (EXP, buffs, breakthrough) runs on the server.
 # Client submits operations and displays results from server responses.
+# Auto cultivation (passive EXP tick) has been removed — EXP only gained via pill use.
 
 signal exp_changed(current_exp: int, exp_to_next: int)
 signal realm_changed(realm_id: int, realm_name: String, level: int)
@@ -20,62 +21,16 @@ var current_qi: int = 100
 var max_qi: int = 100
 
 var _active_buffs: Array = []
-var _tick_timer: Timer = null
-var _paused: bool = false
 
 func _ready() -> void:
 	max_qi = ConfigDatabase.get_initial_qi()
 	current_qi = max_qi
-	GameState.phase_changed.connect(_on_game_phase_changed)
-	_setup_timer()
-	# Connect server signals
-	CloudService.cultivate_tick_confirmed.connect(_on_tick_confirmed)
 	CloudService.pill_consume_confirmed.connect(_on_consume_confirmed)
 	CloudService.breakthrough_confirmed.connect(_on_breakthrough_confirmed)
-	CloudService.cultivate_tick_rejected.connect(_on_tick_rejected)
 	print("[Cultivation] Client layer ready, server-authoritative")
-
-func _setup_timer() -> void:
-	_tick_timer = Timer.new()
-	_tick_timer.name = "CultivationTickTimer"
-	_tick_timer.wait_time = _load_tick_interval()
-	_tick_timer.one_shot = false
-	_tick_timer.timeout.connect(_on_tick_timer)
-	add_child(_tick_timer)
-	_tick_timer.start()
-	print("[Cultivation] Tick interval: ", _tick_timer.wait_time, "s")
-
-func _load_tick_interval() -> float:
-	var file := FileAccess.open("res://config/server.json", FileAccess.READ)
-	if file:
-		var text := file.get_as_text()
-		file.close()
-		var json := JSON.new()
-		if json.parse(text) == OK:
-			var data: Dictionary = json.data
-			return float(data.get("cultivation_tick_interval", 10))
-	return 10.0
-
-func _on_tick_timer() -> void:
-	if _paused:
-		print("[Cultivation] Tick skipped: paused")
-		return
-	if not CloudService.online:
-		print("[Cultivation] Tick skipped: offline")
-		return
-		CloudService.submit_cultivate_tick(GameState.version)
-
-func _on_game_phase_changed(old: int, new: int) -> void:
-	_paused = (new == GameState.GamePhase.PAUSED or new == GameState.GamePhase.GAME_OVER)
 
 # --- Server response handlers ---
 
-func _on_tick_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
-	var c: Dictionary = result.get("cultivation", {})
-	var old_exp := current_exp
-	_apply_cultivation_state(c)
-	
 func _on_consume_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 	var c: Dictionary = result.get("cultivation", {})
@@ -87,14 +42,6 @@ func _on_breakthrough_confirmed(result: Dictionary) -> void:
 	var c: Dictionary = result.get("cultivation", {})
 	_apply_cultivation_state(c)
 	print("[Cultivation] Breakthrough confirmed: realm=", current_realm_id)
-
-func _on_tick_rejected(reason: String) -> void:
-	print("[Cultivation] Tick rejected: ", reason)
-	if reason == "invalid_token":
-		CloudService.clear_token()
-		CloudService.kicked.emit()
-	elif reason != "version_mismatch":
-		EventBus.show_toast.emit("修炼同步失败：" + reason)
 
 # --- Public operations (submit to server) ---
 
@@ -131,7 +78,6 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 	max_qi = c.get("max_qi", 100)
 	_active_buffs = c.get("buffs", [])
 
-	# Emit changes
 	if current_realm_id != old_realm or current_level != old_level:
 		var realm_name: String = get_realm_name()
 		realm_changed.emit(current_realm_id, realm_name, current_level)
@@ -145,20 +91,16 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 	if not _buffs_equal(_active_buffs, old_buffs):
 		buff_changed.emit(_active_buffs.duplicate())
 
-	# Level up / breakthrough detection
 	if current_realm_id > old_realm:
 		breakthrough.emit(current_realm_id, get_realm_name())
 	elif current_level > old_level and current_realm_id == old_realm:
 		level_up.emit(current_realm_id, get_realm_name(), current_level)
 
-	# Always emit breakthrough pill needed status (UI needs this on every update)
 	if _needs_breakthrough_pill():
 		var pill_id := get_required_breakthrough_pill()
 		if pill_id > 0:
-			print("[Cultivation] Breakthrough pill needed: id=", pill_id)
 			breakthrough_pill_needed.emit(pill_id)
 	else:
-		# Reset label in case breakthrough was completed
 		exp_changed.emit(current_exp, get_exp_to_next_level())
 
 func _buffs_equal(a: Array, b: Array) -> bool:
@@ -267,4 +209,3 @@ func serialize() -> Dictionary:
 
 func deserialize(data: Dictionary) -> void:
 	_apply_cultivation_state(data)
-	_paused = false

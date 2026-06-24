@@ -43,6 +43,8 @@ func _on_screen_change_requested(screen_name: String) -> void:
 		"login":
 			var login := preload("res://scenes/screens/LoginScreen.tscn").instantiate()
 			UIManager.push_screen(login, UIManager.Transition.FADE)
+		"home":
+			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn", UIManager.Transition.FADE)
 		"game":
 			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/GameScreen.tscn", UIManager.Transition.FADE)
 		"battle":

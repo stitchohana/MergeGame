@@ -39,7 +39,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       console.log(`[game] new player ${userId}, init with ${state.grid.length} items | v0`);
     } else {
       const oldVer = state.version;
-      engine.tickCultivation(state, true);
+      // tickCultivation removed — no auto EXP gain
       if (state.version !== oldVer) {
         await storage.saveState(userId, state);
       }
