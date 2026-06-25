@@ -21,6 +21,9 @@ signal breakthrough_confirmed(result: Dictionary)
 signal breakthrough_rejected(reason: String)
 signal board_switch_confirmed(result: Dictionary)
 signal board_switch_rejected(reason: String)
+signal meridian_refresh_confirmed(result: Dictionary)
+signal meridian_complete_confirmed(result: Dictionary)
+signal meridian_complete_rejected(reason: String)
 signal craft_add_rejected(reason: String)
 signal craft_start_confirmed(result: Dictionary)
 signal craft_start_rejected(reason: String)
@@ -123,10 +126,9 @@ func _on_merge_response(data: Dictionary) -> void:
 
 # --- Spawn ---
 
-func submit_spawn(launcher_col: int, launcher_row: int, rolled_id: int, version: int) -> void:
+func submit_spawn(launcher_col: int, launcher_row: int, version: int) -> void:
 	var body := JSON.stringify({
 		"launcher_pos": [launcher_col, launcher_row],
-		"rolled_id": rolled_id,
 		"version": version,
 	})
 	_send_authed_request("spawn", "/api/game/spawn", HTTPClient.METHOD_POST, body)
@@ -155,7 +157,6 @@ func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version
 
 # --- Cultivation ---
 
-
 func submit_consume_pill(pill_id: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "version": version})
 	_send_cultivation("consume_pill", "/api/cultivation/consume", HTTPClient.METHOD_POST, body)
@@ -173,6 +174,24 @@ func _on_board_switch_response(data: Dictionary) -> void:
 		board_switch_confirmed.emit(data)
 	else:
 		board_switch_rejected.emit(data.get("error", "unknown_error"))
+
+func submit_meridian_refresh() -> void:
+	_send_authed_request("meridian_refresh", "/api/game/meridian/refresh", HTTPClient.METHOD_POST, "{}")
+
+func _on_meridian_refresh_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		meridian_refresh_confirmed.emit(data)
+
+func submit_meridian_complete(index: int, item_ids: Array) -> void:
+	var body := JSON.stringify({"index": index, "item_ids": item_ids})
+	_send_authed_request("meridian_complete", "/api/game/meridian/complete", HTTPClient.METHOD_POST, body)
+
+func _on_meridian_complete_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		meridian_complete_confirmed.emit(data)
+	else:
+		meridian_complete_rejected.emit(data.get("error", "unknown_error"))
+
 func _on_consume_pill_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		pill_consume_confirmed.emit(data)
@@ -425,6 +444,8 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				breakthrough_rejected.emit(error_msg)
 			"board_switch":
 				board_switch_rejected.emit(error_msg)
+			"meridian_complete":
+				meridian_complete_rejected.emit(error_msg)
 			"craft_add":
 				craft_add_rejected.emit(error_msg)
 			"craft_start":
@@ -461,6 +482,10 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_breakthrough_response(data)
 		"board_switch":
 			_on_board_switch_response(data)
+		"meridian_complete":
+			_on_meridian_complete_response(data)
+		"meridian_refresh":
+			_on_meridian_refresh_response(data)
 		"craft_add":
 			_on_craft_add_response(data)
 		"craft_start":
@@ -496,6 +521,8 @@ func _handle_network_error(tag: String) -> void:
 			breakthrough_rejected.emit("network_error")
 		"board_switch":
 			board_switch_rejected.emit("network_error")
+		"meridian_complete":
+			meridian_complete_rejected.emit("network_error")
 		"sell":
 			sell_rejected.emit("network_error")
 		"craft_add":
@@ -525,6 +552,8 @@ func _handle_parse_error(tag: String) -> void:
 			breakthrough_rejected.emit("invalid_response")
 		"board_switch":
 			board_switch_rejected.emit("invalid_response")
+		"meridian_complete":
+			meridian_complete_rejected.emit("invalid_response")
 		"sell":
 			sell_rejected.emit("invalid_response")
 		"craft_add":

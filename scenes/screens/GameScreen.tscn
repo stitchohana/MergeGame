@@ -1,11 +1,12 @@
 [gd_scene format=3 uid="uid://dh7pcck0eqawn"]
 
-[ext_resource type="Script" uid="uid://bhdqr1v0puvbh" path="res://scenes/screens/GameScreen.gd" id="1_gs"]
-[ext_resource type="PackedScene" path="res://scenes/grid/GridView.tscn" id="2_grid"]
+[ext_resource type="Script" uid="uid://dmv0t71np61ym" path="res://scenes/screens/GameScreen.gd" id="1_gs"]
+[ext_resource type="PackedScene" uid="uid://deg7lbni32jui" path="res://scenes/grid/GridView.tscn" id="2_grid"]
 [ext_resource type="PackedScene" path="res://scenes/ui/TopBar.tscn" id="3_top"]
 [ext_resource type="PackedScene" uid="uid://bi0a8egfjafco" path="res://scenes/ui/Overlay.tscn" id="5_overlay"]
 [ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/ItemDetailPanel.tscn" id="6_detail"]
 [ext_resource type="PackedScene" uid="uid://dx74q48vv12nw" path="res://scenes/ui/CultivationPanel.tscn" id="7_cul"]
+[ext_resource type="PackedScene" uid="uid://bf6fe2778glgu" path="res://scenes/ui/RequirementList.tscn" id="8_req"]
 
 [node name="GameScreen" type="Control" unique_id=1938900574]
 layout_mode = 3
@@ -27,8 +28,15 @@ layout_mode = 0
 offset_top = 101.0
 offset_bottom = 404.0
 
+[node name="RequirementList" parent="." unique_id=1650475559 instance=ExtResource("8_req")]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 264.0
+offset_right = 737.0
+offset_bottom = 404.0
+
 [node name="GridView" parent="." unique_id=644218555 instance=ExtResource("2_grid")]
-anchors_preset = 0
+layout_mode = 0
 offset_left = 40.0
 offset_top = 404.0
 offset_right = 740.0
@@ -51,7 +59,7 @@ offset_top = 799.0
 offset_right = 385.0
 offset_bottom = 799.0
 
-[node name="HomeButton" type="Button" parent="."]
+[node name="HomeButton" type="Button" parent="." unique_id=745559034]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 5.0
@@ -59,7 +67,7 @@ offset_right = 90.0
 offset_bottom = 50.0
 text = "返回"
 
-[node name="BattleButton" type="Button" parent="."]
+[node name="BattleButton" type="Button" parent="." unique_id=769599351]
 layout_mode = 0
 offset_left = 640.0
 offset_top = 1620.0

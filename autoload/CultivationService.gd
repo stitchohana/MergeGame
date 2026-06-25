@@ -3,7 +3,6 @@ extends Node
 # CultivationService: Client-side display layer for cultivation.
 # All logic (EXP, buffs, breakthrough) runs on the server.
 # Client submits operations and displays results from server responses.
-# Auto cultivation (passive EXP tick) has been removed — EXP only gained via pill use.
 
 signal exp_changed(current_exp: int, exp_to_next: int)
 signal realm_changed(realm_id: int, realm_name: String, level: int)
@@ -17,17 +16,14 @@ var current_realm_id: int = 0
 var current_level: int = 1
 var current_exp: int = 0
 var total_exp: int = 0
-var current_qi: int = 100
+var current_qi: int = 0
 var max_qi: int = 100
 
 var _active_buffs: Array = []
 
 func _ready() -> void:
-	max_qi = ConfigDatabase.get_initial_qi()
-	current_qi = max_qi
 	CloudService.pill_consume_confirmed.connect(_on_consume_confirmed)
 	CloudService.breakthrough_confirmed.connect(_on_breakthrough_confirmed)
-	print("[Cultivation] Client layer ready, server-authoritative")
 
 # --- Server response handlers ---
 
@@ -35,13 +31,11 @@ func _on_consume_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 	var c: Dictionary = result.get("cultivation", {})
 	_apply_cultivation_state(c)
-	print("[Cultivation] Pill consumed: exp=", current_exp, " buffs=", _active_buffs.size())
 
 func _on_breakthrough_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 	var c: Dictionary = result.get("cultivation", {})
 	_apply_cultivation_state(c)
-	print("[Cultivation] Breakthrough confirmed: realm=", current_realm_id)
 
 # --- Public operations (submit to server) ---
 
@@ -51,8 +45,6 @@ func apply_buff(pill_data: Dictionary) -> void:
 		return
 	if CloudService.online:
 		CloudService.submit_consume_pill(pill_id, GameState.version)
-	else:
-		print("[Cultivation] Cannot consume pill: offline")
 
 func try_breakthrough(pill_id: int) -> bool:
 	if CloudService.online:
@@ -74,7 +66,7 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 	current_level = c.get("current_level", 1)
 	current_exp = c.get("current_exp", 0)
 	total_exp = c.get("total_exp", 0)
-	current_qi = c.get("current_qi", 100)
+	current_qi = c.get("current_qi", 0)
 	max_qi = c.get("max_qi", 100)
 	_active_buffs = c.get("buffs", [])
 
@@ -121,12 +113,11 @@ func get_exp_to_next_level() -> int:
 	var realm := ConfigDatabase.get_realm_config(current_realm_id)
 	if realm.is_empty():
 		return 999999
-	var base: int = realm.get("base_exp", 100)
-	var growth: float = realm.get("growth", 1.15)
-	if growth <= 1.0:
-		return base
-	var lv: int = mini(current_level + 1, realm.get("levels", 9))
-	return int(base * pow(growth, lv - 1))
+	var exp_arr: Array = realm.get("exp_per_level", [])
+	var idx := current_level - 1
+	if idx < 0 or idx >= exp_arr.size():
+		return 999999
+	return int(exp_arr[idx])
 
 func get_exp_multiplier() -> float:
 	var mult: float = 1.0

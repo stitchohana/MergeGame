@@ -5,7 +5,7 @@ const defaultCultivation = {
   current_level: 1,
   current_exp: 0,
   total_exp: 0,
-  current_qi: 100,
+  current_qi: 0,
   max_qi: 100,
   buffs: [],
   last_tick_time: Date.now(),

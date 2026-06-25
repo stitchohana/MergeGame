@@ -30,8 +30,8 @@
 	{"id": 501, "level": 1, "name": "小药田", "icon": "", "group_id": 3, "max_charges": 30, "recharge_time": 60, "merge_score": 0, "describe": "产出凡草，小概率出灵草或自身", "spawns": [{"id": 21, "weight": 70}, {"id": 22, "weight": 25}, {"id": 501, "weight": 5}]},
 	{"id": 502, "level": 2, "name": "中药田", "icon": "", "group_id": 3, "max_charges": 40, "recharge_time": 50, "merge_score": 30, "describe": "产出灵草，概率出仙草或自身", "spawns": [{"id": 22, "weight": 60}, {"id": 23, "weight": 30}, {"id": 502, "weight": 10}]},
 	{"id": 503, "level": 3, "name": "大药田", "icon": "", "group_id": 3, "max_charges": 50, "recharge_time": 40, "merge_score": 90, "describe": "产出仙草，概率出圣草或自身", "spawns": [{"id": 23, "weight": 50}, {"id": 24, "weight": 35}, {"id": 503, "weight": 15}]},
-	{"id": 504, "level": 1, "name": "矿山", "icon": "", "group_id": 5, "max_charges": 3, "recharge_time": 60, "merge_score": 0, "describe": "产出铜矿，概率出铁矿或自身", "spawns": [{"id": 61, "weight": 70}, {"id": 62, "weight": 25}, {"id": 504, "weight": 5}]},
-	{"id": 505, "level": 1, "name": "飞剑", "icon": "", "group_id": 6, "max_charges": 10, "recharge_time": 30, "merge_score": 0, "describe": "凝聚剑气", "spawns": [{"id": 81, "weight": 80}, {"id": 505, "weight": 20}]}
+	{"id": 504, "level": 1, "name": "矿山", "icon": "", "group_id": 5, "max_charges": 30, "recharge_time": 60, "merge_score": 0, "describe": "产出铜矿，概率出铁矿或自身", "spawns": [{"id": 61, "weight": 70}, {"id": 62, "weight": 25}, {"id": 504, "weight": 5}]},
+	{"id": 505, "level": 1, "name": "飞剑", "icon": "", "group_id": 6, "max_charges": 100, "recharge_time": 30, "merge_score": 0, "describe": "凝聚剑气", "spawns": [{"id": 81, "weight": 80}, {"id": 505, "weight": 20}]}
   ],
   "crafting": [
 	{"id": 601, "level": 1, "name": "基础炼丹炉", "group_id": 3, "icon": "", "merge_score": 0, "describe": "可以炼制丹药", "recipes": [3,4,5,6,7,8,9,10,11,12,13,14]},

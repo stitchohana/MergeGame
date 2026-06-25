@@ -4,31 +4,29 @@ class_name GameScreen extends BaseScreen
 @onready var detail_panel: ItemDetailPanel = $ItemDetailPanel
 @onready var grid_view: GridView = $GridView
 @onready var cultivation_panel: CultivationPanel = $CultivationPanel
+@onready var requirement_list: RequirementList = $RequirementList
 @onready var battle_btn: Button = $BattleButton
 @onready var home_btn: Button = $HomeButton
+
+var _meridian_complete_exp: int = 50
+var _pending_item_ids: Array = []
+var _display_index_map: Array = []
 
 func _ready() -> void:
 	randomize()
 
-	# Game initialization
 	if not GridManager.grid_updated.is_connected(GameState.check_game_over):
 		GridManager.grid_updated.connect(GameState.check_game_over)
-	# Only load initial setup for a fresh game (server state already restored if logged in)
-	if GridManager.count_items() == 0:
-		_load_initial_setup()
+	GridManager.grid_updated.connect(_on_grid_changed)
 	GameState.set_phase(GameState.GamePhase.IDLE)
 
-	# EventBus action handlers
 	EventBus.resume_requested.connect(_on_resume)
 	EventBus.restart_requested.connect(_on_restart)
 	EventBus.pause_requested.connect(_on_pause_requested)
 
-	# Item detail panel
-	# Material remove from crafting table
 	detail_panel.material_clicked.connect(_on_material_clicked)
 	grid_view.item_clicked.connect(_on_item_clicked)
 
-	# Cultivation panel
 	cultivation_panel.cultivation_clicked.connect(_on_cultivation_clicked)
 	grid_view.item_use_requested.connect(_on_item_use_requested)
 	CloudService.craft_remove_confirmed.connect(_on_craft_remove_confirmed)
@@ -36,6 +34,8 @@ func _ready() -> void:
 
 	battle_btn.pressed.connect(_on_battle_pressed)
 	home_btn.pressed.connect(_on_home_pressed)
+	requirement_list.complete_clicked.connect(_on_meridian_complete)
+	_refresh_meridian()
 
 	print("[GameScreen] Game initialized!")
 
@@ -46,8 +46,6 @@ func on_enter() -> void:
 			CloudService.board_switch_confirmed.connect(_on_main_board_switch_confirmed, CONNECT_ONE_SHOT)
 			CloudService.board_switch_rejected.connect(_on_main_board_switch_rejected, CONNECT_ONE_SHOT)
 			CloudService.submit_board_switch("main")
-		else:
-			_sync_main_grid_local()
 
 func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
@@ -59,16 +57,10 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
-	print("[GameScreen] Board switched to main: ", server_grid.size(), " items")
+	print("[GameScreen] Board synced from server: ", server_grid.size(), " items")
 
-func _on_main_board_switch_rejected(reason: String) -> void:
-	print("[GameScreen] Board switch rejected: ", reason)
-	_sync_main_grid_local()
-
-func _sync_main_grid_local() -> void:
-	if GridManager.count_items() == 0:
-		GameState.current_board_type = Constants.BoardType.MAIN
-		_load_initial_setup()
+func _on_main_board_switch_rejected(_reason: String) -> void:
+	pass
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -78,11 +70,7 @@ func _input(event: InputEvent) -> void:
 			_on_resume()
 
 func _load_initial_setup() -> void:
-	var setup = ConfigDatabase.get_initial_setup(GameState.current_board_type)
-	for entry in setup:
-		if not entry.has("id") or not entry.has("col") or not entry.has("row"):
-			push_error("[GameScreen] Invalid initial_setup entry: ", entry)
-			continue
+	for entry in ConfigDatabase.get_initial_setup(GameState.current_board_type):
 		var item_data = ConfigDatabase.get_item_data(entry.id)
 		if not item_data.is_empty():
 			GridManager.add_item(item_data.duplicate(true), Vector2i(entry.col, entry.row))
@@ -96,32 +84,26 @@ func _on_material_clicked(item_id: int) -> void:
 	if spawn_pos == Vector2i(-1, -1):
 		EventBus.show_toast.emit("棋盘已满，无法取出材料")
 		return
-
-	# Optimistic: remove from table + add to grid locally
 	var removed := CraftingService.remove_ingredient(table_item, item_id)
 	if removed.is_empty():
 		return
-	# Enrich with full item data from config (server stores only {id} in craft_stored)
 	var full_data := ConfigDatabase.get_item_data(removed.get("id", 0))
 	if not full_data.is_empty():
 		GridManager.add_item(full_data.duplicate(true), spawn_pos)
 	else:
 		GridManager.add_item(removed.duplicate(true), spawn_pos)
 	detail_panel._refresh_materials()
-
-	# Sync to server
 	if CloudService.online:
 		CloudService.submit_craft_remove(table_pos.x, table_pos.y, item_id, spawn_pos.x, spawn_pos.y, GameState.version)
+
 func _on_cultivation_clicked() -> void:
 	var detail := preload("res://scenes/ui/CultivationDetail.tscn").instantiate()
 	UIManager.show_popup(detail)
 
 func _on_craft_remove_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
-	print("[GameScreen] Craft remove confirmed v", GameState.version)
 
 func _on_craft_remove_rejected(reason: String) -> void:
-	print("[GameScreen] Craft remove rejected: ", reason)
 	EventBus.show_toast.emit("取出材料失败：" + reason)
 
 func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
@@ -131,15 +113,10 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	var effect: Dictionary = ConfigDatabase.get_effect(effect_id)
 	if effect.is_empty():
 		return
-	var effect_type: String = effect.get("type", "")
-	match effect_type:
-		"breakthrough":
-			var pill_id: int = item_data.get("id", 0)
-			CultivationService.try_breakthrough(pill_id)
-		"buff":
-			CultivationService.apply_buff(item_data)
-		_:
-			EventBus.show_toast.emit("此物品无法在此使用")
+	match effect.get("type", ""):
+		"breakthrough": CultivationService.try_breakthrough(item_data.get("id", 0))
+		"buff": CultivationService.apply_buff(item_data)
+		_: EventBus.show_toast.emit("此物品无法在此使用")
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)
@@ -163,3 +140,118 @@ func _on_resume() -> void:
 func _on_pause_requested() -> void:
 	if GameState.phase == GameState.GamePhase.IDLE:
 		overlay.show_pause_menu()
+
+func _on_grid_changed() -> void:
+	_refresh_requirement_buttons()
+
+func _count_grid_item(item_id: int) -> int:
+	var count := 0
+	for entry in GridManager.get_all_items():
+		if entry.data.get("id", 0) == item_id:
+			count += 1
+	return count
+
+func _check_can_complete(req: Dictionary) -> bool:
+	var items: Array = req.get("items", [])
+	for it in items:
+		var needed := _count_grid_item(int(it.get("item_id", 0)))
+		if needed < 1:
+			return false
+	return true
+
+func _refresh_requirement_buttons() -> void:
+	for i in range(_display_index_map.size()):
+		var data_index: int = _display_index_map[i]
+		if data_index < 0 or data_index >= GameState.meridian_acupoints.size():
+			continue
+		var req: Dictionary = GameState.meridian_acupoints[data_index]
+		if not req.get("completed", false):
+			requirement_list.set_entry_available(i, _check_can_complete(req))
+
+func _refresh_meridian() -> void:
+	if not GameState.meridian_acupoints.is_empty():
+		_display_meridian()
+		return
+	if CloudService.online:
+		CloudService.meridian_refresh_confirmed.connect(_on_meridian_refresh_confirmed, CONNECT_ONE_SHOT)
+		CloudService.submit_meridian_refresh()
+
+func _on_meridian_refresh_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	GameState.meridian_acupoints = result.get("acupoints", [])
+	GameState.meridian_threshold_idx = result.get("threshold_idx", 0)
+	_meridian_complete_exp = result.get("complete_exp", 50)
+	_display_meridian()
+
+func _display_meridian() -> void:
+	var completed: int = 0
+	_display_index_map.clear()
+	for req in GameState.meridian_acupoints:
+		if req.get("completed", false):
+			completed += 1
+	requirement_list.set_title("大周天 %d/%d (奖励 %d修为)" % [completed, GameState.meridian_acupoints.size(), _meridian_complete_exp])
+	var display_reqs: Array = []
+	for i in range(GameState.meridian_acupoints.size()):
+		var req: Dictionary = GameState.meridian_acupoints[i]
+		if not req.get("completed", false):
+			display_reqs.append(req.duplicate())
+			_display_index_map.append(i)
+	requirement_list.set_requirements(display_reqs)
+	call_deferred("_refresh_requirement_buttons")
+
+func _on_meridian_complete(display_index: int) -> void:
+	if display_index < 0 or display_index >= _display_index_map.size():
+		return
+	var data_index: int = _display_index_map[display_index]
+	var req: Dictionary = GameState.meridian_acupoints[data_index]
+	if req.get("completed", false):
+		return
+	_pending_item_ids = req.get("item_ids", [])
+	if CloudService.online:
+		if CloudService.meridian_complete_confirmed.is_connected(_on_meridian_confirmed):
+			CloudService.meridian_complete_confirmed.disconnect(_on_meridian_confirmed)
+		if CloudService.meridian_complete_rejected.is_connected(_on_meridian_rejected):
+			CloudService.meridian_complete_rejected.disconnect(_on_meridian_rejected)
+		CloudService.meridian_complete_confirmed.connect(_on_meridian_confirmed, CONNECT_ONE_SHOT)
+		CloudService.meridian_complete_rejected.connect(_on_meridian_rejected, CONNECT_ONE_SHOT)
+		CloudService.submit_meridian_complete(data_index, _pending_item_ids)
+
+func _on_meridian_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+
+	for id in _pending_item_ids:
+		for entry in GridManager.get_all_items():
+			if entry.data.get("id", 0) == int(id):
+				GridManager.remove_item(entry.pos)
+				break
+
+	var cult: Dictionary = result.get("cultivation", {})
+	if not cult.is_empty():
+		CultivationService.deserialize(cult)
+
+	var qi_gained: int = result.get("qi_gained", 0)
+	if qi_gained > 0:
+		EventBus.show_toast.emit("灵力 +%d" % qi_gained)
+		if result.get("qi_full", false):
+			EventBus.show_toast.emit("灵力已满，尽快使用！")
+
+	for i in range(result.get("meridian_acupoints", []).size()):
+		if i < GameState.meridian_acupoints.size():
+			GameState.meridian_acupoints[i] = result.meridian_acupoints[i]
+		if result.meridian_acupoints[i].get("completed", false):
+			requirement_list.remove_entry(i)
+
+	if result.get("circulation_completed", false):
+		GameState.meridian_circulations += 1
+		var exp: int = result.get("exp_gained", 0)
+		EventBus.show_toast.emit("大周天完成！获得%d修为 (%d次)" % [exp, GameState.meridian_circulations])
+		GameState.meridian_acupoints.clear()
+		_refresh_meridian()
+	_display_meridian()
+
+func _on_meridian_rejected(reason: String) -> void:
+	_pending_item_ids.clear()
+	match reason:
+		"insufficient_items": EventBus.show_toast.emit("物品不足")
+		"already_completed": EventBus.show_toast.emit("该穴位已完成")
+		_: EventBus.show_toast.emit("修炼失败：" + reason)

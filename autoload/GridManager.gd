@@ -182,6 +182,13 @@ func find_nearest_empty(from_pos: Vector2i) -> Vector2i:
 
 	return Vector2i(-1, -1)  # No empty cell found
 
+func find_empty_by_row() -> Vector2i:
+	for row in range(GRID_ROWS):
+		for col in range(GRID_COLS):
+			if _grid[row][col] == null:
+				return Vector2i(col, row)
+	return Vector2i(-1, -1)
+
 func count_items() -> int:
 	var count := 0
 	for row in range(GRID_ROWS):

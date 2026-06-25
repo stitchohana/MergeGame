@@ -80,7 +80,6 @@ func _create_ghost() -> void:
 	_drag_ghost.custom_minimum_size = Vector2(CELL_SIZE, CELL_SIZE)
 	_drag_ghost.size = Vector2(CELL_SIZE, CELL_SIZE)
 
-	# Ghost label (item name)
 	var gl := Label.new()
 	gl.name = "GhostLabel"
 	gl.anchor_left = 0.0
@@ -132,12 +131,11 @@ func _input(event: InputEvent) -> void:
 		var cell_pos := _local_to_grid(local_pos)
 
 		if mb.pressed:
-			if _is_dragging or not GridManager.is_valid_pos(cell_pos):
+			if _is_dragging or not GridManager.is_valid_pos(cell_pos) or local_pos.x < 0 or local_pos.y < 0 or local_pos.x > size.x or local_pos.y > size.y:
 				return
 			var item = GridManager.get_item(cell_pos)
 			if item == null:
 				return
-			# Record press on any item
 			_press_start_pos = cell_pos
 			_press_screen_pos = local_pos
 			_pressed_item = item
@@ -145,11 +143,9 @@ func _input(event: InputEvent) -> void:
 		elif _is_dragging:
 			_finish_drag(cell_pos)
 		elif _pressed_has_moved == false and not _pressed_item.is_empty():
-			# Click without drag
 			_select_item(_press_start_pos)
 			item_clicked.emit(_pressed_item, _press_start_pos)
 
-			# Check crafting table or storage click
 			if _pressed_item.get("id") == 603:
 				item_clicked.emit(_pressed_item, _press_start_pos)
 				_handle_storage_click(_press_start_pos)
@@ -163,7 +159,6 @@ func _input(event: InputEvent) -> void:
 					_handle_crafting_retrieve(_pressed_item, _press_start_pos)
 					_pressed_item = {}
 					return
-				# CRAFTING or HAS_ITEMS: show detail panel
 				item_clicked.emit(_pressed_item, _press_start_pos)
 				if cstate == CraftingService.TableState.HAS_ITEMS:
 					var recipe: Dictionary = _pressed_item.get("_craft_recipe", {})
@@ -181,12 +176,11 @@ func _input(event: InputEvent) -> void:
 			_pressed_item = {}
 
 	elif event is InputEventMouseMotion:
+		var local_pos := _to_local(event.position)
 		if _is_dragging:
-			var local_pos := _to_local(event.position)
 			_drag_ghost.position = get_global_mouse_position() - Vector2(CELL_SIZE * 0.5, CELL_SIZE * 0.5)
 			_update_highlights(local_pos)
 		elif not _pressed_item.is_empty() and not _pressed_has_moved:
-			var local_pos := _to_local(event.position)
 			if local_pos.distance_to(_press_screen_pos) > DRAG_THRESHOLD:
 				_pressed_has_moved = true
 				_start_drag(_press_start_pos)
@@ -198,14 +192,10 @@ func _local_to_grid(local_pos: Vector2) -> Vector2i:
 	return Vector2i(int(local_pos.x / CELL_SIZE), int(local_pos.y / CELL_SIZE))
 
 var _pending_spawn_pos: Vector2i = Vector2i(-1, -1)
-var _pending_spawn_id: int = -1
-var _pending_spawn_target: Vector2i = Vector2i(-1, -1)
 
 func _handle_launcher_click(pos: Vector2i) -> void:
 	if GameState.phase != GameState.GamePhase.IDLE:
 		return
-	if _pending_spawn_id != -1:
-		return  # Previous spawn still pending
 	_pressed_item = {}
 
 	GameState.set_phase(GameState.GamePhase.SPAWNING)
@@ -214,7 +204,6 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
-	# Check stamina and charges before optimistic spawn
 	if GameState.stamina < 1:
 		EventBus.show_toast.emit("体力不足")
 		GameState.set_phase(GameState.GamePhase.IDLE)
@@ -225,75 +214,57 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
-	# Roll locally for optimistic UI	# Roll locally for optimistic UI
-	var spawn_data: Dictionary = ConfigDatabase.roll_spawn(item.get("id", 0))
-	if spawn_data.is_empty():
-		GameState.set_phase(GameState.GamePhase.IDLE)
-		return
-
-	var spawn_pos := GridManager.find_nearest_empty(pos)
-	if spawn_pos == Vector2i(-1, -1):
-		EventBus.show_toast.emit("棋盘已满")
-		GameState.set_phase(GameState.GamePhase.IDLE)
-		return
-
-	# Optimistic: add item + play animation immediately
-	var new_item: Dictionary = spawn_data.duplicate(true)
-	# Init charges for spawned launchers
-	if new_item.get("type", "") == "launcher":
-		new_item["charges"] = new_item.get("max_charges", 3)
-	_is_launcher_spawning = true
-	GridManager.add_item(new_item, spawn_pos)
-	_is_launcher_spawning = false
-
-	var fly_key := "%d,%d" % [spawn_pos.x, spawn_pos.y]
-	var fly_node: GridItem = _item_nodes.get(fly_key)
-	if fly_node and is_instance_valid(fly_node):
-		fly_node.position = Vector2(pos.x * CELL_SIZE, pos.y * CELL_SIZE)
-		fly_node.scale = Vector2(0.7, 0.7)
-		var tween := create_tween()
-		tween.set_parallel(true)
-		tween.tween_property(fly_node, "position", Vector2(spawn_pos.x * CELL_SIZE, spawn_pos.y * CELL_SIZE), 0.35).set_trans(Tween.TRANS_CUBIC)
-		tween.tween_property(fly_node, "scale", Vector2(1, 1), 0.35).set_trans(Tween.TRANS_BOUNCE)
-
-	# Submit to server for validation
 	_pending_spawn_pos = pos
-	_pending_spawn_id = spawn_data.get("id", 0)
-	_pending_spawn_target = spawn_pos
 
 	if CloudService.online:
-		CloudService.submit_spawn(pos.x, pos.y, _pending_spawn_id, GameState.version)
+		CloudService.submit_spawn(pos.x, pos.y, GameState.version)
 	else:
-		# Offline: keep local spawn, don't validate
-		_pending_spawn_pos = Vector2i(-1, -1)
-		_pending_spawn_id = -1
-		_pending_spawn_target = Vector2i(-1, -1)
 		GameState.set_phase(GameState.GamePhase.IDLE)
 
 func _on_spawn_confirmed(result: Dictionary) -> void:
-	# Use server position to locate the item (request queue may cause _pending values to be stale)
 	var target_pos: Vector2i = Vector2i(result.get("target_col", -1), result.get("target_row", -1))
-	var launcher_pos: Vector2i = _pending_spawn_pos
-	_pending_spawn_pos = Vector2i(-1, -1)
-	_pending_spawn_id = -1
-	_pending_spawn_target = Vector2i(-1, -1)
+	var spawned_id: int = result.get("spawned_id", 0)
+	var spawned_name: String = result.get("spawned_name", "")
 
 	GameState.version = result.get("new_version", GameState.version)
-	# Update stamina from server (if present)
+
+	# Create the item from server result
+	var item_data: Dictionary = ConfigDatabase.get_item_data(spawned_id)
+	if not item_data.is_empty():
+		var new_item: Dictionary = item_data.duplicate(true)
+		if new_item.get("type", "") == "launcher":
+			new_item["charges"] = new_item.get("max_charges", 3)
+		_is_launcher_spawning = true
+		GridManager.add_item(new_item, target_pos)
+		_is_launcher_spawning = false
+
+	# Fly animation from launcher to target
+	var launcher_pos: Vector2i = _pending_spawn_pos
+	_pending_spawn_pos = Vector2i(-1, -1)
+	var fly_key := "%d,%d" % [target_pos.x, target_pos.y]
+	var fly_node: GridItem = _item_nodes.get(fly_key)
+	if fly_node and is_instance_valid(fly_node):
+		fly_node.position = Vector2(launcher_pos.x * CELL_SIZE, launcher_pos.y * CELL_SIZE)
+		fly_node.scale = Vector2(0.7, 0.7)
+		var tween := create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(fly_node, "position", Vector2(target_pos.x * CELL_SIZE, target_pos.y * CELL_SIZE), 0.35).set_trans(Tween.TRANS_CUBIC)
+		tween.tween_property(fly_node, "scale", Vector2(1, 1), 0.35).set_trans(Tween.TRANS_BOUNCE)
+
+	# Update stamina
 	var stamina: Variant = result.get("stamina", null)
 	if stamina != null:
 		GameState.stamina = stamina
 		GameState.max_stamina = result.get("max_stamina", GameState.max_stamina)
 		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
-	# Update charges display from spawn response
+
+	# Update launcher charges
 	var charges_val: Variant = result.get("charges", null)
 	if charges_val != null:
-		# Update launcher item in GridManager
 		if launcher_pos.x >= 0 and launcher_pos.y >= 0:
 			var launcher_item = GridManager.get_item(launcher_pos)
 			if launcher_item != null:
 				launcher_item["charges"] = charges_val
-				# Update GridItem visual
 				var launcher_key := "%d,%d" % [launcher_pos.x, launcher_pos.y]
 				var launcher_node = _item_nodes.get(launcher_key)
 				if launcher_node and is_instance_valid(launcher_node):
@@ -311,22 +282,14 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 
 func _on_spawn_rejected(reason: String) -> void:
-	var target_pos := _pending_spawn_target
 	_pending_spawn_pos = Vector2i(-1, -1)
-	_pending_spawn_id = -1
-	_pending_spawn_target = Vector2i(-1, -1)
-
 	print("[GridView] Spawn rejected: ", reason)
-	# Remove the optimistically spawned item
-	GridManager.remove_item(target_pos)
 	EventBus.show_toast.emit(_spawn_error_text(reason))
-
 	if GameState.phase == GameState.GamePhase.SPAWNING:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 
 func _spawn_error_text(reason: String) -> String:
 	match reason:
-		"invalid_spawn_id": return "生成失败：物品不合法"
 		"launcher_not_found": return "生成失败：发射器不存在"
 		"not_a_launcher": return "生成失败：不是发射器"
 		"no_empty_cell": return "生成失败：棋盘已满"
@@ -349,12 +312,10 @@ func _start_drag(pos: Vector2i) -> void:
 	_is_dragging = true
 	GameState.set_phase(GameState.GamePhase.DRAGGING)
 
-	# Dim the source item
 	var src_node = _item_nodes.get("%d,%d" % [pos.x, pos.y])
 	if src_node and is_instance_valid(src_node):
 		src_node.set_drag_active(true)
 
-	# Setup ghost visual (match GridItem colors by group_id)
 	var group_id: int = item.get("group_id", 0)
 	var item_type: String = item.get("type", "")
 	if item_type == "launcher":
@@ -371,7 +332,6 @@ func _start_drag(pos: Vector2i) -> void:
 			_: hue = float(level - 1) / 8.0
 		_drag_ghost.color = Color.from_hsv(hue, 0.6, 0.7)
 
-	# Ghost label text (item name)
 	var gl: Label = _drag_ghost.get_node_or_null("GhostLabel") as Label
 	if gl:
 		gl.text = item.get("name", "")
@@ -381,12 +341,10 @@ func _start_drag(pos: Vector2i) -> void:
 	_hide_craft_button()
 
 func _finish_drag(target_pos: Vector2i) -> void:
-	print("[GridView] _finish_drag target=", target_pos, " item=", _drag_item_data.get("name", ""), " effect=", _drag_item_data.get("use_effect_id", 0))
 	_is_dragging = false
 	_pressed_item = {}
 	_drag_ghost.visible = false
 
-	# Restore source item visual
 	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 	if _item_nodes.has(src_key):
 		var src_node = _item_nodes[src_key]
@@ -401,16 +359,14 @@ func _finish_drag(target_pos: Vector2i) -> void:
 	if target_pos == _drag_source_pos:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
-	# No distance limit -- any valid cell is a valid drop target
+
 	var target = GridManager.get_item(target_pos)
 
-	# Check storage drop
 	if target != null and target.get("id") == 603:
 		_handle_storage_drop(target_pos, target)
 		if GameState.phase in [GameState.GamePhase.DRAGGING, GameState.GamePhase.MERGING]:
 			GameState.set_phase(GameState.GamePhase.IDLE)
 		return
-	# Check for crafting table drop
 	if target != null and target.get("type") == "crafting":
 		_handle_crafting_drop(target_pos, target)
 		if GameState.phase in [GameState.GamePhase.DRAGGING, GameState.GamePhase.MERGING]:
@@ -429,24 +385,23 @@ func _finish_drag(target_pos: Vector2i) -> void:
 			_snap_back()
 	if GameState.phase in [GameState.GamePhase.DRAGGING, GameState.GamePhase.MERGING]:
 		GameState.set_phase(GameState.GamePhase.IDLE)
+
 func _place_dragged_item(target_pos: Vector2i) -> void:
 	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 	var node = _item_nodes.get(src_key)
 	if node and is_instance_valid(node):
 		node.position = Vector2(target_pos.x * CELL_SIZE, target_pos.y * CELL_SIZE)
 	GridManager.move_item(_drag_source_pos, target_pos)
-	# Sync move to server
 	if CloudService.online:
 		CloudService.submit_move(_drag_source_pos.x, _drag_source_pos.y, target_pos.x, target_pos.y, GameState.version)
 
 func _on_move_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
-	print("[GridView] Move confirmed: v", GameState.version)
 
 func _on_move_rejected(reason: String) -> void:
 	print("[GridView] Move rejected: ", reason)
-func _snap_back() -> void:
 
+func _snap_back() -> void:
 	var key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 	var item_node = _item_nodes.get(key)
 	if item_node and is_instance_valid(item_node):
@@ -462,7 +417,6 @@ func _update_highlights(local_pos: Vector2) -> void:
 	if hover == _drag_source_pos:
 		return
 
-	# Highlight any valid drop target (no distance limit)
 	var target = GridManager.get_item(hover)
 	if target != null and target.get("id") == _drag_item_data.get("id"):
 		_set_cell_highlight(hover, GridCell.HighlightType.MERGE_TARGET)
@@ -557,20 +511,17 @@ func _setup_crafting() -> void:
 	_craft_button.craft_pressed.connect(_on_craft_button_pressed)
 
 func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
-	# Block drop if table is crafting or ready
 	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
 	if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
 		_snap_back()
 		return
 	var dragged_item = GridManager.get_item(_drag_source_pos)
-
 	if dragged_item == null:
 		_snap_back()
 		return
 
 	var ingredient_id: int = dragged_item.get("id", 0)
 
-	# Remove dragged item from grid (consumed as ingredient)
 	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 	var src_node = _item_nodes.get(src_key)
 	if src_node and is_instance_valid(src_node):
@@ -578,7 +529,6 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 	_item_nodes.erase(src_key)
 	GridManager.remove_item(_drag_source_pos)
 
-	# Add to crafting service -- data stored directly in table_item on the grid
 	var matched := CraftingService.add_ingredient(table_item, dragged_item)
 	if matched:
 		_craft_table_pos = table_pos
@@ -590,11 +540,9 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 	else:
 		_hide_craft_button()
 
-	# Sync to server
 	if CloudService.online:
 		CloudService.submit_craft_add(_drag_source_pos.x, _drag_source_pos.y, table_pos.x, table_pos.y, ingredient_id, GameState.version)
 
-	# Update table visual
 	var table_key := "%d,%d" % [table_pos.x, table_pos.y]
 	var table_node = _item_nodes.get(table_key)
 	if table_node and is_instance_valid(table_node):
@@ -671,18 +619,13 @@ func _on_craft_button_pressed() -> void:
 
 func _on_craft_add_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
-	print("[GridView] Craft add confirmed v", GameState.version)
-
 func _on_craft_add_rejected(reason: String) -> void:
-	print("[GridView] Craft add rejected: ", reason)
 	EventBus.show_toast.emit("放入材料失败：" + reason)
 
 func _on_craft_start_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
-	print("[GridView] Craft start confirmed v", GameState.version)
 
 func _on_craft_start_rejected(reason: String) -> void:
-	print("[GridView] Craft start rejected: ", reason)
 	EventBus.show_toast.emit("开始制作失败：" + reason)
 
 func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
@@ -706,10 +649,8 @@ func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
 	_is_launcher_spawning = false
 	item_clicked.emit({}, Vector2i(-1, -1))
 	EventBus.show_toast.emit("制作完成：%s" % result_data.get("name", "未知"))
-	print("[GridView] Craft retrieve OK: v", GameState.version, " result=#", result_id)
 
 func _on_craft_retrieve_rejected(reason: String) -> void:
-	print("[GridView] Craft retrieve rejected: ", reason)
 	EventBus.show_toast.emit("取件失败：" + reason)
 
 func _get_table_grid_pos(table_item: Dictionary) -> Vector2i:
@@ -719,7 +660,6 @@ func _get_table_grid_pos(table_item: Dictionary) -> Vector2i:
 	return Vector2i(-1, -1)
 
 func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
-	# Update visual for the affected grid item
 	for key in _item_nodes:
 		var node = _item_nodes[key]
 		if node and is_instance_valid(node) and node.item_data == table_item:
@@ -746,10 +686,14 @@ func _sync_crafting_states() -> void:
 			if node and is_instance_valid(node):
 				node.set_crafting_state(cs)
 
+func _hide_craft_button() -> void:
+	_craft_button.hide()
+	_craft_table_pos = Vector2i(-1, -1)
+	_craft_table_item = {}
+
 func _select_item(pos: Vector2i) -> void:
 	var key := "%d,%d" % [pos.x, pos.y]
 	if key == _selected_key and not _selected_key.is_empty():
-		# Second click on selected item → use
 		var item: Dictionary = GridManager.get_item(pos)
 		if item != null:
 			item_use_requested.emit(item, pos)
@@ -760,14 +704,21 @@ func _select_item(pos: Vector2i) -> void:
 		node.set_selected(true)
 		_selected_key = key
 
+func _sync_grid_from_server(result: Dictionary) -> void:
+	var server_grid: Array = result.get("grid", [])
+	if server_grid.is_empty():
+		return
+	GridManager.init_grid()
+	for entry in server_grid:
+		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
+		if not item_data.is_empty():
+			var item := item_data.duplicate(true)
+			if entry.has("charges"): item["charges"] = entry.charges
+			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+
 func _deselect_all() -> void:
 	if not _selected_key.is_empty():
 		var node := _item_nodes.get(_selected_key) as GridItem
 		if node and is_instance_valid(node):
 			node.set_selected(false)
 		_selected_key = ""
-
-func _hide_craft_button() -> void:
-	_craft_button.hide()
-	_craft_table_pos = Vector2i(-1, -1)
-	_craft_table_item = {}

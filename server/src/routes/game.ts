@@ -39,7 +39,14 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       console.log(`[game] new player ${userId}, init with ${state.grid.length} items | v0`);
     } else {
       const oldVer = state.version;
-      // tickCultivation removed — no auto EXP gain
+      // Re-initialize if grid is empty (stale save)
+      if (!state.grid || state.grid.length === 0) {
+        const init = engine.createInitialState();
+        state.grid = init.grid;
+        state.version += 1;
+        await storage.saveState(userId, state);
+        console.log(`[game] re-initialized empty grid for ${userId}: ${state.grid.length} items`);
+      }
       if (state.version !== oldVer) {
         await storage.saveState(userId, state);
       }
@@ -63,8 +70,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
         await storage.saveState(userId, state);
         console.log(`[game] restored main grid for ${userId}: ${state.grid.length} items`);
       }
-      const offlineExp = (state.cultivation as any)._offline_exp_gained || 0;
-      res.json({ score: state.score, high_score: state.high_score, grid: state.grid, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, offline_exp_gained: offlineExp });
+      res.json({ score: state.score, high_score: state.high_score, grid: state.grid, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, meridian_acupoints: state.meridian_acupoints, meridian_circulations: state.meridian_circulations, meridian_threshold_idx: state.meridian_threshold_idx });
     } catch (err) {
       console.error("[game] state error:", err);
       res.status(500).json({ error: "internal_error" });
@@ -81,23 +87,23 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeMerge(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_score: result.newScore, new_version: result.newVersion, result_id: result.resultId });
+    res.json({ ok: true, new_score: result.newScore, new_version: result.newVersion, result_id: result.resultId, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow });
   }));
 
   // POST /api/game/spawn
   router.post("/spawn", op(async (req, res, userId) => {
-    const { launcher_pos, rolled_id } = req.body;
-    if (!Array.isArray(launcher_pos) || launcher_pos.length !== 2 || typeof rolled_id !== "number") {
+    const { launcher_pos } = req.body;
+    if (!Array.isArray(launcher_pos) || launcher_pos.length !== 2) {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     if (!engine.isInBounds(launcher_pos[0], launcher_pos[1])) {
       res.status(400).json({ error: "out_of_bounds" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1], rolled_id);
+    const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spawned_id: result.spawnedId, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges });
+    res.json({ ok: true, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges });
   }));
 
   // POST /api/game/craft/add
@@ -136,7 +142,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeCraftRetrieve(state, table_col, table_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, result_id: result.resultId, new_version: result.newVersion, grid: state.grid });
+    res.json({ ok: true, result_id: result.resultId, new_version: result.newVersion });
   }));
 
   // POST /api/game/craft/remove
@@ -233,6 +239,28 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     res.json({ ok: true, new_version: result.newVersion, storage: storageItem?.storage ?? null });
   }));
 
+  // POST /api/game/meridian/refresh
+  router.post("/meridian/refresh", op(async (req, res, userId) => {
+    const state = await getOrCreateState(userId);
+    const result = engine.generateMeridianRequirements(state);
+    state.version += 1;
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: state.version, acupoints: result.acupoints, threshold_idx: state.meridian_threshold_idx, complete_exp: result.complete_exp });
+  }));
+
+  // POST /api/game/meridian/complete
+  router.post("/meridian/complete", op(async (req, res, userId) => {
+    const { index, item_ids } = req.body;
+    if (typeof index !== "number" || !Array.isArray(item_ids)) {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.completeMeridianAcupoint(state, index, item_ids);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json(result);
+  }));
+
   // POST /api/game/board/switch
   router.post("/board/switch", op(async (req, res, userId) => {
     const { board_type } = req.body;
@@ -252,7 +280,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.switchBoard(state, board_type);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
+    res.json({ ok: true, new_version: result.newVersion });
   }));
 
   // GET /api/leaderboard

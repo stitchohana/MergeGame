@@ -10,6 +10,7 @@ var _cultivation_config: Dictionary = {}
 var _effects_data: Dictionary = {}  # effect_id -> effect_data
 var _expedition_maps: Dictionary = {}
 var _monsters_data: Dictionary = {}
+var _meridian_thresholds: Array = []
 
 func _ready() -> void:
 	load_all()
@@ -22,7 +23,8 @@ func load_all() -> void:
 	_cultivation_config = _load_json("res://config/cultivation.json")
 	_load_effects("res://config/effects.json")
 	_load_expedition("res://config/expedition.json")
-	print("[ConfigDatabase] Loaded all configs: ", _items_data.size(), " items, ", _effects_data.size(), " effects, ", _expedition_maps.size(), " maps")
+	_load_meridians("res://config/meridians.json")
+	print("[ConfigDatabase] Loaded all configs: ", _items_data.size(), " items, ", _effects_data.size(), " effects, ", _expedition_maps.size(), " maps, ", _meridian_thresholds.size(), " meridian thresholds")
 
 func _load_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -208,6 +210,20 @@ func get_expedition_map(map_id: int) -> Dictionary:
 func get_monster(monster_id: int) -> Dictionary:
 	return _monsters_data.get(monster_id, {})
 
+func _load_meridians(path: String) -> void:
+	var data := _load_json(path)
+	if data.is_empty():
+		return
+	_meridian_thresholds = data.get("thresholds", [])
+
+func get_meridian_thresholds() -> Array:
+	return _meridian_thresholds
+
+func get_meridian_threshold(idx: int) -> Dictionary:
+	if idx < 0 or idx >= _meridian_thresholds.size():
+		return {}
+	return _meridian_thresholds[idx]
+
 # Reload all configs at runtime
 func reload() -> void:
 	load_all()
@@ -238,11 +254,6 @@ func get_realm_config(realm_id: int) -> Dictionary:
 func get_passive_exp_per_second() -> int:
 	return _cultivation_config.get("passive_exp_per_second", 3)
 
-func get_initial_qi() -> int:
-	return _cultivation_config.get("initial_qi", 100)
-
-func get_qi_recovery_per_level() -> int:
-	return _cultivation_config.get("qi_recovery_per_level", 5)
-
-func get_qi_breakthrough_bonus() -> int:
-	return _cultivation_config.get("qi_breakthrough_bonus", 50)
+func get_realm_max_qi(realm_id: int) -> int:
+	var realm := get_realm_config(realm_id)
+	return realm.get("max_qi", 100)

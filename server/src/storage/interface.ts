@@ -51,6 +51,9 @@ export interface GameState {
   spirit_stones: number;
   version: number;
   saved_grid?: GridItem[];
+  meridian_circulations?: number;
+  meridian_acupoints?: { item_id: number; name: string; count: number; completed: boolean }[];
+  meridian_threshold_idx?: number;
 }
 
 export interface User {

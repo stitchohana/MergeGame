@@ -1,17 +1,14 @@
 {
   "passive_exp_per_second": 1,
-  "initial_qi": 100,
-  "qi_recovery_per_level": 5,
-  "qi_breakthrough_bonus": 50,
   "realms": [
-	{ "id": 0, "name": "凡人", "levels": 1, "base_exp": 20, "growth": 1.0, "qi_bonus": 0, "breakthrough_pill": 0 },
-	{ "id": 1, "name": "练气", "levels": 9, "base_exp": 100, "growth": 1.15, "qi_bonus": 10, "breakthrough_pill": 31 },
-	{ "id": 2, "name": "筑基", "levels": 9, "base_exp": 500, "growth": 1.20, "qi_bonus": 25, "breakthrough_pill": 32 },
-	{ "id": 3, "name": "金丹", "levels": 9, "base_exp": 2000, "growth": 1.25, "qi_bonus": 50, "breakthrough_pill": 33 },
-	{ "id": 4, "name": "元婴", "levels": 9, "base_exp": 10000, "growth": 1.30, "qi_bonus": 100, "breakthrough_pill": 34 },
-	{ "id": 5, "name": "化神", "levels": 9, "base_exp": 50000, "growth": 1.35, "qi_bonus": 200, "breakthrough_pill": 35 },
-	{ "id": 6, "name": "合体", "levels": 9, "base_exp": 200000, "growth": 1.40, "qi_bonus": 500, "breakthrough_pill": 36 },
-	{ "id": 7, "name": "大乘", "levels": 9, "base_exp": 1000000, "growth": 1.45, "qi_bonus": 1000, "breakthrough_pill": 37 },
-	{ "id": 8, "name": "渡劫", "levels": 9, "base_exp": 5000000, "growth": 1.50, "qi_bonus": 2000, "breakthrough_pill": 0 }
+	{"id": 0, "name": "凡人", "levels": 1, "exp_per_level": [20], "max_qi": 100, "breakthrough_pill": 0},
+	{"id": 1, "name": "练气", "levels": 9, "exp_per_level": [50, 75, 100, 150, 200, 300, 400, 500, 600], "max_qi": 100, "breakthrough_pill": 31},
+	{"id": 2, "name": "筑基", "levels": 9, "exp_per_level": [200, 300, 400, 550, 700, 900, 1100, 1300, 1500], "max_qi": 200, "breakthrough_pill": 32},
+	{"id": 3, "name": "金丹", "levels": 9, "exp_per_level": [500, 700, 1000, 1500, 2000, 2800, 3600, 4500, 5500], "max_qi": 400, "breakthrough_pill": 33},
+	{"id": 4, "name": "元婴", "levels": 9, "exp_per_level": [1000, 1500, 2200, 3200, 4500, 6000, 8000, 10000, 13000], "max_qi": 700, "breakthrough_pill": 34},
+	{"id": 5, "name": "化神", "levels": 9, "exp_per_level": [2000, 3000, 5000, 7500, 10000, 15000, 20000, 28000, 36000], "max_qi": 1200, "breakthrough_pill": 35},
+	{"id": 6, "name": "合体", "levels": 9, "exp_per_level": [5000, 8000, 12000, 18000, 25000, 35000, 50000, 70000, 100000], "max_qi": 2000, "breakthrough_pill": 36},
+	{"id": 7, "name": "大乘", "levels": 9, "exp_per_level": [10000, 18000, 30000, 50000, 80000, 120000, 180000, 250000, 400000], "max_qi": 3500, "breakthrough_pill": 37},
+	{"id": 8, "name": "渡劫", "levels": 9, "exp_per_level": [20000, 40000, 70000, 120000, 200000, 350000, 500000, 700000, 1000000], "max_qi": 5000, "breakthrough_pill": 0}
   ]
 }

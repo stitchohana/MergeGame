@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://bf6fe2778glgu"]
+
+[ext_resource type="Script" uid="uid://682ipjl0uefm" path="res://scenes/ui/RequirementList.gd" id="1_script"]
+
+[node name="RequirementList" type="Control" unique_id=1307681079]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_script")
+
+[node name="Panel" type="Panel" parent="." unique_id=713523825]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleLabel" type="Label" parent="Panel" unique_id=1139437144]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 292.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "需求"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel" unique_id=171782156]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+follow_focus = true
+horizontal_scroll_mode = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/ScrollContainer" unique_id=1482081189]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10

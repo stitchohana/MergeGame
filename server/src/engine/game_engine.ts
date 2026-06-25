@@ -34,17 +34,13 @@ interface RealmDef {
   id: number;
   name: string;
   levels: number;
-  base_exp: number;
-  growth: number;
-  qi_bonus: number;
+  exp_per_level: number[];
+  max_qi: number;
   breakthrough_pill: number;
 }
 
 interface CultivationConfig {
   passive_exp_per_second: number;
-  initial_qi: number;
-  qi_recovery_per_level: number;
-  qi_breakthrough_bonus: number;
   realms: RealmDef[];
 }
 
@@ -73,6 +69,7 @@ export class GameEngine {
   private staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
   private shopConfig = { shopItems: [] as number[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
   private effectsById = new Map<number, { id: number; type: string; exp_gain?: number; duration?: number; multiplier?: number; amount?: number; describe?: string }>();
+  private meridianThresholds: any[] = [];
 
   constructor(configDir: string) {
     this.loadConfigs(configDir);
@@ -88,7 +85,8 @@ export class GameEngine {
     this.loadGameConfig(path.join(configDir, "game_config.json"));
     this.loadShopConfig(path.join(configDir, "shop.json"));
     this.loadEffects(path.join(configDir, "effects.json"));
-    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.realms.length ?? 0} realms, ${this.effectsById.size} effects`);
+    this.loadMeridians(path.join(configDir, "meridians.json"));
+    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.realms.length ?? 0} realms, ${this.effectsById.size} effects, ${this.meridianThresholds.length} meridian thresholds`);
   }
 
   private loadGameConfig(filePath: string): void {
@@ -184,6 +182,62 @@ export class GameEngine {
 
   getEffect(effectId: number) {
     return this.effectsById.get(effectId) ?? null;
+  }
+
+  private loadMeridians(filePath: string): void {
+    try {
+      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      this.meridianThresholds = data.thresholds || [];
+    } catch { /* optional */ }
+  }
+
+  generateMeridianRequirements(state: GameState): { acupoints: any[]; complete_exp: number } {
+    const thresholds = this.meridianThresholds;
+    if (!thresholds.length) return { acupoints: [], complete_exp: 0 };
+
+    const realm = state.cultivation.current_realm_id;
+    const level = state.cultivation.current_level;
+    let foundIdx = 0;
+    for (let i = 0; i < thresholds.length; i++) {
+      const t = thresholds[i];
+      if (t.realm_id === realm && t.level === level) {
+        foundIdx = i;
+        break;
+      }
+    }
+    const t = thresholds[foundIdx];
+    const acuCount: number = t.acupoints ?? 3;
+    const pool: number[] = t.item_pool ?? [];
+    const typeMin: number = t.count_min ?? 1;
+    const typeMax: number = t.count_max ?? 3;
+
+    state.meridian_threshold_idx = foundIdx;
+    const acupoints: any[] = [];
+    for (let i = 0; i < acuCount; i++) {
+      const numTypes = typeMin + Math.floor(Math.random() * (typeMax - typeMin + 1));
+      const pickedIds: number[] = [];
+      const names: string[] = [];
+      const items: any[] = [];
+      const available = [...pool];
+      for (let j = 0; j < numTypes && available.length > 0; j++) {
+        const idx = Math.floor(Math.random() * available.length);
+        const itemId = available[idx];
+        available.splice(idx, 1);
+        const itemData = this.getItemData(itemId);
+        const name = itemData?.name ?? `#${itemId}`;
+        pickedIds.push(itemId);
+        names.push(name);
+        items.push({ item_id: itemId, name });
+      }
+      acupoints.push({
+        item_ids: pickedIds,
+        name: names.join(", "),
+        items,
+        completed: false,
+      });
+    }
+    state.meridian_acupoints = acupoints;
+    return { acupoints, complete_exp: t.complete_exp ?? 50 };
   }
 
   private loadInitialSetup(filePath: string): void {
@@ -299,6 +353,17 @@ export class GameEngine {
     return null;
   }
 
+  findEmptyByRow(grid: Map<string, GridItem>): { col: number; row: number } | null {
+    for (let row = 0; row < this.GRID_ROWS; row++) {
+      for (let col = 0; col < this.GRID_COLS; col++) {
+        if (!grid.has(this.posKey(col, row))) {
+          return { col, row };
+        }
+      }
+    }
+    return null;
+  }
+
   // --- State initialization ---
 
   createInitialState(boardType: string = "main"): GameState {
@@ -312,8 +377,8 @@ export class GameEngine {
         current_level: 1,
         current_exp: 0,
         total_exp: 0,
-        current_qi: this.cultivation?.initial_qi ?? 100,
-        max_qi: this.cultivation?.initial_qi ?? 100,
+        current_qi: 0,
+        max_qi: this.cultivation?.realms[0]?.max_qi ?? 100,
         buffs: [],
         last_tick_time: now,
       },
@@ -325,6 +390,7 @@ export class GameEngine {
     };
 
     const setup = this.getInitialSetup(boardType);
+    const itemNames: string[] = [];
     for (const entry of setup) {
       const itemDef = this.getItemData(entry.id);
       if (itemDef) {
@@ -334,8 +400,10 @@ export class GameEngine {
           gitem.last_charge_time = now;
         }
         state.grid.push(gitem);
+        itemNames.push(`${itemDef.name}(#${entry.id})@(${entry.col},${entry.row})`);
       }
     }
+    console.log(`[engine] createInitialState(${boardType}): ${state.grid.length} items — ${itemNames.join(", ")}`);
     return state;
   }
 
@@ -500,7 +568,7 @@ export class GameEngine {
     fromRow: number,
     toCol: number,
     toRow: number
-  ): { ok: true; newScore: number; newVersion: number; resultId: number } | { ok: false; reason: string } {
+  ): { ok: true; newScore: number; newVersion: number; resultId: number; fromCol: number; fromRow: number; toCol: number; toRow: number } | { ok: false; reason: string } {
     const result = this.validateMerge(state, fromCol, fromRow, toCol, toRow);
     if (!result.valid) {
       return { ok: false, reason: result.reason };
@@ -543,6 +611,10 @@ export class GameEngine {
       newScore: state.score,
       newVersion: state.version,
       resultId: result.resultItem.id,
+      fromCol: result.fromItem.col,
+      fromRow: result.fromItem.row,
+      toCol: result.toItem.col,
+      toRow: result.toItem.row,
     };
   }
 
@@ -551,9 +623,8 @@ export class GameEngine {
   executeSpawn(
     state: GameState,
     launcherCol: number,
-    launcherRow: number,
-    clientRolledId: number
-  ): { ok: true; spawnedId: number; targetCol: number; targetRow: number; newVersion: number; charges: number; maxCharges: number }
+    launcherRow: number
+  ): { ok: true; spawnedId: number; spawnedName: string; targetCol: number; targetRow: number; newVersion: number; charges: number; maxCharges: number }
     | { ok: false; reason: string } {
     const map = this.gridToMap(state.grid);
     const launcherKey = this.posKey(launcherCol, launcherRow);
@@ -566,27 +637,30 @@ export class GameEngine {
       return { ok: false, reason: "not_a_launcher" };
     }
 
-    // Validate client's rolled item is in the launcher's spawn list
+    // Server rolls the spawn
     const spawns = launcherData.spawns;
-    if (!spawns || !spawns.some((s: any) => s.id === clientRolledId)) {
-      console.log(`[engine] spawn rejected: #${clientRolledId} not in launcher #${launcherItem.id} spawn list`);
-      return { ok: false, reason: "invalid_spawn_id" };
+    if (!spawns || !spawns.length) return { ok: false, reason: "no_spawns" };
+    const totalWeight: number = spawns.reduce((sum: number, s: any) => sum + s.weight, 0);
+    let roll = Math.random() * totalWeight;
+    let rolledId = spawns[0].id;
+    for (const s of spawns) {
+      roll -= s.weight;
+      if (roll <= 0) { rolledId = s.id; break; }
     }
 
-    // Stamina check (global)
+    // Stamina check
     if (state.stamina < this.staminaConfig.spawnCost) {
       return { ok: false, reason: "insufficient_stamina" };
     }
 
-    // Launcher charges check (per-launcher)
+    // Launcher charges check
     const maxC = launcherData.max_charges ?? 3;
     const charges = launcherItem.charges ?? maxC;
     if (charges <= 0) {
       return { ok: false, reason: "no_charges" };
     }
 
-    // Use the client's rolled item (already validated as legal)
-    const spawnResult = this.getItemData(clientRolledId);
+    const spawnResult = this.getItemData(rolledId);
     if (!spawnResult) return { ok: false, reason: "spawn_failed" };
 
     const target = this.findNearestEmpty(map, launcherCol, launcherRow);
@@ -610,6 +684,7 @@ export class GameEngine {
     return {
       ok: true,
       spawnedId: spawnResult.id,
+      spawnedName: spawnResult.name,
       targetCol: target.col,
       targetRow: target.row,
       newVersion: state.version,
@@ -927,8 +1002,9 @@ export class GameEngine {
     if (!this.cultivation) return 999999;
     const realm = this.cultivation.realms[currentRealmId];
     if (!realm) return 999999;
-    const level = Math.min(currentLevel + 1, realm.levels);
-    return Math.floor(realm.base_exp * Math.pow(realm.growth, level - 1));
+    const expArr = realm.exp_per_level;
+    if (!expArr || currentLevel < 1 || currentLevel > expArr.length) return 999999;
+    return expArr[currentLevel - 1];
   }
 
   getMaxLevelForRealm(realmId: number): number {
@@ -988,16 +1064,15 @@ export class GameEngine {
     }
     if (!this.cultivation) return { ok: false, reason: "no_config" };
 
+    const nextRealm = this.cultivation.realms[realmId + 1];
+    const newMaxQi: number = nextRealm?.max_qi ?? (state.cultivation.max_qi + 50);
     const newCultivation: CultivationData = {
       current_realm_id: realmId + 1,
       current_level: 1,
       current_exp: 0,
       total_exp: state.cultivation.total_exp,
-      current_qi: Math.min(
-        state.cultivation.current_qi + this.cultivation.qi_recovery_per_level,
-        state.cultivation.max_qi + this.cultivation.qi_breakthrough_bonus
-      ),
-      max_qi: state.cultivation.max_qi + this.cultivation.qi_breakthrough_bonus,
+      current_qi: Math.min(state.cultivation.current_qi, newMaxQi),
+      max_qi: newMaxQi,
       buffs: state.cultivation.buffs,
       last_tick_time: state.cultivation.last_tick_time,
     };
@@ -1112,17 +1187,81 @@ export class GameEngine {
         c.current_level = 1;
         c.current_realm_id += 1;
         if (c.current_realm_id >= maxRealms) break;
-        c.max_qi += this.cultivation.qi_breakthrough_bonus;
-        c.current_qi = Math.min(c.current_qi + this.cultivation.qi_recovery_per_level, c.max_qi);
         const newRealm = this.cultivation.realms[c.current_realm_id];
+        c.max_qi = newRealm?.max_qi ?? c.max_qi;
+        c.current_qi = Math.min(c.current_qi, c.max_qi);
         console.log(`[engine] breakthrough: -> ${newRealm.name} | qi=${c.max_qi}`);
         break;
       }
 
-      c.current_qi = Math.min(c.current_qi + this.cultivation.qi_recovery_per_level, c.max_qi);
       const realmName = this.cultivation.realms[c.current_realm_id]?.name ?? "?";
       console.log(`[engine] level up: ${realmName} Lv${c.current_level}`);
     }
+  }
+
+  // --- Meridian ---
+
+  completeMeridianAcupoint(state: GameState, index: number, itemIds: number[]): { ok: true; newVersion: number; meridian_acupoints: any[]; circulation_completed: boolean; exp_gained: number; qi_gained: number; qi_full: boolean; grid: any[]; cultivation: any } | { ok: false; reason: string } {
+    if (!state.meridian_acupoints || index < 0 || index >= state.meridian_acupoints.length) {
+      return { ok: false, reason: "invalid_index" };
+    }
+    const req = state.meridian_acupoints[index];
+    if (req.completed) return { ok: false, reason: "already_completed" };
+    // Consume one of each required item from grid
+    const toRemove: number[] = [];
+    for (const reqItemId of itemIds) {
+      let found = false;
+      for (let i = 0; i < state.grid.length; i++) {
+        if (!toRemove.includes(i) && state.grid[i].id === reqItemId) {
+          toRemove.push(i);
+          found = true;
+          break;
+        }
+      }
+      if (!found) return { ok: false, reason: "insufficient_items" };
+    }
+
+    // Remove consumed items
+    for (const idx of toRemove.sort((a: number, b: number) => b - a)) {
+      state.grid.splice(idx, 1);
+    }
+
+    req.completed = true;
+    state.version += 1;
+
+    // Grant qi for completing one acupoint
+    const threshold = this.meridianThresholds[state.meridian_threshold_idx ?? 0];
+    const qiReward: number = threshold?.qi_reward ?? 5;
+    let qiFull = false;
+    if (state.cultivation) {
+      const newQi = state.cultivation.current_qi + qiReward;
+      if (newQi >= state.cultivation.max_qi) {
+        state.cultivation.current_qi = state.cultivation.max_qi;
+        qiFull = true;
+      } else {
+        state.cultivation.current_qi = newQi;
+      }
+    }
+
+    // Check if full circulation completed
+    let circulationCompleted = false;
+    let expGained = 0;
+    const allDone = state.meridian_acupoints.every(r => r.completed);
+    if (allDone) {
+      circulationCompleted = true;
+      const exp = threshold?.complete_exp ?? 50;
+      expGained = exp;
+      if (state.cultivation) {
+        this._addExp(state.cultivation, exp);
+      }
+      state.meridian_circulations = (state.meridian_circulations ?? 0) + 1;
+      for (const r of state.meridian_acupoints) {
+        r.completed = false;
+      }
+      console.log(`[engine] meridian circulation #${state.meridian_circulations} completed! +${exp}exp`);
+    }
+
+    return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, circulation_completed: circulationCompleted, exp_gained: expGained, qi_gained: qiReward, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation };
   }
 
   // --- Storage ---

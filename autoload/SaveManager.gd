@@ -61,6 +61,11 @@ func _restore_from_server(state: Dictionary) -> void:
 	if not cultivation_data.is_empty():
 		CultivationService.deserialize(cultivation_data)
 
+	# Meridian
+	GameState.meridian_acupoints = state.get("meridian_acupoints", [])
+	GameState.meridian_circulations = state.get("meridian_circulations", 0)
+	GameState.meridian_threshold_idx = state.get("meridian_threshold_idx", 0)
+
 	# Restore crafting timers for in-progress crafts
 	CraftingService.restore_craft_timers()
 
