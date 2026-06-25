@@ -106,7 +106,6 @@ text = "需丹药突破"
 visible = false
 
 
-[node name="BuffLabel" type="Label" parent="Panel"]
 offset_left = 30.0
 offset_top = 235.0
 offset_right = 570.0

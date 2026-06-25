@@ -48,15 +48,6 @@ func _refresh() -> void:
 	else:
 		breakthrough_label.hide()
 
-	var buffs: Array = CultivationService.get_active_buffs()
-	if buffs.is_empty():
-		$Panel/BuffLabel.hide()
-	else:
-		var lines: PackedStringArray = []
-		for b in buffs:
-			lines.append("%s x%.1f (%ds)" % [b.name, b.multiplier, b.remaining])
-		$Panel/BuffLabel.text = "丹药效果: " + ", ".join(lines)
-		$Panel/BuffLabel.show()
 
 func _on_close() -> void:
 	UIManager.hide_popup(self)

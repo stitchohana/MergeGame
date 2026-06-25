@@ -15,10 +15,10 @@ signal spawn_rejected(reason: String)
 signal craft_add_confirmed(result: Dictionary)
 signal move_confirmed(result: Dictionary)
 signal move_rejected(reason: String)
-signal pill_consume_confirmed(result: Dictionary)
-signal pill_consume_rejected(reason: String)
 signal breakthrough_confirmed(result: Dictionary)
 signal breakthrough_rejected(reason: String)
+signal exp_pill_consume_confirmed(result: Dictionary)
+signal exp_pill_consume_rejected(reason: String)
 signal board_switch_confirmed(result: Dictionary)
 signal board_switch_rejected(reason: String)
 signal meridian_refresh_confirmed(result: Dictionary)
@@ -157,13 +157,13 @@ func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version
 
 # --- Cultivation ---
 
-func submit_consume_pill(pill_id: int, version: int) -> void:
-	var body := JSON.stringify({"pill_id": pill_id, "version": version})
-	_send_cultivation("consume_pill", "/api/cultivation/consume", HTTPClient.METHOD_POST, body)
-
 func submit_breakthrough(pill_id: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "version": version})
 	_send_cultivation("breakthrough", "/api/cultivation/breakthrough", HTTPClient.METHOD_POST, body)
+
+func submit_consume_exp_pill(pill_id: int, version: int) -> void:
+	var body := JSON.stringify({"pill_id": pill_id, "version": version})
+	_send_cultivation("consume_exp_pill", "/api/cultivation/consume-exp", HTTPClient.METHOD_POST, body)
 
 func submit_board_switch(board_type: String) -> void:
 	var body := JSON.stringify({"board_type": board_type})
@@ -192,17 +192,17 @@ func _on_meridian_complete_response(data: Dictionary) -> void:
 	else:
 		meridian_complete_rejected.emit(data.get("error", "unknown_error"))
 
-func _on_consume_pill_response(data: Dictionary) -> void:
-	if data.get("ok", false):
-		pill_consume_confirmed.emit(data)
-	else:
-		pill_consume_rejected.emit(data.get("error", "unknown_error"))
-
 func _on_breakthrough_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		breakthrough_confirmed.emit(data)
 	else:
 		breakthrough_rejected.emit(data.get("error", "unknown_error"))
+
+func _on_consume_exp_pill_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		exp_pill_consume_confirmed.emit(data)
+	else:
+		exp_pill_consume_rejected.emit(data.get("error", "unknown_error"))
 
 # --- Craft ---
 
@@ -291,8 +291,8 @@ func _reject(tag: String, reason: String) -> void:
 		"spawn": spawn_rejected.emit(reason)
 		"merge": merge_rejected.emit(reason)
 		"move": move_rejected.emit(reason)
-		"consume_pill": pill_consume_rejected.emit(reason)
 		"breakthrough": breakthrough_rejected.emit(reason)
+		"consume_exp_pill": exp_pill_consume_rejected.emit(reason)
 		"sell": sell_rejected.emit(reason)
 		"craft_add": craft_add_rejected.emit(reason)
 		"craft_start": craft_start_rejected.emit(reason)
@@ -438,10 +438,10 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				spawn_rejected.emit(error_msg)
 			"move":
 				move_rejected.emit(error_msg)
-			"consume_pill":
-				pill_consume_rejected.emit(error_msg)
 			"breakthrough":
 				breakthrough_rejected.emit(error_msg)
+			"consume_exp_pill":
+				exp_pill_consume_rejected.emit(error_msg)
 			"board_switch":
 				board_switch_rejected.emit(error_msg)
 			"meridian_complete":
@@ -476,10 +476,10 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_spawn_response(data)
 		"move":
 			_on_move_response(data)
-		"consume_pill":
-			_on_consume_pill_response(data)
 		"breakthrough":
 			_on_breakthrough_response(data)
+		"consume_exp_pill":
+			_on_consume_exp_pill_response(data)
 		"board_switch":
 			_on_board_switch_response(data)
 		"meridian_complete":
@@ -515,10 +515,10 @@ func _handle_network_error(tag: String) -> void:
 			spawn_rejected.emit("network_error")
 		"move":
 			move_rejected.emit("network_error")
-		"consume_pill":
-			pill_consume_rejected.emit("network_error")
 		"breakthrough":
 			breakthrough_rejected.emit("network_error")
+		"consume_exp_pill":
+			exp_pill_consume_rejected.emit("network_error")
 		"board_switch":
 			board_switch_rejected.emit("network_error")
 		"meridian_complete":
@@ -546,10 +546,10 @@ func _handle_parse_error(tag: String) -> void:
 			spawn_rejected.emit("invalid_response")
 		"move":
 			move_rejected.emit("invalid_response")
-		"consume_pill":
-			pill_consume_rejected.emit("invalid_response")
 		"breakthrough":
 			breakthrough_rejected.emit("invalid_response")
+		"consume_exp_pill":
+			exp_pill_consume_rejected.emit("invalid_response")
 		"board_switch":
 			board_switch_rejected.emit("invalid_response")
 		"meridian_complete":

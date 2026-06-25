@@ -44,14 +44,14 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
   }
 
 
-  // POST /api/cultivation/consume
-  router.post("/consume", op(async (req, res, userId) => {
+  // POST /api/cultivation/consume-exp
+  router.post("/consume-exp", op(async (req, res, userId) => {
     const { pill_id } = req.body;
     if (typeof pill_id !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.consumePill(state, pill_id);
+    const result = engine.consumeExpPill(state, pill_id);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });

@@ -115,7 +115,7 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 		return
 	match effect.get("type", ""):
 		"breakthrough": CultivationService.try_breakthrough(item_data.get("id", 0))
-		"buff": CultivationService.apply_buff(item_data)
+		"exp": CultivationService.consume_exp_pill(item_data.get("id", 0), grid_pos)
 		_: EventBus.show_toast.emit("此物品无法在此使用")
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:

@@ -10,7 +10,6 @@ interface ItemDef {
   name: string;
   icon: string;
   group_id: number;
-  merge_score: number;
   describe: string;
   type: string;
   spawns?: { id: number; weight: number }[];
@@ -369,8 +368,6 @@ export class GameEngine {
   createInitialState(boardType: string = "main"): GameState {
     const now = Date.now();
     const state: GameState = {
-      score: 0,
-      high_score: 0,
       grid: [],
       cultivation: {
         current_realm_id: 0,
@@ -379,7 +376,6 @@ export class GameEngine {
         total_exp: 0,
         current_qi: 0,
         max_qi: this.cultivation?.realms[0]?.max_qi ?? 100,
-        buffs: [],
         last_tick_time: now,
       },
       stamina: 100,
@@ -487,7 +483,7 @@ export class GameEngine {
     fromRow: number,
     toCol: number,
     toRow: number
-  ): { valid: true; resultItem: ItemDef; scoreGain: number; fromItem: GridItem; toItem: GridItem } | { valid: false; reason: string } {
+  ): { valid: true; resultItem: ItemDef; fromItem: GridItem; toItem: GridItem } | { valid: false; reason: string } {
     const map = this.gridToMap(state.grid);
     const fromKey = this.posKey(fromCol, fromRow);
     const toKey = this.posKey(toCol, toRow);
@@ -556,7 +552,6 @@ export class GameEngine {
     return {
       valid: true,
       resultItem: nextItem,
-      scoreGain: nextItem.merge_score,
       fromItem: itemA,
       toItem: itemB,
     };
@@ -568,7 +563,7 @@ export class GameEngine {
     fromRow: number,
     toCol: number,
     toRow: number
-  ): { ok: true; newScore: number; newVersion: number; resultId: number; fromCol: number; fromRow: number; toCol: number; toRow: number } | { ok: false; reason: string } {
+  ): { ok: true; newVersion: number; resultId: number; fromCol: number; fromRow: number; toCol: number; toRow: number } | { ok: false; reason: string } {
     const result = this.validateMerge(state, fromCol, fromRow, toCol, toRow);
     if (!result.valid) {
       return { ok: false, reason: result.reason };
@@ -595,20 +590,15 @@ export class GameEngine {
       state.grid.push(mergedItem);
     }
 
-    state.score += result.scoreGain;
-    if (state.score > state.high_score) {
-      state.high_score = state.score;
-    }
     state.version += 1;
 
     const mergedName = result.resultItem.name;
     const fromItem = this.getItemData(fromId);
     const fromName = fromItem?.name ?? `#${fromId}`;
-    console.log(`[engine] merge: ${fromName}x2 -> ${mergedName} | score +${result.scoreGain} (total=${state.score}) | v${state.version}`);
+    console.log(`[engine] merge: ${fromName}x2 -> ${mergedName} | v${state.version}`);
 
     return {
       ok: true,
-      newScore: state.score,
       newVersion: state.version,
       resultId: result.resultItem.id,
       fromCol: result.fromItem.col,
@@ -1073,7 +1063,6 @@ export class GameEngine {
       total_exp: state.cultivation.total_exp,
       current_qi: Math.min(state.cultivation.current_qi, newMaxQi),
       max_qi: newMaxQi,
-      buffs: state.cultivation.buffs,
       last_tick_time: state.cultivation.last_tick_time,
     };
 
@@ -1108,53 +1097,28 @@ export class GameEngine {
     return changed;
   }
 
-  consumePill(
+  consumeExpPill(
     state: GameState,
     pillId: number
   ): { ok: true; cultivation: CultivationData } | { ok: false; reason: string } {
-
     const pillData = this.getItemData(pillId);
     if (!pillData) return { ok: false, reason: "invalid_pill" };
 
     const effectId: number = pillData.use_effect_id ?? 0;
     const effect = this.getEffect(effectId);
     if (!effect) return { ok: false, reason: "invalid_effect" };
-    if (effect.type !== "buff" && effect.type !== "exp") return { ok: false, reason: "not_consumable" };
+    if (effect.type !== "exp") return { ok: false, reason: "not_consumable" };
 
-    const c = state.cultivation;
-
-    // Apply instant EXP
     const expGain: number = effect.exp_gain ?? 0;
-    if (expGain > 0) {
-      this._addExp(c, expGain);
-    }
+    if (expGain <= 0) return { ok: false, reason: "no_exp_gain" };
 
-    // Apply buff
-    const duration: number = effect.duration ?? 0;
-    const multiplier: number = effect.multiplier ?? 1.0;
-    if (duration > 0) {
-      c.buffs.push({
-        pill_id: pillId,
-        name: pillData.name,
-        duration: duration,
-        remaining: duration,
-        multiplier: multiplier,
-      });
-    }
+    this._addExp(state.cultivation, expGain);
+    state.version += 1;
 
     const pillName = pillData.name;
-    console.log(`[engine] consume pill: ${pillName} | effect=${effectId} | exp +${expGain} | buff x${multiplier} ${duration}s | realm=${c.current_realm_id} lv=${c.current_level}`);
+    console.log(`[engine] consume exp pill: ${pillName} | exp +${expGain} | v${state.version}`);
 
-    state.version += 1;
-    return { ok: true, cultivation: c };
-  }
-
-  private _getExpMultiplier(c: CultivationData): number {
-    let mult = 1.0;
-    for (const b of c.buffs) {
-      mult = Math.max(mult, (b as any).multiplier ?? 1.0);
-    }
-    return mult;
+    return { ok: true, cultivation: state.cultivation };
   }
 
   private _addExp(c: CultivationData, amount: number): void {

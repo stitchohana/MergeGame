@@ -18,13 +18,9 @@ func _ready() -> void:
 
 func _restore_from_server(state: Dictionary) -> void:
 	# Game state
-	GameState.score = state.get("score", 0)
-	GameState.high_score = state.get("high_score", 0)
 	GameState.version = state.get("version", 0)
 	GameState.stamina = state.get("stamina", 100)
 	GameState.max_stamina = state.get("max_stamina", 100)
-	GameState.score_changed.emit(GameState.score)
-	GameState.high_score_changed.emit(GameState.high_score)
 	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 	GameState.spirit_stones = state.get("spirit_stones", 0)
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
@@ -75,8 +71,6 @@ func _collect_all_data() -> Dictionary:
 	return {
 		"version": GameState.version,
 		"game": {
-			"score": GameState.score,
-			"high_score": GameState.high_score,
 		"spirit_stones": GameState.spirit_stones,
 		},
 		"grid": _collect_grid_data(),

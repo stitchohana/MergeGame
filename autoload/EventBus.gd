@@ -1,8 +1,7 @@
 extends Node
 
 # EventBus: Lightweight signal bus for cross-widget action events.
-# Data events (score changes, grid updates) still flow directly
-# from GameState/GridManager to their listeners.
+# Data events (grid updates) still flow directly from GridManager to their listeners.
 
 # UI action events
 signal button_clicked(button_name: String, metadata: Dictionary)

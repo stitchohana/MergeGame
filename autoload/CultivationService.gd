@@ -1,7 +1,7 @@
 extends Node
 
 # CultivationService: Client-side display layer for cultivation.
-# All logic (EXP, buffs, breakthrough) runs on the server.
+# All logic (EXP, breakthrough) runs on the server.
 # Client submits operations and displays results from server responses.
 
 signal exp_changed(current_exp: int, exp_to_next: int)
@@ -10,7 +10,6 @@ signal qi_changed(current_qi: int, max_qi: int)
 signal level_up(realm_id: int, realm_name: String, level: int)
 signal breakthrough(realm_id: int, realm_name: String)
 signal breakthrough_pill_needed(pill_id: int)
-signal buff_changed(buffs: Array)
 
 var current_realm_id: int = 0
 var current_level: int = 1
@@ -18,39 +17,39 @@ var current_exp: int = 0
 var total_exp: int = 0
 var current_qi: int = 0
 var max_qi: int = 100
-
-var _active_buffs: Array = []
+var _pending_exp_pill_pos: Vector2i = Vector2i(-1, -1)
 
 func _ready() -> void:
-	CloudService.pill_consume_confirmed.connect(_on_consume_confirmed)
 	CloudService.breakthrough_confirmed.connect(_on_breakthrough_confirmed)
+	CloudService.exp_pill_consume_confirmed.connect(_on_exp_pill_consume_confirmed)
 
 # --- Server response handlers ---
-
-func _on_consume_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
-	var c: Dictionary = result.get("cultivation", {})
-	_apply_cultivation_state(c)
 
 func _on_breakthrough_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 	var c: Dictionary = result.get("cultivation", {})
 	_apply_cultivation_state(c)
 
-# --- Public operations (submit to server) ---
+func _on_exp_pill_consume_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	var c: Dictionary = result.get("cultivation", {})
+	_apply_cultivation_state(c)
+	if _pending_exp_pill_pos.x >= 0:
+		GridManager.remove_item(_pending_exp_pill_pos)
+		_pending_exp_pill_pos = Vector2i(-1, -1)
 
-func apply_buff(pill_data: Dictionary) -> void:
-	var pill_id: int = pill_data.get("id", 0)
-	if pill_id <= 0:
-		return
-	if CloudService.online:
-		CloudService.submit_consume_pill(pill_id, GameState.version)
+# --- Public operations (submit to server) ---
 
 func try_breakthrough(pill_id: int) -> bool:
 	if CloudService.online:
 		CloudService.submit_breakthrough(pill_id, GameState.version)
 		return true
 	return false
+
+func consume_exp_pill(pill_id: int, grid_pos: Vector2i) -> void:
+	_pending_exp_pill_pos = grid_pos
+	if CloudService.online:
+		CloudService.submit_consume_exp_pill(pill_id, GameState.version)
 
 # --- State sync from server ---
 
@@ -60,7 +59,6 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 	var old_exp := current_exp
 	var old_qi := current_qi
 	var old_max_qi := max_qi
-	var old_buffs := _active_buffs.duplicate()
 
 	current_realm_id = c.get("current_realm_id", 0)
 	current_level = c.get("current_level", 1)
@@ -68,7 +66,6 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 	total_exp = c.get("total_exp", 0)
 	current_qi = c.get("current_qi", 0)
 	max_qi = c.get("max_qi", 100)
-	_active_buffs = c.get("buffs", [])
 
 	if current_realm_id != old_realm or current_level != old_level:
 		var realm_name: String = get_realm_name()
@@ -79,9 +76,6 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 
 	if current_qi != old_qi or max_qi != old_max_qi:
 		qi_changed.emit(current_qi, max_qi)
-
-	if not _buffs_equal(_active_buffs, old_buffs):
-		buff_changed.emit(_active_buffs.duplicate())
 
 	if current_realm_id > old_realm:
 		breakthrough.emit(current_realm_id, get_realm_name())
@@ -94,14 +88,6 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 			breakthrough_pill_needed.emit(pill_id)
 	else:
 		exp_changed.emit(current_exp, get_exp_to_next_level())
-
-func _buffs_equal(a: Array, b: Array) -> bool:
-	if a.size() != b.size():
-		return false
-	for i in range(a.size()):
-		if a[i].get("pill_id") != b[i].get("pill_id") or a[i].get("remaining") != b[i].get("remaining"):
-			return false
-	return true
 
 # --- Queries (local cache, for UI display) ---
 
@@ -118,15 +104,6 @@ func get_exp_to_next_level() -> int:
 	if idx < 0 or idx >= exp_arr.size():
 		return 999999
 	return int(exp_arr[idx])
-
-func get_exp_multiplier() -> float:
-	var mult: float = 1.0
-	for buff in _active_buffs:
-		mult = maxf(mult, buff.get("multiplier", 1.0))
-	return mult
-
-func get_active_buffs() -> Array:
-	return _active_buffs.duplicate()
 
 func is_breakthrough_ready() -> bool:
 	if is_max_cultivation():
@@ -175,7 +152,7 @@ func get_realm_level_name(level: int) -> String:
 		7: return "七"
 		8: return "八"
 		9: return "九"
-	return str(level)
+		_: return str(level)
 
 func get_formatted_realm_level() -> String:
 	var name: String = get_realm_name()
@@ -195,7 +172,6 @@ func serialize() -> Dictionary:
 		"total_exp": total_exp,
 		"current_qi": current_qi,
 		"max_qi": max_qi,
-		"buffs": _active_buffs.duplicate(),
 	}
 
 func deserialize(data: Dictionary) -> void:

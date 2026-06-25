@@ -6,7 +6,6 @@ signal cultivation_clicked()
 @onready var exp_bar: ProgressBar = $ExpBar
 @onready var exp_label: Label = $ExpLabel
 @onready var qi_label: Label = $QiLabel
-@onready var buff_label: Label = $BuffLabel
 @onready var click_area: Control = $ClickArea
 
 func _ready() -> void:
@@ -14,7 +13,6 @@ func _ready() -> void:
 	CultivationService.exp_changed.connect(_on_exp_changed)
 	CultivationService.realm_changed.connect(_on_realm_changed)
 	CultivationService.qi_changed.connect(_on_qi_changed)
-	CultivationService.buff_changed.connect(_on_buff_changed)
 	CultivationService.breakthrough_pill_needed.connect(_on_breakthrough_pill_needed)
 	_refresh()
 
@@ -42,16 +40,6 @@ func _on_realm_changed(realm_id: int, realm_name: String, level: int) -> void:
 
 func _on_qi_changed(current_qi: int, max_qi: int) -> void:
 	qi_label.text = "灵力 %d/%d" % [current_qi, max_qi]
-
-func _on_buff_changed(buffs: Array) -> void:
-	if buffs.is_empty():
-		buff_label.hide()
-	else:
-		var names: PackedStringArray = []
-		for b in buffs:
-			names.append("%s x%.1f %ds" % [b.name, b.multiplier, b.remaining])
-		buff_label.text = "加成: %s" % ", ".join(names)
-		buff_label.show()
 
 func _on_breakthrough_pill_needed(pill_id: int) -> void:
 	var pill_data := ConfigDatabase.get_item_data(pill_id)

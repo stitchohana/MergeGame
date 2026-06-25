@@ -7,15 +7,12 @@ const defaultCultivation = {
   total_exp: 0,
   current_qi: 0,
   max_qi: 100,
-  buffs: [],
   last_tick_time: Date.now(),
 };
 
 export function defaultGameState(): GameState {
   const now = Date.now();
   return {
-    score: 0,
-    high_score: 0,
     grid: [],
     cultivation: { ...defaultCultivation },
     stamina: 100,
@@ -62,11 +59,9 @@ export class MemoryStorage implements IStorage {
       entries.push({
         userId,
         deviceId: user?.deviceId ?? "unknown",
-        score: state.high_score,
         updatedAt: new Date().toISOString(),
       });
     }
-    entries.sort((a, b) => b.score - a.score);
     return entries.slice(0, limit);
   }
 }

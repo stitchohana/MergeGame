@@ -54,7 +54,6 @@ func _on_merge_confirmed(result: Dictionary) -> void:
 				item["charges"] = item.get("max_charges", 3)
 			GridManager.add_item(item, to_pos)
 
-	GameState.add_score(maxi(0, result.get("new_score", GameState.score) - GameState.score))
 	merge_performed.emit(result, to_pos)
 
 func _on_merge_rejected(reason: String) -> void:

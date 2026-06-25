@@ -51,27 +51,6 @@ offset_top = -200.0
 offset_right = 300.0
 offset_bottom = 200.0
 
-[node name="FinalScoreLabel" type="Label" parent="GameOverPanel" unique_id=867576267]
-layout_mode = 0
-offset_left = 40.0
-offset_top = 40.0
-offset_right = 560.0
-offset_bottom = 110.0
-theme_override_font_sizes/font_size = 40
-text = "最终分数: 0"
-horizontal_alignment = 1
-
-[node name="NewHighScoreLabel" type="Label" parent="GameOverPanel" unique_id=802189408]
-visible = false
-layout_mode = 0
-offset_left = 40.0
-offset_top = 130.0
-offset_right = 560.0
-offset_bottom = 170.0
-theme_override_font_sizes/font_size = 30
-text = "新纪录!"
-horizontal_alignment = 1
-
 [node name="RestartButton" type="Button" parent="GameOverPanel" unique_id=140271005]
 layout_mode = 0
 offset_left = 120.0

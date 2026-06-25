@@ -79,12 +79,10 @@ export class JsonFileStorage implements IStorage {
         entries.push({
           userId,
           deviceId: user.deviceId,
-          score: state.high_score,
           updatedAt: new Date().toISOString(),
         });
       }
     }
-    entries.sort((a, b) => b.score - a.score);
     return entries.slice(0, limit);
   }
 }

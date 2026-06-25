@@ -17,10 +17,6 @@ func show_pause_menu() -> void:
 func _on_game_over() -> void:
 	$PausePanel.hide()
 	$GameOverPanel.show()
-	$GameOverPanel/FinalScoreLabel.text = "最终分数: %d" % GameState.score
-	var is_new := GameState.score >= GameState.high_score
-	$GameOverPanel/NewHighScoreLabel.text = "新纪录!" if is_new else ""
-	$GameOverPanel/NewHighScoreLabel.visible = is_new
 	show_animated()
 
 func _on_resume_pressed() -> void:

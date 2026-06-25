@@ -36,13 +36,10 @@ export interface CultivationData {
   total_exp: number;
   current_qi: number;
   max_qi: number;
-  buffs: Record<string, unknown>[];
   last_tick_time: number;
 }
 
 export interface GameState {
-  score: number;
-  high_score: number;
   grid: GridItem[];
   cultivation: CultivationData;
   stamina: number;
@@ -65,7 +62,6 @@ export interface User {
 export interface LeaderboardEntry {
   userId: string;
   deviceId: string;
-  score: number;
   updatedAt: string;
 }
 

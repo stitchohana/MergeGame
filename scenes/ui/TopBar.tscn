@@ -6,19 +6,6 @@
 size = Vector2(780, 100)
 script = ExtResource("1_gd")
 
-[node name="ScoreLabel" type="Label" parent="."]
-offset_left = 20
-offset_top = 15
-theme_override_font_sizes/font_size = 28
-text = "分数: 0"
-
-[node name="HighScoreLabel" type="Label" parent="."]
-offset_right = 100
-offset_bottom = 90
-theme_override_font_sizes/font_size = 18
-text = "最高: 0"
-horizontal_alignment = 2
-
 [node name="ShopButton" type="Button" parent="."]
 offset_left = 640
 offset_top = 25

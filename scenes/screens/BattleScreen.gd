@@ -147,11 +147,11 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 			GridManager.remove_item(grid_pos)
 			EventBus.show_toast.emit("恢复了 %d 点生命！" % heal)
 			_refresh_char_display()
+		"exp":
+			CultivationService.consume_exp_pill(item_data.get("id", 0), grid_pos)
 		"breakthrough":
 			var pill_id: int = item_data.get("id", 0)
 			CultivationService.try_breakthrough(pill_id)
-		"buff":
-			CultivationService.apply_buff(item_data)
 		_:
 			EventBus.show_toast.emit("此物品无法使用")
 
