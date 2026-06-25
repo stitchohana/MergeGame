@@ -1,12 +1,9 @@
 extends Node
 
-# MergeService: Server-authoritative merge. Uses client positions for local update on confirm.
+# MergeService: Server-authoritative merge.
 
 signal merge_performed(result_data: Dictionary, pos: Vector2i)
 signal merge_failed(reason: String)
-
-var _pending_from: Vector2i = Vector2i(-1, -1)
-var _pending_to: Vector2i = Vector2i(-1, -1)
 
 func _ready() -> void:
 	CloudService.merge_confirmed.connect(_on_merge_confirmed)
@@ -36,8 +33,6 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		return false
 
 	if CloudService.online:
-		_pending_from = from_pos
-		_pending_to = to_pos
 		CloudService.submit_merge(from_pos.x, from_pos.y, to_pos.x, to_pos.y, GameState.version)
 		return true
 	return false
@@ -46,24 +41,23 @@ func _on_merge_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 
 	var result_id: int = result.get("result_id", 0)
-	if result_id > 0 and _pending_from.x >= 0:
-		GridManager.remove_item(_pending_from)
-		GridManager.remove_item(_pending_to)
+	var from_pos := Vector2i(result.get("from_col", -1), result.get("from_row", -1))
+	var to_pos := Vector2i(result.get("to_col", -1), result.get("to_row", -1))
+
+	if result_id > 0 and from_pos.x >= 0:
+		GridManager.remove_item(from_pos)
+		GridManager.remove_item(to_pos)
 		var merged_data: Dictionary = ConfigDatabase.get_item_data(result_id)
 		if not merged_data.is_empty():
 			var item := merged_data.duplicate(true)
 			if item.get("type", "") == "launcher":
 				item["charges"] = item.get("max_charges", 3)
-			GridManager.add_item(item, _pending_to)
+			GridManager.add_item(item, to_pos)
 
 	GameState.add_score(maxi(0, result.get("new_score", GameState.score) - GameState.score))
-	merge_performed.emit(result, _pending_to)
-	_pending_from = Vector2i(-1, -1)
-	_pending_to = Vector2i(-1, -1)
+	merge_performed.emit(result, to_pos)
 
 func _on_merge_rejected(reason: String) -> void:
-	_pending_from = Vector2i(-1, -1)
-	_pending_to = Vector2i(-1, -1)
 	EventBus.show_toast.emit(_merge_error_text(reason))
 	merge_failed.emit(reason)
 

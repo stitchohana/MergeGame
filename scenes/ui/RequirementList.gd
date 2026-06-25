@@ -12,7 +12,10 @@ func set_title(text: String) -> void:
 	title_label.text = text
 
 func set_requirements(reqs: Array) -> void:
-	for child in container.get_children():
+	# Remove old children immediately so new entries get correct indices
+	while container.get_child_count() > 0:
+		var child := container.get_child(0)
+		container.remove_child(child)
 		child.queue_free()
 
 	for i in range(reqs.size()):
@@ -38,4 +41,5 @@ func remove_entry(index: int) -> void:
 		return
 	var entry := container.get_child(index)
 	if entry and is_instance_valid(entry):
+		container.remove_child(entry)
 		entry.queue_free()

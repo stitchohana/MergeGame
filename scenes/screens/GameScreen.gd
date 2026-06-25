@@ -153,9 +153,10 @@ func _count_grid_item(item_id: int) -> int:
 
 func _check_can_complete(req: Dictionary) -> bool:
 	var items: Array = req.get("items", [])
+	if items.is_empty():
+		return false
 	for it in items:
-		var needed := _count_grid_item(int(it.get("item_id", 0)))
-		if needed < 1:
+		if _count_grid_item(int(it.get("item_id", 0))) < 1:
 			return false
 	return true
 
@@ -197,7 +198,7 @@ func _display_meridian() -> void:
 			display_reqs.append(req.duplicate())
 			_display_index_map.append(i)
 	requirement_list.set_requirements(display_reqs)
-	call_deferred("_refresh_requirement_buttons")
+	_refresh_requirement_buttons()
 
 func _on_meridian_complete(display_index: int) -> void:
 	if display_index < 0 or display_index >= _display_index_map.size():
@@ -219,21 +220,21 @@ func _on_meridian_complete(display_index: int) -> void:
 func _on_meridian_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 
-	for id in _pending_item_ids:
-		for entry in GridManager.get_all_items():
-			if entry.data.get("id", 0) == int(id):
-				GridManager.remove_item(entry.pos)
-				break
+	var server_grid: Array = result.get("grid", [])
+	print("[GameScreen] meridian confirmed, server grid size=", server_grid.size())
+	grid_view.set_skip_animations(true)
+	GridManager.init_grid()
+	for entry in server_grid:
+		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
+		if not item_data.is_empty():
+			var item := item_data.duplicate(true)
+			if entry.has("charges"): item["charges"] = entry.charges
+			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	grid_view.set_skip_animations(false)
 
 	var cult: Dictionary = result.get("cultivation", {})
 	if not cult.is_empty():
 		CultivationService.deserialize(cult)
-
-	var qi_gained: int = result.get("qi_gained", 0)
-	if qi_gained > 0:
-		EventBus.show_toast.emit("灵力 +%d" % qi_gained)
-		if result.get("qi_full", false):
-			EventBus.show_toast.emit("灵力已满，尽快使用！")
 
 	for i in range(result.get("meridian_acupoints", []).size()):
 		if i < GameState.meridian_acupoints.size():
@@ -248,6 +249,12 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 		GameState.meridian_acupoints.clear()
 		_refresh_meridian()
 	_display_meridian()
+
+	var qi_gained: int = result.get("qi_gained", 0)
+	if qi_gained > 0:
+		EventBus.show_toast.emit("灵力 +%d" % qi_gained)
+		if result.get("qi_full", false):
+			EventBus.show_toast.emit("灵力已满，尽快使用！")
 
 func _on_meridian_rejected(reason: String) -> void:
 	_pending_item_ids.clear()

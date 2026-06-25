@@ -33,3 +33,7 @@ SceneTransitionManager="*res://autoload/SceneTransitionManager.gd"
 window/size/viewport_width=780
 window/size/viewport_height=1688
 window/stretch/mode="canvas_items"
+
+[rendering]
+
+renderer/rendering_method="mobile"

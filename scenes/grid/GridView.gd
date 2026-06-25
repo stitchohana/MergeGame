@@ -34,6 +34,10 @@ var _craft_table_pos: Vector2i = Vector2i(-1, -1)
 var _craft_table_item: Dictionary = {}
 var _is_launcher_spawning: bool = false
 var _selected_key: String = ""
+var _skip_anims: bool = false
+
+func set_skip_animations(skip: bool) -> void:
+	_skip_anims = skip
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -434,7 +438,7 @@ func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
 	if layer:
 		layer.add_child(item)
 	item.setup(item_data, pos, CELL_SIZE)
-	if not _is_launcher_spawning:
+	if not _is_launcher_spawning and not _skip_anims:
 		item.play_spawn_animation()
 	_item_nodes["%d,%d" % [pos.x, pos.y]] = item
 
@@ -442,6 +446,10 @@ func _on_item_removed(item_data: Dictionary, pos: Vector2i) -> void:
 	var key := "%d,%d" % [pos.x, pos.y]
 	var node = _item_nodes.get(key)
 	if node and is_instance_valid(node):
+		if _skip_anims:
+			node.queue_free()
+			_item_nodes.erase(key)
+			return
 		node.play_merge_animation()
 	_item_nodes.erase(key)
 

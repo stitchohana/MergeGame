@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://cvkxld863ewuk"]
 
-[ext_resource type="Script" uid="uid://dgohdhnlhbejk" path="res://scenes/ui/Toast.gd" id="1_toast"]
+[ext_resource type="Script" uid="uid://b6centcepb1ok" path="res://scenes/ui/Toast.gd" id="1_toast"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_3p6y3"]
-font_size = 65
+font_size = 30
 
 [node name="Toast" type="Panel" unique_id=412002003]
 self_modulate = Color(0, 0, 0, 0.85)
