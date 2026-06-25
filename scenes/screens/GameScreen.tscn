@@ -22,17 +22,21 @@ offset_right = 781.0
 offset_bottom = 101.0
 grow_horizontal = 2
 
-[node name="CultivationPanel" parent="." unique_id=1858215769 instance=ExtResource("7_cul")]
-layout_mode = 0
-offset_top = 101.0
-offset_bottom = 404.0
-
 [node name="RequirementList" parent="." unique_id=1650475559 instance=ExtResource("8_req")]
 layout_mode = 0
 offset_left = 37.0
 offset_top = 264.0
 offset_right = 737.0
 offset_bottom = 404.0
+
+[node name="CultivationPanel" parent="." unique_id=1214071501 instance=ExtResource("7_cul")]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_top = 67.0
+offset_bottom = 255.0
+grow_horizontal = 2
 
 [node name="GridView" parent="." unique_id=644218555 instance=ExtResource("2_grid")]
 layout_mode = 0

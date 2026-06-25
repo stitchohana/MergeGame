@@ -24,6 +24,14 @@ func _ready() -> void:
 	_orig_scale = scale
 
 	select_icon.visible = false
+	var temp := ColorRect.new()
+	temp.name = "SelectColor"
+	temp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	temp.anchors_preset = Control.PRESET_FULL_RECT
+	temp.anchor_right = 1.0
+	temp.anchor_bottom = 1.0
+	temp.color = Color(1, 0.85, 0.2, 0.7)
+	select_icon.add_child(temp)
 
 func set_selected(active: bool) -> void:
 	_is_selected = active

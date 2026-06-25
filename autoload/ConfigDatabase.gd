@@ -147,6 +147,31 @@ func _board_type_key(board_type: int) -> String:
 		Constants.BoardType.BATTLE: return "battle"
 		_: return "main"
 
+# Get all launchers that can spawn a specific item_id
+func get_launchers_for_item(item_id: int) -> Array:
+	var result: Array = []
+	for id in _items_data:
+		if id is int:
+			var item: Dictionary = _items_data[id]
+			if item.get("type", "") != "launcher":
+				continue
+			var spawns: Array = item.get("spawns", [])
+			for s in spawns:
+				if s.get("id", 0) == item_id:
+					result.append(item)
+					break
+	return result
+
+# Get all items in a specific group_id (across all types)
+func get_items_by_group(group_id: int) -> Array:
+	var result: Array = []
+	for item_id in _items_data:
+		if item_id is int:
+			var item: Dictionary = _items_data[item_id]
+			if item.get("group_id", 0) == group_id:
+				result.append(item)
+	return result
+
 # Get all item IDs grouped by type
 func get_all_items_of_type(type: String) -> Array:
 	var by_level: Dictionary = _items_by_type_level.get(type, {})

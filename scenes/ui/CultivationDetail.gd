@@ -6,7 +6,6 @@ class_name CultivationDetail extends BasePopup
 @onready var qi_label: Label = $Panel/QiLabel
 @onready var breakthrough_label: Label = $Panel/BreakthroughLabel
 @onready var close_btn: Button = $Panel/CloseButton
-@onready var figure_rect: ColorRect = $Panel/FigureBg
 
 func _ready() -> void:
 	close_btn.pressed.connect(_on_close)

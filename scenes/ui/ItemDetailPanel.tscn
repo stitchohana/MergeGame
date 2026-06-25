@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ofi2ei6no4yy"]
 
-[ext_resource type="Script" uid="uid://dc7vlvwt75dgk" path="res://scenes/ui/ItemDetailPanel.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://bkxqpth7x6n8p" path="res://scenes/ui/ItemDetailPanel.gd" id="1_gd"]
 
 [node name="ItemDetailPanel" type="Control" unique_id=607450120]
 layout_mode = 3
@@ -70,10 +70,19 @@ vertical_alignment = 1
 layout_mode = 0
 offset_left = 140.0
 offset_top = 145.0
-offset_right = 300.0
+offset_right = 240.0
 offset_bottom = 175.0
 theme_override_font_sizes/font_size = 14
-text = "查看配方"
+text = "配方"
+
+[node name="ViewButton" type="Button" parent="." unique_id=690038754]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 145.0
+offset_right = 350.0
+offset_bottom = 175.0
+theme_override_font_sizes/font_size = 14
+text = "查看"
 
 [node name="MaterialsLabel" type="Label" parent="." unique_id=1916841941]
 layout_mode = 0

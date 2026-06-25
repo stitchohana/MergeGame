@@ -155,7 +155,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.removeIngredientFromTable(state, table_col, table_row, ingredient_id, target_col, target_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion });
+    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
   }));
 
   // POST /api/game/move
@@ -168,7 +168,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeMove(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion });
+    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
   }));
 
   // POST /api/game/shop/sell
@@ -222,7 +222,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.depositItem(state, storage_col, storage_row, item_id, from_col, from_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion });
+    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
   }));
 
   // POST /api/game/storage/withdraw
@@ -280,7 +280,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.switchBoard(state, board_type);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion });
+    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
   }));
 
   // GET /api/leaderboard

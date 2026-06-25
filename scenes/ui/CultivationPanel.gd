@@ -6,21 +6,12 @@ signal cultivation_clicked()
 @onready var exp_bar: ProgressBar = $ExpBar
 @onready var exp_label: Label = $ExpLabel
 @onready var qi_label: Label = $QiLabel
-@onready var click_area: Control = $ClickArea
-
 func _ready() -> void:
-	click_area.gui_input.connect(_on_click_area_input)
 	CultivationService.exp_changed.connect(_on_exp_changed)
 	CultivationService.realm_changed.connect(_on_realm_changed)
 	CultivationService.qi_changed.connect(_on_qi_changed)
 	CultivationService.breakthrough_pill_needed.connect(_on_breakthrough_pill_needed)
 	_refresh()
-
-func _on_click_area_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			cultivation_clicked.emit()
 
 func _on_exp_changed(current_exp: int, exp_to_next: int) -> void:
 	if exp_to_next > 0:

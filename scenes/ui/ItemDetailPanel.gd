@@ -24,6 +24,8 @@ func _ready() -> void:
 	recipe_btn.pressed.connect(_on_recipe_btn_pressed)
 	if sell_btn:
 		sell_btn.pressed.connect(_on_sell_pressed)
+	if $ViewButton:
+		$ViewButton.pressed.connect(_on_view_pressed)
 	CraftingService.table_state_changed.connect(_on_table_state_changed)
 
 func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> void:
@@ -231,6 +233,13 @@ func _hide_materials() -> void:
 func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
 	if not _current_item_data.is_empty() and _current_item_data == table_item:
 		_refresh_materials()
+
+func _on_view_pressed() -> void:
+	if _current_item_data.is_empty():
+		return
+	var popup := preload("res://scenes/ui/CraftPathView.tscn").instantiate() as CraftPathView
+	UIManager.show_popup(popup)
+	popup.show_for_item(_current_item_data)
 
 func _on_recipe_btn_pressed() -> void:
 	if _current_recipes.is_empty():
