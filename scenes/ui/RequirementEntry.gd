@@ -30,26 +30,17 @@ func _do_setup(items: Array, index: int, completed: bool) -> void:
 		child.queue_free()
 
 	for it in items:
-		var item_box := VBoxContainer.new()
-		item_box.custom_minimum_size = Vector2(40, 0)
-		item_box.alignment = BoxContainer.ALIGNMENT_CENTER
-		item_box.add_theme_constant_override("separation", 1)
-
-		var icon := ColorRect.new()
-		icon.custom_minimum_size = Vector2(32, 32)
-		icon.size = Vector2(32, 32)
-		icon.color = _item_color(int(it.get("item_id", 0)))
-		item_box.add_child(icon)
-
-		var lbl := Label.new()
-		lbl.text = it.get("name", "?")
-		lbl.add_theme_color_override("font_color", Color.WHITE)
-		lbl.add_theme_font_size_override("font_size", 9)
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.clip_text = true
-		item_box.add_child(lbl)
-
-		items_container.add_child(item_box)
+		var item_id: int = int(it.get("item_id", 0))
+		var item_data := ConfigDatabase.get_item_data(item_id)
+		var widget := preload("res://scenes/ui/ItemWidget.tscn").instantiate() as ItemWidget
+		if not item_data.is_empty():
+			widget.setup(item_data)
+		else:
+			widget.setup({"name": it.get("name", "?")})
+		widget.custom_minimum_size = Vector2(40, 40)
+		widget.size = Vector2(40, 40)
+		widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		items_container.add_child(widget)
 
 	if completed:
 		complete_btn.text = "✓"
@@ -76,29 +67,6 @@ func mark_completed() -> void:
 	btn.disabled = true
 	btn.visible = true
 	var items_container: HBoxContainer = $Panel/ItemsContainer
-	for box in items_container.get_children():
-		if box is VBoxContainer:
-			for child in box.get_children():
-				if child is ColorRect:
-					child.modulate = Color(0.5, 0.8, 0.5, 1)
-
-func _item_color(item_id: int) -> Color:
-	match item_id:
-		21: return Color(0.3, 0.7, 0.3)
-		22: return Color(0.2, 0.6, 0.2)
-		23: return Color(0.4, 0.8, 0.4)
-		24: return Color(0.5, 0.9, 0.5)
-		61: return Color(0.6, 0.4, 0.2)
-		62: return Color(0.5, 0.5, 0.5)
-		63: return Color(0.7, 0.7, 0.8)
-		64: return Color(0.9, 0.8, 0.3)
-		65: return Color(0.8, 0.5, 0.2)
-		66: return Color(0.6, 0.6, 0.6)
-		67: return Color(0.8, 0.8, 0.9)
-		68: return Color(1.0, 0.9, 0.4)
-		41: return Color(0.7, 0.3, 0.3)
-		42: return Color(0.8, 0.3, 0.3)
-		43: return Color(0.9, 0.3, 0.3)
-		44: return Color(1.0, 0.3, 0.3)
-		45: return Color(1.0, 0.2, 0.2)
-		_: return Color(0.4, 0.4, 0.5)
+	for child in items_container.get_children():
+		if child is ItemWidget:
+			child.modulate = Color(0.5, 0.8, 0.5, 1)

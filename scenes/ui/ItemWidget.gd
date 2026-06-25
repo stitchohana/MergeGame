@@ -1,104 +1,64 @@
-class_name GridItem extends ColorRect
+class_name ItemWidget extends ColorRect
 
-# GridItem: A single item on the game board.
-# Shows colored background, item name, level, and optional icon.
+# ItemWidget: Reusable item display for grid and UI. Shows icon, name, level,
+# selection indicator, charge status, and crafting state.
+
+signal selected(item_data: Dictionary)
 
 var item_data: Dictionary = {}
 var grid_position: Vector2i
 var is_launcher: bool = false
 
+var _is_selected: bool = false
 var _orig_modulate: Color
 var _orig_scale: Vector2
 
-@onready var name_label: Label = $NameLabel
-@onready var level_label: Label = $LevelLabel
 @onready var icon_rect: TextureRect = $IconRect
+@onready var name_label: Label = $NameLabel
 @onready var charge_label: Label = $ChargeLabel
+@onready var level_label: Label = $LevelLabel
 @onready var select_icon: TextureRect = $SelectIcon
-
-var _is_selected: bool = false
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_orig_modulate = modulate
 	_orig_scale = scale
 
-	select_icon.visible = false
-
-func set_selected(active: bool) -> void:
-	_is_selected = active
-	if select_icon:
-		select_icon.visible = active
-
-func setup(data: Dictionary, pos: Vector2i, cell_size: int) -> void:
+func setup(data: Dictionary, pos: Vector2i = Vector2i(-1, -1), cell_size: int = 80) -> void:
 	item_data = data
-	grid_position = pos
 	is_launcher = data.get("type", "") == "launcher"
 
-	custom_minimum_size = Vector2(cell_size, cell_size)
-	size = Vector2(cell_size, cell_size)
-	position = Vector2(pos.x * cell_size, pos.y * cell_size)
+	if pos.x >= 0:
+		grid_position = pos
+		custom_minimum_size = Vector2(cell_size, cell_size)
+		size = Vector2(cell_size, cell_size)
+		position = Vector2(pos.x * cell_size, pos.y * cell_size)
 
 	_update_visuals()
 
 func _update_visuals() -> void:
-	# Background color by type and group
 	var item_type: String = item_data.get("type", "")
 	var group_id: int = item_data.get("group_id", 0)
 
-	# Character rendering
-	if item_type == "character":
-		color = Color(0.15, 0.5, 0.75, 1)
-		if name_label:
-			name_label.text = item_data.get("name", "")
-			name_label.visible = true
-		var hp: int = item_data.get("hp", 0)
-		var max_hp: int = item_data.get("max_hp", 0)
-		if level_label:
-			level_label.text = "HP %d/%d" % [hp, max_hp]
-			level_label.visible = true
-		return
-
-	# Monster rendering
-	if item_type == "monster":
-		color = Color(0.8, 0.15, 0.15, 1)
-		if name_label:
-			name_label.text = item_data.get("name", "")
-			name_label.visible = true
-		var hp: int = item_data.get("hp", 0)
-		var max_hp: int = item_data.get("max_hp", 0)
-		if level_label:
-			level_label.text = "HP %d/%d" % [hp, max_hp]
-			level_label.visible = true
-		return
-
+	# Background color
 	if is_launcher:
 		match group_id:
-			1:
-				color = Color(0.6, 0.3, 0.8, 1)  # purple for stone set
-			2:
-				color = Color(1.0, 0.6, 0.2, 1)  # orange for plant set
-			_:
-				color = Color(0.5, 0.5, 0.5, 1)
+			1: color = Color(0.6, 0.3, 0.8, 1)
+			2: color = Color(1.0, 0.6, 0.2, 1)
+			_: color = Color(0.5, 0.5, 0.5, 1)
 	else:
 		var level: int = item_data.get("level", 0)
 		var hue := 0.0
 		match group_id:
-			1:
-				# Stone set: rainbow range (hue 0.0-0.875)
-				hue = float(level - 1) / 8.0
-			2:
-				# Plant set: green range (hue 0.25-0.4)
-				hue = 0.25 + float(level - 1) / 6.0 * 0.15
-			_:
-				hue = float(level - 1) / 8.0
+			1: hue = float(level - 1) / 8.0
+			2: hue = 0.25 + float(level - 1) / 6.0 * 0.15
+			_: hue = float(level - 1) / 8.0
 		color = Color.from_hsv(hue, 0.6, 0.7)
-		# Apply crafting state visual if present (restored from server)
 		var cs: int = item_data.get("_craft_state", -1)
 		if cs >= 0 and cs <= 3:
-			set_crafting_state(cs)
+			_set_crafting_color(cs)
 
-	# Optional icon overlay
+	# Icon
 	var icon_path: String = item_data.get("icon", "")
 	if icon_path and icon_rect:
 		var tex := load(icon_path) as Texture2D
@@ -106,20 +66,20 @@ func _update_visuals() -> void:
 			icon_rect.texture = tex
 			icon_rect.show()
 
-	# Item name
+	# Name
 	var item_name: String = item_data.get("name", "")
 	var item_id: int = item_data.get("id", 0)
 	if name_label:
 		name_label.text = item_name + (" [#%d]" % item_id if item_id > 0 else "")
 		name_label.visible = true
 
-	# Level label
+	# Level
 	var level: int = item_data.get("level", 0)
 	if level_label:
 		level_label.text = str(level)
 		level_label.visible = true
 
-	# Charge indicator for launchers (uses node from scene)
+	# Charge
 	if charge_label:
 		if is_launcher:
 			var item_charges: int = item_data.get("charges", -1)
@@ -138,7 +98,11 @@ func _update_visuals() -> void:
 		else:
 			charge_label.visible = false
 
-# Called by GridView during drag
+func set_selected(active: bool) -> void:
+	_is_selected = active
+	if select_icon:
+		select_icon.visible = active
+
 func set_drag_active(active: bool) -> void:
 	if active:
 		modulate = Color(1, 1, 1, 0.4)
@@ -148,16 +112,14 @@ func set_drag_active(active: bool) -> void:
 		scale = Vector2(1, 1)
 
 func set_crafting_state(state: int) -> void:
-	# state: 0=IDLE, 1=HAS_ITEMS, 2=CRAFTING, 3=READY
 	match state:
-		1:  # HAS_ITEMS — slight glow
-			modulate = Color(1.0, 1.0, 0.8, 1)
-		2:  # CRAFTING — dim with progress pulse
-			modulate = Color(0.6, 0.6, 0.7, 1)
-		3:  # READY — bright glow
-			modulate = Color(1.0, 1.0, 0.6, 1)
-		_:  # IDLE or unknown — reset
-			modulate = Color.WHITE
+		1: modulate = Color(1.0, 1.0, 0.8, 1)
+		2: modulate = Color(0.6, 0.6, 0.7, 1)
+		3: modulate = Color(1.0, 1.0, 0.6, 1)
+		_: modulate = Color.WHITE
+
+func _set_crafting_color(state: int) -> void:
+	set_crafting_state(state)
 
 func set_visual_position(pos: Vector2) -> void:
 	position = pos

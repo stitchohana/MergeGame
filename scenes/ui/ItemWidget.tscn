@@ -1,23 +1,27 @@
-[gd_scene format=3 uid="uid://dbfaocwrurvis"]
+[gd_scene format=3 uid="uid://dbfaocwritemw"]
 
-[ext_resource type="Script" uid="uid://c6uowbilxkeab" path="res://scenes/items/GridItem.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://csgm2fbx5sx83" path="res://scenes/ui/ItemWidget.gd" id="1_gd"]
 
-[node name="GridItem" type="ColorRect" unique_id=140265477]
-custom_minimum_size = Vector2(100, 100)
-offset_right = 100.0
-offset_bottom = 100.0
+[node name="ItemWidget" type="ColorRect" unique_id=648899735]
+custom_minimum_size = Vector2(80, 80)
+offset_right = 80.0
+offset_bottom = 80.0
 mouse_filter = 1
 color = Color(0.3, 0.3, 0.4, 1)
 script = ExtResource("1_gd")
 
-[node name="IconRect" type="TextureRect" parent="." unique_id=252949918]
-visible = false
-layout_mode = 0
+[node name="IconRect" type="TextureRect" parent="." unique_id=1370072684]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="NameLabel" type="Label" parent="." unique_id=2576373]
+[node name="NameLabel" type="Label" parent="." unique_id=1766180508]
 layout_mode = 0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -28,30 +32,27 @@ offset_right = -4.0
 offset_bottom = -4.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
-text = "道具名"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ChargeLabel" type="Label" parent="." unique_id=1099883731]
+[node name="ChargeLabel" type="Label" parent="." unique_id=1423207993]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 2.0
-offset_right = 98.0
+offset_right = 78.0
 offset_bottom = 18.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 horizontal_alignment = 2
 
-[node name="LevelLabel" type="Label" parent="." unique_id=1183002610]
+[node name="LevelLabel" type="Label" parent="." unique_id=705269815]
 layout_mode = 0
 offset_left = 4.0
 offset_top = 4.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-text = "1"
 
-[node name="SelectIcon" type="TextureRect" parent="." unique_id=1041341535]
-visible = false
+[node name="SelectIcon" type="TextureRect" parent="." unique_id=1048013850]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

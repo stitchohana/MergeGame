@@ -50,26 +50,12 @@ func _build_item_button(item_data: Dictionary, price: int) -> Button:
 	var vbox := VBoxContainer.new()
 	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	var icon_rect := ColorRect.new()
-	icon_rect.custom_minimum_size = Vector2(40, 40)
-	icon_rect.size = Vector2(40, 40)
-	icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var gid: int = item_data.get("group_id", 0)
-	var lv: int = item_data.get("level", 0)
-	var hue := 0.0
-	match gid:
-		3: hue = float(lv - 1) / 8.0
-		4: hue = 0.25 + float(lv - 1) / 6.0 * 0.15
-		5: hue = 0.55 + float(lv - 1) / 6.0 * 0.15
-		_: hue = float(lv - 1) / 8.0
-	icon_rect.color = Color.from_hsv(hue, 0.6, 0.7)
-	vbox.add_child(icon_rect)
-
-	var name_label := Label.new()
-	name_label.text = item_data.get("name", "")
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 11)
-	vbox.add_child(name_label)
+	var widget := preload("res://scenes/ui/ItemWidget.tscn").instantiate() as ItemWidget
+	widget.setup(item_data)
+	widget.custom_minimum_size = Vector2(40, 40)
+	widget.size = Vector2(40, 40)
+	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_child(widget)
 
 	var price_label := Label.new()
 	price_label.text = "%d灵石" % price

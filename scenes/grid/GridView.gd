@@ -8,6 +8,7 @@ const GRID_ROWS := Constants.GRID_ROWS
 const DRAG_THRESHOLD := 10.0  # pixels before drag starts
 
 @export var grid_cell_scene: PackedScene
+
 @export var grid_item_scene: PackedScene
 
 signal item_clicked(item_data: Dictionary, grid_pos: Vector2i)
@@ -26,7 +27,6 @@ var _press_screen_pos: Vector2 = Vector2.ZERO
 var _pressed_item: Dictionary = {}
 var _pressed_has_moved: bool = false
 
-var _drag_ghost: ColorRect = null
 
 # Crafting
 var _craft_button: CraftButton = null
@@ -42,7 +42,6 @@ func set_skip_animations(skip: bool) -> void:
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_create_grid()
-	_create_ghost()
 	_connect_signals()
 	_sync_all_items()
 	_setup_crafting()
@@ -75,36 +74,6 @@ func _create_grid() -> void:
 	items_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(items_layer)
 
-func _create_ghost() -> void:
-	_drag_ghost = ColorRect.new()
-	_drag_ghost.name = "DragGhost"
-	_drag_ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_drag_ghost.visible = false
-	_drag_ghost.modulate = Color(1, 1, 1, 0.7)
-	_drag_ghost.custom_minimum_size = Vector2(CELL_SIZE, CELL_SIZE)
-	_drag_ghost.size = Vector2(CELL_SIZE, CELL_SIZE)
-
-	var gl := Label.new()
-	gl.name = "GhostLabel"
-	gl.anchor_left = 0.0
-	gl.anchor_top = 0.5
-	gl.anchor_right = 1.0
-	gl.anchor_bottom = 1.0
-	gl.offset_left = 2
-	gl.offset_top = 2
-	gl.offset_right = -2
-	gl.offset_bottom = -2
-	gl.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
-	gl.add_theme_font_size_override("font_size", 10)
-	gl.horizontal_alignment = 1
-	gl.vertical_alignment = 1
-	_drag_ghost.add_child(gl)
-
-	var ghost_layer := CanvasLayer.new()
-	ghost_layer.name = "DragGhostLayer"
-	ghost_layer.layer = 100
-	add_child(ghost_layer)
-	ghost_layer.add_child(_drag_ghost)
 
 func _connect_signals() -> void:
 	GridManager.item_added.connect(_on_item_added)
@@ -182,7 +151,11 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion:
 		var local_pos := _to_local(event.position)
 		if _is_dragging:
-			_drag_ghost.position = get_global_mouse_position() - Vector2(CELL_SIZE * 0.5, CELL_SIZE * 0.5)
+
+			var drag_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
+			var drag_node = _item_nodes.get(drag_key)
+			if drag_node and is_instance_valid(drag_node):
+				drag_node.position = get_global_mouse_position() - global_position - Vector2(CELL_SIZE * 0.5, CELL_SIZE * 0.5)
 			_update_highlights(local_pos)
 		elif not _pressed_item.is_empty() and not _pressed_has_moved:
 			if local_pos.distance_to(_press_screen_pos) > DRAG_THRESHOLD:
@@ -315,46 +288,14 @@ func _start_drag(pos: Vector2i) -> void:
 	_drag_item_data = item
 	_is_dragging = true
 	GameState.set_phase(GameState.GamePhase.DRAGGING)
-
-	var src_node = _item_nodes.get("%d,%d" % [pos.x, pos.y])
-	if src_node and is_instance_valid(src_node):
-		src_node.set_drag_active(true)
-
-	var group_id: int = item.get("group_id", 0)
-	var item_type: String = item.get("type", "")
-	if item_type == "launcher":
-		match group_id:
-			1: _drag_ghost.color = Color(0.6, 0.3, 0.8, 1)
-			2: _drag_ghost.color = Color(1.0, 0.6, 0.2, 1)
-			_: _drag_ghost.color = Color(0.5, 0.5, 0.5, 1)
-	else:
-		var level: int = item.get("level", 0)
-		var hue := 0.0
-		match group_id:
-			1: hue = float(level - 1) / 8.0
-			2: hue = 0.25 + float(level - 1) / 6.0 * 0.15
-			_: hue = float(level - 1) / 8.0
-		_drag_ghost.color = Color.from_hsv(hue, 0.6, 0.7)
-
-	var gl: Label = _drag_ghost.get_node_or_null("GhostLabel") as Label
-	if gl:
-		gl.text = item.get("name", "")
-
-	_drag_ghost.modulate = Color(1, 1, 1, 0.7)
-	_drag_ghost.visible = true
 	_hide_craft_button()
+
 
 func _finish_drag(target_pos: Vector2i) -> void:
 	_is_dragging = false
 	_pressed_item = {}
-	_drag_ghost.visible = false
-
-	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
-	if _item_nodes.has(src_key):
-		var src_node = _item_nodes[src_key]
-		if is_instance_valid(src_node):
-			src_node.set_drag_active(false)
 	_clear_highlights()
+
 
 	if not GridManager.is_valid_pos(target_pos) or not Rect2(global_position, size).has_point(get_global_mouse_position()):
 		_snap_back()
@@ -531,22 +472,6 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 	var ingredient_id: int = dragged_item.get("id", 0)
 
 	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
-	var src_node = _item_nodes.get(src_key)
-	if src_node and is_instance_valid(src_node):
-		src_node.queue_free()
-	_item_nodes.erase(src_key)
-	GridManager.remove_item(_drag_source_pos)
-
-	var matched := CraftingService.add_ingredient(table_item, dragged_item)
-	if matched:
-		_craft_table_pos = table_pos
-		_craft_table_item = table_item
-		var recipe := CraftingService.get_current_recipe(table_item)
-		if not recipe.is_empty():
-			_craft_button.show_for_recipe(recipe)
-			_craft_button.set_table_pos(position, table_pos, CELL_SIZE)
-	else:
-		_hide_craft_button()
 
 	if CloudService.online:
 		CloudService.submit_craft_add(_drag_source_pos.x, _drag_source_pos.y, table_pos.x, table_pos.y, ingredient_id, GameState.version)
@@ -585,10 +510,9 @@ func _handle_storage_drop(storage_pos: Vector2i, storage_item: Dictionary) -> vo
 		src_node.queue_free()
 	_item_nodes.erase(src_key)
 	GridManager.remove_item(_drag_source_pos)
-
+	
 	if CloudService.online:
 		CloudService.submit_storage_deposit(storage_pos.x, storage_pos.y, item_id, _drag_source_pos.x, _drag_source_pos.y)
-
 func _handle_crafting_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 	if table_item.is_empty():
 		return
@@ -596,6 +520,7 @@ func _handle_crafting_retrieve(table_item: Dictionary, table_pos: Vector2i) -> v
 		CloudService.submit_craft_retrieve(table_pos.x, table_pos.y, GameState.version)
 	else:
 		_do_local_retrieve(table_item, table_pos)
+
 
 func _do_local_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 	var result_id := CraftingService.retrieve(table_item)
@@ -616,7 +541,6 @@ func _do_local_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 	if table_node and is_instance_valid(table_node):
 		table_node.set_crafting_state(CraftingService.TableState.IDLE)
 	_hide_craft_button()
-
 func _on_craft_button_pressed() -> void:
 	if _craft_table_item.is_empty():
 		return

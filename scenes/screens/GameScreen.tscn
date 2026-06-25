@@ -2,8 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dmv0t71np61ym" path="res://scenes/screens/GameScreen.gd" id="1_gs"]
 [ext_resource type="PackedScene" uid="uid://deg7lbni32jui" path="res://scenes/grid/GridView.tscn" id="2_grid"]
-[ext_resource type="PackedScene" path="res://scenes/ui/TopBar.tscn" id="3_top"]
-[ext_resource type="PackedScene" uid="uid://bi0a8egfjafco" path="res://scenes/ui/Overlay.tscn" id="5_overlay"]
+[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/TopBar.tscn" id="3_top"]
 [ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/ItemDetailPanel.tscn" id="6_detail"]
 [ext_resource type="PackedScene" uid="uid://dx74q48vv12nw" path="res://scenes/ui/CultivationPanel.tscn" id="7_cul"]
 [ext_resource type="PackedScene" uid="uid://bf6fe2778glgu" path="res://scenes/ui/RequirementList.tscn" id="8_req"]
@@ -49,22 +48,12 @@ offset_top = 1314.0
 offset_right = 774.0
 offset_bottom = 1594.0
 
-[node name="Overlay" parent="." unique_id=170101279 instance=ExtResource("5_overlay")]
-layout_mode = 0
-anchors_preset = 0
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_left = 385.0
-offset_top = 799.0
-offset_right = 385.0
-offset_bottom = 799.0
-
 [node name="HomeButton" type="Button" parent="." unique_id=745559034]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 5.0
-offset_right = 90.0
-offset_bottom = 50.0
+offset_left = 20.0
+offset_top = 1611.0
+offset_right = 116.0
+offset_bottom = 1665.0
 text = "返回"
 
 [node name="BattleButton" type="Button" parent="." unique_id=769599351]
@@ -74,3 +63,11 @@ offset_top = 1620.0
 offset_right = 770.0
 offset_bottom = 1678.0
 text = "历练"
+
+[node name="ShopButton" type="Button" parent="." unique_id=1675572361]
+layout_mode = 0
+offset_left = 496.0
+offset_top = 1617.0
+offset_right = 626.0
+offset_bottom = 1675.0
+text = "商店"

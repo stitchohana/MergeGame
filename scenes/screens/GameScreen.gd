@@ -1,12 +1,12 @@
 class_name GameScreen extends BaseScreen
 
-@onready var overlay: Overlay = $Overlay
 @onready var detail_panel: ItemDetailPanel = $ItemDetailPanel
 @onready var grid_view: GridView = $GridView
 @onready var cultivation_panel: CultivationPanel = $CultivationPanel
 @onready var requirement_list: RequirementList = $RequirementList
 @onready var battle_btn: Button = $BattleButton
 @onready var home_btn: Button = $HomeButton
+@onready var shop_btn: Button = $ShopButton
 
 var _meridian_complete_exp: int = 50
 var _pending_item_ids: Array = []
@@ -34,6 +34,8 @@ func _ready() -> void:
 
 	battle_btn.pressed.connect(_on_battle_pressed)
 	home_btn.pressed.connect(_on_home_pressed)
+	if shop_btn:
+		shop_btn.pressed.connect(_on_shop_pressed)
 	requirement_list.complete_clicked.connect(_on_meridian_complete)
 	_refresh_meridian()
 
@@ -66,7 +68,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if GameState.phase == GameState.GamePhase.IDLE:
 			_on_pause_requested()
-		elif GameState.phase == GameState.GamePhase.PAUSED and overlay.visible:
+		elif GameState.phase == GameState.GamePhase.PAUSED:
 			_on_resume()
 
 func _load_initial_setup() -> void:
@@ -127,6 +129,10 @@ func _on_home_pressed() -> void:
 func _on_battle_pressed() -> void:
 	EventBus.screen_change_requested.emit("battle")
 
+func _on_shop_pressed() -> void:
+	var popup := preload("res://scenes/ui/ShopPopup.tscn").instantiate() as ShopPopup
+	UIManager.show_popup(popup)
+
 func _on_restart() -> void:
 	GameState.reset()
 	GridManager.init_grid()
@@ -139,7 +145,7 @@ func _on_resume() -> void:
 
 func _on_pause_requested() -> void:
 	if GameState.phase == GameState.GamePhase.IDLE:
-		overlay.show_pause_menu()
+		GameState.set_phase(GameState.GamePhase.PAUSED)
 
 func _on_grid_changed() -> void:
 	_refresh_requirement_buttons()
