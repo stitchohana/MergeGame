@@ -369,6 +369,7 @@ export class GameEngine {
     const now = Date.now();
     const state: GameState = {
       grid: [],
+      pouch: [],
       cultivation: {
         current_realm_id: 0,
         current_level: 1,
@@ -1119,6 +1120,38 @@ export class GameEngine {
     console.log(`[engine] consume exp pill: ${pillName} | exp +${expGain} | v${state.version}`);
 
     return { ok: true, cultivation: state.cultivation };
+  }
+
+  pouchDeposit(
+    state: GameState,
+    itemId: number,
+    col: number,
+    row: number
+  ): { ok: true; pouch: number[] } | { ok: false; reason: string } {
+    const idx = state.grid.findIndex((g) => g.col === col && g.row === row && g.id === itemId);
+    if (idx < 0) return { ok: false, reason: "item_not_found" };
+    state.grid.splice(idx, 1);
+    state.pouch.push(itemId);
+    state.version += 1;
+    console.log(`[engine] pouch deposit: #${itemId} | pouch=${state.pouch.length} items | v${state.version}`);
+    return { ok: true, pouch: state.pouch };
+  }
+
+  pouchWithdraw(
+    state: GameState,
+    itemId: number,
+    col: number,
+    row: number
+  ): { ok: true; pouch: number[] } | { ok: false; reason: string } {
+    const idx = state.pouch.indexOf(itemId);
+    if (idx < 0) return { ok: false, reason: "item_not_in_pouch" };
+    if (!this.isInBounds(col, row)) return { ok: false, reason: "invalid_position" };
+    if (state.grid.some((g) => g.col === col && g.row === row)) return { ok: false, reason: "cell_occupied" };
+    state.pouch.splice(idx, 1);
+    state.grid.push({ id: itemId, col, row });
+    state.version += 1;
+    console.log(`[engine] pouch withdraw: #${itemId} at (${col},${row}) | pouch=${state.pouch.length} items | v${state.version}`);
+    return { ok: true, pouch: state.pouch };
   }
 
   private _addExp(c: CultivationData, amount: number): void {

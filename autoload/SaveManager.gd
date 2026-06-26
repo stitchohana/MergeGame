@@ -59,6 +59,7 @@ func _restore_from_server(state: Dictionary) -> void:
 
 	# Meridian
 	GameState.meridian_acupoints = state.get("meridian_acupoints", [])
+	StoragePouch.restore_from_server(state.get("pouch", []))
 	GameState.meridian_circulations = state.get("meridian_circulations", 0)
 	GameState.meridian_threshold_idx = state.get("meridian_threshold_idx", 0)
 

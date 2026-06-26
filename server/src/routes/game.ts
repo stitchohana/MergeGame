@@ -39,6 +39,10 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       console.log(`[game] new player ${userId}, init with ${state.grid.length} items | v0`);
     } else {
       const oldVer = state.version;
+      // Migrate: add pouch if missing (old saves)
+      if (!state.pouch) {
+        state.pouch = [];
+      }
       // Re-initialize if grid is empty (stale save)
       if (!state.grid || state.grid.length === 0) {
         const init = engine.createInitialState();
@@ -70,7 +74,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
         await storage.saveState(userId, state);
         console.log(`[game] restored main grid for ${userId}: ${state.grid.length} items`);
       }
-      res.json({ grid: state.grid, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, meridian_acupoints: state.meridian_acupoints, meridian_circulations: state.meridian_circulations, meridian_threshold_idx: state.meridian_threshold_idx });
+      res.json({ grid: state.grid, pouch: state.pouch, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, meridian_acupoints: state.meridian_acupoints, meridian_circulations: state.meridian_circulations, meridian_threshold_idx: state.meridian_threshold_idx });
     } catch (err) {
       console.error("[game] state error:", err);
       res.status(500).json({ error: "internal_error" });
@@ -281,6 +285,32 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
+  }));
+
+  // POST /api/game/pouch/deposit
+  router.post("/pouch/deposit", op(async (req, res, userId) => {
+    const { item_id, from_col, from_row } = req.body;
+    if (typeof item_id !== "number" || typeof from_col !== "number" || typeof from_row !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.pouchDeposit(state, item_id, from_col, from_row);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: state.version, pouch: result.pouch, from_col, from_row });
+  }));
+
+  // POST /api/game/pouch/withdraw
+  router.post("/pouch/withdraw", op(async (req, res, userId) => {
+    const { item_id, target_col, target_row } = req.body;
+    if (typeof item_id !== "number" || typeof target_col !== "number" || typeof target_row !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.pouchWithdraw(state, item_id, target_col, target_row);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: state.version, pouch: result.pouch, target_col, target_row });
   }));
 
   // GET /api/leaderboard

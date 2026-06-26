@@ -41,6 +41,7 @@ export interface CultivationData {
 
 export interface GameState {
   grid: GridItem[];
+  pouch: number[];
   cultivation: CultivationData;
   stamina: number;
   max_stamina: number;

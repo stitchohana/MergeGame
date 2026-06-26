@@ -35,6 +35,10 @@ var _craft_table_item: Dictionary = {}
 var _is_launcher_spawning: bool = false
 var _selected_key: String = ""
 var _skip_anims: bool = false
+var _pouch_zone: Control = null
+
+func set_pouch_zone(zone: Control) -> void:
+	_pouch_zone = zone
 
 func set_skip_animations(skip: bool) -> void:
 	_skip_anims = skip
@@ -86,6 +90,7 @@ func _connect_signals() -> void:
 	CloudService.spawn_rejected.connect(_on_spawn_rejected)
 	CloudService.craft_add_confirmed.connect(_on_craft_add_confirmed)
 	CloudService.craft_add_rejected.connect(_on_craft_add_rejected)
+	StoragePouch.deposit_failed.connect(_on_pouch_deposit_failed)
 	CloudService.craft_start_confirmed.connect(_on_craft_start_confirmed)
 	CloudService.craft_start_rejected.connect(_on_craft_start_rejected)
 	CloudService.craft_retrieve_confirmed.connect(_on_craft_retrieve_confirmed)
@@ -296,6 +301,10 @@ func _finish_drag(target_pos: Vector2i) -> void:
 	_pressed_item = {}
 	_clear_highlights()
 
+	if _pouch_zone and _pouch_zone.visible and Rect2(_pouch_zone.global_position, _pouch_zone.size).has_point(get_global_mouse_position()):
+		_do_pouch_deposit()
+		GameState.set_phase(GameState.GamePhase.IDLE)
+		return
 
 	if not GridManager.is_valid_pos(target_pos) or not Rect2(global_position, size).has_point(get_global_mouse_position()):
 		_snap_back()
@@ -339,6 +348,25 @@ func _place_dragged_item(target_pos: Vector2i) -> void:
 	GridManager.move_item(_drag_source_pos, target_pos)
 	if CloudService.online:
 		CloudService.submit_move(_drag_source_pos.x, _drag_source_pos.y, target_pos.x, target_pos.y, GameState.version)
+
+func _do_pouch_deposit() -> void:
+	if _drag_item_data.is_empty():
+		return
+	var item_id: int = _drag_item_data.get("id", 0)
+	if item_id <= 0:
+		return
+	# Remove visual node immediately; data model removed on server confirmation
+	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
+	var src_node = _item_nodes.get(src_key)
+	if src_node and is_instance_valid(src_node):
+		src_node.queue_free()
+	_item_nodes.erase(src_key)
+	StoragePouch.deposit(item_id, _drag_source_pos)
+
+func _on_pouch_deposit_failed(_reason: String) -> void:
+	var gitem = GridManager.get_item(_drag_source_pos)
+	if gitem != null:
+		_on_item_added(gitem, _drag_source_pos)
 
 func _on_move_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)

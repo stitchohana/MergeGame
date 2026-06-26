@@ -7,6 +7,7 @@ class_name BattleScreen extends BaseScreen
 @onready var char_label: Label = $CharPanel/CharLabel
 @onready var char_hp_label: Label = $CharPanel/CharHpLabel
 @onready var monster_label: Label = $MonsterPanel/MonsterLabel
+@onready var pouch_zone: PouchDropZone = $PouchDropZone
 
 var _current_map_id: int = 1
 var _current_stage: int = 0
@@ -19,6 +20,7 @@ func _ready() -> void:
 	grid_view.item_use_requested.connect(_on_item_use_requested)
 	if not GridManager.grid_updated.is_connected(GameState.check_game_over):
 		GridManager.grid_updated.connect(GameState.check_game_over)
+	grid_view.set_pouch_zone(pouch_zone)
 	leave_btn.pressed.connect(_on_leave_pressed)
 
 func on_enter() -> void:

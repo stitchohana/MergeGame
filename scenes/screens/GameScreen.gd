@@ -7,6 +7,7 @@ class_name GameScreen extends BaseScreen
 @onready var battle_btn: Button = $BattleButton
 @onready var home_btn: Button = $HomeButton
 @onready var shop_btn: Button = $ShopButton
+@onready var pouch_zone: PouchDropZone = $PouchDropZone
 
 var _meridian_complete_exp: int = 50
 var _pending_item_ids: Array = []
@@ -18,6 +19,7 @@ func _ready() -> void:
 	if not GridManager.grid_updated.is_connected(GameState.check_game_over):
 		GridManager.grid_updated.connect(GameState.check_game_over)
 	GridManager.grid_updated.connect(_on_grid_changed)
+	grid_view.set_pouch_zone(pouch_zone)
 	GameState.set_phase(GameState.GamePhase.IDLE)
 
 	EventBus.resume_requested.connect(_on_resume)

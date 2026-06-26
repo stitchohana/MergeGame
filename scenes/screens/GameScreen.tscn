@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/ItemDetailPanel.tscn" id="6_detail"]
 [ext_resource type="PackedScene" uid="uid://dx74q48vv12nw" path="res://scenes/ui/CultivationPanel.tscn" id="7_cul"]
 [ext_resource type="PackedScene" uid="uid://bf6fe2778glgu" path="res://scenes/ui/RequirementList.tscn" id="8_req"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PouchDropZone.tscn" id="10_pouch"]
 
 [node name="GameScreen" type="Control" unique_id=1938900574]
 layout_mode = 3
@@ -30,13 +31,9 @@ offset_right = 737.0
 offset_bottom = 404.0
 
 [node name="CultivationPanel" parent="." unique_id=1214071501 instance=ExtResource("7_cul")]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_top = 67.0
-offset_bottom = 255.0
-grow_horizontal = 2
+layout_mode = 0
+offset_top = 64.0
+offset_bottom = 252.0
 
 [node name="GridView" parent="." unique_id=644218555 instance=ExtResource("2_grid")]
 layout_mode = 0
@@ -44,6 +41,13 @@ offset_left = 40.0
 offset_top = 404.0
 offset_right = 740.0
 offset_bottom = 1304.0
+
+[node name="PouchDropZone" parent="." unique_id=134967436 instance=ExtResource("10_pouch")]
+anchors_preset = 0
+offset_left = 613.0
+offset_top = 147.0
+offset_right = 677.0
+offset_bottom = 211.0
 
 [node name="ItemDetailPanel" parent="." unique_id=1129761759 instance=ExtResource("6_detail")]
 layout_mode = 0

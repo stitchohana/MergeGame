@@ -14,6 +14,7 @@ export function defaultGameState(): GameState {
   const now = Date.now();
   return {
     grid: [],
+    pouch: [],
     cultivation: { ...defaultCultivation },
     stamina: 100,
     max_stamina: 100,

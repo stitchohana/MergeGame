@@ -1,25 +1,28 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://djyc00bikcsnc"]
 
-[ext_resource type="Script" path="res://scenes/screens/BattleScreen.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://scenes/grid/GridView.tscn" id="2_grid"]
-[ext_resource type="PackedScene" path="res://scenes/ui/ItemDetailPanel.tscn" id="3_detail"]
+[ext_resource type="Script" uid="uid://8wyaaqrw8l2j" path="res://scenes/screens/BattleScreen.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://deg7lbni32jui" path="res://scenes/grid/GridView.tscn" id="2_grid"]
+[ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/ItemDetailPanel.tscn" id="3_detail"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PouchDropZone.tscn" id="4_pouch"]
 
-[node name="BattleScreen" type="Control"]
+[node name="BattleScreen" type="Control" unique_id=1668431896]
 layout_mode = 3
 anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="GridView" parent="." instance=ExtResource("2_grid")]
+[node name="GridView" parent="." unique_id=1834702890 instance=ExtResource("2_grid")]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 210.0
 offset_right = 740.0
 offset_bottom = 1110.0
 
-[node name="MapHeader" type="ColorRect" parent="."]
+[node name="MapHeader" type="ColorRect" parent="." unique_id=1430606215]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 15.0
@@ -27,17 +30,19 @@ offset_right = 740.0
 offset_bottom = 55.0
 color = Color(0.1, 0.1, 0.15, 1)
 
-[node name="MapLabel" type="Label" parent="MapHeader"]
+[node name="MapLabel" type="Label" parent="MapHeader" unique_id=1342851428]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CharPanel" type="ColorRect" parent="."]
+[node name="CharPanel" type="ColorRect" parent="." unique_id=541651582]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 70.0
@@ -45,7 +50,7 @@ offset_right = 340.0
 offset_bottom = 195.0
 color = Color(0.1, 0.15, 0.25, 1)
 
-[node name="CharLabel" type="Label" parent="CharPanel"]
+[node name="CharLabel" type="Label" parent="CharPanel" unique_id=149380935]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 6.0
@@ -55,7 +60,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
-[node name="CharHpLabel" type="Label" parent="CharPanel"]
+[node name="CharHpLabel" type="Label" parent="CharPanel" unique_id=1222690529]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 34.0
@@ -65,7 +70,7 @@ theme_override_colors/font_color = Color(0.3, 1, 0.3, 1)
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 
-[node name="MonsterPanel" type="ColorRect" parent="."]
+[node name="MonsterPanel" type="ColorRect" parent="." unique_id=1415864819]
 layout_mode = 0
 offset_left = 360.0
 offset_top = 70.0
@@ -73,7 +78,7 @@ offset_right = 740.0
 offset_bottom = 195.0
 color = Color(0.25, 0.1, 0.1, 1)
 
-[node name="MonsterLabel" type="Label" parent="MonsterPanel"]
+[node name="MonsterLabel" type="Label" parent="MonsterPanel" unique_id=2147415673]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 6.0
@@ -84,17 +89,22 @@ theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ItemDetailPanel" parent="." instance=ExtResource("3_detail")]
+[node name="ItemDetailPanel" parent="." unique_id=339169060 instance=ExtResource("3_detail")]
 layout_mode = 0
-offset_left = 0.0
 offset_top = 1130.0
-offset_right = 780.0
 offset_bottom = 1410.0
 
-[node name="LeaveButton" type="Button" parent="."]
+[node name="LeaveButton" type="Button" parent="." unique_id=101666513]
 layout_mode = 0
 offset_left = 690.0
 offset_top = 18.0
 offset_right = 770.0
 offset_bottom = 52.0
 text = "离去"
+
+[node name="PouchDropZone" parent="." unique_id=958207014 instance=ExtResource("4_pouch")]
+anchors_preset = 0
+offset_left = 246.0
+offset_top = 107.0
+offset_right = 310.0
+offset_bottom = 171.0

@@ -21,6 +21,10 @@ signal exp_pill_consume_confirmed(result: Dictionary)
 signal exp_pill_consume_rejected(reason: String)
 signal board_switch_confirmed(result: Dictionary)
 signal board_switch_rejected(reason: String)
+signal pouch_deposit_confirmed(result: Dictionary)
+signal pouch_deposit_rejected(reason: String)
+signal pouch_withdraw_confirmed(result: Dictionary)
+signal pouch_withdraw_rejected(reason: String)
 signal meridian_refresh_confirmed(result: Dictionary)
 signal meridian_complete_confirmed(result: Dictionary)
 signal meridian_complete_rejected(reason: String)
@@ -169,11 +173,31 @@ func submit_board_switch(board_type: String) -> void:
 	var body := JSON.stringify({"board_type": board_type})
 	_send_authed_request("board_switch", "/api/game/board/switch", HTTPClient.METHOD_POST, body)
 
+func submit_pouch_deposit(item_id: int, from_col: int, from_row: int) -> void:
+	var body := JSON.stringify({"item_id": item_id, "from_col": from_col, "from_row": from_row})
+	_send_authed_request("pouch_deposit", "/api/game/pouch/deposit", HTTPClient.METHOD_POST, body)
+
+func submit_pouch_withdraw(item_id: int, target_col: int, target_row: int) -> void:
+	var body := JSON.stringify({"item_id": item_id, "target_col": target_col, "target_row": target_row})
+	_send_authed_request("pouch_withdraw", "/api/game/pouch/withdraw", HTTPClient.METHOD_POST, body)
+
 func _on_board_switch_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		board_switch_confirmed.emit(data)
 	else:
 		board_switch_rejected.emit(data.get("error", "unknown_error"))
+
+func _on_pouch_deposit_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		pouch_deposit_confirmed.emit(data)
+	else:
+		pouch_deposit_rejected.emit(data.get("error", "unknown_error"))
+
+func _on_pouch_withdraw_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		pouch_withdraw_confirmed.emit(data)
+	else:
+		pouch_withdraw_rejected.emit(data.get("error", "unknown_error"))
 
 func submit_meridian_refresh() -> void:
 	_send_authed_request("meridian_refresh", "/api/game/meridian/refresh", HTTPClient.METHOD_POST, "{}")
@@ -293,6 +317,8 @@ func _reject(tag: String, reason: String) -> void:
 		"move": move_rejected.emit(reason)
 		"breakthrough": breakthrough_rejected.emit(reason)
 		"consume_exp_pill": exp_pill_consume_rejected.emit(reason)
+		"pouch_deposit": pouch_deposit_rejected.emit(reason)
+		"pouch_withdraw": pouch_withdraw_rejected.emit(reason)
 		"sell": sell_rejected.emit(reason)
 		"craft_add": craft_add_rejected.emit(reason)
 		"craft_start": craft_start_rejected.emit(reason)
@@ -444,6 +470,10 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				exp_pill_consume_rejected.emit(error_msg)
 			"board_switch":
 				board_switch_rejected.emit(error_msg)
+			"pouch_deposit":
+				pouch_deposit_rejected.emit(error_msg)
+			"pouch_withdraw":
+				pouch_withdraw_rejected.emit(error_msg)
 			"meridian_complete":
 				meridian_complete_rejected.emit(error_msg)
 			"craft_add":
@@ -482,6 +512,10 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_consume_exp_pill_response(data)
 		"board_switch":
 			_on_board_switch_response(data)
+		"pouch_deposit":
+			_on_pouch_deposit_response(data)
+		"pouch_withdraw":
+			_on_pouch_withdraw_response(data)
 		"meridian_complete":
 			_on_meridian_complete_response(data)
 		"meridian_refresh":
@@ -521,6 +555,10 @@ func _handle_network_error(tag: String) -> void:
 			exp_pill_consume_rejected.emit("network_error")
 		"board_switch":
 			board_switch_rejected.emit("network_error")
+		"pouch_deposit":
+			pouch_deposit_rejected.emit("network_error")
+		"pouch_withdraw":
+			pouch_withdraw_rejected.emit("network_error")
 		"meridian_complete":
 			meridian_complete_rejected.emit("network_error")
 		"sell":
@@ -552,6 +590,10 @@ func _handle_parse_error(tag: String) -> void:
 			exp_pill_consume_rejected.emit("invalid_response")
 		"board_switch":
 			board_switch_rejected.emit("invalid_response")
+		"pouch_deposit":
+			pouch_deposit_rejected.emit("invalid_response")
+		"pouch_withdraw":
+			pouch_withdraw_rejected.emit("invalid_response")
 		"meridian_complete":
 			meridian_complete_rejected.emit("invalid_response")
 		"sell":
