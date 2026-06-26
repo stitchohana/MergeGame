@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bfrasromb4gf7"]
 
 [ext_resource type="Script" uid="uid://bm7eaym0h864p" path="res://scenes/screens/HomeScreen.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/TopBar.tscn" id="2_qahno"]
 
 [node name="HomeScreen" type="Control" unique_id=65201493]
 layout_mode = 3
@@ -44,3 +45,9 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "进入历练"
 
+[node name="TopBar" parent="." unique_id=1995499029 instance=ExtResource("2_qahno")]
+layout_mode = 0
+offset_left = 107.0
+offset_top = 10.0
+offset_right = 746.0
+offset_bottom = 60.0

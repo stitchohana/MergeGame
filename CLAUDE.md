@@ -55,4 +55,3 @@ godot4 --path .
 - All items defined in `config/items.json`. To add a new item: add entry to `regular` or `launcher` array with numeric ID.
 - Launcher spawn tables use `spawns: [{id, weight}]` — weights are relative, not percentages.
 - To replace art: set `icon` path in items.json to a texture in `assets/` directory.
-- Save data uses `user://` path. High score auto-saves.

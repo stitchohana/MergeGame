@@ -18,6 +18,7 @@ var stamina: int = 100
 var max_stamina: int = 100
 var spirit_stones: int = 0
 var current_board_type: int = Constants.BoardType.MAIN
+var previous_screen_name: String = ""
 
 # Meridian cultivation
 var meridian_circulations: int = 0

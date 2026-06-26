@@ -69,6 +69,8 @@ export class GameEngine {
   private shopConfig = { shopItems: [] as number[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
   private effectsById = new Map<number, { id: number; type: string; exp_gain?: number; duration?: number; multiplier?: number; amount?: number; describe?: string }>();
   private meridianThresholds: any[] = [];
+  private maps = new Map<number, any>();
+  private monsters = new Map<number, any>();
 
   constructor(configDir: string) {
     this.loadConfigs(configDir);
@@ -85,7 +87,8 @@ export class GameEngine {
     this.loadShopConfig(path.join(configDir, "shop.json"));
     this.loadEffects(path.join(configDir, "effects.json"));
     this.loadMeridians(path.join(configDir, "meridians.json"));
-    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.realms.length ?? 0} realms, ${this.effectsById.size} effects, ${this.meridianThresholds.length} meridian thresholds`);
+    this.loadExpedition(path.join(configDir, "expedition.json"));
+    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.realms.length ?? 0} realms, ${this.effectsById.size} effects, ${this.meridianThresholds.length} meridian thresholds, ${this.maps.size} maps, ${this.monsters.size} monsters`);
   }
 
   private loadGameConfig(filePath: string): void {
@@ -188,6 +191,20 @@ export class GameEngine {
       const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       this.meridianThresholds = data.thresholds || [];
     } catch { /* optional */ }
+  }
+
+  private loadExpedition(filePath: string): void {
+    try {
+      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      const maps = data.maps as any[] ?? [];
+      for (const m of maps) this.maps.set(m.id, m);
+      const monsters = data.monsters as any[] ?? [];
+      for (const mo of monsters) this.monsters.set(mo.id, mo);
+    } catch { /* optional */ }
+  }
+
+  getMonster(id: number): any {
+    return this.monsters.get(id) ?? null;
   }
 
   generateMeridianRequirements(state: GameState): { acupoints: any[]; complete_exp: number } {
@@ -352,6 +369,21 @@ export class GameEngine {
     return null;
   }
 
+  findEmptyPos(grid: GridItem[]): { col: number; row: number } | null {
+    const occupied = new Set<string>();
+    for (const g of grid) {
+      occupied.add(this.posKey(g.col, g.row));
+    }
+    for (let row = 0; row < this.GRID_ROWS; row++) {
+      for (let col = 0; col < this.GRID_COLS; col++) {
+        if (!occupied.has(this.posKey(col, row))) {
+          return { col, row };
+        }
+      }
+    }
+    return null;
+  }
+
   findEmptyByRow(grid: Map<string, GridItem>): { col: number; row: number } | null {
     for (let row = 0; row < this.GRID_ROWS; row++) {
       for (let col = 0; col < this.GRID_COLS; col++) {
@@ -404,34 +436,34 @@ export class GameEngine {
     return state;
   }
 
-  switchBoard(state: GameState, boardType: string): { ok: true; newVersion: number } | { ok: false; reason: string } {
+  switchBoard(state: GameState, boardType: string, battleMapId?: number, battleStage?: number): { ok: true; newVersion: number } | { ok: false; reason: string } {
     if (boardType === "battle") {
-      // Save current grid and switch to battle setup
+      if (battleMapId !== undefined) state.battle_map_id = battleMapId;
+      if (battleStage !== undefined) state.battle_stage = battleStage;
+      // Already in battle mode — just update progress and return current grid
+      if (state.saved_grid && state.saved_grid.length > 0) {
+        state.version += 1;
+        console.log(`[engine] board already battle: ${state.grid.length} items | v${state.version}`);
+        return { ok: true, newVersion: state.version };
+      }
       state.saved_grid = state.grid;
-      state.grid = [];
-      const setup = this.getInitialSetup("battle");
-      const now = Date.now();
-      for (const entry of setup) {
-        const itemDef = this.getItemData(entry.id);
-        if (itemDef) {
-          const gitem: GridItem = { id: entry.id, col: entry.col, row: entry.row };
-          if (itemDef.type === "launcher") {
-            gitem.charges = this.getMaxCharges(entry.id);
-            gitem.last_charge_time = now;
-          }
-          state.grid.push(gitem);
-        }
+      if (state.battle_grid && state.battle_grid.length > 0) {
+        state.grid = state.battle_grid;
+        state.battle_grid = undefined;
+        console.log(`[engine] board switched to battle: restored ${state.grid.length} battle items, saved ${state.saved_grid.length} main items | v${state.version}`);
+      } else {
+        state.grid = this._buildInitialGrid("battle");
+        console.log(`[engine] board switched to battle: new battle grid ${state.grid.length} items, saved ${state.saved_grid.length} main items | v${state.version}`);
       }
       state.version += 1;
-      console.log(`[engine] board switched to battle: saved ${state.saved_grid.length} items, battle has ${state.grid.length} items | v${state.version}`);
     } else {
-      // Restore saved main grid (or use initial setup for new players)
+      state.battle_grid = state.grid;
       state.grid = state.saved_grid && state.saved_grid.length > 0
         ? state.saved_grid
         : this._buildInitialGrid("main");
       state.saved_grid = undefined;
       state.version += 1;
-      console.log(`[engine] board switched to main: restored ${state.grid.length} items | v${state.version}`);
+      console.log(`[engine] board switched to main: restored ${state.grid.length} main items, saved ${state.battle_grid.length} battle items | v${state.version}`);
     }
     return { ok: true, newVersion: state.version };
   }
@@ -639,9 +671,16 @@ export class GameEngine {
       if (roll <= 0) { rolledId = s.id; break; }
     }
 
-    // Stamina check
-    if (state.stamina < this.staminaConfig.spawnCost) {
-      return { ok: false, reason: "insufficient_stamina" };
+    // Cost check: qi on battle board, stamina on main board
+    const isBattle = state.saved_grid && state.saved_grid.length > 0;
+    if (isBattle) {
+      if (state.cultivation.current_qi < 1) {
+        return { ok: false, reason: "insufficient_qi" };
+      }
+    } else {
+      if (state.stamina < this.staminaConfig.spawnCost) {
+        return { ok: false, reason: "insufficient_stamina" };
+      }
     }
 
     // Launcher charges check
@@ -657,8 +696,12 @@ export class GameEngine {
     const target = this.findNearestEmpty(map, launcherCol, launcherRow);
     if (!target) return { ok: false, reason: "no_empty_cell" };
 
-    // Deduct stamina and launcher charge
-    state.stamina = Math.max(0, state.stamina - this.staminaConfig.spawnCost);
+    // Deduct cost
+    if (isBattle) {
+      state.cultivation.current_qi = Math.max(0, state.cultivation.current_qi - 1);
+    } else {
+      state.stamina = Math.max(0, state.stamina - this.staminaConfig.spawnCost);
+    }
     launcherItem.charges = charges - 1;
     launcherItem.last_charge_time = Date.now();
 
@@ -1152,6 +1195,133 @@ export class GameEngine {
     state.version += 1;
     console.log(`[engine] pouch withdraw: #${itemId} at (${col},${row}) | pouch=${state.pouch.length} items | v${state.version}`);
     return { ok: true, pouch: state.pouch };
+  }
+
+  initBattleMonsters(state: GameState): void {
+    if (!state.battle_monsters || state.battle_monsters.length > 0) return;
+    state.battle_monsters = this._buildMonsterList(state.battle_map_id ?? 1, state.battle_stage ?? 0);
+    console.log(`[engine] init battle monsters: ${state.battle_monsters.length} monsters`);
+  }
+
+  private _buildMonsterList(mapId: number, stage: number): BattleMonster[] {
+    const map = this.maps.get(mapId);
+    if (!map) return [];
+    const stages = map.stages as any[] ?? [];
+    if (stage >= stages.length) return [];
+    const stageData = stages[stage];
+    const result: BattleMonster[] = [];
+    const monsters = stageData.monsters as any[] ?? [];
+    for (const entry of monsters) {
+      const mdata = this.getMonster(entry.monster_id);
+      if (!mdata) continue;
+      for (let i = 0; i < (entry.count ?? 1); i++) {
+        result.push({
+          monster_id: entry.monster_id,
+          name: mdata.name,
+          hp: mdata.hp,
+          max_hp: mdata.hp,
+          atk: mdata.atk ?? 0,
+          accept_effect_ids: mdata.accept_effect_ids ?? [],
+        });
+      }
+    }
+    const boss = stageData.boss;
+    if (boss) {
+      const bdata = this.getMonster(boss.monster_id);
+      if (bdata) {
+        result.push({
+          monster_id: boss.monster_id,
+          name: "[Boss]" + bdata.name,
+          hp: bdata.hp,
+          max_hp: bdata.hp,
+          atk: bdata.atk ?? 0,
+          accept_effect_ids: bdata.accept_effect_ids ?? [],
+          is_boss: true,
+        });
+      }
+    }
+    return result;
+  }
+
+  battleAttack(
+    state: GameState,
+    itemId: number,
+    effectId: number,
+    col: number,
+    row: number
+  ): { ok: true; grid: GridItem[]; monsters: BattleMonster[]; stage_complete: boolean; loot: number[] } | { ok: false; reason: string } {
+    const effect = this.getEffect(effectId);
+    if (!effect) return { ok: false, reason: "invalid_effect" };
+    if (effect.type !== "damage") return { ok: false, reason: "not_damage_effect" };
+    const dmg = effect.amount ?? 0;
+    if (dmg <= 0) return { ok: false, reason: "no_damage" };
+
+    // Remove used item from grid
+    const idx = state.grid.findIndex((g) => g.col === col && g.row === row && g.id === itemId);
+    if (idx < 0) return { ok: false, reason: "item_not_found" };
+    state.grid.splice(idx, 1);
+
+    // Init monsters if needed
+    if (!state.battle_monsters || state.battle_monsters.length === 0) {
+      state.battle_monsters = this._buildMonsterList(state.battle_map_id ?? 1, state.battle_stage ?? 0);
+    }
+
+    // Find first alive monster
+    const mIdx = state.battle_monsters.findIndex((m) => m.hp > 0);
+    if (mIdx < 0) {
+      state.grid.push({ id: itemId, col, row });
+      return { ok: false, reason: "no_alive_monster" };
+    }
+
+    // Check effect compatibility
+    if (!(state.battle_monsters[mIdx].accept_effect_ids as number[]).includes(effectId)) {
+      state.grid.push({ id: itemId, col, row });
+      return { ok: false, reason: "effect_not_accepted" };
+    }
+
+    // Apply damage
+    state.battle_monsters[mIdx].hp = Math.max(0, state.battle_monsters[mIdx].hp - dmg);
+    const monsterName = state.battle_monsters[mIdx].name;
+    const killed = state.battle_monsters[mIdx].hp <= 0;
+    const loot: number[] = [];
+
+    if (killed) {
+      // Drop loot based on monster
+      const mdata = this.getMonster(state.battle_monsters[mIdx].monster_id);
+      if (mdata?.loot?.length) {
+        for (const lootId of mdata.loot) {
+          const emptyPos = this.findEmptyPos(state.grid);
+          if (emptyPos) {
+            state.grid.push({ id: lootId, col: emptyPos.col, row: emptyPos.row });
+            loot.push(lootId);
+          }
+        }
+      }
+      // Check if all monsters in current stage are dead
+      const allDead = state.battle_monsters.every((m) => m.hp <= 0);
+      let stageComplete = false;
+      if (allDead) {
+        state.battle_stage = (state.battle_stage ?? 0) + 1;
+        stageComplete = true;
+        // Build next stage monsters
+        const map = this.maps.get(state.battle_map_id ?? 1);
+        if (map) {
+          const stages = map.stages as any[] ?? [];
+          if ((state.battle_stage ?? 0) < stages.length) {
+            state.battle_monsters = this._buildMonsterList(state.battle_map_id ?? 1, state.battle_stage ?? 0);
+          } else {
+            state.battle_monsters = [];
+          }
+        }
+      }
+      state.version += 1;
+      console.log(`[engine] battle attack: ${monsterName} killed by #${itemId} | loot=${loot.join(",")} | stage_complete=${stageComplete} | v${state.version}`);
+      return { ok: true, grid: state.grid, monsters: state.battle_monsters, stage_complete: stageComplete, loot };
+    }
+
+    state.version += 1;
+    console.log(`[engine] battle attack: ${monsterName} took ${dmg} dmg (${state.battle_monsters[mIdx].hp}/${state.battle_monsters[mIdx].max_hp}) | v${state.version}`);
+    return { ok: true, grid: state.grid, monsters: state.battle_monsters, stage_complete: false, loot: [] };
   }
 
   private _addExp(c: CultivationData, amount: number): void {

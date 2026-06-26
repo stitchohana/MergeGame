@@ -49,6 +49,22 @@ export interface GameState {
   spirit_stones: number;
   version: number;
   saved_grid?: GridItem[];
+  battle_grid?: GridItem[];
+  battle_map_id?: number;
+  battle_stage?: number;
+  battle_monsters?: BattleMonster[];
+}
+
+export interface BattleMonster {
+  monster_id: number;
+  name: string;
+  hp: number;
+  max_hp: number;
+  atk: number;
+  accept_effect_ids: number[];
+  is_boss?: boolean;
+}
+export interface Dummy {}
   meridian_circulations?: number;
   meridian_acupoints?: { item_id: number; name: string; count: number; completed: boolean }[];
   meridian_threshold_idx?: number;

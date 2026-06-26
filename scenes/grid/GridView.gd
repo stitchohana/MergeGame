@@ -186,7 +186,12 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
-	if GameState.stamina < 1:
+	if GameState.current_board_type == Constants.BoardType.BATTLE:
+		if CultivationService.current_qi < 1:
+			EventBus.show_toast.emit("灵力不足")
+			GameState.set_phase(GameState.GamePhase.IDLE)
+			return
+	elif GameState.stamina < 1:
 		EventBus.show_toast.emit("体力不足")
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
@@ -240,6 +245,11 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 		GameState.max_stamina = result.get("max_stamina", GameState.max_stamina)
 		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 
+	# Update cultivation (qi cost for battle board spawn)
+	var cult: Variant = result.get("cultivation", null)
+	if cult != null:
+		CultivationService.deserialize(cult)
+
 	# Update launcher charges
 	var charges_val: Variant = result.get("charges", null)
 	if charges_val != null:
@@ -276,6 +286,7 @@ func _spawn_error_text(reason: String) -> String:
 		"not_a_launcher": return "生成失败：不是发射器"
 		"no_empty_cell": return "生成失败：棋盘已满"
 		"insufficient_stamina": return "体力不足"
+		"insufficient_qi": return "灵力不足"
 		"no_charges": return "发射器次数用尽"
 		"network_error": return "生成失败：网络错误"
 		"version_mismatch": return "生成失败：数据过期，请重试"
@@ -311,6 +322,7 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 	if target_pos == _drag_source_pos:
+		_snap_back()
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 

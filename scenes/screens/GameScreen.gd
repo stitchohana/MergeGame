@@ -47,11 +47,15 @@ func on_enter() -> void:
 	if GameState.current_board_type != Constants.BoardType.MAIN:
 		GameState.current_board_type = Constants.BoardType.MAIN
 		if CloudService.online:
+			if CloudService.board_switch_confirmed.is_connected(_on_main_board_switch_confirmed):
+				CloudService.board_switch_confirmed.disconnect(_on_main_board_switch_confirmed)
 			CloudService.board_switch_confirmed.connect(_on_main_board_switch_confirmed, CONNECT_ONE_SHOT)
 			CloudService.board_switch_rejected.connect(_on_main_board_switch_rejected, CONNECT_ONE_SHOT)
 			CloudService.submit_board_switch("main")
 
 func _on_main_board_switch_confirmed(result: Dictionary) -> void:
+	if result.get("board_type", "") != "main":
+		return
 	GameState.version = result.get("new_version", GameState.version)
 	GridManager.init_grid(Constants.BoardType.MAIN)
 	var server_grid: Array = result.get("grid", [])
@@ -129,6 +133,7 @@ func _on_home_pressed() -> void:
 	EventBus.screen_change_requested.emit("home")
 
 func _on_battle_pressed() -> void:
+	GameState.previous_screen_name = "game"
 	EventBus.screen_change_requested.emit("battle")
 
 func _on_shop_pressed() -> void:

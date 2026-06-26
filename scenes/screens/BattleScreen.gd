@@ -5,7 +5,7 @@ class_name BattleScreen extends BaseScreen
 @onready var leave_btn: Button = $LeaveButton
 @onready var map_label: Label = $MapHeader/MapLabel
 @onready var char_label: Label = $CharPanel/CharLabel
-@onready var char_hp_label: Label = $CharPanel/CharHpLabel
+@onready var qi_label: Label = $CharPanel/QiLabel
 @onready var monster_label: Label = $MonsterPanel/MonsterLabel
 @onready var pouch_zone: PouchDropZone = $PouchDropZone
 
@@ -22,19 +22,24 @@ func _ready() -> void:
 		GridManager.grid_updated.connect(GameState.check_game_over)
 	grid_view.set_pouch_zone(pouch_zone)
 	leave_btn.pressed.connect(_on_leave_pressed)
+	CloudService.battle_attack_confirmed.connect(_on_battle_attack_confirmed)
+	CloudService.battle_attack_rejected.connect(_on_battle_attack_rejected)
+	CultivationService.qi_changed.connect(_on_qi_changed)
 
 func on_enter() -> void:
 	GameState.current_board_type = Constants.BoardType.BATTLE
-	_current_map_id = 1
-	_current_stage = 0
 	_char_hp = 100 + CultivationService.total_exp / 10
 	_char_max_hp = _char_hp
 	_monsters = _build_monster_list()
 
 	if CloudService.online:
+		if CloudService.board_switch_confirmed.is_connected(_on_board_switch_confirmed):
+			CloudService.board_switch_confirmed.disconnect(_on_board_switch_confirmed)
+		if CloudService.board_switch_rejected.is_connected(_on_board_switch_rejected):
+			CloudService.board_switch_rejected.disconnect(_on_board_switch_rejected)
 		CloudService.board_switch_confirmed.connect(_on_board_switch_confirmed, CONNECT_ONE_SHOT)
 		CloudService.board_switch_rejected.connect(_on_board_switch_rejected, CONNECT_ONE_SHOT)
-		CloudService.submit_board_switch("battle")
+		CloudService.submit_board_switch("battle", _current_map_id, _current_stage)
 	else:
 		_init_battle_grid()
 
@@ -43,16 +48,18 @@ func on_enter() -> void:
 	_refresh_map_header()
 
 func _on_board_switch_confirmed(result: Dictionary) -> void:
+	if result.get("board_type", "") != "battle":
+		return
 	GameState.version = result.get("new_version", GameState.version)
-	GridManager.init_grid(Constants.BoardType.BATTLE)
-	var server_grid: Array = result.get("grid", [])
-	for entry in server_grid:
-		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
-		if not item_data.is_empty():
-			var item := item_data.duplicate(true)
-			if entry.has("charges"): item["charges"] = entry.charges
-			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	_current_map_id = result.get("battle_map_id", _current_map_id)
+	_current_stage = result.get("battle_stage", _current_stage)
+	_sync_grid_from_result(result)
+	var server_monsters: Array = result.get("monsters", [])
+	if not server_monsters.is_empty():
+		_monsters = server_monsters.duplicate(true)
 	GameState.set_phase(GameState.GamePhase.IDLE)
+	_refresh_monster_display()
+	_refresh_map_header()
 
 func _on_board_switch_rejected(reason: String) -> void:
 	print("[BattleScreen] Board switch rejected: ", reason)
@@ -98,7 +105,7 @@ func _build_monster_list() -> Array:
 				"atk": monster_data.atk,
 				"accept_effect_ids": monster_data.get("accept_effect_ids", []),
 			})
-	var boss_data = stage_data.get("boss")
+	var boss_data: Variant = stage_data.get("boss")
 	if boss_data != null:
 		var boss_monster: Dictionary = ConfigDatabase.get_monster(boss_data.monster_id)
 		if not boss_monster.is_empty():
@@ -112,12 +119,6 @@ func _build_monster_list() -> Array:
 			})
 	return result
 
-func _get_first_alive_monster() -> Dictionary:
-	for m in _monsters:
-		if m.hp > 0:
-			return m
-	return {}
-
 func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	var effect_id: int = int(item_data.get("use_effect_id", 0))
 	if effect_id <= 0:
@@ -129,26 +130,13 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 
 	match effect_type:
 		"damage":
-			var target: Dictionary = _get_first_alive_monster()
-			if target.is_empty():
-				EventBus.show_toast.emit("没有可攻击的目标")
-				return
-			if not _array_has_int(target.accept_effect_ids, effect_id):
-				EventBus.show_toast.emit("无法对此目标使用")
-				return
-			var dmg: int = effect.get("amount", 0)
-			target["hp"] = maxi(0, target.hp - dmg)
-			GridManager.remove_item(grid_pos)
-			EventBus.show_toast.emit("%s 受到 %d 点伤害！" % [target.name, dmg])
-			if target.hp <= 0:
-				EventBus.show_toast.emit("%s 被击败！" % target.name)
-			_refresh_monster_display()
+			if CloudService.online:
+				_play_attack_animation(item_data, grid_pos, effect_id)
 		"heal":
 			var heal: int = effect.get("amount", 0)
 			_char_hp = mini(_char_max_hp, _char_hp + heal)
 			GridManager.remove_item(grid_pos)
 			EventBus.show_toast.emit("恢复了 %d 点生命！" % heal)
-			_refresh_char_display()
 		"exp":
 			CultivationService.consume_exp_pill(item_data.get("id", 0), grid_pos)
 		"breakthrough":
@@ -157,12 +145,64 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 		_:
 			EventBus.show_toast.emit("此物品无法使用")
 
+func _on_qi_changed(current_qi: int, max_qi: int) -> void:
+	_qi_label()
+
+func _qi_label() -> void:
+	if qi_label:
+		qi_label.text = "灵力 %d/%d" % [CultivationService.current_qi, CultivationService.max_qi]
+
+func _on_battle_attack_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	_sync_grid_from_result(result)
+	var server_monsters: Array = result.get("monsters", [])
+	if not server_monsters.is_empty():
+		_monsters = server_monsters.duplicate(true)
+	var loot_arr: Array = result.get("loot", [])
+	var killed: bool = not loot_arr.is_empty()
+	var stage_done: bool = result.get("stage_complete", false)
+	if killed or stage_done:
+		var timer := Timer.new()
+		timer.wait_time = 0.5
+		timer.one_shot = true
+		timer.timeout.connect(func():
+			_refresh_monster_display()
+			if killed:
+				EventBus.show_toast.emit("击败怪物！掉落物品 x%d" % loot_arr.size())
+			if stage_done:
+				_current_stage = result.get("battle_stage", _current_stage)
+				EventBus.show_toast.emit("关卡通过！进入第 %d 关" % (_current_stage + 1))
+				_refresh_map_header()
+			timer.queue_free()
+		)
+		add_child(timer)
+		timer.start()
+	else:
+		_refresh_monster_display()
+
+func _on_battle_attack_rejected(reason: String) -> void:
+	EventBus.show_toast.emit("攻击失败：" + reason)
+
+func _sync_grid_from_result(result: Dictionary) -> void:
+	var server_grid: Array = result.get("grid", [])
+	if server_grid.is_empty():
+		return
+	grid_view.set_skip_animations(true)
+	GridManager.init_grid(Constants.BoardType.BATTLE)
+	for entry in server_grid:
+		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
+		if not item_data.is_empty():
+			var item := item_data.duplicate(true)
+			if entry.has("charges"): item["charges"] = entry.charges
+			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	grid_view.set_skip_animations(false)
+
 func _refresh_char_display() -> void:
 	var realm_name: String = CultivationService.get_realm_name()
 	var level: int = CultivationService.current_level
 	var name_str: String = realm_name + " Lv." + str(level) if realm_name != "" else "修士"
 	char_label.text = name_str
-	char_hp_label.text = "HP %d/%d" % [_char_hp, _char_max_hp]
+	_qi_label()
 
 func _refresh_monster_display() -> void:
 	var lines: PackedStringArray = []
@@ -188,13 +228,60 @@ func _refresh_map_header() -> void:
 	map_label.text = "%s — 第%d关 %s" % [map_data.get("name", ""), _current_stage + 1, stage_name]
 
 func _on_leave_pressed() -> void:
-	EventBus.screen_change_requested.emit("home")
+	var prev: String = GameState.previous_screen_name
+	if prev == "":
+		prev = "home"
+	EventBus.screen_change_requested.emit(prev)
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)
 
-func _array_has_int(arr: Array, value: int) -> bool:
-	for v in arr:
-		if int(v) == value:
-			return true
-	return false
+func _play_attack_animation(item_data: Dictionary, grid_pos: Vector2i, effect_id: int) -> void:
+	var cell_size := Constants.CELL_SIZE
+	var from_pos := grid_view.global_position + Vector2(grid_pos.x * cell_size + cell_size * 0.5, grid_pos.y * cell_size + cell_size * 0.5)
+	var target_pos := _get_monster_target_pos()
+
+	var proj := ColorRect.new()
+	proj.custom_minimum_size = Vector2(16, 16)
+	proj.size = Vector2(16, 16)
+	proj.pivot_offset = Vector2(8, 8)
+	proj.position = from_pos
+	var group_id: int = item_data.get("group_id", 0)
+	var level: int = item_data.get("level", 0)
+	var hue: float = float(level - 1) / 8.0 if group_id != 6 else 0.6
+	proj.color = Color.from_hsv(hue, 0.8, 0.9)
+	add_child(proj)
+
+	var tween := create_tween()
+	tween.tween_property(proj, "position", target_pos, 0.3).set_trans(Tween.TRANS_CUBIC)
+	tween.tween_callback(_play_monster_hit)
+	tween.tween_callback(proj.queue_free)
+	tween.tween_callback(func():
+		GridManager.remove_item(grid_pos)
+		CloudService.submit_battle_attack(item_data.get("id", 0), effect_id, grid_pos.x, grid_pos.y)
+	)
+
+func _get_monster_target_pos() -> Vector2:
+	if $MonsterPanel:
+		var rect := $MonsterPanel as Control
+		return rect.global_position + rect.size * 0.5
+	return grid_view.global_position + Vector2(400, 100)
+
+func _play_monster_hit() -> void:
+	var panel := $MonsterPanel
+	if not panel:
+		return
+	var flash := panel.get_node_or_null("HitFlash") as ColorRect
+	if not flash:
+		flash = ColorRect.new()
+		flash.name = "HitFlash"
+		flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		flash.anchors_preset = Control.PRESET_FULL_RECT
+		flash.anchor_right = 1.0
+		flash.anchor_bottom = 1.0
+		flash.color = Color(1, 0.3, 0.3, 0)
+		panel.add_child(flash)
+
+	var tween := create_tween()
+	tween.tween_property(flash, "color", Color(1, 0.3, 0.3, 0.5), 0.1)
+	tween.tween_property(flash, "color", Color(1, 0.3, 0.3, 0.0), 0.3)

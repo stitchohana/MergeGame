@@ -11,4 +11,5 @@ func _on_game_pressed() -> void:
 	EventBus.screen_change_requested.emit("game")
 
 func _on_battle_pressed() -> void:
+	GameState.previous_screen_name = "home"
 	EventBus.screen_change_requested.emit("battle")

@@ -74,7 +74,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
         await storage.saveState(userId, state);
         console.log(`[game] restored main grid for ${userId}: ${state.grid.length} items`);
       }
-      res.json({ grid: state.grid, pouch: state.pouch, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, meridian_acupoints: state.meridian_acupoints, meridian_circulations: state.meridian_circulations, meridian_threshold_idx: state.meridian_threshold_idx });
+      res.json({ grid: state.grid, pouch: state.pouch, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage, meridian_acupoints: state.meridian_acupoints, meridian_circulations: state.meridian_circulations, meridian_threshold_idx: state.meridian_threshold_idx });
     } catch (err) {
       console.error("[game] state error:", err);
       res.status(500).json({ error: "internal_error" });
@@ -107,7 +107,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges });
+    res.json({ ok: true, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, cultivation: state.cultivation });
   }));
 
   // POST /api/game/craft/add
@@ -281,10 +281,11 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       delete (item as any)._craft_duration;
       delete (item as any).storage;
     }
-    const result = engine.switchBoard(state, board_type);
+    const result = engine.switchBoard(state, board_type, req.body.map_id, req.body.stage);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
+    if (board_type === "battle") engine.initBattleMonsters(state);
+    res.json({ ok: true, new_version: result.newVersion, board_type: board_type, grid: state.grid, monsters: state.battle_monsters, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage });
   }));
 
   // POST /api/game/pouch/deposit
@@ -311,6 +312,19 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     res.json({ ok: true, new_version: state.version, pouch: result.pouch, target_col, target_row });
+  }));
+
+  // POST /api/battle/attack
+  router.post("/battle/attack", op(async (req, res, userId) => {
+    const { item_id, effect_id, col, row } = req.body;
+    if (typeof item_id !== "number" || typeof effect_id !== "number" || typeof col !== "number" || typeof row !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.battleAttack(state, item_id, effect_id, col, row);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: state.version, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage });
   }));
 
   // GET /api/leaderboard
