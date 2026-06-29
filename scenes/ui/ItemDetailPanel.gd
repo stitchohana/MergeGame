@@ -2,7 +2,6 @@ class_name ItemDetailPanel extends BaseHUD
 signal material_clicked(item_id: int)
 
 @onready var default_label: Label = $DefaultLabel
-@onready var icon_rect: TextureRect = $IconRect
 @onready var name_label: Label = $NameLabel
 @onready var level_label: Label = $LevelLabel
 @onready var desc_label: Label = $DescLabel
@@ -38,19 +37,8 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 	var item_level: int = item_data.get("level", 0)
 	var item_desc: String = item_data.get("describe", "")
 	var item_type: String = item_data.get("type", "regular")
-	var icon_path: String = item_data.get("icon", "")
 
 	default_label.hide()
-
-	if icon_path and icon_rect:
-		var tex := load(icon_path) as Texture2D
-		if tex:
-			icon_rect.texture = tex
-			icon_rect.show()
-		else:
-			icon_rect.hide()
-	else:
-		icon_rect.hide()
 
 	if name_label:
 		name_label.text = item_name
@@ -332,7 +320,6 @@ func clear() -> void:
 	_current_item_data = {}
 	_current_recipes = []
 	default_label.show()
-	icon_rect.hide()
 	name_label.hide()
 	level_label.hide()
 	desc_label.hide()
