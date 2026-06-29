@@ -15,6 +15,10 @@ var _char_hp: int = 100
 var _char_max_hp: int = 100
 var _monsters: Array = []
 
+var _pending_stamina_uid: int = -1
+var _pending_attack_uid: int = -1
+var _pending_attack_effect_id: int = -1
+
 func _ready() -> void:
 	grid_view.item_clicked.connect(_on_item_clicked)
 	grid_view.item_use_requested.connect(_on_item_use_requested)
@@ -24,6 +28,8 @@ func _ready() -> void:
 	leave_btn.pressed.connect(_on_leave_pressed)
 	CloudService.battle_attack_confirmed.connect(_on_battle_attack_confirmed)
 	CloudService.battle_attack_rejected.connect(_on_battle_attack_rejected)
+	CloudService.stamina_restore_confirmed.connect(_on_stamina_restore_confirmed)
+	CloudService.stamina_restore_rejected.connect(_on_stamina_restore_rejected)
 	CultivationService.qi_changed.connect(_on_qi_changed)
 
 func on_enter() -> void:
@@ -119,6 +125,7 @@ func _build_monster_list() -> Array:
 			})
 	return result
 
+
 func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	var effect_id: int = int(item_data.get("use_effect_id", 0))
 	if effect_id <= 0:
@@ -127,18 +134,28 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	if effect.is_empty():
 		return
 	var effect_type: String = effect.get("type", "")
+	var uid: int = item_data.get("_uid", 0)
 
 	match effect_type:
 		"damage":
 			if CloudService.online:
+				_pending_attack_uid = uid
+				_pending_attack_effect_id = effect_id
 				_play_attack_animation(item_data, grid_pos, effect_id)
 		"heal":
 			var heal: int = effect.get("amount", 0)
 			_char_hp = mini(_char_max_hp, _char_hp + heal)
-			GridManager.remove_item(grid_pos)
+			if not CloudService.online:
+				if uid > 0:
+					var pos := GridManager.find_pos_by_uid(uid)
+					if pos != Vector2i(-1, -1):
+						GridManager.remove_item(pos)
 			EventBus.show_toast.emit("恢复了 %d 点生命！" % heal)
 		"exp":
-			CultivationService.consume_exp_pill(item_data.get("id", 0), grid_pos)
+			CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
+		"stamina":
+			_pending_stamina_uid = uid
+			CloudService.submit_restore_stamina(item_data.get("id", 0), uid, GameState.version)
 		"breakthrough":
 			var pill_id: int = item_data.get("id", 0)
 			CultivationService.try_breakthrough(pill_id)
@@ -241,6 +258,12 @@ func _play_attack_animation(item_data: Dictionary, grid_pos: Vector2i, effect_id
 	var from_pos := grid_view.global_position + Vector2(grid_pos.x * cell_size + cell_size * 0.5, grid_pos.y * cell_size + cell_size * 0.5)
 	var target_pos := _get_monster_target_pos()
 
+	# Capture pending state immediately and clear globals to prevent race with overlapping attacks
+	var captured_uid: int = _pending_attack_uid
+	var captured_eid: int = _pending_attack_effect_id
+	_pending_attack_uid = -1
+	_pending_attack_effect_id = -1
+
 	var proj := ColorRect.new()
 	proj.custom_minimum_size = Vector2(16, 16)
 	proj.size = Vector2(16, 16)
@@ -257,8 +280,11 @@ func _play_attack_animation(item_data: Dictionary, grid_pos: Vector2i, effect_id
 	tween.tween_callback(_play_monster_hit)
 	tween.tween_callback(proj.queue_free)
 	tween.tween_callback(func():
-		GridManager.remove_item(grid_pos)
-		CloudService.submit_battle_attack(item_data.get("id", 0), effect_id, grid_pos.x, grid_pos.y)
+		if captured_uid > 0:
+			var pos := GridManager.find_pos_by_uid(captured_uid)
+			if pos != Vector2i(-1, -1):
+				GridManager.remove_item(pos)
+		CloudService.submit_battle_attack(item_data.get("id", 0), captured_eid, grid_pos.x, grid_pos.y)
 	)
 
 func _get_monster_target_pos() -> Vector2:
@@ -285,3 +311,19 @@ func _play_monster_hit() -> void:
 	var tween := create_tween()
 	tween.tween_property(flash, "color", Color(1, 0.3, 0.3, 0.5), 0.1)
 	tween.tween_property(flash, "color", Color(1, 0.3, 0.3, 0.0), 0.3)
+
+func _on_stamina_restore_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	var stam: int = result.get("stamina", 0)
+	if stam > 0:
+		GameState.stamina = stam
+		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	if _pending_stamina_uid > 0:
+		var pos := GridManager.find_pos_by_uid(_pending_stamina_uid)
+		if pos != Vector2i(-1, -1):
+			GridManager.remove_item(pos)
+		_pending_stamina_uid = -1
+
+func _on_stamina_restore_rejected(reason: String) -> void:
+	EventBus.show_toast.emit("回复体力失败：" + reason)
+	_pending_stamina_uid = -1

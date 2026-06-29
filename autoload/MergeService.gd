@@ -40,6 +40,10 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 func _on_merge_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 
+	var regen: float = result.get("regen_remaining_ms", 0.0)
+	if regen > 0:
+		GameState.regen_remaining_ms = regen
+
 	var result_id: int = result.get("result_id", 0)
 	var from_pos := Vector2i(result.get("from_col", -1), result.get("from_row", -1))
 	var to_pos := Vector2i(result.get("to_col", -1), result.get("to_row", -1))

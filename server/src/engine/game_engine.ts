@@ -316,6 +316,11 @@ export class GameEngine {
     return this.getItemData(itemId)?.max_charges ?? 3;
   }
 
+  private _nextUid(state: GameState): number {
+    state.uid_counter = (state.uid_counter ?? 0) + 1;
+    return state.uid_counter!;
+  }
+
   getRechargeTime(itemId: number): number {
     return this.getItemData(itemId)?.recharge_time ?? 60;
   }
@@ -324,6 +329,51 @@ export class GameEngine {
 
   isInBounds(col: number, row: number): boolean {
     return col >= 0 && col < this.GRID_COLS && row >= 0 && row < this.GRID_ROWS;
+  }
+
+  tickStamina(state: GameState): void {
+    const now = Date.now();
+    // Reset timer when stamina is already full
+    if (state.stamina >= this.staminaConfig.max) {
+      state.last_stamina_tick = now;
+      return;
+    }
+    // Normal regen tick
+    const elapsed = (now - state.last_stamina_tick) / 1000;
+    if (elapsed < this.staminaConfig.regenInterval) return;
+    const ticks = Math.floor(elapsed / this.staminaConfig.regenInterval);
+    if (ticks <= 0) return;
+    const gained = ticks * this.staminaConfig.regenAmount;
+    state.stamina = Math.min(state.stamina + gained, this.staminaConfig.max);
+    state.last_stamina_tick += ticks * this.staminaConfig.regenInterval * 1000;
+    // After adding, if stamina just reached max, reset timer
+    if (state.stamina >= this.staminaConfig.max) {
+      state.last_stamina_tick = now;
+    }
+  }
+
+  getRegenRemainingMs(state: GameState): number {
+    const nextTick = state.last_stamina_tick + this.staminaConfig.regenInterval * 1000;
+    return Math.max(0, nextTick - Date.now());
+  }
+
+  tickLauncherRecharge(state: GameState): void {
+    const now = Date.now();
+    for (const item of state.grid) {
+      const itemDef = this.getItemData(item.id);
+      if (!itemDef || itemDef.type !== "launcher") continue;
+      const rechargeTime = itemDef.recharge_time ?? 0;
+      if (rechargeTime <= 0) continue;
+      const maxC = itemDef.max_charges ?? 3;
+      const charges = item.charges ?? maxC;
+      if (charges >= maxC) continue;
+      const lastTime = item.last_charge_time ?? now;
+      const elapsed = (now - lastTime) / 1000;
+      if (elapsed < rechargeTime) continue;
+      item.charges = maxC;
+      item.last_charge_time = now;
+      console.log(`[engine] launcher recharge: #${item.id} at (${item.col},${item.row}) 0->${maxC} (rechargeTime=${rechargeTime}s)`);
+    }
   }
 
   posKey(col: number, row: number): string {
@@ -416,6 +466,7 @@ export class GameEngine {
       last_stamina_tick: now,
       spirit_stones: 0,
       version: 0,
+      uid_counter: 0,
     };
 
     const setup = this.getInitialSetup(boardType);
@@ -423,7 +474,8 @@ export class GameEngine {
     for (const entry of setup) {
       const itemDef = this.getItemData(entry.id);
       if (itemDef) {
-        const gitem: GridItem = { id: entry.id, col: entry.col, row: entry.row };
+        state.uid_counter = (state.uid_counter ?? 0) + 1;
+        const gitem: GridItem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
         if (itemDef.type === "launcher") {
           gitem.charges = this.getMaxCharges(entry.id);
           gitem.last_charge_time = now;
@@ -647,7 +699,7 @@ export class GameEngine {
     state: GameState,
     launcherCol: number,
     launcherRow: number
-  ): { ok: true; spawnedId: number; spawnedName: string; targetCol: number; targetRow: number; newVersion: number; charges: number; maxCharges: number }
+  ): { ok: true; spawnedId: number; spawnedName: string; targetCol: number; targetRow: number; newVersion: number; charges: number; maxCharges: number; rechargeTime: number }
     | { ok: false; reason: string } {
     const map = this.gridToMap(state.grid);
     const launcherKey = this.posKey(launcherCol, launcherRow);
@@ -660,34 +712,46 @@ export class GameEngine {
       return { ok: false, reason: "not_a_launcher" };
     }
 
-    // Server rolls the spawn
-    const spawns = launcherData.spawns;
-    if (!spawns || !spawns.length) return { ok: false, reason: "no_spawns" };
-    const totalWeight: number = spawns.reduce((sum: number, s: any) => sum + s.weight, 0);
-    let roll = Math.random() * totalWeight;
-    let rolledId = spawns[0].id;
-    for (const s of spawns) {
-      roll -= s.weight;
-      if (roll <= 0) { rolledId = s.id; break; }
-    }
-
-    // Cost check: qi on battle board, stamina on main board
-    const isBattle = state.saved_grid && state.saved_grid.length > 0;
-    if (isBattle) {
-      if (state.cultivation.current_qi < 1) {
-        return { ok: false, reason: "insufficient_qi" };
-      }
-    } else {
-      if (state.stamina < this.staminaConfig.spawnCost) {
-        return { ok: false, reason: "insufficient_stamina" };
-      }
-    }
-
     // Launcher charges check
     const maxC = launcherData.max_charges ?? 3;
     const charges = launcherItem.charges ?? maxC;
     if (charges <= 0) {
       return { ok: false, reason: "no_charges" };
+    }
+
+    // Determine rolled ID: fixed spawns or random weighted
+    let rolledId: number;
+    const fixedSpawns = launcherData.fixed_spawns as number[] | undefined;
+    if (fixedSpawns && fixedSpawns.length > 0) {
+      const usedCount = maxC - charges; // times already used
+      if (usedCount >= fixedSpawns.length) {
+        return { ok: false, reason: "no_more_fixed_spawns" };
+      }
+      rolledId = fixedSpawns[usedCount];
+    } else {
+      const spawns = launcherData.spawns;
+      if (!spawns || !spawns.length) return { ok: false, reason: "no_spawns" };
+      const totalWeight: number = spawns.reduce((sum: number, s: any) => sum + s.weight, 0);
+      let roll = Math.random() * totalWeight;
+      rolledId = spawns[0].id;
+      for (const s of spawns) {
+        roll -= s.weight;
+        if (roll <= 0) { rolledId = s.id; break; }
+      }
+    }
+
+    // Cost check: skip for no_cost launchers, else qi/stamina
+    const isBattle = state.saved_grid && state.saved_grid.length > 0;
+    if (!launcherData.no_cost) {
+      if (isBattle) {
+        if (state.cultivation.current_qi < 1) {
+          return { ok: false, reason: "insufficient_qi" };
+        }
+      } else {
+        if (state.stamina < this.staminaConfig.spawnCost) {
+          return { ok: false, reason: "insufficient_stamina" };
+        }
+      }
     }
 
     const spawnResult = this.getItemData(rolledId);
@@ -696,14 +760,24 @@ export class GameEngine {
     const target = this.findNearestEmpty(map, launcherCol, launcherRow);
     if (!target) return { ok: false, reason: "no_empty_cell" };
 
-    // Deduct cost
-    if (isBattle) {
-      state.cultivation.current_qi = Math.max(0, state.cultivation.current_qi - 1);
-    } else {
-      state.stamina = Math.max(0, state.stamina - this.staminaConfig.spawnCost);
+    // Deduct cost (skip for no_cost launchers)
+    if (!launcherData.no_cost) {
+      if (isBattle) {
+        state.cultivation.current_qi = Math.max(0, state.cultivation.current_qi - 1);
+      } else {
+        state.stamina = Math.max(0, state.stamina - this.staminaConfig.spawnCost);
+      }
     }
     launcherItem.charges = charges - 1;
     launcherItem.last_charge_time = Date.now();
+
+    // Remove launcher if charges depleted and no recharge
+    if (launcherItem.charges <= 0 && (launcherData.recharge_time ?? -1) <= 0) {
+      state.grid = state.grid.filter(
+        (g) => !(g.col === launcherCol && g.row === launcherRow)
+      );
+      console.log(`[engine] launcher #${launcherItem.id} at (${launcherCol},${launcherRow}) depleted and removed`);
+    }
 
     const newItem: GridItem = { id: spawnResult.id, col: target.col, row: target.row };
     if (spawnResult.type === "launcher") {
@@ -724,6 +798,7 @@ export class GameEngine {
       newVersion: state.version,
       charges: launcherItem.charges,
       maxCharges: this.getMaxCharges(launcherItem.id),
+      rechargeTime: launcherData.recharge_time ?? 0,
     };
   }
 
@@ -1167,16 +1242,15 @@ export class GameEngine {
 
   pouchDeposit(
     state: GameState,
-    itemId: number,
-    col: number,
-    row: number
+    uid: number
   ): { ok: true; pouch: number[] } | { ok: false; reason: string } {
-    const idx = state.grid.findIndex((g) => g.col === col && g.row === row && g.id === itemId);
+    const idx = state.grid.findIndex((g) => g.uid === uid);
     if (idx < 0) return { ok: false, reason: "item_not_found" };
+    const itemId = state.grid[idx].id;
     state.grid.splice(idx, 1);
     state.pouch.push(itemId);
     state.version += 1;
-    console.log(`[engine] pouch deposit: #${itemId} | pouch=${state.pouch.length} items | v${state.version}`);
+    console.log(`[engine] pouch deposit: #${itemId} (uid=${uid}) | pouch=${state.pouch.length} items | v${state.version}`);
     return { ok: true, pouch: state.pouch };
   }
 
@@ -1322,6 +1396,38 @@ export class GameEngine {
     state.version += 1;
     console.log(`[engine] battle attack: ${monsterName} took ${dmg} dmg (${state.battle_monsters[mIdx].hp}/${state.battle_monsters[mIdx].max_hp}) | v${state.version}`);
     return { ok: true, grid: state.grid, monsters: state.battle_monsters, stage_complete: false, loot: [] };
+  }
+
+  consumeStaminaPill(
+    state: GameState,
+    pillId: number,
+    uid: number
+  ): { ok: true; stamina: number; max_stamina: number } | { ok: false; reason: string } {
+    const pillData = this.getItemData(pillId);
+    if (!pillData) return { ok: false, reason: "invalid_pill" };
+    const effectId: number = pillData.use_effect_id ?? 0;
+    const effect = this.getEffect(effectId);
+    if (!effect) return { ok: false, reason: "invalid_effect" };
+    if (effect.type !== "stamina") return { ok: false, reason: "not_stamina_item" };
+    const amount: number = effect.amount ?? 0;
+    if (amount <= 0) return { ok: false, reason: "no_stamina_gain" };
+    console.log(`[engine] consume stamina pill: #${pillId} "${pillData.name}" (uid=${uid}) | grid=${state.grid.length} items`);
+    // Remove item from grid (by position or by item ID if position not available)
+    let idx = state.grid.findIndex((g) => g.uid === uid);
+    if (idx >= 0) {
+      state.grid.splice(idx, 1);
+      console.log(`[engine]   removed from grid at idx=${idx}`);
+    } else {
+      console.log(`[engine]   item not found in grid, searching all items...`);
+    }
+    state.stamina = Math.min(state.stamina + amount, this.staminaConfig.max);
+    // Reset regen timer if stamina reached max
+    if (state.stamina >= this.staminaConfig.max) {
+      state.last_stamina_tick = Date.now();
+    }
+    state.version += 1;
+    console.log(`[engine] consume stamina pill: #${pillId} (uid=${uid}) | stamina +${amount} (${state.stamina}/${this.staminaConfig.max}) | v${state.version}`);
+    return { ok: true, stamina: state.stamina, max_stamina: this.staminaConfig.max };
   }
 
   private _addExp(c: CultivationData, amount: number): void {
@@ -1487,9 +1593,10 @@ export class GameEngine {
 
   // --- Shop ---
 
-  sellItem(state: GameState, col: number, row: number): { ok: true; stones: number } | { ok: false; reason: string } {
-    const item = state.grid.find(i => i.col === col && i.row === row);
+  sellItem(state: GameState, uid: number): { ok: true; stones: number } | { ok: false; reason: string } {
+    const item = state.grid.find(i => i.uid === uid);
     if (!item) return { ok: false, reason: "item_not_found" };
+    const itemId = item.id;
 
     const data = this.getItemData(item.id);
     if (!data) return { ok: false, reason: "item_data_not_found" };
@@ -1501,12 +1608,12 @@ export class GameEngine {
     const price = this.getSellPrice(item.id);
     if (price <= 0) return { ok: false, reason: "cannot_sell" };
 
-    state.grid = state.grid.filter(i => !(i.col === col && i.row === row));
+    state.grid = state.grid.filter(i => i.uid !== uid);
     state.spirit_stones += price;
     state.version += 1;
 
     const itemName = data.name ?? ("#" + item.id);
-    console.log(`[engine] sell: ${itemName} at (${col},${row}) -> +${price} stones | total=${state.spirit_stones}`);
+    console.log(`[engine] sell: ${itemName} (uid=${uid}) -> +${price} stones | total=${state.spirit_stones}`);
     return { ok: true, stones: state.spirit_stones };
   }
 

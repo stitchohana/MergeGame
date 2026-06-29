@@ -12,6 +12,7 @@ class_name GameScreen extends BaseScreen
 var _meridian_complete_exp: int = 50
 var _pending_item_ids: Array = []
 var _display_index_map: Array = []
+var _pending_stamina_uid: int = -1
 
 func _ready() -> void:
 	randomize()
@@ -33,6 +34,8 @@ func _ready() -> void:
 	grid_view.item_use_requested.connect(_on_item_use_requested)
 	CloudService.craft_remove_confirmed.connect(_on_craft_remove_confirmed)
 	CloudService.craft_remove_rejected.connect(_on_craft_remove_rejected)
+	CloudService.stamina_restore_confirmed.connect(_on_stamina_restore_confirmed)
+	CloudService.stamina_restore_rejected.connect(_on_stamina_restore_rejected)
 
 	battle_btn.pressed.connect(_on_battle_pressed)
 	home_btn.pressed.connect(_on_home_pressed)
@@ -114,6 +117,7 @@ func _on_craft_remove_confirmed(result: Dictionary) -> void:
 func _on_craft_remove_rejected(reason: String) -> void:
 	EventBus.show_toast.emit("取出材料失败：" + reason)
 
+
 func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	var effect_id: int = int(item_data.get("use_effect_id", 0))
 	if effect_id <= 0:
@@ -121,9 +125,13 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	var effect: Dictionary = ConfigDatabase.get_effect(effect_id)
 	if effect.is_empty():
 		return
+	var uid: int = item_data.get("_uid", 0)
 	match effect.get("type", ""):
 		"breakthrough": CultivationService.try_breakthrough(item_data.get("id", 0))
-		"exp": CultivationService.consume_exp_pill(item_data.get("id", 0), grid_pos)
+		"exp": CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
+		"stamina":
+			_pending_stamina_uid = uid
+			CloudService.submit_restore_stamina(item_data.get("id", 0), uid, GameState.version)
 		_: EventBus.show_toast.emit("此物品无法在此使用")
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
@@ -275,3 +283,19 @@ func _on_meridian_rejected(reason: String) -> void:
 		"insufficient_items": EventBus.show_toast.emit("物品不足")
 		"already_completed": EventBus.show_toast.emit("该穴位已完成")
 		_: EventBus.show_toast.emit("修炼失败：" + reason)
+
+func _on_stamina_restore_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	var stam: int = result.get("stamina", 0)
+	if stam > 0:
+		GameState.stamina = stam
+		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	if _pending_stamina_uid > 0:
+		var pos := GridManager.find_pos_by_uid(_pending_stamina_uid)
+		if pos != Vector2i(-1, -1):
+			GridManager.remove_item(pos)
+		_pending_stamina_uid = -1
+
+func _on_stamina_restore_rejected(reason: String) -> void:
+	EventBus.show_toast.emit("回复体力失败：" + reason)
+	_pending_stamina_uid = -1

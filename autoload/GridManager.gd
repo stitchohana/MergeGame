@@ -15,6 +15,9 @@ var _grid: Array[Array] = []
 # Reverse lookup: item_id -> Array[Vector2i] (multiple same-id items can exist)
 var _item_positions: Dictionary = {}  # int item_id -> Array[Vector2i]
 
+# Unique instance ID counter — assigned to every item placed on the grid
+var _next_uid: int = 1
+
 signal item_added(item_data: Dictionary, pos: Vector2i)
 signal item_removed(item_data: Dictionary, pos: Vector2i)
 signal item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i)
@@ -63,6 +66,8 @@ func add_item(item_data: Dictionary, pos: Vector2i) -> bool:
 	item_data = item_data.duplicate(true)
 	if not is_valid_pos(pos) or not is_empty(pos):
 		return false
+	item_data["_uid"] = _next_uid
+	_next_uid += 1
 	_grid[pos.y][pos.x] = item_data
 
 	# Track position for this item_id
@@ -206,6 +211,24 @@ func is_grid_full() -> bool:
 # Get all positions that have a specific item_id
 func get_positions_by_item_id(item_id: int) -> Array[Vector2i]:
 	return _item_positions.get(item_id, []).duplicate()
+
+# Find an item by its unique instance ID
+func find_by_uid(uid: int) -> Dictionary:
+	for row in range(GRID_ROWS):
+		for col in range(GRID_COLS):
+			var item = _grid[row][col]
+			if item != null and item.get("_uid", 0) == uid:
+				return item
+	return {}
+
+# Find the grid position of an item by its unique instance ID
+func find_pos_by_uid(uid: int) -> Vector2i:
+	if uid <= 0:
+		return Vector2i(-1, -1)
+	for entry in get_all_items():
+		if entry.data.get("_uid", 0) == uid:
+			return entry.pos
+	return Vector2i(-1, -1)
 
 # Get all items on the grid
 func get_all_items() -> Array[Dictionary]:

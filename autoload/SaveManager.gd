@@ -22,6 +22,7 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.stamina = state.get("stamina", 100)
 	GameState.max_stamina = state.get("max_stamina", 100)
 	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	GameState.regen_remaining_ms = state.get("regen_remaining_ms", 0.0)
 	GameState.spirit_stones = state.get("spirit_stones", 0)
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 
@@ -44,6 +45,9 @@ func _restore_from_server(state: Dictionary) -> void:
 			var entry_charges: Variant = entry.get("charges", null)
 			if entry_charges != null:
 				new_item["charges"] = entry_charges
+			var recharge_rem: Variant = entry.get("_recharge_remaining", null)
+			if recharge_rem != null:
+				new_item["_recharge_remaining"] = recharge_rem
 			# Restore storage data
 			var entry_storage: Variant = entry.get("storage", null)
 			if entry_storage != null:

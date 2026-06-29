@@ -17,7 +17,7 @@ var current_exp: int = 0
 var total_exp: int = 0
 var current_qi: int = 0
 var max_qi: int = 100
-var _pending_exp_pill_pos: Vector2i = Vector2i(-1, -1)
+var _pending_exp_pill_uid: int = -1
 
 func _ready() -> void:
 	CloudService.breakthrough_confirmed.connect(_on_breakthrough_confirmed)
@@ -34,9 +34,11 @@ func _on_exp_pill_consume_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 	var c: Dictionary = result.get("cultivation", {})
 	_apply_cultivation_state(c)
-	if _pending_exp_pill_pos.x >= 0:
-		GridManager.remove_item(_pending_exp_pill_pos)
-		_pending_exp_pill_pos = Vector2i(-1, -1)
+	if _pending_exp_pill_uid > 0:
+		var pos := GridManager.find_pos_by_uid(_pending_exp_pill_uid)
+		if pos != Vector2i(-1, -1):
+			GridManager.remove_item(pos)
+		_pending_exp_pill_uid = -1
 
 # --- Public operations (submit to server) ---
 
@@ -46,10 +48,12 @@ func try_breakthrough(pill_id: int) -> bool:
 		return true
 	return false
 
-func consume_exp_pill(pill_id: int, grid_pos: Vector2i) -> void:
-	_pending_exp_pill_pos = grid_pos
+func consume_exp_pill(pill_id: int, uid: int) -> void:
+	_pending_exp_pill_uid = uid
 	if CloudService.online:
 		CloudService.submit_consume_exp_pill(pill_id, GameState.version)
+
+# --- Helpers ---
 
 # --- State sync from server ---
 

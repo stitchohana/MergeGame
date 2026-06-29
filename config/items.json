@@ -24,14 +24,20 @@
 	{"id": 73, "level": 3, "name": "凝神散", "icon": "", "group_id": 5, "use_effect_id": 11, "describe": "增加200修为"},
 	{"id": 74, "level": 4, "name": "增元散", "icon": "", "group_id": 5, "use_effect_id": 12, "describe": "增加500修为"},
 	{"id": 81, "level": 1, "name": "剑气", "icon": "", "group_id": 6, "use_effect_id": 7, "describe": "飞剑凝聚的剑气，造成15点伤害"},
-	{"id": 603, "level": 1, "name": "仓库", "group_id": 7, "icon": "", "describe": "可以存放物品", "storage_slots": 20}
+		{"id": 91, "level": 1, "name": "回体散", "icon": "", "group_id": 8, "use_effect_id": 13, "describe": "恢复20体力"},
+		{"id": 92, "level": 2, "name": "回体丹", "icon": "", "group_id": 8, "use_effect_id": 14, "describe": "恢复40体力"},
+		{"id": 93, "level": 3, "name": "回体丸", "icon": "", "group_id": 8, "use_effect_id": 15, "describe": "恢复60体力"},
+		{"id": 94, "level": 4, "name": "回体膏", "icon": "", "group_id": 8, "use_effect_id": 16, "describe": "恢复80体力"},
+		{"id": 95, "level": 5, "name": "回体丹皇", "icon": "", "group_id": 8, "use_effect_id": 17, "describe": "恢复100体力"},
+		{"id": 603, "level": 1, "name": "仓库", "group_id": 7, "icon": "", "describe": "可以存放物品", "storage_slots": 20}
   ],
   "launcher": [
 	{"id": 501, "level": 1, "name": "小药田", "icon": "", "group_id": 11, "max_charges": 30, "recharge_time": 60, "describe": "产出凡草，小概率出灵草或自身", "spawns": [{"id": 21, "weight": 70}, {"id": 22, "weight": 25}, {"id": 501, "weight": 5}]},
 	{"id": 502, "level": 2, "name": "中药田", "icon": "", "group_id": 11, "max_charges": 40, "recharge_time": 50, "describe": "产出灵草，概率出仙草或自身", "spawns": [{"id": 22, "weight": 60}, {"id": 23, "weight": 30}, {"id": 502, "weight": 10}]},
 	{"id": 503, "level": 3, "name": "大药田", "icon": "", "group_id": 11, "max_charges": 50, "recharge_time": 40, "describe": "产出仙草，概率出圣草或自身", "spawns": [{"id": 23, "weight": 50}, {"id": 24, "weight": 35}, {"id": 503, "weight": 15}]},
 	{"id": 504, "level": 1, "name": "矿山", "icon": "", "group_id": 12, "max_charges": 30, "recharge_time": 60, "describe": "产出铜矿，概率出铁矿或自身", "spawns": [{"id": 61, "weight": 70}, {"id": 62, "weight": 25}, {"id": 504, "weight": 5}]},
-	{"id": 505, "level": 1, "name": "飞剑", "icon": "", "group_id": 13, "max_charges": 100, "recharge_time": 30, "describe": "凝聚剑气", "spawns": [{"id": 81, "weight": 80}, {"id": 505, "weight": 20}]}
+	{"id": 505, "level": 1, "name": "飞剑", "icon": "", "group_id": 13, "max_charges": 100, "recharge_time": 30, "describe": "凝聚剑气", "spawns": [{"id": 81, "weight": 80}, {"id": 505, "weight": 20}]},
+		{"id": 506, "level": 1, "name": "体力礼包", "icon": "", "group_id": 14, "max_charges": 3, "recharge_time": 0, "no_cost": true, "describe": "点击获得聚气散、剑气、回体散各1个", "fixed_spawns": [93, 94, 94]}
   ],
   "crafting": [
 	{"id": 601, "level": 1, "name": "基础炼丹炉", "group_id": 21, "icon": "", "describe": "可以炼制丹药", "recipes": [3,4,5,6,7,8,9,10,11,12,13,14]},

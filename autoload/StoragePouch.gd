@@ -22,8 +22,8 @@ func restore_from_server(data: Array) -> void:
 	items = data.duplicate()
 	pouch_updated.emit(items)
 
-func deposit(item_id: int, from_pos: Vector2i) -> void:
-	CloudService.submit_pouch_deposit(item_id, from_pos.x, from_pos.y)
+func deposit(uid: int) -> void:
+	CloudService.submit_pouch_deposit(uid)
 
 func withdraw(item_id: int, target_pos: Vector2i) -> void:
 	_pending_withdraw_id = item_id

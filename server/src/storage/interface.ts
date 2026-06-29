@@ -1,6 +1,7 @@
 // --- Game data types ---
 
 export interface GridItem {
+  uid?: number;
   id: number;
   col: number;
   row: number;
@@ -48,11 +49,15 @@ export interface GameState {
   last_stamina_tick: number;
   spirit_stones: number;
   version: number;
+  uid_counter?: number;
   saved_grid?: GridItem[];
   battle_grid?: GridItem[];
   battle_map_id?: number;
   battle_stage?: number;
   battle_monsters?: BattleMonster[];
+  meridian_circulations?: number;
+  meridian_acupoints?: { item_id: number; name: string; count: number; completed: boolean }[];
+  meridian_threshold_idx?: number;
 }
 
 export interface BattleMonster {
@@ -63,11 +68,6 @@ export interface BattleMonster {
   atk: number;
   accept_effect_ids: number[];
   is_boss?: boolean;
-}
-export interface Dummy {}
-  meridian_circulations?: number;
-  meridian_acupoints?: { item_id: number; name: string; count: number; completed: boolean }[];
-  meridian_threshold_idx?: number;
 }
 
 export interface User {

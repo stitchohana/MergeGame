@@ -15,7 +15,6 @@ signal material_clicked(item_id: int)
 
 var _current_item_data: Dictionary = {}
 var _current_recipes: Array = []
-var _current_grid_pos: Vector2i = Vector2i(-1, -1)
 var _countdown_timer: Timer = null
 var _sell_prices: Dictionary = {}
 
@@ -26,14 +25,14 @@ func _ready() -> void:
 		sell_btn.pressed.connect(_on_sell_pressed)
 	if $ViewButton:
 		$ViewButton.pressed.connect(_on_view_pressed)
-	CraftingService.table_state_changed.connect(_on_table_state_changed)
+	if not CraftingService.table_state_changed.is_connected(_on_table_state_changed):
+		CraftingService.table_state_changed.connect(_on_table_state_changed)
 
 func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> void:
 	if item_data.is_empty():
 		clear()
 		return
 	_current_item_data = item_data
-	_current_grid_pos = grid_pos
 	_update_sell_btn()
 	var item_name: String = item_data.get("name", "")
 	var item_level: int = item_data.get("level", 0)
@@ -84,6 +83,8 @@ func _refresh_materials() -> void:
 		_hide_materials()
 		return
 	var state: int = _current_item_data.get("_craft_state", CraftingService.TableState.IDLE)
+	var timer_exists: bool = _countdown_timer != null and is_instance_valid(_countdown_timer)
+	var timer_in_tree: bool = timer_exists and _countdown_timer.is_inside_tree()
 	if state == CraftingService.TableState.CRAFTING:
 		var remaining := CraftingService.get_remaining_craft_seconds(_current_item_data)
 		if remaining > 0:
@@ -95,7 +96,8 @@ func _refresh_materials() -> void:
 		materials_container.hide()
 		for child in materials_container.get_children():
 			child.queue_free()
-		_start_countdown_timer()
+		if not timer_exists or not timer_in_tree:
+			_start_countdown_timer()
 		return
 	if state == CraftingService.TableState.READY:
 		_stop_countdown_timer()
@@ -189,8 +191,26 @@ func _build_material_icon(item_data: Dictionary, count: int) -> Button:
 func get_current_craft_table() -> Dictionary:
 	return _current_item_data
 
+# Derive position from uid instead of storing it
 func get_current_craft_pos() -> Vector2i:
-	return _current_grid_pos
+	if _current_item_data.is_empty():
+		return Vector2i(-1, -1)
+	var uid: int = _current_item_data.get("_uid", 0)
+	if uid <= 0:
+		return Vector2i(-1, -1)
+	var item: Dictionary = GridManager.find_by_uid(uid)
+	if item.is_empty():
+		return Vector2i(-1, -1)
+	# Scan grid to find position of this item
+	for entry in GridManager.get_all_items():
+		if entry.data.get("_uid", 0) == uid:
+			return entry.pos
+	return Vector2i(-1, -1)
+
+func _get_current_uid() -> int:
+	if _current_item_data.is_empty():
+		return -1
+	return _current_item_data.get("_uid", -1)
 
 func _start_countdown_timer() -> void:
 	_stop_countdown_timer()
@@ -231,7 +251,7 @@ func _hide_materials() -> void:
 		child.queue_free()
 
 func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
-	if not _current_item_data.is_empty() and _current_item_data == table_item:
+	if not _current_item_data.is_empty() and _current_item_data.get("_uid", 0) == table_item.get("_uid", -1):
 		_refresh_materials()
 
 func _on_view_pressed() -> void:
@@ -249,22 +269,28 @@ func _on_recipe_btn_pressed() -> void:
 	popup.setup(_current_recipes, _current_item_data.get("name", ""))
 
 func _on_sell_pressed() -> void:
+	var uid: int = _get_current_uid()
+	if uid <= 0:
+		return
 	var item_id: int = _current_item_data.get("id", 0)
 	var price: int = _sell_prices.get(str(item_id), 0)
-	if price <= 0 or _current_grid_pos == Vector2i(-1, -1):
+	if price <= 0:
 		return
 	var item_name: String = _current_item_data.get("name", "")
 	var popup := preload("res://scenes/ui/ConfirmPopup.tscn").instantiate() as ConfirmPopup
 	popup.setup("确定出售 %s？获得 %d 灵石" % [item_name, price])
-	popup.confirmed.connect(_on_sell_confirmed.bind(item_id), CONNECT_ONE_SHOT)
+	popup.confirmed.connect(_on_sell_confirmed.bind(uid), CONNECT_ONE_SHOT)
 	UIManager.show_popup(popup)
 
-func _on_sell_confirmed(item_id: int) -> void:
+func _on_sell_confirmed(uid: int) -> void:
 	if CloudService.online:
-		var sell_pos := _current_grid_pos
-		GridManager.remove_item(sell_pos)
+		if uid <= 0:
+			return
+		var pos := get_current_craft_pos()
+		if pos != Vector2i(-1, -1):
+			GridManager.remove_item(pos)
 		clear()
-		CloudService.submit_sell(sell_pos.x, sell_pos.y)
+		CloudService.submit_sell(uid)
 	else:
 		EventBus.show_toast.emit("离线无法出售")
 
@@ -305,7 +331,6 @@ func clear() -> void:
 	_stop_countdown_timer()
 	_current_item_data = {}
 	_current_recipes = []
-	_current_grid_pos = Vector2i(-1, -1)
 	default_label.show()
 	icon_rect.hide()
 	name_label.hide()

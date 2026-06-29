@@ -37,6 +37,9 @@ var _selected_key: String = ""
 var _skip_anims: bool = false
 var _pouch_zone: Control = null
 
+var _launcher_cd: Dictionary = {}  # uid -> {remaining, recharge_time, max_charges}
+var _cd_timer: Timer = null
+
 func set_pouch_zone(zone: Control) -> void:
 	_pouch_zone = zone
 
@@ -50,6 +53,46 @@ func _ready() -> void:
 	_sync_all_items()
 	_setup_crafting()
 	_sync_crafting_states()
+	_cd_timer = Timer.new()
+	_cd_timer.wait_time = 1.0
+	_cd_timer.one_shot = false
+	_cd_timer.timeout.connect(_on_cd_tick)
+	add_child(_cd_timer)
+	_cd_timer.start()
+
+func _on_cd_tick() -> void:
+	if _launcher_cd.is_empty():
+		return
+	var to_erase: Array = []
+	for uid in _launcher_cd:
+		var cd: Dictionary = _launcher_cd[uid]
+		cd.remaining -= 1.0
+		if cd.remaining <= 0:
+			to_erase.append(uid)
+		else:
+			var secs: int = int(ceil(cd.remaining))
+			var m: int = int(secs / 60)
+			var s: int = secs % 60
+			for node_key in _item_nodes:
+				var node = _item_nodes[node_key]
+				if is_instance_valid(node) and node.item_data.get("_uid", 0) == uid:
+					node.charge_label.text = "%02d:%02d" % [m, s]
+					node.charge_label.add_theme_color_override("font_color", Color(1, 0.6, 0.2, 1))
+					break
+	for uid in to_erase:
+		_launcher_cd.erase(uid)
+		# Reset charges locally — server recharges independently via tickLauncherRecharge
+		var item := GridManager.find_by_uid(uid)
+		if not item.is_empty():
+			var cfg: Dictionary = ConfigDatabase.get_item_data(item.get("id", 0))
+			var max_c: int = cfg.get("max_charges", 3)
+			item["charges"] = max_c
+			for node_key in _item_nodes:
+				var node = _item_nodes[node_key]
+				if is_instance_valid(node) and node.item_data.get("_uid", 0) == uid:
+					node.charge_label.text = "%d/%d" % [max_c, max_c]
+					node.charge_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
+					break
 
 func _create_grid() -> void:
 	var bg := ColorRect.new()
@@ -90,7 +133,6 @@ func _connect_signals() -> void:
 	CloudService.spawn_rejected.connect(_on_spawn_rejected)
 	CloudService.craft_add_confirmed.connect(_on_craft_add_confirmed)
 	CloudService.craft_add_rejected.connect(_on_craft_add_rejected)
-	StoragePouch.deposit_failed.connect(_on_pouch_deposit_failed)
 	CloudService.craft_start_confirmed.connect(_on_craft_start_confirmed)
 	CloudService.craft_start_rejected.connect(_on_craft_start_rejected)
 	CloudService.craft_retrieve_confirmed.connect(_on_craft_retrieve_confirmed)
@@ -173,7 +215,7 @@ func _to_local(global_pos: Vector2) -> Vector2:
 func _local_to_grid(local_pos: Vector2) -> Vector2i:
 	return Vector2i(int(local_pos.x / CELL_SIZE), int(local_pos.y / CELL_SIZE))
 
-var _pending_spawn_pos: Vector2i = Vector2i(-1, -1)
+var _pending_spawn_uid: int = -1
 
 func _handle_launcher_click(pos: Vector2i) -> void:
 	if GameState.phase != GameState.GamePhase.IDLE:
@@ -186,27 +228,31 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
-	if GameState.current_board_type == Constants.BoardType.BATTLE:
-		if CultivationService.current_qi < 1:
-			EventBus.show_toast.emit("灵力不足")
+	# Skip cost for no_cost launchers (e.g. gift pack)
+	var item_config: Dictionary = ConfigDatabase.get_item_data(item.get("id", 0))
+	if not item_config.get("no_cost", false):
+		if GameState.current_board_type == Constants.BoardType.BATTLE:
+			if CultivationService.current_qi < 1:
+				EventBus.show_toast.emit("灵力不足")
+				GameState.set_phase(GameState.GamePhase.IDLE)
+				return
+		elif GameState.stamina < 1:
+			EventBus.show_toast.emit("体力不足")
 			GameState.set_phase(GameState.GamePhase.IDLE)
 			return
-	elif GameState.stamina < 1:
-		EventBus.show_toast.emit("体力不足")
-		GameState.set_phase(GameState.GamePhase.IDLE)
-		return
 	var item_charges: int = item.get("charges", -1)
 	if item_charges == 0:
 		EventBus.show_toast.emit("发射器次数用尽，等待冷却")
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
-	_pending_spawn_pos = pos
+	_pending_spawn_uid = item.get("_uid", -1)
 
 	if CloudService.online:
 		CloudService.submit_spawn(pos.x, pos.y, GameState.version)
 	else:
 		GameState.set_phase(GameState.GamePhase.IDLE)
+
 
 func _on_spawn_confirmed(result: Dictionary) -> void:
 	var target_pos: Vector2i = Vector2i(result.get("target_col", -1), result.get("target_row", -1))
@@ -226,11 +272,12 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 		_is_launcher_spawning = false
 
 	# Fly animation from launcher to target
-	var launcher_pos: Vector2i = _pending_spawn_pos
-	_pending_spawn_pos = Vector2i(-1, -1)
+	var launcher_uid: int = _pending_spawn_uid
+	var launcher_pos: Vector2i = GridManager.find_pos_by_uid(launcher_uid)
+	_pending_spawn_uid = -1
 	var fly_key := "%d,%d" % [target_pos.x, target_pos.y]
 	var fly_node: GridItem = _item_nodes.get(fly_key)
-	if fly_node and is_instance_valid(fly_node):
+	if fly_node and is_instance_valid(fly_node) and launcher_pos.x >= 0:
 		fly_node.position = Vector2(launcher_pos.x * CELL_SIZE, launcher_pos.y * CELL_SIZE)
 		fly_node.scale = Vector2(0.7, 0.7)
 		var tween := create_tween()
@@ -239,12 +286,21 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 		tween.tween_property(fly_node, "scale", Vector2(1, 1), 0.35).set_trans(Tween.TRANS_BOUNCE)
 
 	# Update stamina
-	var stamina: Variant = result.get("stamina", null)
-	if stamina != null:
-		GameState.stamina = stamina
-		GameState.max_stamina = result.get("max_stamina", GameState.max_stamina)
-		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 
+	var stamina: Variant = result.get("stamina", null)
+
+	var regen_ms: float = result.get("regen_remaining_ms", 0.0)
+
+	if regen_ms > 0:
+		GameState.regen_remaining_ms = regen_ms
+
+	if stamina != null:
+
+		GameState.stamina = stamina
+
+		GameState.max_stamina = result.get("max_stamina", GameState.max_stamina)
+
+		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 	# Update cultivation (qi cost for battle board spawn)
 	var cult: Variant = result.get("cultivation", null)
 	if cult != null:
@@ -252,29 +308,55 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 
 	# Update launcher charges
 	var charges_val: Variant = result.get("charges", null)
+	var launcher_item = null
 	if charges_val != null:
-		if launcher_pos.x >= 0 and launcher_pos.y >= 0:
-			var launcher_item = GridManager.get_item(launcher_pos)
-			if launcher_item != null:
+		if launcher_uid > 0:
+			launcher_item = GridManager.find_by_uid(launcher_uid)
+			if not launcher_item.is_empty():
 				launcher_item["charges"] = charges_val
-				var launcher_key := "%d,%d" % [launcher_pos.x, launcher_pos.y]
-				var launcher_node = _item_nodes.get(launcher_key)
+				var launcher_node = null
+				for nk in _item_nodes:
+					var nd = _item_nodes[nk]
+					if is_instance_valid(nd) and nd.item_data.get("_uid", 0) == launcher_uid:
+						launcher_node = nd
+						break
 				if launcher_node and is_instance_valid(launcher_node):
-					if charges_val <= 0:
+					var max_c: int = result.get("max_charges", 3)
+					var cd_time: float = result.get("recharge_time", 0.0)
+					if charges_val <= 0 and cd_time > 0:
+						_launcher_cd[launcher_uid] = {"remaining": cd_time, "recharge_time": cd_time, "max_charges": max_c}
+						var cd_secs: int = int(ceil(cd_time))
+						launcher_node.charge_label.text = "%02d:%02d" % [int(cd_secs / 60), cd_secs % 60]
+						launcher_node.charge_label.add_theme_color_override("font_color", Color(1, 0.6, 0.2, 1))
+					elif charges_val <= 0:
 						launcher_node.charge_label.text = "空"
 						launcher_node.charge_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3, 1))
 					else:
-						var max_c: int = result.get("max_charges", 3)
 						launcher_node.charge_label.text = "%d/%d" % [charges_val, max_c]
 						launcher_node.charge_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
 		if charges_val <= 0:
-			EventBus.show_toast.emit("发射器次数用尽，等待冷却")
+			var launcher_cfg: Dictionary = ConfigDatabase.get_item_data(launcher_item.get("id", 0)) if not launcher_item.is_empty() else {}
+			if launcher_cfg.get("no_cost", false) and launcher_cfg.get("recharge_time", 0) <= 0:
+				var lnode2 = null
+				for nk2 in _item_nodes:
+					var nd2 = _item_nodes[nk2]
+					if is_instance_valid(nd2) and nd2.item_data.get("_uid", 0) == launcher_uid:
+						lnode2 = nd2
+						_item_nodes.erase(nk2)
+						break
+				if lnode2 and is_instance_valid(lnode2):
+					lnode2.queue_free()
+				if launcher_pos.x >= 0:
+					GridManager.remove_item(launcher_pos)
+				EventBus.show_toast.emit("礼包已耗尽")
+			else:
+				EventBus.show_toast.emit("发射器次数用尽，等待冷却")
 
 	if GameState.phase == GameState.GamePhase.SPAWNING:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 
 func _on_spawn_rejected(reason: String) -> void:
-	_pending_spawn_pos = Vector2i(-1, -1)
+	_pending_spawn_uid = -1
 	print("[GridView] Spawn rejected: ", reason)
 	EventBus.show_toast.emit(_spawn_error_text(reason))
 	if GameState.phase == GameState.GamePhase.SPAWNING:
@@ -373,7 +455,9 @@ func _do_pouch_deposit() -> void:
 	if src_node and is_instance_valid(src_node):
 		src_node.queue_free()
 	_item_nodes.erase(src_key)
-	StoragePouch.deposit(item_id, _drag_source_pos)
+	var _sp = Engine.get_singleton("StoragePouch")
+	if _sp:
+		_sp.call("deposit", _drag_item_data.get("_uid", 0))
 
 func _on_pouch_deposit_failed(_reason: String) -> void:
 	var gitem = GridManager.get_item(_drag_source_pos)
@@ -422,6 +506,35 @@ func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
 	if not _is_launcher_spawning and not _skip_anims:
 		item.play_spawn_animation()
 	_item_nodes["%d,%d" % [pos.x, pos.y]] = item
+	_try_start_launcher_cd(item_data)
+
+func _try_start_launcher_cd(item_data: Dictionary) -> void:
+	if item_data.get("charges", -1) != 0:
+		return
+	var cfg: Dictionary = ConfigDatabase.get_item_data(item_data.get("id", 0))
+	if cfg.is_empty() or cfg.get("type", "") != "launcher":
+		return
+	var cd_time: float = cfg.get("recharge_time", 0.0)
+	if cd_time <= 0:
+		return
+	var uid: int = item_data.get("_uid", 0)
+	if uid <= 0:
+		return
+	var max_c: int = cfg.get("max_charges", 3)
+	var remaining: float = cd_time
+	var server_rem: Variant = item_data.get("_recharge_remaining", null)
+	if typeof(server_rem) == TYPE_FLOAT or typeof(server_rem) == TYPE_INT:
+		remaining = maxf(0, float(server_rem) / 1000.0)
+	_launcher_cd[uid] = {"remaining": remaining, "recharge_time": cd_time, "max_charges": max_c}
+	for node_key in _item_nodes:
+		var node = _item_nodes[node_key]
+		if is_instance_valid(node) and node.item_data.get("_uid", 0) == uid:
+			var secs: int = int(ceil(remaining))
+			var m: int = int(secs / 60)
+			var s: int = secs % 60
+			node.charge_label.text = "%02d:%02d" % [m, s]
+			node.charge_label.add_theme_color_override("font_color", Color(1, 0.6, 0.2, 1))
+			break
 
 func _on_item_removed(item_data: Dictionary, pos: Vector2i) -> void:
 	var key := "%d,%d" % [pos.x, pos.y]
@@ -433,6 +546,9 @@ func _on_item_removed(item_data: Dictionary, pos: Vector2i) -> void:
 			return
 		node.play_merge_animation()
 	_item_nodes.erase(key)
+	var uid: int = item_data.get("_uid", 0)
+	if uid > 0 and _launcher_cd.has(uid):
+		_launcher_cd.erase(uid)
 
 func _on_item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i) -> void:
 	var key := "%d,%d" % [from_pos.x, from_pos.y]
@@ -460,6 +576,7 @@ func _sync_all_items() -> void:
 		layer.add_child(item)
 		item.setup(entry.data, entry.pos, CELL_SIZE)
 		_item_nodes["%d,%d" % [entry.pos.x, entry.pos.y]] = item
+		_try_start_launcher_cd(entry.data)
 
 func _remove_item_node(pos: Vector2i) -> void:
 	var key := "%d,%d" % [pos.x, pos.y]
@@ -493,7 +610,8 @@ func _get_items_layer() -> Control:
 # --- Crafting ---
 
 func _setup_crafting() -> void:
-	CraftingService.table_state_changed.connect(_on_table_state_changed)
+	if not CraftingService.table_state_changed.is_connected(_on_table_state_changed):
+		CraftingService.table_state_changed.connect(_on_table_state_changed)
 	_craft_button = preload("res://scenes/ui/CraftButton.tscn").instantiate() as CraftButton
 	add_child(_craft_button)
 	_craft_button.hide()
@@ -510,19 +628,90 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 		return
 
 	var ingredient_id: int = dragged_item.get("id", 0)
+	# Check if ingredient is valid for this table's recipes
+	var table_id: int = table_item.get("id", 0)
+	var allowed_recipes: Array = ConfigDatabase.get_recipes_for_item(table_id)
+	var valid := false
+	for r in allowed_recipes:
+		var ingredients: Array = r.get("ingredients", [])
+		for ing in ingredients:
+			if ing.get("id", 0) == ingredient_id:
+				valid = true
+				break
+		if valid:
+			break
+	if not valid:
+		_snap_back()
+		EventBus.show_toast.emit("此材料无法放入")
+		return
+	# Check if this ingredient type is already stored in the table
+	var stored: Array = CraftingService.get_stored_items(table_item)
+	for s in stored:
+		if s.get("id", 0) == ingredient_id:
+			_snap_back()
+			EventBus.show_toast.emit("该材料已放入")
+			return
+	# Check if existing stored + new ingredient can match any recipe
+	if not stored.is_empty():
+		var can_match := false
+		for r in allowed_recipes:
+			var recipe_ings: Array = r.get("ingredients", [])
+			var all_stored_match := true
+			for s in stored:
+				var sid: int = s.get("id", 0)
+				var found_s := false
+				for ri in recipe_ings:
+					if ri.get("id", 0) == sid:
+						found_s = true
+						break
+				if not found_s:
+					all_stored_match = false
+					break
+			if not all_stored_match:
+				continue
+			var new_match := false
+			for ri in recipe_ings:
+				if ri.get("id", 0) == ingredient_id:
+					new_match = true
+					break
+			if new_match:
+				can_match = true
+				break
+		if not can_match:
+			_snap_back()
+			EventBus.show_toast.emit("无法与已有材料形成配方")
+			return
 
-	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
+	# Validation passed — submit to server, defer removal to _on_craft_add_confirmed
+	_last_craft_pending_src_key = "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
+	_last_craft_pending_src_pos = _drag_source_pos
+	_last_craft_pending_table_item = table_item
+	_last_craft_pending_dragged_item = dragged_item
+	_last_craft_pending_table_pos = table_pos
+	_last_craft_pending_ingredient_id = ingredient_id
 
 	if CloudService.online:
 		CloudService.submit_craft_add(_drag_source_pos.x, _drag_source_pos.y, table_pos.x, table_pos.y, ingredient_id, GameState.version)
+	else:
+		# Offline: apply immediately
+		_apply_craft_add_local(_last_craft_pending_src_key, _last_craft_pending_src_pos,
+			_last_craft_pending_table_item, _last_craft_pending_dragged_item, _last_craft_pending_table_pos)
+		_clear_craft_pending()
 
 	var table_key := "%d,%d" % [table_pos.x, table_pos.y]
 	var table_node = _item_nodes.get(table_key)
 	if table_node and is_instance_valid(table_node):
 		table_node.set_crafting_state(CraftingService.TableState.HAS_ITEMS)
-
 var _last_craft_ingredient_id: int = -1
 var _last_craft_ingredient_pos: Vector2i = Vector2i(-1, -1)
+
+# Pending state for craft_add (deferred until server confirms)
+var _last_craft_pending_src_key: String = ""
+var _last_craft_pending_src_pos: Vector2i = Vector2i(-1, -1)
+var _last_craft_pending_table_item: Dictionary = {}
+var _last_craft_pending_dragged_item: Dictionary = {}
+var _last_craft_pending_table_pos: Vector2i = Vector2i(-1, -1)
+var _last_craft_pending_ingredient_id: int = -1
 
 func _handle_storage_click(storage_pos: Vector2i) -> void:
 	CloudService.fetch_state()
@@ -550,7 +739,7 @@ func _handle_storage_drop(storage_pos: Vector2i, storage_item: Dictionary) -> vo
 		src_node.queue_free()
 	_item_nodes.erase(src_key)
 	GridManager.remove_item(_drag_source_pos)
-	
+
 	if CloudService.online:
 		CloudService.submit_storage_deposit(storage_pos.x, storage_pos.y, item_id, _drag_source_pos.x, _drag_source_pos.y)
 func _handle_crafting_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
@@ -591,8 +780,30 @@ func _on_craft_button_pressed() -> void:
 
 func _on_craft_add_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
+	if not _last_craft_pending_dragged_item.is_empty():
+		_apply_craft_add_local(_last_craft_pending_src_key, _last_craft_pending_src_pos,
+			_last_craft_pending_table_item, _last_craft_pending_dragged_item, _last_craft_pending_table_pos)
+		_clear_craft_pending()
+
 func _on_craft_add_rejected(reason: String) -> void:
+	_clear_craft_pending()
 	EventBus.show_toast.emit("放入材料失败：" + reason)
+
+func _apply_craft_add_local(src_key: String, src_pos: Vector2i, table_item: Dictionary, dragged_item: Dictionary, table_pos: Vector2i) -> void:
+	var src_node = _item_nodes.get(src_key)
+	if src_node and is_instance_valid(src_node):
+		src_node.queue_free()
+	_item_nodes.erase(src_key)
+	GridManager.remove_item(src_pos)
+	CraftingService.add_ingredient(table_item, dragged_item)
+
+func _clear_craft_pending() -> void:
+	_last_craft_pending_src_key = ""
+	_last_craft_pending_src_pos = Vector2i(-1, -1)
+	_last_craft_pending_table_item = {}
+	_last_craft_pending_dragged_item = {}
+	_last_craft_pending_table_pos = Vector2i(-1, -1)
+	_last_craft_pending_ingredient_id = -1
 
 func _on_craft_start_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
@@ -659,14 +870,15 @@ func _sync_crafting_states() -> void:
 				node.set_crafting_state(cs)
 
 func _hide_craft_button() -> void:
-	_craft_button.hide()
+	if _craft_button:
+		_craft_button.hide()
 	_craft_table_pos = Vector2i(-1, -1)
 	_craft_table_item = {}
 
 func _select_item(pos: Vector2i) -> void:
 	var key := "%d,%d" % [pos.x, pos.y]
 	if key == _selected_key and not _selected_key.is_empty():
-		var item: Dictionary = GridManager.get_item(pos)
+		var item: Variant = GridManager.get_item(pos)
 		if item != null:
 			item_use_requested.emit(item, pos)
 		return

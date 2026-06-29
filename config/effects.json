@@ -6,6 +6,11 @@
 	{"id": 9, "type": "exp", "exp_gain": 30, "describe": "增加30修为"},
 	{"id": 10, "type": "exp", "exp_gain": 80, "describe": "增加80修为"},
 	{"id": 11, "type": "exp", "exp_gain": 200, "describe": "增加200修为"},
-	{"id": 12, "type": "exp", "exp_gain": 500, "describe": "增加500修为"}
+	{"id": 12, "type": "exp", "exp_gain": 500, "describe": "增加500修为"},
+	{"id": 13, "type": "stamina", "amount": 20, "describe": "恢复20体力"},
+	{"id": 14, "type": "stamina", "amount": 40, "describe": "恢复40体力"},
+	{"id": 15, "type": "stamina", "amount": 60, "describe": "恢复60体力"},
+	{"id": 16, "type": "stamina", "amount": 80, "describe": "恢复80体力"},
+	{"id": 17, "type": "stamina", "amount": 100, "describe": "恢复100体力"}
   ]
 }

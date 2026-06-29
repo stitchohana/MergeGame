@@ -19,6 +19,8 @@ signal breakthrough_confirmed(result: Dictionary)
 signal breakthrough_rejected(reason: String)
 signal exp_pill_consume_confirmed(result: Dictionary)
 signal exp_pill_consume_rejected(reason: String)
+signal stamina_restore_confirmed(result: Dictionary)
+signal stamina_restore_rejected(reason: String)
 signal board_switch_confirmed(result: Dictionary)
 signal board_switch_rejected(reason: String)
 signal pouch_deposit_confirmed(result: Dictionary)
@@ -65,7 +67,7 @@ func _load_config() -> void:
 		if json.parse(text) == OK:
 			var data: Dictionary = json.data
 			base_url = data.get("base_url", "http://localhost:3000")
-			cultivation_url = data.get("cultivation_url", base_url)
+			cultivation_url = base_url
 			_timeout = data.get("timeout", 10.0)
 			_max_retries = data.get("max_retries", 2)
 			print("[CloudService] Configured: ", base_url)
@@ -169,6 +171,10 @@ func submit_consume_exp_pill(pill_id: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "version": version})
 	_send_cultivation("consume_exp_pill", "/api/cultivation/consume-exp", HTTPClient.METHOD_POST, body)
 
+func submit_restore_stamina(pill_id: int, uid: int, version: int) -> void:
+	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
+	_send_cultivation("restore_stamina", "/api/cultivation/consume-stamina", HTTPClient.METHOD_POST, body)
+
 func submit_board_switch(board_type: String, map_id: int = 0, stage: int = 0) -> void:
 	var body_data: Dictionary = {"board_type": board_type}
 	if map_id > 0:
@@ -178,8 +184,8 @@ func submit_board_switch(board_type: String, map_id: int = 0, stage: int = 0) ->
 	var body := JSON.stringify(body_data)
 	_send_authed_request("board_switch", "/api/game/board/switch", HTTPClient.METHOD_POST, body)
 
-func submit_pouch_deposit(item_id: int, from_col: int, from_row: int) -> void:
-	var body := JSON.stringify({"item_id": item_id, "from_col": from_col, "from_row": from_row})
+func submit_pouch_deposit(uid: int) -> void:
+	var body := JSON.stringify({"uid": uid})
 	_send_authed_request("pouch_deposit", "/api/game/pouch/deposit", HTTPClient.METHOD_POST, body)
 
 func submit_pouch_withdraw(item_id: int, target_col: int, target_row: int) -> void:
@@ -245,6 +251,12 @@ func _on_consume_exp_pill_response(data: Dictionary) -> void:
 		exp_pill_consume_confirmed.emit(data)
 	else:
 		exp_pill_consume_rejected.emit(data.get("error", "unknown_error"))
+
+func _on_restore_stamina_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		stamina_restore_confirmed.emit(data)
+	else:
+		stamina_restore_rejected.emit(data.get("error", "unknown_error"))
 
 # --- Craft ---
 
@@ -335,6 +347,7 @@ func _reject(tag: String, reason: String) -> void:
 		"move": move_rejected.emit(reason)
 		"breakthrough": breakthrough_rejected.emit(reason)
 		"consume_exp_pill": exp_pill_consume_rejected.emit(reason)
+		"restore_stamina": stamina_restore_rejected.emit(reason)
 		"pouch_deposit": pouch_deposit_rejected.emit(reason)
 		"pouch_withdraw": pouch_withdraw_rejected.emit(reason)
 		"battle_attack": battle_attack_rejected.emit(reason)
@@ -495,6 +508,8 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				pouch_withdraw_rejected.emit(error_msg)
 			"battle_attack":
 				battle_attack_rejected.emit(error_msg)
+			"restore_stamina":
+				stamina_restore_rejected.emit(error_msg)
 			"meridian_complete":
 				meridian_complete_rejected.emit(error_msg)
 			"craft_add":
@@ -539,6 +554,8 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_pouch_withdraw_response(data)
 		"battle_attack":
 			_on_battle_attack_response(data)
+		"restore_stamina":
+			_on_restore_stamina_response(data)
 		"meridian_complete":
 			_on_meridian_complete_response(data)
 		"meridian_refresh":
@@ -584,6 +601,8 @@ func _handle_network_error(tag: String) -> void:
 			pouch_withdraw_rejected.emit("network_error")
 		"battle_attack":
 			battle_attack_rejected.emit("network_error")
+		"restore_stamina":
+			stamina_restore_rejected.emit("network_error")
 		"meridian_complete":
 			meridian_complete_rejected.emit("network_error")
 		"sell":
@@ -621,6 +640,8 @@ func _handle_parse_error(tag: String) -> void:
 			pouch_withdraw_rejected.emit("invalid_response")
 		"battle_attack":
 			battle_attack_rejected.emit("invalid_response")
+		"restore_stamina":
+			stamina_restore_rejected.emit("invalid_response")
 		"meridian_complete":
 			meridian_complete_rejected.emit("invalid_response")
 		"sell":
@@ -687,8 +708,8 @@ func _on_buy_response(data: Dictionary) -> void:
 	else:
 		EventBus.show_toast.emit("购买失败：" + data.get("error", "unknown"))
 
-func submit_sell(col: int, row: int) -> void:
-	var body := JSON.stringify({"col": col, "row": row})
+func submit_sell(uid: int) -> void:
+	var body := JSON.stringify({"uid": uid})
 	_send_authed_request("sell", "/api/game/shop/sell", HTTPClient.METHOD_POST, body)
 
 signal sell_confirmed(spirit_stones: int)

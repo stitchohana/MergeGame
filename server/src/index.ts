@@ -7,6 +7,7 @@ import { JsonFileStorage } from "./storage/json_file";
 import { GameEngine } from "./engine/game_engine";
 import { createAuthRouter } from "./routes/auth";
 import { createGameRouter } from "./routes/game";
+import { createCultivationRouter } from "./routes/cultivation";
 
 function createStorage(): IStorage {
   switch (config.dbType) {
@@ -61,6 +62,7 @@ function main(): void {
   // Routes
   app.use("/api/auth", createAuthRouter(storage));
   app.use("/api/game", createGameRouter(storage, engine));
+  app.use("/api/cultivation", createCultivationRouter(storage, engine));
 
   // Health check
   app.get("/api/health", (_req, res) => {
@@ -79,6 +81,9 @@ function main(): void {
     console.log(`  POST /api/game/craft/start`);
     console.log(`  POST /api/game/craft/retrieve`);
     console.log(`  POST /api/game/cultivate`);
+    console.log(`  POST /api/cultivation/consume-exp`);
+    console.log(`  POST /api/cultivation/consume-stamina`);
+    console.log(`  POST /api/cultivation/breakthrough`);
     console.log(`  GET  /api/game/leaderboard`);
   });
 }
