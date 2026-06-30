@@ -52,6 +52,11 @@ func _restore_from_server(state: Dictionary) -> void:
 			var entry_storage: Variant = entry.get("storage", null)
 			if entry_storage != null:
 				new_item["storage"] = entry_storage
+			var entry_uid: Variant = entry.get("uid", null)
+			if entry_uid != null:
+				new_item["_uid"] = entry_uid
+			else:
+				print("[Save]   WARNING: item #" + str(entry.get("id", 0)) + " has no uid!")
 			GridManager.add_item(new_item, pos)
 		else:
 			print("[Save]   unknown item id: ", entry.get("id", 0))

@@ -12,19 +12,13 @@ func _ready() -> void:
 	_refresh()
 
 func _refresh() -> void:
-	var name: String = CultivationService.get_realm_name()
-	var level: int = CultivationService.current_level
-	var max_lv: int = CultivationService.get_max_level_for_realm(CultivationService.current_realm_id)
+	var stage_name: String = CultivationService.get_formatted_stage()
 	var exp: int = CultivationService.current_exp
 	var exp_to_next: int = CultivationService.get_exp_to_next_level()
 	var qi: int = CultivationService.current_qi
 	var max_qi: int = CultivationService.max_qi
 
-	if max_lv <= 1:
-		realm_label.text = name
-	else:
-		var level_name: String = CultivationService.get_realm_level_name(level)
-		realm_label.text = "%s %s层" % [name, level_name]
+	realm_label.text = stage_name
 
 	if exp_to_next > 0:
 		exp_bar.value = (float(exp) / float(exp_to_next)) * 100.0

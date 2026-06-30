@@ -3,9 +3,11 @@
 [ext_resource type="Script" uid="uid://ne3jtigjrbwk" path="res://scenes/ui/RequirementEntry.gd" id="1_script"]
 
 [node name="RequirementEntry" type="Control" unique_id=556992796]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(260, 80)
 layout_mode = 3
 anchors_preset = 0
+offset_right = 169.0
+offset_bottom = 109.0
 mouse_filter = 1
 script = ExtResource("1_script")
 
@@ -14,15 +16,22 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 1.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
 [node name="ItemsContainer" type="HBoxContainer" parent="Panel" unique_id=604598871]
-layout_mode = 0
-offset_right = 120.0
-offset_bottom = 51.0
-theme_override_constants/separation = 2
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -81.0
+offset_right = 81.0
+offset_bottom = 80.0
+grow_horizontal = 2
+theme_override_constants/separation = 5
 
 [node name="CompleteButton" type="Button" parent="Panel" unique_id=1290879304]
 layout_mode = 1
@@ -31,9 +40,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -25.0
-offset_top = -14.0
-offset_right = 25.0
+offset_left = -27.5
+offset_top = -23.0
+offset_right = 22.5
+offset_bottom = -9.0
 grow_horizontal = 2
 grow_vertical = 0
 size_flags_horizontal = 4

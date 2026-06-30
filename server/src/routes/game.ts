@@ -120,7 +120,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeMerge(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, result_id: result.resultId, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state) });
+    res.json({ ok: true, new_version: result.newVersion, result_uid: result.resultUid, result_id: result.resultId, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state) });
   }));
 
   // POST /api/game/spawn
@@ -136,7 +136,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, recharge_time: result.rechargeTime, cultivation: state.cultivation, regen_remaining_ms: engine.getRegenRemainingMs(state) });
+    res.json({ ok: true, spawned_uid: result.spawnedUid, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, recharge_time: result.rechargeTime, cultivation: state.cultivation, regen_remaining_ms: engine.getRegenRemainingMs(state) });
   }));
 
   // POST /api/game/craft/add
@@ -227,7 +227,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.buyItem(state, item_id, target_col, target_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spirit_stones: result.stones });
+    res.json({ ok: true, uid: result.uid, spirit_stones: result.stones });
   }));
 
   // GET /api/game/shop/items

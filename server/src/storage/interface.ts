@@ -31,7 +31,6 @@ export interface CraftState {
 }
 
 export interface CultivationData {
-  current_realm_id: number;
   current_level: number;
   current_exp: number;
   total_exp: number;

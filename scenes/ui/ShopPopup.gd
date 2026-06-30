@@ -4,10 +4,15 @@ class_name ShopPopup extends BasePopup
 @onready var item_container = $Panel/ItemContainer
 @onready var close_btn: Button = $Panel/CloseButton
 
+var _pending_buy_target: Vector2i = Vector2i(-1, -1)
+var _pending_buy_item_id: int = -1
+
 func _ready() -> void:
 	if close_btn:
 		close_btn.pressed.connect(_on_close)
 	CloudService.shop_items_loaded.connect(_on_shop_items_loaded)
+	CloudService.buy_confirmed.connect(_on_buy_confirmed)
+	CloudService.buy_rejected.connect(_on_buy_rejected)
 	_refresh()
 
 func _refresh() -> void:
@@ -49,13 +54,15 @@ func _build_item_button(item_data: Dictionary, price: int) -> Button:
 
 	var vbox := VBoxContainer.new()
 	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn.add_child(vbox)
 
 	var widget := preload("res://scenes/ui/ItemWidget.tscn").instantiate() as ItemWidget
-	widget.setup(item_data)
-	widget.custom_minimum_size = Vector2(40, 40)
-	widget.size = Vector2(40, 40)
-	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(widget)
+	widget.setup(item_data)
+
+	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if widget.name_label:
+		widget.name_label.add_theme_font_size_override("font_size", 9)
 
 	var price_label := Label.new()
 	price_label.text = "%d灵石" % price
@@ -63,8 +70,6 @@ func _build_item_button(item_data: Dictionary, price: int) -> Button:
 	price_label.add_theme_font_size_override("font_size", 10)
 	price_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2, 1))
 	vbox.add_child(price_label)
-
-	btn.add_child(vbox)
 
 	var item_id: int = item_data.get("id", 0)
 	btn.pressed.connect(func(): _on_buy_pressed(item_id, price))
@@ -78,13 +83,31 @@ func _on_buy_pressed(item_id: int, price: int) -> void:
 	if spawn_pos == Vector2i(-1, -1):
 		EventBus.show_toast.emit("棋盘已满")
 		return
+	_pending_buy_item_id = item_id
+	_pending_buy_target = spawn_pos
 	if CloudService.online:
+		CloudService.submit_buy(item_id, spawn_pos.x, spawn_pos.y)
+
+func _on_buy_confirmed(result: Dictionary) -> void:
+	var item_id: int = _pending_buy_item_id
+	var spawn_pos: Vector2i = _pending_buy_target
+	_pending_buy_item_id = -1
+	_pending_buy_target = Vector2i(-1, -1)
+
+	if item_id > 0 and spawn_pos != Vector2i(-1, -1):
 		var item_data := ConfigDatabase.get_item_data(item_id)
 		if not item_data.is_empty():
-			GridManager.add_item(item_data.duplicate(true), spawn_pos)
-			GameState.spirit_stones -= price
-			GameState.spirit_stones_changed.emit(GameState.spirit_stones)
-		CloudService.submit_buy(item_id, spawn_pos.x, spawn_pos.y)
+			var item := item_data.duplicate(true)
+			item["_uid"] = result.get("uid", 0)
+			GridManager.add_item(item, spawn_pos)
+	GameState.spirit_stones = result.get("spirit_stones", GameState.spirit_stones)
+	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+	EventBus.show_toast.emit("购买成功")
+
+func _on_buy_rejected(reason: String) -> void:
+	_pending_buy_item_id = -1
+	_pending_buy_target = Vector2i(-1, -1)
+	EventBus.show_toast.emit("购买失败：" + reason)
 
 func _on_shop_items_loaded(items: Array) -> void:
 	show_items(items)

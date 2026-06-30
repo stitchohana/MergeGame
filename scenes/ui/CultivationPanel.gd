@@ -8,7 +8,7 @@ signal cultivation_clicked()
 @onready var qi_label: Label = $QiLabel
 func _ready() -> void:
 	CultivationService.exp_changed.connect(_on_exp_changed)
-	CultivationService.realm_changed.connect(_on_realm_changed)
+	CultivationService.stage_changed.connect(_on_stage_changed)
 	CultivationService.qi_changed.connect(_on_qi_changed)
 	CultivationService.breakthrough_pill_needed.connect(_on_breakthrough_pill_needed)
 	_refresh()
@@ -21,13 +21,8 @@ func _on_exp_changed(current_exp: int, exp_to_next: int) -> void:
 		exp_bar.value = 0.0
 		exp_label.text = "%d" % [current_exp]
 
-func _on_realm_changed(realm_id: int, realm_name: String, level: int) -> void:
-	var max_lv: int = CultivationService.get_max_level_for_realm(realm_id)
-	if max_lv <= 1:
-		realm_label.text = realm_name
-	else:
-		var level_name: String = CultivationService.get_realm_level_name(level)
-		realm_label.text = "%s %s层" % [realm_name, level_name]
+func _on_stage_changed(level: int, stage_name: String) -> void:
+	realm_label.text = stage_name
 
 func _on_qi_changed(current_qi: int, max_qi: int) -> void:
 	qi_label.text = "灵力 %d/%d" % [current_qi, max_qi]
@@ -40,6 +35,6 @@ func _on_breakthrough_pill_needed(pill_id: int) -> void:
 	exp_bar.value = 100.0
 
 func _refresh() -> void:
-	_on_realm_changed(CultivationService.current_realm_id, CultivationService.get_realm_name(), CultivationService.current_level)
+	_on_stage_changed(CultivationService.current_level, CultivationService.get_stage_name())
 	_on_exp_changed(CultivationService.current_exp, CultivationService.get_exp_to_next_level())
 	_on_qi_changed(CultivationService.current_qi, CultivationService.max_qi)

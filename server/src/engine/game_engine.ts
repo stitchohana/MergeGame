@@ -29,18 +29,15 @@ interface RecipeDef {
   crafting_level: number;
 }
 
-interface RealmDef {
-  id: number;
+interface StageDef {
   name: string;
-  levels: number;
-  exp_per_level: number[];
+  exp: number;
   max_qi: number;
-  breakthrough_pill: number;
+  breakthrough_pill?: number;
 }
 
 interface CultivationConfig {
-  passive_exp_per_second: number;
-  realms: RealmDef[];
+  stages: StageDef[];
 }
 
 // --- Item Table (enum variants for lookups) ---
@@ -88,7 +85,7 @@ export class GameEngine {
     this.loadEffects(path.join(configDir, "effects.json"));
     this.loadMeridians(path.join(configDir, "meridians.json"));
     this.loadExpedition(path.join(configDir, "expedition.json"));
-    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.realms.length ?? 0} realms, ${this.effectsById.size} effects, ${this.meridianThresholds.length} meridian thresholds, ${this.maps.size} maps, ${this.monsters.size} monsters`);
+    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.stages.length ?? 0} stages, ${this.effectsById.size} effects, ${this.meridianThresholds.length} meridian thresholds, ${this.maps.size} maps, ${this.monsters.size} monsters`);
   }
 
   private loadGameConfig(filePath: string): void {
@@ -211,12 +208,11 @@ export class GameEngine {
     const thresholds = this.meridianThresholds;
     if (!thresholds.length) return { acupoints: [], complete_exp: 0 };
 
-    const realm = state.cultivation.current_realm_id;
-    const level = state.cultivation.current_level;
+    const stageLevel = state.cultivation.current_level;
     let foundIdx = 0;
     for (let i = 0; i < thresholds.length; i++) {
       const t = thresholds[i];
-      if (t.realm_id === realm && t.level === level) {
+      if (t.stage === stageLevel) {
         foundIdx = i;
         break;
       }
@@ -453,12 +449,11 @@ export class GameEngine {
       grid: [],
       pouch: [],
       cultivation: {
-        current_realm_id: 0,
         current_level: 1,
         current_exp: 0,
         total_exp: 0,
         current_qi: 0,
-        max_qi: this.cultivation?.realms[0]?.max_qi ?? 100,
+        max_qi: this.cultivation?.stages[0]?.max_qi ?? 100,
         last_tick_time: now,
       },
       stamina: 100,
@@ -648,7 +643,7 @@ export class GameEngine {
     fromRow: number,
     toCol: number,
     toRow: number
-  ): { ok: true; newVersion: number; resultId: number; fromCol: number; fromRow: number; toCol: number; toRow: number } | { ok: false; reason: string } {
+  ): { ok: true; newVersion: number; resultUid: number; resultId: number; fromCol: number; fromRow: number; toCol: number; toRow: number } | { ok: false; reason: string } {
     const result = this.validateMerge(state, fromCol, fromRow, toCol, toRow);
     if (!result.valid) {
       return { ok: false, reason: result.reason };
@@ -666,14 +661,12 @@ export class GameEngine {
     );
 
     // Add merged item at the target position (where itemB was)
-    {
-      const mergedItem: GridItem = { id: result.resultItem.id, col: result.toItem.col, row: result.toItem.row };
-      if (result.resultItem.type === "launcher") {
-        mergedItem.charges = this.getMaxCharges(result.resultItem.id);
-        mergedItem.last_charge_time = Date.now();
-      }
-      state.grid.push(mergedItem);
+    const mergedItem: GridItem = { uid: this._nextUid(state), id: result.resultItem.id, col: result.toItem.col, row: result.toItem.row };
+    if (result.resultItem.type === "launcher") {
+      mergedItem.charges = this.getMaxCharges(result.resultItem.id);
+      mergedItem.last_charge_time = Date.now();
     }
+    state.grid.push(mergedItem);
 
     state.version += 1;
 
@@ -685,6 +678,7 @@ export class GameEngine {
     return {
       ok: true,
       newVersion: state.version,
+      resultUid: mergedItem.uid ?? 0,
       resultId: result.resultItem.id,
       fromCol: result.fromItem.col,
       fromRow: result.fromItem.row,
@@ -699,7 +693,7 @@ export class GameEngine {
     state: GameState,
     launcherCol: number,
     launcherRow: number
-  ): { ok: true; spawnedId: number; spawnedName: string; targetCol: number; targetRow: number; newVersion: number; charges: number; maxCharges: number; rechargeTime: number }
+  ): { ok: true; spawnedUid: number; spawnedId: number; spawnedName: string; targetCol: number; targetRow: number; newVersion: number; charges: number; maxCharges: number; rechargeTime: number }
     | { ok: false; reason: string } {
     const map = this.gridToMap(state.grid);
     const launcherKey = this.posKey(launcherCol, launcherRow);
@@ -779,7 +773,7 @@ export class GameEngine {
       console.log(`[engine] launcher #${launcherItem.id} at (${launcherCol},${launcherRow}) depleted and removed`);
     }
 
-    const newItem: GridItem = { id: spawnResult.id, col: target.col, row: target.row };
+    const newItem: GridItem = { uid: this._nextUid(state), id: spawnResult.id, col: target.col, row: target.row };
     if (spawnResult.type === "launcher") {
       newItem.charges = this.getMaxCharges(spawnResult.id);
       newItem.last_charge_time = Date.now();
@@ -791,6 +785,7 @@ export class GameEngine {
 
     return {
       ok: true,
+      spawnedUid: newItem.uid ?? 0,
       spawnedId: spawnResult.id,
       spawnedName: spawnResult.name,
       targetCol: target.col,
@@ -878,7 +873,7 @@ export class GameEngine {
       return { ok: false, reason: "target_occupied" };
     }
 
-    state.grid.push({ id: ingredientId, col: targetCol, row: targetRow });
+    state.grid.push({ uid: this._nextUid(state), id: ingredientId, col: targetCol, row: targetRow });
     state.version += 1;
 
     // Re-check recipe after removal
@@ -1107,77 +1102,66 @@ export class GameEngine {
 
   // --- Cultivation ---
 
-  getExpToNextLevel(currentRealmId: number, currentLevel: number): number {
+  getStageBreakthroughPill(level: number): number {
+    if (!this.cultivation) return 0;
+    const stages = this.cultivation.stages;
+    if (!stages || level < 1 || level > stages.length) return 0;
+    return stages[level - 1]?.breakthrough_pill ?? 0;
+  }
+
+  getExpToNextLevel(level: number): number {
     if (!this.cultivation) return 999999;
-    const realm = this.cultivation.realms[currentRealmId];
-    if (!realm) return 999999;
-    const expArr = realm.exp_per_level;
-    if (!expArr || currentLevel < 1 || currentLevel > expArr.length) return 999999;
-    return expArr[currentLevel - 1];
+    const stages = this.cultivation.stages;
+    if (!stages || level < 1 || level > stages.length) return 999999;
+    return stages[level - 1].exp;
   }
 
-  getMaxLevelForRealm(realmId: number): number {
-    if (!this.cultivation) return 1;
-    return this.cultivation.realms[realmId]?.levels ?? 1;
-  }
-
-  isMaxCultivation(realmId: number, level: number): boolean {
+  isMaxCultivation(level: number): boolean {
     if (!this.cultivation) return true;
-    return (
-      realmId >= this.cultivation.realms.length - 1 &&
-      level >= this.getMaxLevelForRealm(realmId)
-    );
+    return level >= this.cultivation.stages.length;
   }
 
-  needsBreakthroughPill(realmId: number, level: number): boolean {
+  needsBreakthroughPill(level: number): boolean {
     if (!this.cultivation) return false;
-    if (this.isMaxCultivation(realmId, level)) return false;
-    const maxLv = this.getMaxLevelForRealm(realmId);
-    if (level < maxLv) return false;
-    const realm = this.cultivation.realms[realmId];
-    return (realm?.breakthrough_pill ?? 0) > 0;
+    if (this.isMaxCultivation(level)) return false;
+    return this.getStageBreakthroughPill(level) > 0;
   }
 
-  isBreakthroughReady(
-    realmId: number,
-    level: number,
-    exp: number
-  ): boolean {
+  isBreakthroughReady(level: number, exp: number): boolean {
     if (!this.cultivation) return false;
-    if (this.isMaxCultivation(realmId, level)) return false;
-    const realm = this.cultivation.realms[realmId];
-    if (!realm) return false;
-    const maxLv = realm.levels;
-    return level >= maxLv && exp >= this.getExpToNextLevel(realmId, level);
+    if (this.isMaxCultivation(level)) return false;
+    if (level > this.cultivation.stages.length) return false;
+    if (exp < this.getExpToNextLevel(level)) return false;
+    const pill = this.getStageBreakthroughPill(level);
+    return pill > 0 || level < this.cultivation.stages.length;
   }
 
-  getRequiredBreakthroughPill(realmId: number, level: number, exp: number): number {
-    if (!this.isBreakthroughReady(realmId, level, exp)) return 0;
-    const realm = this.cultivation!.realms[realmId];
-    return realm?.breakthrough_pill ?? 0;
+  getRequiredBreakthroughPill(level: number, exp: number): number {
+    if (!this.isBreakthroughReady(level, exp)) return 0;
+    return this.getStageBreakthroughPill(level);
   }
 
   executeTryBreakthrough(
     state: GameState,
     pillId: number,
-    realmId: number,
     level: number,
     exp: number
   ): { ok: true; newCultivation: CultivationData } | { ok: false; reason: string } {
-    if (!this.isBreakthroughReady(realmId, level, exp)) {
+    if (!this.isBreakthroughReady(level, exp)) {
       return { ok: false, reason: "not_ready" };
     }
-    const required = this.getRequiredBreakthroughPill(realmId, level, exp);
+    const required = this.getRequiredBreakthroughPill(level, exp);
     if (required <= 0 || pillId !== required) {
       return { ok: false, reason: "wrong_pill" };
     }
     if (!this.cultivation) return { ok: false, reason: "no_config" };
 
-    const nextRealm = this.cultivation.realms[realmId + 1];
-    const newMaxQi: number = nextRealm?.max_qi ?? (state.cultivation.max_qi + 50);
+    const newLevel = level + 1;
+    if (newLevel > (this.cultivation.stages.length)) return { ok: false, reason: "max_level" };
+    const nextStage = this.cultivation.stages[newLevel - 1];
+    const newMaxQi: number = nextStage?.max_qi ?? (state.cultivation.max_qi + 50);
     const newCultivation: CultivationData = {
-      current_realm_id: realmId + 1,
-      current_level: 1,
+      current_level: newLevel,
       current_exp: 0,
       total_exp: state.cultivation.total_exp,
       current_qi: Math.min(state.cultivation.current_qi, newMaxQi),
@@ -1188,9 +1172,8 @@ export class GameEngine {
     state.cultivation = newCultivation;
     state.version += 1;
 
-    const newRealm = this.cultivation?.realms[newCultivation.current_realm_id];
-    const realmName = newRealm?.name ?? `realm_${newCultivation.current_realm_id}`;
-    console.log(`[engine] breakthrough: -> ${realmName} | qi=${newCultivation.max_qi} | v${state.version}`);
+    const stageName = nextStage?.name ?? `stage_${newLevel}`;
+    console.log(`[engine] breakthrough: -> ${stageName} | qi=${newCultivation.max_qi} | v${state.version}`);
 
     return { ok: true, newCultivation };
   }
@@ -1366,7 +1349,7 @@ export class GameEngine {
         for (const lootId of mdata.loot) {
           const emptyPos = this.findEmptyPos(state.grid);
           if (emptyPos) {
-            state.grid.push({ id: lootId, col: emptyPos.col, row: emptyPos.row });
+            state.grid.push({ uid: this._nextUid(state), id: lootId, col: emptyPos.col, row: emptyPos.row });
             loot.push(lootId);
           }
         }
@@ -1412,14 +1395,14 @@ export class GameEngine {
     const amount: number = effect.amount ?? 0;
     if (amount <= 0) return { ok: false, reason: "no_stamina_gain" };
     console.log(`[engine] consume stamina pill: #${pillId} "${pillData.name}" (uid=${uid}) | grid=${state.grid.length} items`);
-    // Remove item from grid (by position or by item ID if position not available)
+    console.log(`[engine]   grid uids: [${state.grid.map(g => `${g.id}(${g.col},${g.row}):uid=${g.uid}`).join(", ")}]`);
     let idx = state.grid.findIndex((g) => g.uid === uid);
-    if (idx >= 0) {
-      state.grid.splice(idx, 1);
-      console.log(`[engine]   removed from grid at idx=${idx}`);
-    } else {
-      console.log(`[engine]   item not found in grid, searching all items...`);
+    if (idx < 0) {
+      console.log(`[engine]   uid=${uid} NOT found!`);
+      return { ok: false, reason: "item_not_found" };
     }
+    state.grid.splice(idx, 1);
+    console.log(`[engine]   removed from grid at idx=${idx}`);
     state.stamina = Math.min(state.stamina + amount, this.staminaConfig.max);
     // Reset regen timer if stamina reached max
     if (state.stamina >= this.staminaConfig.max) {
@@ -1433,42 +1416,27 @@ export class GameEngine {
   private _addExp(c: CultivationData, amount: number): void {
     if (amount <= 0) return;
     if (!this.cultivation) return;
-    if (this.isMaxCultivation(c.current_realm_id, c.current_level)) return;
-    if (this.needsBreakthroughPill(c.current_realm_id, c.current_level)) return;
+    if (this.isMaxCultivation(c.current_level)) return;
 
     c.current_exp += amount;
     c.total_exp += amount;
 
-    const maxRealms = this.cultivation.realms.length;
-    while (c.current_exp >= this.getExpToNextLevel(c.current_realm_id, c.current_level)) {
-      if (this.isMaxCultivation(c.current_realm_id, c.current_level)) break;
-
-      c.current_exp -= this.getExpToNextLevel(c.current_realm_id, c.current_level);
-      c.current_level += 1;
-
-      const maxLv = this.getMaxLevelForRealm(c.current_realm_id);
-      if (c.current_level > maxLv) {
-        // Breakthrough check
-        const realm = this.cultivation.realms[c.current_realm_id];
-        if ((realm?.breakthrough_pill ?? 0) > 0) {
-          // Needs pill — stop here
-          c.current_level = maxLv;
-          c.current_exp = this.getExpToNextLevel(c.current_realm_id, c.current_level);
-          break;
-        }
-        // Auto breakthrough (凡人 -> 练气)
-        c.current_level = 1;
-        c.current_realm_id += 1;
-        if (c.current_realm_id >= maxRealms) break;
-        const newRealm = this.cultivation.realms[c.current_realm_id];
-        c.max_qi = newRealm?.max_qi ?? c.max_qi;
-        c.current_qi = Math.min(c.current_qi, c.max_qi);
-        console.log(`[engine] breakthrough: -> ${newRealm.name} | qi=${c.max_qi}`);
+    const maxLevel = this.cultivation.stages.length;
+    while (c.current_exp >= this.getExpToNextLevel(c.current_level)) {
+      if (this.isMaxCultivation(c.current_level)) break;
+      if (this.needsBreakthroughPill(c.current_level)) {
+        c.current_exp = this.getExpToNextLevel(c.current_level);
         break;
       }
 
-      const realmName = this.cultivation.realms[c.current_realm_id]?.name ?? "?";
-      console.log(`[engine] level up: ${realmName} Lv${c.current_level}`);
+      c.current_exp -= this.getExpToNextLevel(c.current_level);
+      c.current_level += 1;
+      if (c.current_level > maxLevel) break;
+
+      const newStage = this.cultivation.stages[c.current_level - 1];
+      c.max_qi = newStage?.max_qi ?? c.max_qi;
+      c.current_qi = Math.min(c.current_qi, c.max_qi);
+      console.log(`[engine] level up: ${newStage?.name ?? "?"} | qi=${c.max_qi}`);
     }
   }
 
@@ -1617,7 +1585,7 @@ export class GameEngine {
     return { ok: true, stones: state.spirit_stones };
   }
 
-  buyItem(state: GameState, itemId: number, targetCol: number, targetRow: number): { ok: true; stones: number } | { ok: false; reason: string } {
+  buyItem(state: GameState, itemId: number, targetCol: number, targetRow: number): { ok: true; uid: number; stones: number } | { ok: false; reason: string } {
     if (!this.isInBounds(targetCol, targetRow)) return { ok: false, reason: "out_of_bounds" };
     const targetKey = this.posKey(targetCol, targetRow);
     if (state.grid.some(i => this.posKey(i.col, i.row) === targetKey)) return { ok: false, reason: "target_occupied" };
@@ -1633,11 +1601,12 @@ export class GameEngine {
     if (!itemData) return { ok: false, reason: "item_data_not_found" };
 
     state.spirit_stones -= price;
-    state.grid.push({ id: itemId, col: targetCol, row: targetRow });
+    const buyUid = this._nextUid(state);
+    state.grid.push({ uid: buyUid, id: itemId, col: targetCol, row: targetRow });
     state.version += 1;
 
     console.log(`[engine] buy: ${itemData.name} at (${targetCol},${targetRow}) -> -${price} stones | total=${state.spirit_stones}`);
-    return { ok: true, stones: state.spirit_stones };
+    return { ok: true, uid: buyUid, stones: state.spirit_stones };
   }
 
   getGridHash(state: GameState): number {

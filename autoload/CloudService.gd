@@ -43,7 +43,6 @@ signal state_load_failed(reason: String)
 var online: bool = false
 var token: String = ""
 var base_url: String = ""
-var cultivation_url: String = ""
 
 var _http: HTTPRequest = null
 var _timeout: float = 10.0
@@ -67,7 +66,6 @@ func _load_config() -> void:
 		if json.parse(text) == OK:
 			var data: Dictionary = json.data
 			base_url = data.get("base_url", "http://localhost:3000")
-			cultivation_url = base_url
 			_timeout = data.get("timeout", 10.0)
 			_max_retries = data.get("max_retries", 2)
 			print("[CloudService] Configured: ", base_url)
@@ -165,15 +163,15 @@ func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version
 
 func submit_breakthrough(pill_id: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "version": version})
-	_send_cultivation("breakthrough", "/api/cultivation/breakthrough", HTTPClient.METHOD_POST, body)
+	_send_authed_request("breakthrough", "/api/cultivation/breakthrough", HTTPClient.METHOD_POST, body)
 
 func submit_consume_exp_pill(pill_id: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "version": version})
-	_send_cultivation("consume_exp_pill", "/api/cultivation/consume-exp", HTTPClient.METHOD_POST, body)
+	_send_authed_request("consume_exp_pill", "/api/cultivation/consume-exp", HTTPClient.METHOD_POST, body)
 
 func submit_restore_stamina(pill_id: int, uid: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
-	_send_cultivation("restore_stamina", "/api/cultivation/consume-stamina", HTTPClient.METHOD_POST, body)
+	_send_authed_request("restore_stamina", "/api/cultivation/consume-stamina", HTTPClient.METHOD_POST, body)
 
 func submit_board_switch(board_type: String, map_id: int = 0, stage: int = 0) -> void:
 	var body_data: Dictionary = {"board_type": board_type}
@@ -403,40 +401,6 @@ func _send_authed_request(tag: String, path: String, method: int, body: String =
 		return -1
 
 	var full_url := base_url + path
-	var headers: PackedStringArray = [
-		"Content-Type: application/json",
-		"Accept: application/json",
-		"Authorization: Bearer " + token,
-	]
-
-	_busy = true
-	_current_tag = tag
-
-	var err := _http.request(full_url, headers, method, body)
-	if err != OK:
-		_busy = false
-		_current_tag = ""
-		if err == ERR_CANT_OPEN or err == ERR_CANT_CONNECT:
-			if online:
-				online = false
-				disconnected.emit()
-				kicked.emit()
-		_callbacks.erase(req_id)
-		_reject(tag, "network_error")
-		return -1
-
-	return req_id
-
-func _send_cultivation(tag: String, path: String, method: int, body: String = "") -> int:
-	var req_id := _request_counter
-	_request_counter += 1
-	_callbacks[req_id] = {"tag": tag, "retries": 0}
-
-	if _busy:
-		_callbacks.erase(req_id)
-		return -1
-
-	var full_url := cultivation_url + path
 	var headers: PackedStringArray = [
 		"Content-Type: application/json",
 		"Accept: application/json",
@@ -703,10 +667,9 @@ func submit_buy(item_id: int, target_col: int, target_row: int) -> void:
 
 func _on_buy_response(data: Dictionary) -> void:
 	if data.get("ok", false):
-		buy_confirmed.emit()
-		EventBus.show_toast.emit("购买成功")
+		buy_confirmed.emit(data)
 	else:
-		EventBus.show_toast.emit("购买失败：" + data.get("error", "unknown"))
+		buy_rejected.emit(data.get("error", "unknown"))
 
 func submit_sell(uid: int) -> void:
 	var body := JSON.stringify({"uid": uid})
@@ -715,7 +678,8 @@ func submit_sell(uid: int) -> void:
 signal sell_confirmed(spirit_stones: int)
 signal sell_rejected(reason: String)
 signal shop_items_loaded(items: Array)
-signal buy_confirmed()
+signal buy_confirmed(result: Dictionary)
+signal buy_rejected(reason: String)
 
 func _on_sell_response(data: Dictionary) -> void:
 	if data.get("ok", false):

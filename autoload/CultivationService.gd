@@ -5,13 +5,10 @@ extends Node
 # Client submits operations and displays results from server responses.
 
 signal exp_changed(current_exp: int, exp_to_next: int)
-signal realm_changed(realm_id: int, realm_name: String, level: int)
+signal stage_changed(level: int, stage_name: String)
 signal qi_changed(current_qi: int, max_qi: int)
-signal level_up(realm_id: int, realm_name: String, level: int)
-signal breakthrough(realm_id: int, realm_name: String)
 signal breakthrough_pill_needed(pill_id: int)
 
-var current_realm_id: int = 0
 var current_level: int = 1
 var current_exp: int = 0
 var total_exp: int = 0
@@ -53,38 +50,29 @@ func consume_exp_pill(pill_id: int, uid: int) -> void:
 	if CloudService.online:
 		CloudService.submit_consume_exp_pill(pill_id, GameState.version)
 
-# --- Helpers ---
-
 # --- State sync from server ---
 
 func _apply_cultivation_state(c: Dictionary) -> void:
-	var old_realm := current_realm_id
 	var old_level := current_level
 	var old_exp := current_exp
 	var old_qi := current_qi
 	var old_max_qi := max_qi
 
-	current_realm_id = c.get("current_realm_id", 0)
 	current_level = c.get("current_level", 1)
 	current_exp = c.get("current_exp", 0)
 	total_exp = c.get("total_exp", 0)
 	current_qi = c.get("current_qi", 0)
 	max_qi = c.get("max_qi", 100)
 
-	if current_realm_id != old_realm or current_level != old_level:
-		var realm_name: String = get_realm_name()
-		realm_changed.emit(current_realm_id, realm_name, current_level)
+	if current_level != old_level:
+		var stage_name: String = get_stage_name()
+		stage_changed.emit(current_level, stage_name)
 
 	if current_exp != old_exp:
 		exp_changed.emit(current_exp, get_exp_to_next_level())
 
 	if current_qi != old_qi or max_qi != old_max_qi:
 		qi_changed.emit(current_qi, max_qi)
-
-	if current_realm_id > old_realm:
-		breakthrough.emit(current_realm_id, get_realm_name())
-	elif current_level > old_level and current_realm_id == old_realm:
-		level_up.emit(current_realm_id, get_realm_name(), current_level)
 
 	if _needs_breakthrough_pill():
 		var pill_id := get_required_breakthrough_pill()
@@ -95,82 +83,35 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 
 # --- Queries (local cache, for UI display) ---
 
-func get_realm_name() -> String:
-	var realm := ConfigDatabase.get_realm_config(current_realm_id)
-	return realm.get("name", "未知")
+func get_stage_name() -> String:
+	return ConfigDatabase.get_stage_name(current_level)
 
 func get_exp_to_next_level() -> int:
-	var realm := ConfigDatabase.get_realm_config(current_realm_id)
-	if realm.is_empty():
-		return 999999
-	var exp_arr: Array = realm.get("exp_per_level", [])
-	var idx := current_level - 1
-	if idx < 0 or idx >= exp_arr.size():
-		return 999999
-	return int(exp_arr[idx])
+	return ConfigDatabase.get_stage_exp(current_level)
 
 func is_breakthrough_ready() -> bool:
 	if is_max_cultivation():
 		return false
-	var realm := ConfigDatabase.get_realm_config(current_realm_id)
-	if realm.is_empty():
-		return false
-	var max_lv: int = realm.get("levels", 1)
-	return current_level >= max_lv and current_exp >= get_exp_to_next_level()
+	return current_exp >= get_exp_to_next_level()
 
 func is_max_cultivation() -> bool:
-	var realms: Array = ConfigDatabase.get_cultivation_config().get("realms", [])
-	return current_realm_id >= realms.size() - 1 and current_level >= _get_max_level_for_realm(current_realm_id)
-
-func get_max_level_for_realm(realm_id: int) -> int:
-	var realm := ConfigDatabase.get_realm_config(realm_id)
-	return realm.get("levels", 1)
-
-func _get_max_level_for_realm(realm_id: int) -> int:
-	return get_max_level_for_realm(realm_id)
+	return current_level >= ConfigDatabase.get_stage_count()
 
 func get_required_breakthrough_pill() -> int:
-	if not is_breakthrough_ready():
-		return 0
-	var realm := ConfigDatabase.get_realm_config(current_realm_id)
-	return realm.get("breakthrough_pill", 0)
+	return ConfigDatabase.get_stage_breakthrough_pill(current_level)
 
 func _needs_breakthrough_pill() -> bool:
 	if is_max_cultivation():
 		return false
-	var max_lv: int = _get_max_level_for_realm(current_realm_id)
-	if current_level < max_lv:
-		return false
-	var realm := ConfigDatabase.get_realm_config(current_realm_id)
-	var pill_id: int = realm.get("breakthrough_pill", 0)
-	return pill_id > 0
+	return ConfigDatabase.get_stage_breakthrough_pill(current_level) > 0
 
-func get_realm_level_name(level: int) -> String:
-	match level:
-		1: return "一"
-		2: return "二"
-		3: return "三"
-		4: return "四"
-		5: return "五"
-		6: return "六"
-		7: return "七"
-		8: return "八"
-		9: return "九"
-		_: return str(level)
-
-func get_formatted_realm_level() -> String:
-	var name: String = get_realm_name()
-	var max_lv: int = _get_max_level_for_realm(current_realm_id)
-	if max_lv <= 1:
-		return name
-	var level_names := ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"]
-	return "%s%s" % [name, level_names[current_level] if current_level < level_names.size() else str(current_level)]
+func get_formatted_stage() -> String:
+	return ConfigDatabase.get_stage_name(current_level)
 
 # --- Save/Load (now from server) ---
 
 func serialize() -> Dictionary:
 	return {
-		"current_realm_id": current_realm_id,
 		"current_level": current_level,
 		"current_exp": current_exp,
 		"total_exp": total_exp,

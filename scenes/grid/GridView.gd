@@ -39,6 +39,8 @@ var _pouch_zone: Control = null
 
 var _launcher_cd: Dictionary = {}  # uid -> {remaining, recharge_time, max_charges}
 var _cd_timer: Timer = null
+var _spawn_in_flight: bool = false
+var _merge_in_flight: bool = false
 
 func set_pouch_zone(zone: Control) -> void:
 	_pouch_zone = zone
@@ -137,6 +139,7 @@ func _connect_signals() -> void:
 	CloudService.craft_start_rejected.connect(_on_craft_start_rejected)
 	CloudService.craft_retrieve_confirmed.connect(_on_craft_retrieve_confirmed)
 	CloudService.craft_retrieve_rejected.connect(_on_craft_retrieve_rejected)
+	MergeService.merge_failed.connect(_on_merge_failed)
 
 # --- Input: press on any item, then drag or click dispatch ---
 
@@ -218,13 +221,15 @@ func _local_to_grid(local_pos: Vector2) -> Vector2i:
 var _pending_spawn_uid: int = -1
 
 func _handle_launcher_click(pos: Vector2i) -> void:
-	if GameState.phase != GameState.GamePhase.IDLE:
+	if GameState.phase != GameState.GamePhase.IDLE or _spawn_in_flight:
 		return
 	_pressed_item = {}
+	_spawn_in_flight = true
 
 	GameState.set_phase(GameState.GamePhase.SPAWNING)
 	var item = GridManager.get_item(pos)
 	if item == null:
+		_spawn_in_flight = false
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
@@ -234,15 +239,18 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		if GameState.current_board_type == Constants.BoardType.BATTLE:
 			if CultivationService.current_qi < 1:
 				EventBus.show_toast.emit("灵力不足")
+				_spawn_in_flight = false
 				GameState.set_phase(GameState.GamePhase.IDLE)
 				return
 		elif GameState.stamina < 1:
 			EventBus.show_toast.emit("体力不足")
+			_spawn_in_flight = false
 			GameState.set_phase(GameState.GamePhase.IDLE)
 			return
 	var item_charges: int = item.get("charges", -1)
 	if item_charges == 0:
 		EventBus.show_toast.emit("发射器次数用尽，等待冷却")
+		_spawn_in_flight = false
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
@@ -251,6 +259,7 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 	if CloudService.online:
 		CloudService.submit_spawn(pos.x, pos.y, GameState.version)
 	else:
+		_spawn_in_flight = false
 		GameState.set_phase(GameState.GamePhase.IDLE)
 
 
@@ -265,6 +274,7 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 	var item_data: Dictionary = ConfigDatabase.get_item_data(spawned_id)
 	if not item_data.is_empty():
 		var new_item: Dictionary = item_data.duplicate(true)
+		new_item["_uid"] = result.get("spawned_uid", 0)
 		if new_item.get("type", "") == "launcher":
 			new_item["charges"] = new_item.get("max_charges", 3)
 		_is_launcher_spawning = true
@@ -352,11 +362,13 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 			else:
 				EventBus.show_toast.emit("发射器次数用尽，等待冷却")
 
+	_spawn_in_flight = false
 	if GameState.phase == GameState.GamePhase.SPAWNING:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 
 func _on_spawn_rejected(reason: String) -> void:
 	_pending_spawn_uid = -1
+	_spawn_in_flight = false
 	print("[GridView] Spawn rejected: ", reason)
 	EventBus.show_toast.emit(_spawn_error_text(reason))
 	if GameState.phase == GameState.GamePhase.SPAWNING:
@@ -455,9 +467,8 @@ func _do_pouch_deposit() -> void:
 	if src_node and is_instance_valid(src_node):
 		src_node.queue_free()
 	_item_nodes.erase(src_key)
-	var _sp = Engine.get_singleton("StoragePouch")
-	if _sp:
-		_sp.call("deposit", _drag_item_data.get("_uid", 0))
+	if StoragePouch:
+		StoragePouch.deposit(_drag_item_data.get("_uid", 0))
 
 func _on_pouch_deposit_failed(_reason: String) -> void:
 	var gitem = GridManager.get_item(_drag_source_pos)
@@ -469,6 +480,10 @@ func _on_move_confirmed(result: Dictionary) -> void:
 
 func _on_move_rejected(reason: String) -> void:
 	print("[GridView] Move rejected: ", reason)
+
+func _on_merge_failed(_reason: String) -> void:
+	_merge_in_flight = false
+	_sync_all_items()
 
 func _snap_back() -> void:
 	var key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
@@ -898,6 +913,7 @@ func _sync_grid_from_server(result: Dictionary) -> void:
 		if not item_data.is_empty():
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
+			if entry.has("uid"): item["_uid"] = entry.uid
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
 
 func _deselect_all() -> void:

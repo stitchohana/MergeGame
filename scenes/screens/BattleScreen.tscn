@@ -18,10 +18,10 @@ script = ExtResource("1_script")
 
 [node name="GridView" parent="." unique_id=1834702890 instance=ExtResource("2_grid")]
 layout_mode = 0
-offset_left = 40.0
-offset_top = 210.0
-offset_right = 740.0
-offset_bottom = 1110.0
+offset_left = 45.0
+offset_top = 358.0
+offset_right = 745.0
+offset_bottom = 1258.0
 
 [node name="MapHeader" type="ColorRect" parent="." unique_id=1430606215]
 layout_mode = 0
@@ -50,7 +50,7 @@ layout_mode = 0
 offset_left = 37.0
 offset_top = 129.0
 offset_right = 337.0
-offset_bottom = 254.0
+offset_bottom = 311.0
 color = Color(0.1, 0.15, 0.25, 1)
 
 [node name="CharLabel" type="Label" parent="CharPanel" unique_id=149380935]
@@ -78,7 +78,7 @@ layout_mode = 0
 offset_left = 360.0
 offset_top = 126.0
 offset_right = 740.0
-offset_bottom = 251.0
+offset_bottom = 307.0
 color = Color(0.25, 0.1, 0.1, 1)
 
 [node name="MonsterLabel" type="Label" parent="MonsterPanel" unique_id=2147415673]
@@ -94,10 +94,10 @@ vertical_alignment = 1
 
 [node name="ItemDetailPanel" parent="." unique_id=339169060 instance=ExtResource("3_detail")]
 layout_mode = 0
-offset_left = -3.0
-offset_top = 1252.0
-offset_right = 777.0
-offset_bottom = 1532.0
+offset_left = -1.0
+offset_top = 1344.0
+offset_right = 779.0
+offset_bottom = 1530.0
 
 [node name="LeaveButton" type="Button" parent="." unique_id=101666513]
 layout_mode = 0

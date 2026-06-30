@@ -15,8 +15,6 @@ var _grid: Array[Array] = []
 # Reverse lookup: item_id -> Array[Vector2i] (multiple same-id items can exist)
 var _item_positions: Dictionary = {}  # int item_id -> Array[Vector2i]
 
-# Unique instance ID counter — assigned to every item placed on the grid
-var _next_uid: int = 1
 
 signal item_added(item_data: Dictionary, pos: Vector2i)
 signal item_removed(item_data: Dictionary, pos: Vector2i)
@@ -66,8 +64,8 @@ func add_item(item_data: Dictionary, pos: Vector2i) -> bool:
 	item_data = item_data.duplicate(true)
 	if not is_valid_pos(pos) or not is_empty(pos):
 		return false
-	item_data["_uid"] = _next_uid
-	_next_uid += 1
+	if not item_data.has("_uid") or item_data["_uid"] <= 0:
+		print("[GridManager] WARNING: item #" + str(item_data.get("id", 0)) + " has no server uid!")
 	_grid[pos.y][pos.x] = item_data
 
 	# Track position for this item_id

@@ -79,7 +79,6 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
     const state = await getOrCreateState(userId);
     const result = engine.executeTryBreakthrough(
       state, pill_id,
-      state.cultivation.current_realm_id,
       state.cultivation.current_level,
       state.cultivation.current_exp
     );

@@ -67,6 +67,7 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 		if not item_data.is_empty():
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
+			if entry.has("uid"): item["_uid"] = entry.uid
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
 	print("[GameScreen] Board synced from server: ", server_grid.size(), " items")
 
@@ -79,12 +80,6 @@ func _input(event: InputEvent) -> void:
 			_on_pause_requested()
 		elif GameState.phase == GameState.GamePhase.PAUSED:
 			_on_resume()
-
-func _load_initial_setup() -> void:
-	for entry in ConfigDatabase.get_initial_setup(GameState.current_board_type):
-		var item_data = ConfigDatabase.get_item_data(entry.id)
-		if not item_data.is_empty():
-			GridManager.add_item(item_data.duplicate(true), Vector2i(entry.col, entry.row))
 
 func _on_material_clicked(item_id: int) -> void:
 	var table_item := detail_panel.get_current_craft_table()
@@ -151,9 +146,10 @@ func _on_shop_pressed() -> void:
 func _on_restart() -> void:
 	GameState.reset()
 	GridManager.init_grid()
-	_load_initial_setup()
 	GameState.set_phase(GameState.GamePhase.IDLE)
 	detail_panel.clear()
+	if CloudService.online:
+		CloudService.fetch_state()
 
 func _on_resume() -> void:
 	GameState.set_phase(GameState.GamePhase.IDLE)
@@ -250,6 +246,7 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 		if not item_data.is_empty():
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
+			if entry.has("uid"): item["_uid"] = entry.uid
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
 	grid_view.set_skip_animations(false)
 

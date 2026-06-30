@@ -49,9 +49,9 @@ func _build_item_button(item_data: Dictionary) -> Button:
 	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
 	var widget := preload("res://scenes/ui/ItemWidget.tscn").instantiate() as ItemWidget
+	btn.add_child(widget)
 	widget.setup(item_data)
 	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	btn.add_child(widget)
 
 	var item_id: int = item_data.get("id", 0)
 	btn.pressed.connect(func(): _on_item_pressed(item_id))

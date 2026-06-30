@@ -54,6 +54,7 @@ func _on_merge_confirmed(result: Dictionary) -> void:
 		var merged_data: Dictionary = ConfigDatabase.get_item_data(result_id)
 		if not merged_data.is_empty():
 			var item := merged_data.duplicate(true)
+			item["_uid"] = result.get("result_uid", 0)
 			if item.get("type", "") == "launcher":
 				item["charges"] = item.get("max_charges", 3)
 			GridManager.add_item(item, to_pos)

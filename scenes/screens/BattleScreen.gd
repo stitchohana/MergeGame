@@ -73,20 +73,10 @@ func _on_board_switch_rejected(reason: String) -> void:
 
 func _init_battle_grid() -> void:
 	GridManager.init_grid(Constants.BoardType.BATTLE)
-	_load_battle_setup()
 	GameState.set_phase(GameState.GamePhase.IDLE)
 
 func on_exit() -> void:
 	detail_panel.clear()
-
-func _load_battle_setup() -> void:
-	var setup: Array = ConfigDatabase.get_initial_setup(Constants.BoardType.BATTLE)
-	for entry in setup:
-		if not entry.has("id") or not entry.has("col") or not entry.has("row"):
-			continue
-		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
-		if not item_data.is_empty():
-			GridManager.add_item(item_data.duplicate(true), Vector2i(entry.col, entry.row))
 
 func _build_monster_list() -> Array:
 	var result: Array = []
@@ -211,6 +201,7 @@ func _sync_grid_from_result(result: Dictionary) -> void:
 		if not item_data.is_empty():
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
+			if entry.has("uid"): item["_uid"] = entry.uid
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
 	grid_view.set_skip_animations(false)
 

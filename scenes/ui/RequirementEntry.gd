@@ -33,14 +33,15 @@ func _do_setup(items: Array, index: int, completed: bool) -> void:
 		var item_id: int = int(it.get("item_id", 0))
 		var item_data := ConfigDatabase.get_item_data(item_id)
 		var widget := preload("res://scenes/ui/ItemWidget.tscn").instantiate() as ItemWidget
+		items_container.add_child(widget)
 		if not item_data.is_empty():
 			widget.setup(item_data)
 		else:
 			widget.setup({"name": it.get("name", "?")})
-		widget.custom_minimum_size = Vector2(40, 40)
-		widget.size = Vector2(40, 40)
 		widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		items_container.add_child(widget)
+		if widget.name_label:
+			widget.name_label.visible = true
+			widget.name_label.add_theme_font_size_override("font_size", 9)
 
 	if completed:
 		complete_btn.text = "✓"

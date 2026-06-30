@@ -269,16 +269,42 @@ func get_game_config(key: String) -> Variant:
 func get_cultivation_config() -> Dictionary:
 	return _cultivation_config
 
-func get_realm_config(realm_id: int) -> Dictionary:
-	var realms: Array = _cultivation_config.get("realms", [])
-	for r in realms:
-		if r.get("id", -1) == realm_id:
-			return r
-	return {}
+func get_stages() -> Array:
+	return _cultivation_config.get("stages", [])
+
+func get_stage_count() -> int:
+	return get_stages().size()
 
 func get_passive_exp_per_second() -> int:
 	return _cultivation_config.get("passive_exp_per_second", 3)
 
-func get_realm_max_qi(realm_id: int) -> int:
-	var realm := get_realm_config(realm_id)
-	return realm.get("max_qi", 100)
+func _get_stage(level: int) -> Dictionary:
+	var stages: Array = get_stages()
+	var idx := level - 1
+	if idx < 0 or idx >= stages.size():
+		return {}
+	return stages[idx]
+
+func get_stage_exp(level: int) -> int:
+	var s: Dictionary = _get_stage(level)
+	if s.is_empty():
+		return 999999
+	return int(s.get("exp", 0))
+
+func get_stage_name(level: int) -> String:
+	var s: Dictionary = _get_stage(level)
+	if s.is_empty():
+		return "未知"
+	return s.get("name", "未知")
+
+func get_stage_max_qi(level: int) -> int:
+	var s: Dictionary = _get_stage(level)
+	if s.is_empty():
+		return 100
+	return int(s.get("max_qi", 100))
+
+func get_stage_breakthrough_pill(level: int) -> int:
+	var s: Dictionary = _get_stage(level)
+	if s.is_empty():
+		return 0
+	return int(s.get("breakthrough_pill", 0))

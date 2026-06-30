@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://csgm2fbx5sx83" path="res://scenes/ui/ItemWidget.gd" id="1_gd"]
 
+[sub_resource type="CanvasTexture" id="CanvasTexture_hk2cv"]
+
 [node name="ItemWidget" type="ColorRect" unique_id=648899735]
 custom_minimum_size = Vector2(80, 80)
 offset_right = 80.0
@@ -53,12 +55,18 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 
 [node name="SelectIcon" type="TextureRect" parent="." unique_id=1048013850]
+modulate = Color(0.61960787, 0.40392157, 1, 1)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 39.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -46.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+texture = SubResource("CanvasTexture_hk2cv")
 expand_mode = 1
 stretch_mode = 5
