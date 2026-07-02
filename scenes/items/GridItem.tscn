@@ -50,6 +50,17 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 text = "1"
 
+[node name="ImmovableIcon" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 76.0
+offset_top = 2.0
+offset_right = 96.0
+offset_bottom = 22.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+visible = false
+
 [node name="SelectIcon" type="TextureRect" parent="." unique_id=1041341535]
 modulate = Color(0.5419332, 0.977588, 0.9125599, 1)
 layout_mode = 1

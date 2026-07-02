@@ -152,9 +152,9 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 		"breakthrough":
 			var pill_id: int = item_data.get("id", 0)
 			if uid <= 0:
-					EventBus.show_toast.emit("物品数据异常，请重新登录")
-					return
-				CultivationService.try_breakthrough(pill_id, uid)
+				EventBus.show_toast.emit("物品数据异常，请重新登录")
+				return
+			CultivationService.try_breakthrough(pill_id, uid)
 		_:
 			EventBus.show_toast.emit("此物品无法使用")
 
@@ -208,6 +208,7 @@ func _sync_grid_from_result(result: Dictionary) -> void:
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
 			if entry.has("uid"): item["_uid"] = entry.uid
+			if entry.has("immovable"): item["immovable"] = entry.immovable
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
 	grid_view.set_skip_animations(false)
 

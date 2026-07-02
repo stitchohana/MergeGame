@@ -70,6 +70,7 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
 			if entry.has("uid"): item["_uid"] = entry.uid
+			if entry.has("immovable"): item["immovable"] = entry.immovable
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
 	print("[GameScreen] Board synced from server: ", server_grid.size(), " items")
 
@@ -256,6 +257,7 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
 			if entry.has("uid"): item["_uid"] = entry.uid
+			if entry.has("immovable"): item["immovable"] = entry.immovable
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
 	grid_view.set_skip_animations(false)
 

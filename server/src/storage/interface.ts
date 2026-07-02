@@ -5,6 +5,7 @@ export interface GridItem {
   id: number;
   col: number;
   row: number;
+  immovable?: boolean;
   craft?: CraftState;
   storage?: StorageData;
   charges?: number;

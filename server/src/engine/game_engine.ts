@@ -473,12 +473,13 @@ export class GameEngine {
       if (itemDef) {
         state.uid_counter = (state.uid_counter ?? 0) + 1;
         const gitem: GridItem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
+        if ((entry as any).immovable) gitem.immovable = true;
         if (itemDef.type === "launcher") {
           gitem.charges = this.getMaxCharges(entry.id);
           gitem.last_charge_time = now;
         }
         state.grid.push(gitem);
-        itemNames.push(`${itemDef.name}(#${entry.id})@(${entry.col},${entry.row})`);
+        itemNames.push(`${itemDef.name}(#${entry.id})@(${entry.col},${entry.row})${gitem.immovable ? " [immovable]" : ""}`);
       }
     }
     console.log(`[engine] createInitialState(${boardType}): ${state.grid.length} items — ${itemNames.join(", ")}`);
@@ -525,6 +526,7 @@ export class GameEngine {
       const itemDef = this.getItemData(entry.id);
       if (itemDef) {
         const gitem: GridItem = { id: entry.id, col: entry.col, row: entry.row };
+        if ((entry as any).immovable) gitem.immovable = true;
         if (itemDef.type === "launcher") {
           gitem.charges = this.getMaxCharges(entry.id);
           gitem.last_charge_time = now;
@@ -831,6 +833,10 @@ export class GameEngine {
     );
     if (!targetItem) {
       return { ok: false, reason: "source_item_not_found" };
+    }
+
+    if (targetItem.immovable) {
+      return { ok: false, reason: "item_immovable" };
     }
 
     const itemName = this.getItemData(targetItem.id)?.name ?? ("#" + targetItem.id);
@@ -1483,6 +1489,7 @@ export class GameEngine {
     if (!fromItem) { console.log("[engine] pushAndPlace: source_item_not_found"); return { ok: false, reason: "source_item_not_found" }; }
     if (!toItem) { console.log("[engine] pushAndPlace: target_item_not_found"); return { ok: false, reason: "target_item_not_found" }; }
     if (fromCol === toCol && fromRow === toRow) return { ok: false, reason: "same_position" };
+    if (toItem.immovable) { console.log("[engine] pushAndPlace: target_immovable"); return { ok: false, reason: "target_immovable" }; }
 
     // Find nearest empty cell for the target item
     const map = this.gridToMap(state.grid);

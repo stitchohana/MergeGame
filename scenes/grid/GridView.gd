@@ -241,6 +241,12 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 		return
 
+	if item.get("immovable") == true:
+		EventBus.show_toast.emit("该物品无法使用")
+		_spawn_in_flight = false
+		GameState.set_phase(GameState.GamePhase.IDLE)
+		return
+
 	# Skip cost for no_cost launchers (e.g. gift pack)
 	var item_config: Dictionary = ConfigDatabase.get_item_data(item.get("id", 0))
 	if not item_config.get("no_cost", false):
@@ -407,6 +413,10 @@ func _start_drag(pos: Vector2i) -> void:
 	if item == null:
 		return
 
+	if item.get("immovable") == true:
+		EventBus.show_toast.emit("该物品无法移动")
+		return
+
 	_drag_source_pos = pos
 	_drag_item_data = item
 	_is_dragging = true
@@ -414,14 +424,18 @@ func _start_drag(pos: Vector2i) -> void:
 	var drag_key := "%d,%d" % [pos.x, pos.y]
 	var drag_node = _item_nodes.get(drag_key)
 	if drag_node and is_instance_valid(drag_node):
-		var layer := _get_items_layer()
-		if layer:
-			layer.move_child(drag_node, layer.get_child_count() - 1)
+		drag_node.z_index = 100
+
+
 	_hide_craft_button()
 
 
 func _finish_drag(target_pos: Vector2i) -> void:
 	_is_dragging = false
+	var drag_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
+	var drag_node = _item_nodes.get(drag_key)
+	if drag_node and is_instance_valid(drag_node):
+		drag_node.z_index = 0
 	_pressed_item = {}
 	_clear_highlights()
 
@@ -456,7 +470,9 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		if _drag_item_data.get("type") == "crafting":
 			item_clicked.emit(_drag_item_data, target_pos)
 	elif not MergeService.try_merge(_drag_source_pos, target_pos):
-		if CloudService.online:
+		if target != null and target.get("immovable") == true:
+			_snap_back()
+		elif CloudService.online:
 			_pending_push_src = _drag_source_pos
 			_pending_push_target = target_pos
 			CloudService.submit_push_place(_drag_source_pos.x, _drag_source_pos.y, target_pos.x, target_pos.y, GameState.version)
@@ -964,6 +980,9 @@ func _select_item(pos: Vector2i) -> void:
 	if key == _selected_key and not _selected_key.is_empty():
 		var item: Variant = GridManager.get_item(pos)
 		if item != null:
+			if item.get("immovable") == true:
+				EventBus.show_toast.emit("该物品无法使用")
+				return
 			print("[GridView] double-click use: id=" + str(item.get("id",0)) + " type=" + str(item.get("type","")))
 			item_use_requested.emit(item, pos)
 		return
@@ -984,6 +1003,7 @@ func _sync_grid_from_server(result: Dictionary) -> void:
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
 			if entry.has("uid"): item["_uid"] = entry.uid
+			if entry.has("immovable"): item["immovable"] = entry.immovable
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
 
 func _deselect_all() -> void:

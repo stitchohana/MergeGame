@@ -14,6 +14,7 @@ var _orig_scale: Vector2
 @onready var level_label: Label = $LevelLabel
 @onready var icon_rect: TextureRect = $IconRect
 @onready var charge_label: Label = $ChargeLabel
+@onready var immovable_icon: TextureRect = $ImmovableIcon
 @onready var select_icon: TextureRect = $SelectIcon
 
 var _is_selected: bool = false
@@ -32,6 +33,15 @@ func _ready() -> void:
 	temp.anchor_bottom = 1.0
 	temp.color = Color(1, 0.85, 0.2, 0.7)
 	select_icon.add_child(temp)
+
+	var lock_bg := ColorRect.new()
+	lock_bg.name = "LockBg"
+	lock_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lock_bg.anchors_preset = Control.PRESET_FULL_RECT
+	lock_bg.anchor_right = 1.0
+	lock_bg.anchor_bottom = 1.0
+	lock_bg.color = Color(1, 0.2, 0.2, 0.85)
+	immovable_icon.add_child(lock_bg)
 
 func set_selected(active: bool) -> void:
 	_is_selected = active
@@ -143,8 +153,12 @@ func _update_visuals() -> void:
 					charge_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
 			else:
 				charge_label.visible = false
+
 		else:
 			charge_label.visible = false
+
+	if immovable_icon:
+		immovable_icon.visible = item_data.get("immovable") == true
 
 # Called by GridView during drag
 func set_drag_active(active: bool) -> void:
