@@ -35,12 +35,10 @@ func _build_entry(recipe: Dictionary) -> Control:
 	var craft_time: float = recipe.get("craft_time", 0.0)
 
 	var parts: PackedStringArray = []
-	for ing in ingredients:
-		var ing_id: int = ing.get("id", 0)
-		var ing_count: int = ing.get("count", 1)
+	for ing_id in ingredients:
 		var ing_data := ConfigDatabase.get_item_data(ing_id)
 		var ing_name: String = ing_data.get("name", "未知")
-		parts.append("%s x%d" % [ing_name, ing_count])
+		parts.append(ing_name)
 
 	var result_data := ConfigDatabase.get_item_data(result_id)
 	var result_name: String = result_data.get("name", "未知")

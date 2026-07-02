@@ -18,6 +18,7 @@ var _monsters: Array = []
 var _pending_stamina_uid: int = -1
 var _pending_attack_uid: int = -1
 var _pending_attack_effect_id: int = -1
+var _pending_heal_amount: int = 0
 
 func _ready() -> void:
 	grid_view.item_clicked.connect(_on_item_clicked)
@@ -30,6 +31,8 @@ func _ready() -> void:
 	CloudService.battle_attack_rejected.connect(_on_battle_attack_rejected)
 	CloudService.stamina_restore_confirmed.connect(_on_stamina_restore_confirmed)
 	CloudService.stamina_restore_rejected.connect(_on_stamina_restore_rejected)
+	CloudService.battle_heal_confirmed.connect(_on_battle_heal_confirmed)
+	CloudService.battle_heal_rejected.connect(_on_battle_heal_rejected)
 	CultivationService.qi_changed.connect(_on_qi_changed)
 
 func on_enter() -> void:
@@ -148,7 +151,10 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 			CloudService.submit_restore_stamina(item_data.get("id", 0), uid, GameState.version)
 		"breakthrough":
 			var pill_id: int = item_data.get("id", 0)
-			CultivationService.try_breakthrough(pill_id)
+			if uid <= 0:
+					EventBus.show_toast.emit("物品数据异常，请重新登录")
+					return
+				CultivationService.try_breakthrough(pill_id, uid)
 		_:
 			EventBus.show_toast.emit("此物品无法使用")
 
@@ -234,6 +240,18 @@ func _refresh_map_header() -> void:
 	if _current_stage < stages.size():
 		stage_name = stages[_current_stage].get("name", "")
 	map_label.text = "%s — 第%d关 %s" % [map_data.get("name", ""), _current_stage + 1, stage_name]
+
+func _on_battle_heal_confirmed(result: Dictionary) -> void:
+	GameState.version = result.get("new_version", GameState.version)
+	_sync_grid_from_result(result)
+	_char_hp = mini(_char_max_hp, _char_hp + _pending_heal_amount)
+	_refresh_char_display()
+	EventBus.show_toast.emit("恢复了 %d 点生命！" % _pending_heal_amount)
+	_pending_heal_amount = 0
+
+func _on_battle_heal_rejected(reason: String) -> void:
+	_pending_heal_amount = 0
+	EventBus.show_toast.emit("恢复失败：" + reason)
 
 func _on_leave_pressed() -> void:
 	var prev: String = GameState.previous_screen_name

@@ -8,6 +8,7 @@ import { GameEngine } from "./engine/game_engine";
 import { createAuthRouter } from "./routes/auth";
 import { createGameRouter } from "./routes/game";
 import { createCultivationRouter } from "./routes/cultivation";
+import { createGMRouter } from "./routes/gm";
 
 function createStorage(): IStorage {
   switch (config.dbType) {
@@ -63,6 +64,7 @@ function main(): void {
   app.use("/api/auth", createAuthRouter(storage));
   app.use("/api/game", createGameRouter(storage, engine));
   app.use("/api/cultivation", createCultivationRouter(storage, engine));
+  app.use("/api/gm", createGMRouter(storage, engine));
 
   // Health check
   app.get("/api/health", (_req, res) => {

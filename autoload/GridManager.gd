@@ -21,6 +21,8 @@ signal item_removed(item_data: Dictionary, pos: Vector2i)
 signal item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i)
 signal grid_updated()
 
+var _skip_anims: bool = false
+
 func _ready() -> void:
 	init_grid(current_board_type)
 
@@ -65,7 +67,7 @@ func add_item(item_data: Dictionary, pos: Vector2i) -> bool:
 	if not is_valid_pos(pos) or not is_empty(pos):
 		return false
 	if not item_data.has("_uid") or item_data["_uid"] <= 0:
-		print("[GridManager] WARNING: item #" + str(item_data.get("id", 0)) + " has no server uid!")
+		print("[ERROR] GridManager.add_item: no server uid for id=#" + str(item_data.get("id", 0)) + " has no server uid!")
 	_grid[pos.y][pos.x] = item_data
 
 	# Track position for this item_id

@@ -1,20 +1,20 @@
 {
   "recipes": [
-	{"id": 3, "name": "炼筑基丹", "ingredients": [{"id": 21, "count": 1}, {"id": 22, "count": 1}], "result": 31, "craft_time": 3, "crafting_level": 1},
-	{"id": 4, "name": "炼金丹丹", "ingredients": [{"id": 22, "count": 1}, {"id": 23, "count": 1}], "result": 32, "craft_time": 4, "crafting_level": 1},
-	{"id": 5, "name": "炼元婴丹", "ingredients": [{"id": 23, "count": 1}, {"id": 24, "count": 1}], "result": 33, "craft_time": 4, "crafting_level": 1},
-	{"id": 6, "name": "炼化神丹", "ingredients": [{"id": 24, "count": 1}, {"id": 21, "count": 1}], "result": 34, "craft_time": 5, "crafting_level": 1},
-	{"id": 7, "name": "炼合体丹", "ingredients": [{"id": 23, "count": 1}, {"id": 24, "count": 1}], "result": 35, "craft_time": 5, "crafting_level": 1},
-	{"id": 8, "name": "炼大乘丹", "ingredients": [{"id": 24, "count": 1}, {"id": 23, "count": 1}], "result": 36, "craft_time": 6, "crafting_level": 1},
-	{"id": 9, "name": "炼渡劫丹", "ingredients": [{"id": 24, "count": 1}, {"id": 22, "count": 1}], "result": 37, "craft_time": 8, "crafting_level": 1},
-	{"id": 10, "name": "炼聚气散", "ingredients": [{"id": 21, "count": 1}], "result": 71, "craft_time": 3, "crafting_level": 1},
-	{"id": 11, "name": "炼培元散", "ingredients": [{"id": 22, "count": 1}], "result": 72, "craft_time": 2, "crafting_level": 1},
-	{"id": 12, "name": "炼凝神散", "ingredients": [{"id": 22, "count": 1}, {"id": 23, "count": 1}], "result": 73, "craft_time": 3, "crafting_level": 1},
-	{"id": 13, "name": "炼增元散", "ingredients": [{"id": 23, "count": 1}], "result": 74, "craft_time": 3, "crafting_level": 1},
-	{"id": 14, "name": "炼圣药", "ingredients": [{"id": 24, "count": 1}, {"id": 23, "count": 1}], "result": 74, "craft_time": 8, "crafting_level": 1},
-	{"id": 15, "name": "炼铜锭", "ingredients": [{"id": 61, "count": 1}], "result": 65, "craft_time": 3, "crafting_level": 1},
-	{"id": 16, "name": "炼铁锭", "ingredients": [{"id": 62, "count": 1}], "result": 66, "craft_time": 3, "crafting_level": 1},
-	{"id": 17, "name": "炼银锭", "ingredients": [{"id": 63, "count": 1}], "result": 67, "craft_time": 4, "crafting_level": 1},
-	{"id": 18, "name": "炼金锭", "ingredients": [{"id": 64, "count": 1}], "result": 68, "craft_time": 5, "crafting_level": 1}
+	{"id":3,"name":"炼筑基丹","ingredients":[101,102],"result":31,"craft_time":3,"crafting_level":1},
+	{"id":4,"name":"炼金丹丹","ingredients":[103,104],"result":32,"craft_time":4,"crafting_level":1},
+	{"id":5,"name":"炼元婴丹","ingredients":[105,106],"result":33,"craft_time":4,"crafting_level":1},
+	{"id":6,"name":"炼化神丹","ingredients":[107,108],"result":34,"craft_time":5,"crafting_level":1},
+	{"id":7,"name":"炼合体丹","ingredients":[109,110],"result":35,"craft_time":5,"crafting_level":1},
+	{"id":8,"name":"炼大乘丹","ingredients":[111,112],"result":36,"craft_time":6,"crafting_level":1},
+	{"id":9,"name":"炼渡劫丹","ingredients":[113,114],"result":37,"craft_time":8,"crafting_level":1},
+	{"id":10,"name":"炼聚气散","ingredients":[121],"result":71,"craft_time":3,"crafting_level":1},
+	{"id":11,"name":"炼培元散","ingredients":[122],"result":72,"craft_time":2,"crafting_level":1},
+	{"id":12,"name":"炼凝神散","ingredients":[123],"result":73,"craft_time":3,"crafting_level":1},
+	{"id":13,"name":"炼增元散","ingredients":[124],"result":74,"craft_time":3,"crafting_level":1},
+	{"id":14,"name":"炼圣药","ingredients":[125,126],"result":74,"craft_time":8,"crafting_level":1},
+	{"id":15,"name":"炼铜锭","ingredients":[61],"result":65,"craft_time":3,"crafting_level":1},
+	{"id":16,"name":"炼铁锭","ingredients":[62],"result":66,"craft_time":3,"crafting_level":1},
+	{"id":17,"name":"炼银锭","ingredients":[63],"result":67,"craft_time":4,"crafting_level":1},
+	{"id":18,"name":"炼金锭","ingredients":[64],"result":68,"craft_time":5,"crafting_level":1}
   ]
 }

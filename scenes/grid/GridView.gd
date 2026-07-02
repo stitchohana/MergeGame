@@ -41,6 +41,8 @@ var _launcher_cd: Dictionary = {}  # uid -> {remaining, recharge_time, max_charg
 var _cd_timer: Timer = null
 var _spawn_in_flight: bool = false
 var _merge_in_flight: bool = false
+var _pending_push_src: Vector2i = Vector2i(-1, -1)
+var _pending_push_target: Vector2i = Vector2i(-1, -1)
 
 func set_pouch_zone(zone: Control) -> void:
 	_pouch_zone = zone
@@ -67,6 +69,10 @@ func _on_cd_tick() -> void:
 		return
 	var to_erase: Array = []
 	for uid in _launcher_cd:
+		if uid <= 0:
+			print("[ERROR] _on_cd_tick: uid=0 in _launcher_cd, erasing")
+			to_erase.append(uid)
+			continue
 		var cd: Dictionary = _launcher_cd[uid]
 		cd.remaining -= 1.0
 		if cd.remaining <= 0:
@@ -140,6 +146,8 @@ func _connect_signals() -> void:
 	CloudService.craft_retrieve_confirmed.connect(_on_craft_retrieve_confirmed)
 	CloudService.craft_retrieve_rejected.connect(_on_craft_retrieve_rejected)
 	MergeService.merge_failed.connect(_on_merge_failed)
+	CloudService.push_place_confirmed.connect(_on_push_place_confirmed)
+	CloudService.push_place_rejected.connect(_on_push_place_rejected)
 
 # --- Input: press on any item, then drag or click dispatch ---
 
@@ -255,6 +263,8 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		return
 
 	_pending_spawn_uid = item.get("_uid", -1)
+	if _pending_spawn_uid <= 0:
+		print("[ERROR] _handle_launcher_click: uid=" + str(_pending_spawn_uid) + " id=#" + str(item.get("id", 0)) + " at " + str(pos))
 
 	if CloudService.online:
 		CloudService.submit_spawn(pos.x, pos.y, GameState.version)
@@ -334,7 +344,10 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 					var max_c: int = result.get("max_charges", 3)
 					var cd_time: float = result.get("recharge_time", 0.0)
 					if charges_val <= 0 and cd_time > 0:
-						_launcher_cd[launcher_uid] = {"remaining": cd_time, "recharge_time": cd_time, "max_charges": max_c}
+						if launcher_uid > 0:
+							_launcher_cd[launcher_uid] = {"remaining": cd_time, "recharge_time": cd_time, "max_charges": max_c}
+						else:
+							print("[ERROR] _on_spawn_confirmed: launcher uid=" + str(launcher_uid) + " id=#" + str(launcher_item.get("id", 0)))
 						var cd_secs: int = int(ceil(cd_time))
 						launcher_node.charge_label.text = "%02d:%02d" % [int(cd_secs / 60), cd_secs % 60]
 						launcher_node.charge_label.add_theme_color_override("font_color", Color(1, 0.6, 0.2, 1))
@@ -398,6 +411,12 @@ func _start_drag(pos: Vector2i) -> void:
 	_drag_item_data = item
 	_is_dragging = true
 	GameState.set_phase(GameState.GamePhase.DRAGGING)
+	var drag_key := "%d,%d" % [pos.x, pos.y]
+	var drag_node = _item_nodes.get(drag_key)
+	if drag_node and is_instance_valid(drag_node):
+		var layer := _get_items_layer()
+		if layer:
+			layer.move_child(drag_node, layer.get_child_count() - 1)
 	_hide_craft_button()
 
 
@@ -437,12 +456,10 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		if _drag_item_data.get("type") == "crafting":
 			item_clicked.emit(_drag_item_data, target_pos)
 	elif not MergeService.try_merge(_drag_source_pos, target_pos):
-		var push_pos = GridManager.find_nearest_empty(target_pos)
-		if push_pos != Vector2i(-1, -1):
-			GridManager.move_item(target_pos, push_pos)
-			_place_dragged_item(target_pos)
-		else:
-			_snap_back()
+		if CloudService.online:
+			_pending_push_src = _drag_source_pos
+			_pending_push_target = target_pos
+			CloudService.submit_push_place(_drag_source_pos.x, _drag_source_pos.y, target_pos.x, target_pos.y, GameState.version)
 	if GameState.phase in [GameState.GamePhase.DRAGGING, GameState.GamePhase.MERGING]:
 		GameState.set_phase(GameState.GamePhase.IDLE)
 
@@ -475,6 +492,43 @@ func _on_pouch_deposit_failed(_reason: String) -> void:
 	if gitem != null:
 		_on_item_added(gitem, _drag_source_pos)
 
+func _on_push_place_confirmed(result: Dictionary) -> void:
+	print("[GridView] push_place confirmed: pushed=(" + str(result.get("pushed_col", -1)) + "," + str(result.get("pushed_row", -1)) + ")")
+	GameState.version = result.get("new_version", GameState.version)
+	var pushed_pos := Vector2i(result.get("pushed_col", -1), result.get("pushed_row", -1))
+	if _pending_push_target.x >= 0 and pushed_pos.x >= 0:
+		var src_key := "%d,%d" % [_pending_push_src.x, _pending_push_src.y]
+		var dst_key := "%d,%d" % [_pending_push_target.x, _pending_push_target.y]
+		if pushed_pos == _pending_push_src:
+			# Direct swap — no signals
+			var src_node = _item_nodes.get(src_key)
+			var dst_node = _item_nodes.get(dst_key)
+			# Swap grid data
+			var tmp_grid = GridManager._grid[_pending_push_src.y][_pending_push_src.x]
+			GridManager._grid[_pending_push_src.y][_pending_push_src.x] = GridManager._grid[_pending_push_target.y][_pending_push_target.x]
+			GridManager._grid[_pending_push_target.y][_pending_push_target.x] = tmp_grid
+			# Swap node dict entries
+			_item_nodes[src_key] = dst_node
+			_item_nodes[dst_key] = src_node
+			# Visual: source snaps to target
+			if src_node and is_instance_valid(src_node):
+				src_node.position = Vector2(_pending_push_target.x * CELL_SIZE, _pending_push_target.y * CELL_SIZE)
+				src_node.grid_position = _pending_push_target
+			# Visual: target tweens to source
+			if dst_node and is_instance_valid(dst_node):
+				dst_node.grid_position = _pending_push_src
+				var tween := create_tween()
+				tween.tween_property(dst_node, "position", Vector2(_pending_push_src.x * CELL_SIZE, _pending_push_src.y * CELL_SIZE), 0.15)
+		else:
+			GridManager.move_item(_pending_push_target, pushed_pos)
+			GridManager.move_item(_pending_push_src, _pending_push_target)
+	_pending_push_src = Vector2i(-1, -1)
+	_pending_push_target = Vector2i(-1, -1)
+func _on_push_place_rejected(reason: String) -> void:
+	print("[GridView] push_place REJECTED: " + reason)
+	_pending_push_src = Vector2i(-1, -1)
+	_pending_push_target = Vector2i(-1, -1)
+
 func _on_move_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 
@@ -483,7 +537,6 @@ func _on_move_rejected(reason: String) -> void:
 
 func _on_merge_failed(_reason: String) -> void:
 	_merge_in_flight = false
-	_sync_all_items()
 
 func _snap_back() -> void:
 	var key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
@@ -518,7 +571,7 @@ func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
 	if layer:
 		layer.add_child(item)
 	item.setup(item_data, pos, CELL_SIZE)
-	if not _is_launcher_spawning and not _skip_anims:
+	if not _is_launcher_spawning and not _skip_anims and not GridManager._skip_anims:
 		item.play_spawn_animation()
 	_item_nodes["%d,%d" % [pos.x, pos.y]] = item
 	_try_start_launcher_cd(item_data)
@@ -534,6 +587,7 @@ func _try_start_launcher_cd(item_data: Dictionary) -> void:
 		return
 	var uid: int = item_data.get("_uid", 0)
 	if uid <= 0:
+		print("[ERROR] _try_start_launcher_cd: uid=" + str(uid) + " for item #" + str(item_data.get("id", 0)))
 		return
 	var max_c: int = cfg.get("max_charges", 3)
 	var remaining: float = cd_time
@@ -650,7 +704,7 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 	for r in allowed_recipes:
 		var ingredients: Array = r.get("ingredients", [])
 		for ing in ingredients:
-			if ing.get("id", 0) == ingredient_id:
+			if ing == ingredient_id:
 				valid = true
 				break
 		if valid:
@@ -676,7 +730,7 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 				var sid: int = s.get("id", 0)
 				var found_s := false
 				for ri in recipe_ings:
-					if ri.get("id", 0) == sid:
+					if ri == sid:
 						found_s = true
 						break
 				if not found_s:
@@ -686,7 +740,7 @@ func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
 				continue
 			var new_match := false
 			for ri in recipe_ings:
-				if ri.get("id", 0) == ingredient_id:
+				if ri == ingredient_id:
 					new_match = true
 					break
 			if new_match:
@@ -728,6 +782,30 @@ var _last_craft_pending_dragged_item: Dictionary = {}
 var _last_craft_pending_table_pos: Vector2i = Vector2i(-1, -1)
 var _last_craft_pending_ingredient_id: int = -1
 
+# Check if stored items + new ingredient match a recipe, show craft button if so
+func _stored_plus_new_check(table_item: Dictionary, new_ingredient_id: int, table_pos: Vector2i) -> void:
+	var stored: Array = CraftingService.get_stored_items(table_item)
+	var allowed_recipes: Array = ConfigDatabase.get_recipes_for_item(table_item.get("id", 0))
+	var combined_ids: Array = []
+	for s in stored:
+		combined_ids.append(s.get("id", 0))
+	combined_ids.append(new_ingredient_id)
+	for r in allowed_recipes:
+		var ings: Array = r.get("ingredients", [])
+		if ings.size() != combined_ids.size():
+			continue
+		var matched := true
+		for ing in ings:
+			if not combined_ids.has(ing):
+				matched = false
+				break
+		if matched:
+			_craft_button.show_for_recipe(r)
+			_craft_button.set_table_pos(position, table_pos, CELL_SIZE)
+			_craft_table_item = table_item
+			_craft_table_pos = table_pos
+			break
+
 func _handle_storage_click(storage_pos: Vector2i) -> void:
 	CloudService.fetch_state()
 	CloudService.state_loaded.connect(func(data):
@@ -762,29 +840,8 @@ func _handle_crafting_retrieve(table_item: Dictionary, table_pos: Vector2i) -> v
 		return
 	if CloudService.online:
 		CloudService.submit_craft_retrieve(table_pos.x, table_pos.y, GameState.version)
-	else:
-		_do_local_retrieve(table_item, table_pos)
 
 
-func _do_local_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
-	var result_id := CraftingService.retrieve(table_item)
-	if result_id <= 0:
-		return
-	var result_data := ConfigDatabase.get_item_data(result_id)
-	if result_data.is_empty():
-		return
-	var spawn_pos := GridManager.find_nearest_empty(table_pos)
-	if spawn_pos == Vector2i(-1, -1):
-		return
-	var new_item: Dictionary = result_data.duplicate(true)
-	_is_launcher_spawning = true
-	GridManager.add_item(new_item, spawn_pos)
-	_is_launcher_spawning = false
-	var table_key := "%d,%d" % [table_pos.x, table_pos.y]
-	var table_node = _item_nodes.get(table_key)
-	if table_node and is_instance_valid(table_node):
-		table_node.set_crafting_state(CraftingService.TableState.IDLE)
-	_hide_craft_button()
 func _on_craft_button_pressed() -> void:
 	if _craft_table_item.is_empty():
 		return
@@ -842,6 +899,7 @@ func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
 		EventBus.show_toast.emit("棋盘已满，无法取出制作结果")
 		return
 	var new_item: Dictionary = result_data.duplicate(true)
+	new_item["_uid"] = result.get("result_uid", 0)
 	_is_launcher_spawning = true
 	GridManager.add_item(new_item, spawn_pos)
 	_is_launcher_spawning = false
@@ -864,7 +922,18 @@ func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
 			node.set_crafting_state(state)
 			break
 
-	if state == CraftingService.TableState.CRAFTING:
+	if state == CraftingService.TableState.HAS_ITEMS:
+		var recipe := CraftingService.get_current_recipe(table_item)
+		if not recipe.is_empty():
+			_craft_button.show_for_recipe(recipe)
+			_craft_table_item = table_item
+			var tpos := _get_table_grid_pos(table_item)
+			if tpos.x >= 0:
+				_craft_table_pos = tpos
+				_craft_button.set_table_pos(position, tpos, CELL_SIZE)
+		else:
+			_hide_craft_button()
+	elif state == CraftingService.TableState.CRAFTING:
 		_hide_craft_button()
 
 func _show_craft_button(table_pos: Vector2i) -> void:
@@ -895,6 +964,7 @@ func _select_item(pos: Vector2i) -> void:
 	if key == _selected_key and not _selected_key.is_empty():
 		var item: Variant = GridManager.get_item(pos)
 		if item != null:
+			print("[GridView] double-click use: id=" + str(item.get("id",0)) + " type=" + str(item.get("type","")))
 			item_use_requested.emit(item, pos)
 		return
 	_deselect_all()

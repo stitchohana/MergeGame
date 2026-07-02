@@ -46,12 +46,12 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
 
   // POST /api/cultivation/consume-exp
   router.post("/consume-exp", op(async (req, res, userId) => {
-    const { pill_id } = req.body;
-    if (typeof pill_id !== "number") {
+    const { pill_id, uid } = req.body;
+    if (typeof pill_id !== "number" || typeof uid !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.consumeExpPill(state, pill_id);
+    const result = engine.consumeExpPill(state, pill_id, uid);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     res.json({ ok: true, new_version: state.version, cultivation: state.cultivation });
@@ -72,13 +72,13 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
 
   // POST /api/cultivation/breakthrough
   router.post("/breakthrough", op(async (req, res, userId) => {
-    const { pill_id } = req.body;
-    if (typeof pill_id !== "number") {
+    const { pill_id, uid } = req.body;
+    if (typeof pill_id !== "number" || typeof uid !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
     const result = engine.executeTryBreakthrough(
-      state, pill_id,
+      state, pill_id, uid,
       state.cultivation.current_level,
       state.cultivation.current_exp
     );

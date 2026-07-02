@@ -1,7 +1,6 @@
 import { IStorage, User, GameState, LeaderboardEntry } from "./interface";
 
 const defaultCultivation = {
-  current_realm_id: 0,
   current_level: 1,
   current_exp: 0,
   total_exp: 0,

@@ -15,17 +15,35 @@ var total_exp: int = 0
 var current_qi: int = 0
 var max_qi: int = 100
 var _pending_exp_pill_uid: int = -1
+var _pending_breakthrough_uid: int = -1
 
 func _ready() -> void:
 	CloudService.breakthrough_confirmed.connect(_on_breakthrough_confirmed)
+	CloudService.breakthrough_rejected.connect(_on_breakthrough_rejected)
 	CloudService.exp_pill_consume_confirmed.connect(_on_exp_pill_consume_confirmed)
 
 # --- Server response handlers ---
 
 func _on_breakthrough_confirmed(result: Dictionary) -> void:
+	print("[Cultivation] breakthrough confirmed")
 	GameState.version = result.get("new_version", GameState.version)
+	if _pending_breakthrough_uid > 0:
+		print("[Cultivation] removing pill by uid=" + str(_pending_breakthrough_uid))
+		var pos := GridManager.find_pos_by_uid(_pending_breakthrough_uid)
+		print("[Cultivation] find_pos_by_uid result=" + str(pos))
+		if pos != Vector2i(-1, -1):
+			GridManager.remove_item(pos)
+			print("[Cultivation] pill removed from grid")
+		else:
+			print("[Cultivation] pill NOT FOUND by uid=" + str(_pending_breakthrough_uid))
+		_pending_breakthrough_uid = -1
+	else:
+		print("[Cultivation] _pending_breakthrough_uid <= 0, skipping local removal")
 	var c: Dictionary = result.get("cultivation", {})
 	_apply_cultivation_state(c)
+
+func _on_breakthrough_rejected(_reason: String) -> void:
+	_pending_breakthrough_uid = -1
 
 func _on_exp_pill_consume_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
@@ -39,16 +57,22 @@ func _on_exp_pill_consume_confirmed(result: Dictionary) -> void:
 
 # --- Public operations (submit to server) ---
 
-func try_breakthrough(pill_id: int) -> bool:
+func try_breakthrough(pill_id: int, uid: int) -> bool:
+	print("[Cultivation] try_breakthrough pill=" + str(pill_id) + " uid=" + str(uid))
+	if uid <= 0:
+		print("[Cultivation] try_breakthrough BLOCKED: uid=" + str(uid))
+		return false
+	_pending_breakthrough_uid = uid
+	print("[Cultivation] pending_breakthrough_uid=" + str(_pending_breakthrough_uid))
 	if CloudService.online:
-		CloudService.submit_breakthrough(pill_id, GameState.version)
+		CloudService.submit_breakthrough(pill_id, uid, GameState.version)
 		return true
 	return false
 
 func consume_exp_pill(pill_id: int, uid: int) -> void:
 	_pending_exp_pill_uid = uid
 	if CloudService.online:
-		CloudService.submit_consume_exp_pill(pill_id, GameState.version)
+		CloudService.submit_consume_exp_pill(pill_id, uid, GameState.version)
 
 # --- State sync from server ---
 
@@ -60,6 +84,7 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 
 	current_level = c.get("current_level", 1)
 	current_exp = c.get("current_exp", 0)
+	print("[Cultivation] apply_state: level=" + str(current_level) + " exp=" + str(current_exp) + " qi=" + str(current_qi) + "/" + str(max_qi))
 	total_exp = c.get("total_exp", 0)
 	current_qi = c.get("current_qi", 0)
 	max_qi = c.get("max_qi", 100)
@@ -69,7 +94,9 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 		stage_changed.emit(current_level, stage_name)
 
 	if current_exp != old_exp:
-		exp_changed.emit(current_exp, get_exp_to_next_level())
+		var e2n = get_exp_to_next_level()
+		print("[Cultivation] exp_changed: " + str(current_exp) + "/" + str(e2n))
+		exp_changed.emit(current_exp, e2n)
 
 	if current_qi != old_qi or max_qi != old_max_qi:
 		qi_changed.emit(current_qi, max_qi)
@@ -98,10 +125,14 @@ func is_max_cultivation() -> bool:
 	return current_level >= ConfigDatabase.get_stage_count()
 
 func get_required_breakthrough_pill() -> int:
+	if not is_breakthrough_ready():
+		return 0
 	return ConfigDatabase.get_stage_breakthrough_pill(current_level)
 
 func _needs_breakthrough_pill() -> bool:
 	if is_max_cultivation():
+		return false
+	if not is_breakthrough_ready():
 		return false
 	return ConfigDatabase.get_stage_breakthrough_pill(current_level) > 0
 

@@ -28,6 +28,7 @@ func _restore_from_server(state: Dictionary) -> void:
 
 	# Grid
 	GridManager.init_grid()
+	GridManager._skip_anims = true
 	var grid_data: Array = state.get("grid", [])
 	print("[Save] restore: ", grid_data.size(), " items from server")
 	for entry in grid_data:
@@ -53,6 +54,7 @@ func _restore_from_server(state: Dictionary) -> void:
 			if entry_storage != null:
 				new_item["storage"] = entry_storage
 			var entry_uid: Variant = entry.get("uid", null)
+			print("[Save] item #" + str(entry.get("id", 0)) + " server uid=" + str(entry_uid))
 			if entry_uid != null:
 				new_item["_uid"] = entry_uid
 			else:
@@ -73,6 +75,7 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.meridian_threshold_idx = state.get("meridian_threshold_idx", 0)
 
 	# Restore crafting timers for in-progress crafts
+	GridManager._skip_anims = false
 	CraftingService.restore_craft_timers()
 
 # --- Collect current state (for server submission if needed) ---

@@ -23,7 +23,7 @@ interface ItemDef {
 interface RecipeDef {
   id: number;
   name: string;
-  ingredients: { id: number; count: number }[];
+  ingredients: number[];
   result: number;
   craft_time: number;
   crafting_level: number;
@@ -61,8 +61,10 @@ export class GameEngine {
   private recipes: RecipeDef[] = [];
   private recipesByTable = new Map<number, RecipeDef[]>();
   private cultivation: CultivationConfig | null = null;
+
+  get cultivationStages() { return this.cultivation?.stages ?? []; }
   private initialSetups = new Map<string, { id: number; col: number; row: number }[]>();
-  private staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
+  staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
   private shopConfig = { shopItems: [] as number[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
   private effectsById = new Map<number, { id: number; type: string; exp_gain?: number; duration?: number; multiplier?: number; amount?: number; describe?: string }>();
   private meridianThresholds: any[] = [];
@@ -312,7 +314,7 @@ export class GameEngine {
     return this.getItemData(itemId)?.max_charges ?? 3;
   }
 
-  private _nextUid(state: GameState): number {
+  _nextUid(state: GameState): number {
     state.uid_counter = (state.uid_counter ?? 0) + 1;
     return state.uid_counter!;
   }
@@ -616,6 +618,9 @@ export class GameEngine {
 
     if (dataA.group_id !== dataB.group_id) {
       console.log(`[engine] merge rejected: group_id mismatch #${dataA.id}(gid=${dataA.group_id}) vs #${dataB.id}(gid=${dataB.group_id})`);
+      console.log(`[engine] group_id_mismatch: client expects #${dataA.id}(gid=${dataA.group_id}) and #${dataB.id}(gid=${dataB.group_id})`);
+      console.log(`[engine]   server grid at merge positions: from=(${fromCol},${fromRow}) id=${itemA.id} to=(${toCol},${toRow}) id=${itemB.id}`);
+      console.log(`[engine]   full grid: [${state.grid.map(g => `${g.id}(${g.col},${g.row}):uid=${g.uid}`).join(", ")}]`);
       return { valid: false, reason: "group_id_mismatch" };
     }
     if (dataA.id !== dataB.id) {
@@ -646,6 +651,7 @@ export class GameEngine {
   ): { ok: true; newVersion: number; resultUid: number; resultId: number; fromCol: number; fromRow: number; toCol: number; toRow: number } | { ok: false; reason: string } {
     const result = this.validateMerge(state, fromCol, fromRow, toCol, toRow);
     if (!result.valid) {
+      console.log(`[engine] merge rejected: ${result.reason} | from=(${fromCol},${fromRow}) to=(${toCol},${toRow})`);
       return { ok: false, reason: result.reason };
     }
 
@@ -673,7 +679,7 @@ export class GameEngine {
     const mergedName = result.resultItem.name;
     const fromItem = this.getItemData(fromId);
     const fromName = fromItem?.name ?? `#${fromId}`;
-    console.log(`[engine] merge: ${fromName}x2 -> ${mergedName} | v${state.version}`);
+    console.log(`[engine] merge: ${fromName}x2 -> ${mergedName} | grid=${state.grid.length}/63 | v${state.version}`);
 
     return {
       ok: true,
@@ -954,7 +960,7 @@ export class GameEngine {
     state: GameState,
     tableCol: number,
     tableRow: number
-  ): { ok: true; resultId: number; newVersion: number } | { ok: false; reason: string } {
+  ): { ok: true; resultUid: number; resultId: number; newVersion: number } | { ok: false; reason: string } {
     let tableItem = state.grid.find(
       (item) => item.col === tableCol && item.row === tableRow
     );
@@ -987,8 +993,9 @@ export class GameEngine {
     // Place result item on grid near the table
     const map = this.gridToMap(state.grid);
     const target = this.findNearestEmpty(map, tableItem.col, tableItem.row);
+    const craftUid = this._nextUid(state);
     if (target) {
-      state.grid.push({ id: resultId, col: target.col, row: target.row });
+      state.grid.push({ uid: craftUid, id: resultId, col: target.col, row: target.row });
     }
 
     // Clear craft state
@@ -997,9 +1004,9 @@ export class GameEngine {
 
     const retrievedItem = this.getItemData(resultId);
     const retrievedName = retrievedItem?.name ?? `#${resultId}`;
-    console.log(`[engine] craft retrieve: -> ${retrievedName} at (${target?.col ?? -1},${target?.row ?? -1}) | v${state.version}`);
+    console.log(`[engine] craft retrieve: -> ${retrievedName} uid=${craftUid} at (${target?.col ?? -1},${target?.row ?? -1}) | v${state.version}`);
 
-    return { ok: true, resultId, newVersion: state.version };
+    return { ok: true, resultUid: craftUid, resultId, newVersion: state.version };
   }
 
   addIngredientToTable(
@@ -1085,12 +1092,12 @@ export class GameEngine {
     }
 
     for (const recipe of recipes) {
-      const totalRequired = recipe.ingredients.reduce((sum, ing) => sum + ing.count, 0);
+      const totalRequired = recipe.ingredients.length;
       if (stored.length !== totalRequired) continue;
 
       let match = true;
-      for (const { id, count } of recipe.ingredients) {
-        if ((storedCounts.get(id) || 0) !== count) {
+      for (const id of recipe.ingredients) {
+        if ((storedCounts.get(id) || 0) !== 1) {
           match = false;
           break;
         }
@@ -1144,17 +1151,30 @@ export class GameEngine {
   executeTryBreakthrough(
     state: GameState,
     pillId: number,
+    uid: number,
     level: number,
     exp: number
   ): { ok: true; newCultivation: CultivationData } | { ok: false; reason: string } {
+    console.log(`[engine] tryBreakthrough: pill=${pillId} uid=${uid} level=${level} exp=${exp}`);
     if (!this.isBreakthroughReady(level, exp)) {
+      console.log(`[engine] tryBreakthrough: not ready (need exp=${this.getExpToNextLevel(level)} have=${exp})`);
       return { ok: false, reason: "not_ready" };
     }
     const required = this.getRequiredBreakthroughPill(level, exp);
     if (required <= 0 || pillId !== required) {
+      console.log(`[engine] tryBreakthrough: wrong pill (need=${required} got=${pillId})`);
       return { ok: false, reason: "wrong_pill" };
     }
     if (!this.cultivation) return { ok: false, reason: "no_config" };
+
+    // Remove the pill from grid
+    const pillIdx = state.grid.findIndex(g => g.uid === uid);
+    if (pillIdx >= 0) {
+      state.grid.splice(pillIdx, 1);
+      console.log(`[engine]   breakthrough pill #${pillId} removed, uid=${uid}`);
+    } else {
+      console.log(`[engine]   breakthrough: uid=${uid} NOT FOUND in grid! All uids: [${state.grid.map(g => `${g.id}:uid=${g.uid}`).join(", ")}]`);
+    }
 
     const newLevel = level + 1;
     if (newLevel > (this.cultivation.stages.length)) return { ok: false, reason: "max_level" };
@@ -1201,7 +1221,8 @@ export class GameEngine {
 
   consumeExpPill(
     state: GameState,
-    pillId: number
+    pillId: number,
+    uid: number
   ): { ok: true; cultivation: CultivationData } | { ok: false; reason: string } {
     const pillData = this.getItemData(pillId);
     if (!pillData) return { ok: false, reason: "invalid_pill" };
@@ -1213,6 +1234,13 @@ export class GameEngine {
 
     const expGain: number = effect.exp_gain ?? 0;
     if (expGain <= 0) return { ok: false, reason: "no_exp_gain" };
+
+    // Remove pill from grid
+    const pillIdx = state.grid.findIndex(g => g.uid === uid);
+    if (pillIdx >= 0) {
+      state.grid.splice(pillIdx, 1);
+      console.log(`[engine]   exp pill #${pillId} removed, uid=${uid}`);
+    }
 
     this._addExp(state.cultivation, expGain);
     state.version += 1;
@@ -1300,6 +1328,15 @@ export class GameEngine {
     return result;
   }
 
+  battleHeal(state: GameState, itemId: number, uid: number, effectId: number): { ok: true; newVersion: number; grid: GridItem[] } | { ok: false; reason: string } {
+    const idx = state.grid.findIndex(g => g.uid === uid);
+    if (idx < 0) return { ok: false, reason: "item_not_found" };
+    state.grid.splice(idx, 1);
+    state.version += 1;
+    console.log(`[engine] battle heal: #${itemId} removed, uid=${uid}`);
+    return { ok: true, newVersion: state.version, grid: state.grid };
+  }
+
   battleAttack(
     state: GameState,
     itemId: number,
@@ -1316,7 +1353,7 @@ export class GameEngine {
     // Remove used item from grid
     const idx = state.grid.findIndex((g) => g.col === col && g.row === row && g.id === itemId);
     if (idx < 0) return { ok: false, reason: "item_not_found" };
-    state.grid.splice(idx, 1);
+    const removedItem = state.grid.splice(idx, 1)[0];
 
     // Init monsters if needed
     if (!state.battle_monsters || state.battle_monsters.length === 0) {
@@ -1326,13 +1363,13 @@ export class GameEngine {
     // Find first alive monster
     const mIdx = state.battle_monsters.findIndex((m) => m.hp > 0);
     if (mIdx < 0) {
-      state.grid.push({ id: itemId, col, row });
+      state.grid.push(removedItem);
       return { ok: false, reason: "no_alive_monster" };
     }
 
     // Check effect compatibility
     if (!(state.battle_monsters[mIdx].accept_effect_ids as number[]).includes(effectId)) {
-      state.grid.push({ id: itemId, col, row });
+      state.grid.push(removedItem);
       return { ok: false, reason: "effect_not_accepted" };
     }
 
@@ -1403,17 +1440,14 @@ export class GameEngine {
     }
     state.grid.splice(idx, 1);
     console.log(`[engine]   removed from grid at idx=${idx}`);
-    state.stamina = Math.min(state.stamina + amount, this.staminaConfig.max);
-    // Reset regen timer if stamina reached max
-    if (state.stamina >= this.staminaConfig.max) {
-      state.last_stamina_tick = Date.now();
-    }
+    state.stamina += amount;
+    state.last_stamina_tick = Date.now();
     state.version += 1;
-    console.log(`[engine] consume stamina pill: #${pillId} (uid=${uid}) | stamina +${amount} (${state.stamina}/${this.staminaConfig.max}) | v${state.version}`);
+    console.log(`[engine] consume stamina pill: #${pillId} (uid=${uid}) | stamina +${amount} total=${state.stamina} | v${state.version}`);
     return { ok: true, stamina: state.stamina, max_stamina: this.staminaConfig.max };
   }
 
-  private _addExp(c: CultivationData, amount: number): void {
+  _addExp(c: CultivationData, amount: number): void {
     if (amount <= 0) return;
     if (!this.cultivation) return;
     if (this.isMaxCultivation(c.current_level)) return;
@@ -1438,6 +1472,36 @@ export class GameEngine {
       c.current_qi = Math.min(c.current_qi, c.max_qi);
       console.log(`[engine] level up: ${newStage?.name ?? "?"} | qi=${c.max_qi}`);
     }
+  }
+
+  pushAndPlace(state: GameState, fromCol: number, fromRow: number, toCol: number, toRow: number): { ok: true; newVersion: number; pushed_col: number; pushed_row: number; from_col: number; from_row: number; to_col: number; to_row: number } | { ok: false; reason: string } {
+    const fromKey = this.posKey(fromCol, fromRow);
+    const toKey = this.posKey(toCol, toRow);
+    console.log(`[engine] pushAndPlace: from=(${fromCol},${fromRow}) to=(${toCol},${toRow}) v=${state.version}`);
+    const fromItem = state.grid.find(i => this.posKey(i.col, i.row) === fromKey);
+    const toItem = state.grid.find(i => this.posKey(i.col, i.row) === toKey);
+    if (!fromItem) { console.log("[engine] pushAndPlace: source_item_not_found"); return { ok: false, reason: "source_item_not_found" }; }
+    if (!toItem) { console.log("[engine] pushAndPlace: target_item_not_found"); return { ok: false, reason: "target_item_not_found" }; }
+    if (fromCol === toCol && fromRow === toRow) return { ok: false, reason: "same_position" };
+
+    // Find nearest empty cell for the target item
+    const map = this.gridToMap(state.grid);
+    map.delete(fromKey);
+    const empty = this.findNearestEmpty(map, toCol, toRow);
+    console.log(`[engine] pushAndPlace: empty=(${empty!.col},${empty!.row})`);
+
+    // Move target item to empty cell (or swap with source if board full)
+    toItem.col = empty!.col;
+    toItem.row = empty!.row;
+    // Move dragged item to target position
+    fromItem.col = toCol;
+    fromItem.row = toRow;
+    state.version += 1;
+
+    const pushedCol = empty!.col;
+    const pushedRow = empty!.row;
+    console.log(`[engine] pushAndPlace: #${fromItem.id} (${fromCol},${fromRow})->(${toCol},${toRow}), #${toItem.id} (${toCol},${toRow})->(${pushedCol},${pushedRow})`);
+    return { ok: true, newVersion: state.version, pushed_col: pushedCol, pushed_row: pushedRow, from_col: fromCol, from_row: fromRow, to_col: toCol, to_row: toRow };
   }
 
   // --- Meridian ---

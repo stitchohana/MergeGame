@@ -15,6 +15,8 @@ signal spawn_rejected(reason: String)
 signal craft_add_confirmed(result: Dictionary)
 signal move_confirmed(result: Dictionary)
 signal move_rejected(reason: String)
+signal push_place_confirmed(result: Dictionary)
+signal push_place_rejected(reason: String)
 signal breakthrough_confirmed(result: Dictionary)
 signal breakthrough_rejected(reason: String)
 signal exp_pill_consume_confirmed(result: Dictionary)
@@ -143,6 +145,12 @@ func _on_spawn_response(data: Dictionary) -> void:
 	else:
 		spawn_rejected.emit(data.get("error", "unknown_error"))
 
+func _on_push_place_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		push_place_confirmed.emit(data)
+	else:
+		push_place_rejected.emit(data.get("error", "unknown_error"))
+
 func _on_move_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		move_confirmed.emit(data)
@@ -150,6 +158,10 @@ func _on_move_response(data: Dictionary) -> void:
 		move_rejected.emit(data.get("error", "unknown_error"))
 
 # --- Move ---
+
+func submit_push_place(from_col: int, from_row: int, to_col: int, to_row: int, version: int) -> void:
+	var body := JSON.stringify({"from": [from_col, from_row], "to": [to_col, to_row], "version": version})
+	_send_authed_request("push_place", "/api/game/push_place", HTTPClient.METHOD_POST, body)
 
 func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version: int) -> void:
 	var body := JSON.stringify({
@@ -161,12 +173,13 @@ func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version
 
 # --- Cultivation ---
 
-func submit_breakthrough(pill_id: int, version: int) -> void:
-	var body := JSON.stringify({"pill_id": pill_id, "version": version})
+func submit_breakthrough(pill_id: int, uid: int, version: int) -> void:
+	print("[CloudService] submit_breakthrough: pill=" + str(pill_id) + " uid=" + str(uid) + " v=" + str(version))
+	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
 	_send_authed_request("breakthrough", "/api/cultivation/breakthrough", HTTPClient.METHOD_POST, body)
 
-func submit_consume_exp_pill(pill_id: int, version: int) -> void:
-	var body := JSON.stringify({"pill_id": pill_id, "version": version})
+func submit_consume_exp_pill(pill_id: int, uid: int, version: int) -> void:
+	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
 	_send_authed_request("consume_exp_pill", "/api/cultivation/consume-exp", HTTPClient.METHOD_POST, body)
 
 func submit_restore_stamina(pill_id: int, uid: int, version: int) -> void:
@@ -192,10 +205,22 @@ func submit_pouch_withdraw(item_id: int, target_col: int, target_row: int) -> vo
 
 signal battle_attack_confirmed(result: Dictionary)
 signal battle_attack_rejected(reason: String)
+signal battle_heal_confirmed(result: Dictionary)
+signal battle_heal_rejected(reason: String)
+
+func submit_battle_heal(item_id: int, effect_id: int, uid: int) -> void:
+	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "uid": uid})
+	_send_authed_request("battle_heal", "/api/game/battle/heal", HTTPClient.METHOD_POST, body)
 
 func submit_battle_attack(item_id: int, effect_id: int, col: int, row: int) -> void:
 	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "col": col, "row": row})
 	_send_authed_request("battle_attack", "/api/game/battle/attack", HTTPClient.METHOD_POST, body)
+
+func _on_battle_heal_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		battle_heal_confirmed.emit(data)
+	else:
+		battle_heal_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_battle_attack_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -239,9 +264,11 @@ func _on_meridian_complete_response(data: Dictionary) -> void:
 		meridian_complete_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_breakthrough_response(data: Dictionary) -> void:
+	print("[CloudService] breakthrough response: " + str(data))
 	if data.get("ok", false):
 		breakthrough_confirmed.emit(data)
 	else:
+		print("[CloudService] breakthrough REJECTED: " + str(data.get("error", "unknown")))
 		breakthrough_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_consume_exp_pill_response(data: Dictionary) -> void:
@@ -349,7 +376,9 @@ func _reject(tag: String, reason: String) -> void:
 		"pouch_deposit": pouch_deposit_rejected.emit(reason)
 		"pouch_withdraw": pouch_withdraw_rejected.emit(reason)
 		"battle_attack": battle_attack_rejected.emit(reason)
+		"battle_heal": battle_heal_rejected.emit(reason)
 		"sell": sell_rejected.emit(reason)
+		"gm_exec": gm_exec_rejected.emit(reason)
 		"craft_add": craft_add_rejected.emit(reason)
 		"craft_start": craft_start_rejected.emit(reason)
 		"craft_remove": craft_remove_rejected.emit(reason)
@@ -506,6 +535,8 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_spawn_response(data)
 		"move":
 			_on_move_response(data)
+		"push_place":
+			_on_push_place_response(data)
 		"breakthrough":
 			_on_breakthrough_response(data)
 		"consume_exp_pill":
@@ -518,6 +549,8 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_pouch_withdraw_response(data)
 		"battle_attack":
 			_on_battle_attack_response(data)
+		"battle_heal":
+			_on_battle_heal_response(data)
 		"restore_stamina":
 			_on_restore_stamina_response(data)
 		"meridian_complete":
@@ -538,6 +571,8 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_shop_items_response(data)
 		"buy":
 			_on_buy_response(data)
+		"gm_exec":
+			_on_gm_exec_response(data)
 
 func _handle_network_error(tag: String) -> void:
 	if online:
@@ -565,12 +600,16 @@ func _handle_network_error(tag: String) -> void:
 			pouch_withdraw_rejected.emit("network_error")
 		"battle_attack":
 			battle_attack_rejected.emit("network_error")
+		"battle_heal":
+			battle_heal_rejected.emit("network_error")
 		"restore_stamina":
 			stamina_restore_rejected.emit("network_error")
 		"meridian_complete":
 			meridian_complete_rejected.emit("network_error")
 		"sell":
 			sell_rejected.emit("network_error")
+		"gm_exec":
+			gm_exec_rejected.emit("network_error")
 		"craft_add":
 			craft_add_rejected.emit("network_error")
 		"craft_start":
@@ -604,12 +643,16 @@ func _handle_parse_error(tag: String) -> void:
 			pouch_withdraw_rejected.emit("invalid_response")
 		"battle_attack":
 			battle_attack_rejected.emit("invalid_response")
+		"battle_heal":
+			battle_heal_rejected.emit("invalid_response")
 		"restore_stamina":
 			stamina_restore_rejected.emit("invalid_response")
 		"meridian_complete":
 			meridian_complete_rejected.emit("invalid_response")
 		"sell":
 			sell_rejected.emit("invalid_response")
+		"gm_exec":
+			gm_exec_rejected.emit("invalid_response")
 		"craft_add":
 			craft_add_rejected.emit("invalid_response")
 		"craft_start":
@@ -665,6 +708,16 @@ func submit_buy(item_id: int, target_col: int, target_row: int) -> void:
 	var body := JSON.stringify({"item_id": item_id, "target_col": target_col, "target_row": target_row})
 	_send_authed_request("buy", "/api/game/shop/buy", HTTPClient.METHOD_POST, body)
 
+func submit_gm_exec(cmd: String, amount: int, item_id: int = 0, col: int = -1, row: int = -1) -> void:
+	var body := JSON.stringify({"cmd": cmd, "amount": amount, "item_id": item_id, "col": col, "row": row})
+	_send_authed_request("gm_exec", "/api/gm/exec", HTTPClient.METHOD_POST, body)
+
+func _on_gm_exec_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		gm_exec_confirmed.emit(data)
+	else:
+		gm_exec_rejected.emit(data.get("error", "unknown_error"))
+
 func _on_buy_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		buy_confirmed.emit(data)
@@ -680,6 +733,8 @@ signal sell_rejected(reason: String)
 signal shop_items_loaded(items: Array)
 signal buy_confirmed(result: Dictionary)
 signal buy_rejected(reason: String)
+signal gm_exec_confirmed(result: Dictionary)
+signal gm_exec_rejected(reason: String)
 
 func _on_sell_response(data: Dictionary) -> void:
 	if data.get("ok", false):

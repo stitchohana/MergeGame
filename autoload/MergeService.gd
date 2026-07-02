@@ -29,13 +29,14 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		merge_failed.emit("Invalid item")
 		return false
 	if not can_merge(item_a, item_b):
+		print("[MergeService] can_merge failed: #" + str(item_a.get("id",0)) + " vs #" + str(item_b.get("id",0)))
 		merge_failed.emit("Cannot merge")
 		return false
 
 	if CloudService.online:
+		print("[MergeService] submit_merge: from=" + str(from_pos) + " id=" + str(item_a.get("id",0)) + " to=" + str(to_pos) + " id=" + str(item_b.get("id",0)))
 		CloudService.submit_merge(from_pos.x, from_pos.y, to_pos.x, to_pos.y, GameState.version)
-		return true
-	return false
+	return true
 
 func _on_merge_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)

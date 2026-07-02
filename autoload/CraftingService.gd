@@ -185,33 +185,18 @@ func _recheck_recipe(table_item: Dictionary) -> void:
 # --- Recipe matching ---
 
 func _match_recipe(stored: Array, recipes: Array) -> Dictionary:
-	var stored_counts := _count_items(stored)
+	var stored_ids: Array = []
+	for s in stored:
+		stored_ids.append(s.get("id", 0))
 	for recipe in recipes:
 		var ingredients: Array = recipe.get("ingredients", [])
-		var required: Dictionary = {}
-		var total_required := 0
-		for req in ingredients:
-			var req_id: int = req.get("id", 0)
-			var req_count: int = req.get("count", 1)
-			required[req_id] = required.get(req_id, 0) + req_count
-			total_required += req_count
-
-		if stored.size() != total_required:
+		if stored_ids.size() != ingredients.size():
 			continue
-
 		var matched := true
-		for rid in required:
-			if stored_counts.get(rid, 0) != required[rid]:
+		for ing_id in ingredients:
+			if not stored_ids.has(ing_id):
 				matched = false
 				break
-
 		if matched:
 			return recipe
 	return {}
-
-func _count_items(items: Array) -> Dictionary:
-	var result: Dictionary = {}
-	for item in items:
-		var item_id: int = item.get("id", 0)
-		result[item_id] = result.get(item_id, 0) + 1
-	return result

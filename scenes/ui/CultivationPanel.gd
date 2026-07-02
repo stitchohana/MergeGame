@@ -38,3 +38,7 @@ func _refresh() -> void:
 	_on_stage_changed(CultivationService.current_level, CultivationService.get_stage_name())
 	_on_exp_changed(CultivationService.current_exp, CultivationService.get_exp_to_next_level())
 	_on_qi_changed(CultivationService.current_qi, CultivationService.max_qi)
+	if CultivationService._needs_breakthrough_pill():
+		var pill_id := CultivationService.get_required_breakthrough_pill()
+		if pill_id > 0:
+			_on_breakthrough_pill_needed(pill_id)

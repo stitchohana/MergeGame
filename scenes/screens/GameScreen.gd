@@ -13,6 +13,7 @@ var _meridian_complete_exp: int = 50
 var _pending_item_ids: Array = []
 var _display_index_map: Array = []
 var _pending_stamina_uid: int = -1
+var _meridian_waiting_breakthrough: bool = false
 
 func _ready() -> void:
 	randomize()
@@ -36,6 +37,7 @@ func _ready() -> void:
 	CloudService.craft_remove_rejected.connect(_on_craft_remove_rejected)
 	CloudService.stamina_restore_confirmed.connect(_on_stamina_restore_confirmed)
 	CloudService.stamina_restore_rejected.connect(_on_stamina_restore_rejected)
+	CultivationService.stage_changed.connect(_on_stage_changed_for_meridian)
 
 	battle_btn.pressed.connect(_on_battle_pressed)
 	home_btn.pressed.connect(_on_home_pressed)
@@ -115,6 +117,7 @@ func _on_craft_remove_rejected(reason: String) -> void:
 
 func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	var effect_id: int = int(item_data.get("use_effect_id", 0))
+	print("[GameScreen] item_use: id=" + str(item_data.get("id",0)) + " effect=" + str(effect_id) + " uid=" + str(item_data.get("_uid", 0)))
 	if effect_id <= 0:
 		return
 	var effect: Dictionary = ConfigDatabase.get_effect(effect_id)
@@ -122,7 +125,13 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 		return
 	var uid: int = item_data.get("_uid", 0)
 	match effect.get("type", ""):
-		"breakthrough": CultivationService.try_breakthrough(item_data.get("id", 0))
+		"breakthrough":
+				print("[GameScreen] breakthrough click: pill_id=" + str(item_data.get("id",0)) + " uid=" + str(uid) + " pos=" + str(grid_pos))
+				if uid <= 0:
+					EventBus.show_toast.emit("物品数据异常，请重新登录")
+					print("[GameScreen] breakthrough BLOCKED: uid=" + str(uid))
+					return
+				CultivationService.try_breakthrough(item_data.get("id", 0), uid)
 		"exp": CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
 		"stamina":
 			_pending_stamina_uid = uid
@@ -265,7 +274,12 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 		var exp: int = result.get("exp_gained", 0)
 		EventBus.show_toast.emit("大周天完成！获得%d修为 (%d次)" % [exp, GameState.meridian_circulations])
 		GameState.meridian_acupoints.clear()
-		_refresh_meridian()
+		if CultivationService._needs_breakthrough_pill():
+			_meridian_waiting_breakthrough = true
+			requirement_list.set_title("需突破后才可继续修炼")
+			EventBus.show_toast.emit("修为已达瓶颈，需突破后继续")
+		else:
+			_refresh_meridian()
 	_display_meridian()
 
 	var qi_gained: int = result.get("qi_gained", 0)
@@ -273,6 +287,11 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 		EventBus.show_toast.emit("灵力 +%d" % qi_gained)
 		if result.get("qi_full", false):
 			EventBus.show_toast.emit("灵力已满，尽快使用！")
+
+func _on_stage_changed_for_meridian(_level: int, _name: String) -> void:
+	if _meridian_waiting_breakthrough and not CultivationService._needs_breakthrough_pill():
+		_meridian_waiting_breakthrough = false
+		_refresh_meridian()
 
 func _on_meridian_rejected(reason: String) -> void:
 	_pending_item_ids.clear()

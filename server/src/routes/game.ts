@@ -53,7 +53,19 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
           item.uid = state.uid_counter;
         }
       }
-      // Re-initialize if grid is empty (stale save)
+      // Migrate: convert old cultivation (current_realm_id + current_level) to flat current_level
+      if (state.cultivation && typeof (state.cultivation as any).current_realm_id === "number") {
+        const oldRealm = (state.cultivation as any).current_realm_id;
+        const oldLv = state.cultivation.current_level;
+        const realmOffsets = [0, 1, 10, 13, 16, 19, 22, 25, 28];
+        const newLevel = (realmOffsets[oldRealm] ?? 0) + oldLv;
+        console.log(`[game] migrating cultivation: realm=${oldRealm} lv=${oldLv} -> flat level=${newLevel}`);
+        state.cultivation.current_level = newLevel;
+        delete (state.cultivation as any).current_realm_id;
+        state.version += 1;
+      }
+
+            // Re-initialize if grid is empty (stale save)
       if (!state.grid || state.grid.length === 0) {
         const init = engine.createInitialState();
         state.grid = init.grid;
@@ -103,6 +115,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
           (item as any)._recharge_remaining = (rt - elapsed) * 1000;
         }
       }
+      console.log(`[game] state response: grid=${state.grid.length} items, first uid=${state.grid[0]?.uid ?? "missing"}`);
       res.json({ grid: state.grid, pouch: state.pouch, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, regen_remaining_ms: regenRemainingMs, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage, meridian_acupoints: state.meridian_acupoints, meridian_circulations: state.meridian_circulations, meridian_threshold_idx: state.meridian_threshold_idx });
     } catch (err) {
       console.error("[game] state error:", err);
@@ -175,7 +188,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeCraftRetrieve(state, table_col, table_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, result_id: result.resultId, new_version: result.newVersion });
+    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, new_version: result.newVersion });
   }));
 
   // POST /api/game/craft/remove
@@ -189,6 +202,20 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
+  }));
+
+  // POST /api/game/push_place
+  router.post("/push_place", op(async (req, res, userId) => {
+    const { from, to, version } = req.body;
+    if (!Array.isArray(from) || from.length !== 2 || !Array.isArray(to) || to.length !== 2 || typeof version !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    console.log(`[game] push_place: from=(${from[0]},${from[1]}) to=(${to[0]},${to[1]}) v=${version}`);
+    const result = engine.pushAndPlace(state, from[0], from[1], to[0], to[1]);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: result.newVersion, pushed_col: result.pushed_col, pushed_row: result.pushed_row, from_col: result.from_col, from_row: result.from_row, to_col: result.to_col, to_row: result.to_row });
   }));
 
   // POST /api/game/move
@@ -344,6 +371,18 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
   }));
 
   // POST /api/battle/attack
+  router.post("/battle/heal", op(async (req, res, userId) => {
+    const { item_id, effect_id, uid } = req.body;
+    if (typeof item_id !== "number" || typeof effect_id !== "number" || typeof uid !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.battleHeal(state, item_id, uid, effect_id);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, new_version: result.newVersion, grid: result.grid });
+  }));
+
   router.post("/battle/attack", op(async (req, res, userId) => {
     const { item_id, effect_id, col, row } = req.body;
     if (typeof item_id !== "number" || typeof effect_id !== "number" || typeof col !== "number" || typeof row !== "number") {

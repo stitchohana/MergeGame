@@ -3,8 +3,13 @@ class_name TopBar extends BaseHUD
 @onready var stamina_label: Label = $StaminaLabel
 @onready var stones_label: Label = $StonesLabel
 @onready var regen_timer_label: Label = $RegenTimerLabel
+@onready var gm_btn: Button = $GMButton
 
 var _regen_remaining: float = 0.0
+
+func _open_gm() -> void:
+	var gm := preload("res://scenes/ui/GMPanel.tscn").instantiate()
+	UIManager.show_popup(gm)
 var _last_regen_server_ms: float = 0.0
 
 func _ready() -> void:
@@ -13,6 +18,8 @@ func _ready() -> void:
 	GameState.stamina_changed.connect(_on_stamina_changed)
 	GameState.spirit_stones_changed.connect(_on_stones_changed)
 	_sync_from_server()
+	if gm_btn:
+		gm_btn.pressed.connect(_open_gm)
 
 func _sync_from_server() -> void:
 	if GameState.regen_remaining_ms > 0:
