@@ -28,6 +28,8 @@ CraftingService="*res://autoload/CraftingService.gd"
 UIManager="*res://autoload/UIManager.gd"
 SceneTransitionManager="*res://autoload/SceneTransitionManager.gd"
 StoragePouch="*res://autoload/StoragePouch.gd"
+RewardManager="*res://autoload/RewardManager.gd"
+QuestService="*res://autoload/QuestService.gd"
 
 [display]
 

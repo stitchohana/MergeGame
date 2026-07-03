@@ -1,0 +1,13 @@
+{
+  "quests": [
+	{
+	  "id": 1,
+	  "type": 1,
+	  "name": "合成新手",
+	  "description": "完成5次合成",
+	  "target_count": 5,
+	  "rewards": 1,
+	  "auto_reward": true
+	}
+  ]
+}

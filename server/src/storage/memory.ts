@@ -20,6 +20,7 @@ export function defaultGameState(): GameState {
     last_stamina_tick: now,
     spirit_stones: 0,
     version: 0,
+    pending_rewards: [],
   };
 }
 

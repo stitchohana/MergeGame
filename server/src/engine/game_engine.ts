@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-import { GameState, GridItem, CultivationData } from "../storage/interface";
+import { GameState, GridItem, CultivationData, QuestType, TokenType, RewardConfig, BattleMonster } from "../storage/interface";
+import { QuestEngine } from "./quest_engine";
 
 // --- Config types ---
 
@@ -27,6 +28,7 @@ interface RecipeDef {
   result: number;
   craft_time: number;
   crafting_level: number;
+  rewards?: RewardConfig;
 }
 
 interface StageDef {
@@ -70,9 +72,13 @@ export class GameEngine {
   private meridianThresholds: any[] = [];
   private maps = new Map<number, any>();
   private monsters = new Map<number, any>();
+  private rewardsTable = new Map<number, RewardConfig>();
+  questEngine: QuestEngine;
 
   constructor(configDir: string) {
     this.loadConfigs(configDir);
+    this.questEngine = new QuestEngine(configDir);
+    this.loadRewards(path.join(configDir, "rewards.json"));
   }
 
   // --- Config loading ---
@@ -200,6 +206,21 @@ export class GameEngine {
       const monsters = data.monsters as any[] ?? [];
       for (const mo of monsters) this.monsters.set(mo.id, mo);
     } catch { /* optional */ }
+  }
+
+  private loadRewards(filePath: string): void {
+    try {
+      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      const rewards = data.rewards || {};
+      for (const key of Object.keys(rewards)) {
+        this.rewardsTable.set(Number(key), rewards[key] as RewardConfig);
+      }
+      console.log(`[engine] Loaded ${this.rewardsTable.size} reward configs`);
+    } catch { /* rewards.json optional */ }
+  }
+
+  getRewardConfig(rewardId: number): RewardConfig | undefined {
+    return this.rewardsTable.get(rewardId);
   }
 
   getMonster(id: number): any {
@@ -443,6 +464,69 @@ export class GameEngine {
     return null;
   }
 
+  // --- Generic reward distribution ---
+
+  applyRewards(state: GameState, rewards: RewardConfig | number): RewardConfig {
+    const result: RewardConfig = { tokens: [], items: [] };
+
+    // Resolve reward ID to config
+    if (typeof rewards === "number") {
+      const resolved = this.rewardsTable.get(rewards);
+      if (!resolved) {
+        console.log(`[reward] unknown reward id: ${rewards}`);
+        return result;
+      }
+      rewards = resolved;
+    }
+
+    // Token rewards — directly credited
+    if (rewards.tokens) {
+      for (const t of rewards.tokens) {
+        switch (t.token) {
+          case TokenType.SPIRIT_STONES:
+            state.spirit_stones += t.amount;
+            console.log(`[reward] +${t.amount} spirit_stones (total: ${state.spirit_stones})`);
+            break;
+          case TokenType.QI:
+            state.cultivation.current_qi = Math.min(state.cultivation.max_qi, state.cultivation.current_qi + t.amount);
+            console.log(`[reward] +${t.amount} qi (total: ${state.cultivation.current_qi}/${state.cultivation.max_qi})`);
+            break;
+          case TokenType.STAMINA:
+            state.stamina = Math.min(this.staminaConfig.max, state.stamina + t.amount);
+            console.log(`[reward] +${t.amount} stamina (total: ${state.stamina})`);
+            break;
+          case TokenType.EXP:
+            this._addExp(state.cultivation, t.amount);
+            console.log(`[reward] +${t.amount} exp (total: ${state.cultivation.current_exp})`);
+            break;
+          default:
+            console.log(`[reward] unknown token type: ${t.token}`);
+        }
+        result.tokens!.push({ token: t.token, amount: t.amount });
+      }
+    }
+
+    // Item rewards -> pending_rewards
+    if (rewards.items) {
+      state.pending_rewards = state.pending_rewards || [];
+      for (const ri of rewards.items) {
+        const itemData = this.getItemData(ri.id);
+        const name = itemData?.name ?? `#${ri.id}`;
+        for (let i = 0; i < ri.count; i++) {
+          state.pending_rewards.push({
+            uid: this._nextUid(state),
+            id: ri.id,
+            name,
+          });
+        }
+        result.items!.push({ id: ri.id, count: ri.count });
+        console.log(`[reward] +${ri.count}x ${name} -> pending_rewards`);
+      }
+    }
+
+    return result;
+  }
+
   // --- State initialization ---
 
   createInitialState(boardType: string = "main"): GameState {
@@ -464,6 +548,7 @@ export class GameEngine {
       spirit_stones: 0,
       version: 0,
       uid_counter: 0,
+      pending_rewards: [],
     };
 
     const setup = this.getInitialSetup(boardType);
@@ -683,6 +768,8 @@ export class GameEngine {
     const fromName = fromItem?.name ?? `#${fromId}`;
     console.log(`[engine] merge: ${fromName}x2 -> ${mergedName} | grid=${state.grid.length}/63 | v${state.version}`);
 
+    this.questEngine.incrementQuestProgress(state, QuestType.MERGE, 1, this);
+
     return {
       ok: true,
       newVersion: state.version,
@@ -790,6 +877,8 @@ export class GameEngine {
     state.version += 1;
 
     console.log(`[engine] spawn: launcher #${launcherItem.id} -> ${spawnResult.name} at (${target.col},${target.row}) | v${state.version}`);
+
+    this.questEngine.incrementQuestProgress(state, QuestType.SPAWN, 1, this);
 
     return {
       ok: true,
@@ -1012,6 +1101,8 @@ export class GameEngine {
     const retrievedName = retrievedItem?.name ?? `#${resultId}`;
     console.log(`[engine] craft retrieve: -> ${retrievedName} uid=${craftUid} at (${target?.col ?? -1},${target?.row ?? -1}) | v${state.version}`);
 
+    this.questEngine.incrementQuestProgress(state, QuestType.CRAFT, 1, this);
+
     return { ok: true, resultUid: craftUid, resultId, newVersion: state.version };
   }
 
@@ -1023,6 +1114,8 @@ export class GameEngine {
     fromCol: number,
     fromRow: number
   ): { ok: true; matched: boolean; newVersion: number } | { ok: false; reason: string } {
+    if (!this.isInBounds(fromCol, fromRow)) return { ok: false, reason: "source_out_of_bounds" };
+    if (!this.isInBounds(tableCol, tableRow)) return { ok: false, reason: "table_out_of_bounds" };
     // Remove ingredient from grid (quantity conservation)
     const fromKey = this.posKey(fromCol, fromRow);
     const gridItem = state.grid.find(
@@ -1201,6 +1294,8 @@ export class GameEngine {
     const stageName = nextStage?.name ?? `stage_${newLevel}`;
     console.log(`[engine] breakthrough: -> ${stageName} | qi=${newCultivation.max_qi} | v${state.version}`);
 
+    this.questEngine.incrementQuestProgress(state, QuestType.BREAKTHROUGH, 1, this);
+
     return { ok: true, newCultivation };
   }
 
@@ -1253,6 +1348,8 @@ export class GameEngine {
 
     const pillName = pillData.name;
     console.log(`[engine] consume exp pill: ${pillName} | exp +${expGain} | v${state.version}`);
+
+    this.questEngine.incrementQuestProgress(state, QuestType.ANY_ITEM_CONSUME, 1, this);
 
     return { ok: true, cultivation: state.cultivation };
   }
@@ -1416,11 +1513,19 @@ export class GameEngine {
       }
       state.version += 1;
       console.log(`[engine] battle attack: ${monsterName} killed by #${itemId} | loot=${loot.join(",")} | stage_complete=${stageComplete} | v${state.version}`);
+
+      this.questEngine.incrementQuestProgress(state, QuestType.BATTLE_ATTACK, 1, this);
+      if (stageComplete) {
+        this.questEngine.incrementQuestProgress(state, QuestType.BATTLE_CLEAR, 1, this);
+      }
+
       return { ok: true, grid: state.grid, monsters: state.battle_monsters, stage_complete: stageComplete, loot };
     }
 
     state.version += 1;
     console.log(`[engine] battle attack: ${monsterName} took ${dmg} dmg (${state.battle_monsters[mIdx].hp}/${state.battle_monsters[mIdx].max_hp}) | v${state.version}`);
+
+    this.questEngine.incrementQuestProgress(state, QuestType.BATTLE_ATTACK, 1, this);
     return { ok: true, grid: state.grid, monsters: state.battle_monsters, stage_complete: false, loot: [] };
   }
 
@@ -1450,6 +1555,9 @@ export class GameEngine {
     state.last_stamina_tick = Date.now();
     state.version += 1;
     console.log(`[engine] consume stamina pill: #${pillId} (uid=${uid}) | stamina +${amount} total=${state.stamina} | v${state.version}`);
+
+    this.questEngine.incrementQuestProgress(state, QuestType.ANY_ITEM_CONSUME, 1, this);
+
     return { ok: true, stamina: state.stamina, max_stamina: this.staminaConfig.max };
   }
 
@@ -1481,6 +1589,8 @@ export class GameEngine {
   }
 
   pushAndPlace(state: GameState, fromCol: number, fromRow: number, toCol: number, toRow: number): { ok: true; newVersion: number; pushed_col: number; pushed_row: number; from_col: number; from_row: number; to_col: number; to_row: number } | { ok: false; reason: string } {
+    if (!this.isInBounds(fromCol, fromRow)) return { ok: false, reason: "source_out_of_bounds" };
+    if (!this.isInBounds(toCol, toRow)) return { ok: false, reason: "target_out_of_bounds" };
     const fromKey = this.posKey(fromCol, fromRow);
     const toKey = this.posKey(toCol, toRow);
     console.log(`[engine] pushAndPlace: from=(${fromCol},${fromRow}) to=(${toCol},${toRow}) v=${state.version}`);
@@ -1495,25 +1605,25 @@ export class GameEngine {
     const map = this.gridToMap(state.grid);
     map.delete(fromKey);
     const empty = this.findNearestEmpty(map, toCol, toRow);
-    console.log(`[engine] pushAndPlace: empty=(${empty!.col},${empty!.row})`);
+    if (!empty) return { ok: false, reason: "no_empty_cell" };
 
-    // Move target item to empty cell (or swap with source if board full)
-    toItem.col = empty!.col;
-    toItem.row = empty!.row;
+    // Move target item to empty cell
+    toItem.col = empty.col;
+    toItem.row = empty.row;
     // Move dragged item to target position
     fromItem.col = toCol;
     fromItem.row = toRow;
     state.version += 1;
 
-    const pushedCol = empty!.col;
-    const pushedRow = empty!.row;
+    const pushedCol = empty.col;
+    const pushedRow = empty.row;
     console.log(`[engine] pushAndPlace: #${fromItem.id} (${fromCol},${fromRow})->(${toCol},${toRow}), #${toItem.id} (${toCol},${toRow})->(${pushedCol},${pushedRow})`);
     return { ok: true, newVersion: state.version, pushed_col: pushedCol, pushed_row: pushedRow, from_col: fromCol, from_row: fromRow, to_col: toCol, to_row: toRow };
   }
 
   // --- Meridian ---
 
-  completeMeridianAcupoint(state: GameState, index: number, itemIds: number[]): { ok: true; newVersion: number; meridian_acupoints: any[]; circulation_completed: boolean; exp_gained: number; qi_gained: number; qi_full: boolean; grid: any[]; cultivation: any } | { ok: false; reason: string } {
+  completeMeridianAcupoint(state: GameState, index: number, itemIds: number[]): { ok: true; newVersion: number; meridian_acupoints: any[]; circulation_completed: boolean; exp_gained: number; qi_gained: number; qi_full: boolean; grid: any[]; cultivation: any; rewards_applied: RewardConfig } | { ok: false; reason: string } {
     if (!state.meridian_acupoints || index < 0 || index >= state.meridian_acupoints.length) {
       return { ok: false, reason: "invalid_index" };
     }
@@ -1541,18 +1651,19 @@ export class GameEngine {
     req.completed = true;
     state.version += 1;
 
-    // Grant qi for completing one acupoint
+    // Acupoint reward — generic reward distribution
     const threshold = this.meridianThresholds[state.meridian_threshold_idx ?? 0];
-    const qiReward: number = threshold?.qi_reward ?? 5;
+    const acupointRewards: RewardConfig | undefined = threshold?.acupoint_rewards;
+    let qiGained = 0;
     let qiFull = false;
-    if (state.cultivation) {
-      const newQi = state.cultivation.current_qi + qiReward;
-      if (newQi >= state.cultivation.max_qi) {
-        state.cultivation.current_qi = state.cultivation.max_qi;
-        qiFull = true;
-      } else {
-        state.cultivation.current_qi = newQi;
-      }
+    let rewardsApplied: RewardConfig = { tokens: [], items: [] };
+    if (acupointRewards) {
+      const qiBefore = state.cultivation.current_qi;
+      const r = this.applyRewards(state, acupointRewards);
+      rewardsApplied.tokens!.push(...(r.tokens || []));
+      rewardsApplied.items!.push(...(r.items || []));
+      qiGained = state.cultivation.current_qi - qiBefore;
+      qiFull = state.cultivation.current_qi >= state.cultivation.max_qi && qiBefore < state.cultivation.max_qi;
     }
 
     // Check if full circulation completed
@@ -1561,19 +1672,23 @@ export class GameEngine {
     const allDone = state.meridian_acupoints.every(r => r.completed);
     if (allDone) {
       circulationCompleted = true;
-      const exp = threshold?.complete_exp ?? 50;
-      expGained = exp;
-      if (state.cultivation) {
-        this._addExp(state.cultivation, exp);
+      const circulationRewards = threshold?.circulation_rewards;
+      const expBefore = state.cultivation.total_exp;
+      if (circulationRewards) {
+        const r = this.applyRewards(state, circulationRewards);
+        rewardsApplied.tokens!.push(...(r.tokens || []));
+        rewardsApplied.items!.push(...(r.items || []));
       }
+      expGained = state.cultivation.total_exp - expBefore;
       state.meridian_circulations = (state.meridian_circulations ?? 0) + 1;
       for (const r of state.meridian_acupoints) {
         r.completed = false;
       }
-      console.log(`[engine] meridian circulation #${state.meridian_circulations} completed! +${exp}exp`);
+      console.log(`[engine] meridian circulation #${state.meridian_circulations} completed! +${expGained}exp`);
+      this.questEngine.incrementQuestProgress(state, QuestType.MERIDIAN_CIRCULATION, 1, this);
     }
 
-    return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, circulation_completed: circulationCompleted, exp_gained: expGained, qi_gained: qiReward, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation };
+    return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, circulation_completed: circulationCompleted, exp_gained: expGained, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, rewards_applied: rewardsApplied };
   }
 
   // --- Storage ---
@@ -1586,6 +1701,8 @@ export class GameEngine {
   }
 
   depositItem(state: GameState, storageCol: number, storageRow: number, itemId: number, fromCol: number, fromRow: number): { ok: true; newVersion: number } | { ok: false; reason: string } {
+    if (!this.isInBounds(fromCol, fromRow)) return { ok: false, reason: "from_out_of_bounds" };
+    if (!this.isInBounds(storageCol, storageRow)) return { ok: false, reason: "storage_out_of_bounds" };
     const fromKey = this.posKey(fromCol, fromRow);
     const sourceItem = state.grid.find(i => this.posKey(i.col, i.row) === fromKey);
     if (!sourceItem) return { ok: false, reason: "item_not_found" };
@@ -1610,6 +1727,8 @@ export class GameEngine {
   }
 
   withdrawItem(state: GameState, storageCol: number, storageRow: number, itemId: number, targetCol: number, targetRow: number): { ok: true; newVersion: number } | { ok: false; reason: string } {
+    if (!this.isInBounds(storageCol, storageRow)) return { ok: false, reason: "storage_out_of_bounds" };
+    if (!this.isInBounds(targetCol, targetRow)) return { ok: false, reason: "target_out_of_bounds" };
     const storageItem = state.grid.find(i => i.col === storageCol && i.row === storageRow);
     if (!storageItem?.storage) return { ok: false, reason: "storage_not_found" };
 
@@ -1626,7 +1745,7 @@ export class GameEngine {
     state.version += 1;
 
     const itemName = this.getItemData(itemId)?.name ?? ("#" + itemId);
-    console.log();
+    console.log(`[engine] withdraw: ${itemName} from storage at (${storageCol},${storageRow}) -> (${targetCol},${targetRow})`);
     return { ok: true, newVersion: state.version };
   }
 
@@ -1653,6 +1772,9 @@ export class GameEngine {
 
     const itemName = data.name ?? ("#" + item.id);
     console.log(`[engine] sell: ${itemName} (uid=${uid}) -> +${price} stones | total=${state.spirit_stones}`);
+
+    this.questEngine.incrementQuestProgress(state, QuestType.SELL, 1, this);
+
     return { ok: true, stones: state.spirit_stones };
   }
 

@@ -32,6 +32,10 @@ signal pouch_withdraw_rejected(reason: String)
 signal meridian_refresh_confirmed(result: Dictionary)
 signal meridian_complete_confirmed(result: Dictionary)
 signal meridian_complete_rejected(reason: String)
+signal quest_claim_confirmed(result: Dictionary)
+signal quest_claim_rejected(reason: String)
+signal pending_reward_claimed(result: Dictionary)
+signal pending_reward_claimed_rejected(reason: String)
 signal craft_add_rejected(reason: String)
 signal craft_start_confirmed(result: Dictionary)
 signal craft_start_rejected(reason: String)
@@ -41,6 +45,18 @@ signal craft_retrieve_confirmed(result: Dictionary)
 signal craft_retrieve_rejected(reason: String)
 signal state_loaded(state: Dictionary)
 signal state_load_failed(reason: String)
+signal battle_attack_confirmed(result: Dictionary)
+signal battle_attack_rejected(reason: String)
+signal battle_heal_confirmed(result: Dictionary)
+signal battle_heal_rejected(reason: String)
+signal storage_withdraw_confirmed(result: Dictionary)
+signal sell_confirmed(result: Dictionary)
+signal sell_rejected(reason: String)
+signal shop_items_loaded(items: Array)
+signal buy_confirmed(result: Dictionary)
+signal buy_rejected(reason: String)
+signal gm_exec_confirmed(result: Dictionary)
+signal gm_exec_rejected(reason: String)
 
 var online: bool = false
 var token: String = ""
@@ -91,7 +107,7 @@ func configure(url: String) -> void:
 
 func login(device_id: String) -> void:
 	var body := JSON.stringify({"device_id": device_id})
-	_send_request("login", "/api/auth/login", HTTPClient.METHOD_POST, body)
+	_send_request("login", "/api/auth/login", HTTPClient.Method.METHOD_POST, body)
 
 func _on_login_response(data: Dictionary) -> void:
 	token = data.get("token", "")
@@ -109,7 +125,7 @@ func _on_login_response(data: Dictionary) -> void:
 # --- Game State ---
 
 func fetch_state() -> void:
-	_send_authed_request("fetch_state", "/api/game/state", HTTPClient.METHOD_GET)
+	_send_authed_request("fetch_state", "/api/game/state", HTTPClient.Method.METHOD_GET)
 
 func _on_fetch_state_response(data: Dictionary) -> void:
 	state_loaded.emit(data)
@@ -122,7 +138,7 @@ func submit_merge(from_col: int, from_row: int, to_col: int, to_row: int, versio
 		"to": [to_col, to_row],
 		"version": version,
 	})
-	_send_authed_request("merge", "/api/game/merge", HTTPClient.METHOD_POST, body)
+	_send_authed_request("merge", "/api/game/merge", HTTPClient.Method.METHOD_POST, body)
 
 func _on_merge_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -137,7 +153,7 @@ func submit_spawn(launcher_col: int, launcher_row: int, version: int) -> void:
 		"launcher_pos": [launcher_col, launcher_row],
 		"version": version,
 	})
-	_send_authed_request("spawn", "/api/game/spawn", HTTPClient.METHOD_POST, body)
+	_send_authed_request("spawn", "/api/game/spawn", HTTPClient.Method.METHOD_POST, body)
 
 func _on_spawn_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -161,7 +177,7 @@ func _on_move_response(data: Dictionary) -> void:
 
 func submit_push_place(from_col: int, from_row: int, to_col: int, to_row: int, version: int) -> void:
 	var body := JSON.stringify({"from": [from_col, from_row], "to": [to_col, to_row], "version": version})
-	_send_authed_request("push_place", "/api/game/push_place", HTTPClient.METHOD_POST, body)
+	_send_authed_request("push_place", "/api/game/push_place", HTTPClient.Method.METHOD_POST, body)
 
 func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version: int) -> void:
 	var body := JSON.stringify({
@@ -169,22 +185,22 @@ func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version
 		"to": [to_col, to_row],
 		"version": version,
 	})
-	_send_authed_request("move", "/api/game/move", HTTPClient.METHOD_POST, body)
+	_send_authed_request("move", "/api/game/move", HTTPClient.Method.METHOD_POST, body)
 
 # --- Cultivation ---
 
 func submit_breakthrough(pill_id: int, uid: int, version: int) -> void:
 	print("[CloudService] submit_breakthrough: pill=" + str(pill_id) + " uid=" + str(uid) + " v=" + str(version))
 	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
-	_send_authed_request("breakthrough", "/api/cultivation/breakthrough", HTTPClient.METHOD_POST, body)
+	_send_authed_request("breakthrough", "/api/cultivation/breakthrough", HTTPClient.Method.METHOD_POST, body)
 
 func submit_consume_exp_pill(pill_id: int, uid: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
-	_send_authed_request("consume_exp_pill", "/api/cultivation/consume-exp", HTTPClient.METHOD_POST, body)
+	_send_authed_request("consume_exp_pill", "/api/cultivation/consume-exp", HTTPClient.Method.METHOD_POST, body)
 
 func submit_restore_stamina(pill_id: int, uid: int, version: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
-	_send_authed_request("restore_stamina", "/api/cultivation/consume-stamina", HTTPClient.METHOD_POST, body)
+	_send_authed_request("restore_stamina", "/api/cultivation/consume-stamina", HTTPClient.Method.METHOD_POST, body)
 
 func submit_board_switch(board_type: String, map_id: int = 0, stage: int = 0) -> void:
 	var body_data: Dictionary = {"board_type": board_type}
@@ -193,28 +209,23 @@ func submit_board_switch(board_type: String, map_id: int = 0, stage: int = 0) ->
 	if stage > 0:
 		body_data["stage"] = stage
 	var body := JSON.stringify(body_data)
-	_send_authed_request("board_switch", "/api/game/board/switch", HTTPClient.METHOD_POST, body)
+	_send_authed_request("board_switch", "/api/game/board/switch", HTTPClient.Method.METHOD_POST, body)
 
 func submit_pouch_deposit(uid: int) -> void:
 	var body := JSON.stringify({"uid": uid})
-	_send_authed_request("pouch_deposit", "/api/game/pouch/deposit", HTTPClient.METHOD_POST, body)
+	_send_authed_request("pouch_deposit", "/api/game/pouch/deposit", HTTPClient.Method.METHOD_POST, body)
 
 func submit_pouch_withdraw(item_id: int, target_col: int, target_row: int) -> void:
 	var body := JSON.stringify({"item_id": item_id, "target_col": target_col, "target_row": target_row})
-	_send_authed_request("pouch_withdraw", "/api/game/pouch/withdraw", HTTPClient.METHOD_POST, body)
-
-signal battle_attack_confirmed(result: Dictionary)
-signal battle_attack_rejected(reason: String)
-signal battle_heal_confirmed(result: Dictionary)
-signal battle_heal_rejected(reason: String)
+	_send_authed_request("pouch_withdraw", "/api/game/pouch/withdraw", HTTPClient.Method.METHOD_POST, body)
 
 func submit_battle_heal(item_id: int, effect_id: int, uid: int) -> void:
 	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "uid": uid})
-	_send_authed_request("battle_heal", "/api/game/battle/heal", HTTPClient.METHOD_POST, body)
+	_send_authed_request("battle_heal", "/api/game/battle/heal", HTTPClient.Method.METHOD_POST, body)
 
 func submit_battle_attack(item_id: int, effect_id: int, col: int, row: int) -> void:
 	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "col": col, "row": row})
-	_send_authed_request("battle_attack", "/api/game/battle/attack", HTTPClient.METHOD_POST, body)
+	_send_authed_request("battle_attack", "/api/game/battle/attack", HTTPClient.Method.METHOD_POST, body)
 
 func _on_battle_heal_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -247,7 +258,7 @@ func _on_pouch_withdraw_response(data: Dictionary) -> void:
 		pouch_withdraw_rejected.emit(data.get("error", "unknown_error"))
 
 func submit_meridian_refresh() -> void:
-	_send_authed_request("meridian_refresh", "/api/game/meridian/refresh", HTTPClient.METHOD_POST, "{}")
+	_send_authed_request("meridian_refresh", "/api/game/meridian/refresh", HTTPClient.Method.METHOD_POST, "{}")
 
 func _on_meridian_refresh_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -255,13 +266,33 @@ func _on_meridian_refresh_response(data: Dictionary) -> void:
 
 func submit_meridian_complete(index: int, item_ids: Array) -> void:
 	var body := JSON.stringify({"index": index, "item_ids": item_ids})
-	_send_authed_request("meridian_complete", "/api/game/meridian/complete", HTTPClient.METHOD_POST, body)
+	_send_authed_request("meridian_complete", "/api/game/meridian/complete", HTTPClient.Method.METHOD_POST, body)
+
+func submit_quest_claim(quest_id: int) -> void:
+	var body := JSON.stringify({"quest_id": quest_id})
+	_send_authed_request("quest_claim", "/api/game/quest_claim", HTTPClient.Method.METHOD_POST, body)
+
+func submit_claim_pending_reward(uid: int, col: int, row: int) -> void:
+	var body := JSON.stringify({"uid": uid, "col": col, "row": row})
+	_send_authed_request("claim_pending_reward", "/api/game/claim_pending_reward", HTTPClient.Method.METHOD_POST, body)
 
 func _on_meridian_complete_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		meridian_complete_confirmed.emit(data)
 	else:
 		meridian_complete_rejected.emit(data.get("error", "unknown_error"))
+
+func _on_quest_claim_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		quest_claim_confirmed.emit(data)
+	else:
+		quest_claim_rejected.emit(data.get("error", "unknown_error"))
+
+func _on_claim_pending_reward_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		pending_reward_claimed.emit(data)
+	else:
+		pending_reward_claimed_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_breakthrough_response(data: Dictionary) -> void:
 	print("[CloudService] breakthrough response: " + str(data))
@@ -294,7 +325,7 @@ func submit_craft_add(from_col: int, from_row: int, table_col: int, table_row: i
 		"ingredient_id": ingredient_id,
 		"version": version,
 	})
-	_send_authed_request("craft_add", "/api/game/craft/add", HTTPClient.METHOD_POST, body)
+	_send_authed_request("craft_add", "/api/game/craft/add", HTTPClient.Method.METHOD_POST, body)
 
 func _on_craft_add_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -308,7 +339,7 @@ func submit_craft_start(table_col: int, table_row: int, version: int) -> void:
 		"table_row": table_row,
 		"version": version,
 	})
-	_send_authed_request("craft_start", "/api/game/craft/start", HTTPClient.METHOD_POST, body)
+	_send_authed_request("craft_start", "/api/game/craft/start", HTTPClient.Method.METHOD_POST, body)
 
 func _on_craft_start_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -325,7 +356,7 @@ func submit_craft_remove(table_col: int, table_row: int, ingredient_id: int, tar
 		"target_row": target_row,
 		"version": version,
 	})
-	_send_authed_request("craft_remove", "/api/game/craft/remove", HTTPClient.METHOD_POST, body)
+	_send_authed_request("craft_remove", "/api/game/craft/remove", HTTPClient.Method.METHOD_POST, body)
 
 func submit_craft_retrieve(table_col: int, table_row: int, version: int) -> void:
 	var body := JSON.stringify({
@@ -333,7 +364,7 @@ func submit_craft_retrieve(table_col: int, table_row: int, version: int) -> void
 		"table_row": table_row,
 		"version": version,
 	})
-	_send_authed_request("craft_retrieve", "/api/game/craft/retrieve", HTTPClient.METHOD_POST, body)
+	_send_authed_request("craft_retrieve", "/api/game/craft/retrieve", HTTPClient.Method.METHOD_POST, body)
 
 func _on_craft_remove_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -350,7 +381,7 @@ func _on_craft_retrieve_response(data: Dictionary) -> void:
 # --- Leaderboard ---
 
 func get_leaderboard(limit: int = 50) -> void:
-	_send_authed_request("leaderboard", "/api/game/leaderboard?limit=" + str(limit), HTTPClient.METHOD_GET)
+	_send_authed_request("leaderboard", "/api/game/leaderboard?limit=" + str(limit), HTTPClient.Method.METHOD_GET)
 
 # --- Internal ---
 
@@ -505,6 +536,10 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				stamina_restore_rejected.emit(error_msg)
 			"meridian_complete":
 				meridian_complete_rejected.emit(error_msg)
+			"quest_claim":
+				quest_claim_rejected.emit(error_msg)
+			"claim_pending_reward":
+				pending_reward_claimed_rejected.emit(error_msg)
 			"craft_add":
 				craft_add_rejected.emit(error_msg)
 			"craft_start":
@@ -555,6 +590,10 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_restore_stamina_response(data)
 		"meridian_complete":
 			_on_meridian_complete_response(data)
+		"quest_claim":
+			_on_quest_claim_response(data)
+		"claim_pending_reward":
+			_on_claim_pending_reward_response(data)
 		"meridian_refresh":
 			_on_meridian_refresh_response(data)
 		"craft_add":
@@ -606,6 +645,10 @@ func _handle_network_error(tag: String) -> void:
 			stamina_restore_rejected.emit("network_error")
 		"meridian_complete":
 			meridian_complete_rejected.emit("network_error")
+		"quest_claim":
+			quest_claim_rejected.emit("network_error")
+		"claim_pending_reward":
+			pending_reward_claimed_rejected.emit("network_error")
 		"sell":
 			sell_rejected.emit("network_error")
 		"gm_exec":
@@ -649,6 +692,10 @@ func _handle_parse_error(tag: String) -> void:
 			stamina_restore_rejected.emit("invalid_response")
 		"meridian_complete":
 			meridian_complete_rejected.emit("invalid_response")
+		"quest_claim":
+			quest_claim_rejected.emit("invalid_response")
+		"claim_pending_reward":
+			pending_reward_claimed_rejected.emit("invalid_response")
 		"sell":
 			sell_rejected.emit("invalid_response")
 		"gm_exec":
@@ -664,8 +711,6 @@ func _handle_parse_error(tag: String) -> void:
 		"fetch_state":
 			state_load_failed.emit("invalid_response")
 
-signal storage_withdraw_confirmed(result: Dictionary)
-
 # --- Storage ---
 
 func submit_storage_deposit(storage_col: int, storage_row: int, item_id: int, from_col: int, from_row: int) -> void:
@@ -676,7 +721,7 @@ func submit_storage_deposit(storage_col: int, storage_row: int, item_id: int, fr
 		"from_col": from_col,
 		"from_row": from_row,
 	})
-	_send_authed_request("storage_deposit", "/api/game/storage/deposit", HTTPClient.METHOD_POST, body)
+	_send_authed_request("storage_deposit", "/api/game/storage/deposit", HTTPClient.Method.METHOD_POST, body)
 
 func submit_storage_withdraw(storage_col: int, storage_row: int, item_id: int, target_col: int, target_row: int) -> void:
 	var body := JSON.stringify({
@@ -686,7 +731,7 @@ func submit_storage_withdraw(storage_col: int, storage_row: int, item_id: int, t
 		"target_col": target_col,
 		"target_row": target_row,
 	})
-	_send_authed_request("storage_withdraw", "/api/game/storage/withdraw", HTTPClient.METHOD_POST, body)
+	_send_authed_request("storage_withdraw", "/api/game/storage/withdraw", HTTPClient.Method.METHOD_POST, body)
 
 func _on_storage_withdraw_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -698,7 +743,7 @@ func _on_storage_withdraw_response(data: Dictionary) -> void:
 # --- Shop ---
 
 func fetch_shop_items() -> void:
-	_send_authed_request("shop_items", "/api/game/shop/items", HTTPClient.METHOD_GET)
+	_send_authed_request("shop_items", "/api/game/shop/items", HTTPClient.Method.METHOD_GET)
 
 func _on_shop_items_response(data: Dictionary) -> void:
 	if data.has("items"):
@@ -706,11 +751,11 @@ func _on_shop_items_response(data: Dictionary) -> void:
 
 func submit_buy(item_id: int, target_col: int, target_row: int) -> void:
 	var body := JSON.stringify({"item_id": item_id, "target_col": target_col, "target_row": target_row})
-	_send_authed_request("buy", "/api/game/shop/buy", HTTPClient.METHOD_POST, body)
+	_send_authed_request("buy", "/api/game/shop/buy", HTTPClient.Method.METHOD_POST, body)
 
 func submit_gm_exec(cmd: String, amount: int, item_id: int = 0, col: int = -1, row: int = -1) -> void:
 	var body := JSON.stringify({"cmd": cmd, "amount": amount, "item_id": item_id, "col": col, "row": row})
-	_send_authed_request("gm_exec", "/api/gm/exec", HTTPClient.METHOD_POST, body)
+	_send_authed_request("gm_exec", "/api/gm/exec", HTTPClient.Method.METHOD_POST, body)
 
 func _on_gm_exec_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -726,21 +771,13 @@ func _on_buy_response(data: Dictionary) -> void:
 
 func submit_sell(uid: int) -> void:
 	var body := JSON.stringify({"uid": uid})
-	_send_authed_request("sell", "/api/game/shop/sell", HTTPClient.METHOD_POST, body)
-
-signal sell_confirmed(spirit_stones: int)
-signal sell_rejected(reason: String)
-signal shop_items_loaded(items: Array)
-signal buy_confirmed(result: Dictionary)
-signal buy_rejected(reason: String)
-signal gm_exec_confirmed(result: Dictionary)
-signal gm_exec_rejected(reason: String)
+	_send_authed_request("sell", "/api/game/shop/sell", HTTPClient.Method.METHOD_POST, body)
 
 func _on_sell_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		GameState.spirit_stones = data.get("spirit_stones", GameState.spirit_stones)
 		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
-		sell_confirmed.emit(GameState.spirit_stones)
+		sell_confirmed.emit(data)
 		EventBus.show_toast.emit("出售成功")
 	else:
 		sell_rejected.emit(data.get("error", "unknown"))

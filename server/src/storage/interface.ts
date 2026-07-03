@@ -1,5 +1,51 @@
 // --- Game data types ---
 
+export enum TokenType {
+  SPIRIT_STONES = 1,  // 灵石
+  QI = 2,             // 灵力
+  STAMINA = 3,        // 体力
+  EXP = 4,            // 经验值
+}
+
+export enum QuestType {
+  MERGE = 1,
+  SPAWN = 2,
+  CRAFT = 3,
+  SELL = 4,
+  BATTLE_ATTACK = 5,
+  BATTLE_CLEAR = 6,
+  BREAKTHROUGH = 7,
+  ANY_ITEM_CONSUME = 8,
+  MERIDIAN_CIRCULATION = 9,
+}
+
+export interface PendingReward {
+  uid: number;
+  id: number;
+  name: string;
+}
+
+export interface RewardToken {
+  token: number;
+  amount: number;
+}
+
+export interface RewardItem {
+  id: number;
+  count: number;
+}
+
+export interface RewardConfig {
+  tokens?: RewardToken[];
+  items?: RewardItem[];
+}
+
+export interface QuestProgress {
+  current_count: number;
+  completed: boolean;
+  claimed: boolean;
+}
+
 export interface GridItem {
   uid?: number;
   id: number;
@@ -58,6 +104,9 @@ export interface GameState {
   meridian_circulations?: number;
   meridian_acupoints?: { item_id: number; name: string; count: number; completed: boolean }[];
   meridian_threshold_idx?: number;
+  quest_progress?: Record<number, QuestProgress>;
+  quests_initialized?: boolean;
+  pending_rewards: PendingReward[];
 }
 
 export interface BattleMonster {

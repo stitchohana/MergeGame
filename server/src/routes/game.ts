@@ -44,6 +44,10 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
         state.pouch = [];
       }
       // Migrate: backfill uid for items without uid
+      // Migrate: add pending_rewards if missing
+      if (!state.pending_rewards) {
+        state.pending_rewards = [];
+      }
       if (!state.uid_counter) {
         state.uid_counter = 0;
       }
@@ -65,7 +69,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
         state.version += 1;
       }
 
-            // Re-initialize if grid is empty (stale save)
+      // Re-initialize if grid is empty (stale save)
       if (!state.grid || state.grid.length === 0) {
         const init = engine.createInitialState();
         state.grid = init.grid;
@@ -116,7 +120,8 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
         }
       }
       console.log(`[game] state response: grid=${state.grid.length} items, first uid=${state.grid[0]?.uid ?? "missing"}`);
-      res.json({ grid: state.grid, pouch: state.pouch, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, regen_remaining_ms: regenRemainingMs, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage, meridian_acupoints: state.meridian_acupoints, meridian_circulations: state.meridian_circulations, meridian_threshold_idx: state.meridian_threshold_idx });
+      engine.questEngine.initQuestProgress(state);
+      res.json({ grid: state.grid, pouch: state.pouch, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, regen_remaining_ms: regenRemainingMs, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage, meridian_acupoints: state.meridian_acupoints, meridian_circulations: state.meridian_circulations, meridian_threshold_idx: state.meridian_threshold_idx, quest_progress: state.quest_progress, quest_defs: engine.questEngine.getResolvedQuestDefs(engine), pending_rewards: state.pending_rewards });
     } catch (err) {
       console.error("[game] state error:", err);
       res.status(500).json({ error: "internal_error" });
@@ -133,7 +138,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeMerge(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, result_uid: result.resultUid, result_id: result.resultId, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state) });
+    res.json({ ok: true, new_version: result.newVersion, result_uid: result.resultUid, result_id: result.resultId, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
   }));
 
   // POST /api/game/spawn
@@ -149,7 +154,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spawned_uid: result.spawnedUid, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, recharge_time: result.rechargeTime, cultivation: state.cultivation, regen_remaining_ms: engine.getRegenRemainingMs(state) });
+    res.json({ ok: true, spawned_uid: result.spawnedUid, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, recharge_time: result.rechargeTime, cultivation: state.cultivation, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
   }));
 
   // POST /api/game/craft/add
@@ -188,8 +193,9 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeCraftRetrieve(state, table_col, table_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, new_version: result.newVersion });
+    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, new_version: result.newVersion, quest_progress: state.quest_progress });
   }));
+
 
   // POST /api/game/craft/remove
   router.post("/craft/remove", op(async (req, res, userId) => {
@@ -241,7 +247,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.sellItem(state, uid);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spirit_stones: result.stones });
+    res.json({ ok: true, spirit_stones: result.stones, quest_progress: state.quest_progress });
   }));
 
   // POST /api/game/shop/buy
@@ -318,7 +324,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.completeMeridianAcupoint(state, index, item_ids);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json(result);
+    res.json({ ...result, quest_progress: state.quest_progress });
   }));
 
   // POST /api/game/board/switch
@@ -392,7 +398,33 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.battleAttack(state, item_id, effect_id, col, row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage });
+    res.json({ ok: true, new_version: state.version, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage, quest_progress: state.quest_progress, rewards_applied: engine.questEngine.lastAppliedRewards, pending_rewards: state.pending_rewards });
+  }));
+
+  // POST /api/game/quest_claim
+  router.post("/quest_claim", op(async (req, res, userId) => {
+    const { quest_id } = req.body;
+    if (typeof quest_id !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.questEngine.claimQuestReward(state, quest_id, engine);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, quest_id, rewards: result.rewards, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, grid: state.grid, pouch: state.pouch, quest_progress: state.quest_progress, pending_rewards: state.pending_rewards });
+  }));
+
+  // POST /api/game/claim_pending_reward
+  router.post("/claim_pending_reward", op(async (req, res, userId) => {
+    const { uid, col, row } = req.body;
+    if (typeof uid !== "number" || typeof col !== "number" || typeof row !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.questEngine.claimPendingReward(state, uid, col, row, engine);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json({ ok: true, grid: state.grid, pending_rewards: state.pending_rewards, new_version: state.version });
   }));
 
   // GET /api/leaderboard

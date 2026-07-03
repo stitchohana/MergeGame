@@ -27,6 +27,7 @@ var meridian_acupoints: Array = []  # [{item_id, name, count, completed}]
 var meridian_threshold_idx: int = 0
 
 signal meridian_updated()
+signal pending_rewards_changed(count: int)
 
 signal phase_changed(old_phase: GamePhase, new_phase: GamePhase)
 signal stamina_changed(current: int, max: int)

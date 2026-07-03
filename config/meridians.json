@@ -3,119 +3,117 @@
 	{
 	  "stage": 1,
 	  "acupoints": 3,
-	  "complete_exp": 50,
-	  "qi_reward": 5,
 	  "item_pool": [
 		101
 	  ],
 	  "count_min": 1,
-	  "count_max": 2
+	  "count_max": 2,
+	  "acupoint_rewards": 3,
+	  "circulation_rewards": 25
 	},
 	{
 	  "stage": 2,
 	  "acupoints": 3,
-	  "complete_exp": 80,
-	  "qi_reward": 5,
 	  "item_pool": [
 		101,
 		103
 	  ],
 	  "count_min": 1,
-	  "count_max": 2
+	  "count_max": 2,
+	  "acupoint_rewards": 3,
+	  "circulation_rewards": 26
 	},
 	{
 	  "stage": 3,
 	  "acupoints": 4,
-	  "complete_exp": 90,
-	  "qi_reward": 6,
 	  "item_pool": [
 		101,
 		103
 	  ],
 	  "count_min": 1,
-	  "count_max": 3
+	  "count_max": 3,
+	  "acupoint_rewards": 4,
+	  "circulation_rewards": 27
 	},
 	{
 	  "stage": 4,
 	  "acupoints": 4,
-	  "complete_exp": 100,
-	  "qi_reward": 6,
 	  "item_pool": [
 		101,
 		103
 	  ],
 	  "count_min": 2,
-	  "count_max": 3
+	  "count_max": 3,
+	  "acupoint_rewards": 4,
+	  "circulation_rewards": 28
 	},
 	{
 	  "stage": 5,
 	  "acupoints": 5,
-	  "complete_exp": 110,
-	  "qi_reward": 7,
 	  "item_pool": [
 		101,
 		103
 	  ],
 	  "count_min": 2,
-	  "count_max": 4
+	  "count_max": 4,
+	  "acupoint_rewards": 5,
+	  "circulation_rewards": 29
 	},
 	{
 	  "stage": 6,
 	  "acupoints": 5,
-	  "complete_exp": 120,
-	  "qi_reward": 8,
 	  "item_pool": [
 		101,
 		103,
 		61
 	  ],
 	  "count_min": 2,
-	  "count_max": 4
+	  "count_max": 4,
+	  "acupoint_rewards": 6,
+	  "circulation_rewards": 30
 	},
 	{
 	  "stage": 7,
 	  "acupoints": 6,
-	  "complete_exp": 130,
-	  "qi_reward": 8,
 	  "item_pool": [
 		101,
 		103,
 		61
 	  ],
 	  "count_min": 2,
-	  "count_max": 4
+	  "count_max": 4,
+	  "acupoint_rewards": 6,
+	  "circulation_rewards": 31
 	},
 	{
 	  "stage": 8,
 	  "acupoints": 6,
-	  "complete_exp": 140,
-	  "qi_reward": 9,
 	  "item_pool": [
 		101,
 		103,
 		61
 	  ],
 	  "count_min": 2,
-	  "count_max": 5
+	  "count_max": 5,
+	  "acupoint_rewards": 7,
+	  "circulation_rewards": 32
 	},
 	{
 	  "stage": 9,
 	  "acupoints": 7,
-	  "complete_exp": 150,
-	  "qi_reward": 10,
 	  "item_pool": [
 		101,
 		103,
 		61
 	  ],
 	  "count_min": 2,
-	  "count_max": 5
+	  "count_max": 5,
+	  "acupoint_rewards": 8,
+	  "circulation_rewards": 33
 	},
 	{
 	  "stage": 10,
 	  "acupoints": 7,
-	  "complete_exp": 160,
-	  "qi_reward": 10,
 	  "item_pool": [
 		101,
 		103,
@@ -123,26 +121,26 @@
 		62
 	  ],
 	  "count_min": 2,
-	  "count_max": 5
+	  "count_max": 5,
+	  "acupoint_rewards": 8,
+	  "circulation_rewards": 34
 	},
 	{
 	  "stage": 11,
 	  "acupoints": 5,
-	  "complete_exp": 260,
-	  "qi_reward": 15,
 	  "item_pool": [
 		103,
 		105,
 		61
 	  ],
 	  "count_min": 2,
-	  "count_max": 4
+	  "count_max": 4,
+	  "acupoint_rewards": 9,
+	  "circulation_rewards": 35
 	},
 	{
 	  "stage": 12,
 	  "acupoints": 7,
-	  "complete_exp": 350,
-	  "qi_reward": 20,
 	  "item_pool": [
 		103,
 		105,
@@ -150,13 +148,13 @@
 		63
 	  ],
 	  "count_min": 2,
-	  "count_max": 5
+	  "count_max": 5,
+	  "acupoint_rewards": 10,
+	  "circulation_rewards": 36
 	},
 	{
 	  "stage": 13,
 	  "acupoints": 8,
-	  "complete_exp": 440,
-	  "qi_reward": 25,
 	  "item_pool": [
 		105,
 		107,
@@ -164,26 +162,26 @@
 		64
 	  ],
 	  "count_min": 2,
-	  "count_max": 6
+	  "count_max": 6,
+	  "acupoint_rewards": 11,
+	  "circulation_rewards": 37
 	},
 	{
 	  "stage": 14,
 	  "acupoints": 6,
-	  "complete_exp": 450,
-	  "qi_reward": 25,
 	  "item_pool": [
 		105,
 		107,
 		62
 	  ],
 	  "count_min": 2,
-	  "count_max": 4
+	  "count_max": 4,
+	  "acupoint_rewards": 11,
+	  "circulation_rewards": 38
 	},
 	{
 	  "stage": 15,
 	  "acupoints": 8,
-	  "complete_exp": 600,
-	  "qi_reward": 35,
 	  "item_pool": [
 		105,
 		107,
@@ -192,13 +190,13 @@
 		65
 	  ],
 	  "count_min": 3,
-	  "count_max": 5
+	  "count_max": 5,
+	  "acupoint_rewards": 12,
+	  "circulation_rewards": 39
 	},
 	{
 	  "stage": 16,
 	  "acupoints": 9,
-	  "complete_exp": 750,
-	  "qi_reward": 50,
 	  "item_pool": [
 		107,
 		41,
@@ -207,26 +205,26 @@
 		67
 	  ],
 	  "count_min": 3,
-	  "count_max": 6
+	  "count_max": 6,
+	  "acupoint_rewards": 13,
+	  "circulation_rewards": 40
 	},
 	{
 	  "stage": 17,
 	  "acupoints": 6,
-	  "complete_exp": 660,
-	  "qi_reward": 40,
 	  "item_pool": [
 		107,
 		41,
 		66
 	  ],
 	  "count_min": 2,
-	  "count_max": 4
+	  "count_max": 4,
+	  "acupoint_rewards": 14,
+	  "circulation_rewards": 41
 	},
 	{
 	  "stage": 18,
 	  "acupoints": 8,
-	  "complete_exp": 900,
-	  "qi_reward": 55,
 	  "item_pool": [
 		107,
 		41,
@@ -235,13 +233,13 @@
 		68
 	  ],
 	  "count_min": 3,
-	  "count_max": 5
+	  "count_max": 5,
+	  "acupoint_rewards": 15,
+	  "circulation_rewards": 42
 	},
 	{
 	  "stage": 19,
 	  "acupoints": 9,
-	  "complete_exp": 1140,
-	  "qi_reward": 70,
 	  "item_pool": [
 		107,
 		42,
@@ -249,26 +247,26 @@
 		68
 	  ],
 	  "count_min": 3,
-	  "count_max": 6
+	  "count_max": 6,
+	  "acupoint_rewards": 16,
+	  "circulation_rewards": 43
 	},
 	{
 	  "stage": 20,
 	  "acupoints": 7,
-	  "complete_exp": 940,
-	  "qi_reward": 50,
 	  "item_pool": [
 		107,
 		43,
 		66
 	  ],
 	  "count_min": 3,
-	  "count_max": 5
+	  "count_max": 5,
+	  "acupoint_rewards": 13,
+	  "circulation_rewards": 44
 	},
 	{
 	  "stage": 21,
 	  "acupoints": 9,
-	  "complete_exp": 1300,
-	  "qi_reward": 65,
 	  "item_pool": [
 		107,
 		43,
@@ -277,13 +275,13 @@
 		68
 	  ],
 	  "count_min": 3,
-	  "count_max": 6
+	  "count_max": 6,
+	  "acupoint_rewards": 17,
+	  "circulation_rewards": 45
 	},
 	{
 	  "stage": 22,
 	  "acupoints": 10,
-	  "complete_exp": 1660,
-	  "qi_reward": 85,
 	  "item_pool": [
 		107,
 		44,
@@ -291,26 +289,26 @@
 		68
 	  ],
 	  "count_min": 3,
-	  "count_max": 6
+	  "count_max": 6,
+	  "acupoint_rewards": 18,
+	  "circulation_rewards": 46
 	},
 	{
 	  "stage": 23,
 	  "acupoints": 8,
-	  "complete_exp": 1400,
-	  "qi_reward": 60,
 	  "item_pool": [
 		107,
 		44,
 		66
 	  ],
 	  "count_min": 3,
-	  "count_max": 5
+	  "count_max": 5,
+	  "acupoint_rewards": 19,
+	  "circulation_rewards": 47
 	},
 	{
 	  "stage": 24,
 	  "acupoints": 10,
-	  "complete_exp": 2000,
-	  "qi_reward": 85,
 	  "item_pool": [
 		107,
 		45,
@@ -318,39 +316,39 @@
 		68
 	  ],
 	  "count_min": 3,
-	  "count_max": 6
+	  "count_max": 6,
+	  "acupoint_rewards": 18,
+	  "circulation_rewards": 48
 	},
 	{
 	  "stage": 25,
 	  "acupoints": 11,
-	  "complete_exp": 2600,
-	  "qi_reward": 110,
 	  "item_pool": [
 		107,
 		45,
 		68
 	  ],
 	  "count_min": 4,
-	  "count_max": 7
+	  "count_max": 7,
+	  "acupoint_rewards": 20,
+	  "circulation_rewards": 49
 	},
 	{
 	  "stage": 26,
 	  "acupoints": 9,
-	  "complete_exp": 2100,
-	  "qi_reward": 80,
 	  "item_pool": [
 		107,
 		45,
 		66
 	  ],
 	  "count_min": 3,
-	  "count_max": 6
+	  "count_max": 6,
+	  "acupoint_rewards": 21,
+	  "circulation_rewards": 50
 	},
 	{
 	  "stage": 27,
 	  "acupoints": 11,
-	  "complete_exp": 3000,
-	  "qi_reward": 110,
 	  "item_pool": [
 		107,
 		45,
@@ -358,39 +356,39 @@
 		68
 	  ],
 	  "count_min": 4,
-	  "count_max": 7
+	  "count_max": 7,
+	  "acupoint_rewards": 20,
+	  "circulation_rewards": 51
 	},
 	{
 	  "stage": 28,
 	  "acupoints": 12,
-	  "complete_exp": 3900,
-	  "qi_reward": 140,
 	  "item_pool": [
 		107,
 		45,
 		68
 	  ],
 	  "count_min": 4,
-	  "count_max": 8
+	  "count_max": 8,
+	  "acupoint_rewards": 22,
+	  "circulation_rewards": 52
 	},
 	{
 	  "stage": 29,
 	  "acupoints": 10,
-	  "complete_exp": 3000,
-	  "qi_reward": 100,
 	  "item_pool": [
 		107,
 		45,
 		66
 	  ],
 	  "count_min": 3,
-	  "count_max": 6
+	  "count_max": 6,
+	  "acupoint_rewards": 23,
+	  "circulation_rewards": 51
 	},
 	{
 	  "stage": 30,
 	  "acupoints": 12,
-	  "complete_exp": 4500,
-	  "qi_reward": 140,
 	  "item_pool": [
 		107,
 		45,
@@ -398,20 +396,22 @@
 		68
 	  ],
 	  "count_min": 4,
-	  "count_max": 7
+	  "count_max": 7,
+	  "acupoint_rewards": 22,
+	  "circulation_rewards": 53
 	},
 	{
 	  "stage": 31,
 	  "acupoints": 13,
-	  "complete_exp": 6000,
-	  "qi_reward": 180,
 	  "item_pool": [
 		107,
 		45,
 		68
 	  ],
 	  "count_min": 4,
-	  "count_max": 8
+	  "count_max": 8,
+	  "acupoint_rewards": 24,
+	  "circulation_rewards": 54
 	}
   ]
 }
