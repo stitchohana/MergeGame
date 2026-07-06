@@ -29,10 +29,15 @@ func _connect_signals() -> void:
 		CloudService.battle_attack_confirmed.connect(_on_battle_attack_tick)
 	if not CloudService.breakthrough_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.BREAKTHROUGH)):
 		CloudService.breakthrough_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.BREAKTHROUGH))
+	# Both exp pill and stamina pill consumption count as "any item consume" quest progress
 	if not CloudService.exp_pill_consume_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME)):
 		CloudService.exp_pill_consume_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME))
 	if not CloudService.stamina_restore_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME)):
 		CloudService.stamina_restore_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME))
+	if not CloudService.quest_claim_confirmed.is_connected(_on_quest_claim_confirmed):
+		CloudService.quest_claim_confirmed.connect(_on_quest_claim_confirmed)
+	if not CloudService.quest_claim_rejected.is_connected(_on_quest_claim_rejected):
+		CloudService.quest_claim_rejected.connect(_on_quest_claim_rejected)
 
 
 func _on_state_loaded(state: Dictionary) -> void:
@@ -50,7 +55,7 @@ func _on_progress_tick(_result: Dictionary, quest_type: int) -> void:
 		for q in quest_defs:
 			if q.type != quest_type:
 				continue
-			var pid: int = q.id
+			var pid: int = int(q.id)
 			if not progress.has(pid):
 				continue
 			var p: Dictionary = progress[pid]
@@ -76,12 +81,11 @@ func _on_meridian_complete_tick(result: Dictionary) -> void:
 
 func _apply_progress(server_progress: Dictionary) -> void:
 	for key in server_progress:
-		var pid: int = key as int if key is int else int(key)
+		var pid: int = int(key)
 		var p: Dictionary = server_progress[key]
 		var old: Dictionary = progress.get(pid, {})
 		if p.get("completed", false) and not old.get("completed", false):
 			quest_completed.emit(pid)
-		# Auto-reward quest claimed: notify RewardManager
 		if p.get("claimed", false) and not old.get("claimed", false):
 			var rewards = _find_quest_rewards(pid)
 			if not rewards.is_empty():
@@ -96,11 +100,13 @@ func claim_quest(quest_id: int) -> void:
 
 
 func get_progress(quest_id: int) -> Dictionary:
-	return progress.get(quest_id, {})
+	var pid: int = int(quest_id)
+	var result: Dictionary = progress.get(pid, {})
+	return result
 
 
 func is_quest_complete(quest_id: int) -> bool:
-	return progress.get(quest_id, {}).get("completed", false)
+	return progress.get(int(quest_id), {}).get("completed", false)
 
 
 func _find_quest_rewards(quest_id: int) -> Dictionary:
@@ -121,3 +127,11 @@ func _find_quest_target(quest_id: int) -> int:
 
 
 
+
+
+func _on_quest_claim_confirmed(result: Dictionary) -> void:
+	if result.has("quest_progress"):
+		_apply_progress(result.quest_progress)
+
+func _on_quest_claim_rejected(reason: String) -> void:
+	EventBus.show_toast.emit("领取失败")

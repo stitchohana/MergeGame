@@ -7,6 +7,12 @@ export enum TokenType {
   EXP = 4,            // 经验值
 }
 
+export enum ResetCycle {
+  NEVER = 0,
+  DAILY = 1,
+  WEEKLY = 2,
+}
+
 export enum QuestType {
   MERGE = 1,
   SPAWN = 2,
@@ -106,6 +112,7 @@ export interface GameState {
   meridian_threshold_idx?: number;
   quest_progress?: Record<number, QuestProgress>;
   quests_initialized?: boolean;
+  quest_last_reset?: number;
   pending_rewards: PendingReward[];
 }
 

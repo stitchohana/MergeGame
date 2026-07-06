@@ -89,6 +89,27 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     return state;
   }
 
+  function buildStateResponse(state: any, engine: GameEngine, regenRemainingMs: number) {
+    return {
+      grid: state.grid,
+      pouch: state.pouch,
+      cultivation: state.cultivation,
+      stamina: state.stamina,
+      max_stamina: state.max_stamina,
+      spirit_stones: state.spirit_stones,
+      version: state.version,
+      regen_remaining_ms: regenRemainingMs,
+      battle_map_id: state.battle_map_id,
+      battle_stage: state.battle_stage,
+      meridian_acupoints: state.meridian_acupoints,
+      meridian_circulations: state.meridian_circulations,
+      meridian_threshold_idx: state.meridian_threshold_idx,
+      quest_progress: state.quest_progress,
+      quest_defs: engine.questEngine.getResolvedQuestDefs(engine),
+      pending_rewards: state.pending_rewards,
+    };
+  }
+
   // GET /api/game/state
   router.get("/state", async (req: Request, res: Response) => {
     try {
@@ -121,7 +142,15 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       }
       console.log(`[game] state response: grid=${state.grid.length} items, first uid=${state.grid[0]?.uid ?? "missing"}`);
       engine.questEngine.initQuestProgress(state);
-      res.json({ grid: state.grid, pouch: state.pouch, cultivation: state.cultivation, stamina: state.stamina, max_stamina: state.max_stamina, spirit_stones: state.spirit_stones, version: state.version, regen_remaining_ms: regenRemainingMs, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage, meridian_acupoints: state.meridian_acupoints, meridian_circulations: state.meridian_circulations, meridian_threshold_idx: state.meridian_threshold_idx, quest_progress: state.quest_progress, quest_defs: engine.questEngine.getResolvedQuestDefs(engine), pending_rewards: state.pending_rewards });
+      const questResetOccurred = engine.questEngine.checkAndResetQuests(state, engine.questResetHour);
+      if (questResetOccurred) {
+        try {
+          await storage.saveState(userId, state);
+        } catch (e) {
+          console.error("[game] failed to save state after quest reset:", e);
+        }
+      }
+      res.json(buildStateResponse(state, engine, regenRemainingMs));
     } catch (err) {
       console.error("[game] state error:", err);
       res.status(500).json({ error: "internal_error" });

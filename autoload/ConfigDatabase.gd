@@ -11,6 +11,7 @@ var _effects_data: Dictionary = {}  # effect_id -> effect_data
 var _expedition_maps: Dictionary = {}
 var _monsters_data: Dictionary = {}
 var _meridian_thresholds: Array = []
+var _tokens_data: Dictionary = {}
 
 func _ready() -> void:
 	load_all()
@@ -24,7 +25,7 @@ func load_all() -> void:
 	_load_effects("res://config/effects.json")
 	_load_expedition("res://config/expedition.json")
 	_load_meridians("res://config/meridians.json")
-	print("[ConfigDatabase] Loaded all configs: ", _items_data.size(), " items, ", _effects_data.size(), " effects, ", _expedition_maps.size(), " maps, ", _meridian_thresholds.size(), " meridian thresholds")
+	_load_tokens("res://config/tokens.json")
 
 func _load_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -240,6 +241,15 @@ func _load_meridians(path: String) -> void:
 	if data.is_empty():
 		return
 	_meridian_thresholds = data.get("thresholds", [])
+
+
+func _load_tokens(path: String) -> void:
+	var data := _load_json(path)
+	for t in data.get("tokens", []):
+		_tokens_data[int(t.id)] = t
+
+func get_token_data(token_id: int) -> Dictionary:
+	return _tokens_data.get(token_id, {})
 
 func get_meridian_thresholds() -> Array:
 	return _meridian_thresholds

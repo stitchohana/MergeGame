@@ -12,6 +12,8 @@ const TOKEN_NAMES := {
 	TokenType.EXP: "经验值",
 }
 
+enum ResetCycle { NEVER = 0, DAILY = 1, WEEKLY = 2 }
+
 enum QuestType {
 	MERGE = 1,
 	SPAWN = 2,

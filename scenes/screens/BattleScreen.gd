@@ -213,7 +213,7 @@ func _sync_grid_from_result(result: Dictionary) -> void:
 	grid_view.set_skip_animations(false)
 
 func _refresh_char_display() -> void:
-	var realm_name: String = CultivationService.get_realm_name()
+	var realm_name: String = CultivationService.get_stage_name()
 	var level: int = CultivationService.current_level
 	var name_str: String = realm_name + " Lv." + str(level) if realm_name != "" else "修士"
 	char_label.text = name_str

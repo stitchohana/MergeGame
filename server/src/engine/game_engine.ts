@@ -67,6 +67,7 @@ export class GameEngine {
   get cultivationStages() { return this.cultivation?.stages ?? []; }
   private initialSetups = new Map<string, { id: number; col: number; row: number }[]>();
   staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
+  questResetHour = 0;
   private shopConfig = { shopItems: [] as number[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
   private effectsById = new Map<number, { id: number; type: string; exp_gain?: number; duration?: number; multiplier?: number; amount?: number; describe?: string }>();
   private meridianThresholds: any[] = [];
@@ -108,6 +109,10 @@ export class GameEngine {
           regenAmount: s.regen_amount ?? 1,
         };
         console.log(`[engine] Stamina config: max=${this.staminaConfig.max} cost=${this.staminaConfig.spawnCost} regen=${this.staminaConfig.regenAmount}/${this.staminaConfig.regenInterval}s`);
+      }
+      this.questResetHour = data.reset_hour ?? 0;
+      if (this.questResetHour > 0) {
+        console.log(`[engine] Daily reset hour: ${this.questResetHour}`);
       }
     } catch { /* ignore */ }
   }
