@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bm7eaym0h864p" path="res://scenes/screens/HomeScreen.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/TopBar.tscn" id="2_qahno"]
+[ext_resource type="PackedScene" uid="uid://dx74q48vv12nw" path="res://scenes/ui/CultivationPanel.tscn" id="3_cul"]
 
 [node name="HomeScreen" type="Control" unique_id=65201493]
 layout_mode = 3
@@ -13,41 +14,42 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=160052064]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -120.0
-offset_top = -80.0
-offset_right = 120.0
-offset_bottom = 80.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 20
+[node name="CultivationPanel" parent="." unique_id=2107554876 instance=ExtResource("3_cul")]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 64.0
+offset_right = 700.0
+offset_bottom = 252.0
 
-[node name="TitleLabel" type="Label" parent="VBoxContainer" unique_id=1452159853]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 24
-text = "MergeGame"
-horizontal_alignment = 1
-
-[node name="GameButton" type="Button" parent="VBoxContainer" unique_id=1411331884]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "进入棋盘"
-
-[node name="BattleButton" type="Button" parent="VBoxContainer" unique_id=413815188]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "进入历练"
+[node name="MeridianContainer" type="VBoxContainer" parent="." unique_id=1118438235]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 420.0
+offset_right = 751.0
+offset_bottom = 1387.0
+theme_override_constants/separation = 8
 
 [node name="TopBar" parent="." unique_id=1995499029 instance=ExtResource("2_qahno")]
 layout_mode = 0
-offset_left = 107.0
+offset_left = 5.0
 offset_top = 10.0
-offset_right = 746.0
+offset_right = 781.0
 offset_bottom = 60.0
+
+[node name="GameButton" type="Button" parent="." unique_id=1411331884]
+layout_mode = 0
+offset_left = 74.0
+offset_top = 1597.0
+offset_right = 286.0
+offset_bottom = 1631.0
+theme_override_font_sizes/font_size = 18
+text = "进入棋盘"
+
+[node name="BattleButton" type="Button" parent="." unique_id=413815188]
+layout_mode = 0
+offset_left = 399.0
+offset_top = 1588.0
+offset_right = 639.0
+offset_bottom = 1622.0
+theme_override_font_sizes/font_size = 18
+text = "进入历练"

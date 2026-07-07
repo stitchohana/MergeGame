@@ -6,33 +6,40 @@ var _data: Dictionary = {}
 var _items_setup: Array = []
 var _index_setup: int = -1
 var _completed_setup: bool = false
+var _rewards_setup: Dictionary = {}
 var _ready_done: bool = false
+var _item_widget_scene := preload("res://scenes/ui/ItemWidget.tscn")
+var _reward_slot_scene := preload("res://scenes/ui/RewardSlot.tscn")
 
 func _ready() -> void:
 	_ready_done = true
 	if not _items_setup.is_empty():
-		_do_setup(_items_setup, _index_setup, _completed_setup)
+		_do_setup(_items_setup, _index_setup, _completed_setup, _rewards_setup)
 
-func setup(items: Array, index: int, completed: bool) -> void:
+func setup(items: Array, index: int, completed: bool, rewards: Dictionary = {}) -> void:
 	_items_setup = items
 	_index_setup = index
 	_completed_setup = completed
+	_rewards_setup = rewards
 	if _ready_done:
-		_do_setup(items, index, completed)
+		_do_setup(items, index, completed, rewards)
 
-func _do_setup(items: Array, index: int, completed: bool) -> void:
+func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -> void:
 	_data = {"items": items, "index": index, "completed": completed}
 
 	var items_container: HBoxContainer = $Panel/ItemsContainer
+	var reward_box: HBoxContainer = $Panel/RewardBox
 	var complete_btn: Button = $Panel/CompleteButton
 
 	for child in items_container.get_children():
+		child.queue_free()
+	for child in reward_box.get_children():
 		child.queue_free()
 
 	for it in items:
 		var item_id: int = int(it.get("item_id", 0))
 		var item_data := ConfigDatabase.get_item_data(item_id)
-		var widget := preload("res://scenes/ui/ItemWidget.tscn").instantiate() as ItemWidget
+		var widget := _item_widget_scene.instantiate() as ItemWidget
 		items_container.add_child(widget)
 		if not item_data.is_empty():
 			widget.setup(item_data)
@@ -42,6 +49,25 @@ func _do_setup(items: Array, index: int, completed: bool) -> void:
 		if widget.name_label:
 			widget.name_label.visible = true
 			widget.name_label.add_theme_font_size_override("font_size", 9)
+
+	# Reward preview
+	if not rewards.is_empty():
+		if rewards.has("tokens"):
+			for t in rewards.tokens:
+				var token_type: int = int(t.get("token", 0))
+				var amount: int = int(t.get("amount", 0))
+				var slot := _reward_slot_scene.instantiate() as RewardSlot
+				reward_box.add_child(slot)
+				slot.setup(token_type, amount)
+				slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if rewards.has("items"):
+			for ri in rewards.items:
+				var item_id: int = int(ri.get("id", 0))
+				var count: int = int(ri.get("count", 0))
+				var slot := _reward_slot_scene.instantiate() as RewardSlot
+				reward_box.add_child(slot)
+				slot.setup(item_id, count)
+				slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	if completed:
 		complete_btn.text = "✓"

@@ -1,0 +1,75 @@
+{
+  "effects": [
+    {
+      "id": 1,
+      "type": "breakthrough",
+      "describe": "突破境界"
+    },
+    {
+      "id": 7,
+      "type": "damage",
+      "describe": "造成15点伤害",
+      "amount": 15
+    },
+    {
+      "id": 8,
+      "type": "heal",
+      "describe": "恢复20点生命",
+      "amount": 20
+    },
+    {
+      "id": 9,
+      "type": "exp",
+      "describe": "增加30修为",
+      "exp_gain": 30
+    },
+    {
+      "id": 10,
+      "type": "exp",
+      "describe": "增加80修为",
+      "exp_gain": 80
+    },
+    {
+      "id": 11,
+      "type": "exp",
+      "describe": "增加200修为",
+      "exp_gain": 200
+    },
+    {
+      "id": 12,
+      "type": "exp",
+      "describe": "增加500修为",
+      "exp_gain": 500
+    },
+    {
+      "id": 13,
+      "type": "stamina",
+      "describe": "恢复20体力",
+      "amount": 20
+    },
+    {
+      "id": 14,
+      "type": "stamina",
+      "describe": "恢复40体力",
+      "amount": 40
+    },
+    {
+      "id": 15,
+      "type": "stamina",
+      "describe": "恢复60体力",
+      "amount": 60
+    },
+    {
+      "id": 16,
+      "type": "stamina",
+      "describe": "恢复80体力",
+      "amount": 80
+    },
+    {
+      "id": 17,
+      "type": "stamina",
+      "describe": "恢复100体力",
+      "amount": 100
+    }
+  ]
+}

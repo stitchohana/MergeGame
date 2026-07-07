@@ -1,0 +1,856 @@
+{
+  "regular": [
+    {
+      "id": 21,
+      "level": 1,
+      "name": "凡草",
+      "icon": "",
+      "group_id": 1,
+      "describe": "最普通的草药",
+      "value": 1,
+      "sell_price": 5
+    },
+    {
+      "id": 22,
+      "level": 2,
+      "name": "灵草",
+      "icon": "",
+      "group_id": 1,
+      "describe": "蕴含灵气的草药",
+      "value": 2,
+      "sell_price": 15
+    },
+    {
+      "id": 23,
+      "level": 3,
+      "name": "仙草",
+      "icon": "",
+      "group_id": 1,
+      "describe": "罕见的仙品草药",
+      "value": 3,
+      "sell_price": 40
+    },
+    {
+      "id": 24,
+      "level": 4,
+      "name": "圣草",
+      "icon": "",
+      "group_id": 1,
+      "describe": "传说中的圣药",
+      "value": 10,
+      "sell_price": 100
+    },
+    {
+      "id": 31,
+      "level": 1,
+      "name": "筑基丹",
+      "icon": "",
+      "group_id": 2,
+      "describe": "筑基必备丹药，突破至筑基期所需",
+      "sell_price": 50,
+      "use_effect_id": 1
+    },
+    {
+      "id": 32,
+      "level": 2,
+      "name": "金丹丹",
+      "icon": "",
+      "group_id": 2,
+      "describe": "凝结金丹的丹药，突破至金丹期所需",
+      "sell_price": 150,
+      "use_effect_id": 1
+    },
+    {
+      "id": 33,
+      "level": 3,
+      "name": "元婴丹",
+      "icon": "",
+      "group_id": 2,
+      "describe": "孕育元婴的丹药，突破至元婴期所需",
+      "sell_price": 400,
+      "use_effect_id": 1
+    },
+    {
+      "id": 34,
+      "level": 4,
+      "name": "化神丹",
+      "icon": "",
+      "group_id": 2,
+      "describe": "化神所需丹药，突破至化神期所需",
+      "sell_price": 1000,
+      "use_effect_id": 1
+    },
+    {
+      "id": 35,
+      "level": 5,
+      "name": "合体丹",
+      "icon": "",
+      "group_id": 2,
+      "describe": "合体期丹药，突破至合体期所需",
+      "sell_price": 2500,
+      "use_effect_id": 1
+    },
+    {
+      "id": 36,
+      "level": 6,
+      "name": "大乘丹",
+      "icon": "",
+      "group_id": 2,
+      "describe": "大乘期丹药，突破至大乘期所需",
+      "sell_price": 6000,
+      "use_effect_id": 1
+    },
+    {
+      "id": 37,
+      "level": 7,
+      "name": "渡劫丹",
+      "icon": "",
+      "group_id": 2,
+      "describe": "渡劫飞升丹药，突破至渡劫期所需",
+      "sell_price": 15000,
+      "use_effect_id": 1
+    },
+    {
+      "id": 61,
+      "level": 1,
+      "name": "铜矿",
+      "icon": "",
+      "group_id": 3,
+      "describe": "普通的铜矿石",
+      "value": 2,
+      "sell_price": 3
+    },
+    {
+      "id": 62,
+      "level": 2,
+      "name": "铁矿",
+      "icon": "",
+      "group_id": 3,
+      "describe": "坚硬的铁矿石",
+      "value": 3,
+      "sell_price": 10
+    },
+    {
+      "id": 63,
+      "level": 3,
+      "name": "银矿",
+      "icon": "",
+      "group_id": 3,
+      "describe": "珍贵的银矿石",
+      "value": 5,
+      "sell_price": 30
+    },
+    {
+      "id": 64,
+      "level": 4,
+      "name": "金矿",
+      "icon": "",
+      "group_id": 3,
+      "describe": "稀有的金矿石",
+      "value": 8,
+      "sell_price": 80
+    },
+    {
+      "id": 65,
+      "level": 1,
+      "name": "铜锭",
+      "icon": "",
+      "group_id": 4,
+      "describe": "提炼好的铜锭",
+      "value": 4,
+      "sell_price": 10
+    },
+    {
+      "id": 66,
+      "level": 2,
+      "name": "铁锭",
+      "icon": "",
+      "group_id": 4,
+      "describe": "提炼好的铁锭",
+      "value": 6,
+      "sell_price": 30
+    },
+    {
+      "id": 67,
+      "level": 3,
+      "name": "银锭",
+      "icon": "",
+      "group_id": 4,
+      "describe": "提炼好的银锭",
+      "value": 10,
+      "sell_price": 80
+    },
+    {
+      "id": 68,
+      "level": 4,
+      "name": "金锭",
+      "icon": "",
+      "group_id": 4,
+      "describe": "提炼好的金锭",
+      "value": 15,
+      "sell_price": 200
+    },
+    {
+      "id": 71,
+      "level": 1,
+      "name": "聚气散",
+      "icon": "",
+      "group_id": 5,
+      "describe": "增加30修为",
+      "use_effect_id": 9
+    },
+    {
+      "id": 72,
+      "level": 2,
+      "name": "培元散",
+      "icon": "",
+      "group_id": 5,
+      "describe": "增加80修为",
+      "use_effect_id": 10
+    },
+    {
+      "id": 73,
+      "level": 3,
+      "name": "凝神散",
+      "icon": "",
+      "group_id": 5,
+      "describe": "增加200修为",
+      "use_effect_id": 11
+    },
+    {
+      "id": 74,
+      "level": 4,
+      "name": "增元散",
+      "icon": "",
+      "group_id": 5,
+      "describe": "增加500修为",
+      "use_effect_id": 12
+    },
+    {
+      "id": 81,
+      "level": 1,
+      "name": "剑气",
+      "icon": "",
+      "group_id": 6,
+      "describe": "飞剑凝聚的剑气，造成15点伤害",
+      "use_effect_id": 7
+    },
+    {
+      "id": 91,
+      "level": 1,
+      "name": "回体散",
+      "icon": "",
+      "group_id": 8,
+      "describe": "恢复20体力",
+      "use_effect_id": 13
+    },
+    {
+      "id": 92,
+      "level": 2,
+      "name": "回体丹",
+      "icon": "",
+      "group_id": 8,
+      "describe": "恢复40体力",
+      "use_effect_id": 14
+    },
+    {
+      "id": 93,
+      "level": 3,
+      "name": "回体丸",
+      "icon": "",
+      "group_id": 8,
+      "describe": "恢复60体力",
+      "use_effect_id": 15
+    },
+    {
+      "id": 94,
+      "level": 4,
+      "name": "回体膏",
+      "icon": "",
+      "group_id": 8,
+      "describe": "恢复80体力",
+      "use_effect_id": 16
+    },
+    {
+      "id": 95,
+      "level": 5,
+      "name": "回体丹皇",
+      "icon": "",
+      "group_id": 8,
+      "describe": "恢复100体力",
+      "use_effect_id": 17
+    },
+    {
+      "id": 101,
+      "level": 1,
+      "name": "筑基草·阳",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制筑基丹的材料",
+      "value": 2
+    },
+    {
+      "id": 102,
+      "level": 1,
+      "name": "筑基草·阴",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制筑基丹的材料",
+      "value": 2
+    },
+    {
+      "id": 103,
+      "level": 2,
+      "name": "金丹草·阳",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制金丹丹的材料",
+      "value": 5
+    },
+    {
+      "id": 104,
+      "level": 2,
+      "name": "金丹草·阴",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制金丹丹的材料",
+      "value": 5
+    },
+    {
+      "id": 105,
+      "level": 3,
+      "name": "元婴草·阳",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制元婴丹的材料",
+      "value": 8
+    },
+    {
+      "id": 106,
+      "level": 3,
+      "name": "元婴草·阴",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制元婴丹的材料",
+      "value": 8
+    },
+    {
+      "id": 107,
+      "level": 4,
+      "name": "化神草·阳",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制化神丹的材料",
+      "value": 12
+    },
+    {
+      "id": 108,
+      "level": 4,
+      "name": "化神草·阴",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制化神丹的材料",
+      "value": 12
+    },
+    {
+      "id": 109,
+      "level": 5,
+      "name": "合体草·阳",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制合体丹的材料",
+      "value": 18
+    },
+    {
+      "id": 110,
+      "level": 5,
+      "name": "合体草·阴",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制合体丹的材料",
+      "value": 18
+    },
+    {
+      "id": 111,
+      "level": 6,
+      "name": "大乘草·阳",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制大乘丹的材料",
+      "value": 25
+    },
+    {
+      "id": 112,
+      "level": 6,
+      "name": "大乘草·阴",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制大乘丹的材料",
+      "value": 25
+    },
+    {
+      "id": 113,
+      "level": 7,
+      "name": "渡劫草·阳",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制渡劫丹的材料",
+      "value": 40
+    },
+    {
+      "id": 114,
+      "level": 7,
+      "name": "渡劫草·阴",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制渡劫丹的材料",
+      "value": 40
+    },
+    {
+      "id": 121,
+      "level": 1,
+      "name": "聚气花",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制聚气散的材料",
+      "value": 3
+    },
+    {
+      "id": 122,
+      "level": 2,
+      "name": "培元花",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制培元散的材料",
+      "value": 5
+    },
+    {
+      "id": 123,
+      "level": 3,
+      "name": "凝神花",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制凝神散的材料",
+      "value": 8
+    },
+    {
+      "id": 124,
+      "level": 4,
+      "name": "增元花",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制增元散的材料",
+      "value": 12
+    },
+    {
+      "id": 125,
+      "level": 5,
+      "name": "圣药花",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制圣药的材料",
+      "value": 20
+    },
+    {
+      "id": 126,
+      "level": 5,
+      "name": "圣灵草",
+      "icon": "",
+      "group_id": 1,
+      "describe": "炼制圣药的材料",
+      "value": 30
+    },
+    {
+      "id": 603,
+      "level": 1,
+      "name": "仓库",
+      "icon": "",
+      "group_id": 7,
+      "describe": "可以存放物品",
+      "storage_slots": 20
+    }
+  ],
+  "launcher": [
+    {
+      "id": 501,
+      "level": 1,
+      "name": "小药田",
+      "icon": "",
+      "group_id": 11,
+      "max_charges": 30,
+      "recharge_time": 60,
+      "describe": "产出凡草，小概率出灵草或自身",
+      "spawns": [
+        {
+          "id": 101,
+          "weight": 40
+        },
+        {
+          "id": 102,
+          "weight": 35
+        },
+        {
+          "id": 121,
+          "weight": 20
+        },
+        {
+          "id": 501,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 502,
+      "level": 2,
+      "name": "中药田",
+      "icon": "",
+      "group_id": 11,
+      "max_charges": 40,
+      "recharge_time": 50,
+      "describe": "产出灵草，概率出仙草或自身",
+      "spawns": [
+        {
+          "id": 103,
+          "weight": 35
+        },
+        {
+          "id": 104,
+          "weight": 35
+        },
+        {
+          "id": 122,
+          "weight": 25
+        },
+        {
+          "id": 502,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 503,
+      "level": 3,
+      "name": "大药田",
+      "icon": "",
+      "group_id": 11,
+      "max_charges": 50,
+      "recharge_time": 40,
+      "describe": "产出仙草，概率出圣草或自身",
+      "spawns": [
+        {
+          "id": 105,
+          "weight": 35
+        },
+        {
+          "id": 106,
+          "weight": 30
+        },
+        {
+          "id": 123,
+          "weight": 30
+        },
+        {
+          "id": 503,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 504,
+      "level": 1,
+      "name": "矿山",
+      "icon": "",
+      "group_id": 12,
+      "max_charges": 30,
+      "recharge_time": 60,
+      "describe": "产出铜矿，概率出铁矿或自身",
+      "spawns": [
+        {
+          "id": 61,
+          "weight": 70
+        },
+        {
+          "id": 62,
+          "weight": 25
+        },
+        {
+          "id": 504,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 505,
+      "level": 1,
+      "name": "飞剑",
+      "icon": "",
+      "group_id": 13,
+      "max_charges": 100,
+      "recharge_time": 30,
+      "describe": "凝聚剑气",
+      "spawns": [
+        {
+          "id": 81,
+          "weight": 80
+        },
+        {
+          "id": 505,
+          "weight": 20
+        }
+      ]
+    },
+    {
+      "id": 506,
+      "level": 1,
+      "name": "体力礼包",
+      "icon": "",
+      "group_id": 14,
+      "max_charges": 3,
+      "recharge_time": 0,
+      "describe": "点击获得聚气散、剑气、回体散各1个",
+      "no_cost": true,
+      "fixed_spawns": [
+        93,
+        94,
+        94
+      ]
+    },
+    {
+      "id": 507,
+      "level": 1,
+      "name": "初级药田",
+      "icon": "",
+      "group_id": 1,
+      "max_charges": 10,
+      "recharge_time": 30,
+      "describe": "产出筑基草·阴阳、聚气花",
+      "type": "launcher",
+      "spawns": [
+        {
+          "id": 101,
+          "weight": 35
+        },
+        {
+          "id": 102,
+          "weight": 35
+        },
+        {
+          "id": 121,
+          "weight": 25
+        },
+        {
+          "id": 507,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 508,
+      "level": 2,
+      "name": "中级药田",
+      "icon": "",
+      "group_id": 1,
+      "max_charges": 10,
+      "recharge_time": 35,
+      "describe": "产出金丹草·阴阳、培元花",
+      "type": "launcher",
+      "spawns": [
+        {
+          "id": 103,
+          "weight": 35
+        },
+        {
+          "id": 104,
+          "weight": 35
+        },
+        {
+          "id": 122,
+          "weight": 25
+        },
+        {
+          "id": 508,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 509,
+      "level": 3,
+      "name": "高级药田",
+      "icon": "",
+      "group_id": 1,
+      "max_charges": 10,
+      "recharge_time": 40,
+      "describe": "产出元婴草·阴阳、凝神花",
+      "type": "launcher",
+      "spawns": [
+        {
+          "id": 105,
+          "weight": 35
+        },
+        {
+          "id": 106,
+          "weight": 35
+        },
+        {
+          "id": 123,
+          "weight": 25
+        },
+        {
+          "id": 509,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 510,
+      "level": 4,
+      "name": "顶级药田",
+      "icon": "",
+      "group_id": 1,
+      "max_charges": 10,
+      "recharge_time": 45,
+      "describe": "产出化神草·阴阳、增元花",
+      "type": "launcher",
+      "spawns": [
+        {
+          "id": 107,
+          "weight": 35
+        },
+        {
+          "id": 108,
+          "weight": 35
+        },
+        {
+          "id": 124,
+          "weight": 25
+        },
+        {
+          "id": 510,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 511,
+      "level": 5,
+      "name": "圣品药田",
+      "icon": "",
+      "group_id": 1,
+      "max_charges": 10,
+      "recharge_time": 50,
+      "describe": "产出合体草·阴阳、圣药花",
+      "type": "launcher",
+      "spawns": [
+        {
+          "id": 109,
+          "weight": 35
+        },
+        {
+          "id": 110,
+          "weight": 35
+        },
+        {
+          "id": 125,
+          "weight": 25
+        },
+        {
+          "id": 511,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 512,
+      "level": 6,
+      "name": "仙品药田",
+      "icon": "",
+      "group_id": 1,
+      "max_charges": 10,
+      "recharge_time": 60,
+      "describe": "产出大乘草·阴阳、圣灵草",
+      "type": "launcher",
+      "spawns": [
+        {
+          "id": 111,
+          "weight": 35
+        },
+        {
+          "id": 112,
+          "weight": 35
+        },
+        {
+          "id": 126,
+          "weight": 25
+        },
+        {
+          "id": 512,
+          "weight": 5
+        }
+      ]
+    },
+    {
+      "id": 513,
+      "level": 7,
+      "name": "神品药田",
+      "icon": "",
+      "group_id": 1,
+      "max_charges": 10,
+      "recharge_time": 90,
+      "describe": "产出渡劫草·阴阳",
+      "type": "launcher",
+      "spawns": [
+        {
+          "id": 113,
+          "weight": 40
+        },
+        {
+          "id": 114,
+          "weight": 55
+        },
+        {
+          "id": 513,
+          "weight": 5
+        }
+      ]
+    }
+  ],
+  "crafting": [
+    {
+      "id": 601,
+      "level": 1,
+      "name": "基础炼丹炉",
+      "group_id": 21,
+      "icon": "",
+      "describe": "可以炼制丹药",
+      "recipes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "id": 602,
+      "level": 1,
+      "name": "炼器室",
+      "group_id": 22,
+      "icon": "",
+      "describe": "可以将矿物炼制成锭",
+      "recipes": [
+        15,
+        16,
+        17,
+        18
+      ]
+    }
+  ]
+}

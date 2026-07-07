@@ -36,6 +36,8 @@ signal quest_claim_confirmed(result: Dictionary)
 signal quest_claim_rejected(reason: String)
 signal pending_reward_claimed(result: Dictionary)
 signal pending_reward_claimed_rejected(reason: String)
+signal home_meridian_light_confirmed(result: Dictionary)
+signal home_meridian_light_rejected(reason: String)
 signal craft_add_rejected(reason: String)
 signal craft_start_confirmed(result: Dictionary)
 signal craft_start_rejected(reason: String)
@@ -76,7 +78,7 @@ func _ready() -> void:
 	_setup_http()
 
 func _load_config() -> void:
-	var file := FileAccess.open("res://config/server.json", FileAccess.READ)
+	var file := FileAccess.open("res://config/json_output/server.json", FileAccess.READ)
 	if file:
 		var text := file.get_as_text()
 		file.close()
@@ -276,6 +278,11 @@ func submit_claim_pending_reward(uid: int, col: int, row: int) -> void:
 	var body := JSON.stringify({"uid": uid, "col": col, "row": row})
 	_send_authed_request("claim_pending_reward", "/api/game/claim_pending_reward", HTTPClient.Method.METHOD_POST, body)
 
+
+func submit_light_home_acupoint(stage: int, index: int) -> void:
+	var body := JSON.stringify({"stage": stage, "index": index})
+	_send_authed_request("home_meridian_light", "/api/game/home_meridian/light", HTTPClient.METHOD_POST, body)
+
 func _on_meridian_complete_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		meridian_complete_confirmed.emit(data)
@@ -287,6 +294,13 @@ func _on_quest_claim_response(data: Dictionary) -> void:
 		quest_claim_confirmed.emit(data)
 	else:
 		quest_claim_rejected.emit(data.get("error", "unknown_error"))
+
+func _on_home_meridian_light_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		home_meridian_light_confirmed.emit(data)
+	else:
+		home_meridian_light_rejected.emit(data.get("error", "unknown_error"))
+
 
 func _on_claim_pending_reward_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -540,6 +554,8 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				quest_claim_rejected.emit(error_msg)
 			"claim_pending_reward":
 				pending_reward_claimed_rejected.emit(error_msg)
+			"home_meridian_light":
+				home_meridian_light_rejected.emit(error_msg)
 			"craft_add":
 				craft_add_rejected.emit(error_msg)
 			"craft_start":
@@ -594,6 +610,8 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 			_on_quest_claim_response(data)
 		"claim_pending_reward":
 			_on_claim_pending_reward_response(data)
+		"home_meridian_light":
+			_on_home_meridian_light_response(data)
 		"meridian_refresh":
 			_on_meridian_refresh_response(data)
 		"craft_add":
@@ -649,6 +667,8 @@ func _handle_network_error(tag: String) -> void:
 			quest_claim_rejected.emit("network_error")
 		"claim_pending_reward":
 			pending_reward_claimed_rejected.emit("network_error")
+		"home_meridian_light":
+			home_meridian_light_rejected.emit("network_error")
 		"sell":
 			sell_rejected.emit("network_error")
 		"gm_exec":
@@ -696,6 +716,8 @@ func _handle_parse_error(tag: String) -> void:
 			quest_claim_rejected.emit("invalid_response")
 		"claim_pending_reward":
 			pending_reward_claimed_rejected.emit("invalid_response")
+		"home_meridian_light":
+			home_meridian_light_rejected.emit("invalid_response")
 		"sell":
 			sell_rejected.emit("invalid_response")
 		"gm_exec":

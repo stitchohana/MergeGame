@@ -1,5 +1,6 @@
 class_name TopBar extends BaseHUD
 
+@onready var qi_label: Label = $QiLabel
 @onready var stamina_label: Label = $StaminaLabel
 @onready var stones_label: Label = $StonesLabel
 @onready var regen_timer_label: Label = $RegenTimerLabel
@@ -7,72 +8,79 @@ class_name TopBar extends BaseHUD
 
 var _regen_remaining: float = 0.0
 
+
 func _open_gm() -> void:
 	var gm := preload("res://scenes/ui/GMPanel.tscn").instantiate()
 	UIManager.show_popup(gm)
-var _last_regen_server_ms: float = 0.0
+
 
 func _ready() -> void:
+	_update_qi()
 	_update_stamina()
 	_update_stones()
+	_reset_regen()
+	CultivationService.qi_changed.connect(_on_qi_changed)
 	GameState.stamina_changed.connect(_on_stamina_changed)
 	GameState.spirit_stones_changed.connect(_on_stones_changed)
-	_sync_from_server()
 	if gm_btn:
 		gm_btn.pressed.connect(_open_gm)
 
-func _sync_from_server() -> void:
-	if GameState.regen_remaining_ms > 0:
-		_last_regen_server_ms = GameState.regen_remaining_ms
-		_regen_remaining = GameState.regen_remaining_ms / 1000.0
 
 func _reset_regen() -> void:
 	if GameState.stamina >= GameState.max_stamina:
 		_regen_remaining = 0.0
-		_update_regen_timer()
-		return
-	# Use server value if it changed (e.g. from merge/spawn/pill response)
-	if GameState.regen_remaining_ms > 0 and GameState.regen_remaining_ms != _last_regen_server_ms:
-		_last_regen_server_ms = GameState.regen_remaining_ms
+	elif GameState.regen_remaining_ms > 0:
 		_regen_remaining = GameState.regen_remaining_ms / 1000.0
-		_update_regen_timer()
-		return
-	if _regen_remaining > 0:
-		_update_regen_timer()
-		return
-	_regen_remaining = 120.0
+	else:
+		_regen_remaining = 1.0 * ConfigDatabase.get_game_config("stamina.regen_interval")
 	_update_regen_timer()
+
 
 func _process(delta: float) -> void:
 	if _regen_remaining > 0:
 		_regen_remaining -= delta
 		if _regen_remaining <= 0:
 			_regen_remaining = 0
-			GameState.stamina = mini(GameState.stamina + 1, GameState.max_stamina)
 			if GameState.stamina < GameState.max_stamina:
-				_regen_remaining = 120.0
-			GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
-	_update_regen_timer()
+				GameState.stamina += int(ConfigDatabase.get_game_config("stamina.regen_amount"))
+				GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+			_reset_regen()
+		_update_regen_timer()
+	GameState.regen_remaining_ms = _regen_remaining * 1000.0
+
 
 func _on_stamina_changed(current: int, max_stam: int) -> void:
 	_update_stamina()
 	_reset_regen()
 
+
 func _on_stones_changed(amount: int) -> void:
 	_update_stones()
+
+
+func _on_qi_changed(_current: int, _max: int) -> void:
+	_update_qi()
+
+
+func _update_qi() -> void:
+	if qi_label:
+		qi_label.text = "%d/%d" % [CultivationService.current_qi, CultivationService.max_qi]
+
 
 func _update_stones() -> void:
 	if stones_label:
 		stones_label.text = "%d" % GameState.spirit_stones
 
+
 func _update_stamina() -> void:
 	if stamina_label:
 		stamina_label.text = "%d/%d" % [GameState.stamina, GameState.max_stamina]
 
+
 func _update_regen_timer() -> void:
 	if not regen_timer_label:
 		return
-	if GameState.stamina >= GameState.max_stamina:
+	if _regen_remaining <= 0:
 		regen_timer_label.text = ""
 		return
 	var secs: int = int(ceil(_regen_remaining))

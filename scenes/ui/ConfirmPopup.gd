@@ -1,26 +1,26 @@
 class_name ConfirmPopup extends BasePopup
 
-signal confirmed()
-signal cancelled()
+@onready var title_label: Label = $Panel/VBox/TitleLabel
+@onready var message_label: Label = $Panel/VBox/MessageLabel
+@onready var confirm_btn: Button = $Panel/VBox/BtnBox/ConfirmButton
+@onready var cancel_btn: Button = $Panel/VBox/BtnBox/CancelButton
 
-@onready var message_label: Label = $Panel/MessageLabel
-@onready var confirm_btn: Button = $Panel/ConfirmButton
-@onready var cancel_btn: Button = $Panel/CancelButton
+var _on_confirmed: Callable = Callable()
 
-func _ready() -> void:
-	if confirm_btn:
-		confirm_btn.pressed.connect(_on_confirm)
-	if cancel_btn:
-		cancel_btn.pressed.connect(_on_cancel)
 
-func setup(msg: String) -> void:
-	if message_label:
-		message_label.text = msg
+func setup(title: String, message: String, on_confirmed: Callable) -> void:
+	title_label.text = title
+	message_label.text = message
+	_on_confirmed = on_confirmed
+	confirm_btn.pressed.connect(_on_confirm)
+	cancel_btn.pressed.connect(_on_cancel)
+
 
 func _on_confirm() -> void:
-	confirmed.emit()
+	if _on_confirmed.is_valid():
+		_on_confirmed.call()
 	UIManager.hide_popup(self)
 
+
 func _on_cancel() -> void:
-	cancelled.emit()
 	UIManager.hide_popup(self)

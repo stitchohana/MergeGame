@@ -46,6 +46,12 @@ export interface RewardConfig {
   items?: RewardItem[];
 }
 
+export interface HomeMeridianStageProgress {
+  stage: number;
+  lit: boolean[];
+  circulation_completed: boolean;
+}
+
 export interface QuestProgress {
   current_count: number;
   completed: boolean;
@@ -114,6 +120,7 @@ export interface GameState {
   quests_initialized?: boolean;
   quest_last_reset?: number;
   pending_rewards: PendingReward[];
+  home_meridian_progress?: HomeMeridianStageProgress[];
 }
 
 export interface BattleMonster {

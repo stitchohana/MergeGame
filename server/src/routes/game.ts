@@ -105,8 +105,8 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       meridian_circulations: state.meridian_circulations,
       meridian_threshold_idx: state.meridian_threshold_idx,
       quest_progress: state.quest_progress,
-      quest_defs: engine.questEngine.getResolvedQuestDefs(engine),
-      pending_rewards: state.pending_rewards,
+      quest_defs: engine.questEngine.getResolvedQuestDefs(engine), home_meridian_defs: engine.getHomeMeridianDefs(),
+      pending_rewards: state.pending_rewards, home_meridian_progress: state.home_meridian_progress,
     };
   }
 
@@ -295,11 +295,11 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
   // GET /api/game/shop/items
   router.get("/shop/items", async (req: Request, res: Response) => {
     try {
-      const items = engine.getShopItems().map(id => ({
-        id,
-        name: engine.getItemData(id)?.name ?? ("#" + id),
-        price: engine.getBuyPrice(id),
-      })).filter(i => i.price > 0);
+      const items = engine.getShopItems().map((s: any) => ({
+        id: s.id,
+        name: engine.getItemData(s.id)?.name ?? ("#" + s.id),
+        price: s.price,
+      }));
       res.json({ items });
     } catch (err) {
       console.error("[game] shop items error:", err);
@@ -340,7 +340,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.generateMeridianRequirements(state);
     state.version += 1;
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, acupoints: result.acupoints, threshold_idx: state.meridian_threshold_idx, complete_exp: result.complete_exp });
+    res.json({ ok: true, new_version: state.version, acupoints: result.acupoints, threshold_idx: state.meridian_threshold_idx });
   }));
 
   // POST /api/game/meridian/complete
@@ -440,7 +440,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.questEngine.claimQuestReward(state, quest_id, engine);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, quest_id, rewards: result.rewards, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, grid: state.grid, pouch: state.pouch, quest_progress: state.quest_progress, pending_rewards: state.pending_rewards });
+    res.json({ ok: true, quest_id, rewards: result.rewards, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, grid: state.grid, pouch: state.pouch, quest_progress: state.quest_progress, rewards_applied: engine.questEngine.lastAppliedRewards, pending_rewards: state.pending_rewards });
   }));
 
   // POST /api/game/claim_pending_reward
@@ -454,6 +454,19 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     res.json({ ok: true, grid: state.grid, pending_rewards: state.pending_rewards, new_version: state.version });
+  }));
+
+  // POST /api/game/home_meridian/light
+  router.post("/home_meridian/light", op(async (req, res, userId) => {
+    const { stage, index } = req.body;
+    if (typeof stage !== "number" || typeof index !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.lightHomeAcupoint(state, stage, index);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    await storage.saveState(userId, state);
+    res.json(result);
   }));
 
   // GET /api/leaderboard

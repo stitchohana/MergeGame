@@ -1,9 +1,0 @@
-{
-  "stamina": {
-	"max": 100,
-	"spawn_cost": 1,
-	"regen_interval": 120,
-	"regen_amount": 1
-  },
-  "reset_hour": 5
-}

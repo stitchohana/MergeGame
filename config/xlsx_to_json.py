@@ -1,0 +1,325 @@
+#!/usr/bin/env python3
+"""Convert separate .xlsx files under config/xlsx/ back to JSON config files.
+
+Usage: cd config && python xlsx_to_json.py
+Output: config/json_output/
+"""
+
+import json
+from pathlib import Path
+from openpyxl import load_workbook
+
+BASE = Path(__file__).parent
+XLSX_DIR = BASE / "xlsx"
+OUT = BASE / "json_output"
+OUT.mkdir(exist_ok=True)
+
+
+def parse_int(v):
+    if v is None or v == "" or v == "None":
+        return None
+    return int(v)
+
+
+def parse_bool(v):
+    if v is None or v == "":
+        return False
+    if isinstance(v, bool):
+        return v
+    return str(v).upper() in ("TRUE", "1", "YES")
+
+
+def parse_int_list(v, sep=";"):
+    if v is None or v == "":
+        return []
+    return [int(x.strip()) for x in str(v).split(sep) if x.strip()]
+
+
+def parse_dict_list(v, key1="id", key2="weight", sep=";"):
+    if v is None or v == "":
+        return []
+    result = []
+    for part in str(v).split(sep):
+        part = part.strip()
+        if not part:
+            continue
+        if ":" in part:
+            a, b = part.split(":", 1)
+            result.append({key1: int(a), key2: int(b)})
+        else:
+            result.append(int(part))
+    return result
+
+
+def read_rows(ws):
+    headers = [str(c.value).strip() if c.value else "" for c in ws[1]]
+    rows = []
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        d = {}
+        for i, val in enumerate(row):
+            if i < len(headers) and headers[i]:
+                d[headers[i]] = str(val).strip() if val is not None and str(val).strip() != "None" else ""
+        if any(v != "" for v in d.values()):
+            rows.append(d)
+    return rows
+
+
+def save_json(filename, data):
+    path = OUT / filename
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"  -> {filename}")
+
+
+def open_book(name):
+    return load_workbook(XLSX_DIR / f"{name}.xlsx")
+
+
+# ─── items ─────────────────────────────────────────────────
+print("Building items.json...")
+wb = open_book("items")
+
+regular = []
+for row in read_rows(wb["items_regular"]):
+    item = {"id": parse_int(row["id"]), "level": parse_int(row["level"]),
+            "name": row["name"], "icon": row.get("icon", ""),
+            "group_id": parse_int(row["group_id"]), "describe": row["describe"]}
+    if row.get("value"):
+        item["value"] = parse_int(row["value"])
+    if row.get("sell_price"):
+        item["sell_price"] = parse_int(row["sell_price"])
+    if row.get("use_effect_id"):
+        item["use_effect_id"] = parse_int(row["use_effect_id"])
+    if row.get("storage_slots"):
+        item["storage_slots"] = parse_int(row["storage_slots"])
+    regular.append(item)
+
+launcher = []
+for row in read_rows(wb["items_launcher"]):
+    item = {"id": parse_int(row["id"]), "level": parse_int(row["level"]),
+            "name": row["name"], "icon": row.get("icon", ""),
+            "group_id": parse_int(row["group_id"]),
+            "max_charges": parse_int(row["max_charges"]),
+            "recharge_time": parse_int(row["recharge_time"]),
+            "describe": row["describe"]}
+    if row.get("type"):
+        item["type"] = row["type"]
+    if parse_bool(row.get("no_cost")):
+        item["no_cost"] = True
+    spawns = parse_dict_list(row.get("spawns(id:weight)", ""))
+    fixed = parse_int_list(row.get("fixed_spawns", ""))
+    if fixed:
+        item["fixed_spawns"] = fixed
+    elif spawns:
+        item["spawns"] = spawns
+    launcher.append(item)
+
+crafting = []
+for row in read_rows(wb["items_crafting"]):
+    crafting.append({
+        "id": parse_int(row["id"]), "level": parse_int(row["level"]),
+        "name": row["name"], "group_id": parse_int(row["group_id"]),
+        "icon": row.get("icon", ""), "describe": row["describe"],
+        "recipes": parse_int_list(row.get("recipes", "")),
+    })
+save_json("items.json", {"regular": regular, "launcher": launcher, "crafting": crafting})
+
+# ─── meridians ─────────────────────────────────────────────
+print("Building meridians.json...")
+wb = open_book("meridians")
+thresholds = []
+for row in read_rows(wb["meridians"]):
+    thresholds.append({
+        "stage": parse_int(row["stage"]),
+        "item_pool": parse_int_list(row["item_pool"]),
+        "count_min": parse_int(row["count_min"]),
+        "count_max": parse_int(row["count_max"]),
+        "acupoint_rewards": parse_int(row["acupoint_rewards"]),
+        "order_count": parse_int(row["order_count"]),
+    })
+save_json("meridians.json", {"thresholds": thresholds})
+
+# ─── rewards ───────────────────────────────────────────────
+print("Building rewards.json...")
+wb = open_book("rewards")
+rewards = {}
+for row in read_rows(wb["rewards"]):
+    entry = {}
+    tokens = parse_dict_list(row.get("tokens(token:amount)", ""), "token", "amount")
+    if tokens:
+        entry["tokens"] = tokens
+    items = parse_dict_list(row.get("items(id:count)", ""), "id", "count")
+    if items:
+        entry["items"] = items
+    if entry:
+        rewards[row["reward_id"]] = entry
+save_json("rewards.json", {"rewards": rewards})
+
+# ─── game_config ───────────────────────────────────────────
+print("Building game_config.json...")
+wb = open_book("game_config")
+def unflatten(rows):
+    result = {}
+    for row in rows:
+        key = row["parameter"]
+        val = row["value"]
+        if not key or val == "":
+            continue
+        v = parse_int(val) if val.lstrip("-").isdigit() else val
+        parts = key.split(".")
+        target = result
+        for part in parts[:-1]:
+            if part not in target:
+                target[part] = {}
+            target = target[part]
+        target[parts[-1]] = v
+    return result
+save_json("game_config.json", unflatten(read_rows(wb["game_config"])))
+
+# ─── recipes ───────────────────────────────────────────────
+print("Building recipes.json...")
+wb = open_book("recipes")
+recipes = []
+for row in read_rows(wb["recipes"]):
+    recipes.append({
+        "id": parse_int(row["id"]), "name": row["name"],
+        "ingredients": parse_int_list(row["ingredients"]),
+        "result": parse_int(row["result"]),
+        "craft_time": parse_int(row["craft_time"]),
+        "crafting_level": parse_int(row["crafting_level"]),
+    })
+save_json("recipes.json", {"recipes": recipes})
+
+# ─── initial_setup ─────────────────────────────────────────
+print("Building initial_setup.json...")
+wb = open_book("initial_setup")
+setup = {}
+for row in read_rows(wb["initial_setup"]):
+    section = row["section"]
+    if section not in setup:
+        setup[section] = {"items": []}
+    setup[section]["items"].append({
+        "id": parse_int(row["id"]), "col": parse_int(row["col"]),
+        "row": parse_int(row["row"]), "immovable": parse_bool(row["immovable"]),
+    })
+save_json("initial_setup.json", setup)
+
+# ─── cultivation ───────────────────────────────────────────
+print("Building cultivation.json...")
+wb = open_book("cultivation")
+stages = []
+for row in read_rows(wb["cultivation"]):
+    stage = {"name": row["name"], "exp": parse_int(row["exp"]),
+             "max_qi": parse_int(row["max_qi"])}
+    if row.get("breakthrough_pill"):
+        stage["breakthrough_pill"] = parse_int(row["breakthrough_pill"])
+    stages.append(stage)
+save_json("cultivation.json", {"stages": stages})
+
+# ─── shop ──────────────────────────────────────────────────
+print("Building shop.json...")
+wb = open_book("shop")
+items_list = []
+for row in read_rows(wb["shop"]):
+    items_list.append({"id": parse_int(row["id"]), "price": parse_int(row["price"])})
+save_json("shop.json", {"items": items_list})
+
+# ─── expedition ────────────────────────────────────────────
+print("Building expedition.json...")
+wb = open_book("expedition")
+monsters = []
+for row in read_rows(wb["monsters"]):
+    monsters.append({
+        "id": parse_int(row["id"]), "name": row["name"],
+        "hp": parse_int(row["hp"]), "atk": parse_int(row["atk"]),
+        "accept_effect_ids": parse_int_list(row["accept_effect_ids"]),
+        "loot": parse_int_list(row["loot"]),
+        "describe": row["describe"],
+    })
+
+maps_raw = {row["id"]: row for row in read_rows(wb["maps"])}
+stages_by_map = {}
+for row in read_rows(wb["map_stages"]):
+    mid = row["map_id"]
+    if mid not in stages_by_map:
+        stages_by_map[mid] = []
+    stage = {
+        "stage": parse_int(row["stage"]), "name": row["name"],
+        "monsters": parse_dict_list(row.get("monsters(monster_id:count)", ""), "monster_id", "count"),
+    }
+    boss_id = row.get("boss_monster_id", "")
+    if boss_id:
+        stage["boss"] = {"monster_id": parse_int(boss_id)}
+    stages_by_map[mid].append(stage)
+
+maps_list = []
+for mid, mp in maps_raw.items():
+    maps_list.append({
+        "id": parse_int(mp["id"]), "name": mp["name"],
+        "describe": mp["describe"],
+        "stages": stages_by_map.get(mid, []),
+    })
+save_json("expedition.json", {"monsters": monsters, "maps": maps_list})
+
+# ─── effects ───────────────────────────────────────────────
+print("Building effects.json...")
+wb = open_book("effects")
+effects = []
+for row in read_rows(wb["effects"]):
+    e = {"id": parse_int(row["id"]), "type": row["type"], "describe": row["describe"]}
+    if row.get("amount"):
+        e["amount"] = parse_int(row["amount"])
+    if row.get("exp_gain"):
+        e["exp_gain"] = parse_int(row["exp_gain"])
+    effects.append(e)
+save_json("effects.json", {"effects": effects})
+
+# ─── tokens ────────────────────────────────────────────────
+print("Building tokens.json...")
+wb = open_book("tokens")
+tokens = []
+for row in read_rows(wb["tokens"]):
+    tokens.append({
+        "id": parse_int(row["id"]), "name": row["name"],
+        "icon": row.get("icon", ""), "describe": row["describe"],
+    })
+save_json("tokens.json", {"tokens": tokens})
+
+# ─── server ────────────────────────────────────────────────
+print("Building server.json...")
+wb = open_book("server")
+server = {}
+for row in read_rows(wb["server"]):
+    val = row["value"]
+    server[row["parameter"]] = parse_int(val) if val.isdigit() else val
+save_json("server.json", server)
+
+# ─── quests ────────────────────────────────────────────────
+print("Building quests.json...")
+wb = open_book("quests")
+quests = []
+for row in read_rows(wb["quests"]):
+    quests.append({
+        "id": parse_int(row["id"]), "type": parse_int(row["type"]),
+        "name": row["name"], "description": row["description"],
+        "target_count": parse_int(row["target_count"]),
+        "rewards": parse_int(row["rewards"]),
+        "auto_reward": parse_bool(row["auto_reward"]),
+        "reset_cycle": parse_int(row["reset_cycle"]),
+    })
+save_json("quests.json", {"quests": quests})
+
+# ─── home_meridians ────────────────────────────────────────
+print("Building home_meridians.json...")
+wb = open_book("home_meridians")
+home_stages = []
+for row in read_rows(wb["home_meridians"]):
+    home_stages.append({
+        "name": row["name"], "acupoints": parse_int(row["acupoints"]),
+        "qi_cost": parse_int(row["qi_cost"]),
+        "acupoint_rewards": parse_int(row["acupoint_rewards"]),
+        "circulation_rewards": parse_int(row["circulation_rewards"]),
+    })
+save_json("home_meridians.json", {"stages": home_stages})
+
+print(f"\nDone! JSON files written to {OUT}")

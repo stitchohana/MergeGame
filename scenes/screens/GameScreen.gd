@@ -2,14 +2,12 @@ class_name GameScreen extends BaseScreen
 
 @onready var detail_panel: ItemDetailPanel = $ItemDetailPanel
 @onready var grid_view: GridView = $GridView
-@onready var cultivation_panel: CultivationPanel = $CultivationPanel
 @onready var requirement_list: RequirementList = $RequirementList
 @onready var battle_btn: Button = $BattleButton
 @onready var home_btn: Button = $HomeButton
 @onready var shop_btn: Button = $ShopButton
 @onready var pouch_zone: PouchDropZone = $PouchDropZone
 
-var _meridian_complete_exp: int = 50
 var _pending_item_ids: Array = []
 var _display_index_map: Array = []
 var _pending_stamina_uid: int = -1
@@ -31,7 +29,6 @@ func _ready() -> void:
 	detail_panel.material_clicked.connect(_on_material_clicked)
 	grid_view.item_clicked.connect(_on_item_clicked)
 
-	cultivation_panel.cultivation_clicked.connect(_on_cultivation_clicked)
 	grid_view.item_use_requested.connect(_on_item_use_requested)
 	CloudService.craft_remove_confirmed.connect(_on_craft_remove_confirmed)
 	CloudService.craft_remove_rejected.connect(_on_craft_remove_rejected)
@@ -104,10 +101,6 @@ func _on_material_clicked(item_id: int) -> void:
 	detail_panel._refresh_materials()
 	if CloudService.online:
 		CloudService.submit_craft_remove(table_pos.x, table_pos.y, item_id, spawn_pos.x, spawn_pos.y, GameState.version)
-
-func _on_cultivation_clicked() -> void:
-	var detail := preload("res://scenes/ui/CultivationDetail.tscn").instantiate()
-	UIManager.show_popup(detail)
 
 func _on_craft_remove_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
@@ -208,7 +201,6 @@ func _on_meridian_refresh_confirmed(result: Dictionary) -> void:
 	GameState.version = result.get("new_version", GameState.version)
 	GameState.meridian_acupoints = result.get("acupoints", [])
 	GameState.meridian_threshold_idx = result.get("threshold_idx", 0)
-	_meridian_complete_exp = result.get("complete_exp", 50)
 	_display_meridian()
 
 func _display_meridian() -> void:
@@ -217,7 +209,7 @@ func _display_meridian() -> void:
 	for req in GameState.meridian_acupoints:
 		if req.get("completed", false):
 			completed += 1
-	requirement_list.set_title("大周天 %d/%d (奖励 %d修为)" % [completed, GameState.meridian_acupoints.size(), _meridian_complete_exp])
+	requirement_list.set_title("修炼需求 %d/%d" % [completed, GameState.meridian_acupoints.size()])
 	var display_reqs: Array = []
 	for i in range(GameState.meridian_acupoints.size()):
 		var req: Dictionary = GameState.meridian_acupoints[i]
@@ -265,23 +257,8 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 	if not cult.is_empty():
 		CultivationService.deserialize(cult)
 
-	for i in range(result.get("meridian_acupoints", []).size()):
-		if i < GameState.meridian_acupoints.size():
-			GameState.meridian_acupoints[i] = result.meridian_acupoints[i]
-		if result.meridian_acupoints[i].get("completed", false):
-			requirement_list.remove_entry(i)
-
-	if result.get("circulation_completed", false):
-		GameState.meridian_circulations += 1
-		var exp: int = result.get("exp_gained", 0)
-		EventBus.show_toast.emit("大周天完成！获得%d修为 (%d次)" % [exp, GameState.meridian_circulations])
-		GameState.meridian_acupoints.clear()
-		if CultivationService._needs_breakthrough_pill():
-			_meridian_waiting_breakthrough = true
-			requirement_list.set_title("需突破后才可继续修炼")
-			EventBus.show_toast.emit("修为已达瓶颈，需突破后继续")
-		else:
-			_refresh_meridian()
+	# Server returns updated list (completed order removed, new order added)
+	GameState.meridian_acupoints = result.get("meridian_acupoints", [])
 	_display_meridian()
 
 	var qi_gained: int = result.get("qi_gained", 0)
@@ -300,6 +277,7 @@ func _on_meridian_rejected(reason: String) -> void:
 	match reason:
 		"insufficient_items": EventBus.show_toast.emit("物品不足")
 		"already_completed": EventBus.show_toast.emit("该穴位已完成")
+		"qi_full": EventBus.show_toast.emit("灵力已达上限，请先去使用吧")
 		_: EventBus.show_toast.emit("修炼失败：" + reason)
 
 func _on_stamina_restore_confirmed(result: Dictionary) -> void:

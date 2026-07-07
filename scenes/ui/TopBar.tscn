@@ -9,6 +9,24 @@ offset_right = 780.0
 offset_bottom = 50.0
 script = ExtResource("1_gd")
 
+[node name="QiIcon" type="ColorRect" parent="." unique_id=500123]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 13.0
+offset_right = 34.0
+offset_bottom = 37.0
+color = Color(0.3, 0.6, 1, 1)
+
+[node name="QiLabel" type="Label" parent="." unique_id=500124]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 13.0
+offset_right = 130.0
+offset_bottom = 37.0
+theme_override_colors/font_color = Color(0.3, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "0/100"
+
 [node name="StaminaIcon" type="ColorRect" parent="." unique_id=1176530702]
 layout_mode = 0
 offset_left = 138.0

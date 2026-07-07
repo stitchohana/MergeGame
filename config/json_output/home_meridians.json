@@ -1,0 +1,25 @@
+{
+  "stages": [
+    {
+      "name": "练气期·经脉初开",
+      "acupoints": 3,
+      "qi_cost": 10,
+      "acupoint_rewards": 1,
+      "circulation_rewards": 2
+    },
+    {
+      "name": "筑基期·经脉贯通",
+      "acupoints": 5,
+      "qi_cost": 15,
+      "acupoint_rewards": 1,
+      "circulation_rewards": 2
+    },
+    {
+      "name": "金丹期·经脉大成",
+      "acupoints": 7,
+      "qi_cost": 20,
+      "acupoint_rewards": 1,
+      "circulation_rewards": 2
+    }
+  ]
+}

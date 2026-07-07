@@ -22,7 +22,7 @@ func set_requirements(reqs: Array) -> void:
 		var req: Dictionary = reqs[i]
 		var entry: RequirementEntry = _entry_scene.instantiate()
 		container.add_child(entry)
-		entry.setup(req.get("items", []), i, req.get("completed", false))
+		entry.setup(req.get("items", []), i, req.get("completed", false), req.get("rewards", {}))
 		var idx := i
 		entry.complete_pressed.connect(_emit_complete.bind(idx))
 

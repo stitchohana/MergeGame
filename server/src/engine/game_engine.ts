@@ -13,6 +13,8 @@ interface ItemDef {
   group_id: number;
   describe: string;
   type: string;
+  value?: number;
+  sell_price?: number;
   spawns?: { id: number; weight: number }[];
   use_effect_id?: number;
   recipes?: number[];
@@ -68,32 +70,34 @@ export class GameEngine {
   private initialSetups = new Map<string, { id: number; col: number; row: number }[]>();
   staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
   questResetHour = 0;
-  private shopConfig = { shopItems: [] as number[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
+  private shopConfig = { shopItems: [] as any[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
   private effectsById = new Map<number, { id: number; type: string; exp_gain?: number; duration?: number; multiplier?: number; amount?: number; describe?: string }>();
   private meridianThresholds: any[] = [];
   private maps = new Map<number, any>();
   private monsters = new Map<number, any>();
   private rewardsTable = new Map<number, RewardConfig>();
+  private homeMeridianDefs: any[] = [];
   questEngine: QuestEngine;
 
   constructor(configDir: string) {
     this.loadConfigs(configDir);
     this.questEngine = new QuestEngine(configDir);
-    this.loadRewards(path.join(configDir, "rewards.json"));
+    this.loadRewards(path.join(configDir, "json_output", "rewards.json"));
+    this.loadHomeMeridians(path.join(configDir, "json_output", "home_meridians.json"));
   }
 
   // --- Config loading ---
 
   private loadConfigs(configDir: string): void {
-    this.loadItems(path.join(configDir, "items.json"));
-    this.loadCultivation(path.join(configDir, "cultivation.json"));
-    this.loadInitialSetup(path.join(configDir, "initial_setup.json"));
-    this.loadRecipes(path.join(configDir, "recipes.json"));
-    this.loadGameConfig(path.join(configDir, "game_config.json"));
-    this.loadShopConfig(path.join(configDir, "shop.json"));
-    this.loadEffects(path.join(configDir, "effects.json"));
-    this.loadMeridians(path.join(configDir, "meridians.json"));
-    this.loadExpedition(path.join(configDir, "expedition.json"));
+    this.loadItems(path.join(configDir, "json_output", "items.json"));
+    this.loadCultivation(path.join(configDir, "json_output", "cultivation.json"));
+    this.loadInitialSetup(path.join(configDir, "json_output", "initial_setup.json"));
+    this.loadRecipes(path.join(configDir, "json_output", "recipes.json"));
+    this.loadGameConfig(path.join(configDir, "json_output", "game_config.json"));
+    this.loadShopConfig(path.join(configDir, "json_output", "shop.json"));
+    this.loadEffects(path.join(configDir, "json_output", "effects.json"));
+    this.loadMeridians(path.join(configDir, "json_output", "meridians.json"));
+    this.loadExpedition(path.join(configDir, "json_output", "expedition.json"));
     console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.stages.length ?? 0} stages, ${this.effectsById.size} effects, ${this.meridianThresholds.length} meridian thresholds, ${this.maps.size} maps, ${this.monsters.size} monsters`);
   }
 
@@ -121,23 +125,26 @@ export class GameEngine {
     try {
       const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       this.shopConfig = {
-        shopItems: data.shop_items ?? [],
-        sellPrices: data.sell_prices ?? {},
-        buyPrices: data.buy_prices ?? {},
+        shopItems: data.items ?? [],
+        sellPrices: {} as Record<string, number>,
+        buyPrices: {} as Record<string, number>,
       };
-      console.log(`[engine] Shop config: ${this.shopConfig.shopItems.length} items, ${Object.keys(this.shopConfig.sellPrices).length} sellable prices`);
+      for (const s of this.shopConfig.shopItems) {
+        this.shopConfig.buyPrices[String(s.id)] = s.price;
+      }
+      console.log(`[engine] Shop config: ${this.shopConfig.shopItems.length} items`);
     } catch { /* ignore */ }
   }
 
   getSellPrice(itemId: number): number {
-    return this.shopConfig.sellPrices[String(itemId)] ?? 0;
+    return this.getItemData(itemId)?.sell_price ?? 0;
   }
 
   getBuyPrice(itemId: number): number {
     return this.shopConfig.buyPrices[String(itemId)] ?? 0;
   }
 
-  getShopItems(): number[] {
+  getShopItems(): any[] {
     return this.shopConfig.shopItems;
   }
 
@@ -228,56 +235,159 @@ export class GameEngine {
     return this.rewardsTable.get(rewardId);
   }
 
+  private loadHomeMeridians(filePath: string): void {
+    try {
+      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      this.homeMeridianDefs = data.stages || [];
+      console.log(`[engine] Loaded ${this.homeMeridianDefs.length} home meridian stages`);
+    } catch { /* optional */ }
+  }
+
+  getHomeMeridianDefs(): any[] {
+    return this.homeMeridianDefs.map(s => ({
+      ...s,
+      acupoint_rewards: typeof s.acupoint_rewards === "number" ? (this.rewardsTable.get(s.acupoint_rewards) ?? s.acupoint_rewards) : s.acupoint_rewards,
+      circulation_rewards: typeof s.circulation_rewards === "number" ? (this.rewardsTable.get(s.circulation_rewards) ?? s.circulation_rewards) : s.circulation_rewards,
+    }));
+  }
+
+  lightHomeAcupoint(state: GameState, stageIndex: number, acupointIndex: number):
+    { ok: true; rewards_applied: RewardConfig; circulation_completed: boolean; cultivation: any; spirit_stones: number; stamina: number; pending_rewards: any[]; home_meridian_progress: any[] }
+    | { ok: false; reason: string }
+  {
+    if (stageIndex < 0 || stageIndex >= this.homeMeridianDefs.length) {
+      return { ok: false, reason: "invalid_stage" };
+    }
+    const def = this.homeMeridianDefs[stageIndex];
+    if (acupointIndex < 0 || acupointIndex >= def.acupoints) {
+      return { ok: false, reason: "invalid_acupoint" };
+    }
+
+    // Init progress
+    state.home_meridian_progress = state.home_meridian_progress || [];
+    let stageProgress = state.home_meridian_progress.find(p => p.stage === stageIndex);
+    if (!stageProgress) {
+      stageProgress = { stage: stageIndex, lit: new Array(def.acupoints).fill(false), circulation_completed: false };
+      state.home_meridian_progress.push(stageProgress);
+    }
+    if (stageProgress.lit[acupointIndex]) {
+      return { ok: false, reason: "already_lit" };
+    }
+    if (stageProgress.circulation_completed) {
+      return { ok: false, reason: "circulation_completed" };
+    }
+
+    // Check qi
+    const qiCost: number = def.qi_cost ?? 10;
+    if (state.cultivation.current_qi < qiCost) {
+      return { ok: false, reason: "insufficient_qi" };
+    }
+
+    // Deduct qi
+    state.cultivation.current_qi -= qiCost;
+
+    // Light acupoint
+    stageProgress.lit[acupointIndex] = true;
+
+    // Acupoint reward
+    let rewardsApplied: RewardConfig = { tokens: [], items: [] };
+    if (def.acupoint_rewards) {
+      const r = this.applyRewards(state, def.acupoint_rewards);
+      rewardsApplied.tokens!.push(...(r.tokens || []));
+      rewardsApplied.items!.push(...(r.items || []));
+    }
+
+    // Check circulation completion
+    const allLit = stageProgress.lit.every(l => l);
+    if (allLit) {
+      stageProgress.circulation_completed = true;
+      if (def.circulation_rewards) {
+        const r = this.applyRewards(state, def.circulation_rewards);
+        rewardsApplied.tokens!.push(...(r.tokens || []));
+        rewardsApplied.items!.push(...(r.items || []));
+      }
+    }
+
+    state.version += 1;
+    return {
+      ok: true,
+      rewards_applied: rewardsApplied,
+      circulation_completed: allLit,
+      cultivation: state.cultivation,
+      spirit_stones: state.spirit_stones,
+      stamina: state.stamina,
+      pending_rewards: state.pending_rewards,
+      home_meridian_progress: state.home_meridian_progress,
+    };
+  }
+
   getMonster(id: number): any {
     return this.monsters.get(id) ?? null;
   }
 
-  generateMeridianRequirements(state: GameState): { acupoints: any[]; complete_exp: number } {
+  generateMeridianRequirements(state: GameState): { acupoints: any[] } {
     const thresholds = this.meridianThresholds;
-    if (!thresholds.length) return { acupoints: [], complete_exp: 0 };
+    if (!thresholds.length) return { acupoints: [] };
 
     const stageLevel = state.cultivation.current_level;
-    let foundIdx = 0;
-    for (let i = 0; i < thresholds.length; i++) {
-      const t = thresholds[i];
-      if (t.stage === stageLevel) {
-        foundIdx = i;
-        break;
-      }
-    }
-    const t = thresholds[foundIdx];
-    const acuCount: number = t.acupoints ?? 3;
+    const t = this._findMeridianThreshold(stageLevel) ?? thresholds[0];
+    const foundIdx = thresholds.indexOf(t);
+    const orderCount: number = t.order_count ?? t.acupoints ?? 3;
     const pool: number[] = t.item_pool ?? [];
     const typeMin: number = t.count_min ?? 1;
     const typeMax: number = t.count_max ?? 3;
 
     state.meridian_threshold_idx = foundIdx;
+    const templateRewards: RewardConfig | undefined = t.acupoint_rewards;
     const acupoints: any[] = [];
-    for (let i = 0; i < acuCount; i++) {
-      const numTypes = typeMin + Math.floor(Math.random() * (typeMax - typeMin + 1));
-      const pickedIds: number[] = [];
-      const names: string[] = [];
-      const items: any[] = [];
-      const available = [...pool];
-      for (let j = 0; j < numTypes && available.length > 0; j++) {
-        const idx = Math.floor(Math.random() * available.length);
-        const itemId = available[idx];
-        available.splice(idx, 1);
-        const itemData = this.getItemData(itemId);
-        const name = itemData?.name ?? `#${itemId}`;
-        pickedIds.push(itemId);
-        names.push(name);
-        items.push({ item_id: itemId, name });
+    for (let i = 0; i < orderCount; i++) {
+      const order = this._genOneAcupoint(pool, typeMin, typeMax);
+      if (templateRewards && order.total_value > 0) {
+        order.rewards = this._scaleRewardConfig(templateRewards, order.total_value);
       }
-      acupoints.push({
-        item_ids: pickedIds,
-        name: names.join(", "),
-        items,
-        completed: false,
-      });
+      acupoints.push(order);
     }
     state.meridian_acupoints = acupoints;
-    return { acupoints, complete_exp: t.complete_exp ?? 50 };
+    return { acupoints };
+  }
+
+  private _scaleRewardConfig(rewards: RewardConfig | number, multiplier: number): RewardConfig {
+    const base: RewardConfig = typeof rewards === "number"
+      ? (this.rewardsTable.get(rewards) ?? { tokens: [], items: [] })
+      : rewards;
+    return {
+      tokens: (base.tokens || []).map(t => ({ token: t.token, amount: t.amount * multiplier })),
+      items: (base.items || []).map(i => ({ id: i.id, count: i.count * multiplier })),
+    };
+  }
+
+  private _findMeridianThreshold(stageLevel: number): any {
+    for (const t of this.meridianThresholds) {
+      if (t.stage === stageLevel) return t;
+    }
+    return this.meridianThresholds[0] ?? null;
+  }
+
+  private _genOneAcupoint(pool: number[], typeMin: number, typeMax: number): any {
+    const numTypes = typeMin + Math.floor(Math.random() * (typeMax - typeMin + 1));
+    const pickedIds: number[] = [];
+    const names: string[] = [];
+    const items: any[] = [];
+    let totalValue = 0;
+    const available = [...pool];
+    for (let j = 0; j < numTypes && available.length > 0; j++) {
+      const idx = Math.floor(Math.random() * available.length);
+      const itemId = available[idx];
+      available.splice(idx, 1);
+      const itemData = this.getItemData(itemId);
+      const name = itemData?.name ?? `#${itemId}`;
+      const value = itemData?.value ?? 0;
+      totalValue += value;
+      pickedIds.push(itemId);
+      names.push(name);
+      items.push({ item_id: itemId, name, value });
+    }
+    return { item_ids: pickedIds, name: names.join(", "), items, completed: false, total_value: totalValue };
   }
 
   private loadInitialSetup(filePath: string): void {
@@ -357,22 +467,18 @@ export class GameEngine {
 
   tickStamina(state: GameState): void {
     const now = Date.now();
-    // Reset timer when stamina is already full
     if (state.stamina >= this.staminaConfig.max) {
       state.last_stamina_tick = now;
       return;
     }
-    // Normal regen tick
-    const elapsed = (now - state.last_stamina_tick) / 1000;
-    if (elapsed < this.staminaConfig.regenInterval) return;
-    const ticks = Math.floor(elapsed / this.staminaConfig.regenInterval);
-    if (ticks <= 0) return;
-    const gained = ticks * this.staminaConfig.regenAmount;
-    state.stamina = Math.min(state.stamina + gained, this.staminaConfig.max);
-    state.last_stamina_tick += ticks * this.staminaConfig.regenInterval * 1000;
-    // After adding, if stamina just reached max, reset timer
-    if (state.stamina >= this.staminaConfig.max) {
-      state.last_stamina_tick = now;
+    const intervalMs = this.staminaConfig.regenInterval * 1000;
+    while (now - state.last_stamina_tick >= intervalMs) {
+      if (state.stamina >= this.staminaConfig.max) {
+        state.last_stamina_tick = now;
+        break;
+      }
+      state.stamina += this.staminaConfig.regenAmount;
+      state.last_stamina_tick += intervalMs;
     }
   }
 
@@ -497,7 +603,7 @@ export class GameEngine {
             console.log(`[reward] +${t.amount} qi (total: ${state.cultivation.current_qi}/${state.cultivation.max_qi})`);
             break;
           case TokenType.STAMINA:
-            state.stamina = Math.min(this.staminaConfig.max, state.stamina + t.amount);
+            state.stamina += t.amount;
             console.log(`[reward] +${t.amount} stamina (total: ${state.stamina})`);
             break;
           case TokenType.EXP:
@@ -1271,13 +1377,32 @@ export class GameEngine {
     }
     if (!this.cultivation) return { ok: false, reason: "no_config" };
 
-    // Remove the pill from grid
-    const pillIdx = state.grid.findIndex(g => g.uid === uid);
-    if (pillIdx >= 0) {
-      state.grid.splice(pillIdx, 1);
-      console.log(`[engine]   breakthrough pill #${pillId} removed, uid=${uid}`);
+    // Find and remove the pill
+    if (uid > 0) {
+      const pillIdx = state.grid.findIndex(g => g.uid === uid);
+      if (pillIdx >= 0) {
+        state.grid.splice(pillIdx, 1);
+        console.log(`[engine]   breakthrough pill #${pillId} removed from grid, uid=${uid}`);
+      } else {
+        console.log(`[engine]   breakthrough: uid=${uid} NOT FOUND in grid`);
+        return { ok: false, reason: "pill_not_found" };
+      }
     } else {
-      console.log(`[engine]   breakthrough: uid=${uid} NOT FOUND in grid! All uids: [${state.grid.map(g => `${g.id}:uid=${g.uid}`).join(", ")}]`);
+      // uid=0: search pouch first, then grid
+      const pouchIdx = state.pouch.indexOf(pillId);
+      if (pouchIdx >= 0) {
+        state.pouch.splice(pouchIdx, 1);
+        console.log(`[engine]   breakthrough pill #${pillId} removed from pouch`);
+      } else {
+        const gridIdx = state.grid.findIndex(g => g.id === pillId);
+        if (gridIdx >= 0) {
+          state.grid.splice(gridIdx, 1);
+          console.log(`[engine]   breakthrough pill #${pillId} removed from grid`);
+        } else {
+          console.log(`[engine]   breakthrough: pill #${pillId} not found in pouch or grid`);
+          return { ok: false, reason: "pill_not_found" };
+        }
+      }
     }
 
     const newLevel = level + 1;
@@ -1628,7 +1753,7 @@ export class GameEngine {
 
   // --- Meridian ---
 
-  completeMeridianAcupoint(state: GameState, index: number, itemIds: number[]): { ok: true; newVersion: number; meridian_acupoints: any[]; circulation_completed: boolean; exp_gained: number; qi_gained: number; qi_full: boolean; grid: any[]; cultivation: any; rewards_applied: RewardConfig } | { ok: false; reason: string } {
+  completeMeridianAcupoint(state: GameState, index: number, itemIds: number[]): { ok: true; newVersion: number; meridian_acupoints: any[]; qi_gained: number; qi_full: boolean; grid: any[]; cultivation: any; rewards_applied: RewardConfig } | { ok: false; reason: string } {
     if (!state.meridian_acupoints || index < 0 || index >= state.meridian_acupoints.length) {
       return { ok: false, reason: "invalid_index" };
     }
@@ -1653,47 +1778,44 @@ export class GameEngine {
       state.grid.splice(idx, 1);
     }
 
+    // Check if qi is capped (rewards would be wasted)
+    if (state.cultivation.current_qi >= state.cultivation.max_qi) {
+      return { ok: false, reason: "qi_full" };
+    }
+
     req.completed = true;
     state.version += 1;
 
-    // Acupoint reward — generic reward distribution
+    // Order reward — scale by total item value
     const threshold = this.meridianThresholds[state.meridian_threshold_idx ?? 0];
-    const acupointRewards: RewardConfig | undefined = threshold?.acupoint_rewards;
+    const totalValue: number = (req as any).total_value ?? 0;
     let qiGained = 0;
     let qiFull = false;
     let rewardsApplied: RewardConfig = { tokens: [], items: [] };
-    if (acupointRewards) {
+    if (totalValue > 0 && threshold?.acupoint_rewards) {
+      const scaledRewards = this._scaleRewardConfig(threshold.acupoint_rewards, totalValue);
       const qiBefore = state.cultivation.current_qi;
-      const r = this.applyRewards(state, acupointRewards);
+      const r = this.applyRewards(state, scaledRewards);
       rewardsApplied.tokens!.push(...(r.tokens || []));
       rewardsApplied.items!.push(...(r.items || []));
       qiGained = state.cultivation.current_qi - qiBefore;
       qiFull = state.cultivation.current_qi >= state.cultivation.max_qi && qiBefore < state.cultivation.max_qi;
     }
 
-    // Check if full circulation completed
-    let circulationCompleted = false;
-    let expGained = 0;
-    const allDone = state.meridian_acupoints.every(r => r.completed);
-    if (allDone) {
-      circulationCompleted = true;
-      const circulationRewards = threshold?.circulation_rewards;
-      const expBefore = state.cultivation.total_exp;
-      if (circulationRewards) {
-        const r = this.applyRewards(state, circulationRewards);
-        rewardsApplied.tokens!.push(...(r.tokens || []));
-        rewardsApplied.items!.push(...(r.items || []));
-      }
-      expGained = state.cultivation.total_exp - expBefore;
-      state.meridian_circulations = (state.meridian_circulations ?? 0) + 1;
-      for (const r of state.meridian_acupoints) {
-        r.completed = false;
-      }
-      console.log(`[engine] meridian circulation #${state.meridian_circulations} completed! +${expGained}exp`);
-      this.questEngine.incrementQuestProgress(state, QuestType.MERIDIAN_CIRCULATION, 1, this);
+    // Remove completed order, generate replacement using current stage
+    state.meridian_acupoints.splice(index, 1);
+    const newThreshold = this._findMeridianThreshold(state.cultivation.current_level);
+    const newPool: number[] = newThreshold?.item_pool ?? [];
+    const newTypeMin: number = newThreshold?.count_min ?? 1;
+    const newTypeMax: number = newThreshold?.count_max ?? 3;
+    const newOrder = this._genOneAcupoint(newPool, newTypeMin, newTypeMax);
+    if (newThreshold?.acupoint_rewards && newOrder.total_value > 0) {
+      newOrder.rewards = this._scaleRewardConfig(newThreshold.acupoint_rewards, newOrder.total_value);
     }
+    state.meridian_acupoints.push(newOrder);
+    console.log(`[engine] meridian order #${index} completed, new order generated`);
 
-    return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, circulation_completed: circulationCompleted, exp_gained: expGained, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, rewards_applied: rewardsApplied };
+    return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, rewards_applied: rewardsApplied };
   }
 
   // --- Storage ---

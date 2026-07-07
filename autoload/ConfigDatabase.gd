@@ -17,15 +17,15 @@ func _ready() -> void:
 	load_all()
 
 func load_all() -> void:
-	_game_config = _load_json("res://config/game_config.json")
-	_initial_setup = _load_json("res://config/initial_setup.json")
-	_load_items("res://config/items.json")
-	_load_recipes("res://config/recipes.json")
-	_cultivation_config = _load_json("res://config/cultivation.json")
-	_load_effects("res://config/effects.json")
-	_load_expedition("res://config/expedition.json")
-	_load_meridians("res://config/meridians.json")
-	_load_tokens("res://config/tokens.json")
+	_game_config = _load_json("res://config/json_output/game_config.json")
+	_initial_setup = _load_json("res://config/json_output/initial_setup.json")
+	_load_items("res://config/json_output/items.json")
+	_load_recipes("res://config/json_output/recipes.json")
+	_cultivation_config = _load_json("res://config/json_output/cultivation.json")
+	_load_effects("res://config/json_output/effects.json")
+	_load_expedition("res://config/json_output/expedition.json")
+	_load_meridians("res://config/json_output/meridians.json")
+	_load_tokens("res://config/json_output/tokens.json")
 
 func _load_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)

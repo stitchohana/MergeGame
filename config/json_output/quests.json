@@ -1,0 +1,124 @@
+{
+  "quests": [
+    {
+      "id": 1,
+      "type": 1,
+      "name": "合成新手",
+      "description": "完成5次合成",
+      "target_count": 5,
+      "rewards": 1,
+      "auto_reward": true,
+      "reset_cycle": 1
+    },
+    {
+      "id": 101,
+      "type": 1,
+      "name": "初次合成",
+      "description": "完成1次合成",
+      "target_count": 1,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 102,
+      "type": 1,
+      "name": "合成能手",
+      "description": "完成10次合成",
+      "target_count": 10,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 103,
+      "type": 1,
+      "name": "合成大师",
+      "description": "完成50次合成",
+      "target_count": 50,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 201,
+      "type": 2,
+      "name": "初次生成",
+      "description": "生成1个物品",
+      "target_count": 1,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 301,
+      "type": 3,
+      "name": "初次制作",
+      "description": "完成1次制作",
+      "target_count": 1,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 401,
+      "type": 4,
+      "name": "初次出售",
+      "description": "出售1个物品",
+      "target_count": 1,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 501,
+      "type": 5,
+      "name": "初次战斗",
+      "description": "进行1次战斗",
+      "target_count": 1,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 502,
+      "type": 6,
+      "name": "清剿关卡",
+      "description": "通关1个战斗关卡",
+      "target_count": 1,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 601,
+      "type": 7,
+      "name": "突破境界",
+      "description": "完成1次突破",
+      "target_count": 1,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 701,
+      "type": 8,
+      "name": "服药达人",
+      "description": "使用10次丹药",
+      "target_count": 10,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    },
+    {
+      "id": 901,
+      "type": 9,
+      "name": "周天初成",
+      "description": "完成1次大周天",
+      "target_count": 1,
+      "rewards": 1,
+      "auto_reward": false,
+      "reset_cycle": 0
+    }
+  ]
+}

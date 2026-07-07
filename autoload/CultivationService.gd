@@ -60,8 +60,7 @@ func _on_exp_pill_consume_confirmed(result: Dictionary) -> void:
 func try_breakthrough(pill_id: int, uid: int) -> bool:
 	print("[Cultivation] try_breakthrough pill=" + str(pill_id) + " uid=" + str(uid))
 	if uid <= 0:
-		print("[Cultivation] try_breakthrough BLOCKED: uid=" + str(uid))
-		return false
+		print("[Cultivation] try_breakthrough uid=0, will search pouch/grid")
 	_pending_breakthrough_uid = uid
 	print("[Cultivation] pending_breakthrough_uid=" + str(_pending_breakthrough_uid))
 	if CloudService.online:

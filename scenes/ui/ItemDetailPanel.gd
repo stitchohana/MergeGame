@@ -15,7 +15,6 @@ signal material_clicked(item_id: int)
 var _current_item_data: Dictionary = {}
 var _current_recipes: Array = []
 var _countdown_timer: Timer = null
-var _sell_prices: Dictionary = {}
 
 func _ready() -> void:
 	clear()
@@ -260,15 +259,17 @@ func _on_sell_pressed() -> void:
 	var uid: int = _get_current_uid()
 	if uid <= 0:
 		return
+	if _current_item_data.get("immovable", false):
+		EventBus.show_toast.emit("该物品无法出售")
+		return
 	var item_id: int = _current_item_data.get("id", 0)
-	var price: int = _sell_prices.get(str(item_id), 0)
+	var price: int = _current_item_data.get("sell_price", 0)
 	if price <= 0:
 		return
 	var item_name: String = _current_item_data.get("name", "")
 	var popup := preload("res://scenes/ui/ConfirmPopup.tscn").instantiate() as ConfirmPopup
-	popup.setup("确定出售 %s？获得 %d 灵石" % [item_name, price])
-	popup.confirmed.connect(_on_sell_confirmed.bind(uid), CONNECT_ONE_SHOT)
 	UIManager.show_popup(popup)
+	popup.setup("出售", "确定出售 %s？获得 %d 灵石" % [item_name, price], func(): _on_sell_confirmed(uid))
 
 func _on_sell_confirmed(uid: int) -> void:
 	if CloudService.online:
@@ -282,20 +283,6 @@ func _on_sell_confirmed(uid: int) -> void:
 	else:
 		EventBus.show_toast.emit("离线无法出售")
 
-func _load_sell_prices() -> void:
-	if not _sell_prices.is_empty():
-		return
-	var file := FileAccess.open("res://config/shop.json", FileAccess.READ)
-	if file:
-		var text := file.get_as_text()
-		file.close()
-		var json := JSON.new()
-		if json.parse(text) == OK:
-			_sell_prices = json.data.get("sell_prices", {})
-			print("[Shop] Loaded ", _sell_prices.size(), " prices")
-			return
-	print("[Shop] Failed to load sell prices from res://config/shop.json")
-
 func _update_sell_btn() -> void:
 	if not sell_btn or not sell_price_label:
 		return
@@ -304,9 +291,8 @@ func _update_sell_btn() -> void:
 		sell_btn.hide()
 		sell_price_label.hide()
 		return
-	_load_sell_prices()
 	var item_id: int = _current_item_data.get("id", 0)
-	var price: int = _sell_prices.get(str(item_id), 0)
+	var price: int = _current_item_data.get("sell_price", 0)
 	if price <= 0:
 		sell_btn.hide()
 		sell_price_label.hide()

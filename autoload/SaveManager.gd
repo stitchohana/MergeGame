@@ -19,10 +19,10 @@ func _ready() -> void:
 func _restore_from_server(state: Dictionary) -> void:
 	# Game state
 	GameState.version = state.get("version", 0)
+	GameState.regen_remaining_ms = state.get("regen_remaining_ms", 0.0)
 	GameState.stamina = state.get("stamina", 100)
 	GameState.max_stamina = state.get("max_stamina", 100)
 	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
-	GameState.regen_remaining_ms = state.get("regen_remaining_ms", 0.0)
 	GameState.spirit_stones = state.get("spirit_stones", 0)
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 

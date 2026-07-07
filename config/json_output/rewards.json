@@ -1,0 +1,60 @@
+{
+  "rewards": {
+    "1": {
+      "tokens": [
+        {
+          "token": 2,
+          "amount": 1
+        }
+      ],
+      "items": [
+        {
+          "id": 21,
+          "count": 1
+        }
+      ]
+    },
+    "2": {
+      "tokens": [
+        {
+          "token": 1,
+          "amount": 50
+        },
+        {
+          "token": 3,
+          "amount": 10
+        }
+      ],
+      "items": [
+        {
+          "id": 101,
+          "count": 2
+        }
+      ]
+    },
+    "3": {
+      "tokens": [
+        {
+          "token": 2,
+          "amount": 5
+        }
+      ]
+    },
+    "4": {
+      "tokens": [
+        {
+          "token": 2,
+          "amount": 6
+        }
+      ]
+    },
+    "5": {
+      "tokens": [
+        {
+          "token": 2,
+          "amount": 7
+        }
+      ]
+    }
+  }
+}

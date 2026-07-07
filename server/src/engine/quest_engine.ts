@@ -24,7 +24,7 @@ export class QuestEngine {
 
   private loadQuests(configDir: string): void {
     try {
-      const data = JSON.parse(fs.readFileSync(path.join(configDir, "quests.json"), "utf-8"));
+      const data = JSON.parse(fs.readFileSync(path.join(configDir, "json_output", "quests.json"), "utf-8"));
       this.quests = data.quests || [];
       console.log(`[quest] Loaded ${this.quests.length} quests`);
     } catch { /* quests.json optional */ }

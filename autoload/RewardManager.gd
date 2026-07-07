@@ -15,6 +15,10 @@ func _ready() -> void:
 		CloudService.meridian_complete_confirmed.connect(_on_reward_response)
 	if not CloudService.quest_claim_confirmed.is_connected(_on_reward_response):
 		CloudService.quest_claim_confirmed.connect(_on_reward_response)
+	if not CloudService.home_meridian_light_confirmed.is_connected(_on_reward_response):
+		CloudService.home_meridian_light_confirmed.connect(_on_reward_response)
+	if not CloudService.battle_attack_confirmed.is_connected(_on_reward_response):
+		CloudService.battle_attack_confirmed.connect(_on_reward_response)
 
 
 func _on_state_loaded(state: Dictionary) -> void:
@@ -38,8 +42,8 @@ func apply_rewards(config: Dictionary) -> void:
 func _apply(config: Dictionary) -> void:
 	if config.has("tokens"):
 		for t in config.tokens:
-			var token_type: int = t.get("token", 0)
-			var amount: int = t.get("amount", 0)
+			var token_type: int = int(t.get("token", 0))
+			var amount: int = int(t.get("amount", 0))
 			match token_type:
 				Constants.TokenType.SPIRIT_STONES:
 					GameState.spirit_stones += amount
@@ -49,7 +53,7 @@ func _apply(config: Dictionary) -> void:
 					CultivationService.current_qi = new_qi
 					CultivationService.qi_changed.emit(new_qi, CultivationService.max_qi)
 				Constants.TokenType.STAMINA:
-					GameState.stamina = mini(GameState.stamina + amount, GameState.max_stamina)
+					GameState.stamina += amount
 					GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 				Constants.TokenType.EXP:
 					CultivationService.current_exp += amount
