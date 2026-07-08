@@ -2,25 +2,15 @@
 
 [ext_resource type="Script" uid="uid://dmv0t71np61ym" path="res://scenes/screens/GameScreen.gd" id="1_gs"]
 [ext_resource type="PackedScene" uid="uid://deg7lbni32jui" path="res://scenes/grid/GridView.tscn" id="2_grid"]
-[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/TopBar.tscn" id="3_top"]
-[ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/ItemDetailPanel.tscn" id="6_detail"]
-[ext_resource type="PackedScene" uid="uid://bf6fe2778glgu" path="res://scenes/ui/RequirementList.tscn" id="8_req"]
-[ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/PouchDropZone.tscn" id="10_pouch"]
+[ext_resource type="PackedScene" path="res://scenes/ui/main/ItemDetailPanel.tscn" id="5_pbayp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/main/TopBar.tscn" id="6_0wecs"]
+[ext_resource type="PackedScene" uid="uid://bf6fe2778glgu" path="res://scenes/ui/meridian/RequirementList.tscn" id="8_req"]
+[ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/main/PouchDropZone.tscn" id="10_pouch"]
 
 [node name="GameScreen" type="Control" unique_id=1938900574]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_gs")
-
-[node name="TopBar" parent="." unique_id=1324420132 instance=ExtResource("3_top")]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 1.0
-offset_top = 1.0
-offset_right = 781.0
-offset_bottom = 101.0
-grow_horizontal = 2
 
 [node name="GridView" parent="." unique_id=644218555 instance=ExtResource("2_grid")]
 layout_mode = 0
@@ -35,11 +25,6 @@ offset_left = 631.0
 offset_top = 115.0
 offset_right = 695.0
 offset_bottom = 179.0
-
-[node name="ItemDetailPanel" parent="." unique_id=1129761759 instance=ExtResource("6_detail")]
-layout_mode = 0
-offset_top = 1438.0
-offset_bottom = 1601.0
 
 [node name="HomeButton" type="Button" parent="." unique_id=745559034]
 layout_mode = 0
@@ -72,3 +57,17 @@ offset_top = 192.0
 offset_right = 778.805
 offset_bottom = 435.0
 size_flags_horizontal = 2
+
+[node name="ItemDetailPanel" parent="." unique_id=607450120 instance=ExtResource("5_pbayp")]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 1405.0
+offset_right = 790.0
+offset_bottom = 1552.0
+
+[node name="TopBar" parent="." unique_id=1995499029 instance=ExtResource("6_0wecs")]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 9.0
+offset_right = 785.0
+offset_bottom = 59.0

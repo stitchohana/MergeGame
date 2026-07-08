@@ -697,7 +697,7 @@ func _get_items_layer() -> Control:
 func _setup_crafting() -> void:
 	if not CraftingService.table_state_changed.is_connected(_on_table_state_changed):
 		CraftingService.table_state_changed.connect(_on_table_state_changed)
-	_craft_button = preload("res://scenes/ui/CraftButton.tscn").instantiate() as CraftButton
+	_craft_button = preload("res://scenes/ui/main/CraftButton.tscn").instantiate() as CraftButton
 	add_child(_craft_button)
 	_craft_button.hide()
 	_craft_button.craft_pressed.connect(_on_craft_button_pressed)
@@ -830,7 +830,7 @@ func _handle_storage_click(storage_pos: Vector2i) -> void:
 			if entry.col == storage_pos.x and entry.row == storage_pos.y and entry.has("storage"):
 				items = entry.storage.items
 				break
-		var popup := preload("res://scenes/ui/StoragePopup.tscn").instantiate() as StoragePopup
+		var popup := preload("res://scenes/ui/main/StoragePopup.tscn").instantiate() as StoragePopup
 		popup.setup(storage_pos, items)
 		UIManager.show_popup(popup)
 	, CONNECT_ONE_SHOT)

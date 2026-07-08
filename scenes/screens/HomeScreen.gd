@@ -125,7 +125,7 @@ func _on_acupoint_pressed(index: int) -> void:
 	var qi_cost: int = def.get("qi_cost", 0)
 	var title: String = def.get("name", "穴位") + " 第%d穴" % (index + 1)
 	var cost: String = "消耗灵气：%d  当前：%d/%d" % [qi_cost, CultivationService.current_qi, CultivationService.max_qi]
-	var popup := preload("res://scenes/ui/AcupointActivatePopup.tscn").instantiate() as AcupointActivatePopup
+	var popup := preload("res://scenes/ui/home/AcupointActivatePopup.tscn").instantiate() as AcupointActivatePopup
 	UIManager.show_popup(popup)
 	popup.setup(title, cost, def.get("acupoint_rewards", {}), "激活", func(): CloudService.submit_light_home_acupoint(_current_stage_idx, index))
 
@@ -139,8 +139,7 @@ func _on_light_confirmed(result: Dictionary) -> void:
 
 
 func _on_cultivation_clicked() -> void:
-	var detail := preload("res://scenes/ui/CultivationDetail.tscn").instantiate()
-	UIManager.show_popup(detail)
+	pass
 
 
 func _on_game_pressed() -> void:
@@ -183,13 +182,13 @@ func _refresh_breakthrough_btn() -> void:
 func _on_breakthrough_pressed() -> void:
 	var pill_id: int = CultivationService.get_required_breakthrough_pill()
 	if pill_id > 0:
-		var popup := preload("res://scenes/ui/ConfirmPopup.tscn").instantiate() as ConfirmPopup
+		var popup := preload("res://scenes/ui/common/ConfirmPopup.tscn").instantiate() as ConfirmPopup
 		UIManager.show_popup(popup)
 		var pill_data := ConfigDatabase.get_item_data(pill_id)
 		popup.setup("突破确认", "确定使用" + pill_data.get("name", "丹药") + "进行突破吗？", func(): _do_breakthrough(pill_id))
 	else:
 		# No pill needed — just confirm
-		var popup := preload("res://scenes/ui/ConfirmPopup.tscn").instantiate() as ConfirmPopup
+		var popup := preload("res://scenes/ui/common/ConfirmPopup.tscn").instantiate() as ConfirmPopup
 		UIManager.show_popup(popup)
 		popup.setup("突破确认", "确定进行突破吗？", func(): _do_breakthrough(0))
 

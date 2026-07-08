@@ -12,6 +12,7 @@ var _expedition_maps: Dictionary = {}
 var _monsters_data: Dictionary = {}
 var _meridian_thresholds: Array = []
 var _tokens_data: Dictionary = {}
+var _weekly_tasks: Dictionary = {}
 
 func _ready() -> void:
 	load_all()
@@ -26,6 +27,7 @@ func load_all() -> void:
 	_load_expedition("res://config/json_output/expedition.json")
 	_load_meridians("res://config/json_output/meridians.json")
 	_load_tokens("res://config/json_output/tokens.json")
+	_load_weekly_tasks("res://config/json_output/weekly_tasks.json")
 
 func _load_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -318,3 +320,12 @@ func get_stage_breakthrough_pill(level: int) -> int:
 	if s.is_empty():
 		return 0
 	return int(s.get("breakthrough_pill", 0))
+
+
+func _load_weekly_tasks(path: String) -> void:
+	var data := _load_json(path)
+	for wt in data.get("weekly_tasks", []):
+		_weekly_tasks[int(wt.activity_id)] = wt.daily_quests
+
+func get_weekly_tasks(activity_id: int) -> Array:
+	return _weekly_tasks.get(activity_id, [])

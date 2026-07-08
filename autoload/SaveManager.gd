@@ -82,6 +82,11 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.meridian_circulations = state.get("meridian_circulations", 0)
 	GameState.meridian_threshold_idx = state.get("meridian_threshold_idx", 0)
 
+	# Activities
+	GameState.activity_defs = state.get("activity_defs", [])
+	GameState.activity_progress = state.get("activity_progress", {})
+	GameState.activity_current_day = state.get("activity_current_day", 0)
+
 	# Restore crafting timers for in-progress crafts
 	GridManager._skip_anims = false
 	CraftingService.restore_craft_timers()

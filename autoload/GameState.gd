@@ -30,6 +30,11 @@ var meridian_threshold_idx: int = 0
 var main_grid_cache: Array = []
 var battle_grid_cache: Array = []
 
+# Activity system
+var activity_defs: Array = []
+var activity_progress: Dictionary = {}
+var activity_current_day: int = 0  # { activity_id: { completed, claimed, last_reset } }
+
 signal meridian_updated()
 signal pending_rewards_changed(count: int)
 

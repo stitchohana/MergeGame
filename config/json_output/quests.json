@@ -119,6 +119,356 @@
       "rewards": 1,
       "auto_reward": false,
       "reset_cycle": 0
+    },
+    {
+      "id": 1001,
+      "type": 1,
+      "name": "D1·合成×1",
+      "description": "周常第1天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1002,
+      "type": 2,
+      "name": "D1·生成×2",
+      "description": "周常第1天任务",
+      "target_count": 2,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1003,
+      "type": 3,
+      "name": "D1·制作×3",
+      "description": "周常第1天任务",
+      "target_count": 3,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1004,
+      "type": 4,
+      "name": "D1·出售×5",
+      "description": "周常第1天任务",
+      "target_count": 5,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1005,
+      "type": 5,
+      "name": "D1·战斗×1",
+      "description": "周常第1天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1006,
+      "type": 1,
+      "name": "D2·合成×2",
+      "description": "周常第2天任务",
+      "target_count": 2,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1007,
+      "type": 2,
+      "name": "D2·生成×3",
+      "description": "周常第2天任务",
+      "target_count": 3,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1008,
+      "type": 3,
+      "name": "D2·制作×1",
+      "description": "周常第2天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1009,
+      "type": 4,
+      "name": "D2·出售×2",
+      "description": "周常第2天任务",
+      "target_count": 2,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1010,
+      "type": 5,
+      "name": "D2·战斗×3",
+      "description": "周常第2天任务",
+      "target_count": 3,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1011,
+      "type": 1,
+      "name": "D3·合成×5",
+      "description": "周常第3天任务",
+      "target_count": 5,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1012,
+      "type": 2,
+      "name": "D3·生成×1",
+      "description": "周常第3天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1013,
+      "type": 3,
+      "name": "D3·制作×1",
+      "description": "周常第3天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1014,
+      "type": 4,
+      "name": "D3·出售×2",
+      "description": "周常第3天任务",
+      "target_count": 2,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1015,
+      "type": 5,
+      "name": "D3·战斗×3",
+      "description": "周常第3天任务",
+      "target_count": 3,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1016,
+      "type": 1,
+      "name": "D4·合成×5",
+      "description": "周常第4天任务",
+      "target_count": 5,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1017,
+      "type": 2,
+      "name": "D4·生成×1",
+      "description": "周常第4天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1018,
+      "type": 3,
+      "name": "D4·制作×2",
+      "description": "周常第4天任务",
+      "target_count": 2,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1019,
+      "type": 4,
+      "name": "D4·出售×3",
+      "description": "周常第4天任务",
+      "target_count": 3,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1020,
+      "type": 5,
+      "name": "D4·战斗×1",
+      "description": "周常第4天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1021,
+      "type": 1,
+      "name": "D5·合成×2",
+      "description": "周常第5天任务",
+      "target_count": 2,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1022,
+      "type": 2,
+      "name": "D5·生成×3",
+      "description": "周常第5天任务",
+      "target_count": 3,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1023,
+      "type": 3,
+      "name": "D5·制作×5",
+      "description": "周常第5天任务",
+      "target_count": 5,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1024,
+      "type": 4,
+      "name": "D5·出售×1",
+      "description": "周常第5天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1025,
+      "type": 5,
+      "name": "D5·战斗×1",
+      "description": "周常第5天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1026,
+      "type": 1,
+      "name": "D6·合成×2",
+      "description": "周常第6天任务",
+      "target_count": 2,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1027,
+      "type": 2,
+      "name": "D6·生成×3",
+      "description": "周常第6天任务",
+      "target_count": 3,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1028,
+      "type": 3,
+      "name": "D6·制作×5",
+      "description": "周常第6天任务",
+      "target_count": 5,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1029,
+      "type": 4,
+      "name": "D6·出售×1",
+      "description": "周常第6天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1030,
+      "type": 5,
+      "name": "D6·战斗×2",
+      "description": "周常第6天任务",
+      "target_count": 2,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1031,
+      "type": 1,
+      "name": "D7·合成×3",
+      "description": "周常第7天任务",
+      "target_count": 3,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1032,
+      "type": 2,
+      "name": "D7·生成×1",
+      "description": "周常第7天任务",
+      "target_count": 1,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1033,
+      "type": 3,
+      "name": "D7·制作×2",
+      "description": "周常第7天任务",
+      "target_count": 2,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1034,
+      "type": 4,
+      "name": "D7·出售×3",
+      "description": "周常第7天任务",
+      "target_count": 3,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
+    },
+    {
+      "id": 1035,
+      "type": 5,
+      "name": "D7·战斗×5",
+      "description": "周常第7天任务",
+      "target_count": 5,
+      "rewards": 2,
+      "auto_reward": false,
+      "reset_cycle": 2
     }
   ]
 }

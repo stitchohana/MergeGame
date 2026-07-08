@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://shop_popup_001"]
+
+[ext_resource type="Script" path="res://scenes/ui/shop/ShopPopup.gd" id="1_sp"]
+
+[node name="ShopPopup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+script = ExtResource("1_sp")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+color = Color(0, 0, 0, 0.5)
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 80
+offset_top = 100
+offset_right = 700
+offset_bottom = 1300
+
+[node name="TitleLabel" type="Label" parent="Panel"]
+offset_left = 20
+offset_top = 15
+offset_right = 580
+offset_bottom = 45
+theme_override_font_sizes/font_size = 22
+text = "商店"
+
+[node name="CloseButton" type="Button" parent="Panel"]
+offset_left = 580
+offset_top = 15
+offset_right = 620
+offset_bottom = 45
+text = "X"
+
+[node name="ItemContainer" type="GridContainer" parent="Panel"]
+offset_left = 20
+offset_top = 60
+offset_right = 600
+offset_bottom = 1100
+columns = 5

@@ -7,7 +7,6 @@ class_name GameScreen extends BaseScreen
 @onready var home_btn: Button = $HomeButton
 @onready var shop_btn: Button = $ShopButton
 @onready var pouch_zone: PouchDropZone = $PouchDropZone
-@onready var activity_entry: ActivityEntry
 @onready var pending_bar: PendingRewardBar
 
 var _pending_item_ids: Array = []
@@ -50,19 +49,21 @@ func _ready() -> void:
 	print("[GameScreen] Game initialized!")
 
 func _setup_extras() -> void:
-	if not activity_entry:
-		activity_entry = preload("res://scenes/ui/ActivityEntry.tscn").instantiate() as ActivityEntry
-		activity_entry.pressed.connect(_on_activity_pressed)
-		requirement_list.container.add_child(activity_entry)
-		requirement_list.container.move_child(activity_entry, 0)
+	# Add activity entry widgets for active activities with widgets configured
+	for act in ActivityManager.get_active_activities():
+		var widget: String = act.get("widget", "")
+		if widget.is_empty():
+			continue
+		var entry := _create_activity_entry(act)
+		if entry:
+			requirement_list.container.add_child(entry)
+			requirement_list.container.move_child(entry, 0)
+			entry.setup(act)
 
 	if not pending_bar:
-		pending_bar = preload("res://scenes/ui/PendingRewardBar.tscn").instantiate() as PendingRewardBar
+		pending_bar = preload("res://scenes/ui/main/PendingRewardBar.tscn").instantiate() as PendingRewardBar
 		requirement_list.container.add_child(pending_bar)
 		requirement_list.container.move_child(pending_bar, 1)
-
-func _on_activity_pressed() -> void:
-	EventBus.show_toast.emit("活动暂未开放")
 
 func on_enter() -> void:
 	GameState.current_board_type = Constants.BoardType.MAIN
@@ -184,7 +185,7 @@ func _on_battle_pressed() -> void:
 	EventBus.screen_change_requested.emit("battle")
 
 func _on_shop_pressed() -> void:
-	var popup := preload("res://scenes/ui/ShopPopup.tscn").instantiate() as ShopPopup
+	var popup := preload("res://scenes/ui/shop/ShopPopup.tscn").instantiate() as ShopPopup
 	UIManager.show_popup(popup)
 
 func _on_restart() -> void:
@@ -336,3 +337,11 @@ func _on_stamina_restore_confirmed(result: Dictionary) -> void:
 func _on_stamina_restore_rejected(reason: String) -> void:
 	EventBus.show_toast.emit("回复体力失败：" + reason)
 	_pending_stamina_uid = -1
+
+func _create_activity_entry(act: Dictionary) -> Control:
+	var widget: String = act.get("widget", "")
+	match widget:
+		"WeeklyActivityEntry":
+			var we := preload("res://scenes/ui/activity/WeeklyActivityEntry.tscn").instantiate() as WeeklyActivityEntry
+			return we
+	return null

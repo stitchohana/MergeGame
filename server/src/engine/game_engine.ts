@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { GameState, GridItem, CultivationData, QuestType, TokenType, RewardConfig, BattleMonster } from "../storage/interface";
 import { QuestEngine } from "./quest_engine";
+import { ActivityEngine } from "./activity_engine";
 
 // --- Config types ---
 
@@ -78,10 +79,12 @@ export class GameEngine {
   private rewardsTable = new Map<number, RewardConfig>();
   private homeMeridianDefs: any[] = [];
   questEngine: QuestEngine;
+  activityEngine: ActivityEngine;
 
   constructor(configDir: string) {
     this.loadConfigs(configDir);
     this.questEngine = new QuestEngine(configDir);
+    this.activityEngine = new ActivityEngine(configDir);
     this.loadRewards(path.join(configDir, "json_output", "rewards.json"));
     this.loadHomeMeridians(path.join(configDir, "json_output", "home_meridians.json"));
   }
@@ -685,16 +688,19 @@ export class GameEngine {
     return state;
   }
 
+  private _activeBoard: string = "main";
+
   switchBoard(state: GameState, boardType: string, battleMapId?: number, battleStage?: number): { ok: true; newVersion: number } | { ok: false; reason: string } {
+    if (boardType === this._activeBoard) {
+      // Already on the target board — just return
+      state.version += 1;
+      console.log(`[engine] board already ${boardType}: ${state.grid.length} items | v${state.version}`);
+      return { ok: true, newVersion: state.version };
+    }
+
     if (boardType === "battle") {
       if (battleMapId !== undefined) state.battle_map_id = battleMapId;
       if (battleStage !== undefined) state.battle_stage = battleStage;
-      // Already in battle mode — just update progress and return current grid
-      if (state.saved_grid && state.saved_grid.length > 0) {
-        state.version += 1;
-        console.log(`[engine] board already battle: ${state.grid.length} items | v${state.version}`);
-        return { ok: true, newVersion: state.version };
-      }
       state.saved_grid = state.grid;
       if (state.battle_grid && state.battle_grid.length > 0) {
         state.grid = state.battle_grid;
@@ -704,16 +710,17 @@ export class GameEngine {
         state.grid = this._buildInitialGrid("battle");
         console.log(`[engine] board switched to battle: new battle grid ${state.grid.length} items, saved ${state.saved_grid.length} main items | v${state.version}`);
       }
-      state.version += 1;
+      this._activeBoard = "battle";
     } else {
       state.battle_grid = state.grid;
       state.grid = state.saved_grid && state.saved_grid.length > 0
         ? state.saved_grid
         : this._buildInitialGrid("main");
       state.saved_grid = undefined;
-      state.version += 1;
+      this._activeBoard = "main";
       console.log(`[engine] board switched to main: restored ${state.grid.length} main items, saved ${state.battle_grid.length} battle items | v${state.version}`);
     }
+    state.version += 1;
     return { ok: true, newVersion: state.version };
   }
 
@@ -962,6 +969,13 @@ export class GameEngine {
 
     const target = this.findNearestEmpty(map, launcherCol, launcherRow);
     if (!target) return { ok: false, reason: "no_empty_cell" };
+    // Double-check: ensure the cell is truly empty in the grid array
+    const targetKey = this.posKey(target.col, target.row);
+    if (state.grid.some(g => this.posKey(g.col, g.row) === targetKey)) {
+      console.log(`[engine] spawn: target (${target.col},${target.row}) already occupied! Grid has ${state.grid.length} items:`);
+      state.grid.forEach(g => console.log(`  #${g.id} uid=${g.uid} at (${g.col},${g.row})`));
+      return { ok: false, reason: "no_empty_cell" };
+    }
 
     // Deduct cost (skip for no_cost launchers)
     if (!launcherData.no_cost) {

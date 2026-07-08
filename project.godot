@@ -30,6 +30,7 @@ SceneTransitionManager="*res://autoload/SceneTransitionManager.gd"
 StoragePouch="*res://autoload/StoragePouch.gd"
 RewardManager="*res://autoload/RewardManager.gd"
 QuestService="*res://autoload/QuestService.gd"
+ActivityManager="*res://autoload/ActivityManager.gd"
 
 [display]
 

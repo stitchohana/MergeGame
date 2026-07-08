@@ -22,7 +22,7 @@ func _ready() -> void:
 	UIManager.push_screen(login, UIManager.Transition.FADE)
 
 func _setup_toast() -> void:
-	_toast = preload("res://scenes/ui/Toast.tscn").instantiate()
+	_toast = preload("res://scenes/ui/common/Toast.tscn").instantiate()
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	layer.add_child(_toast)

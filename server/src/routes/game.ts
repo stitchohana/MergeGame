@@ -108,6 +108,9 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       meridian_threshold_idx: state.meridian_threshold_idx,
       quest_progress: state.quest_progress,
       quest_defs: engine.questEngine.getResolvedQuestDefs(engine), home_meridian_defs: engine.getHomeMeridianDefs(),
+      activity_defs: engine.activityEngine.getActivities().map(a => ({ ...a, active: engine.activityEngine.isActive(a) })),
+      activity_progress: state.activity_progress,
+      activity_current_day: engine.activityEngine.getCurrentDay(3, engine.questResetHour),
       pending_rewards: state.pending_rewards, home_meridian_progress: state.home_meridian_progress,
     };
   }
@@ -145,6 +148,8 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       console.log(`[game] state response: grid=${state.grid.length} items, first uid=${state.grid[0]?.uid ?? "missing"}`);
       engine.questEngine.initQuestProgress(state);
       const questResetOccurred = engine.questEngine.checkAndResetQuests(state, engine.questResetHour);
+      engine.activityEngine.initProgress(state);
+      engine.activityEngine.checkAndReset(state, engine.questResetHour);
       if (questResetOccurred) {
         try {
           await storage.saveState(userId, state);

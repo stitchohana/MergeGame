@@ -13,6 +13,32 @@ export enum ResetCycle {
   WEEKLY = 2,
 }
 
+export enum ActivityCycle {
+  ONCE = 0,
+  DAILY = 1,
+  WEEKLY = 2,
+  MONTHLY = 3,
+}
+
+export interface ActivityDef {
+  id: number;
+  name: string;
+  cycle: number;
+  start_time?: string;
+  end_time?: string;
+}
+
+export interface WeeklyTask {
+  activity_id: number;
+  daily_quests: number[][];
+}
+
+export interface ActivityProgress {
+  completed: boolean;
+  claimed: boolean;
+  last_reset?: number;
+}
+
 export enum QuestType {
   MERGE = 1,
   SPAWN = 2,
@@ -121,6 +147,7 @@ export interface GameState {
   quest_last_reset?: number;
   pending_rewards: PendingReward[];
   home_meridian_progress?: HomeMeridianStageProgress[];
+  activity_progress?: Record<number, ActivityProgress>;
 }
 
 export interface BattleMonster {

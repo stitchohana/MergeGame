@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://pending_reward_bar"]
+
+[ext_resource type="Script" path="res://scenes/ui/main/PendingRewardBar.gd" id="1_gd"]
+
+[node name="PendingRewardBar" type="Control"]
+custom_minimum_size = Vector2(200, 80)
+layout_mode = 3
+script = ExtResource("1_gd")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = -8.0
+offset_bottom = -4.0
+
+[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "暂存区"
+
+[node name="ItemsBox" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4

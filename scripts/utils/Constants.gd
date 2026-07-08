@@ -14,6 +14,8 @@ const TOKEN_NAMES := {
 
 enum ResetCycle { NEVER = 0, DAILY = 1, WEEKLY = 2 }
 
+enum ActivityCycle { ONCE = 0, DAILY = 1, WEEKLY = 2, MONTHLY = 3 }
+
 enum QuestType {
 	MERGE = 1,
 	SPAWN = 2,
