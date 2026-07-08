@@ -92,6 +92,8 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
   function buildStateResponse(state: any, engine: GameEngine, regenRemainingMs: number) {
     return {
       grid: state.grid,
+      main_grid: state.saved_grid ?? state.grid,
+      battle_grid: (state.saved_grid ? state.grid : (state.battle_grid?.length ? state.battle_grid : engine.createInitialState("battle").grid)),
       pouch: state.pouch,
       cultivation: state.cultivation,
       stamina: state.stamina,
@@ -445,15 +447,15 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
 
   // POST /api/game/claim_pending_reward
   router.post("/claim_pending_reward", op(async (req, res, userId) => {
-    const { uid, col, row } = req.body;
-    if (typeof uid !== "number" || typeof col !== "number" || typeof row !== "number") {
+    const { uid } = req.body;
+    if (typeof uid !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.questEngine.claimPendingReward(state, uid, col, row, engine);
+    const result = engine.questEngine.claimPendingReward(state, uid, engine);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, grid: state.grid, pending_rewards: state.pending_rewards, new_version: state.version });
+    res.json({ ok: true, col: result.col, row: result.row, grid: state.grid, pending_rewards: state.pending_rewards, new_version: state.version });
   }));
 
   // POST /api/game/home_meridian/light

@@ -274,8 +274,8 @@ func submit_quest_claim(quest_id: int) -> void:
 	var body := JSON.stringify({"quest_id": quest_id})
 	_send_authed_request("quest_claim", "/api/game/quest_claim", HTTPClient.Method.METHOD_POST, body)
 
-func submit_claim_pending_reward(uid: int, col: int, row: int) -> void:
-	var body := JSON.stringify({"uid": uid, "col": col, "row": row})
+func submit_claim_pending_reward(uid: int) -> void:
+	var body := JSON.stringify({"uid": uid})
 	_send_authed_request("claim_pending_reward", "/api/game/claim_pending_reward", HTTPClient.Method.METHOD_POST, body)
 
 

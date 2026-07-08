@@ -37,6 +37,10 @@ window/size/viewport_width=780
 window/size/viewport_height=1688
 window/stretch/mode="canvas_items"
 
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
 [rendering]
 
 renderer/rendering_method="mobile"

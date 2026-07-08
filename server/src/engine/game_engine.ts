@@ -255,6 +255,9 @@ export class GameEngine {
     { ok: true; rewards_applied: RewardConfig; circulation_completed: boolean; cultivation: any; spirit_stones: number; stamina: number; pending_rewards: any[]; home_meridian_progress: any[] }
     | { ok: false; reason: string }
   {
+    if (this.isBreakthroughReady(state.cultivation.current_level, state.cultivation.current_exp)) {
+      return { ok: false, reason: "breakthrough_needed" };
+    }
     if (stageIndex < 0 || stageIndex >= this.homeMeridianDefs.length) {
       return { ok: false, reason: "invalid_stage" };
     }
@@ -735,7 +738,7 @@ export class GameEngine {
 
   // --- Grid helpers ---
 
-  private buildGridMap(grid: GridItem[]): Map<string, GridItem> {
+  buildGridMap(grid: GridItem[]): Map<string, GridItem> {
     const map = new Map<string, GridItem>();
     for (const item of grid) {
       map.set(this.posKey(item.col, item.row), item);
@@ -1371,14 +1374,15 @@ export class GameEngine {
       return { ok: false, reason: "not_ready" };
     }
     const required = this.getRequiredBreakthroughPill(level, exp);
-    if (required <= 0 || pillId !== required) {
+    if (required > 0 && pillId !== required) {
       console.log(`[engine] tryBreakthrough: wrong pill (need=${required} got=${pillId})`);
       return { ok: false, reason: "wrong_pill" };
     }
     if (!this.cultivation) return { ok: false, reason: "no_config" };
 
-    // Find and remove the pill
-    if (uid > 0) {
+    // Find and remove the pill (only if required)
+    if (required > 0) {
+      if (uid > 0) {
       const pillIdx = state.grid.findIndex(g => g.uid === uid);
       if (pillIdx >= 0) {
         state.grid.splice(pillIdx, 1);
@@ -1403,6 +1407,7 @@ export class GameEngine {
           return { ok: false, reason: "pill_not_found" };
         }
       }
+    }
     }
 
     const newLevel = level + 1;

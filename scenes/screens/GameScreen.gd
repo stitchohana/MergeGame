@@ -7,6 +7,8 @@ class_name GameScreen extends BaseScreen
 @onready var home_btn: Button = $HomeButton
 @onready var shop_btn: Button = $ShopButton
 @onready var pouch_zone: PouchDropZone = $PouchDropZone
+@onready var activity_entry: ActivityEntry
+@onready var pending_bar: PendingRewardBar
 
 var _pending_item_ids: Array = []
 var _display_index_map: Array = []
@@ -14,6 +16,7 @@ var _pending_stamina_uid: int = -1
 var _meridian_waiting_breakthrough: bool = false
 
 func _ready() -> void:
+	modulate = Color.TRANSPARENT
 	randomize()
 
 	if not GridManager.grid_updated.is_connected(GameState.check_game_over):
@@ -42,23 +45,56 @@ func _ready() -> void:
 		shop_btn.pressed.connect(_on_shop_pressed)
 	requirement_list.complete_clicked.connect(_on_meridian_complete)
 	_refresh_meridian()
+	_setup_extras()
 
 	print("[GameScreen] Game initialized!")
 
+func _setup_extras() -> void:
+	if not activity_entry:
+		activity_entry = preload("res://scenes/ui/ActivityEntry.tscn").instantiate() as ActivityEntry
+		activity_entry.pressed.connect(_on_activity_pressed)
+		requirement_list.container.add_child(activity_entry)
+		requirement_list.container.move_child(activity_entry, 0)
+
+	if not pending_bar:
+		pending_bar = preload("res://scenes/ui/PendingRewardBar.tscn").instantiate() as PendingRewardBar
+		requirement_list.container.add_child(pending_bar)
+		requirement_list.container.move_child(pending_bar, 1)
+
+func _on_activity_pressed() -> void:
+	EventBus.show_toast.emit("活动暂未开放")
+
 func on_enter() -> void:
-	if GameState.current_board_type != Constants.BoardType.MAIN:
-		GameState.current_board_type = Constants.BoardType.MAIN
-		if CloudService.online:
-			if CloudService.board_switch_confirmed.is_connected(_on_main_board_switch_confirmed):
-				CloudService.board_switch_confirmed.disconnect(_on_main_board_switch_confirmed)
-			CloudService.board_switch_confirmed.connect(_on_main_board_switch_confirmed, CONNECT_ONE_SHOT)
-			CloudService.board_switch_rejected.connect(_on_main_board_switch_rejected, CONNECT_ONE_SHOT)
-			CloudService.submit_board_switch("main")
+	GameState.current_board_type = Constants.BoardType.MAIN
+	# Notify server in background, use cached data for display
+	if CloudService.online:
+		CloudService.submit_board_switch("main")
+	_refresh_from_cache()
+
+func _refresh_from_cache() -> void:
+	grid_view.set_skip_animations(true)
+	GridManager.init_grid(Constants.BoardType.MAIN)
+	for entry in GameState.main_grid_cache:
+		var item_data := ConfigDatabase.get_item_data(entry.id)
+		if not item_data.is_empty():
+			var item := item_data.duplicate(true)
+			item["_uid"] = entry.uid
+			if entry.has("charges"): item["charges"] = entry.charges
+			if entry.has("immovable"): item["immovable"] = entry.immovable
+			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	grid_view.set_skip_animations(false)
+	var fade := create_tween()
+	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
+
+func on_exit() -> void:
+	grid_view._clear_all_item_nodes()
+	detail_panel.clear()
 
 func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 	if result.get("board_type", "") != "main":
 		return
 	GameState.version = result.get("new_version", GameState.version)
+	grid_view.set_skip_animations(true)
 	GridManager.init_grid(Constants.BoardType.MAIN)
 	var server_grid: Array = result.get("grid", [])
 	for entry in server_grid:
@@ -69,7 +105,12 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 			if entry.has("uid"): item["_uid"] = entry.uid
 			if entry.has("immovable"): item["immovable"] = entry.immovable
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	grid_view.set_skip_animations(false)
 	print("[GameScreen] Board synced from server: ", server_grid.size(), " items")
+	GameState.main_grid_cache = server_grid
+	grid_view.set_skip_animations(false)
+	var fade := create_tween()
+	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
 
 func _on_main_board_switch_rejected(_reason: String) -> void:
 	pass

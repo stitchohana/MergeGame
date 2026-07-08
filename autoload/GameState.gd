@@ -26,6 +26,10 @@ var meridian_circulations: int = 0
 var meridian_acupoints: Array = []  # [{item_id, name, count, completed}]
 var meridian_threshold_idx: int = 0
 
+# Grid caching for screen switching
+var main_grid_cache: Array = []
+var battle_grid_cache: Array = []
+
 signal meridian_updated()
 signal pending_rewards_changed(count: int)
 

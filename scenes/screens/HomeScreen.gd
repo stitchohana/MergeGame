@@ -13,12 +13,16 @@ var _current_stage_idx: int = -1
 
 
 func _ready() -> void:
+	modulate = Color.TRANSPARENT
 	game_btn.pressed.connect(_on_game_pressed)
 	battle_btn.pressed.connect(_on_battle_pressed)
 	cultivation_panel.cultivation_clicked.connect(_on_cultivation_clicked)
 	CloudService.state_loaded.connect(_on_state_loaded)
 	CloudService.home_meridian_light_confirmed.connect(_on_light_confirmed)
 	CloudService.breakthrough_confirmed.connect(_on_breakthrough_done)
+	CloudService.breakthrough_rejected.connect(_on_breakthrough_rejected)
+	CultivationService.exp_changed.connect(func(_c, _t): _refresh_breakthrough_btn())
+	CultivationService.stage_changed.connect(func(_l, _n): _refresh_breakthrough_btn())
 	_setup_meridian_ui()
 	_setup_breakthrough_btn()
 	if CloudService.online:
@@ -26,6 +30,7 @@ func _ready() -> void:
 
 
 func on_enter() -> void:
+	modulate = Color.TRANSPARENT
 	if CloudService.online:
 		CloudService.fetch_state()
 
@@ -51,9 +56,15 @@ func _on_state_loaded(state: Dictionary) -> void:
 		_home_progress = state.home_meridian_progress
 	_refresh_display()
 	_refresh_breakthrough_btn()
+	var fade := create_tween()
+	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
 
 
 func _refresh_display() -> void:
+	if CultivationService.is_breakthrough_ready():
+		meridian_container.hide()
+		return
+	meridian_container.show()
 	if _home_defs.is_empty():
 		meridian_title.text = "经脉：无"
 		return
@@ -111,10 +122,12 @@ func _on_acupoint_pressed(index: int) -> void:
 	if _current_stage_idx < 0 or _home_defs.is_empty():
 		return
 	var def: Dictionary = _home_defs[_current_stage_idx]
-	var is_last: bool = index == def.get("acupoints", 0) - 1
+	var qi_cost: int = def.get("qi_cost", 0)
+	var title: String = def.get("name", "穴位") + " 第%d穴" % (index + 1)
+	var cost: String = "消耗灵气：%d  当前：%d/%d" % [qi_cost, CultivationService.current_qi, CultivationService.max_qi]
 	var popup := preload("res://scenes/ui/AcupointActivatePopup.tscn").instantiate() as AcupointActivatePopup
 	UIManager.show_popup(popup)
-	popup.setup(_current_stage_idx, index, def, is_last)
+	popup.setup(title, cost, def.get("acupoint_rewards", {}), "激活", func(): CloudService.submit_light_home_acupoint(_current_stage_idx, index))
 
 
 func _on_light_confirmed(result: Dictionary) -> void:
@@ -156,25 +169,36 @@ func _setup_breakthrough_btn() -> void:
 func _refresh_breakthrough_btn() -> void:
 	var btn := get_node_or_null("BreakthroughBtn") as Button
 	if not btn: return
-	if CultivationService._needs_breakthrough_pill():
+	if CultivationService.is_breakthrough_ready():
 		var pill_id: int = CultivationService.get_required_breakthrough_pill()
-		var pill_data := ConfigDatabase.get_item_data(pill_id)
-		var pill_name: String = pill_data.get("name", "突破丹")
-		btn.text = "使用" + pill_name
+		if pill_id > 0:
+			var pill_data := ConfigDatabase.get_item_data(pill_id)
+			btn.text = "突破·" + pill_data.get("name", "丹药")
+		else:
+			btn.text = "突破"
 		btn.visible = true
 	else:
 		btn.visible = false
 
 func _on_breakthrough_pressed() -> void:
 	var pill_id: int = CultivationService.get_required_breakthrough_pill()
-	if pill_id <= 0: return
-	var popup := preload("res://scenes/ui/ConfirmPopup.tscn").instantiate() as ConfirmPopup
-	UIManager.show_popup(popup)
-	var pill_data := ConfigDatabase.get_item_data(pill_id)
-	popup.setup("突破确认", "确定使用" + pill_data.get("name", "丹药") + "进行突破吗？", func(): _do_breakthrough(pill_id))
+	if pill_id > 0:
+		var popup := preload("res://scenes/ui/ConfirmPopup.tscn").instantiate() as ConfirmPopup
+		UIManager.show_popup(popup)
+		var pill_data := ConfigDatabase.get_item_data(pill_id)
+		popup.setup("突破确认", "确定使用" + pill_data.get("name", "丹药") + "进行突破吗？", func(): _do_breakthrough(pill_id))
+	else:
+		# No pill needed — just confirm
+		var popup := preload("res://scenes/ui/ConfirmPopup.tscn").instantiate() as ConfirmPopup
+		UIManager.show_popup(popup)
+		popup.setup("突破确认", "确定进行突破吗？", func(): _do_breakthrough(0))
 
 func _do_breakthrough(pill_id: int) -> void:
 	CultivationService.try_breakthrough(pill_id, 0)
 
 func _on_breakthrough_done(_result: Dictionary) -> void:
 	_refresh_breakthrough_btn()
+
+func _on_breakthrough_rejected(reason: String) -> void:
+	if reason == "pill_not_found":
+		EventBus.show_toast.emit("当前没有该丹药")

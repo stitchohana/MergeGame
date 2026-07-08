@@ -19,6 +19,8 @@ func _ready() -> void:
 		CloudService.home_meridian_light_confirmed.connect(_on_reward_response)
 	if not CloudService.battle_attack_confirmed.is_connected(_on_reward_response):
 		CloudService.battle_attack_confirmed.connect(_on_reward_response)
+	if not CloudService.pending_reward_claimed.is_connected(_on_reward_response):
+		CloudService.pending_reward_claimed.connect(_on_reward_response)
 
 
 func _on_state_loaded(state: Dictionary) -> void:
@@ -70,8 +72,8 @@ func _apply(config: Dictionary) -> void:
 		pending_rewards_changed.emit(pending_rewards.size())
 
 
-func claim_pending_reward(uid: int, col: int, row: int) -> void:
-	CloudService.submit_claim_pending_reward(uid, col, row)
+func claim_pending_reward(uid: int) -> void:
+	CloudService.submit_claim_pending_reward(uid)
 
 
 func has_pending_rewards() -> bool:

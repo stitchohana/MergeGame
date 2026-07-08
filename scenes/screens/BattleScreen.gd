@@ -21,6 +21,7 @@ var _pending_attack_effect_id: int = -1
 var _pending_heal_amount: int = 0
 
 func _ready() -> void:
+	modulate = Color.TRANSPARENT
 	grid_view.item_clicked.connect(_on_item_clicked)
 	grid_view.item_use_requested.connect(_on_item_use_requested)
 	if not GridManager.grid_updated.is_connected(GameState.check_game_over):
@@ -41,13 +42,22 @@ func on_enter() -> void:
 	_char_max_hp = _char_hp
 	_monsters = _build_monster_list()
 
+	# Use cached battle grid, notify server in background
+	grid_view.set_skip_animations(true)
+	GridManager.init_grid(Constants.BoardType.BATTLE)
+	for entry in GameState.battle_grid_cache:
+		var item_data := ConfigDatabase.get_item_data(entry.id)
+		if not item_data.is_empty():
+			var item := item_data.duplicate(true)
+			item["_uid"] = entry.uid
+			if entry.has("charges"): item["charges"] = entry.charges
+			if entry.has("immovable"): item["immovable"] = entry.immovable
+			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	grid_view.set_skip_animations(false)
+	var fade := create_tween()
+	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
+
 	if CloudService.online:
-		if CloudService.board_switch_confirmed.is_connected(_on_board_switch_confirmed):
-			CloudService.board_switch_confirmed.disconnect(_on_board_switch_confirmed)
-		if CloudService.board_switch_rejected.is_connected(_on_board_switch_rejected):
-			CloudService.board_switch_rejected.disconnect(_on_board_switch_rejected)
-		CloudService.board_switch_confirmed.connect(_on_board_switch_confirmed, CONNECT_ONE_SHOT)
-		CloudService.board_switch_rejected.connect(_on_board_switch_rejected, CONNECT_ONE_SHOT)
 		CloudService.submit_board_switch("battle", _current_map_id, _current_stage)
 	else:
 		_init_battle_grid()
@@ -67,8 +77,11 @@ func _on_board_switch_confirmed(result: Dictionary) -> void:
 	if not server_monsters.is_empty():
 		_monsters = server_monsters.duplicate(true)
 	GameState.set_phase(GameState.GamePhase.IDLE)
+	GameState.battle_grid_cache = result.get("grid", [])
 	_refresh_monster_display()
 	_refresh_map_header()
+	var fade := create_tween()
+	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
 
 func _on_board_switch_rejected(reason: String) -> void:
 	print("[BattleScreen] Board switch rejected: ", reason)
@@ -79,6 +92,7 @@ func _init_battle_grid() -> void:
 	GameState.set_phase(GameState.GamePhase.IDLE)
 
 func on_exit() -> void:
+	grid_view._clear_all_item_nodes()
 	detail_panel.clear()
 
 func _build_monster_list() -> Array:
@@ -198,10 +212,11 @@ func _on_battle_attack_rejected(reason: String) -> void:
 
 func _sync_grid_from_result(result: Dictionary) -> void:
 	var server_grid: Array = result.get("grid", [])
-	if server_grid.is_empty():
-		return
 	grid_view.set_skip_animations(true)
 	GridManager.init_grid(Constants.BoardType.BATTLE)
+	if server_grid.is_empty():
+		grid_view.set_skip_animations(false)
+		return
 	for entry in server_grid:
 		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
 		if not item_data.is_empty():
@@ -210,6 +225,7 @@ func _sync_grid_from_result(result: Dictionary) -> void:
 			if entry.has("uid"): item["_uid"] = entry.uid
 			if entry.has("immovable"): item["immovable"] = entry.immovable
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	GameState.battle_grid_cache = server_grid
 	grid_view.set_skip_animations(false)
 
 func _refresh_char_display() -> void:

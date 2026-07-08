@@ -22,13 +22,6 @@ offset_right = 781.0
 offset_bottom = 101.0
 grow_horizontal = 2
 
-[node name="RequirementList" parent="." unique_id=1650475559 instance=ExtResource("8_req")]
-layout_mode = 0
-offset_left = 38.0
-offset_top = 228.0
-offset_right = 751.0
-offset_bottom = 425.0
-
 [node name="GridView" parent="." unique_id=644218555 instance=ExtResource("2_grid")]
 layout_mode = 0
 offset_left = 42.0
@@ -38,10 +31,10 @@ offset_bottom = 1358.0
 
 [node name="PouchDropZone" parent="." unique_id=134967436 instance=ExtResource("10_pouch")]
 anchors_preset = 0
-offset_left = 613.0
-offset_top = 147.0
-offset_right = 677.0
-offset_bottom = 211.0
+offset_left = 631.0
+offset_top = 115.0
+offset_right = 695.0
+offset_bottom = 179.0
 
 [node name="ItemDetailPanel" parent="." unique_id=1129761759 instance=ExtResource("6_detail")]
 layout_mode = 0
@@ -71,3 +64,11 @@ offset_top = 1617.0
 offset_right = 626.0
 offset_bottom = 1675.0
 text = "商店"
+
+[node name="RequirementList" parent="." unique_id=1650475559 instance=ExtResource("8_req")]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 192.0
+offset_right = 778.805
+offset_bottom = 435.0
+size_flags_horizontal = 2

@@ -21,9 +21,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -160.0
-offset_top = -120.0
+offset_top = -140.0
 offset_right = 160.0
-offset_bottom = 120.0
+offset_bottom = 140.0
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 1
@@ -39,7 +39,6 @@ theme_override_constants/separation = 10
 [node name="TitleLabel" type="Label" parent="Panel/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "点亮穴位"
 horizontal_alignment = 1
 
 [node name="CostLabel" type="Label" parent="Panel/VBox"]
@@ -51,12 +50,16 @@ horizontal_alignment = 1
 layout_mode = 2
 alignment = 1
 
-[node name="ActivateButton" type="Button" parent="Panel/VBox"]
+[node name="BtnBox" type="HBoxContainer" parent="Panel/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "激活"
+alignment = 1
+theme_override_constants/separation = 20
 
-[node name="CloseButton" type="Button" parent="Panel/VBox"]
+[node name="ActionButton" type="Button" parent="Panel/VBox/BtnBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 15
+
+[node name="CancelButton" type="Button" parent="Panel/VBox/BtnBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
 text = "取消"

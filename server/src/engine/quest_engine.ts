@@ -165,21 +165,23 @@ export class QuestEngine {
     return { ok: true, rewards: q.rewards };
   }
 
-  claimPendingReward(state: GameState, uid: number, col: number, row: number, engine: GameEngine):
-    { ok: true } | { ok: false; reason: string }
+  claimPendingReward(state: GameState, uid: number, engine: GameEngine):
+    { ok: true; col: number; row: number } | { ok: false; reason: string }
   {
     state.pending_rewards = state.pending_rewards || [];
     const idx = state.pending_rewards.findIndex(r => r.uid === uid);
     if (idx < 0) return { ok: false, reason: "reward_not_found" };
-    if (!engine.isInBounds(col, row)) return { ok: false, reason: "invalid_position" };
-    const key = engine.posKey(col, row);
-    if (state.grid.some(g => engine.posKey(g.col, g.row) === key)) return { ok: false, reason: "target_occupied" };
+
+    // Server finds empty cell
+    const map = engine.buildGridMap(state.grid);
+    const target = engine.findEmptyByRow(map);
+    if (!target) return { ok: false, reason: "board_full" };
 
     const reward = state.pending_rewards[idx];
     state.pending_rewards.splice(idx, 1);
-    state.grid.push({ uid: engine._nextUid(state), id: reward.id, col, row });
+    state.grid.push({ uid: engine._nextUid(state), id: reward.id, col: target.col, row: target.row });
     state.version += 1;
-    console.log(`[quest] claim pending reward: ${reward.name} uid=${uid} -> (${col},${row})`);
-    return { ok: true };
+    console.log(`[quest] claim pending reward: ${reward.name} uid=${uid} -> (${target.col},${target.row})`);
+    return { ok: true, col: target.col, row: target.row };
   }
 }

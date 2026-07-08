@@ -13,10 +13,10 @@ func set_title(text: String) -> void:
 
 func set_requirements(reqs: Array) -> void:
 	# Remove old children immediately so new entries get correct indices
-	while container.get_child_count() > 0:
-		var child := container.get_child(0)
-		container.remove_child(child)
-		child.queue_free()
+	for child in container.get_children():
+		if child is RequirementEntry:
+			container.remove_child(child)
+			child.queue_free()
 
 	for i in range(reqs.size()):
 		var req: Dictionary = reqs[i]
