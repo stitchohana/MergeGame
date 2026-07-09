@@ -42,7 +42,7 @@ func _set_state(table_item: Dictionary, state: int) -> void:
 func add_ingredient(table_item: Dictionary, ingredient_data: Dictionary) -> bool:
 	_init_craft_data(table_item)
 	var stored: Array = table_item["_craft_stored"]
-	stored.append(ingredient_data.duplicate())
+	stored.append({"uid": ingredient_data.get("_uid", ingredient_data.get("uid", 0)) as int, "id": ingredient_data.get("id", 0) as int})
 	_set_state(table_item, TableState.HAS_ITEMS)
 
 	var table_id: int = table_item.get("id", 0)
@@ -136,6 +136,7 @@ func retrieve(table_item: Dictionary) -> int:
 		return -1
 	var result_id: int = table_item.get("_craft_result_id", -1)
 	_clear_craft_data(table_item)
+	table_state_changed.emit(table_item, TableState.IDLE)
 	return result_id
 
 func get_stored_items(table_item: Dictionary) -> Array:
@@ -165,7 +166,9 @@ func remove_ingredient(table_item: Dictionary, item_id: int) -> Dictionary:
 			var removed: Dictionary = stored[i]
 			stored.remove_at(i)
 			_recheck_recipe(table_item)
-			table_state_changed.emit(table_item, TableState.HAS_ITEMS)
+			if stored.is_empty():
+				_set_state(table_item, TableState.IDLE)
+			table_state_changed.emit(table_item, TableState.HAS_ITEMS if not stored.is_empty() else TableState.IDLE)
 			return removed
 	return {}
 
@@ -185,16 +188,22 @@ func _recheck_recipe(table_item: Dictionary) -> void:
 # --- Recipe matching ---
 
 func _match_recipe(stored: Array, recipes: Array) -> Dictionary:
-	var stored_ids: Array = []
+	var stored_counts: Dictionary = {}
 	for s in stored:
-		stored_ids.append(s.get("id", 0))
+		var sid: int = s.get("id", 0) as int
+		stored_counts[sid] = stored_counts.get(sid, 0) + 1
+
 	for recipe in recipes:
 		var ingredients: Array = recipe.get("ingredients", [])
-		if stored_ids.size() != ingredients.size():
+		if stored.size() != ingredients.size():
 			continue
-		var matched := true
+		var recipe_counts: Dictionary = {}
 		for ing_id in ingredients:
-			if not stored_ids.has(ing_id):
+			var iid: int = ing_id as int
+			recipe_counts[iid] = recipe_counts.get(iid, 0) + 1
+		var matched := true
+		for iid in recipe_counts:
+			if stored_counts.get(iid, 0) != recipe_counts[iid]:
 				matched = false
 				break
 		if matched:

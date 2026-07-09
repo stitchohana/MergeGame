@@ -43,8 +43,8 @@ export class QuestEngine {
       target_count: q.target_count,
       auto_reward: q.auto_reward,
       reset_cycle: q.reset_cycle ?? ResetCycle.NEVER,
-      rewards: typeof q.rewards === "number" ? engine.getRewardConfig(q.rewards) ?? q.rewards : q.rewards,
-    }));
+      rewards: typeof q.rewards === "number" ? engine.getRewardConfig(q.rewards) ?? q.rewards : q.rewards
+      }));
   }
 
   checkAndResetQuests(state: GameState, resetHour: number): boolean {
@@ -179,9 +179,7 @@ export class QuestEngine {
 
     const reward = state.pending_rewards[idx];
     state.pending_rewards.splice(idx, 1);
-    state.grid.push({ uid: engine._nextUid(state), id: reward.id, col: target.col, row: target.row });
-    state.version += 1;
-    console.log(`[quest] claim pending reward: ${reward.name} uid=${uid} -> (${target.col},${target.row})`);
+    state.grid.push({ uid: engine._nextUid(state), id: reward.id, col: target.col, row: target.row });    console.log(`[quest] claim pending reward: ${reward.name} uid=${uid} -> (${target.col},${target.row})`);
     return { ok: true, col: target.col, row: target.row };
   }
 }

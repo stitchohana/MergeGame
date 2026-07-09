@@ -32,6 +32,8 @@ func _ready() -> void:
 	grid_view.item_clicked.connect(_on_item_clicked)
 
 	grid_view.item_use_requested.connect(_on_item_use_requested)
+	CloudService.board_switch_confirmed.connect(_on_main_board_switch_confirmed)
+	CloudService.board_switch_rejected.connect(_on_main_board_switch_rejected)
 	CloudService.craft_remove_confirmed.connect(_on_craft_remove_confirmed)
 	CloudService.craft_remove_rejected.connect(_on_craft_remove_rejected)
 	CloudService.stamina_restore_confirmed.connect(_on_stamina_restore_confirmed)
@@ -67,25 +69,10 @@ func _setup_extras() -> void:
 
 func on_enter() -> void:
 	GameState.current_board_type = Constants.BoardType.MAIN
-	# Notify server in background, use cached data for display
+	GridManager.init_grid(Constants.BoardType.MAIN)
 	if CloudService.online:
 		CloudService.submit_board_switch("main")
-	_refresh_from_cache()
 
-func _refresh_from_cache() -> void:
-	grid_view.set_skip_animations(true)
-	GridManager.init_grid(Constants.BoardType.MAIN)
-	for entry in GameState.main_grid_cache:
-		var item_data := ConfigDatabase.get_item_data(entry.id)
-		if not item_data.is_empty():
-			var item := item_data.duplicate(true)
-			item["_uid"] = entry.uid
-			if entry.has("charges"): item["charges"] = entry.charges
-			if entry.has("immovable"): item["immovable"] = entry.immovable
-			GridManager.add_item(item, Vector2i(entry.col, entry.row))
-	grid_view.set_skip_animations(false)
-	var fade := create_tween()
-	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
 
 func on_exit() -> void:
 	grid_view._clear_all_item_nodes()
@@ -94,22 +81,12 @@ func on_exit() -> void:
 func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 	if result.get("board_type", "") != "main":
 		return
-	GameState.version = result.get("new_version", GameState.version)
+	GameState.main_grid_cache = result.get("grid", [])
 	grid_view.set_skip_animations(true)
 	GridManager.init_grid(Constants.BoardType.MAIN)
-	var server_grid: Array = result.get("grid", [])
-	for entry in server_grid:
-		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
-		if not item_data.is_empty():
-			var item := item_data.duplicate(true)
-			if entry.has("charges"): item["charges"] = entry.charges
-			if entry.has("uid"): item["_uid"] = entry.uid
-			if entry.has("immovable"): item["immovable"] = entry.immovable
-			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	GridManager.populate_from_server(GameState.main_grid_cache)
 	grid_view.set_skip_animations(false)
-	print("[GameScreen] Board synced from server: ", server_grid.size(), " items")
-	GameState.main_grid_cache = server_grid
-	grid_view.set_skip_animations(false)
+	print("[GameScreen] Board synced from server: ", GameState.main_grid_cache.size(), " items")
 	var fade := create_tween()
 	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
 
@@ -123,7 +100,7 @@ func _input(event: InputEvent) -> void:
 		elif GameState.phase == GameState.GamePhase.PAUSED:
 			_on_resume()
 
-func _on_material_clicked(item_id: int) -> void:
+func _on_material_clicked(uid: int, item_id: int) -> void:
 	var table_item := detail_panel.get_current_craft_table()
 	if table_item.is_empty():
 		return
@@ -135,17 +112,17 @@ func _on_material_clicked(item_id: int) -> void:
 	var removed := CraftingService.remove_ingredient(table_item, item_id)
 	if removed.is_empty():
 		return
-	var full_data := ConfigDatabase.get_item_data(removed.get("id", 0))
-	if not full_data.is_empty():
-		GridManager.add_item(full_data.duplicate(true), spawn_pos)
-	else:
-		GridManager.add_item(removed.duplicate(true), spawn_pos)
+	var rid: int = removed.get("id", 0) as int
+	var full_data := ConfigDatabase.get_item_data(rid)
+	var new_item: Dictionary = full_data.duplicate(true) if not full_data.is_empty() else removed.duplicate(true)
+	new_item["_uid"] = removed.get("uid", 0) as int
+	GridManager.add_item(new_item, spawn_pos)
 	detail_panel._refresh_materials()
 	if CloudService.online:
-		CloudService.submit_craft_remove(table_pos.x, table_pos.y, item_id, spawn_pos.x, spawn_pos.y, GameState.version)
+		CloudService.submit_craft_remove(table_pos.x, table_pos.y, uid, spawn_pos.x, spawn_pos.y)
 
 func _on_craft_remove_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
+	pass
 
 func _on_craft_remove_rejected(reason: String) -> void:
 	EventBus.show_toast.emit("取出材料失败：" + reason)
@@ -171,7 +148,7 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 		"exp": CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
 		"stamina":
 			_pending_stamina_uid = uid
-			CloudService.submit_restore_stamina(item_data.get("id", 0), uid, GameState.version)
+			CloudService.submit_restore_stamina(item_data.get("id", 0), uid)
 		_: EventBus.show_toast.emit("此物品无法在此使用")
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
@@ -240,7 +217,6 @@ func _refresh_meridian() -> void:
 		CloudService.submit_meridian_refresh()
 
 func _on_meridian_refresh_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
 	GameState.meridian_acupoints = result.get("acupoints", [])
 	GameState.meridian_threshold_idx = result.get("threshold_idx", 0)
 	_display_meridian()
@@ -279,20 +255,13 @@ func _on_meridian_complete(display_index: int) -> void:
 		CloudService.submit_meridian_complete(data_index, _pending_item_ids)
 
 func _on_meridian_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
+	pass
 
 	var server_grid: Array = result.get("grid", [])
 	print("[GameScreen] meridian confirmed, server grid size=", server_grid.size())
 	grid_view.set_skip_animations(true)
 	GridManager.init_grid()
-	for entry in server_grid:
-		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
-		if not item_data.is_empty():
-			var item := item_data.duplicate(true)
-			if entry.has("charges"): item["charges"] = entry.charges
-			if entry.has("uid"): item["_uid"] = entry.uid
-			if entry.has("immovable"): item["immovable"] = entry.immovable
-			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	GridManager.populate_from_server(server_grid)
 	grid_view.set_skip_animations(false)
 
 	var cult: Dictionary = result.get("cultivation", {})
@@ -323,7 +292,6 @@ func _on_meridian_rejected(reason: String) -> void:
 		_: EventBus.show_toast.emit("修炼失败：" + reason)
 
 func _on_stamina_restore_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
 	var stam: int = result.get("stamina", 0)
 	if stam > 0:
 		GameState.stamina = stam

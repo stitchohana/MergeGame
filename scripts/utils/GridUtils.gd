@@ -25,3 +25,25 @@ static func grid_to_local(col: int, row: int, cell_size: int) -> Vector2:
 # Local pixel position to grid position
 static func local_to_grid(local_pos: Vector2, cell_size: int) -> Vector2i:
 	return Vector2i(int(local_pos.x / cell_size), int(local_pos.y / cell_size))
+
+# Item color from group_id and level
+static func item_color(group_id: int, level: int) -> Color:
+	var hue := 0.0
+	match group_id:
+		1:
+			hue = float(level - 1) / 8.0
+		2:
+			hue = 0.25 + float(level - 1) / 6.0 * 0.15
+		_:
+			hue = float(level - 1) / 8.0
+	return Color.from_hsv(hue, 0.6, 0.7)
+
+# Launcher color from group_id
+static func launcher_color(group_id: int) -> Color:
+	match group_id:
+		1:
+			return Color(0.6, 0.3, 0.8, 1)
+		2:
+			return Color(1.0, 0.6, 0.2, 1)
+		_:
+			return Color(0.5, 0.5, 0.5, 1)

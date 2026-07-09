@@ -73,9 +73,54 @@ var _request_queue: Array[Dictionary] = []
 const QUEUE_MAX := 10
 var _current_tag: String = ""
 
+# --- Endpoint registry: maps tag -> { response_cb, rejected_signal, network_signal, parse_signal } ---
+var _endpoints: Dictionary = {}
+
 func _ready() -> void:
 	_load_config()
 	_setup_http()
+	_register_all_endpoints()
+
+func _register_endpoint(tag: String, response_cb: Callable,
+		rejected_signal: Signal = Signal(), network_signal: Signal = Signal(), parse_signal: Signal = Signal()) -> void:
+	_endpoints[tag] = {
+		"response_cb": response_cb,
+		"rejected": rejected_signal,
+		"network": network_signal,
+		"parse": parse_signal,
+	}
+
+func _register_all_endpoints() -> void:
+	_register_endpoint("login", _on_login_response, login_failed, login_failed, login_failed)
+	_register_endpoint("fetch_state", _on_fetch_state_response, state_load_failed, state_load_failed, state_load_failed)
+	_register_endpoint("merge", _on_merge_response, merge_rejected, merge_rejected, merge_rejected)
+	_register_endpoint("spawn", _on_spawn_response, spawn_rejected, spawn_rejected, spawn_rejected)
+	_register_endpoint("push_place", _on_push_place_response, push_place_rejected, push_place_rejected, push_place_rejected)
+	_register_endpoint("move", _on_move_response, move_rejected, move_rejected, move_rejected)
+	_register_endpoint("breakthrough", _on_breakthrough_response, breakthrough_rejected, breakthrough_rejected, breakthrough_rejected)
+	_register_endpoint("consume_exp_pill", _on_consume_exp_pill_response, exp_pill_consume_rejected, exp_pill_consume_rejected, exp_pill_consume_rejected)
+	_register_endpoint("restore_stamina", _on_restore_stamina_response, stamina_restore_rejected, stamina_restore_rejected, stamina_restore_rejected)
+	_register_endpoint("board_switch", _on_board_switch_response, board_switch_rejected, board_switch_rejected, board_switch_rejected)
+	_register_endpoint("pouch_deposit", _on_pouch_deposit_response, pouch_deposit_rejected, pouch_deposit_rejected, pouch_deposit_rejected)
+	_register_endpoint("pouch_withdraw", _on_pouch_withdraw_response, pouch_withdraw_rejected, pouch_withdraw_rejected, pouch_withdraw_rejected)
+	_register_endpoint("meridian_refresh", _on_meridian_refresh_response, meridian_refresh_confirmed, meridian_refresh_confirmed, meridian_refresh_confirmed)
+	_register_endpoint("meridian_complete", _on_meridian_complete_response, meridian_complete_rejected, meridian_complete_rejected, meridian_complete_rejected)
+	_register_endpoint("quest_claim", _on_quest_claim_response, quest_claim_rejected, quest_claim_rejected, quest_claim_rejected)
+	_register_endpoint("claim_pending_reward", _on_claim_pending_reward_response, pending_reward_claimed_rejected, pending_reward_claimed_rejected, pending_reward_claimed_rejected)
+	_register_endpoint("home_meridian_light", _on_home_meridian_light_response, home_meridian_light_rejected, home_meridian_light_rejected, home_meridian_light_rejected)
+	_register_endpoint("craft_add", _on_craft_add_response, craft_add_rejected, craft_add_rejected, craft_add_rejected)
+	_register_endpoint("craft_start", _on_craft_start_response, craft_start_rejected, craft_start_rejected, craft_start_rejected)
+	_register_endpoint("craft_remove", _on_craft_remove_response, craft_remove_rejected, craft_remove_rejected, craft_remove_rejected)
+	_register_endpoint("craft_retrieve", _on_craft_retrieve_response, craft_retrieve_rejected, craft_retrieve_rejected, craft_retrieve_rejected)
+	_register_endpoint("battle_attack", _on_battle_attack_response, battle_attack_rejected, battle_attack_rejected, battle_attack_rejected)
+	_register_endpoint("battle_heal", _on_battle_heal_response, battle_heal_rejected, battle_heal_rejected, battle_heal_rejected)
+	_register_endpoint("storage_withdraw", _on_storage_withdraw_response)
+	_register_endpoint("storage_deposit", Callable())
+	_register_endpoint("sell", _on_sell_response, sell_rejected, sell_rejected, sell_rejected)
+	_register_endpoint("shop_items", _on_shop_items_response)
+	_register_endpoint("buy", _on_buy_response, buy_rejected, buy_rejected, buy_rejected)
+	_register_endpoint("gm_exec", _on_gm_exec_response, gm_exec_rejected, gm_exec_rejected, gm_exec_rejected)
+	_register_endpoint("leaderboard", Callable())
 
 func _load_config() -> void:
 	var file := FileAccess.open("res://config/json_output/server.json", FileAccess.READ)
@@ -134,11 +179,10 @@ func _on_fetch_state_response(data: Dictionary) -> void:
 
 # --- Merge ---
 
-func submit_merge(from_col: int, from_row: int, to_col: int, to_row: int, version: int) -> void:
+func submit_merge(from_col: int, from_row: int, to_col: int, to_row: int) -> void:
 	var body := JSON.stringify({
 		"from": [from_col, from_row],
-		"to": [to_col, to_row],
-		"version": version,
+		"to": [to_col, to_row]
 	})
 	_send_authed_request("merge", "/api/game/merge", HTTPClient.Method.METHOD_POST, body)
 
@@ -150,10 +194,9 @@ func _on_merge_response(data: Dictionary) -> void:
 
 # --- Spawn ---
 
-func submit_spawn(launcher_col: int, launcher_row: int, version: int) -> void:
+func submit_spawn(launcher_col: int, launcher_row: int) -> void:
 	var body := JSON.stringify({
-		"launcher_pos": [launcher_col, launcher_row],
-		"version": version,
+		"launcher_pos": [launcher_col, launcher_row]
 	})
 	_send_authed_request("spawn", "/api/game/spawn", HTTPClient.Method.METHOD_POST, body)
 
@@ -177,31 +220,29 @@ func _on_move_response(data: Dictionary) -> void:
 
 # --- Move ---
 
-func submit_push_place(from_col: int, from_row: int, to_col: int, to_row: int, version: int) -> void:
-	var body := JSON.stringify({"from": [from_col, from_row], "to": [to_col, to_row], "version": version})
+func submit_push_place(from_col: int, from_row: int, to_col: int, to_row: int) -> void:
+	var body := JSON.stringify({"from": [from_col, from_row], "to": [to_col, to_row]})
 	_send_authed_request("push_place", "/api/game/push_place", HTTPClient.Method.METHOD_POST, body)
 
-func submit_move(from_col: int, from_row: int, to_col: int, to_row: int, version: int) -> void:
+func submit_move(from_col: int, from_row: int, to_col: int, to_row: int) -> void:
 	var body := JSON.stringify({
 		"from": [from_col, from_row],
-		"to": [to_col, to_row],
-		"version": version,
+		"to": [to_col, to_row]
 	})
 	_send_authed_request("move", "/api/game/move", HTTPClient.Method.METHOD_POST, body)
 
 # --- Cultivation ---
 
-func submit_breakthrough(pill_id: int, uid: int, version: int) -> void:
-	print("[CloudService] submit_breakthrough: pill=" + str(pill_id) + " uid=" + str(uid) + " v=" + str(version))
-	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
+func submit_breakthrough(pill_id: int, uid: int) -> void:
+	var body := JSON.stringify({"pill_id": pill_id, "uid": uid})
 	_send_authed_request("breakthrough", "/api/cultivation/breakthrough", HTTPClient.Method.METHOD_POST, body)
 
-func submit_consume_exp_pill(pill_id: int, uid: int, version: int) -> void:
-	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
+func submit_consume_exp_pill(pill_id: int, uid: int) -> void:
+	var body := JSON.stringify({"pill_id": pill_id, "uid": uid})
 	_send_authed_request("consume_exp_pill", "/api/cultivation/consume-exp", HTTPClient.Method.METHOD_POST, body)
 
-func submit_restore_stamina(pill_id: int, uid: int, version: int) -> void:
-	var body := JSON.stringify({"pill_id": pill_id, "uid": uid, "version": version})
+func submit_restore_stamina(pill_id: int, uid: int) -> void:
+	var body := JSON.stringify({"pill_id": pill_id, "uid": uid})
 	_send_authed_request("restore_stamina", "/api/cultivation/consume-stamina", HTTPClient.Method.METHOD_POST, body)
 
 func submit_board_switch(board_type: String, map_id: int = 0, stage: int = 0) -> void:
@@ -217,8 +258,8 @@ func submit_pouch_deposit(uid: int) -> void:
 	var body := JSON.stringify({"uid": uid})
 	_send_authed_request("pouch_deposit", "/api/game/pouch/deposit", HTTPClient.Method.METHOD_POST, body)
 
-func submit_pouch_withdraw(item_id: int, target_col: int, target_row: int) -> void:
-	var body := JSON.stringify({"item_id": item_id, "target_col": target_col, "target_row": target_row})
+func submit_pouch_withdraw(uid: int) -> void:
+	var body := JSON.stringify({"uid": uid})
 	_send_authed_request("pouch_withdraw", "/api/game/pouch/withdraw", HTTPClient.Method.METHOD_POST, body)
 
 func submit_battle_heal(item_id: int, effect_id: int, uid: int) -> void:
@@ -278,7 +319,6 @@ func submit_claim_pending_reward(uid: int) -> void:
 	var body := JSON.stringify({"uid": uid})
 	_send_authed_request("claim_pending_reward", "/api/game/claim_pending_reward", HTTPClient.Method.METHOD_POST, body)
 
-
 func submit_light_home_acupoint(stage: int, index: int) -> void:
 	var body := JSON.stringify({"stage": stage, "index": index})
 	_send_authed_request("home_meridian_light", "/api/game/home_meridian/light", HTTPClient.METHOD_POST, body)
@@ -300,7 +340,6 @@ func _on_home_meridian_light_response(data: Dictionary) -> void:
 		home_meridian_light_confirmed.emit(data)
 	else:
 		home_meridian_light_rejected.emit(data.get("error", "unknown_error"))
-
 
 func _on_claim_pending_reward_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -330,14 +369,13 @@ func _on_restore_stamina_response(data: Dictionary) -> void:
 
 # --- Craft ---
 
-func submit_craft_add(from_col: int, from_row: int, table_col: int, table_row: int, ingredient_id: int, version: int) -> void:
+func submit_craft_add(from_col: int, from_row: int, table_col: int, table_row: int, ingredient_id: int) -> void:
 	var body := JSON.stringify({
 		"from_col": from_col,
 		"from_row": from_row,
 		"table_col": table_col,
 		"table_row": table_row,
-		"ingredient_id": ingredient_id,
-		"version": version,
+		"ingredient_id": ingredient_id
 	})
 	_send_authed_request("craft_add", "/api/game/craft/add", HTTPClient.Method.METHOD_POST, body)
 
@@ -347,11 +385,10 @@ func _on_craft_add_response(data: Dictionary) -> void:
 	else:
 		craft_add_rejected.emit(data.get("error", "unknown_error"))
 
-func submit_craft_start(table_col: int, table_row: int, version: int) -> void:
+func submit_craft_start(table_col: int, table_row: int) -> void:
 	var body := JSON.stringify({
 		"table_col": table_col,
-		"table_row": table_row,
-		"version": version,
+		"table_row": table_row
 	})
 	_send_authed_request("craft_start", "/api/game/craft/start", HTTPClient.Method.METHOD_POST, body)
 
@@ -361,22 +398,20 @@ func _on_craft_start_response(data: Dictionary) -> void:
 	else:
 		craft_start_rejected.emit(data.get("error", "unknown_error"))
 
-func submit_craft_remove(table_col: int, table_row: int, ingredient_id: int, target_col: int, target_row: int, version: int) -> void:
+func submit_craft_remove(table_col: int, table_row: int, uid: int, target_col: int, target_row: int) -> void:
 	var body := JSON.stringify({
 		"table_col": table_col,
 		"table_row": table_row,
-		"ingredient_id": ingredient_id,
+		"uid": uid,
 		"target_col": target_col,
-		"target_row": target_row,
-		"version": version,
+		"target_row": target_row
 	})
 	_send_authed_request("craft_remove", "/api/game/craft/remove", HTTPClient.Method.METHOD_POST, body)
 
-func submit_craft_retrieve(table_col: int, table_row: int, version: int) -> void:
+func submit_craft_retrieve(table_col: int, table_row: int) -> void:
 	var body := JSON.stringify({
 		"table_col": table_col,
-		"table_row": table_row,
-		"version": version,
+		"table_row": table_row
 	})
 	_send_authed_request("craft_retrieve", "/api/game/craft/retrieve", HTTPClient.Method.METHOD_POST, body)
 
@@ -397,7 +432,7 @@ func _on_craft_retrieve_response(data: Dictionary) -> void:
 func get_leaderboard(limit: int = 50) -> void:
 	_send_authed_request("leaderboard", "/api/game/leaderboard?limit=" + str(limit), HTTPClient.Method.METHOD_GET)
 
-# --- Internal ---
+# --- Request queue ---
 
 var _request_counter: int = 0
 
@@ -410,26 +445,12 @@ func _flush_queue() -> void:
 	else:
 		_send_request(req.tag, req.path, req.method, req.body)
 
-func _reject(tag: String, reason: String) -> void:
-	match tag:
-		"spawn": spawn_rejected.emit(reason)
-		"merge": merge_rejected.emit(reason)
-		"move": move_rejected.emit(reason)
-		"breakthrough": breakthrough_rejected.emit(reason)
-		"consume_exp_pill": exp_pill_consume_rejected.emit(reason)
-		"restore_stamina": stamina_restore_rejected.emit(reason)
-		"pouch_deposit": pouch_deposit_rejected.emit(reason)
-		"pouch_withdraw": pouch_withdraw_rejected.emit(reason)
-		"battle_attack": battle_attack_rejected.emit(reason)
-		"battle_heal": battle_heal_rejected.emit(reason)
-		"sell": sell_rejected.emit(reason)
-		"gm_exec": gm_exec_rejected.emit(reason)
-		"craft_add": craft_add_rejected.emit(reason)
-		"craft_start": craft_start_rejected.emit(reason)
-		"craft_remove": craft_remove_rejected.emit(reason)
-		"craft_retrieve": craft_retrieve_rejected.emit(reason)
-		"fetch_state": state_load_failed.emit(reason)
-		"leaderboard": pass
+func _emit_error(tag: String, error_type: String, reason: String) -> void:
+	var ep: Dictionary = _endpoints.get(tag, {})
+	var sig: Signal = ep.get(error_type, Signal())
+	if sig.is_null():
+		return
+	sig.emit(reason)
 
 func _send_request(tag: String, path: String, method: int, body: String = "") -> int:
 	var req_id := _request_counter
@@ -458,7 +479,7 @@ func _send_request(tag: String, path: String, method: int, body: String = "") ->
 				disconnected.emit()
 				kicked.emit()
 		_callbacks.erase(req_id)
-		_reject(tag, "network_error")
+		_emit_error(tag, "network", "network_error")
 		return -1
 
 	return req_id
@@ -494,7 +515,7 @@ func _send_authed_request(tag: String, path: String, method: int, body: String =
 				disconnected.emit()
 				kicked.emit()
 		_callbacks.erase(req_id)
-		_reject(tag, "network_error")
+		_emit_error(tag, "network", "network_error")
 		return -1
 
 	return req_id
@@ -503,6 +524,7 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 	_busy = false
 	_current_tag = ""
 	_flush_queue()
+
 	var req_id := -1
 	var callback: Dictionary = {}
 	for id in _callbacks:
@@ -525,47 +547,11 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 
 	if response_code >= 400:
 		var error_msg: String = data.get("error", "request_failed")
-		match callback.get("tag", ""):
-			"login":
-				login_failed.emit(error_msg)
-			"merge":
-				merge_rejected.emit(error_msg)
-			"spawn":
-				spawn_rejected.emit(error_msg)
-			"move":
-				move_rejected.emit(error_msg)
-			"breakthrough":
-				breakthrough_rejected.emit(error_msg)
-			"consume_exp_pill":
-				exp_pill_consume_rejected.emit(error_msg)
-			"board_switch":
-				board_switch_rejected.emit(error_msg)
-			"pouch_deposit":
-				pouch_deposit_rejected.emit(error_msg)
-			"pouch_withdraw":
-				pouch_withdraw_rejected.emit(error_msg)
-			"battle_attack":
-				battle_attack_rejected.emit(error_msg)
-			"restore_stamina":
-				stamina_restore_rejected.emit(error_msg)
-			"meridian_complete":
-				meridian_complete_rejected.emit(error_msg)
-			"quest_claim":
-				quest_claim_rejected.emit(error_msg)
-			"claim_pending_reward":
-				pending_reward_claimed_rejected.emit(error_msg)
-			"home_meridian_light":
-				home_meridian_light_rejected.emit(error_msg)
-			"craft_add":
-				craft_add_rejected.emit(error_msg)
-			"craft_start":
-				craft_start_rejected.emit(error_msg)
-			"craft_remove":
-				craft_remove_rejected.emit(error_msg)
-			"craft_retrieve":
-				craft_retrieve_rejected.emit(error_msg)
-			"fetch_state":
-				state_load_failed.emit(error_msg)
+		var tag: String = callback.get("tag", "")
+		if tag == "login":
+			login_failed.emit(error_msg)
+		else:
+			_emit_error(tag, "rejected", error_msg)
 		return
 
 	if not online:
@@ -575,163 +561,19 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 	_dispatch_response(callback.get("tag", ""), data)
 
 func _dispatch_response(tag: String, data: Dictionary) -> void:
-	match tag:
-		"login":
-			_on_login_response(data)
-		"fetch_state":
-			_on_fetch_state_response(data)
-		"merge":
-			_on_merge_response(data)
-		"spawn":
-			_on_spawn_response(data)
-		"move":
-			_on_move_response(data)
-		"push_place":
-			_on_push_place_response(data)
-		"breakthrough":
-			_on_breakthrough_response(data)
-		"consume_exp_pill":
-			_on_consume_exp_pill_response(data)
-		"board_switch":
-			_on_board_switch_response(data)
-		"pouch_deposit":
-			_on_pouch_deposit_response(data)
-		"pouch_withdraw":
-			_on_pouch_withdraw_response(data)
-		"battle_attack":
-			_on_battle_attack_response(data)
-		"battle_heal":
-			_on_battle_heal_response(data)
-		"restore_stamina":
-			_on_restore_stamina_response(data)
-		"meridian_complete":
-			_on_meridian_complete_response(data)
-		"quest_claim":
-			_on_quest_claim_response(data)
-		"claim_pending_reward":
-			_on_claim_pending_reward_response(data)
-		"home_meridian_light":
-			_on_home_meridian_light_response(data)
-		"meridian_refresh":
-			_on_meridian_refresh_response(data)
-		"craft_add":
-			_on_craft_add_response(data)
-		"craft_start":
-			_on_craft_start_response(data)
-		"craft_remove":
-			_on_craft_remove_response(data)
-		"craft_retrieve":
-			_on_craft_retrieve_response(data)
-		"sell":
-			_on_sell_response(data)
-		"shop_items":
-			_on_shop_items_response(data)
-		"buy":
-			_on_buy_response(data)
-		"gm_exec":
-			_on_gm_exec_response(data)
+	var ep: Dictionary = _endpoints.get(tag, {})
+	var cb: Callable = ep.get("response_cb", Callable())
+	if cb.is_valid():
+		cb.call(data)
 
 func _handle_network_error(tag: String) -> void:
 	if online:
 		online = false
 		disconnected.emit()
-
-	match tag:
-		"login":
-			login_failed.emit("network_error")
-		"merge":
-			merge_rejected.emit("network_error")
-		"spawn":
-			spawn_rejected.emit("network_error")
-		"move":
-			move_rejected.emit("network_error")
-		"breakthrough":
-			breakthrough_rejected.emit("network_error")
-		"consume_exp_pill":
-			exp_pill_consume_rejected.emit("network_error")
-		"board_switch":
-			board_switch_rejected.emit("network_error")
-		"pouch_deposit":
-			pouch_deposit_rejected.emit("network_error")
-		"pouch_withdraw":
-			pouch_withdraw_rejected.emit("network_error")
-		"battle_attack":
-			battle_attack_rejected.emit("network_error")
-		"battle_heal":
-			battle_heal_rejected.emit("network_error")
-		"restore_stamina":
-			stamina_restore_rejected.emit("network_error")
-		"meridian_complete":
-			meridian_complete_rejected.emit("network_error")
-		"quest_claim":
-			quest_claim_rejected.emit("network_error")
-		"claim_pending_reward":
-			pending_reward_claimed_rejected.emit("network_error")
-		"home_meridian_light":
-			home_meridian_light_rejected.emit("network_error")
-		"sell":
-			sell_rejected.emit("network_error")
-		"gm_exec":
-			gm_exec_rejected.emit("network_error")
-		"craft_add":
-			craft_add_rejected.emit("network_error")
-		"craft_start":
-			craft_start_rejected.emit("network_error")
-		"craft_remove":
-			craft_remove_rejected.emit("network_error")
-		"craft_retrieve":
-			craft_retrieve_rejected.emit("network_error")
-		"fetch_state":
-			state_load_failed.emit("network_error")
+	_emit_error(tag, "network", "network_error")
 
 func _handle_parse_error(tag: String) -> void:
-	match tag:
-		"login":
-			login_failed.emit("invalid_response")
-		"merge":
-			merge_rejected.emit("invalid_response")
-		"spawn":
-			spawn_rejected.emit("invalid_response")
-		"move":
-			move_rejected.emit("invalid_response")
-		"breakthrough":
-			breakthrough_rejected.emit("invalid_response")
-		"consume_exp_pill":
-			exp_pill_consume_rejected.emit("invalid_response")
-		"board_switch":
-			board_switch_rejected.emit("invalid_response")
-		"pouch_deposit":
-			pouch_deposit_rejected.emit("invalid_response")
-		"pouch_withdraw":
-			pouch_withdraw_rejected.emit("invalid_response")
-		"battle_attack":
-			battle_attack_rejected.emit("invalid_response")
-		"battle_heal":
-			battle_heal_rejected.emit("invalid_response")
-		"restore_stamina":
-			stamina_restore_rejected.emit("invalid_response")
-		"meridian_complete":
-			meridian_complete_rejected.emit("invalid_response")
-		"quest_claim":
-			quest_claim_rejected.emit("invalid_response")
-		"claim_pending_reward":
-			pending_reward_claimed_rejected.emit("invalid_response")
-		"home_meridian_light":
-			home_meridian_light_rejected.emit("invalid_response")
-		"sell":
-			sell_rejected.emit("invalid_response")
-		"gm_exec":
-			gm_exec_rejected.emit("invalid_response")
-		"craft_add":
-			craft_add_rejected.emit("invalid_response")
-		"craft_start":
-			craft_start_rejected.emit("invalid_response")
-		"craft_remove":
-			craft_remove_rejected.emit("invalid_response")
-		"craft_retrieve":
-			craft_retrieve_rejected.emit("invalid_response")
-		"fetch_state":
-			state_load_failed.emit("invalid_response")
+	_emit_error(tag, "parse", "invalid_response")
 
 # --- Storage ---
 
@@ -745,11 +587,11 @@ func submit_storage_deposit(storage_col: int, storage_row: int, item_id: int, fr
 	})
 	_send_authed_request("storage_deposit", "/api/game/storage/deposit", HTTPClient.Method.METHOD_POST, body)
 
-func submit_storage_withdraw(storage_col: int, storage_row: int, item_id: int, target_col: int, target_row: int) -> void:
+func submit_storage_withdraw(storage_col: int, storage_row: int, uid: int, target_col: int, target_row: int) -> void:
 	var body := JSON.stringify({
 		"storage_col": storage_col,
 		"storage_row": storage_row,
-		"item_id": item_id,
+		"uid": uid,
 		"target_col": target_col,
 		"target_row": target_row,
 	})

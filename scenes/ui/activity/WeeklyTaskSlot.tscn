@@ -1,34 +1,33 @@
-[gd_scene format=3 uid="uid://weekly_task_slot"]
+[gd_scene format=3 uid="uid://rvgnrq1q6d55"]
 
-[ext_resource type="Script" path="res://scenes/ui/activity/WeeklyTaskSlot.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://dm82hgbf2n0ev" path="res://scenes/ui/activity/WeeklyTaskSlot.gd" id="1_gd"]
 
-[node name="WeeklyTaskSlot" type="HBoxContainer"]
-layout_mode = 2
+[node name="WeeklyTaskSlot" type="HBoxContainer" unique_id=364069552]
 theme_override_constants/separation = 12
 script = ExtResource("1_gd")
 
-[node name="NameLabel" type="Label" parent="."]
+[node name="NameLabel" type="Label" parent="." unique_id=2027992513]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
 
-[node name="ProgressLabel" type="Label" parent="."]
+[node name="ProgressLabel" type="Label" parent="." unique_id=333222226]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 
-[node name="RewardsContainer" type="HBoxContainer" parent="."]
+[node name="RewardsContainer" type="HBoxContainer" parent="." unique_id=563268647]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="ClaimButton" type="Button" parent="."]
+[node name="ClaimButton" type="Button" parent="." unique_id=945952851]
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "领取"
 
-[node name="DoneLabel" type="Label" parent="."]
+[node name="DoneLabel" type="Label" parent="." unique_id=1223414780]
 visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.3, 1, 0.3, 1)
+theme_override_font_sizes/font_size = 14
 text = "✓"

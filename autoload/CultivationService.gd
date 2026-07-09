@@ -26,7 +26,6 @@ func _ready() -> void:
 
 func _on_breakthrough_confirmed(result: Dictionary) -> void:
 	print("[Cultivation] breakthrough confirmed")
-	GameState.version = result.get("new_version", GameState.version)
 	if _pending_breakthrough_uid > 0:
 		print("[Cultivation] removing pill by uid=" + str(_pending_breakthrough_uid))
 		var pos := GridManager.find_pos_by_uid(_pending_breakthrough_uid)
@@ -46,7 +45,6 @@ func _on_breakthrough_rejected(_reason: String) -> void:
 	_pending_breakthrough_uid = -1
 
 func _on_exp_pill_consume_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
 	var c: Dictionary = result.get("cultivation", {})
 	_apply_cultivation_state(c)
 	if _pending_exp_pill_uid > 0:
@@ -64,14 +62,14 @@ func try_breakthrough(pill_id: int, uid: int) -> bool:
 	_pending_breakthrough_uid = uid
 	print("[Cultivation] pending_breakthrough_uid=" + str(_pending_breakthrough_uid))
 	if CloudService.online:
-		CloudService.submit_breakthrough(pill_id, uid, GameState.version)
+		CloudService.submit_breakthrough(pill_id, uid)
 		return true
 	return false
 
 func consume_exp_pill(pill_id: int, uid: int) -> void:
 	_pending_exp_pill_uid = uid
 	if CloudService.online:
-		CloudService.submit_consume_exp_pill(pill_id, uid, GameState.version)
+		CloudService.submit_consume_exp_pill(pill_id, uid)
 
 # --- State sync from server ---
 

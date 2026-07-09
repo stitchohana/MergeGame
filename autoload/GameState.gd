@@ -12,7 +12,6 @@ enum GamePhase {
 	GAME_OVER
 }
 
-var version: int = 0
 var phase: GamePhase = GamePhase.INIT
 var stamina: int = 100
 var max_stamina: int = 100

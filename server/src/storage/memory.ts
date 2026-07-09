@@ -6,8 +6,8 @@ const defaultCultivation = {
   total_exp: 0,
   current_qi: 0,
   max_qi: 100,
-  last_tick_time: Date.now(),
-};
+  last_tick_time: Date.now()
+      };
 
 export function defaultGameState(): GameState {
   const now = Date.now();
@@ -19,9 +19,8 @@ export function defaultGameState(): GameState {
     max_stamina: 100,
     last_stamina_tick: now,
     spirit_stones: 0,
-    version: 0,
-    pending_rewards: [],
-  };
+    pending_rewards: []
+      };
 }
 
 export class MemoryStorage implements IStorage {
@@ -39,8 +38,8 @@ export class MemoryStorage implements IStorage {
     const user: User = {
       userId: `u_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       deviceId,
-      createdAt: new Date().toISOString(),
-    };
+      createdAt: new Date().toISOString()
+      };
     this.users.set(user.userId, user);
     return user;
   }
@@ -60,7 +59,7 @@ export class MemoryStorage implements IStorage {
       entries.push({
         userId,
         deviceId: user?.deviceId ?? "unknown",
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
     }
     return entries.slice(0, limit);

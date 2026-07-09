@@ -278,3 +278,52 @@ func has_possible_merge() -> bool:
 # Hash a position for use as a Dictionary key
 static func hash_pos(pos: Vector2i) -> int:
 	return pos.y * GRID_COLS + pos.x
+# Recursively convert JSON floats to ints for integer keys
+static func _sanitize_json_ints(data: Variant) -> Variant:
+	if data is Dictionary:
+		var result: Dictionary = {}
+		for key in data as Dictionary:
+			var val: Variant = (data as Dictionary)[key]
+			if typeof(val) == TYPE_FLOAT and val == floor(val):
+				result[key] = int(val)
+			elif val is Dictionary or val is Array:
+				result[key] = _sanitize_json_ints(val)
+			else:
+				result[key] = val
+		return result
+	elif data is Array:
+		var result: Array = []
+		for val in data as Array:
+			if typeof(val) == TYPE_FLOAT and val == floor(val):
+				result.append(int(val))
+			elif val is Dictionary or val is Array:
+				result.append(_sanitize_json_ints(val))
+			else:
+				result.append(val)
+		return result
+	return data
+
+# Populate grid from server entries — shared by all screen restore paths
+func populate_from_server(server_grid: Array) -> void:
+	for raw_entry in server_grid:
+		var entry: Dictionary = _sanitize_json_ints(raw_entry) as Dictionary
+		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
+		if item_data.is_empty():
+			continue
+		var item := item_data.duplicate(true)
+		item["_uid"] = entry.uid
+		if entry.has("charges"):
+			item["charges"] = entry.charges
+		if entry.has("immovable"):
+			item["immovable"] = entry.immovable
+		var craft_data: Variant = entry.get("craft", null)
+		if craft_data is Dictionary and not (craft_data as Dictionary).is_empty():
+			for key in craft_data as Dictionary:
+				item[key] = craft_data[key]
+		var recharge_rem: Variant = entry.get("_recharge_remaining", null)
+		if recharge_rem != null:
+			item["_recharge_remaining"] = recharge_rem
+		var entry_storage: Variant = entry.get("storage", null)
+		if entry_storage != null:
+			item["storage"] = entry_storage
+		add_item(item, Vector2i(entry.col, entry.row))

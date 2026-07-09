@@ -11,6 +11,6 @@ export const config = {
   jsonDbPath: process.env.JSON_DB_PATH || "./data",
   game: {
     gridCols: 7,
-    gridRows: 9,
-  },
-};
+    gridRows: 9
+      }
+      };

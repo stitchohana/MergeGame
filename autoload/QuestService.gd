@@ -13,31 +13,18 @@ func _ready() -> void:
 	_connect_signals()
 
 func _connect_signals() -> void:
-	if not CloudService.state_loaded.is_connected(_on_state_loaded):
-		CloudService.state_loaded.connect(_on_state_loaded)
-	if not CloudService.merge_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.MERGE)):
-		CloudService.merge_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.MERGE))
-	if not CloudService.spawn_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.SPAWN)):
-		CloudService.spawn_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.SPAWN))
-	if not CloudService.craft_retrieve_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.CRAFT)):
-		CloudService.craft_retrieve_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.CRAFT))
-	if not CloudService.sell_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.SELL)):
-		CloudService.sell_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.SELL))
-	if not CloudService.meridian_complete_confirmed.is_connected(_on_meridian_complete_tick):
-		CloudService.meridian_complete_confirmed.connect(_on_meridian_complete_tick)
-	if not CloudService.battle_attack_confirmed.is_connected(_on_battle_attack_tick):
-		CloudService.battle_attack_confirmed.connect(_on_battle_attack_tick)
-	if not CloudService.breakthrough_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.BREAKTHROUGH)):
-		CloudService.breakthrough_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.BREAKTHROUGH))
-	# Both exp pill and stamina pill consumption count as "any item consume" quest progress
-	if not CloudService.exp_pill_consume_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME)):
-		CloudService.exp_pill_consume_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME))
-	if not CloudService.stamina_restore_confirmed.is_connected(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME)):
-		CloudService.stamina_restore_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME))
-	if not CloudService.quest_claim_confirmed.is_connected(_on_quest_claim_confirmed):
-		CloudService.quest_claim_confirmed.connect(_on_quest_claim_confirmed)
-	if not CloudService.quest_claim_rejected.is_connected(_on_quest_claim_rejected):
-		CloudService.quest_claim_rejected.connect(_on_quest_claim_rejected)
+	CloudService.state_loaded.connect(_on_state_loaded)
+	CloudService.merge_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.MERGE))
+	CloudService.spawn_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.SPAWN))
+	CloudService.craft_retrieve_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.CRAFT))
+	CloudService.sell_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.SELL))
+	CloudService.meridian_complete_confirmed.connect(_on_meridian_complete_tick)
+	CloudService.battle_attack_confirmed.connect(_on_battle_attack_tick)
+	CloudService.breakthrough_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.BREAKTHROUGH))
+	CloudService.exp_pill_consume_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME))
+	CloudService.stamina_restore_confirmed.connect(_on_progress_tick.bind(Constants.QuestType.ANY_ITEM_CONSUME))
+	CloudService.quest_claim_confirmed.connect(_on_quest_claim_confirmed)
+	CloudService.quest_claim_rejected.connect(_on_quest_claim_rejected)
 
 
 func _on_state_loaded(state: Dictionary) -> void:
@@ -123,10 +110,6 @@ func _find_quest_target(quest_id: int) -> int:
 		if q.id == quest_id:
 			return q.target_count
 	return 0
-
-
-
-
 
 
 func _on_quest_claim_confirmed(result: Dictionary) -> void:

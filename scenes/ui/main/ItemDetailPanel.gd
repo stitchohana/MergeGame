@@ -1,5 +1,5 @@
 class_name ItemDetailPanel extends BaseHUD
-signal material_clicked(item_id: int)
+signal material_clicked(uid: int, item_id: int)
 
 @onready var default_label: Label = $DefaultLabel
 @onready var name_label: Label = $NameLabel
@@ -114,18 +114,21 @@ func _populate_materials(items: Array) -> void:
 		materials_container.add_child(hint)
 		return
 
-	var count_map: Dictionary = {}
+	var uid_map: Dictionary = {}
 	for item in items:
-		var iid: int = item.get("id", 0)
-		count_map[iid] = count_map.get(iid, 0) + 1
+		var iid: int = item.get("id", 0) as int
+		if not uid_map.has(iid):
+			uid_map[iid] = {"count": 1, "uid": item.get("uid", item.get("_uid", 0)) as int}
+		else:
+			uid_map[iid]["count"] += 1
 
-	for iid in count_map:
-		var count: int = count_map[iid]
+	for iid in uid_map:
+		var info: Dictionary = uid_map[iid]
 		var data := ConfigDatabase.get_item_data(iid)
-		var entry := _build_material_icon(data, count)
+		var entry := _build_material_icon(data, info["count"], info["uid"])
 		materials_container.add_child(entry)
 
-func _build_material_icon(item_data: Dictionary, count: int) -> Button:
+func _build_material_icon(item_data: Dictionary, count: int, uid: int) -> Button:
 	var entry := Button.new()
 	entry.flat = true
 	entry.custom_minimum_size = Vector2(60, 60)
@@ -139,17 +142,9 @@ func _build_material_icon(item_data: Dictionary, count: int) -> Button:
 	var group_id: int = item_data.get("group_id", 0)
 	var level: int = item_data.get("level", 0)
 	if item_data.get("type", "") == "launcher":
-		match group_id:
-			1: rect.color = Color(0.6, 0.3, 0.8, 1)
-			2: rect.color = Color(1.0, 0.6, 0.2, 1)
-			_: rect.color = Color(0.5, 0.5, 0.5, 1)
+		rect.color = GridUtils.launcher_color(group_id)
 	else:
-		var hue := 0.0
-		match group_id:
-			1: hue = float(level - 1) / 8.0
-			2: hue = 0.25 + float(level - 1) / 6.0 * 0.15
-			_: hue = float(level - 1) / 8.0
-		rect.color = Color.from_hsv(hue, 0.6, 0.7)
+		rect.color = GridUtils.item_color(group_id, level)
 
 	var name_label := Label.new()
 	name_label.text = item_data.get("name", "")
@@ -172,7 +167,7 @@ func _build_material_icon(item_data: Dictionary, count: int) -> Button:
 	entry.add_child(rect)
 	entry.add_child(name_label)
 	entry.add_child(count_label)
-	entry.pressed.connect(func(): material_clicked.emit(item_data.get("id", 0)))
+	entry.pressed.connect(func(): material_clicked.emit(uid, item_data.get("id", 0)))
 	return entry
 
 func get_current_craft_table() -> Dictionary:

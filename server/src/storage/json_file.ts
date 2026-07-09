@@ -49,8 +49,8 @@ export class JsonFileStorage implements IStorage {
     const user: User = {
       userId: `u_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       deviceId,
-      createdAt: new Date().toISOString(),
-    };
+      createdAt: new Date().toISOString()
+      };
     users.set(user.userId, user);
     this.writeUsers(users);
     return user;
@@ -79,8 +79,8 @@ export class JsonFileStorage implements IStorage {
         entries.push({
           userId,
           deviceId: user.deviceId,
-          updatedAt: new Date().toISOString(),
-        });
+          updatedAt: new Date().toISOString()
+      });
       }
     }
     return entries.slice(0, limit);

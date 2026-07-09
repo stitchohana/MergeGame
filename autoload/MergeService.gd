@@ -35,11 +35,11 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 
 	if CloudService.online:
 		print("[MergeService] submit_merge: from=" + str(from_pos) + " id=" + str(item_a.get("id",0)) + " to=" + str(to_pos) + " id=" + str(item_b.get("id",0)))
-		CloudService.submit_merge(from_pos.x, from_pos.y, to_pos.x, to_pos.y, GameState.version)
+		CloudService.submit_merge(from_pos.x, from_pos.y, to_pos.x, to_pos.y)
 	return true
 
 func _on_merge_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
+	pass
 
 	var regen: float = result.get("regen_remaining_ms", 0.0)
 	if regen > 0:
@@ -74,5 +74,4 @@ func _merge_error_text(reason: String) -> String:
 		"item_id_mismatch": return "合并失败：物品不同"
 		"already_max_level": return "合并失败：已达最高等级"
 		"network_error": return "合并失败：网络错误"
-		"version_mismatch": return "合并失败：数据过期，请重试"
 		_: return "合并失败：" + reason

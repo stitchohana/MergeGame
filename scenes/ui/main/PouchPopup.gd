@@ -35,14 +35,16 @@ func _refresh() -> void:
 		item_container.add_child(hint)
 		return
 
-	for item_id in _items:
+	for entry in _items:
+		var item_id: int = entry.get("id", 0) as int
+		var item_uid: int = entry.get("uid", 0) as int
 		var item_data := ConfigDatabase.get_item_data(item_id)
 		if item_data.is_empty():
 			continue
-		var btn := _build_item_button(item_data)
+		var btn := _build_item_button(item_data, item_uid)
 		item_container.add_child(btn)
 
-func _build_item_button(item_data: Dictionary) -> Button:
+func _build_item_button(item_data: Dictionary, uid: int) -> Button:
 	var btn := Button.new()
 	btn.flat = true
 	btn.custom_minimum_size = Vector2(80, 100)
@@ -53,17 +55,11 @@ func _build_item_button(item_data: Dictionary) -> Button:
 	widget.setup(item_data)
 	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	var item_id: int = item_data.get("id", 0)
-	btn.pressed.connect(func(): _on_item_pressed(item_id))
+	btn.pressed.connect(func(): _on_item_pressed(uid))
 	return btn
 
-func _on_item_pressed(item_id: int) -> void:
-	var spawn_pos := GridManager.find_nearest_empty(Vector2i(3, 3))
-	if spawn_pos == Vector2i(-1, -1):
-		EventBus.show_toast.emit("棋盘已满")
-		return
-
-	StoragePouch.withdraw(item_id, spawn_pos)
+func _on_item_pressed(uid: int) -> void:
+	StoragePouch.withdraw(uid)
 
 func _clear_items() -> void:
 	if item_container:

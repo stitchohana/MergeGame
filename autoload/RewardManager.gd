@@ -30,6 +30,8 @@ func _on_state_loaded(state: Dictionary) -> void:
 
 
 func _on_reward_response(result: Dictionary) -> void:
+	if result.has("cultivation"):
+		CultivationService.deserialize(result.cultivation)
 	if result.has("rewards_applied") and result.rewards_applied != null:
 		_apply(result.rewards_applied)
 	if result.has("pending_rewards"):
@@ -58,8 +60,7 @@ func _apply(config: Dictionary) -> void:
 					GameState.stamina += amount
 					GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 				Constants.TokenType.EXP:
-					CultivationService.current_exp += amount
-					CultivationService.exp_changed.emit(CultivationService.current_exp, CultivationService.get_exp_to_next_level())
+					pass  # CultivationService.deserialize() handles this via server response
 
 	if config.has("items"):
 		for ri in config.items:

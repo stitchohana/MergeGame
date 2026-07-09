@@ -86,7 +86,7 @@ func _on_claimed(result: Dictionary) -> void:
 
 	var on_done := func():
 		if result.has("grid"):
-			_sync_grid(result.grid, result.get("new_version", 0))
+			_sync_grid(result.grid)
 
 	var animating := false
 	for uid in _fly_targets:
@@ -103,8 +103,7 @@ func _on_claimed(result: Dictionary) -> void:
 		on_done.call()
 
 
-func _sync_grid(grid: Array, version: int) -> void:
-	GameState.version = version
+func _sync_grid(grid: Array) -> void:
 	GridManager.init_grid()
 	GridManager._skip_anims = true
 	for entry in grid:

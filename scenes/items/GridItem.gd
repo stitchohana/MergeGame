@@ -91,26 +91,10 @@ func _update_visuals() -> void:
 		return
 
 	if is_launcher:
-		match group_id:
-			1:
-				color = Color(0.6, 0.3, 0.8, 1)  # purple for stone set
-			2:
-				color = Color(1.0, 0.6, 0.2, 1)  # orange for plant set
-			_:
-				color = Color(0.5, 0.5, 0.5, 1)
+		color = GridUtils.launcher_color(group_id)
 	else:
 		var level: int = item_data.get("level", 0)
-		var hue := 0.0
-		match group_id:
-			1:
-				# Stone set: rainbow range (hue 0.0-0.875)
-				hue = float(level - 1) / 8.0
-			2:
-				# Plant set: green range (hue 0.25-0.4)
-				hue = 0.25 + float(level - 1) / 6.0 * 0.15
-			_:
-				hue = float(level - 1) / 8.0
-		color = Color.from_hsv(hue, 0.6, 0.7)
+		color = GridUtils.item_color(group_id, level)
 		# Apply crafting state visual if present (restored from server)
 		var cs: int = item_data.get("_craft_state", -1)
 		if cs >= 0 and cs <= 3:
@@ -140,7 +124,7 @@ func _update_visuals() -> void:
 	# Charge indicator for launchers (uses node from scene)
 	if charge_label:
 		if is_launcher:
-			var item_charges: int = item_data.get("charges", -1)
+			var item_charges: int = item_data.get("charges", -1) as int
 			var config := ConfigDatabase.get_item_data(item_data.get("id", 0))
 			var max_c: int = config.get("max_charges", 0) if not config.is_empty() else 0
 			if item_charges >= 0 and max_c > 0:

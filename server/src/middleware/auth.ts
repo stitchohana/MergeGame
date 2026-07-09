@@ -35,6 +35,6 @@ export function authRequired(req: Request, res: Response, next: NextFunction): v
 
 export function signToken(payload: AuthPayload): string {
   return jwt.sign(payload, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn as string & { __brand: never },
-  } as jwt.SignOptions);
+    expiresIn: config.jwtExpiresIn as string & { __brand: never }
+      } as jwt.SignOptions);
 }

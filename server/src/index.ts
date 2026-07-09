@@ -1,4 +1,5 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import * as path from "path";
 import { config } from "./config";
 import { IStorage } from "./storage/interface";
@@ -42,13 +43,32 @@ function main(): void {
   app.use((_req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Authorization, Content-Type");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     if (_req.method === "OPTIONS") {
       res.sendStatus(200);
       return;
     }
     next();
   });
+
+  // Rate limiting
+  const generalLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "too_many_requests" }
+      });
+
+  const mutationLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "too_many_requests" }
+      });
+
+  app.use("/api/", generalLimiter);
 
   // Dependencies
   const storage = createStorage();

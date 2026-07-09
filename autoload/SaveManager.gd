@@ -18,7 +18,6 @@ func _ready() -> void:
 
 func _restore_from_server(state: Dictionary) -> void:
 	# Game state
-	GameState.version = state.get("version", 0)
 	GameState.regen_remaining_ms = state.get("regen_remaining_ms", 0.0)
 	GameState.stamina = state.get("stamina", 100)
 	GameState.max_stamina = state.get("max_stamina", 100)
@@ -95,7 +94,6 @@ func _restore_from_server(state: Dictionary) -> void:
 
 func _collect_all_data() -> Dictionary:
 	return {
-		"version": GameState.version,
 		"game": {
 		"spirit_stones": GameState.spirit_stones,
 		},
@@ -164,6 +162,3 @@ func delete_save(slot: int) -> void:
 		DirAccess.remove_absolute(SAVE_PATH_PREFIX + str(slot) + ".json")
 
 # --- Legacy autosave removed — server is authoritative ---
-
-func load_autosave() -> void:
-	pass  # No-op: use server state via LoginScreen instead

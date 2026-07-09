@@ -1,5 +1,7 @@
 class_name StoragePopup extends BasePopup
 
+var _pending_withdraw_uid: int = 0
+
 @onready var title_label: Label = $Panel/TitleLabel
 @onready var item_container = $Panel/ItemContainer
 @onready var close_btn: Button = $Panel/CloseButton
@@ -63,30 +65,35 @@ func _on_item_pressed(item_id: int) -> void:
 		EventBus.show_toast.emit("棋盘已满")
 		return
 
-	# Add to grid optimistically
-	var item_data := ConfigDatabase.get_item_data(item_id)
-	if not item_data.is_empty():
-		GridManager.add_item(item_data.duplicate(true), spawn_pos)
-
-	# Remove from local items and refresh
+	# Find and remove from local items
 	var idx := -1
 	for i in range(_items.size()):
 		if _items[i].id == item_id:
 			idx = i
 			break
 	if idx >= 0:
+		_pending_withdraw_uid = _items[idx].get("uid", 0) as int
 		_items.remove_at(idx)
 	_refresh()
 
 	if CloudService.online:
-		CloudService.submit_storage_withdraw(_storage_pos.x, _storage_pos.y, item_id, spawn_pos.x, spawn_pos.y)
+		CloudService.submit_storage_withdraw(_storage_pos.x, _storage_pos.y, _pending_withdraw_uid, spawn_pos.x, spawn_pos.y)
 
 func _on_withdraw_confirmed(result: Dictionary) -> void:
-	# Update storage data from server response
 	var storage_data = result.get("storage", null)
 	if storage_data != null:
 		_items = storage_data.items
 		_refresh()
+	var _sw_uid: int = result.get("uid", 0) as int
+	if _sw_uid > 0 and _pending_withdraw_uid > 0:
+		var _sw_col: int = result.get("col", 0) as int
+		var _sw_row: int = result.get("row", 0) as int
+		var item_data := ConfigDatabase.get_item_data(_pending_withdraw_uid)
+		if not item_data.is_empty():
+			var new_item := item_data.duplicate(true)
+			new_item["_uid"] = _sw_uid
+			GridManager.add_item(new_item, Vector2i(_sw_col, _sw_row))
+		_pending_withdraw_uid = 0
 
 func _clear_items() -> void:
 	if item_container:

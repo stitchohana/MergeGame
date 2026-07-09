@@ -197,6 +197,7 @@ func _do_breakthrough(pill_id: int) -> void:
 
 func _on_breakthrough_done(_result: Dictionary) -> void:
 	_refresh_breakthrough_btn()
+	_refresh_display()
 
 func _on_breakthrough_rejected(reason: String) -> void:
 	if reason == "pill_not_found":

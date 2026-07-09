@@ -121,12 +121,9 @@ export function createGMRouter(storage: IStorage, engine: GameEngine): Router {
         default:
           res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid"] });
           return;
-      }
-
-      state.version += 1;
-      await storage.saveState(userId, state);
+      }      await storage.saveState(userId, state);
       console.log(`[gm] ${userId}: ${cmd} — ${msg}`);
-      res.json({ ok: true, msg, version: state.version });
+      res.json({ ok: true, msg });
     } catch (e: any) {
       console.error("[gm] error:", e);
       res.status(500).json({ error: "internal_error" });

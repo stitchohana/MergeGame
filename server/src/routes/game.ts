@@ -38,7 +38,6 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       await storage.saveState(userId, state);
       console.log(`[game] new player ${userId}, init with ${state.grid.length} items | v0`);
     } else {
-      const oldVer = state.version;
       // Migrate: add pouch if missing (old saves)
       if (!state.pouch) {
         state.pouch = [];
@@ -51,10 +50,49 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       if (!state.uid_counter) {
         state.uid_counter = 0;
       }
+      // Migrate: backfill uid in pouch items (old format: number[])
+      if (state.pouch.length > 0 && typeof state.pouch[0] === "number") {
+        const newPouch: any[] = [];
+        for (const id of state.pouch as unknown as number[]) {
+          state.uid_counter = (state.uid_counter ?? 0) + 1;
+          newPouch.push({ uid: state.uid_counter, id });
+        }
+        state.pouch = newPouch as any;
+      }
+      // Migrate: backfill uid in craft_stored items (old format: {id} without uid)
+      for (const item of state.grid) {
+        if (item.craft?._craft_stored) {
+          for (const s of item.craft._craft_stored) {
+            if (!(s as any).uid) {
+              state.uid_counter = (state.uid_counter ?? 0) + 1;
+              (s as any).uid = state.uid_counter;
+            }
+          }
+        }
+      }
       for (const item of state.grid) {
         if (!item.uid) {
-          state.uid_counter += 1;
+          state.uid_counter = (state.uid_counter ?? 0) + 1;
           item.uid = state.uid_counter;
+        }
+      }
+      // Backfill uids for saved grids too
+      for (const grid of [state.saved_grid, state.battle_grid]) {
+        if (grid) {
+          for (const item of grid) {
+            if (!item.uid) {
+              state.uid_counter = (state.uid_counter ?? 0) + 1;
+              item.uid = state.uid_counter;
+            }
+            if (item.craft?._craft_stored) {
+              for (const s of item.craft._craft_stored) {
+                if (!(s as any).uid) {
+                  state.uid_counter = (state.uid_counter ?? 0) + 1;
+                  (s as any).uid = state.uid_counter;
+                }
+              }
+            }
+          }
         }
       }
       // Migrate: convert old cultivation (current_realm_id + current_level) to flat current_level
@@ -65,22 +103,15 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
         const newLevel = (realmOffsets[oldRealm] ?? 0) + oldLv;
         console.log(`[game] migrating cultivation: realm=${oldRealm} lv=${oldLv} -> flat level=${newLevel}`);
         state.cultivation.current_level = newLevel;
-        delete (state.cultivation as any).current_realm_id;
-        state.version += 1;
-      }
+        delete (state.cultivation as any).current_realm_id;      }
 
       // Re-initialize if grid is empty (stale save)
       if (!state.grid || state.grid.length === 0) {
         const init = engine.createInitialState();
-        state.grid = init.grid;
-        state.version += 1;
-        await storage.saveState(userId, state);
+        state.grid = init.grid;        await storage.saveState(userId, state);
         console.log(`[game] re-initialized empty grid for ${userId}: ${state.grid.length} items`);
       }
-      if (state.version !== oldVer) {
-        await storage.saveState(userId, state);
-      }
-      if (engine.tickCraftingState(state)) {
+            if (engine.tickCraftingState(state)) {
         await storage.saveState(userId, state);
       }
       engine.tickStamina(state);
@@ -99,7 +130,6 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       stamina: state.stamina,
       max_stamina: state.max_stamina,
       spirit_stones: state.spirit_stones,
-      version: state.version,
       regen_remaining_ms: regenRemainingMs,
       battle_map_id: state.battle_map_id,
       battle_stage: state.battle_stage,
@@ -111,8 +141,8 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       activity_defs: engine.activityEngine.getActivities().map(a => ({ ...a, active: engine.activityEngine.isActive(a) })),
       activity_progress: state.activity_progress,
       activity_current_day: engine.activityEngine.getCurrentDay(3, engine.questResetHour),
-      pending_rewards: state.pending_rewards, home_meridian_progress: state.home_meridian_progress,
-    };
+      pending_rewards: state.pending_rewards, home_meridian_progress: state.home_meridian_progress
+      };
   }
 
   // GET /api/game/state
@@ -123,9 +153,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       // Restore main grid if returning from battle after reconnect
       if (state.saved_grid && state.saved_grid.length > 0) {
         state.grid = state.saved_grid;
-        state.saved_grid = undefined;
-        state.version += 1;
-        await storage.saveState(userId, state);
+        state.saved_grid = undefined;        await storage.saveState(userId, state);
         console.log(`[game] restored main grid for ${userId}: ${state.grid.length} items`);
       }
       const regenRemainingMs = engine.getRegenRemainingMs(state);
@@ -166,15 +194,15 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
 
   // POST /api/game/merge
   router.post("/merge", op(async (req, res, userId) => {
-    const { from, to, version } = req.body;
-    if (!Array.isArray(from) || from.length !== 2 || !Array.isArray(to) || to.length !== 2 || typeof version !== "number") {
+    const { from, to } = req.body;
+    if (!Array.isArray(from) || from.length !== 2 || !Array.isArray(to) || to.length !== 2) {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
     const result = engine.executeMerge(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, result_uid: result.resultUid, result_id: result.resultId, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
+    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
   }));
 
   // POST /api/game/spawn
@@ -190,87 +218,87 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spawned_uid: result.spawnedUid, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, new_version: result.newVersion, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, recharge_time: result.rechargeTime, cultivation: state.cultivation, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
+    res.json({ ok: true, spawned_uid: result.spawnedUid, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, recharge_time: result.rechargeTime, cultivation: state.cultivation, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
   }));
 
   // POST /api/game/craft/add
   router.post("/craft/add", op(async (req, res, userId) => {
-    const { table_col, table_row, ingredient_id, from_col, from_row, version } = req.body;
-    if (typeof table_col !== "number" || typeof table_row !== "number" || typeof ingredient_id !== "number" || typeof from_col !== "number" || typeof from_row !== "number" || typeof version !== "number") {
+    const { table_col, table_row, ingredient_id, from_col, from_row } = req.body;
+    if (typeof table_col !== "number" || typeof table_row !== "number" || typeof ingredient_id !== "number" || typeof from_col !== "number" || typeof from_row !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
     const result = engine.addIngredientToTable(state, table_col, table_row, ingredient_id, from_col, from_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, matched: result.matched, new_version: result.newVersion });
+    res.json({ ok: true, matched: result.matched });
   }));
 
   // POST /api/game/craft/start
   router.post("/craft/start", op(async (req, res, userId) => {
-    const { table_col, table_row, version } = req.body;
-    if (typeof table_col !== "number" || typeof table_row !== "number" || typeof version !== "number") {
+    const { table_col, table_row } = req.body;
+    if (typeof table_col !== "number" || typeof table_row !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
     const result = engine.executeCraftStart(state, table_col, table_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, recipe_id: result.recipe.id, craft_time: result.recipe.craft_time });
+    res.json({ ok: true, recipe_id: result.recipe.id, craft_time: result.recipe.craft_time });
   }));
 
   // POST /api/game/craft/retrieve
   router.post("/craft/retrieve", op(async (req, res, userId) => {
-    const { table_col, table_row, version } = req.body;
-    if (typeof table_col !== "number" || typeof table_row !== "number" || typeof version !== "number") {
+    const { table_col, table_row } = req.body;
+    if (typeof table_col !== "number" || typeof table_row !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
     const result = engine.executeCraftRetrieve(state, table_col, table_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, new_version: result.newVersion, quest_progress: state.quest_progress });
+    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, quest_progress: state.quest_progress });
   }));
 
 
   // POST /api/game/craft/remove
   router.post("/craft/remove", op(async (req, res, userId) => {
-    const { table_col, table_row, ingredient_id, target_col, target_row } = req.body;
-    if (typeof table_col !== "number" || typeof table_row !== "number" || typeof ingredient_id !== "number" || typeof target_col !== "number" || typeof target_row !== "number") {
+    const { table_col, table_row, uid, target_col, target_row } = req.body;
+    if (typeof table_col !== "number" || typeof table_row !== "number" || typeof uid !== "number" || typeof target_col !== "number" || typeof target_row !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.removeIngredientFromTable(state, table_col, table_row, ingredient_id, target_col, target_row);
+    const result = engine.removeIngredientFromTable(state, table_col, table_row, uid, target_col, target_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
+    res.json({ ok: true, grid: state.grid });
   }));
 
   // POST /api/game/push_place
   router.post("/push_place", op(async (req, res, userId) => {
-    const { from, to, version } = req.body;
-    if (!Array.isArray(from) || from.length !== 2 || !Array.isArray(to) || to.length !== 2 || typeof version !== "number") {
+    const { from, to } = req.body;
+    if (!Array.isArray(from) || from.length !== 2 || !Array.isArray(to) || to.length !== 2) {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    console.log(`[game] push_place: from=(${from[0]},${from[1]}) to=(${to[0]},${to[1]}) v=${version}`);
+    console.log(`[game] push_place: from=(${from[0]},${from[1]}) to=(${to[0]},${to[1]})`);
     const result = engine.pushAndPlace(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, pushed_col: result.pushed_col, pushed_row: result.pushed_row, from_col: result.from_col, from_row: result.from_row, to_col: result.to_col, to_row: result.to_row });
+    res.json({ ok: true, pushed_col: result.pushed_col, pushed_row: result.pushed_row, from_col: result.from_col, from_row: result.from_row, to_col: result.to_col, to_row: result.to_row });
   }));
 
   // POST /api/game/move
   router.post("/move", op(async (req, res, userId) => {
-    const { from, to, version } = req.body;
-    if (!Array.isArray(from) || from.length !== 2 || !Array.isArray(to) || to.length !== 2 || typeof version !== "number") {
+    const { from, to } = req.body;
+    if (!Array.isArray(from) || from.length !== 2 || !Array.isArray(to) || to.length !== 2) {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
     const result = engine.executeMove(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
+    res.json({ ok: true, grid: state.grid });
   }));
 
   // POST /api/game/shop/sell
@@ -305,7 +333,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       const items = engine.getShopItems().map((s: any) => ({
         id: s.id,
         name: engine.getItemData(s.id)?.name ?? ("#" + s.id),
-        price: s.price,
+        price: s.price
       }));
       res.json({ items });
     } catch (err) {
@@ -324,30 +352,28 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.depositItem(state, storage_col, storage_row, item_id, from_col, from_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, grid: state.grid });
+    res.json({ ok: true, grid: state.grid });
   }));
 
   // POST /api/game/storage/withdraw
   router.post("/storage/withdraw", op(async (req, res, userId) => {
-    const { storage_col, storage_row, item_id, target_col, target_row } = req.body;
-    if (typeof storage_col !== "number" || typeof storage_row !== "number" || typeof item_id !== "number" || typeof target_col !== "number" || typeof target_row !== "number") {
+    const { storage_col, storage_row, uid, target_col, target_row } = req.body;
+    if (typeof storage_col !== "number" || typeof storage_row !== "number" || typeof uid !== "number" || typeof target_col !== "number" || typeof target_row !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.withdrawItem(state, storage_col, storage_row, item_id, target_col, target_row);
+    const result = engine.withdrawItem(state, storage_col, storage_row, uid, target_col, target_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     const storageItem = state.grid.find(i => i.col === storage_col && i.row === storage_row);
-    res.json({ ok: true, new_version: result.newVersion, storage: storageItem?.storage ?? null });
+    res.json({ ok: true, storage: storageItem?.storage ?? null, uid: result.uid, col: result.col, row: result.row });
   }));
 
   // POST /api/game/meridian/refresh
   router.post("/meridian/refresh", op(async (req, res, userId) => {
     const state = await getOrCreateState(userId);
-    const result = engine.generateMeridianRequirements(state);
-    state.version += 1;
-    await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, acupoints: result.acupoints, threshold_idx: state.meridian_threshold_idx });
+    const result = engine.generateMeridianRequirements(state);    await storage.saveState(userId, state);
+    res.json({ ok: true, acupoints: result.acupoints, threshold_idx: state.meridian_threshold_idx });
   }));
 
   // POST /api/game/meridian/complete
@@ -370,20 +396,11 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    // Clean up crafting state before switching (clear table states from grid)
-    for (const item of state.grid) {
-      delete (item as any)._craft_state;
-      delete (item as any)._craft_stored;
-      delete (item as any)._craft_recipe;
-      delete (item as any)._craft_start_time;
-      delete (item as any)._craft_duration;
-      delete (item as any).storage;
-    }
     const result = engine.switchBoard(state, board_type, req.body.map_id, req.body.stage);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     if (board_type === "battle") engine.initBattleMonsters(state);
-    res.json({ ok: true, new_version: result.newVersion, board_type: board_type, grid: state.grid, monsters: state.battle_monsters, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage });
+    res.json({ ok: true, board_type: board_type, grid: state.grid, monsters: state.battle_monsters, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage });
   }));
 
   // POST /api/game/pouch/deposit
@@ -396,20 +413,20 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.pouchDeposit(state, uid);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, pouch: result.pouch });
+    res.json({ ok: true, pouch: result.pouch });
   }));
 
   // POST /api/game/pouch/withdraw
   router.post("/pouch/withdraw", op(async (req, res, userId) => {
-    const { item_id, target_col, target_row } = req.body;
-    if (typeof item_id !== "number" || typeof target_col !== "number" || typeof target_row !== "number") {
+    const { uid } = req.body;
+    if (typeof uid !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.pouchWithdraw(state, item_id, target_col, target_row);
+    const result = engine.pouchWithdraw(state, uid);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, pouch: result.pouch, target_col, target_row });
+    res.json({ ok: true, pouch: result.pouch, col: result.col, row: result.row });
   }));
 
   // POST /api/battle/attack
@@ -422,7 +439,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.battleHeal(state, item_id, uid, effect_id);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: result.newVersion, grid: result.grid });
+    res.json({ ok: true, grid: result.grid });
   }));
 
   router.post("/battle/attack", op(async (req, res, userId) => {
@@ -434,7 +451,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.battleAttack(state, item_id, effect_id, col, row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage, quest_progress: state.quest_progress, rewards_applied: engine.questEngine.lastAppliedRewards, pending_rewards: state.pending_rewards });
+    res.json({ ok: true, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage, quest_progress: state.quest_progress, rewards_applied: engine.questEngine.lastAppliedRewards, pending_rewards: state.pending_rewards });
   }));
 
   // POST /api/game/quest_claim
@@ -460,7 +477,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.questEngine.claimPendingReward(state, uid, engine);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, col: result.col, row: result.row, grid: state.grid, pending_rewards: state.pending_rewards, new_version: state.version });
+    res.json({ ok: true, col: result.col, row: result.row, grid: state.grid, pending_rewards: state.pending_rewards, });
   }));
 
   // POST /api/game/home_meridian/light

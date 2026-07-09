@@ -28,6 +28,8 @@ func _ready() -> void:
 		GridManager.grid_updated.connect(GameState.check_game_over)
 	grid_view.set_pouch_zone(pouch_zone)
 	leave_btn.pressed.connect(_on_leave_pressed)
+	CloudService.board_switch_confirmed.connect(_on_board_switch_confirmed)
+	CloudService.board_switch_rejected.connect(_on_board_switch_rejected)
 	CloudService.battle_attack_confirmed.connect(_on_battle_attack_confirmed)
 	CloudService.battle_attack_rejected.connect(_on_battle_attack_rejected)
 	CloudService.stamina_restore_confirmed.connect(_on_stamina_restore_confirmed)
@@ -42,20 +44,8 @@ func on_enter() -> void:
 	_char_max_hp = _char_hp
 	_monsters = _build_monster_list()
 
-	# Use cached battle grid, notify server in background
-	grid_view.set_skip_animations(true)
+	# Clear old grid, notify server in background
 	GridManager.init_grid(Constants.BoardType.BATTLE)
-	for entry in GameState.battle_grid_cache:
-		var item_data := ConfigDatabase.get_item_data(entry.id)
-		if not item_data.is_empty():
-			var item := item_data.duplicate(true)
-			item["_uid"] = entry.uid
-			if entry.has("charges"): item["charges"] = entry.charges
-			if entry.has("immovable"): item["immovable"] = entry.immovable
-			GridManager.add_item(item, Vector2i(entry.col, entry.row))
-	grid_view.set_skip_animations(false)
-	var fade := create_tween()
-	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
 
 	if CloudService.online:
 		CloudService.submit_board_switch("battle", _current_map_id, _current_stage)
@@ -65,19 +55,23 @@ func on_enter() -> void:
 	_refresh_char_display()
 	_refresh_monster_display()
 	_refresh_map_header()
+	var fade := create_tween()
+	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
 
 func _on_board_switch_confirmed(result: Dictionary) -> void:
 	if result.get("board_type", "") != "battle":
 		return
-	GameState.version = result.get("new_version", GameState.version)
+	GameState.battle_grid_cache = result.get("grid", [])
+	grid_view.set_skip_animations(true)
+	GridManager.init_grid(Constants.BoardType.BATTLE)
+	GridManager.populate_from_server(GameState.battle_grid_cache)
+	grid_view.set_skip_animations(false)
 	_current_map_id = result.get("battle_map_id", _current_map_id)
 	_current_stage = result.get("battle_stage", _current_stage)
-	_sync_grid_from_result(result)
 	var server_monsters: Array = result.get("monsters", [])
 	if not server_monsters.is_empty():
 		_monsters = server_monsters.duplicate(true)
 	GameState.set_phase(GameState.GamePhase.IDLE)
-	GameState.battle_grid_cache = result.get("grid", [])
 	_refresh_monster_display()
 	_refresh_map_header()
 	var fade := create_tween()
@@ -162,7 +156,7 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 			CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
 		"stamina":
 			_pending_stamina_uid = uid
-			CloudService.submit_restore_stamina(item_data.get("id", 0), uid, GameState.version)
+			CloudService.submit_restore_stamina(item_data.get("id", 0), uid)
 		"breakthrough":
 			var pill_id: int = item_data.get("id", 0)
 			if uid <= 0:
@@ -180,7 +174,6 @@ func _qi_label() -> void:
 		qi_label.text = "灵力 %d/%d" % [CultivationService.current_qi, CultivationService.max_qi]
 
 func _on_battle_attack_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
 	_sync_grid_from_result(result)
 	var server_monsters: Array = result.get("monsters", [])
 	if not server_monsters.is_empty():
@@ -214,17 +207,7 @@ func _sync_grid_from_result(result: Dictionary) -> void:
 	var server_grid: Array = result.get("grid", [])
 	grid_view.set_skip_animations(true)
 	GridManager.init_grid(Constants.BoardType.BATTLE)
-	if server_grid.is_empty():
-		grid_view.set_skip_animations(false)
-		return
-	for entry in server_grid:
-		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
-		if not item_data.is_empty():
-			var item := item_data.duplicate(true)
-			if entry.has("charges"): item["charges"] = entry.charges
-			if entry.has("uid"): item["_uid"] = entry.uid
-			if entry.has("immovable"): item["immovable"] = entry.immovable
-			GridManager.add_item(item, Vector2i(entry.col, entry.row))
+	GridManager.populate_from_server(server_grid)
 	GameState.battle_grid_cache = server_grid
 	grid_view.set_skip_animations(false)
 
@@ -259,7 +242,6 @@ func _refresh_map_header() -> void:
 	map_label.text = "%s — 第%d关 %s" % [map_data.get("name", ""), _current_stage + 1, stage_name]
 
 func _on_battle_heal_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
 	_sync_grid_from_result(result)
 	_char_hp = mini(_char_max_hp, _char_hp + _pending_heal_amount)
 	_refresh_char_display()
@@ -339,7 +321,6 @@ func _play_monster_hit() -> void:
 	tween.tween_property(flash, "color", Color(1, 0.3, 0.3, 0.0), 0.3)
 
 func _on_stamina_restore_confirmed(result: Dictionary) -> void:
-	GameState.version = result.get("new_version", GameState.version)
 	var stam: int = result.get("stamina", 0)
 	if stam > 0:
 		GameState.stamina = stam

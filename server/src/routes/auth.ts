@@ -35,8 +35,8 @@ export function createAuthRouter(storage: IStorage): Router {
         user: {
           user_id: user.userId,
           device_id: user.deviceId,
-          created_at: user.createdAt,
-        },
+          created_at: user.createdAt
+      }
       });
     } catch (err) {
       console.error("[auth] login error:", err);

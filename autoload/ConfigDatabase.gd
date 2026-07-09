@@ -40,7 +40,7 @@ func _load_json(path: String) -> Dictionary:
 	if err != OK:
 		push_error("[ConfigDatabase] JSON parse error in ", path, ": ", json.get_error_message())
 		return {}
-	return json.data
+	return GridManager._sanitize_json_ints(json.data)
 
 func _load_items(path: String) -> void:
 	var data := _load_json(path)
@@ -266,14 +266,14 @@ func reload() -> void:
 	load_all()
 
 # Get game config value by key path (e.g., "game.grid_cols")
-func get_game_config(key: String) -> Variant:
+func get_game_config(key: String, default = null) -> Variant:
 	var keys := key.split(".")
-	var current = _game_config
+	var current: Variant = _game_config
 	for k in keys:
-		if current is Dictionary and current.has(k):
-			current = current[k]
+		if current is Dictionary and (current as Dictionary).has(k):
+			current = (current as Dictionary)[k]
 		else:
-			return null
+			return default
 	return current
 
 # --- Cultivation config ---

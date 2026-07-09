@@ -54,7 +54,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
     const result = engine.consumeExpPill(state, pill_id, uid);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, cultivation: state.cultivation, quest_progress: state.quest_progress });
+    res.json({ ok: true, cultivation: state.cultivation, quest_progress: state.quest_progress });
   }));
 
   // POST /api/cultivation/consume-stamina
@@ -67,7 +67,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
     const result = engine.consumeStaminaPill(state, pill_id, uid);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, stamina: result.stamina, max_stamina: result.max_stamina, quest_progress: state.quest_progress });
+    res.json({ ok: true, stamina: result.stamina, max_stamina: result.max_stamina, quest_progress: state.quest_progress });
   }));
 
   // POST /api/cultivation/breakthrough
@@ -84,7 +84,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
     );
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, new_version: state.version, cultivation: state.cultivation, quest_progress: state.quest_progress });
+    res.json({ ok: true, cultivation: state.cultivation, quest_progress: state.quest_progress });
   }));
 
   return router;

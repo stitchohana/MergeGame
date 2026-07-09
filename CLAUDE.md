@@ -14,7 +14,7 @@ See `docs/设计文档.md` for full architecture, config schemas, signal map, an
 
 - **All UI is Control-based** (no Node2D/Sprite2D) — items use TextureRect, replace textures for re-skinning
 - **Config-driven**: `config/items.json` defines all items with weighted spawns, `config/game_config.json` for game parameters, `config/initial_setup.json` for starting board layout
-- **Autoload singletons** (in initialization order): ConfigDatabase → GridManager → GameState → MergeService → SaveManager
+- **Autoload singletons** (in initialization order as registered in project.godot): ConfigDatabase → GridManager → GameState → CultivationService → MergeService → SaveManager → EventBus → CloudService → CraftingService → UIManager → SceneTransitionManager → StoragePouch → RewardManager → QuestService → ActivityManager
 - **Single merge, no chain reaction** — one drag-drop triggers one merge
 - **Input handling**: GridView uses `_input()` for drag-and-drop across the full game area
 
