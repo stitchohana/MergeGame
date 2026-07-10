@@ -32,13 +32,19 @@ export class ActivityEngine {
 
   getActivities(): ActivityDef[] { return this.activities; }
 
+  hasWeeklyTasks(activityId: number): boolean {
+    return this.weeklyTasks.has(activityId);
+  }
+
   getCurrentDay(activityId: number, resetHour: number): number {
     const quests = this.weeklyTasks.get(activityId);
     if (!quests) return 0;
-    const now = new Date(Date.now() - resetHour * 3600000);
-    let dow = now.getUTCDay();
-    dow = dow === 0 ? 6 : dow - 1;
-    return Math.min(dow, quests.length - 1);
+    const rawNow = new Date();
+    const now = new Date(rawNow.getTime() - resetHour * 3600000);
+    let dow = now.getDay();
+    const converted = dow === 0 ? 6 : dow - 1;
+    console.log(`[activity] getCurrentDay: local=${rawNow.toLocaleString()} adjusted=${now.toLocaleString()} rawDow=${dow} converted=${converted} resetHour=${resetHour}`);
+    return Math.min(converted, quests.length - 1);
   }
 
   isActive(a: ActivityDef): boolean {
@@ -111,19 +117,19 @@ export class ActivityEngine {
     const last = new Date(lastTime - adjustMs);
     const cur = new Date(now - adjustMs);
     if (period === "day") {
-      return last.getUTCDate() !== cur.getUTCDate() || last.getUTCMonth() !== cur.getUTCMonth() || last.getUTCFullYear() !== cur.getUTCFullYear();
+      return last.getDate() !== cur.getDate() || last.getMonth() !== cur.getMonth() || last.getFullYear() !== cur.getFullYear();
     }
     if (period === "week") {
       const getWeek = (d: Date) => {
-        const jan4 = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
-        const jan4Day = jan4.getUTCDay() || 7;
+        const jan4 = new Date(d.getFullYear(), 0, 4);
+        const jan4Day = jan4.getDay() || 7;
         const days = (d.getTime() - jan4.getTime()) / 86400000;
         return Math.floor((days + jan4Day + 3) / 7);
       };
-      return last.getUTCFullYear() !== cur.getUTCFullYear() || getWeek(last) !== getWeek(cur);
+      return last.getFullYear() !== cur.getFullYear() || getWeek(last) !== getWeek(cur);
     }
     if (period === "month") {
-      return last.getUTCMonth() !== cur.getUTCMonth() || last.getUTCFullYear() !== cur.getUTCFullYear();
+      return last.getMonth() !== cur.getMonth() || last.getFullYear() !== cur.getFullYear();
     }
     return false;
   }

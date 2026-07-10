@@ -12,6 +12,9 @@ func setup(activity: Dictionary) -> void:
 
 
 func _on_pressed() -> void:
-	var panel := preload("res://scenes/ui/activity/WeeklyActivityPanel.tscn").instantiate() as WeeklyActivityPanel
-	UIManager.show_popup(panel)
-	panel.setup(_activity_id)
+	CloudService.fetch_state()
+	CloudService.state_loaded.connect(func(_data):
+		var panel := preload("res://scenes/ui/activity/WeeklyActivityPanel.tscn").instantiate() as WeeklyActivityPanel
+		UIManager.show_popup(panel)
+		panel.setup(_activity_id)
+	, CONNECT_ONE_SHOT)

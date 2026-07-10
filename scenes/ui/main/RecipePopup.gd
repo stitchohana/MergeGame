@@ -54,4 +54,3 @@ func _build_entry(recipe: Dictionary) -> Control:
 
 func _on_close() -> void:
 	UIManager.hide_popup(self)
-	queue_free()

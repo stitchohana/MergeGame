@@ -12,8 +12,10 @@ func setup(title: String, message: String, on_confirmed: Callable) -> void:
 	title_label.text = title
 	message_label.text = message
 	_on_confirmed = on_confirmed
-	confirm_btn.pressed.connect(_on_confirm)
-	cancel_btn.pressed.connect(_on_cancel)
+	if not confirm_btn.pressed.is_connected(_on_confirm):
+		confirm_btn.pressed.connect(_on_confirm)
+	if not cancel_btn.pressed.is_connected(_on_cancel):
+		cancel_btn.pressed.connect(_on_cancel)
 
 
 func _on_confirm() -> void:

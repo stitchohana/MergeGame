@@ -5,6 +5,7 @@ extends Control
 var _toast: Node = null
 
 func _ready() -> void:
+	randomize()
 	await get_tree().process_frame
 
 	# Register screen navigation

@@ -61,7 +61,7 @@ func _build_item_grid(selected: Dictionary) -> void:
 		btn.flat = true
 		btn.custom_minimum_size = Vector2(80, 100)
 		btn.add_child(widget)
-		btn.pressed.connect(func(): _on_item_clicked(i))
+		btn.pressed.connect(_on_item_clicked.bind(i))
 		item_grid.add_child(btn)
 		_item_widgets.append(widget)
 
@@ -90,15 +90,6 @@ func _build_launcher_section(selected: Dictionary) -> void:
 		vbox.add_child(widget)
 		vbox.add_child(lbl)
 		launcher_container.add_child(vbox)
-
-func _on_name_pressed(index: int) -> void:
-	if index < 0 or index >= _items.size():
-		return
-	var item := _items[index] as Dictionary
-	item_selected.emit(item)
-	_build_name_list(item)
-	_build_item_grid(item)
-	_build_launcher_section(item)
 
 func _on_item_clicked(index: int) -> void:
 	if index < 0 or index >= _items.size():

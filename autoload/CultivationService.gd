@@ -81,10 +81,10 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 
 	current_level = c.get("current_level", 1)
 	current_exp = c.get("current_exp", 0)
-	print("[Cultivation] apply_state: level=" + str(current_level) + " exp=" + str(current_exp) + " qi=" + str(current_qi) + "/" + str(max_qi))
 	total_exp = c.get("total_exp", 0)
 	current_qi = c.get("current_qi", 0)
 	max_qi = c.get("max_qi", 100)
+	print("[Cultivation] apply_state: level=" + str(current_level) + " exp=" + str(current_exp) + " qi=" + str(current_qi) + "/" + str(max_qi))
 
 	if current_level != old_level:
 		var stage_name: String = get_stage_name()

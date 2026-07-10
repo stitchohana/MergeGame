@@ -24,6 +24,7 @@ enum Transition {
 var transition_duration: float = 0.3
 
 var _ui_root: Control
+var _canvas_layer: CanvasLayer = null
 var _layers: Dictionary = {}
 var _screen_stack: Array[BaseScreen] = []
 var _active_popups: Array[BasePopup] = []
@@ -40,10 +41,10 @@ func _ready() -> void:
 	_ui_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_ui_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	var cl := CanvasLayer.new()
-	cl.layer = 1
-	cl.add_child(_ui_root)
-	get_tree().root.add_child.call_deferred(cl)
+	_canvas_layer = CanvasLayer.new()
+	_canvas_layer.layer = 1
+	_canvas_layer.add_child(_ui_root)
+	get_tree().root.add_child.call_deferred(_canvas_layer)
 
 	# Create layer containers in Z-order (last child = topmost)
 	var layer_order := [
@@ -61,8 +62,8 @@ func _ready() -> void:
 	_update_input_gating()
 
 func _exit_tree() -> void:
-	if _ui_root and is_instance_valid(_ui_root):
-		_ui_root.get_parent().queue_free()
+	if _canvas_layer and is_instance_valid(_canvas_layer):
+		_canvas_layer.queue_free()
 
 # --- Layer access ---
 
@@ -206,7 +207,7 @@ func hide_popup(popup: BasePopup) -> void:
 	popup.hide_animated()
 	_active_popups.erase(popup)
 	_update_input_gating()
-	input_blocked_changed.emit(false)
+	input_blocked_changed.emit(is_input_blocked())
 
 func hide_top_popup() -> void:
 	if _active_popups.size() > 0:

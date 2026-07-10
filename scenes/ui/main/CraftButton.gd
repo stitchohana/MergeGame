@@ -14,7 +14,7 @@ func show_for_recipe(recipe: Dictionary) -> void:
 		recipe_label.text = recipe.get("name", "合成")
 	show()
 
-func set_table_pos(grid_view_pos: Vector2, cell_pos: Vector2i, cell_size: int) -> void:
+func set_table_pos(cell_pos: Vector2i, cell_size: int) -> void:
 	# Position above the cell: centered horizontally, above vertically
 	var cell_x := cell_pos.x * cell_size
 	var cell_y := cell_pos.y * cell_size

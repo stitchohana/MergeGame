@@ -10,15 +10,15 @@ export enum TokenType {
 export enum ResetCycle {
   NEVER = 0,
   DAILY = 1,
-  WEEKLY = 2
-      }
+  WEEKLY = 2,
+}
 
 export enum ActivityCycle {
   ONCE = 0,
   DAILY = 1,
   WEEKLY = 2,
-  MONTHLY = 3
-      }
+  MONTHLY = 3,
+}
 
 export interface ActivityDef {
   id: number;
@@ -48,8 +48,8 @@ export enum QuestType {
   BATTLE_CLEAR = 6,
   BREAKTHROUGH = 7,
   ANY_ITEM_CONSUME = 8,
-  MERIDIAN_CIRCULATION = 9
-      }
+  MERIDIAN_CIRCULATION = 9,
+}
 
 export interface PendingReward {
   uid: number;
@@ -84,11 +84,6 @@ export interface QuestProgress {
   claimed: boolean;
 }
 
-export interface PouchItem {
-  uid: number;
-  id: number;
-}
-
 export interface GridItem {
   uid?: number;
   id: number;
@@ -101,7 +96,9 @@ export interface GridItem {
   last_charge_time?: number;
 }
 
-export type StorageSlot = PouchItem;
+export interface StorageSlot {
+  id: number;
+}
 
 export interface StorageData {
   items: StorageSlot[];
@@ -111,7 +108,7 @@ export interface StorageData {
 export interface CraftState {
   _craft_init: boolean;
   _craft_state: number;
-  _craft_stored: PouchItem[];
+  _craft_stored: Record<string, unknown>[];
   _craft_recipe: Record<string, unknown>;
   _craft_progress: number;
   _craft_result_id: number;
@@ -129,13 +126,15 @@ export interface CultivationData {
 
 export interface GameState {
   grid: GridItem[];
-  pouch: PouchItem[];
+  pouch: number[];
   cultivation: CultivationData;
   stamina: number;
   max_stamina: number;
   last_stamina_tick: number;
-  spirit_stones: number;  uid_counter?: number;
+  spirit_stones: number;
+  version: number;
   board_type?: string;
+  uid_counter?: number;
   saved_grid?: GridItem[];
   battle_grid?: GridItem[];
   battle_map_id?: number;

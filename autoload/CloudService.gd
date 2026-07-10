@@ -30,6 +30,7 @@ signal pouch_deposit_rejected(reason: String)
 signal pouch_withdraw_confirmed(result: Dictionary)
 signal pouch_withdraw_rejected(reason: String)
 signal meridian_refresh_confirmed(result: Dictionary)
+signal meridian_refresh_rejected(reason: String)
 signal meridian_complete_confirmed(result: Dictionary)
 signal meridian_complete_rejected(reason: String)
 signal quest_claim_confirmed(result: Dictionary)
@@ -52,6 +53,9 @@ signal battle_attack_rejected(reason: String)
 signal battle_heal_confirmed(result: Dictionary)
 signal battle_heal_rejected(reason: String)
 signal storage_withdraw_confirmed(result: Dictionary)
+signal storage_withdraw_rejected(reason: String)
+signal storage_deposit_confirmed(result: Dictionary)
+signal storage_deposit_rejected(reason: String)
 signal sell_confirmed(result: Dictionary)
 signal sell_rejected(reason: String)
 signal shop_items_loaded(items: Array)
@@ -103,7 +107,7 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("board_switch", _on_board_switch_response, board_switch_rejected, board_switch_rejected, board_switch_rejected)
 	_register_endpoint("pouch_deposit", _on_pouch_deposit_response, pouch_deposit_rejected, pouch_deposit_rejected, pouch_deposit_rejected)
 	_register_endpoint("pouch_withdraw", _on_pouch_withdraw_response, pouch_withdraw_rejected, pouch_withdraw_rejected, pouch_withdraw_rejected)
-	_register_endpoint("meridian_refresh", _on_meridian_refresh_response, meridian_refresh_confirmed, meridian_refresh_confirmed, meridian_refresh_confirmed)
+	_register_endpoint("meridian_refresh", _on_meridian_refresh_response, meridian_refresh_rejected, meridian_refresh_rejected, meridian_refresh_rejected)
 	_register_endpoint("meridian_complete", _on_meridian_complete_response, meridian_complete_rejected, meridian_complete_rejected, meridian_complete_rejected)
 	_register_endpoint("quest_claim", _on_quest_claim_response, quest_claim_rejected, quest_claim_rejected, quest_claim_rejected)
 	_register_endpoint("claim_pending_reward", _on_claim_pending_reward_response, pending_reward_claimed_rejected, pending_reward_claimed_rejected, pending_reward_claimed_rejected)
@@ -114,8 +118,8 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("craft_retrieve", _on_craft_retrieve_response, craft_retrieve_rejected, craft_retrieve_rejected, craft_retrieve_rejected)
 	_register_endpoint("battle_attack", _on_battle_attack_response, battle_attack_rejected, battle_attack_rejected, battle_attack_rejected)
 	_register_endpoint("battle_heal", _on_battle_heal_response, battle_heal_rejected, battle_heal_rejected, battle_heal_rejected)
-	_register_endpoint("storage_withdraw", _on_storage_withdraw_response)
-	_register_endpoint("storage_deposit", Callable())
+	_register_endpoint("storage_withdraw", _on_storage_withdraw_response, storage_withdraw_rejected, storage_withdraw_rejected, storage_withdraw_rejected)
+	_register_endpoint("storage_deposit", _on_storage_deposit_response, storage_deposit_rejected, storage_deposit_rejected, storage_deposit_rejected)
 	_register_endpoint("sell", _on_sell_response, sell_rejected, sell_rejected, sell_rejected)
 	_register_endpoint("shop_items", _on_shop_items_response)
 	_register_endpoint("buy", _on_buy_response, buy_rejected, buy_rejected, buy_rejected)
@@ -266,8 +270,8 @@ func submit_battle_heal(item_id: int, effect_id: int, uid: int) -> void:
 	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "uid": uid})
 	_send_authed_request("battle_heal", "/api/game/battle/heal", HTTPClient.Method.METHOD_POST, body)
 
-func submit_battle_attack(item_id: int, effect_id: int, col: int, row: int) -> void:
-	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "col": col, "row": row})
+func submit_battle_attack(item_id: int, effect_id: int, uid: int, col: int, row: int) -> void:
+	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "uid": uid, "col": col, "row": row})
 	_send_authed_request("battle_attack", "/api/game/battle/attack", HTTPClient.Method.METHOD_POST, body)
 
 func _on_battle_heal_response(data: Dictionary) -> void:
@@ -321,7 +325,7 @@ func submit_claim_pending_reward(uid: int) -> void:
 
 func submit_light_home_acupoint(stage: int, index: int) -> void:
 	var body := JSON.stringify({"stage": stage, "index": index})
-	_send_authed_request("home_meridian_light", "/api/game/home_meridian/light", HTTPClient.METHOD_POST, body)
+	_send_authed_request("home_meridian_light", "/api/game/home_meridian/light", HTTPClient.Method.METHOD_POST, body)
 
 func _on_meridian_complete_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -525,12 +529,8 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 	_current_tag = ""
 	_flush_queue()
 
-	var req_id := -1
-	var callback: Dictionary = {}
-	for id in _callbacks:
-		req_id = id
-		callback = _callbacks[id]
-		break
+	var req_id: int = _callbacks.keys()[0] if _callbacks.size() > 0 else -1
+	var callback: Dictionary = _callbacks.get(req_id, {})
 	_callbacks.erase(req_id)
 
 	if result != HTTPRequest.RESULT_SUCCESS:
@@ -577,11 +577,11 @@ func _handle_parse_error(tag: String) -> void:
 
 # --- Storage ---
 
-func submit_storage_deposit(storage_col: int, storage_row: int, item_id: int, from_col: int, from_row: int) -> void:
+func submit_storage_deposit(storage_col: int, storage_row: int, uid: int, from_col: int, from_row: int) -> void:
 	var body := JSON.stringify({
 		"storage_col": storage_col,
 		"storage_row": storage_row,
-		"item_id": item_id,
+		"uid": uid,
 		"from_col": from_col,
 		"from_row": from_row,
 	})
@@ -602,7 +602,16 @@ func _on_storage_withdraw_response(data: Dictionary) -> void:
 		storage_withdraw_confirmed.emit(data)
 		EventBus.show_toast.emit("取出成功")
 	else:
-		EventBus.show_toast.emit("取出失败：" + data.get("error", "unknown"))
+		var reason: String = data.get("error", "unknown_error")
+		storage_withdraw_rejected.emit(reason)
+		EventBus.show_toast.emit("取出失败：" + reason)
+
+
+func _on_storage_deposit_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		storage_deposit_confirmed.emit(data)
+	else:
+		storage_deposit_rejected.emit(data.get("error", "unknown_error"))
 
 # --- Shop ---
 
@@ -618,7 +627,7 @@ func submit_buy(item_id: int, target_col: int, target_row: int) -> void:
 	_send_authed_request("buy", "/api/game/shop/buy", HTTPClient.Method.METHOD_POST, body)
 
 func submit_gm_exec(cmd: String, amount: int, item_id: int = 0, col: int = -1, row: int = -1) -> void:
-	var body := JSON.stringify({"cmd": cmd, "amount": amount, "item_id": item_id, "col": col, "row": row})
+	var body := JSON.stringify({"cmd": cmd, "amount": amount, "item_id": item_id, "col": col, "row": row, "gm_key": "dev-gm-key"})
 	_send_authed_request("gm_exec", "/api/gm/exec", HTTPClient.Method.METHOD_POST, body)
 
 func _on_gm_exec_response(data: Dictionary) -> void:

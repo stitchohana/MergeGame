@@ -14,6 +14,8 @@ var _grid: Array[Array] = []
 
 # Reverse lookup: item_id -> Array[Vector2i] (multiple same-id items can exist)
 var _item_positions: Dictionary = {}  # int item_id -> Array[Vector2i]
+# Reverse lookup: uid -> Vector2i for O(1) position queries
+var _uid_to_pos: Dictionary = {}  # int uid -> Vector2i
 
 
 signal item_added(item_data: Dictionary, pos: Vector2i)
@@ -38,6 +40,7 @@ func init_grid(board_type: int = Constants.BoardType.MAIN) -> void:
 					item_removed.emit(item, pos)
 	_grid.clear()
 	_item_positions.clear()
+	_uid_to_pos.clear()
 	for row in range(GRID_ROWS):
 		var row_data: Array = []
 		row_data.resize(GRID_COLS)
@@ -76,6 +79,11 @@ func add_item(item_data: Dictionary, pos: Vector2i) -> bool:
 		_item_positions[item_id] = []
 	_item_positions[item_id].append(pos)
 
+	# Track uid -> position
+	var uid: int = item_data.get("_uid", 0)
+	if uid > 0:
+		_uid_to_pos[uid] = pos
+
 	item_added.emit(item_data, pos)
 	grid_updated.emit()
 	return true
@@ -95,6 +103,11 @@ func remove_item(pos: Vector2i) -> Dictionary:
 			_item_positions[item_id].remove_at(idx)
 		if _item_positions[item_id].is_empty():
 			_item_positions.erase(item_id)
+
+	# Remove uid tracking
+	var uid: int = item_data.get("_uid", 0)
+	if uid > 0:
+		_uid_to_pos.erase(uid)
 
 	item_removed.emit(item_data, pos)
 	grid_updated.emit()
@@ -118,6 +131,11 @@ func move_item(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		var idx = _item_positions[item_id].find(from_pos)
 		if idx >= 0:
 			_item_positions[item_id][idx] = to_pos
+
+	# Update uid tracking
+	var uid: int = item_data.get("_uid", 0)
+	if uid > 0:
+		_uid_to_pos[uid] = to_pos
 
 	item_moved.emit(item_data, from_pos, to_pos)
 	grid_updated.emit()
@@ -143,6 +161,13 @@ func swap_items(pos_a: Vector2i, pos_b: Vector2i) -> void:
 		var idx = _item_positions[id_b].find(pos_b)
 		if idx >= 0:
 			_item_positions[id_b][idx] = pos_a
+	# Update uid tracking
+	var uid_a: int = item_a.get("_uid", 0)
+	var uid_b: int = item_b.get("_uid", 0)
+	if uid_a > 0:
+		_uid_to_pos[uid_a] = pos_b
+	if uid_b > 0:
+		_uid_to_pos[uid_b] = pos_a
 	item_moved.emit(item_a, pos_a, pos_b)
 	item_moved.emit(item_b, pos_b, pos_a)
 	grid_updated.emit()
@@ -212,22 +237,31 @@ func is_grid_full() -> bool:
 func get_positions_by_item_id(item_id: int) -> Array[Vector2i]:
 	return _item_positions.get(item_id, []).duplicate()
 
-# Find an item by its unique instance ID
+# Find an item by its unique instance ID — O(1) via uid index
 func find_by_uid(uid: int) -> Dictionary:
-	for row in range(GRID_ROWS):
-		for col in range(GRID_COLS):
-			var item = _grid[row][col]
-			if item != null and item.get("_uid", 0) == uid:
-				return item
-	return {}
+	if uid <= 0 or not _uid_to_pos.has(uid):
+		return {}
+	var pos: Vector2i = _uid_to_pos[uid]
+	if not is_valid_pos(pos):
+		_uid_to_pos.erase(uid)
+		return {}
+	var item = _grid[pos.y][pos.x]
+	if item == null or item.get("_uid", 0) != uid:
+		_uid_to_pos.erase(uid)
+		return {}
+	return item
 
-# Find the grid position of an item by its unique instance ID
+# Find the grid position of an item by its unique instance ID — O(1) via uid index
 func find_pos_by_uid(uid: int) -> Vector2i:
 	if uid <= 0:
 		return Vector2i(-1, -1)
-	for entry in get_all_items():
-		if entry.data.get("_uid", 0) == uid:
-			return entry.pos
+	if _uid_to_pos.has(uid):
+		var pos: Vector2i = _uid_to_pos[uid]
+		if is_valid_pos(pos):
+			var item = _grid[pos.y][pos.x]
+			if item != null and item.get("_uid", 0) == uid:
+				return pos
+		_uid_to_pos.erase(uid)
 	return Vector2i(-1, -1)
 
 # Get all items on the grid

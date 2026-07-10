@@ -100,13 +100,25 @@ func _refresh_display() -> void:
 	var qi_str: String = "灵气：%d/%d 消耗：%d" % [CultivationService.current_qi, CultivationService.max_qi, def.get("qi_cost", 0)]
 	meridian_title.text += "\n" + qi_str
 
-	# Rebuild nodes
-	for child in nodes_box.get_children():
-		child.queue_free()
-	for i in range(lit.size()):
-		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(40, 40)
-		btn.add_theme_font_size_override("font_size", 18)
+	# Update existing buttons, create/remove as needed
+	var existing := nodes_box.get_children()
+	var count := lit.size()
+	while existing.size() > count:
+		var extra: Node = existing.pop_back()
+		if is_instance_valid(extra):
+			extra.queue_free()
+	for i in range(count):
+		var btn: Button
+		if i < existing.size():
+			btn = existing[i] as Button
+			# Disconnect all existing connections before re-binding
+			for conn in btn.pressed.get_connections():
+				btn.pressed.disconnect(conn.callable)
+		else:
+			btn = Button.new()
+			btn.custom_minimum_size = Vector2(40, 40)
+			btn.add_theme_font_size_override("font_size", 18)
+			nodes_box.add_child(btn)
 		if lit[i]:
 			btn.text = "●"
 			btn.add_theme_color_override("font_color", Color(1, 0.75, 0.2, 1))
@@ -114,8 +126,8 @@ func _refresh_display() -> void:
 		else:
 			btn.text = "○"
 			btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1))
+			btn.disabled = false
 			btn.pressed.connect(_on_acupoint_pressed.bind(i))
-		nodes_box.add_child(btn)
 
 
 func _on_acupoint_pressed(index: int) -> void:

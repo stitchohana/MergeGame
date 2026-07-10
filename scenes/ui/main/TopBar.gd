@@ -32,7 +32,7 @@ func _reset_regen() -> void:
 	elif GameState.regen_remaining_ms > 0:
 		_regen_remaining = GameState.regen_remaining_ms / 1000.0
 	else:
-		_regen_remaining = 1.0 * ConfigDatabase.get_game_config("stamina.regen_interval")
+		_regen_remaining = 1.0 * float(ConfigDatabase.get_game_config("stamina.regen_interval", 120))
 	_update_regen_timer()
 
 
@@ -42,8 +42,10 @@ func _process(delta: float) -> void:
 		if _regen_remaining <= 0:
 			_regen_remaining = 0
 			if GameState.stamina < GameState.max_stamina:
-				GameState.stamina += int(ConfigDatabase.get_game_config("stamina.regen_amount"))
+				GameState.stamina += int(ConfigDatabase.get_game_config("stamina.regen_amount", 1))
 				GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+			# Clear stale ms so _reset_regen uses full interval
+			GameState.regen_remaining_ms = 0.0
 			_reset_regen()
 		_update_regen_timer()
 	GameState.regen_remaining_ms = _regen_remaining * 1000.0

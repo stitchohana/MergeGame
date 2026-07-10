@@ -4,12 +4,16 @@ class_name PendingRewardBar extends Control
 @onready var items_box: HBoxContainer = $Panel/VBox/ItemsBox
 
 var _item_widget_scene := preload("res://scenes/ui/common/ItemWidget.tscn")
+var grid_view: Control = null
 
 
 func _ready() -> void:
 	RewardManager.pending_rewards_changed.connect(_refresh)
 	CloudService.pending_reward_claimed.connect(_on_claimed)
 	_refresh(0)
+
+func setup(grid: Control) -> void:
+	grid_view = grid
 
 
 func _refresh(_count: int) -> void:
@@ -50,6 +54,8 @@ func _on_claim(reward: Dictionary) -> void:
 		return
 
 	# Start fly animation (target will be filled in by _on_claimed)
+	if items_box.get_child_count() == 0:
+		return
 	var from_pos: Vector2 = items_box.get_child(0).global_position
 	var item_data := ConfigDatabase.get_item_data(reward.get("id", 0))
 
@@ -80,9 +86,9 @@ func _on_claimed(result: Dictionary) -> void:
 	# Play fly animation, then sync grid
 	var col: int = result.get("col", -1)
 	var row: int = result.get("row", -1)
-	var grid_origin: Vector2 = Vector2(42, 458)
-	var cell_size: int = 100
-	var to_pos: Vector2 = grid_origin + Vector2(col * cell_size + cell_size / 2, row * cell_size + cell_size / 2)
+	var grid_origin: Vector2 = grid_view.global_position if grid_view and is_instance_valid(grid_view) else Vector2.ZERO
+	var cell_size: int = Constants.CELL_SIZE
+	var cell_center: Vector2 = grid_origin + Vector2(col * cell_size + cell_size / 2, row * cell_size + cell_size / 2)
 
 	var on_done := func():
 		if result.has("grid"):
@@ -95,6 +101,7 @@ func _on_claimed(result: Dictionary) -> void:
 		_fly_targets.erase(uid)
 		if fly and is_instance_valid(fly):
 			animating = true
+			var to_pos: Vector2 = cell_center - fly.size / 2
 			var tween := get_tree().create_tween()
 			tween.tween_property(fly, "global_position", to_pos, 0.3).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
 			tween.tween_callback(func(): fly.queue_free(); on_done.call())

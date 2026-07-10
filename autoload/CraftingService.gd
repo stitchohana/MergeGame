@@ -106,7 +106,10 @@ func restore_craft_timers() -> void:
 			table_state_changed.emit(item, TableState.READY)
 			continue
 
-		# Create timer for remaining time
+		# Clean up old timer if exists, then create new one
+		var old_timer: Timer = item.get("_craft_timer")
+		if old_timer and is_instance_valid(old_timer):
+			old_timer.queue_free()
 		var timer := Timer.new()
 		timer.one_shot = true
 		timer.wait_time = remaining
@@ -115,6 +118,33 @@ func restore_craft_timers() -> void:
 		timer.start()
 		item["_craft_timer"] = timer
 		table_state_changed.emit(item, TableState.CRAFTING)
+
+func restore_craft_timer_for_item(item: Dictionary) -> void:
+	if item.get("_craft_state", TableState.IDLE) != TableState.CRAFTING:
+		return
+	var recipe: Dictionary = item.get("_craft_recipe", {})
+	if recipe.is_empty():
+		return
+	var total_time: float = recipe.get("craft_time", 3.0)
+	var start_time: float = item.get("_craft_start_time", 0)
+	var elapsed: float = (Time.get_unix_time_from_system() * 1000 - start_time) / 1000.0
+	var remaining: float = maxf(0, total_time - elapsed)
+	if remaining <= 0:
+		_set_state(item, TableState.READY)
+		item["_craft_progress"] = 1.0
+		table_state_changed.emit(item, TableState.READY)
+		return
+	var old_timer: Timer = item.get("_craft_timer")
+	if old_timer and is_instance_valid(old_timer):
+		old_timer.queue_free()
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.wait_time = remaining
+	timer.timeout.connect(_on_craft_timeout.bind(item))
+	add_child(timer)
+	timer.start()
+	item["_craft_timer"] = timer
+	table_state_changed.emit(item, TableState.CRAFTING)
 
 func get_remaining_craft_seconds(table_item: Dictionary) -> float:
 	var timer: Timer = table_item.get("_craft_timer")

@@ -24,8 +24,6 @@ func _ready() -> void:
 	modulate = Color.TRANSPARENT
 	grid_view.item_clicked.connect(_on_item_clicked)
 	grid_view.item_use_requested.connect(_on_item_use_requested)
-	if not GridManager.grid_updated.is_connected(GameState.check_game_over):
-		GridManager.grid_updated.connect(GameState.check_game_over)
 	grid_view.set_pouch_zone(pouch_zone)
 	leave_btn.pressed.connect(_on_leave_pressed)
 	CloudService.board_switch_confirmed.connect(_on_board_switch_confirmed)
@@ -71,7 +69,6 @@ func _on_board_switch_confirmed(result: Dictionary) -> void:
 	var server_monsters: Array = result.get("monsters", [])
 	if not server_monsters.is_empty():
 		_monsters = server_monsters.duplicate(true)
-	GameState.set_phase(GameState.GamePhase.IDLE)
 	_refresh_monster_display()
 	_refresh_map_header()
 	var fade := create_tween()
@@ -83,7 +80,6 @@ func _on_board_switch_rejected(reason: String) -> void:
 
 func _init_battle_grid() -> void:
 	GridManager.init_grid(Constants.BoardType.BATTLE)
-	GameState.set_phase(GameState.GamePhase.IDLE)
 
 func on_exit() -> void:
 	grid_view._clear_all_item_nodes()
@@ -145,13 +141,9 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 				_play_attack_animation(item_data, grid_pos, effect_id)
 		"heal":
 			var heal: int = effect.get("amount", 0)
-			_char_hp = mini(_char_max_hp, _char_hp + heal)
-			if not CloudService.online:
-				if uid > 0:
-					var pos := GridManager.find_pos_by_uid(uid)
-					if pos != Vector2i(-1, -1):
-						GridManager.remove_item(pos)
-			EventBus.show_toast.emit("恢复了 %d 点生命！" % heal)
+			_pending_heal_amount = heal
+			if CloudService.online:
+				CloudService.submit_battle_heal(item_data.get("id", 0), effect_id, uid)
 		"exp":
 			CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
 		"stamina":
@@ -288,11 +280,7 @@ func _play_attack_animation(item_data: Dictionary, grid_pos: Vector2i, effect_id
 	tween.tween_callback(_play_monster_hit)
 	tween.tween_callback(proj.queue_free)
 	tween.tween_callback(func():
-		if captured_uid > 0:
-			var pos := GridManager.find_pos_by_uid(captured_uid)
-			if pos != Vector2i(-1, -1):
-				GridManager.remove_item(pos)
-		CloudService.submit_battle_attack(item_data.get("id", 0), captured_eid, grid_pos.x, grid_pos.y)
+		CloudService.submit_battle_attack(item_data.get("id", 0), captured_eid, captured_uid, grid_pos.x, grid_pos.y)
 	)
 
 func _get_monster_target_pos() -> Vector2:

@@ -26,8 +26,10 @@ func _build_ui() -> void:
 
 	_current_day = GameState.activity_current_day
 	_show_day(_current_day)
-	CloudService.quest_claim_confirmed.connect(_on_claim_done)
-	close_btn.pressed.connect(_on_close)
+	if not CloudService.quest_claim_confirmed.is_connected(_on_claim_done):
+		CloudService.quest_claim_confirmed.connect(_on_claim_done)
+	if not close_btn.pressed.is_connected(_on_close):
+		close_btn.pressed.connect(_on_close)
 
 
 func _on_claim_done(_result: Dictionary) -> void:
@@ -40,9 +42,11 @@ func _show_day(day: int) -> void:
 		child.queue_free()
 
 	var today: int = GameState.activity_current_day
+	print("[WeeklyPanel] activity_current_day=", today, " showing day=", day)
 	for i in range(day_buttons.get_child_count()):
 		var btn := day_buttons.get_child(i) as Button
 		btn.disabled = i > today
+		print("[WeeklyPanel] day button", i, "disabled=", btn.disabled)
 		if i == day:
 			btn.add_theme_color_override("font_color", Color(1, 0.85, 0.2, 1))
 		else:

@@ -37,22 +37,6 @@ func _on_state_loaded(state: Dictionary) -> void:
 func _on_progress_tick(_result: Dictionary, quest_type: int) -> void:
 	if _result.has("quest_progress"):
 		_apply_progress(_result.quest_progress)
-	else:
-		# Optimistic local increment (fallback)
-		for q in quest_defs:
-			if q.type != quest_type:
-				continue
-			var pid: int = int(q.id)
-			if not progress.has(pid):
-				continue
-			var p: Dictionary = progress[pid]
-			if p.get("completed", false) or p.get("claimed", false):
-				continue
-			p["current_count"] = mini(p.get("current_count", 0) + 1, q.target_count)
-			quest_progress_updated.emit(pid, p.current_count, q.target_count)
-			if p.current_count >= q.target_count and not p.get("completed", false):
-				p["completed"] = true
-				quest_completed.emit(pid)
 
 
 func _on_battle_attack_tick(result: Dictionary) -> void:
@@ -73,10 +57,6 @@ func _apply_progress(server_progress: Dictionary) -> void:
 		var old: Dictionary = progress.get(pid, {})
 		if p.get("completed", false) and not old.get("completed", false):
 			quest_completed.emit(pid)
-		if p.get("claimed", false) and not old.get("claimed", false):
-			var rewards = _find_quest_rewards(pid)
-			if not rewards.is_empty():
-				RewardManager.apply_rewards(rewards)
 		progress[pid] = p
 		var target: int = _find_quest_target(pid)
 		quest_progress_updated.emit(pid, p.get("current_count", 0), target)
@@ -94,15 +74,6 @@ func get_progress(quest_id: int) -> Dictionary:
 
 func is_quest_complete(quest_id: int) -> bool:
 	return progress.get(int(quest_id), {}).get("completed", false)
-
-
-func _find_quest_rewards(quest_id: int) -> Dictionary:
-	for q in quest_defs:
-		if q.id == quest_id:
-			if q.rewards is Dictionary:
-				return q.rewards
-			return {}
-	return {}
 
 
 func _find_quest_target(quest_id: int) -> int:

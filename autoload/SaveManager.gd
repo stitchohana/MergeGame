@@ -35,40 +35,7 @@ func _restore_from_server(state: Dictionary) -> void:
 	GridManager._skip_anims = true
 	var grid_data: Array = state.get("grid", [])
 	print("[Save] restore: ", grid_data.size(), " items from server")
-	for entry in grid_data:
-		var item_data := ConfigDatabase.get_item_data(entry.get("id", 0))
-		if not item_data.is_empty():
-			var pos := Vector2i(entry.get("col", 0), entry.get("row", 0))
-			var new_item := item_data.duplicate(true)
-			# Restore crafting state
-			var craft_data: Variant = entry.get("craft", {})
-			if craft_data is Dictionary and not craft_data.is_empty():
-				print("[Save]   table #", entry.get("id", 0), " has craft: ", craft_data.get("_craft_state", -1))
-				for key in craft_data:
-					new_item[key] = craft_data[key]
-			# Restore launcher charges
-			var entry_charges: Variant = entry.get("charges", null)
-			if entry_charges != null:
-				new_item["charges"] = entry_charges
-			var recharge_rem: Variant = entry.get("_recharge_remaining", null)
-			if recharge_rem != null:
-				new_item["_recharge_remaining"] = recharge_rem
-			# Restore storage data
-			var entry_storage: Variant = entry.get("storage", null)
-			if entry_storage != null:
-				new_item["storage"] = entry_storage
-			var entry_uid: Variant = entry.get("uid", null)
-			print("[Save] item #" + str(entry.get("id", 0)) + " server uid=" + str(entry_uid))
-			if entry_uid != null:
-				new_item["_uid"] = entry_uid
-			else:
-				print("[Save]   WARNING: item #" + str(entry.get("id", 0)) + " has no uid!")
-			var entry_immovable: Variant = entry.get("immovable", null)
-			if entry_immovable != null:
-				new_item["immovable"] = entry_immovable
-			GridManager.add_item(new_item, pos)
-		else:
-			print("[Save]   unknown item id: ", entry.get("id", 0))
+	GridManager.populate_from_server(grid_data)
 
 	# Cultivation
 	var cultivation_data: Dictionary = state.get("cultivation", {})
@@ -114,7 +81,7 @@ func _collect_grid_data() -> Array:
 		if data.has("_craft_init"):
 			var craft_data: Dictionary = {}
 			for key in ["_craft_init", "_craft_state", "_craft_stored", "_craft_recipe",
-					"_craft_progress", "_craft_result_id"]:
+					"_craft_progress", "_craft_result_id", "_craft_start_time"]:
 				if data.has(key):
 					craft_data[key] = data[key]
 			if not craft_data.is_empty():

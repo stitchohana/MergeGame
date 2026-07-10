@@ -12,7 +12,6 @@ func set_title(text: String) -> void:
 	title_label.text = text
 
 func set_requirements(reqs: Array) -> void:
-	# Remove old children immediately so new entries get correct indices
 	for child in container.get_children():
 		if child is RequirementEntry:
 			container.remove_child(child)
@@ -26,20 +25,26 @@ func set_requirements(reqs: Array) -> void:
 		var idx := i
 		entry.complete_pressed.connect(_emit_complete.bind(idx))
 
+func _get_entries() -> Array[RequirementEntry]:
+	var entries: Array[RequirementEntry] = []
+	for child in container.get_children():
+		if child is RequirementEntry and is_instance_valid(child):
+			entries.append(child as RequirementEntry)
+	return entries
+
 func set_entry_available(index: int, available: bool) -> void:
-	if index < 0 or index >= container.get_child_count():
+	var entries := _get_entries()
+	if index < 0 or index >= entries.size():
 		return
-	var entry := container.get_child(index) as RequirementEntry
-	if entry and is_instance_valid(entry):
-		entry.set_available(available)
+	entries[index].set_available(available)
 
 func _emit_complete(idx: int) -> void:
 	complete_clicked.emit(idx)
 
 func remove_entry(index: int) -> void:
-	if index < 0 or index >= container.get_child_count():
+	var entries := _get_entries()
+	if index < 0 or index >= entries.size():
 		return
-	var entry := container.get_child(index)
-	if entry and is_instance_valid(entry):
-		container.remove_child(entry)
-		entry.queue_free()
+	var entry := entries[index]
+	container.remove_child(entry)
+	entry.queue_free()

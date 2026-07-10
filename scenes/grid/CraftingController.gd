@@ -11,7 +11,6 @@ signal table_visual_update(table_item: Dictionary, state: int)
 var _craft_button: Node = null
 var _craft_table_pos: Vector2i = Vector2i(-1, -1)
 var _craft_table_item: Dictionary = {}
-var _grid_global_pos: Vector2 = Vector2.ZERO
 var _cell_size: int = 0
 
 # Pending state for craft_add (deferred until server confirms)
@@ -36,7 +35,6 @@ func setup_button(parent: Node) -> void:
 	parent.add_child(_craft_button)
 	_craft_button.hide()
 	_craft_button.craft_pressed.connect(_on_craft_button_pressed)
-	_grid_global_pos = parent.global_position
 	_cell_size = Constants.CELL_SIZE
 
 # --- Called by GridView ---
@@ -107,9 +105,6 @@ func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Ve
 
 	if CloudService.online:
 		CloudService.submit_craft_add(src_pos.x, src_pos.y, table_pos.x, table_pos.y, ingredient_id)
-	else:
-		_apply_local()
-		_clear_pending()
 
 	return true
 
@@ -118,14 +113,13 @@ func try_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 		return
 	_craft_table_item = table_item
 	_craft_table_pos = table_pos
-	if CloudService.online:
-		CloudService.submit_craft_retrieve(table_pos.x, table_pos.y)
+	CloudService.submit_craft_retrieve(table_pos.x, table_pos.y)
 
-func show_button_for_table(recipe: Dictionary, grid_global_pos: Vector2, table_pos: Vector2i, cell_size: int) -> void:
+func show_button_for_table(recipe: Dictionary, table_pos: Vector2i, cell_size: int) -> void:
 	if not _craft_button:
 		return
 	_craft_button.show_for_recipe(recipe)
-	_craft_button.set_table_pos(grid_global_pos, table_pos, cell_size)
+	_craft_button.set_table_pos(table_pos, cell_size)
 
 func hide_button() -> void:
 	if _craft_button:
@@ -146,27 +140,35 @@ func _on_craft_add_rejected(reason: String) -> void:
 	craft_rejected.emit("放入材料失败：" + reason)
 
 func _on_craft_start_confirmed(_result: Dictionary) -> void:
-	pass
+	_craft_start_pending = false
+	if not _craft_table_item.is_empty():
+		CraftingService.start_craft(_craft_table_item)
 
 func _on_craft_start_rejected(reason: String) -> void:
+	_craft_start_pending = false
 	craft_rejected.emit("开始制作失败：" + reason)
 
 func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
 	var result_id: int = result.get("result_id", 0) as int
 	if result_id <= 0:
 		return
+	var table_pos := _craft_table_pos
 	if not _craft_table_item.is_empty():
 		CraftingService.retrieve(_craft_table_item)
 		_craft_table_item = {}
-	craft_retrieve_ready.emit(result_id, result.get("result_uid", 0) as int, _craft_table_pos)
+	craft_retrieve_ready.emit(result_id, result.get("result_uid", 0) as int, table_pos)
 
 func _on_craft_retrieve_rejected(reason: String) -> void:
 	craft_rejected.emit("取件失败：" + reason)
 
+var _craft_start_pending: bool = false
+
 func _on_craft_button_pressed() -> void:
 	if _craft_table_item.is_empty():
 		return
-	CraftingService.start_craft(_craft_table_item)
+	if _craft_start_pending:
+		return
+	_craft_start_pending = true
 	var table_pos: Vector2i = _get_table_grid_pos(_craft_table_item)
 	if CloudService.online:
 		CloudService.submit_craft_start(table_pos.x, table_pos.y)
@@ -182,7 +184,7 @@ func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
 				_craft_table_pos = tpos
 			if _craft_button:
 				_craft_button.show_for_recipe(recipe)
-				_craft_button.set_table_pos(_grid_global_pos, tpos, _cell_size)
+				_craft_button.set_table_pos(tpos, _cell_size)
 		else:
 			hide_button()
 	elif state == CraftingService.TableState.CRAFTING:
@@ -192,10 +194,6 @@ func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
 		table_visual_update.emit(table_item, state)
 
 # --- Internal ---
-
-func _apply_local() -> void:
-	item_accepted_for_craft.emit(_pending_src_key, _pending_src_pos)
-	CraftingService.add_ingredient(_pending_table_item, _pending_dragged_item)
 
 func _clear_pending() -> void:
 	_pending_src_key = ""

@@ -13,6 +13,7 @@ var _monsters_data: Dictionary = {}
 var _meridian_thresholds: Array = []
 var _tokens_data: Dictionary = {}
 var _weekly_tasks: Dictionary = {}
+var _recipes_by_table: Dictionary = {}  # table_id -> Array[recipe]
 
 func _ready() -> void:
 	load_all()
@@ -40,7 +41,32 @@ func _load_json(path: String) -> Dictionary:
 	if err != OK:
 		push_error("[ConfigDatabase] JSON parse error in ", path, ": ", json.get_error_message())
 		return {}
-	return GridManager._sanitize_json_ints(json.data)
+	return sanitize_json_ints(json.data)
+
+# Recursively convert JSON floats to ints for integer keys
+static func sanitize_json_ints(data: Variant) -> Variant:
+	if data is Dictionary:
+		var result: Dictionary = {}
+		for key in data as Dictionary:
+			var val: Variant = (data as Dictionary)[key]
+			if typeof(val) == TYPE_FLOAT and val == floor(val):
+				result[key] = int(val)
+			elif val is Dictionary or val is Array:
+				result[key] = sanitize_json_ints(val)
+			else:
+				result[key] = val
+		return result
+	elif data is Array:
+		var result: Array = []
+		for val in data as Array:
+			if typeof(val) == TYPE_FLOAT and val == floor(val):
+				result.append(int(val))
+			elif val is Dictionary or val is Array:
+				result.append(sanitize_json_ints(val))
+			else:
+				result.append(val)
+		return result
+	return data
 
 func _load_items(path: String) -> void:
 	var data := _load_json(path)
@@ -96,8 +122,21 @@ func _load_recipes(path: String) -> void:
 	var data := _load_json(path)
 	if data.is_empty():
 		return
-	_items_data["_recipes"] = data.get("recipes", [])
-	print("[ConfigDatabase] Loaded ", _items_data["_recipes"].size(), " recipes")
+	var recipes: Array = data.get("recipes", [])
+	_items_data["_recipes"] = recipes
+	_recipes_by_table.clear()
+	for recipe in recipes:
+		var rid: int = recipe.get("id", 0)
+		for item_id in _items_data:
+			if not item_id is int:
+				continue
+			var item: Dictionary = _items_data[item_id]
+			var item_recipes: Array = item.get("recipes", [])
+			if item_recipes.has(rid):
+				if not _recipes_by_table.has(item_id):
+					_recipes_by_table[item_id] = []
+				_recipes_by_table[item_id].append(recipe)
+	print("[ConfigDatabase] Loaded ", recipes.size(), " recipes")
 
 func get_item_data(item_id: int) -> Dictionary:
 	return _items_data.get(item_id, {})
@@ -191,20 +230,7 @@ func get_recipes() -> Array:
 
 # Get recipes allowed for a specific crafting table item
 func get_recipes_for_item(item_id: int) -> Array:
-	var item_data := get_item_data(item_id)
-	if item_data.is_empty():
-		return []
-	var recipe_ids: Array = item_data.get("recipes", [])
-	if recipe_ids.is_empty():
-		return []
-	var all_recipes: Array = get_recipes()
-	var result: Array = []
-	for rid in recipe_ids:
-		for r in all_recipes:
-			if r.get("id", 0) == rid:
-				result.append(r)
-				break
-	return result
+	return _recipes_by_table.get(item_id, [])
 
 func _load_effects(path: String) -> void:
 	var data := _load_json(path)

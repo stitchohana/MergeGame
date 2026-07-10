@@ -16,8 +16,6 @@ interface QuestDef {
 
 export class QuestEngine {
   private quests: QuestDef[] = [];
-  lastAppliedRewards: RewardConfig | null = null;
-
   constructor(configDir: string) {
     this.loadQuests(configDir);
   }
@@ -64,23 +62,22 @@ export class QuestEngine {
     let resetWeekly = false;
 
     // Daily: different adjusted day
-    if (lastAdjusted.getUTCFullYear() !== nowAdjusted.getUTCFullYear() ||
-        lastAdjusted.getUTCMonth() !== nowAdjusted.getUTCMonth() ||
-        lastAdjusted.getUTCDate() !== nowAdjusted.getUTCDate()) {
+    if (lastAdjusted.getFullYear() !== nowAdjusted.getFullYear() ||
+        lastAdjusted.getMonth() !== nowAdjusted.getMonth() ||
+        lastAdjusted.getDate() !== nowAdjusted.getDate()) {
       resetDaily = true;
     }
 
     // Weekly: different ISO week (week containing Jan 4)
-    // ISO 8601 week date algorithm: week 1 is the week with the first Thursday.
-    // getUTCDay() returns 0=Sun..6=Sat, converted to 1=Mon..7=Sun via `|| 7`.
+    // getDay() returns 0=Sun..6=Sat, converted to 1=Mon..7=Sun via `|| 7`.
     const getISOWeek = (d: Date) => {
-      const dayOfWeek = d.getUTCDay() || 7; // Mon=1..Sun=7
-      const jan4 = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
-      const jan4Day = jan4.getUTCDay() || 7;
+      const dayOfWeek = d.getDay() || 7; // Mon=1..Sun=7
+      const jan4 = new Date(d.getFullYear(), 0, 4);
+      const jan4Day = jan4.getDay() || 7;
       const daysSinceJan4 = (d.getTime() - jan4.getTime()) / 86400000;
       return Math.floor((daysSinceJan4 + jan4Day + 3) / 7);
     };
-    if (lastAdjusted.getUTCFullYear() !== nowAdjusted.getUTCFullYear() ||
+    if (lastAdjusted.getFullYear() !== nowAdjusted.getFullYear() ||
         getISOWeek(lastAdjusted) !== getISOWeek(nowAdjusted)) {
       resetWeekly = true;
     }
@@ -104,21 +101,25 @@ export class QuestEngine {
     return didReset;
   }
 
-  initQuestProgress(state: GameState): void {
+  initQuestProgress(state: GameState): boolean {
     state.quest_progress = state.quest_progress || {};
+    let modified = false;
     state.pending_rewards = state.pending_rewards || [];
     // Lazily add missing quest entries (supports new quests added to config later)
     for (const q of this.quests) {
       // One-time migration: if quest is no longer auto_reward, reset claimed state
       if (!state.quests_initialized && !q.auto_reward && state.quest_progress[q.id]?.claimed) {
         state.quest_progress[q.id].claimed = false;
+        modified = true;
         console.log(`[quest] #${q.id} migrated: auto_reward disabled, reset claimed`);
       }
       if (!state.quest_progress[q.id]) {
         state.quest_progress[q.id] = { current_count: 0, completed: false, claimed: false };
+        modified = true;
       }
     }
-    state.quests_initialized = true;
+    if (!state.quests_initialized) { state.quests_initialized = true; return true; }
+    return false;
   }
 
   incrementQuestProgress(
@@ -128,7 +129,6 @@ export class QuestEngine {
     engine: GameEngine
   ): void {
     this.initQuestProgress(state);
-    this.lastAppliedRewards = null;
     for (const q of this.quests) {
       if (q.type !== type) continue;
       const p = state.quest_progress![q.id];
@@ -138,8 +138,7 @@ export class QuestEngine {
         p.completed = true;
         console.log(`[quest] #${q.id} "${q.name}" completed`);
         if (q.auto_reward) {
-          const applied = engine.applyRewards(state, q.rewards);
-          this.lastAppliedRewards = applied;
+          engine.applyRewards(state, q.rewards);
           p.claimed = true;
           console.log(`[quest] #${q.id} auto-reward distributed`);
         }
@@ -158,8 +157,7 @@ export class QuestEngine {
     if (p.claimed) return { ok: false, reason: "already_claimed" };
     if (q.auto_reward) return { ok: false, reason: "auto_reward_quest" };
 
-    const applied = engine.applyRewards(state, q.rewards);
-    this.lastAppliedRewards = applied;
+    engine.applyRewards(state, q.rewards);
     p.claimed = true;
     console.log(`[quest] #${q.id} "${q.name}" claimed`);
     return { ok: true, rewards: q.rewards };
@@ -179,7 +177,7 @@ export class QuestEngine {
 
     const reward = state.pending_rewards[idx];
     state.pending_rewards.splice(idx, 1);
-    state.grid.push({ uid: engine._nextUid(state), id: reward.id, col: target.col, row: target.row });    console.log(`[quest] claim pending reward: ${reward.name} uid=${uid} -> (${target.col},${target.row})`);
+    state.grid.push({ uid: reward.uid, id: reward.id, col: target.col, row: target.row });    console.log(`[quest] claim pending reward: ${reward.name} uid=${uid} -> (${target.col},${target.row})`);
     return { ok: true, col: target.col, row: target.row };
   }
 }

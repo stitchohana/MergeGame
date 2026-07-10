@@ -13,6 +13,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 BASE = Path(__file__).parent
+JSON_DIR = BASE / "json_output"
 OUT = BASE / "xlsx"
 OUT.mkdir(exist_ok=True)
 
@@ -83,7 +84,7 @@ def save(wb, name):
 #  items.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building items.xlsx...")
-data = json.load(open(BASE / "items.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "items.json", encoding="utf-8"))
 wb = new_book()
 
 hr = ["id","level","name","icon","group_id","describe","value","sell_price","use_effect_id","storage_slots"]
@@ -120,7 +121,7 @@ save(wb, "items")
 #  meridians.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building meridians.xlsx...")
-data = json.load(open(BASE / "meridians.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "meridians.json", encoding="utf-8"))
 wb = new_book()
 h = ["stage","item_pool","count_min","count_max","acupoint_rewards","order_count"]
 r = []
@@ -136,7 +137,7 @@ save(wb, "meridians")
 #  rewards.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building rewards.xlsx...")
-data = json.load(open(BASE / "rewards.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "rewards.json", encoding="utf-8"))
 wb = new_book()
 h = ["reward_id","tokens(token:amount)","items(id:count)"]
 r = []
@@ -150,7 +151,7 @@ save(wb, "rewards")
 #  game_config.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building game_config.xlsx...")
-data = json.load(open(BASE / "game_config.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "game_config.json", encoding="utf-8"))
 def flatten(obj, prefix=""):
     result = []
     for k, v in obj.items():
@@ -169,7 +170,7 @@ save(wb, "game_config")
 #  recipes.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building recipes.xlsx...")
-data = json.load(open(BASE / "recipes.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "recipes.json", encoding="utf-8"))
 wb = new_book()
 h = ["id","name","ingredients","result","craft_time","crafting_level"]
 r = []
@@ -184,7 +185,7 @@ save(wb, "recipes")
 #  initial_setup.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building initial_setup.xlsx...")
-data = json.load(open(BASE / "initial_setup.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "initial_setup.json", encoding="utf-8"))
 wb = new_book()
 h = ["section","id","col","row","immovable"]
 r = []
@@ -200,7 +201,7 @@ save(wb, "initial_setup")
 #  cultivation.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building cultivation.xlsx...")
-data = json.load(open(BASE / "cultivation.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "cultivation.json", encoding="utf-8"))
 wb = new_book()
 h = ["stage_index","name","exp","max_qi","breakthrough_pill"]
 r = []
@@ -215,7 +216,7 @@ save(wb, "cultivation")
 #  shop.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building shop.xlsx...")
-data = json.load(open(BASE / "shop.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "shop.json", encoding="utf-8"))
 wb = new_book()
 ws = wb.create_sheet("shop")
 add_sheet(ws, ["id","price"], [[it["id"], it["price"]] for it in data["items"]])
@@ -225,7 +226,7 @@ save(wb, "shop")
 #  expedition.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building expedition.xlsx...")
-data = json.load(open(BASE / "expedition.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "expedition.json", encoding="utf-8"))
 wb = new_book()
 h = ["id","name","hp","atk","accept_effect_ids","loot","describe"]
 r = []
@@ -256,7 +257,7 @@ save(wb, "expedition")
 #  effects.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building effects.xlsx...")
-data = json.load(open(BASE / "effects.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "effects.json", encoding="utf-8"))
 wb = new_book()
 h = ["id","type","amount","exp_gain","describe"]
 r = []
@@ -271,7 +272,7 @@ save(wb, "effects")
 #  tokens.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building tokens.xlsx...")
-data = json.load(open(BASE / "tokens.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "tokens.json", encoding="utf-8"))
 wb = new_book()
 ws = wb.create_sheet("tokens")
 add_sheet(ws, ["id","name","icon","describe"],
@@ -283,7 +284,7 @@ save(wb, "tokens")
 #  server.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building server.xlsx...")
-data = json.load(open(BASE / "server.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "server.json", encoding="utf-8"))
 wb = new_book()
 ws = wb.create_sheet("server")
 add_sheet(ws, ["parameter","value"], [[k, v] for k, v in data.items()])
@@ -293,7 +294,7 @@ save(wb, "server")
 #  quests.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building quests.xlsx...")
-data = json.load(open(BASE / "quests.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "quests.json", encoding="utf-8"))
 wb = new_book()
 h = ["id","type","name","description","target_count","rewards","auto_reward","reset_cycle"]
 r = []
@@ -306,10 +307,40 @@ add_sheet(ws, h, r)
 save(wb, "quests")
 
 # ════════════════════════════════════════════════════════════
+#  activities.xlsx
+# ════════════════════════════════════════════════════════════
+print("Building activities.xlsx...")
+data = json.load(open(JSON_DIR / "activities.json", encoding="utf-8"))
+wb = new_book()
+h = ["id","name","cycle","start_time","end_time","widget"]
+r = []
+for a in data["activities"]:
+    r.append([a.get("id",""), a.get("name",""), a.get("cycle",""),
+              a.get("start_time",""), a.get("end_time",""), a.get("widget","")])
+ws = wb.create_sheet("activities")
+add_sheet(ws, h, r)
+save(wb, "activities")
+
+# ════════════════════════════════════════════════════════════
+#  weekly_tasks.xlsx
+# ════════════════════════════════════════════════════════════
+print("Building weekly_tasks.xlsx...")
+data = json.load(open(JSON_DIR / "weekly_tasks.json", encoding="utf-8"))
+wb = new_book()
+h = ["activity_id","day","quests"]
+r = []
+for wt in data["weekly_tasks"]:
+    for day_idx, quests in enumerate(wt.get("daily_quests", []), 1):
+        r.append([wt.get("activity_id",""), day_idx, join_list(quests)])
+ws = wb.create_sheet("weekly_tasks")
+add_sheet(ws, h, r)
+save(wb, "weekly_tasks")
+
+# ════════════════════════════════════════════════════════════
 #  home_meridians.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building home_meridians.xlsx...")
-data = json.load(open(BASE / "home_meridians.json", encoding="utf-8"))
+data = json.load(open(JSON_DIR / "home_meridians.json", encoding="utf-8"))
 wb = new_book()
 ws = wb.create_sheet("home_meridians")
 add_sheet(ws, ["name","acupoints","qi_cost","acupoint_rewards","circulation_rewards"],

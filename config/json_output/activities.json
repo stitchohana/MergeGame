@@ -1,7 +1,24 @@
 {
   "activities": [
-	{"id": 1, "name": "每日合成", "cycle": 1, "widget": ""},
-	{"id": 2, "name": "限时活动", "cycle": 0, "start_time": "2026-07-10T00:00:00Z", "end_time": "2026-07-20T00:00:00Z", "widget": ""},
-	{"id": 3, "name": "周常任务", "cycle": 2, "widget": "WeeklyActivityEntry"}
+	{
+	  "id": 1,
+	  "name": "每日合成",
+	  "cycle": 1,
+	  "widget": ""
+	},
+	{
+	  "id": 2,
+	  "name": "限时活动",
+	  "cycle": 0,
+	  "widget": "",
+	  "start_time": "2026-07-10T00:00:00Z",
+	  "end_time": "2026-07-20T00:00:00Z"
+	},
+	{
+	  "id": 3,
+	  "name": "周常任务",
+	  "cycle": 2,
+	  "widget": "WeeklyActivityEntry"
+	}
   ]
 }

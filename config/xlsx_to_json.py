@@ -309,6 +309,32 @@ for row in read_rows(wb["quests"]):
     })
 save_json("quests.json", {"quests": quests})
 
+# ─── activities ────────────────────────────────────────────
+print("Building activities.json...")
+wb = open_book("activities")
+activities = []
+for row in read_rows(wb["activities"]):
+    act = {"id": parse_int(row["id"]), "name": row["name"],
+           "cycle": parse_int(row["cycle"]), "widget": row.get("widget", "")}
+    if row.get("start_time"):
+        act["start_time"] = row["start_time"]
+    if row.get("end_time"):
+        act["end_time"] = row["end_time"]
+    activities.append(act)
+save_json("activities.json", {"activities": activities})
+
+# ─── weekly_tasks ───────────────────────────────────────────
+print("Building weekly_tasks.json...")
+wb = open_book("weekly_tasks")
+tasks_by_activity = {}
+for row in read_rows(wb["weekly_tasks"]):
+    aid = row["activity_id"]
+    if aid not in tasks_by_activity:
+        tasks_by_activity[aid] = {"activity_id": parse_int(aid), "daily_quests": []}
+    tasks_by_activity[aid]["daily_quests"].append(parse_int_list(row["quests"]))
+weekly_tasks = list(tasks_by_activity.values())
+save_json("weekly_tasks.json", {"weekly_tasks": weekly_tasks})
+
 # ─── home_meridians ────────────────────────────────────────
 print("Building home_meridians.json...")
 wb = open_book("home_meridians")

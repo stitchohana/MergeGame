@@ -46,10 +46,8 @@ func _on_exec() -> void:
 		"添加道具":
 			cmd_key = "add_item"
 			item_id = int(amount_spin.value)
-			col = 0
-			row = 0
 		"重置发射器CD": cmd_key = "reset_launcher_cd"
-	var amount: int = int(amount_spin.value)
+	var amount: int = 1 if cmd == "添加道具" else int(amount_spin.value)
 	result_label.text = "执行中..."
 	CloudService.submit_gm_exec(cmd_key, amount, item_id, col, row)
 

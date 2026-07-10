@@ -2,16 +2,8 @@ import { Router, Request, Response } from "express";
 import { IStorage } from "../storage/interface";
 import { authRequired } from "../middleware/auth";
 import { GameEngine } from "../engine/game_engine";
+import { enqueue } from "./queue";
 
-// Per-user operation queue — sequential execution per user
-const userQueues = new Map<string, Promise<void>>();
-
-function enqueue(userId: string, fn: () => Promise<void>): Promise<void> {
-  const prev = userQueues.get(userId) ?? Promise.resolve();
-  const next = prev.then(fn, fn);
-  userQueues.set(userId, next);
-  return next;
-}
 
 function op(handler: (req: Request, res: Response, userId: string) => Promise<void>) {
   return async (req: Request, res: Response): Promise<void> => {
@@ -36,13 +28,14 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
       await storage.saveState(userId, state);
       console.log(`[cult] new player ${userId}, init with ${state.grid.length} items`);
     } else {
+      engine.tickStamina(state);
+      engine.tickLauncherRecharge(state);
       if (engine.tickCraftingState(state)) {
         await storage.saveState(userId, state);
       }
     }
     return state;
   }
-
 
   // POST /api/cultivation/consume-exp
   router.post("/consume-exp", op(async (req, res, userId) => {

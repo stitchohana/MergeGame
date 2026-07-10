@@ -15,6 +15,7 @@ signal material_clicked(uid: int, item_id: int)
 var _current_item_data: Dictionary = {}
 var _current_recipes: Array = []
 var _countdown_timer: Timer = null
+var _pending_sell_uid: int = -1
 
 func _ready() -> void:
 	clear()
@@ -25,6 +26,8 @@ func _ready() -> void:
 		$ViewButton.pressed.connect(_on_view_pressed)
 	if not CraftingService.table_state_changed.is_connected(_on_table_state_changed):
 		CraftingService.table_state_changed.connect(_on_table_state_changed)
+	CloudService.sell_confirmed.connect(_on_sell_server_confirmed)
+	CloudService.sell_rejected.connect(_on_sell_server_rejected)
 
 func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> void:
 	if item_data.is_empty():
@@ -267,16 +270,25 @@ func _on_sell_pressed() -> void:
 	popup.setup("出售", "确定出售 %s？获得 %d 灵石" % [item_name, price], func(): _on_sell_confirmed(uid))
 
 func _on_sell_confirmed(uid: int) -> void:
-	if CloudService.online:
-		if uid <= 0:
-			return
-		var pos := get_current_craft_pos()
+	if not CloudService.online:
+		EventBus.show_toast.emit("离线无法出售")
+		return
+	if uid <= 0:
+		return
+	_pending_sell_uid = uid
+	CloudService.submit_sell(uid)
+
+func _on_sell_server_confirmed(_result: Dictionary) -> void:
+	if _pending_sell_uid > 0:
+		var pos := GridManager.find_pos_by_uid(_pending_sell_uid)
 		if pos != Vector2i(-1, -1):
 			GridManager.remove_item(pos)
-		clear()
-		CloudService.submit_sell(uid)
-	else:
-		EventBus.show_toast.emit("离线无法出售")
+		_pending_sell_uid = -1
+	clear()
+
+func _on_sell_server_rejected(reason: String) -> void:
+	_pending_sell_uid = -1
+	EventBus.show_toast.emit("出售失败：" + reason)
 
 func _update_sell_btn() -> void:
 	if not sell_btn or not sell_price_label:

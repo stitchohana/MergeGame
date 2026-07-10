@@ -67,4 +67,6 @@ func _clear_items() -> void:
 			child.queue_free()
 
 func _on_close() -> void:
+	if StoragePouch.pouch_updated.is_connected(_on_pouch_changed):
+		StoragePouch.pouch_updated.disconnect(_on_pouch_changed)
 	UIManager.hide_popup(self)

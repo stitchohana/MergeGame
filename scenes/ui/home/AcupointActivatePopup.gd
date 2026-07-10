@@ -17,7 +17,14 @@ func _ready() -> void:
 
 
 func _on_success(_result: Dictionary) -> void:
+	_disconnect_signals()
 	UIManager.hide_popup(self)
+
+func _disconnect_signals() -> void:
+	if CloudService.home_meridian_light_confirmed.is_connected(_on_success):
+		CloudService.home_meridian_light_confirmed.disconnect(_on_success)
+	if CloudService.home_meridian_light_rejected.is_connected(_on_rejected_handler):
+		CloudService.home_meridian_light_rejected.disconnect(_on_rejected_handler)
 
 
 func _on_rejected_handler(reason: String) -> void:
@@ -30,10 +37,7 @@ func _on_rejected_handler(reason: String) -> void:
 
 
 func _on_cancel() -> void:
-	if CloudService.home_meridian_light_confirmed.is_connected(_on_success):
-		CloudService.home_meridian_light_confirmed.disconnect(_on_success)
-	if CloudService.home_meridian_light_rejected.is_connected(_on_rejected_handler):
-		CloudService.home_meridian_light_rejected.disconnect(_on_rejected_handler)
+	_disconnect_signals()
 	UIManager.hide_popup(self)
 
 
@@ -71,8 +75,10 @@ func setup(title: String, cost: String, rewards: Dictionary, action_text: String
 					iw.tooltip_text = "%s x%d" % [item_data.get("name", "?"), count]
 					rewards_box.add_child(iw)
 
-	action_btn.pressed.connect(_on_action_btn)
-	cancel_btn.pressed.connect(_on_cancel)
+	if not action_btn.pressed.is_connected(_on_action_btn):
+		action_btn.pressed.connect(_on_action_btn)
+	if not cancel_btn.pressed.is_connected(_on_cancel):
+		cancel_btn.pressed.connect(_on_cancel)
 
 
 func _on_action_btn() -> void:

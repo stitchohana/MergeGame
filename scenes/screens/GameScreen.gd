@@ -10,6 +10,7 @@ class_name GameScreen extends BaseScreen
 @onready var pending_bar: PendingRewardBar
 
 var _pending_item_ids: Array = []
+var _meridian_submit_pending: bool = false
 var _display_index_map: Array = []
 var _pending_stamina_uid: int = -1
 var _meridian_waiting_breakthrough: bool = false
@@ -18,15 +19,11 @@ func _ready() -> void:
 	modulate = Color.TRANSPARENT
 	randomize()
 
-	if not GridManager.grid_updated.is_connected(GameState.check_game_over):
-		GridManager.grid_updated.connect(GameState.check_game_over)
 	GridManager.grid_updated.connect(_on_grid_changed)
 	grid_view.set_pouch_zone(pouch_zone)
-	GameState.set_phase(GameState.GamePhase.IDLE)
 
-	EventBus.resume_requested.connect(_on_resume)
+
 	EventBus.restart_requested.connect(_on_restart)
-	EventBus.pause_requested.connect(_on_pause_requested)
 
 	detail_panel.material_clicked.connect(_on_material_clicked)
 	grid_view.item_clicked.connect(_on_item_clicked)
@@ -66,6 +63,7 @@ func _setup_extras() -> void:
 		pending_bar = preload("res://scenes/ui/main/PendingRewardBar.tscn").instantiate() as PendingRewardBar
 		requirement_list.container.add_child(pending_bar)
 		requirement_list.container.move_child(pending_bar, 1)
+		pending_bar.setup(grid_view)
 
 func on_enter() -> void:
 	GameState.current_board_type = Constants.BoardType.MAIN
@@ -93,36 +91,33 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 func _on_main_board_switch_rejected(_reason: String) -> void:
 	pass
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		if GameState.phase == GameState.GamePhase.IDLE:
-			_on_pause_requested()
-		elif GameState.phase == GameState.GamePhase.PAUSED:
-			_on_resume()
-
 func _on_material_clicked(uid: int, item_id: int) -> void:
-	var table_item := detail_panel.get_current_craft_table()
-	if table_item.is_empty():
-		return
 	var table_pos := detail_panel.get_current_craft_pos()
 	var spawn_pos := GridManager.find_nearest_empty(table_pos)
 	if spawn_pos == Vector2i(-1, -1):
 		EventBus.show_toast.emit("棋盘已满，无法取出材料")
 		return
-	var removed := CraftingService.remove_ingredient(table_item, item_id)
-	if removed.is_empty():
-		return
-	var rid: int = removed.get("id", 0) as int
-	var full_data := ConfigDatabase.get_item_data(rid)
-	var new_item: Dictionary = full_data.duplicate(true) if not full_data.is_empty() else removed.duplicate(true)
-	new_item["_uid"] = removed.get("uid", 0) as int
-	GridManager.add_item(new_item, spawn_pos)
-	detail_panel._refresh_materials()
 	if CloudService.online:
-		CloudService.submit_craft_remove(table_pos.x, table_pos.y, uid, spawn_pos.x, spawn_pos.y)
+		CloudService.submit_craft_remove(table_pos.x, table_pos.y, item_id, spawn_pos.x, spawn_pos.y)
 
 func _on_craft_remove_confirmed(result: Dictionary) -> void:
-	pass
+	var table_col: int = result.get("table_col", -1)
+	var table_row: int = result.get("table_row", -1)
+	var removed_id: int = result.get("removed_id", 0)
+	var removed_uid: int = result.get("removed_uid", 0)
+	var target_col: int = result.get("target_col", -1)
+	var target_row: int = result.get("target_row", -1)
+	if removed_id <= 0:
+		return
+	var table_item: Dictionary = GridManager.get_item(Vector2i(table_col, table_row))
+	if table_item.is_empty():
+		return
+	CraftingService.remove_ingredient(table_item, removed_id)
+	var full_data := ConfigDatabase.get_item_data(removed_id)
+	var new_item: Dictionary = full_data.duplicate(true) if not full_data.is_empty() else {"id": removed_id}
+	new_item["_uid"] = removed_uid
+	GridManager.add_item(new_item, Vector2i(target_col, target_row))
+	detail_panel._refresh_materials()
 
 func _on_craft_remove_rejected(reason: String) -> void:
 	EventBus.show_toast.emit("取出材料失败：" + reason)
@@ -168,17 +163,10 @@ func _on_shop_pressed() -> void:
 func _on_restart() -> void:
 	GameState.reset()
 	GridManager.init_grid()
-	GameState.set_phase(GameState.GamePhase.IDLE)
+
 	detail_panel.clear()
 	if CloudService.online:
 		CloudService.fetch_state()
-
-func _on_resume() -> void:
-	GameState.set_phase(GameState.GamePhase.IDLE)
-
-func _on_pause_requested() -> void:
-	if GameState.phase == GameState.GamePhase.IDLE:
-		GameState.set_phase(GameState.GamePhase.PAUSED)
 
 func _on_grid_changed() -> void:
 	_refresh_requirement_buttons()
@@ -246,16 +234,17 @@ func _on_meridian_complete(display_index: int) -> void:
 		return
 	_pending_item_ids = req.get("item_ids", [])
 	if CloudService.online:
-		if CloudService.meridian_complete_confirmed.is_connected(_on_meridian_confirmed):
-			CloudService.meridian_complete_confirmed.disconnect(_on_meridian_confirmed)
-		if CloudService.meridian_complete_rejected.is_connected(_on_meridian_rejected):
-			CloudService.meridian_complete_rejected.disconnect(_on_meridian_rejected)
+		if _meridian_submit_pending:
+			return
+		_meridian_submit_pending = true
 		CloudService.meridian_complete_confirmed.connect(_on_meridian_confirmed, CONNECT_ONE_SHOT)
 		CloudService.meridian_complete_rejected.connect(_on_meridian_rejected, CONNECT_ONE_SHOT)
 		CloudService.submit_meridian_complete(data_index, _pending_item_ids)
 
 func _on_meridian_confirmed(result: Dictionary) -> void:
-	pass
+	_meridian_submit_pending = false
+	if CloudService.meridian_complete_rejected.is_connected(_on_meridian_rejected):
+		CloudService.meridian_complete_rejected.disconnect(_on_meridian_rejected)
 
 	var server_grid: Array = result.get("grid", [])
 	print("[GameScreen] meridian confirmed, server grid size=", server_grid.size())
@@ -284,6 +273,9 @@ func _on_stage_changed_for_meridian(_level: int, _name: String) -> void:
 		_refresh_meridian()
 
 func _on_meridian_rejected(reason: String) -> void:
+	_meridian_submit_pending = false
+	if CloudService.meridian_complete_confirmed.is_connected(_on_meridian_confirmed):
+		CloudService.meridian_complete_confirmed.disconnect(_on_meridian_confirmed)
 	_pending_item_ids.clear()
 	match reason:
 		"insufficient_items": EventBus.show_toast.emit("物品不足")

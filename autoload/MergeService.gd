@@ -33,14 +33,11 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		merge_failed.emit("Cannot merge")
 		return false
 
-	if CloudService.online:
-		print("[MergeService] submit_merge: from=" + str(from_pos) + " id=" + str(item_a.get("id",0)) + " to=" + str(to_pos) + " id=" + str(item_b.get("id",0)))
-		CloudService.submit_merge(from_pos.x, from_pos.y, to_pos.x, to_pos.y)
+	print("[MergeService] submit_merge: from=" + str(from_pos) + " id=" + str(item_a.get("id",0)) + " to=" + str(to_pos) + " id=" + str(item_b.get("id",0)))
+	CloudService.submit_merge(from_pos.x, from_pos.y, to_pos.x, to_pos.y)
 	return true
 
 func _on_merge_confirmed(result: Dictionary) -> void:
-	pass
-
 	var regen: float = result.get("regen_remaining_ms", 0.0)
 	if regen > 0:
 		GameState.regen_remaining_ms = regen

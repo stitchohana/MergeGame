@@ -39,9 +39,15 @@ function main(): void {
   // Middleware
   app.use(express.json({ limit: "200kb" }));
 
-  // CORS — allow Godot client from any origin during development
+  // CORS — allow Godot client (no Origin header) and browser requests from localhost
+  const corsOrigin = process.env.CORS_ORIGIN || "";
   app.use((_req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
+    const origin = _req.headers.origin;
+    if (origin) {
+      if (origin.startsWith("http://localhost") || origin.startsWith("http://127.0.0.1") || origin === corsOrigin) {
+        res.header("Access-Control-Allow-Origin", origin);
+      }
+    }
     res.header("Access-Control-Allow-Headers", "Authorization, Content-Type");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     if (_req.method === "OPTIONS") {

@@ -1,7 +1,8 @@
 extends Node
 
 # RewardManager: Receives reward notifications from explicit reward flows.
-# Operations only carry quest_progress; rewards come from claim/meridian/state.
+# Items are synced exclusively via pending_rewards from server responses.
+# Tokens (spirit_stones, stamina, qi, cultivation) are synced from response fields.
 
 signal pending_rewards_changed(count: int)
 
@@ -32,44 +33,14 @@ func _on_state_loaded(state: Dictionary) -> void:
 func _on_reward_response(result: Dictionary) -> void:
 	if result.has("cultivation"):
 		CultivationService.deserialize(result.cultivation)
-	if result.has("rewards_applied") and result.rewards_applied != null:
-		_apply(result.rewards_applied)
+	if result.has("spirit_stones"):
+		GameState.spirit_stones = result.spirit_stones
+		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+	if result.has("stamina"):
+		GameState.stamina = result.stamina
+		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 	if result.has("pending_rewards"):
 		pending_rewards = result.pending_rewards
-		pending_rewards_changed.emit(pending_rewards.size())
-
-
-func apply_rewards(config: Dictionary) -> void:
-	_apply(config)
-
-
-func _apply(config: Dictionary) -> void:
-	if config.has("tokens"):
-		for t in config.tokens:
-			var token_type: int = int(t.get("token", 0))
-			var amount: int = int(t.get("amount", 0))
-			match token_type:
-				Constants.TokenType.SPIRIT_STONES:
-					GameState.spirit_stones += amount
-					GameState.spirit_stones_changed.emit(GameState.spirit_stones)
-				Constants.TokenType.QI:
-					var new_qi: int = mini(CultivationService.current_qi + amount, CultivationService.max_qi)
-					CultivationService.current_qi = new_qi
-					CultivationService.qi_changed.emit(new_qi, CultivationService.max_qi)
-				Constants.TokenType.STAMINA:
-					GameState.stamina += amount
-					GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
-				Constants.TokenType.EXP:
-					pass  # CultivationService.deserialize() handles this via server response
-
-	if config.has("items"):
-		for ri in config.items:
-			var item_id: int = ri.get("id", 0)
-			var count: int = ri.get("count", 0)
-			var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
-			var item_name: String = item_data.get("name", "#" + str(item_id))
-			for _i in range(count):
-				pending_rewards.append({"id": item_id, "name": item_name, "uid": -1})
 		pending_rewards_changed.emit(pending_rewards.size())
 
 

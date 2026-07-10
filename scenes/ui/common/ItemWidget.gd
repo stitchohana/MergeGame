@@ -72,7 +72,7 @@ func _update_visuals() -> void:
 		color = Color.from_hsv(hue, 0.6, 0.7)
 		var cs: int = item_data.get("_craft_state", -1)
 		if cs >= 0 and cs <= 3:
-			_set_crafting_color(cs)
+			set_crafting_state(cs)
 
 	# Icon
 	var icon_path: String = item_data.get("icon", "")
@@ -138,9 +138,6 @@ func set_crafting_state(state: int) -> void:
 		2: modulate = Color(0.6, 0.6, 0.7, 1)
 		3: modulate = Color(1.0, 1.0, 0.6, 1)
 		_: modulate = Color.WHITE
-
-func _set_crafting_color(state: int) -> void:
-	set_crafting_state(state)
 
 func set_visual_position(pos: Vector2) -> void:
 	position = pos

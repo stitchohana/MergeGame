@@ -46,9 +46,9 @@ func try_spawn(grid_pos: Vector2i, launcher_uid: int, charges: int, is_immovable
 			spawn_failed.emit("体力不足")
 			return false
 
-	if charges == 0:
+	if charges <= 0 and _launcher_cd.has(launcher_uid):
 		_spawn_in_flight = false
-		spawn_failed.emit("发射器次数用尽，等待冷却")
+		spawn_failed.emit("发射器冷却中")
 		return false
 
 	spawn_started.emit(launcher_uid)
@@ -76,8 +76,8 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 			charge_visual_update.emit(launcher_uid, "%d/%d" % [charges_val, max_c], Color(1, 1, 1, 0.7))
 
 		if charges_val <= 0:
-			var launcher_cfg: Dictionary = ConfigDatabase.get_item_data(launcher_item.get("id", 0)) if not launcher_item.is_empty() else {}
-			if launcher_cfg.get("no_cost", false) and launcher_cfg.get("recharge_time", 0) <= 0:
+			var recharge_t: float = result.get("recharge_time", 0.0)
+			if recharge_t <= 0:
 				var launcher_pos: Vector2i = GridManager.find_pos_by_uid(launcher_uid)
 				_spawn_in_flight = false
 				depleted_launcher_removed.emit(launcher_uid, launcher_pos)
@@ -92,6 +92,8 @@ func _on_spawn_rejected(reason: String) -> void:
 	spawn_failed.emit(reason)
 
 func _on_cd_tick() -> void:
+	if not _launcher_cd.is_empty():
+		print("[LauncherCD] tick: tracking", _launcher_cd.size(), "launchers, uids=", _launcher_cd.keys())
 	if _launcher_cd.is_empty():
 		return
 	var to_erase: Array = []
@@ -115,11 +117,15 @@ func _on_cd_tick() -> void:
 		if not item.is_empty():
 			var cfg: Dictionary = ConfigDatabase.get_item_data(item.get("id", 0) as int)
 			var max_c: int = cfg.get("max_charges", 3) as int
-			item["charges"] = max_c
 			charge_visual_update.emit(uid, "%d/%d" % [max_c, max_c], Color(1, 1, 1, 0.7))
 
 func start_cd_from_restore(item_data: Dictionary) -> void:
+	print("[LauncherCD] start_cd_from_restore: uid=", item_data.get("_uid", 0), " charges=", item_data.get("charges", -1))
 	if item_data.get("charges", -1) != 0:
+		return
+	var uid: int = item_data.get("_uid", 0) as int
+	if _launcher_cd.has(uid):
+		print("[LauncherCD] skipping uid=", uid, " already tracking")
 		return
 	var cfg: Dictionary = ConfigDatabase.get_item_data(item_data.get("id", 0) as int)
 	if cfg.is_empty() or cfg.get("type", "") != "launcher":
@@ -127,17 +133,18 @@ func start_cd_from_restore(item_data: Dictionary) -> void:
 	var cd_time: float = cfg.get("recharge_time", 0.0) as float
 	if cd_time <= 0:
 		return
-	var uid: int = item_data.get("_uid", 0) as int
 	var max_c: int = cfg.get("max_charges", 3) as int
 	var remaining: float = cd_time
 	var server_rem: Variant = item_data.get("_recharge_remaining", null)
 	if typeof(server_rem) == TYPE_FLOAT or typeof(server_rem) == TYPE_INT:
 		remaining = maxf(0, float(server_rem) / 1000.0)
 	_launcher_cd[uid] = {"remaining": remaining, "recharge_time": cd_time, "max_charges": max_c}
+	print("[LauncherCD] NEW CD uid=", uid, " remaining=", remaining, " recharge_time=", cd_time)
 	var secs: int = int(ceil(remaining))
 	charge_visual_update.emit(uid, "%02d:%02d" % [int(secs / 60), secs % 60], Color(1, 0.6, 0.2, 1))
 
 func clear_cd(uid: int) -> void:
+	print("[LauncherCD] clear_cd called: uid=", uid, " stack:", get_stack())
 	if uid > 0 and _launcher_cd.has(uid):
 		_launcher_cd.erase(uid)
 

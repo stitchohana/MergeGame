@@ -69,4 +69,5 @@ func _on_deposit_rejected(reason: String) -> void:
 	deposit_failed.emit(reason)
 
 func _on_withdraw_rejected(reason: String) -> void:
+	_pending_withdraw_uid = 0
 	withdraw_failed.emit(reason)

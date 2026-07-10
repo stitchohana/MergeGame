@@ -8,6 +8,10 @@ func setup(item_id: int, amount: int) -> void:
 	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
 	if item_data.is_empty():
 		item_data = ConfigDatabase.get_token_data(item_id)
+	if item_data.is_empty():
+		push_warning("[RewardSlot] Unknown item/token id: ", item_id)
+		count_label.text = str(amount)
+		return
 	count_label.text = str(amount)
 
 	var icon_path: String = item_data.get("icon", "")

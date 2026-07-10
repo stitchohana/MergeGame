@@ -2,16 +2,7 @@ import { Router, Request, Response } from "express";
 import { IStorage } from "../storage/interface";
 import { authRequired } from "../middleware/auth";
 import { GameEngine, TableState } from "../engine/game_engine";
-
-// Per-user operation queue — sequential execution per user
-const userQueues = new Map<string, Promise<void>>();
-
-function enqueue(userId: string, fn: () => Promise<void>): Promise<void> {
-  const prev = userQueues.get(userId) ?? Promise.resolve();
-  const next = prev.then(fn, fn);
-  userQueues.set(userId, next);
-  return next;
-}
+import { enqueue } from "./queue";
 
 // Operation wrapper: validates params, queues user op, handles errors
 function op(handler: (req: Request, res: Response, userId: string) => Promise<void>) {
@@ -69,6 +60,15 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
             }
           }
         }
+        // Migrate: backfill uid in storage items (old format: {id} without uid)
+        if (item.storage?.items) {
+          for (const s of item.storage.items) {
+            if (!(s as any).uid) {
+              state.uid_counter = (state.uid_counter ?? 0) + 1;
+              (s as any).uid = state.uid_counter;
+            }
+          }
+        }
       }
       for (const item of state.grid) {
         if (!item.uid) {
@@ -86,6 +86,14 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
             }
             if (item.craft?._craft_stored) {
               for (const s of item.craft._craft_stored) {
+                if (!(s as any).uid) {
+                  state.uid_counter = (state.uid_counter ?? 0) + 1;
+                  (s as any).uid = state.uid_counter;
+                }
+              }
+            }
+            if (item.storage?.items) {
+              for (const s of item.storage.items) {
                 if (!(s as any).uid) {
                   state.uid_counter = (state.uid_counter ?? 0) + 1;
                   (s as any).uid = state.uid_counter;
@@ -140,7 +148,10 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       quest_defs: engine.questEngine.getResolvedQuestDefs(engine), home_meridian_defs: engine.getHomeMeridianDefs(),
       activity_defs: engine.activityEngine.getActivities().map(a => ({ ...a, active: engine.activityEngine.isActive(a) })),
       activity_progress: state.activity_progress,
-      activity_current_day: engine.activityEngine.getCurrentDay(3, engine.questResetHour),
+      activity_current_day: (() => {
+        const active = engine.activityEngine.getActivities().find((a: any) => engine.activityEngine.isActive(a) && engine.activityEngine.hasWeeklyTasks(a.id));
+        return active ? engine.activityEngine.getCurrentDay(active.id, engine.questResetHour) : 0;
+      })(),
       pending_rewards: state.pending_rewards, home_meridian_progress: state.home_meridian_progress
       };
   }
@@ -150,35 +161,20 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     try {
       const userId = req.auth!.userId;
       const state = await getOrCreateState(userId);
-      // Restore main grid if returning from battle after reconnect
-      if (state.saved_grid && state.saved_grid.length > 0) {
+      // Restore main grid if returning from battle after reconnect, unless still on battle board
+      if (state.board_type !== "battle" && state.saved_grid && state.saved_grid.length > 0) {
         state.grid = state.saved_grid;
         state.saved_grid = undefined;        await storage.saveState(userId, state);
         console.log(`[game] restored main grid for ${userId}: ${state.grid.length} items`);
       }
       const regenRemainingMs = engine.getRegenRemainingMs(state);
-      // Add recharge remaining time to launcher items
-      const now = Date.now();
-      for (const item of state.grid) {
-        const itemDef = engine.getItemData(item.id);
-        if (!itemDef || itemDef.type !== "launcher") continue;
-        const rt = itemDef.recharge_time ?? 0;
-        if (rt <= 0) continue;
-        const maxC = itemDef.max_charges ?? 3;
-        const charges = item.charges ?? maxC;
-        if (charges >= maxC) continue;
-        const lct = item.last_charge_time ?? now;
-        const elapsed = (now - lct) / 1000;
-        if (elapsed < rt) {
-          (item as any)._recharge_remaining = (rt - elapsed) * 1000;
-        }
-      }
+      engine.enrichGridWithRechargeRemaining(state.grid);
       console.log(`[game] state response: grid=${state.grid.length} items, first uid=${state.grid[0]?.uid ?? "missing"}`);
-      engine.questEngine.initQuestProgress(state);
+      const questInitModified = engine.questEngine.initQuestProgress(state);
       const questResetOccurred = engine.questEngine.checkAndResetQuests(state, engine.questResetHour);
       engine.activityEngine.initProgress(state);
       engine.activityEngine.checkAndReset(state, engine.questResetHour);
-      if (questResetOccurred) {
+      if (questInitModified || questResetOccurred) {
         try {
           await storage.saveState(userId, state);
         } catch (e) {
@@ -271,7 +267,8 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.removeIngredientFromTable(state, table_col, table_row, uid, target_col, target_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, grid: state.grid });
+    engine.enrichGridWithRechargeRemaining(state.grid);
+    res.json({ ok: true, removed_id: result.removed_id, removed_uid: result.removed_uid, table_col: result.table_col, table_row: result.table_row, target_col: result.target_col, target_row: result.target_row, grid: state.grid });
   }));
 
   // POST /api/game/push_place
@@ -344,14 +341,15 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
 
   // POST /api/game/storage/deposit
   router.post("/storage/deposit", op(async (req, res, userId) => {
-    const { storage_col, storage_row, item_id, from_col, from_row } = req.body;
-    if (typeof storage_col !== "number" || typeof storage_row !== "number" || typeof item_id !== "number" || typeof from_col !== "number" || typeof from_row !== "number") {
+    const { storage_col, storage_row, uid, from_col, from_row } = req.body;
+    if (typeof storage_col !== "number" || typeof storage_row !== "number" || typeof uid !== "number" || typeof from_col !== "number" || typeof from_row !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.depositItem(state, storage_col, storage_row, item_id, from_col, from_row);
+    const result = engine.depositItem(state, storage_col, storage_row, uid, from_col, from_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
+    engine.enrichGridWithRechargeRemaining(state.grid);
     res.json({ ok: true, grid: state.grid });
   }));
 
@@ -366,6 +364,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     const storageItem = state.grid.find(i => i.col === storage_col && i.row === storage_row);
+    engine.enrichGridWithRechargeRemaining(state.grid);
     res.json({ ok: true, storage: storageItem?.storage ?? null, uid: result.uid, col: result.col, row: result.row });
   }));
 
@@ -400,6 +399,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     if (board_type === "battle") engine.initBattleMonsters(state);
+    engine.enrichGridWithRechargeRemaining(state.grid);
     res.json({ ok: true, board_type: board_type, grid: state.grid, monsters: state.battle_monsters, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage });
   }));
 
@@ -423,7 +423,11 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.pouchWithdraw(state, uid);
+    const pouchEntry = state.pouch.find((p: any) => p.uid === uid);
+    if (!pouchEntry) { res.status(400).json({ error: "item_not_in_pouch" }); return; }
+    const empty = engine.findEmptyPos(state.grid);
+    if (!empty) { res.status(400).json({ error: "grid_full" }); return; }
+    const result = engine.pouchWithdraw(state, pouchEntry.id, empty.col, empty.row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     res.json({ ok: true, pouch: result.pouch, col: result.col, row: result.row });
@@ -443,15 +447,15 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
   }));
 
   router.post("/battle/attack", op(async (req, res, userId) => {
-    const { item_id, effect_id, col, row } = req.body;
-    if (typeof item_id !== "number" || typeof effect_id !== "number" || typeof col !== "number" || typeof row !== "number") {
+    const { item_id, effect_id, uid, col, row } = req.body;
+    if (typeof item_id !== "number" || typeof effect_id !== "number" || typeof uid !== "number" || typeof col !== "number" || typeof row !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
-    const result = engine.battleAttack(state, item_id, effect_id, col, row);
+    const result = engine.battleAttack(state, item_id, effect_id, uid, col, row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage, quest_progress: state.quest_progress, rewards_applied: engine.questEngine.lastAppliedRewards, pending_rewards: state.pending_rewards });
+    res.json({ ok: true, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage, quest_progress: state.quest_progress, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, pending_rewards: state.pending_rewards });
   }));
 
   // POST /api/game/quest_claim
@@ -464,7 +468,8 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.questEngine.claimQuestReward(state, quest_id, engine);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, quest_id, rewards: result.rewards, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, grid: state.grid, pouch: state.pouch, quest_progress: state.quest_progress, rewards_applied: engine.questEngine.lastAppliedRewards, pending_rewards: state.pending_rewards });
+    engine.enrichGridWithRechargeRemaining(state.grid);
+    res.json({ ok: true, quest_id, rewards: result.rewards, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, grid: state.grid, pouch: state.pouch, quest_progress: state.quest_progress, pending_rewards: state.pending_rewards });
   }));
 
   // POST /api/game/claim_pending_reward
@@ -477,6 +482,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.questEngine.claimPendingReward(state, uid, engine);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
+    engine.enrichGridWithRechargeRemaining(state.grid);
     res.json({ ok: true, col: result.col, row: result.row, grid: state.grid, pending_rewards: state.pending_rewards, });
   }));
 

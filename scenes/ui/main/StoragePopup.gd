@@ -1,6 +1,7 @@
 class_name StoragePopup extends BasePopup
 
 var _pending_withdraw_uid: int = 0
+var _pending_withdraw_item_id: int = 0
 
 @onready var title_label: Label = $Panel/TitleLabel
 @onready var item_container = $Panel/ItemContainer
@@ -12,7 +13,10 @@ var _items: Array = []
 func _ready() -> void:
 	if close_btn:
 		close_btn.pressed.connect(_on_close)
-	CloudService.storage_withdraw_confirmed.connect(_on_withdraw_confirmed)
+	if not CloudService.storage_withdraw_confirmed.is_connected(_on_withdraw_confirmed):
+		CloudService.storage_withdraw_confirmed.connect(_on_withdraw_confirmed)
+	if not CloudService.storage_withdraw_rejected.is_connected(_on_withdraw_rejected):
+		CloudService.storage_withdraw_rejected.connect(_on_withdraw_rejected)
 	_refresh()
 
 func setup(storage_pos: Vector2i, items: Array) -> void:
@@ -41,10 +45,10 @@ func _refresh() -> void:
 		var item_data := ConfigDatabase.get_item_data(slot.id)
 		if item_data.is_empty():
 			continue
-		var btn := _build_item_button(item_data)
+		var btn := _build_item_button(item_data, slot.uid)
 		item_container.add_child(btn)
 
-func _build_item_button(item_data: Dictionary) -> Button:
+func _build_item_button(item_data: Dictionary, slot_uid: int) -> Button:
 	var btn := Button.new()
 	btn.flat = true
 	btn.custom_minimum_size = Vector2(80, 100)
@@ -55,29 +59,35 @@ func _build_item_button(item_data: Dictionary) -> Button:
 	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	btn.add_child(widget)
 
-	var item_id: int = item_data.get("id", 0)
-	btn.pressed.connect(func(): _on_item_pressed(item_id))
+	btn.pressed.connect(func(): _on_item_pressed(slot_uid))
 	return btn
 
-func _on_item_pressed(item_id: int) -> void:
+func _on_item_pressed(slot_uid: int) -> void:
+	if _pending_withdraw_uid > 0:
+		EventBus.show_toast.emit("操作太频繁，请稍后再试")
+		return
 	var spawn_pos := GridManager.find_nearest_empty(_storage_pos)
 	if spawn_pos == Vector2i(-1, -1):
 		EventBus.show_toast.emit("棋盘已满")
 		return
 
-	# Find and remove from local items
+	# Find the item by uid
 	var idx := -1
 	for i in range(_items.size()):
-		if _items[i].id == item_id:
+		if _items[i].get("uid", 0) == slot_uid:
 			idx = i
 			break
 	if idx >= 0:
-		_pending_withdraw_uid = _items[idx].get("uid", 0) as int
-		_items.remove_at(idx)
-	_refresh()
+		_pending_withdraw_uid = slot_uid
+		_pending_withdraw_item_id = _items[idx].get("id", 0)
 
 	if CloudService.online:
 		CloudService.submit_storage_withdraw(_storage_pos.x, _storage_pos.y, _pending_withdraw_uid, spawn_pos.x, spawn_pos.y)
+
+func _on_withdraw_rejected(reason: String) -> void:
+	EventBus.show_toast.emit("取出失败：" + reason)
+	_pending_withdraw_uid = 0
+	_pending_withdraw_item_id = 0
 
 func _on_withdraw_confirmed(result: Dictionary) -> void:
 	var storage_data = result.get("storage", null)
@@ -88,12 +98,13 @@ func _on_withdraw_confirmed(result: Dictionary) -> void:
 	if _sw_uid > 0 and _pending_withdraw_uid > 0:
 		var _sw_col: int = result.get("col", 0) as int
 		var _sw_row: int = result.get("row", 0) as int
-		var item_data := ConfigDatabase.get_item_data(_pending_withdraw_uid)
+		var item_data := ConfigDatabase.get_item_data(_pending_withdraw_item_id)
 		if not item_data.is_empty():
 			var new_item := item_data.duplicate(true)
 			new_item["_uid"] = _sw_uid
 			GridManager.add_item(new_item, Vector2i(_sw_col, _sw_row))
 		_pending_withdraw_uid = 0
+		_pending_withdraw_item_id = 0
 
 func _clear_items() -> void:
 	if item_container:
@@ -101,4 +112,8 @@ func _clear_items() -> void:
 			child.queue_free()
 
 func _on_close() -> void:
+	if CloudService.storage_withdraw_confirmed.is_connected(_on_withdraw_confirmed):
+		CloudService.storage_withdraw_confirmed.disconnect(_on_withdraw_confirmed)
+	if CloudService.storage_withdraw_rejected.is_connected(_on_withdraw_rejected):
+		CloudService.storage_withdraw_rejected.disconnect(_on_withdraw_rejected)
 	UIManager.hide_popup(self)

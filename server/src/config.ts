@@ -1,11 +1,15 @@
-const jwtSecret = process.env.JWT_SECRET;
+import dotenv from "dotenv";
+dotenv.config();
+
+const jwtSecret = process.env.JWT_SECRET || "";
 if (!jwtSecret) {
-  console.warn("[config] WARNING: JWT_SECRET not set, using insecure default. Set JWT_SECRET in production.");
+  console.error("[config] FATAL: JWT_SECRET environment variable is required. Exiting.");
+  process.exit(1);
 }
 
 export const config = {
   port: parseInt(process.env.PORT || "3000", 10),
-  jwtSecret: jwtSecret || "mergegame-dev-secret-change-in-production",
+  jwtSecret,
   jwtExpiresIn: process.env.JWT_EXPIRES || "30d",
   dbType: process.env.DB_TYPE || "json_file",
   jsonDbPath: process.env.JSON_DB_PATH || "./data",
