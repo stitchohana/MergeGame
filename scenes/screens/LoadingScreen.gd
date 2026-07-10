@@ -1,4 +1,4 @@
-class_name LoadingScreen extends BaseScreen
+class_name LoadingScreen extends Control
 
 @onready var progress_bar: ProgressBar = $Panel/VBoxContainer/ProgressBar
 @onready var status_label: Label = $Panel/VBoxContainer/StatusLabel
@@ -6,11 +6,12 @@ class_name LoadingScreen extends BaseScreen
 var _dot_timer: float = 0.0
 var _base_message: String = "加载中"
 
-func on_enter() -> void:
-	modulate = Color.TRANSPARENT
+
+func _ready() -> void:
 	progress_bar.value = 0.0
 	_base_message = "加载中"
 	status_label.text = _base_message
+
 
 func _process(delta: float) -> void:
 	_dot_timer += delta
@@ -20,7 +21,17 @@ func _process(delta: float) -> void:
 		dots += "."
 	status_label.text = _base_message + dots
 
-func set_progress(ratio: float, _message: String = "") -> void:
+
+func get_progress() -> float:
+	if progress_bar:
+		return progress_bar.value
+	return 0.0
+
+
+func set_progress(ratio: float) -> void:
 	if progress_bar:
 		progress_bar.value = ratio
-	_base_message = "加载中 %d%%" % int(ratio * 100)
+
+
+func set_message(message: String) -> void:
+	_base_message = message

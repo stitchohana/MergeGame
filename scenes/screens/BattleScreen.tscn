@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://8wyaaqrw8l2j" path="res://scenes/screens/BattleScreen.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://deg7lbni32jui" path="res://scenes/grid/GridView.tscn" id="2_grid"]
-[ext_resource type="PackedScene" path="res://scenes/ui/main/ItemDetailPanel.tscn" id="3_detail"]
+[ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/main/ItemDetailPanel.tscn" id="3_detail"]
 [ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/main/PouchDropZone.tscn" id="4_pouch"]
-[ext_resource type="PackedScene" path="res://scenes/ui/main/TopBar.tscn" id="5_qxd11"]
+[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/main/TopBar.tscn" id="5_qxd11"]
 
 [node name="BattleScreen" type="Control" unique_id=1668431896]
 layout_mode = 3
@@ -116,7 +116,7 @@ offset_bottom = 217.0
 
 [node name="TopBar" parent="." unique_id=1995499029 instance=ExtResource("5_qxd11")]
 layout_mode = 0
-offset_left = 138.0
+offset_left = 5.0
 offset_top = 8.0
-offset_right = 638.0
+offset_right = 505.0
 offset_bottom = 58.0

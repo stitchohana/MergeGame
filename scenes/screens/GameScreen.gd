@@ -14,6 +14,8 @@ var _meridian_submit_pending: bool = false
 var _display_index_map: Array = []
 var _pending_stamina_uid: int = -1
 var _meridian_waiting_breakthrough: bool = false
+var _item_use_pending: bool = false
+var _load_token: int = -1
 
 func _ready() -> void:
 	modulate = Color.TRANSPARENT
@@ -36,6 +38,10 @@ func _ready() -> void:
 	CloudService.stamina_restore_confirmed.connect(_on_stamina_restore_confirmed)
 	CloudService.stamina_restore_rejected.connect(_on_stamina_restore_rejected)
 	CultivationService.stage_changed.connect(_on_stage_changed_for_meridian)
+	CloudService.breakthrough_confirmed.connect(func(_r): _item_use_pending = false)
+	CloudService.breakthrough_rejected.connect(func(_r): _item_use_pending = false)
+	CloudService.exp_pill_consume_confirmed.connect(func(_r): _item_use_pending = false)
+	CloudService.exp_pill_consume_rejected.connect(func(_r): _item_use_pending = false)
 
 	battle_btn.pressed.connect(_on_battle_pressed)
 	home_btn.pressed.connect(_on_home_pressed)
@@ -68,11 +74,15 @@ func _setup_extras() -> void:
 func on_enter() -> void:
 	GameState.current_board_type = Constants.BoardType.MAIN
 	GridManager.init_grid(Constants.BoardType.MAIN)
+	grid_view.visible = false
+	_load_token = LoadingManager.begin("加载棋盘数据...")
 	if CloudService.online:
 		CloudService.submit_board_switch("main")
 
 
 func on_exit() -> void:
+	if GridManager.grid_updated.is_connected(_on_grid_changed):
+		GridManager.grid_updated.disconnect(_on_grid_changed)
 	grid_view._clear_all_item_nodes()
 	detail_panel.clear()
 
@@ -84,12 +94,16 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 	GridManager.init_grid(Constants.BoardType.MAIN)
 	GridManager.populate_from_server(GameState.main_grid_cache)
 	grid_view.set_skip_animations(false)
+	grid_view.visible = true
 	print("[GameScreen] Board synced from server: ", GameState.main_grid_cache.size(), " items")
-	var fade := create_tween()
-	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
+	if _load_token > 0:
+		LoadingManager.end(_load_token)
+		_load_token = -1
 
 func _on_main_board_switch_rejected(_reason: String) -> void:
-	pass
+	if _load_token > 0:
+		LoadingManager.end(_load_token)
+		_load_token = -1
 
 func _on_material_clicked(uid: int, item_id: int) -> void:
 	var table_pos := detail_panel.get_current_craft_pos()
@@ -124,6 +138,8 @@ func _on_craft_remove_rejected(reason: String) -> void:
 
 
 func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
+	if _item_use_pending:
+		return
 	var effect_id: int = int(item_data.get("use_effect_id", 0))
 	print("[GameScreen] item_use: id=" + str(item_data.get("id",0)) + " effect=" + str(effect_id) + " uid=" + str(item_data.get("_uid", 0)))
 	if effect_id <= 0:
@@ -132,6 +148,7 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	if effect.is_empty():
 		return
 	var uid: int = item_data.get("_uid", 0)
+	_item_use_pending = true
 	match effect.get("type", ""):
 		"breakthrough":
 				print("[GameScreen] breakthrough click: pill_id=" + str(item_data.get("id",0)) + " uid=" + str(uid) + " pos=" + str(grid_pos))
@@ -188,6 +205,7 @@ func _check_can_complete(req: Dictionary) -> bool:
 	return true
 
 func _refresh_requirement_buttons() -> void:
+	_refresh_required_indicators()
 	for i in range(_display_index_map.size()):
 		var data_index: int = _display_index_map[i]
 		if data_index < 0 or data_index >= GameState.meridian_acupoints.size():
@@ -195,6 +213,23 @@ func _refresh_requirement_buttons() -> void:
 		var req: Dictionary = GameState.meridian_acupoints[data_index]
 		if not req.get("completed", false):
 			requirement_list.set_entry_available(i, _check_can_complete(req))
+
+
+func _refresh_required_indicators() -> void:
+	if GameState.current_board_type != Constants.BoardType.MAIN:
+		return
+	var required_ids: Array = []
+	# Collect all item IDs needed by incomplete acupoints
+	for req in GameState.meridian_acupoints:
+		for it in req.get("items", []):
+			var item_id: int = int(it.get("item_id", 0))
+			if item_id > 0 and not required_ids.has(item_id):
+				required_ids.append(item_id)
+	# Update all grid items
+	for entry in GridManager.get_all_items():
+		var node: GridItem = grid_view._item_nodes.get("%d,%d" % [entry.pos.x, entry.pos.y])
+		if node and is_instance_valid(node):
+			node.set_required(required_ids.has(entry.data.get("id", 0)))
 
 func _refresh_meridian() -> void:
 	if not GameState.meridian_acupoints.is_empty():
@@ -284,6 +319,7 @@ func _on_meridian_rejected(reason: String) -> void:
 		_: EventBus.show_toast.emit("修炼失败：" + reason)
 
 func _on_stamina_restore_confirmed(result: Dictionary) -> void:
+	_item_use_pending = false
 	var stam: int = result.get("stamina", 0)
 	if stam > 0:
 		GameState.stamina = stam
@@ -295,6 +331,7 @@ func _on_stamina_restore_confirmed(result: Dictionary) -> void:
 		_pending_stamina_uid = -1
 
 func _on_stamina_restore_rejected(reason: String) -> void:
+	_item_use_pending = false
 	EventBus.show_toast.emit("回复体力失败：" + reason)
 	_pending_stamina_uid = -1
 

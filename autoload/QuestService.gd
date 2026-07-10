@@ -62,7 +62,12 @@ func _apply_progress(server_progress: Dictionary) -> void:
 		quest_progress_updated.emit(pid, p.get("current_count", 0), target)
 
 
+var _claiming_quest_id: int = -1
+
 func claim_quest(quest_id: int) -> void:
+	if _claiming_quest_id > 0:
+		return
+	_claiming_quest_id = quest_id
 	CloudService.submit_quest_claim(quest_id)
 
 
@@ -84,8 +89,10 @@ func _find_quest_target(quest_id: int) -> int:
 
 
 func _on_quest_claim_confirmed(result: Dictionary) -> void:
+	_claiming_quest_id = -1
 	if result.has("quest_progress"):
 		_apply_progress(result.quest_progress)
 
 func _on_quest_claim_rejected(reason: String) -> void:
+	_claiming_quest_id = -1
 	EventBus.show_toast.emit("领取失败")

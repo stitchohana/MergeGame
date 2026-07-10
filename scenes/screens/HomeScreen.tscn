@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bfrasromb4gf7"]
 
 [ext_resource type="Script" uid="uid://bm7eaym0h864p" path="res://scenes/screens/HomeScreen.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://scenes/ui/main/TopBar.tscn" id="2_qahno"]
+[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/main/TopBar.tscn" id="2_qahno"]
 [ext_resource type="PackedScene" uid="uid://dx74q48vv12nw" path="res://scenes/ui/cultivation/CultivationPanel.tscn" id="3_cul"]
 
 [node name="HomeScreen" type="Control" unique_id=65201493]
@@ -16,10 +16,10 @@ script = ExtResource("1_script")
 
 [node name="CultivationPanel" parent="." unique_id=2107554876 instance=ExtResource("3_cul")]
 layout_mode = 0
-offset_left = 80.0
-offset_top = 64.0
-offset_right = 700.0
-offset_bottom = 252.0
+offset_left = -3.0
+offset_top = 66.0
+offset_right = 781.0
+offset_bottom = 254.0
 
 [node name="MeridianContainer" type="VBoxContainer" parent="." unique_id=1118438235]
 layout_mode = 0

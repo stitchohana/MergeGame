@@ -466,18 +466,17 @@ func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
 	if layer:
 		layer.add_child(item)
 	item.setup(item_data, pos, CELL_SIZE)
+	if GameState.current_board_type != Constants.BoardType.MAIN:
+		item.set_required(false)
 	if not _is_launcher_spawning and not _skip_anims and not GridManager._skip_anims:
 		item.play_spawn_animation()
 	_item_nodes["%d,%d" % [pos.x, pos.y]] = item
-	if item_data.get("type", "") == "launcher":
-		print("[GridView] _on_item_added launcher: uid=", item_data.get("_uid", 0), " charges=", item_data.get("charges", -1))
 	_try_start_launcher_cd(item_data)
 	CraftingService.restore_craft_timer_for_item(item_data)
 
 func _try_start_launcher_cd(item_data: Dictionary) -> void:
 	if item_data.get("type", "") != "launcher":
 		return
-	print("[GridView] _try_start_launcher_cd: uid=", item_data.get("_uid", 0), " charges=", item_data.get("charges", -1))
 	_launcher_ctrl.start_cd_from_restore(item_data)
 
 func _on_item_removed(item_data: Dictionary, pos: Vector2i) -> void:
@@ -556,6 +555,8 @@ func _get_items_layer() -> Control:
 # Check if stored items + new ingredient match a recipe, show craft button if so
 
 # Storage popup opens directly from local grid data
+var _storage_popup_open: bool = false
+
 func _has_storage_slots(item: Variant) -> bool:
 	if item == null:
 		return false
@@ -563,6 +564,8 @@ func _has_storage_slots(item: Variant) -> bool:
 	return cfg.get("storage_slots", 0) > 0
 
 func _handle_storage_click(storage_pos: Vector2i) -> void:
+	if _storage_popup_open:
+		return
 	var item = GridManager.get_item(storage_pos)
 	if item == null:
 		return
@@ -570,6 +573,8 @@ func _handle_storage_click(storage_pos: Vector2i) -> void:
 	var items: Array = storage_data.get("items", []) if storage_data is Dictionary else []
 	var popup := preload("res://scenes/ui/main/StoragePopup.tscn").instantiate() as StoragePopup
 	popup.setup(storage_pos, items)
+	_storage_popup_open = true
+	popup.tree_exiting.connect(func(): _storage_popup_open = false)
 	UIManager.show_popup(popup)
 
 func _handle_storage_drop(storage_pos: Vector2i, storage_item: Dictionary) -> void:

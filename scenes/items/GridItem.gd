@@ -16,6 +16,7 @@ var _orig_scale: Vector2
 @onready var charge_label: Label = $ChargeLabel
 @onready var immovable_icon: TextureRect = $ImmovableIcon
 @onready var select_icon: TextureRect = $SelectIcon
+@onready var require_icon: TextureRect = $RequireIcon
 
 var _is_selected: bool = false
 
@@ -167,6 +168,10 @@ func set_crafting_state(state: int) -> void:
 
 func set_visual_position(pos: Vector2) -> void:
 	position = pos
+
+func set_required(required: bool) -> void:
+	if require_icon:
+		require_icon.visible = required
 
 func play_merge_animation() -> void:
 	var tween := create_tween()

@@ -19,11 +19,17 @@ var _pending_stamina_uid: int = -1
 var _pending_attack_uid: int = -1
 var _pending_attack_effect_id: int = -1
 var _pending_heal_amount: int = 0
+var _item_use_pending: bool = false
+var _load_token: int = -1
 
 func _ready() -> void:
 	modulate = Color.TRANSPARENT
 	grid_view.item_clicked.connect(_on_item_clicked)
 	grid_view.item_use_requested.connect(_on_item_use_requested)
+	CloudService.breakthrough_confirmed.connect(func(_r): _item_use_pending = false)
+	CloudService.breakthrough_rejected.connect(func(_r): _item_use_pending = false)
+	CloudService.exp_pill_consume_confirmed.connect(func(_r): _item_use_pending = false)
+	CloudService.exp_pill_consume_rejected.connect(func(_r): _item_use_pending = false)
 	grid_view.set_pouch_zone(pouch_zone)
 	leave_btn.pressed.connect(_on_leave_pressed)
 	CloudService.board_switch_confirmed.connect(_on_board_switch_confirmed)
@@ -38,12 +44,12 @@ func _ready() -> void:
 
 func on_enter() -> void:
 	GameState.current_board_type = Constants.BoardType.BATTLE
+	GridManager.init_grid(Constants.BoardType.BATTLE)
+	grid_view.visible = false
+	_load_token = LoadingManager.begin("加载战斗数据...")
 	_char_hp = 100 + CultivationService.total_exp / 10
 	_char_max_hp = _char_hp
 	_monsters = _build_monster_list()
-
-	# Clear old grid, notify server in background
-	GridManager.init_grid(Constants.BoardType.BATTLE)
 
 	if CloudService.online:
 		CloudService.submit_board_switch("battle", _current_map_id, _current_stage)
@@ -53,8 +59,9 @@ func on_enter() -> void:
 	_refresh_char_display()
 	_refresh_monster_display()
 	_refresh_map_header()
-	var fade := create_tween()
-	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
+	if _load_token > 0:
+		LoadingManager.end(_load_token)
+		_load_token = -1
 
 func _on_board_switch_confirmed(result: Dictionary) -> void:
 	if result.get("board_type", "") != "battle":
@@ -64,6 +71,7 @@ func _on_board_switch_confirmed(result: Dictionary) -> void:
 	GridManager.init_grid(Constants.BoardType.BATTLE)
 	GridManager.populate_from_server(GameState.battle_grid_cache)
 	grid_view.set_skip_animations(false)
+	grid_view.visible = true
 	_current_map_id = result.get("battle_map_id", _current_map_id)
 	_current_stage = result.get("battle_stage", _current_stage)
 	var server_monsters: Array = result.get("monsters", [])
@@ -71,15 +79,20 @@ func _on_board_switch_confirmed(result: Dictionary) -> void:
 		_monsters = server_monsters.duplicate(true)
 	_refresh_monster_display()
 	_refresh_map_header()
-	var fade := create_tween()
-	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
+	if _load_token > 0:
+		LoadingManager.end(_load_token)
+		_load_token = -1
 
 func _on_board_switch_rejected(reason: String) -> void:
 	print("[BattleScreen] Board switch rejected: ", reason)
 	_init_battle_grid()
+	if _load_token > 0:
+		LoadingManager.end(_load_token)
+		_load_token = -1
 
 func _init_battle_grid() -> void:
 	GridManager.init_grid(Constants.BoardType.BATTLE)
+	grid_view.visible = true
 
 func on_exit() -> void:
 	grid_view._clear_all_item_nodes()
@@ -124,6 +137,8 @@ func _build_monster_list() -> Array:
 
 
 func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
+	if _item_use_pending:
+		return
 	var effect_id: int = int(item_data.get("use_effect_id", 0))
 	if effect_id <= 0:
 		return
@@ -133,6 +148,7 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	var effect_type: String = effect.get("type", "")
 	var uid: int = item_data.get("_uid", 0)
 
+	_item_use_pending = true
 	match effect_type:
 		"damage":
 			if CloudService.online:
@@ -166,6 +182,7 @@ func _qi_label() -> void:
 		qi_label.text = "灵力 %d/%d" % [CultivationService.current_qi, CultivationService.max_qi]
 
 func _on_battle_attack_confirmed(result: Dictionary) -> void:
+	_item_use_pending = false
 	_sync_grid_from_result(result)
 	var server_monsters: Array = result.get("monsters", [])
 	if not server_monsters.is_empty():
@@ -193,6 +210,7 @@ func _on_battle_attack_confirmed(result: Dictionary) -> void:
 		_refresh_monster_display()
 
 func _on_battle_attack_rejected(reason: String) -> void:
+	_item_use_pending = false
 	EventBus.show_toast.emit("攻击失败：" + reason)
 
 func _sync_grid_from_result(result: Dictionary) -> void:
@@ -234,6 +252,7 @@ func _refresh_map_header() -> void:
 	map_label.text = "%s — 第%d关 %s" % [map_data.get("name", ""), _current_stage + 1, stage_name]
 
 func _on_battle_heal_confirmed(result: Dictionary) -> void:
+	_item_use_pending = false
 	_sync_grid_from_result(result)
 	_char_hp = mini(_char_max_hp, _char_hp + _pending_heal_amount)
 	_refresh_char_display()
@@ -241,6 +260,7 @@ func _on_battle_heal_confirmed(result: Dictionary) -> void:
 	_pending_heal_amount = 0
 
 func _on_battle_heal_rejected(reason: String) -> void:
+	_item_use_pending = false
 	_pending_heal_amount = 0
 	EventBus.show_toast.emit("恢复失败：" + reason)
 
@@ -309,6 +329,7 @@ func _play_monster_hit() -> void:
 	tween.tween_property(flash, "color", Color(1, 0.3, 0.3, 0.0), 0.3)
 
 func _on_stamina_restore_confirmed(result: Dictionary) -> void:
+	_item_use_pending = false
 	var stam: int = result.get("stamina", 0)
 	if stam > 0:
 		GameState.stamina = stam
@@ -320,5 +341,6 @@ func _on_stamina_restore_confirmed(result: Dictionary) -> void:
 		_pending_stamina_uid = -1
 
 func _on_stamina_restore_rejected(reason: String) -> void:
+	_item_use_pending = false
 	EventBus.show_toast.emit("回复体力失败：" + reason)
 	_pending_stamina_uid = -1

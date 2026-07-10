@@ -48,7 +48,11 @@ func _refresh(_count: int) -> void:
 
 var _fly_targets: Dictionary = {}  # uid -> (col, row) for fly animation
 
+var _claim_pending: bool = false
+
 func _on_claim(reward: Dictionary) -> void:
+	if _claim_pending:
+		return
 	var uid: int = reward.get("uid", -1)
 	if uid < 0:
 		return
@@ -74,10 +78,12 @@ func _on_claim(reward: Dictionary) -> void:
 	_fly_targets[uid] = {"fly": fly, "from": from_pos}
 
 	# Send request, server returns position
+	_claim_pending = true
 	CloudService.submit_claim_pending_reward(uid)
 
 
 func _on_claimed(result: Dictionary) -> void:
+	_claim_pending = false
 	# Update pending rewards immediately (hide the claimed item)
 	if result.has("pending_rewards"):
 		RewardManager.pending_rewards = result.pending_rewards

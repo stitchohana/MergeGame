@@ -10,6 +10,7 @@ class_name HomeScreen extends BaseScreen
 var _home_defs: Array = []
 var _home_progress: Array = []
 var _current_stage_idx: int = -1
+var _load_token: int = -1
 
 
 func _ready() -> void:
@@ -25,12 +26,11 @@ func _ready() -> void:
 	CultivationService.stage_changed.connect(func(_l, _n): _refresh_breakthrough_btn())
 	_setup_meridian_ui()
 	_setup_breakthrough_btn()
-	if CloudService.online:
-		CloudService.fetch_state()
 
 
 func on_enter() -> void:
 	modulate = Color.TRANSPARENT
+	_load_token = LoadingManager.begin("加载数据...")
 	if CloudService.online:
 		CloudService.fetch_state()
 
@@ -50,6 +50,9 @@ func _setup_meridian_ui() -> void:
 
 
 func _on_state_loaded(state: Dictionary) -> void:
+	if _load_token > 0:
+		LoadingManager.end(_load_token)
+		_load_token = -1
 	if state.has("home_meridian_defs"):
 		_home_defs = state.home_meridian_defs
 	if state.has("home_meridian_progress"):

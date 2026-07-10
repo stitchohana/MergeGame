@@ -1,25 +1,27 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://b0qwmpp3a264y"]
 
-[ext_resource type="Script" path="res://scenes/screens/LoadingScreen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://82lnsp6iko4i" path="res://scenes/screens/LoadingScreen.gd" id="1_script"]
 
-[node name="LoadingScreen" type="Control"]
+[node name="LoadingScreen" type="Control" unique_id=51986090]
 layout_mode = 3
 anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=703024991]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.6)
+color = Color(0.00202959, 0.0021561831, 0.004514525, 1)
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Panel" type="Panel" parent="." unique_id=1204493492]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -33,7 +35,7 @@ offset_bottom = 50.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel" unique_id=148104264]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -42,12 +44,12 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 12
 
-[node name="StatusLabel" type="Label" parent="Panel/VBoxContainer"]
+[node name="StatusLabel" type="Label" parent="Panel/VBoxContainer" unique_id=1651667406]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 
-[node name="ProgressBar" type="ProgressBar" parent="Panel/VBoxContainer"]
+[node name="ProgressBar" type="ProgressBar" parent="Panel/VBoxContainer" unique_id=2073909106]
 layout_mode = 2
 size_flags_horizontal = 3
 max_value = 1.0
