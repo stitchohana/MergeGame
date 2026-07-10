@@ -38,6 +38,7 @@ var _pouch_zone: Control = null
 var _launcher_ctrl: Node = null
 
 var _merge_in_flight: bool = false
+var _merge_failed_is_push: bool = false
 var _cached_launcher_uid: int = -1
 var _pending_push_src: Vector2i = Vector2i(-1, -1)
 var _pending_push_target: Vector2i = Vector2i(-1, -1)
@@ -144,7 +145,7 @@ func _input(event: InputEvent) -> void:
 			_select_item(_press_start_pos)
 			item_clicked.emit(_pressed_item, _press_start_pos)
 
-			if _pressed_item.get("type") == "crafting":
+			if _pressed_item.get("type", 0) == Constants.ItemType.CRAFTING:
 				var cstate: int = _pressed_item.get("_craft_state", CraftingService.TableState.IDLE)
 				if cstate == CraftingService.TableState.READY:
 					_craft_ctrl.try_retrieve(_pressed_item, _press_start_pos)
@@ -159,7 +160,7 @@ func _input(event: InputEvent) -> void:
 				return
 
 			_craft_ctrl.hide_button()
-			if _pressed_item.get("type") == "launcher":
+			if _pressed_item.get("type", 0) == Constants.ItemType.LAUNCHER:
 				pass  # handled on double-click via _select_item
 			_pressed_item = {}
 
@@ -227,7 +228,7 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 	if not item_data.is_empty():
 		var new_item: Dictionary = item_data.duplicate(true)
 		new_item["_uid"] = result.get("spawned_uid", 0)
-		if new_item.get("type", "") == "launcher":
+		if new_item.get("type", 0) == Constants.ItemType.LAUNCHER:
 			new_item["charges"] = new_item.get("max_charges", 3)
 		_is_launcher_spawning = true
 		GridManager.add_item(new_item, target_pos)
@@ -337,20 +338,24 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		if _target_cfg.get("storage_slots", 0) > 0:
 			_handle_storage_drop(target_pos, target)
 			return
-	if target != null and target.get("type") == "crafting":
+	if target != null and target.get("type", 0) == Constants.ItemType.CRAFTING:
 		_handle_crafting_drop(target_pos, target)
 		return
 	if target == null:
 		_place_dragged_item(target_pos)
-		if _drag_item_data.get("type") == "crafting":
+		if _drag_item_data.get("type", 0) == Constants.ItemType.CRAFTING:
 			item_clicked.emit(_drag_item_data, target_pos)
-	elif not MergeService.try_merge(_drag_source_pos, target_pos):
-		if target != null and target.get("immovable") == true:
-			_snap_back()
-		elif CloudService.online:
-			_pending_push_src = _drag_source_pos
-			_pending_push_target = target_pos
-			CloudService.submit_push_place(_drag_source_pos.x, _drag_source_pos.y, target_pos.x, target_pos.y)
+	else:
+		_merge_failed_is_push = true
+		if not MergeService.try_merge(_drag_source_pos, target_pos):
+			if target != null and target.get("immovable") == true:
+				_snap_back()
+			elif CloudService.online:
+				_pending_push_src = _drag_source_pos
+				_pending_push_target = target_pos
+				CloudService.submit_push_place(_drag_source_pos.x, _drag_source_pos.y, target_pos.x, target_pos.y)
+		else:
+			_merge_failed_is_push = false
 
 
 func _place_dragged_item(target_pos: Vector2i) -> void:
@@ -379,31 +384,20 @@ func _on_pouch_deposit_rejected(reason: String) -> void:
 	EventBus.show_toast.emit("存入背包失败：" + reason)
 
 func _on_push_place_confirmed(result: Dictionary) -> void:
+	print("[GridView] push_place_confirmed: src=", _pending_push_src, " tgt=", _pending_push_target, " pushed=", Vector2i(result.get("pushed_col", -1), result.get("pushed_row", -1)))
 	print("[GridView] push_place confirmed: pushed=(" + str(result.get("pushed_col", -1)) + "," + str(result.get("pushed_row", -1)) + ")")
 	var pushed_pos := Vector2i(result.get("pushed_col", -1), result.get("pushed_row", -1))
 	if _pending_push_target.x >= 0 and pushed_pos.x >= 0:
 		var src_key := "%d,%d" % [_pending_push_src.x, _pending_push_src.y]
 		var dst_key := "%d,%d" % [_pending_push_target.x, _pending_push_target.y]
 		if pushed_pos == _pending_push_src:
-			# Direct swap using public API
+			# swap_items triggers item_moved which handles visual update
 			GridManager.swap_items(_pending_push_src, _pending_push_target)
-			var src_node = _item_nodes.get(src_key)
-			var dst_node = _item_nodes.get(dst_key)
-			# Fix node dict to match new positions
-			_item_nodes[src_key] = dst_node
-			_item_nodes[dst_key] = src_node
-			# Visual: source snaps to target
-			if src_node and is_instance_valid(src_node):
-				src_node.position = Vector2(_pending_push_target.x * CELL_SIZE, _pending_push_target.y * CELL_SIZE)
-				src_node.grid_position = _pending_push_target
-			# Visual: target tweens to source
-			if dst_node and is_instance_valid(dst_node):
-				dst_node.grid_position = _pending_push_src
-				var tween := create_tween()
-				tween.tween_property(dst_node, "position", Vector2(_pending_push_src.x * CELL_SIZE, _pending_push_src.y * CELL_SIZE), 0.15)
 		else:
 			GridManager.move_item(_pending_push_target, pushed_pos)
+			_skip_anims = true
 			GridManager.move_item(_pending_push_src, _pending_push_target)
+			_skip_anims = false
 	_pending_push_src = Vector2i(-1, -1)
 	_pending_push_target = Vector2i(-1, -1)
 func _on_push_place_rejected(reason: String) -> void:
@@ -429,6 +423,11 @@ func _on_move_rejected(reason: String) -> void:
 
 func _on_merge_failed(_reason: String) -> void:
 	_merge_in_flight = false
+	if _merge_failed_is_push:
+		_merge_failed_is_push = false
+		return
+	if _drag_source_pos.x >= 0:
+		_snap_back_to(_drag_source_pos)
 
 func _snap_back() -> void:
 	_snap_back_to(_drag_source_pos)
@@ -475,7 +474,7 @@ func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
 	CraftingService.restore_craft_timer_for_item(item_data)
 
 func _try_start_launcher_cd(item_data: Dictionary) -> void:
-	if item_data.get("type", "") != "launcher":
+	if item_data.get("type", 0) != Constants.ItemType.LAUNCHER:
 		return
 	_launcher_ctrl.start_cd_from_restore(item_data)
 
@@ -501,8 +500,11 @@ func _on_item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i)
 		_item_nodes.erase(key)
 		_item_nodes["%d,%d" % [to_pos.x, to_pos.y]] = node
 		var target := Vector2(to_pos.x * CELL_SIZE, to_pos.y * CELL_SIZE)
-		var tween := create_tween()
-		tween.tween_property(node, "position", target, 0.15)
+		if _skip_anims:
+			node.position = target
+		else:
+			var tween := create_tween()
+			tween.tween_property(node, "position", target, 0.15)
 	else:
 		_sync_all_items()
 
@@ -700,7 +702,7 @@ func _select_item(pos: Vector2i) -> void:
 			if item.get("immovable") == true:
 				EventBus.show_toast.emit("该物品无法使用")
 				return
-			if item.get("type") == "launcher":
+			if item.get("type", 0) == Constants.ItemType.LAUNCHER:
 				print("[GridView] double-click spawn: id=" + str(item.get("id",0)))
 				_handle_launcher_click(pos)
 			elif _has_storage_slots(item):

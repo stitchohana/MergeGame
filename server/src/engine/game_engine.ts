@@ -13,11 +13,13 @@ interface ItemDef {
   icon: string;
   group_id: number;
   describe: string;
-  type: string;
+  type: number;
   value?: number;
   sell_price?: number;
   spawns?: { id: number; weight: number }[];
-  use_effect_id?: number;
+  effect_type?: number;
+  effect_value?: number;
+  atk?: number;
   recipes?: number[];
   max_charges?: number;
   recharge_time?: number;
@@ -72,7 +74,8 @@ export class GameEngine {
   staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
   questResetHour = 0;
   private shopConfig = { shopItems: [] as any[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
-  private effectsById = new Map<number, { id: number; type: string; exp_gain?: number; duration?: number; multiplier?: number; amount?: number; describe?: string }>();
+
+
   private meridianThresholds: any[] = [];
   private maps = new Map<number, any>();
   private monsters = new Map<number, any>();
@@ -98,10 +101,9 @@ export class GameEngine {
     this.loadRecipes(path.join(configDir, "json_output", "recipes.json"));
     this.loadGameConfig(path.join(configDir, "json_output", "game_config.json"));
     this.loadShopConfig(path.join(configDir, "json_output", "shop.json"));
-    this.loadEffects(path.join(configDir, "json_output", "effects.json"));
     this.loadMeridians(path.join(configDir, "json_output", "meridians.json"));
     this.loadExpedition(path.join(configDir, "json_output", "expedition.json"));
-    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.stages.length ?? 0} stages, ${this.effectsById.size} effects, ${this.meridianThresholds.length} meridian thresholds, ${this.maps.size} maps, ${this.monsters.size} monsters`);
+    console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.stages.length ?? 0} stages, ${this.meridianThresholds.length} meridian thresholds, ${this.maps.size} maps, ${this.monsters.size} monsters`);
   }
 
   private loadGameConfig(filePath: string): void {
@@ -154,16 +156,17 @@ export class GameEngine {
   private loadItems(filePath: string): void {
     const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     const categories = ["regular", "launcher", "crafting"] as const;
+    const typeMap: Record<string, number> = { regular: 0, launcher: 1, crafting: 2 };
 
     for (const cat of categories) {
       for (const item of data[cat] || []) {
-        item.type = cat;
+        item.type = typeMap[cat];
         this.itemsById.set(item.id, item);
 
-        if (!this.itemsByTypeLevel.has(cat)) {
-          this.itemsByTypeLevel.set(cat, new Map());
+        if (!this.itemsByTypeLevel.has(item.type)) {
+          this.itemsByTypeLevel.set(item.type, new Map());
         }
-        const byLevel = this.itemsByTypeLevel.get(cat)!;
+        const byLevel = this.itemsByTypeLevel.get(item.type)!;
         if (!byLevel.has(item.level)) {
           byLevel.set(item.level, []);
         }
@@ -193,18 +196,7 @@ export class GameEngine {
     this.cultivation = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   }
 
-  private loadEffects(filePath: string): void {
-    try {
-      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-      for (const e of data.effects || []) {
-        this.effectsById.set(e.id, e);
-      }
-    } catch { /* effects.json optional */ }
-  }
 
-  getEffect(effectId: number) {
-    return this.effectsById.get(effectId) ?? null;
-  }
 
   private loadMeridians(filePath: string): void {
     try {
@@ -399,10 +391,11 @@ export class GameEngine {
     const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     // Support both old flat format and new board-type format
     if (data.items) {
-      this.initialSetups.set("main", data.items);
+      this.initialSetups.set(0, data.items);
     } else {
       for (const key of Object.keys(data)) {
-        this.initialSetups.set(key, data[key].items || []);
+        const boardKey: number = key === "battle" ? 1 : 0;
+        this.initialSetups.set(boardKey, data[key].items || []);
       }
     }
   }
@@ -413,7 +406,7 @@ export class GameEngine {
     return this.itemsById.get(id) ?? null;
   }
 
-  getItemByLevel(type: string, level: number, groupId = 0): ItemDef | null {
+  getItemByLevel(type: number, level: number, groupId = 0): ItemDef | null {
     const byLevel = this.itemsByTypeLevel.get(type);
     if (!byLevel) return null;
     const items = byLevel.get(level) || [];
@@ -422,7 +415,7 @@ export class GameEngine {
     return items.find((i) => i.group_id === groupId) ?? null;
   }
 
-  getNextLevel(type: string, level: number, groupId = 0): ItemDef | null {
+  getNextLevel(type: number, level: number, groupId = 0): ItemDef | null {
     return this.getItemByLevel(type, level + 1, groupId);
   }
 
@@ -447,8 +440,8 @@ export class GameEngine {
     return this.cultivation;
   }
 
-  getInitialSetup(boardType: string = "main") {
-    return this.initialSetups.get(boardType) || this.initialSetups.get("main") || [];
+  getInitialSetup(boardType: number = 0) {
+    return this.initialSetups.get(boardType) || this.initialSetups.get(0) || [];
   }
 
   getMaxCharges(itemId: number): number {
@@ -497,7 +490,7 @@ export class GameEngine {
     const now = Date.now();
     for (const item of grid) {
       const itemDef = this.getItemData(item.id);
-      if (!itemDef || itemDef.type !== "launcher") continue;
+      if (!itemDef || itemDef.type !== 1) continue;
       const rt = itemDef.recharge_time ?? 0;
       if (rt <= 0) continue;
       const maxC = itemDef.max_charges ?? 3;
@@ -515,7 +508,7 @@ export class GameEngine {
     const now = Date.now();
     for (const item of state.grid) {
       const itemDef = this.getItemData(item.id);
-      if (!itemDef || itemDef.type !== "launcher") continue;
+      if (!itemDef || itemDef.type !== 1) continue;
       const rechargeTime = itemDef.recharge_time ?? 0;
       if (rechargeTime <= 0) continue;
       const maxC = itemDef.max_charges ?? 3;
@@ -664,7 +657,7 @@ export class GameEngine {
 
   // --- State initialization ---
 
-  createInitialState(boardType: string = "main"): GameState {
+  createInitialState(boardType: number = 0): GameState {
     const now = Date.now();
     const state: GameState = {
       grid: [],
@@ -695,7 +688,7 @@ export class GameEngine {
         state.uid_counter = (state.uid_counter ?? 0) + 1;
         const gitem: GridItem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
         if ((entry as any).immovable) gitem.immovable = true;
-        if (itemDef.type === "launcher") {
+        if (itemDef.type === 1) {
           gitem.charges = this.getMaxCharges(entry.id);
           gitem.last_charge_time = now;
         }
@@ -716,7 +709,7 @@ export class GameEngine {
       return { ok: true, newVersion: state.version };
     }
 
-    if (boardType === "battle") {
+    if (boardType === 1) {
       if (battleMapId !== undefined) state.battle_map_id = battleMapId;
       if (battleStage !== undefined) state.battle_stage = battleStage;
       state.saved_grid = state.grid;
@@ -725,24 +718,24 @@ export class GameEngine {
         state.battle_grid = undefined;
         console.log(`[engine] board switched to battle: restored ${state.grid.length} battle items, saved ${state.saved_grid.length} main items | v${state.version}`);
       } else {
-        state.grid = this._buildInitialGrid("battle", state);
+        state.grid = this._buildInitialGrid(1, state);
         console.log(`[engine] board switched to battle: new battle grid ${state.grid.length} items, saved ${state.saved_grid.length} main items | v${state.version}`);
       }
-      state.board_type = "battle";
+      state.board_type = 1;
     } else {
       state.battle_grid = state.grid;
       state.grid = state.saved_grid && state.saved_grid.length > 0
         ? state.saved_grid
-        : this._buildInitialGrid("main", state);
+        : this._buildInitialGrid(0, state);
       state.saved_grid = undefined;
-      state.board_type = "main";
+      state.board_type = 0;
       console.log(`[engine] board switched to main: restored ${state.grid.length} main items, saved ${state.battle_grid.length} battle items | v${state.version}`);
     }
     state.version += 1;
     return { ok: true, newVersion: state.version };
   }
 
-  private _buildInitialGrid(boardType: string, state: GameState): GridItem[] {
+  private _buildInitialGrid(boardType: number, state: GameState): GridItem[] {
     const setup = this.getInitialSetup(boardType);
     const now = Date.now();
     const grid: GridItem[] = [];
@@ -752,7 +745,7 @@ export class GameEngine {
         state.uid_counter = (state.uid_counter ?? 0) + 1;
         const gitem: GridItem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
         if ((entry as any).immovable) gitem.immovable = true;
-        if (itemDef.type === "launcher") {
+        if (itemDef.type === 1) {
           gitem.charges = this.getMaxCharges(entry.id);
           gitem.last_charge_time = now;
         }
@@ -878,7 +871,7 @@ export class GameEngine {
 
     // Add merged item at the target position (where itemB was)
     const mergedItem: GridItem = { uid: this._nextUid(state), id: result.resultItem.id, col: result.toItem.col, row: result.toItem.row };
-    if (result.resultItem.type === "launcher") {
+    if (result.resultItem.type === 1) {
       mergedItem.charges = this.getMaxCharges(result.resultItem.id);
       mergedItem.last_charge_time = Date.now();
     }
@@ -920,7 +913,7 @@ export class GameEngine {
     if (!launcherItem) return { ok: false, reason: "launcher_not_found" };
 
     const launcherData = this.getItemData(launcherItem.id);
-    if (!launcherData || launcherData.type !== "launcher") {
+    if (!launcherData || launcherData.type !== 1) {
       return { ok: false, reason: "not_a_launcher" };
     }
 
@@ -953,7 +946,7 @@ export class GameEngine {
     }
 
     // Cost check: skip for no_cost launchers, else qi/stamina
-    const isBattle = state.board_type === "battle";
+    const isBattle = state.board_type === 1;
     if (!launcherData.no_cost) {
       if (isBattle) {
         if (state.cultivation.current_qi < 1) {
@@ -999,7 +992,7 @@ export class GameEngine {
     }
 
     const newItem: GridItem = { uid: this._nextUid(state), id: spawnResult.id, col: target.col, row: target.row };
-    if (spawnResult.type === "launcher") {
+    if (spawnResult.type === 1) {
       newItem.charges = this.getMaxCharges(spawnResult.id);
       newItem.last_charge_time = Date.now();
     }
@@ -1268,7 +1261,7 @@ export class GameEngine {
     if (!tableItem) return { ok: false, reason: "table_not_found" };
 
     const tableData = this.getItemData(tableItem.id);
-    if (!tableData || tableData.type !== "crafting") {
+    if (!tableData || tableData.type !== 2) {
       return { ok: false, reason: "not_a_crafting_table" };
     }
 
@@ -1485,12 +1478,9 @@ export class GameEngine {
     const pillData = this.getItemData(pillId);
     if (!pillData) return { ok: false, reason: "invalid_pill" };
 
-    const effectId: number = pillData.use_effect_id ?? 0;
-    const effect = this.getEffect(effectId);
-    if (!effect) return { ok: false, reason: "invalid_effect" };
-    if (effect.type !== "exp") return { ok: false, reason: "not_consumable" };
+    if (!pillData.effect_type || pillData.effect_type !== 3) return { ok: false, reason: "invalid_effect" };
 
-    const expGain: number = effect.exp_gain ?? 0;
+    const expGain: number = pillData.effect_value ?? 0;
     if (expGain <= 0) return { ok: false, reason: "no_exp_gain" };
 
     // Remove pill from grid
@@ -1567,7 +1557,7 @@ export class GameEngine {
           hp: mdata.hp,
           max_hp: mdata.hp,
           atk: mdata.atk ?? 0,
-          accept_effect_ids: mdata.accept_effect_ids ?? [],
+          accept_effect_types: mdata.accept_effect_types ?? [],
         });
       }
     }
@@ -1581,7 +1571,7 @@ export class GameEngine {
           hp: bdata.hp,
           max_hp: bdata.hp,
           atk: bdata.atk ?? 0,
-          accept_effect_ids: bdata.accept_effect_ids ?? [],
+          accept_effect_types: bdata.accept_effect_types ?? [],
           is_boss: true,
         });
       }
@@ -1608,10 +1598,12 @@ export class GameEngine {
     col: number,
     row: number
   ): { ok: true; grid: GridItem[]; monsters: BattleMonster[]; stage_complete: boolean; loot: number[] } | { ok: false; reason: string } {
-    const effect = this.getEffect(effectId);
-    if (!effect) return { ok: false, reason: "invalid_effect" };
-    if (effect.type !== "damage") return { ok: false, reason: "not_damage_effect" };
-    const dmg = effect.amount ?? 0;
+    const itemDef = this.getItemData(itemId);
+    if (!itemDef || !itemDef.effect_type || itemDef.effect_type !== 1) return { ok: false, reason: "invalid_effect" };
+    const stage = this.cultivationStages[state.cultivation.current_level - 1];
+    const stageAtk = (stage as any)?.atk ?? 0;
+    const itemAtk = itemDef.atk ?? 0;
+    const dmg = (stageAtk + itemAtk) * (itemDef.effect_value ?? 1);
     if (dmg <= 0) return { ok: false, reason: "no_damage" };
 
     // Remove used item from grid (prefer uid match, fall back to pos+id)
@@ -1631,8 +1623,8 @@ export class GameEngine {
       return { ok: false, reason: "no_alive_monster" };
     }
 
-    // Check effect compatibility
-    if (!(state.battle_monsters[mIdx].accept_effect_ids as number[]).includes(effectId)) {
+    // Check effect compatibility using item's effect_type
+    if (!(state.battle_monsters[mIdx].accept_effect_types as number[]).includes(itemDef.effect_type ?? 0)) {
       state.grid.push(removedItem);
       return { ok: false, reason: "effect_not_accepted" };
     }
@@ -1697,11 +1689,8 @@ export class GameEngine {
   ): { ok: true; stamina: number; max_stamina: number } | { ok: false; reason: string } {
     const pillData = this.getItemData(pillId);
     if (!pillData) return { ok: false, reason: "invalid_pill" };
-    const effectId: number = pillData.use_effect_id ?? 0;
-    const effect = this.getEffect(effectId);
-    if (!effect) return { ok: false, reason: "invalid_effect" };
-    if (effect.type !== "stamina") return { ok: false, reason: "not_stamina_item" };
-    const amount: number = effect.amount ?? 0;
+    if (!pillData.effect_type || pillData.effect_type !== 4) return { ok: false, reason: "invalid_effect" };
+    const amount: number = pillData.effect_value ?? 0;
     if (amount <= 0) return { ok: false, reason: "no_stamina_gain" };
     console.log(`[engine] consume stamina pill: #${pillId} "${pillData.name}" (uid=${uid}) | grid=${state.grid.length} items`);
     console.log(`[engine]   grid uids: [${state.grid.map(g => `${g.id}(${g.col},${g.row}):uid=${g.uid}`).join(", ")}]`);
@@ -1762,10 +1751,13 @@ export class GameEngine {
     if (fromCol === toCol && fromRow === toRow) return { ok: false, reason: "same_position" };
     if (toItem.immovable) { console.log("[engine] pushAndPlace: target_immovable"); return { ok: false, reason: "target_immovable" }; }
 
-    // Find nearest empty cell for the target item
+    // Find nearest empty cell. If grid is full, allow using the source position.
     const map = this.gridToMap(state.grid);
-    map.delete(fromKey);
-    const empty = this.findNearestEmpty(map, toCol, toRow);
+    let empty = this.findNearestEmpty(map, toCol, toRow);
+    if (!empty) {
+      map.delete(fromKey);
+      empty = this.findNearestEmpty(map, toCol, toRow);
+    }
     if (!empty) return { ok: false, reason: "no_empty_cell" };
 
     // Move target item to empty cell
@@ -1917,7 +1909,7 @@ export class GameEngine {
     const data = this.getItemData(item.id);
     if (!data) return { ok: false, reason: "item_data_not_found" };
 
-    if (data.type === "launcher" || data.type === "crafting") {
+    if (data.type === 1 || data.type === 2) {
       return { ok: false, reason: "cannot_sell" };
     }
 

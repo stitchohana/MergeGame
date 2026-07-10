@@ -117,7 +117,7 @@ export function createGMRouter(storage: IStorage, engine: GameEngine): Router {
             if (emptyCol < 0) { res.status(400).json({ error: "grid_full" }); return; }
             const uid = engine._nextUid(state);
             const gitem: any = { uid, id: iid, col: emptyCol, row: emptyRow };
-            if (itemDef.type === "launcher") {
+            if (itemDef.type === 1) {
               gitem.charges = engine.getMaxCharges(iid);
               gitem.last_charge_time = Date.now();
             }
@@ -129,7 +129,7 @@ export function createGMRouter(storage: IStorage, engine: GameEngine): Router {
             const now = Date.now();
             for (const item of state.grid) {
               const def = engine.getItemData(item.id);
-              if (def?.type === "launcher") {
+              if (def?.type === 1) {
                 item.charges = engine.getMaxCharges(item.id);
                 item.last_charge_time = now;
               }

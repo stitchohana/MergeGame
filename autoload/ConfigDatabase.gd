@@ -7,7 +7,6 @@ var _items_data: Dictionary = {}        # item_id -> item_data Dictionary
 var _items_by_type_level: Dictionary = {}  # type -> { level -> Array[item_data] }
 var _initial_setup: Dictionary = {}
 var _cultivation_config: Dictionary = {}
-var _effects_data: Dictionary = {}  # effect_id -> effect_data
 var _expedition_maps: Dictionary = {}
 var _monsters_data: Dictionary = {}
 var _meridian_thresholds: Array = []
@@ -24,7 +23,6 @@ func load_all() -> void:
 	_load_items("res://config/json_output/items.json")
 	_load_recipes("res://config/json_output/recipes.json")
 	_cultivation_config = _load_json("res://config/json_output/cultivation.json")
-	_load_effects("res://config/json_output/effects.json")
 	_load_expedition("res://config/json_output/expedition.json")
 	_load_meridians("res://config/json_output/meridians.json")
 	_load_tokens("res://config/json_output/tokens.json")
@@ -73,47 +71,17 @@ func _load_items(path: String) -> void:
 	if data.is_empty():
 		return
 
-	# Load regular items
-	var regular: Array = data.get("regular", [])
-	for reg_item in regular:
-		var id: int = reg_item.id
-		reg_item.type = "regular"
-		_items_data[id] = reg_item
+	for reg_item in data.get("regular", []):
+		reg_item.type = 0
+		_add_item_by_type_level(reg_item)
 
-		var level: int = reg_item.level
-		if not _items_by_type_level.has("regular"):
-			_items_by_type_level["regular"] = {}
-		if not _items_by_type_level["regular"].has(level):
-			_items_by_type_level["regular"][level] = []
-		_items_by_type_level["regular"][level].append(reg_item)
+	for laun_item in data.get("launcher", []):
+		laun_item.type = 1
+		_add_item_by_type_level(laun_item)
 
-	# Load launcher items
-	var launchers: Array = data.get("launcher", [])
-	for laun_item in launchers:
-		var id: int = laun_item.id
-		laun_item.type = "launcher"
-		_items_data[id] = laun_item
-
-		var level: int = laun_item.level
-		if not _items_by_type_level.has("launcher"):
-			_items_by_type_level["launcher"] = {}
-		if not _items_by_type_level["launcher"].has(level):
-			_items_by_type_level["launcher"][level] = []
-		_items_by_type_level["launcher"][level].append(laun_item)
-
-	# Load crafting items
-	var craftings: Array = data.get("crafting", [])
-	for craft_item in craftings:
-		var id: int = craft_item.id
-		craft_item.type = "crafting"
-		_items_data[id] = craft_item
-
-		var level: int = craft_item.level
-		if not _items_by_type_level.has("crafting"):
-			_items_by_type_level["crafting"] = {}
-		if not _items_by_type_level["crafting"].has(level):
-			_items_by_type_level["crafting"][level] = []
-		_items_by_type_level["crafting"][level].append(craft_item)
+	for craft_item in data.get("crafting", []):
+		craft_item.type = 2
+		_add_item_by_type_level(craft_item)
 
 	# Recipes now loaded from separate file
 
@@ -142,7 +110,7 @@ func get_item_data(item_id: int) -> Dictionary:
 	return _items_data.get(item_id, {})
 
 # Get item data by type, level, and optional group_id
-func get_item_by_level(type: String, level: int, group_id: int = 0) -> Dictionary:
+func get_item_by_level(type: int, level: int, group_id: int = 0) -> Dictionary:
 	var by_level: Dictionary = _items_by_type_level.get(type, {})
 	var items: Array = by_level.get(level, [])
 	if items.is_empty():
@@ -155,7 +123,17 @@ func get_item_by_level(type: String, level: int, group_id: int = 0) -> Dictionar
 	return {}
 
 # Get the next level item filtered by group_id
-func get_next_level(type: String, level: int, group_id: int = 0) -> Dictionary:
+func _add_item_by_type_level(item_data: Dictionary) -> void:
+	var item_type: int = item_data.get("type", 0)
+	var level: int = int(item_data.get("level", 0))
+	_items_data[int(item_data.id)] = item_data
+	if not _items_by_type_level.has(item_type):
+		_items_by_type_level[item_type] = {}
+	if not _items_by_type_level[item_type].has(level):
+		_items_by_type_level[item_type][level] = []
+	_items_by_type_level[item_type][level].append(item_data)
+
+func get_next_level(type: int, level: int, group_id: int = 0) -> Dictionary:
 	return get_item_by_level(type, level + 1, group_id)
 
 # Roll a spawn outcome for a launcher based on weighted probabilities
@@ -195,7 +173,7 @@ func get_launchers_for_item(item_id: int) -> Array:
 	for id in _items_data:
 		if id is int:
 			var item: Dictionary = _items_data[id]
-			if item.get("type", "") != "launcher":
+			if item.get("type", 0) != Constants.ItemType.LAUNCHER:
 				continue
 			var spawns: Array = item.get("spawns", [])
 			for s in spawns:
@@ -215,7 +193,7 @@ func get_items_by_group(group_id: int) -> Array:
 	return result
 
 # Get all item IDs grouped by type
-func get_all_items_of_type(type: String) -> Array:
+func get_all_items_of_type(type: int) -> Array:
 	var by_level: Dictionary = _items_by_type_level.get(type, {})
 	var result: Array = []
 	for level in by_level:
@@ -231,18 +209,6 @@ func get_recipes() -> Array:
 # Get recipes allowed for a specific crafting table item
 func get_recipes_for_item(item_id: int) -> Array:
 	return _recipes_by_table.get(item_id, [])
-
-func _load_effects(path: String) -> void:
-	var data := _load_json(path)
-	if data.is_empty():
-		return
-	var effects: Array = data.get("effects", [])
-	for e in effects:
-		var id: int = e.id
-		_effects_data[id] = e
-
-func get_effect(effect_id: int) -> Dictionary:
-	return _effects_data.get(effect_id, {})
 
 func _load_expedition(path: String) -> void:
 	var data := _load_json(path)
@@ -340,6 +306,12 @@ func get_stage_max_qi(level: int) -> int:
 	if s.is_empty():
 		return 100
 	return int(s.get("max_qi", 100))
+
+func get_stage_atk(level: int) -> int:
+	var s: Dictionary = _get_stage(level)
+	if s.is_empty():
+		return 0
+	return int(s.get("atk", 0))
 
 func get_stage_breakthrough_pill(level: int) -> int:
 	var s: Dictionary = _get_stage(level)

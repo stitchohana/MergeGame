@@ -26,7 +26,7 @@ func _ready() -> void:
 
 func setup(data: Dictionary, pos: Vector2i = Vector2i(-1, -1), cell_size: int = 80) -> void:
 	item_data = data
-	is_launcher = data.get("type", "") == "launcher"
+	is_launcher = data.get("type", 0) == Constants.ItemType.LAUNCHER
 
 	if pos.x >= 0:
 		grid_position = pos
@@ -53,7 +53,7 @@ func _si() -> TextureRect:
 	return select_icon if select_icon else get_node_or_null("SelectIcon") as TextureRect
 
 func _update_visuals() -> void:
-	var item_type: String = item_data.get("type", "")
+	var item_type: int = item_data.get("type", 0)
 	var group_id: int = item_data.get("group_id", 0)
 
 	# Background color

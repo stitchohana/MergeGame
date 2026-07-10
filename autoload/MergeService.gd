@@ -16,7 +16,7 @@ func can_merge(item_a_data: Dictionary, item_b_data: Dictionary) -> bool:
 		return false
 	if item_a_data.get("id", 0) != item_b_data.get("id", 0):
 		return false
-	var type: String = item_a_data.get("type", "")
+	var type: int = item_a_data.get("type", 0)
 	var level: int = item_a_data.get("level", 0)
 	var gid: int = item_a_data.get("group_id", 0)
 	var next = ConfigDatabase.get_next_level(type, level, gid)
@@ -53,7 +53,7 @@ func _on_merge_confirmed(result: Dictionary) -> void:
 		if not merged_data.is_empty():
 			var item := merged_data.duplicate(true)
 			item["_uid"] = result.get("result_uid", 0)
-			if item.get("type", "") == "launcher":
+			if item.get("type", 0) == Constants.ItemType.LAUNCHER:
 				item["charges"] = item.get("max_charges", 3)
 			GridManager.add_item(item, to_pos)
 

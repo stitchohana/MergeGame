@@ -77,7 +77,7 @@ func on_enter() -> void:
 	grid_view.visible = false
 	_load_token = LoadingManager.begin("加载棋盘数据...")
 	if CloudService.online:
-		CloudService.submit_board_switch("main")
+		CloudService.submit_board_switch(Constants.BoardType.MAIN)
 
 
 func on_exit() -> void:
@@ -87,7 +87,7 @@ func on_exit() -> void:
 	detail_panel.clear()
 
 func _on_main_board_switch_confirmed(result: Dictionary) -> void:
-	if result.get("board_type", "") != "main":
+	if result.get("board_type", -1) != Constants.BoardType.MAIN:
 		return
 	GameState.main_grid_cache = result.get("grid", [])
 	grid_view.set_skip_animations(true)
@@ -140,16 +140,12 @@ func _on_craft_remove_rejected(reason: String) -> void:
 func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	if _item_use_pending:
 		return
-	var effect_id: int = int(item_data.get("use_effect_id", 0))
-	print("[GameScreen] item_use: id=" + str(item_data.get("id",0)) + " effect=" + str(effect_id) + " uid=" + str(item_data.get("_uid", 0)))
-	if effect_id <= 0:
-		return
-	var effect: Dictionary = ConfigDatabase.get_effect(effect_id)
-	if effect.is_empty():
+	var effect_type: int = int(item_data.get("effect_type", 0))
+	if effect_type <= 0:
 		return
 	var uid: int = item_data.get("_uid", 0)
 	_item_use_pending = true
-	match effect.get("type", ""):
+	match effect_type:
 		"breakthrough":
 				print("[GameScreen] breakthrough click: pill_id=" + str(item_data.get("id",0)) + " uid=" + str(uid) + " pos=" + str(grid_pos))
 				if uid <= 0:

@@ -121,6 +121,9 @@ func is_breakthrough_ready() -> bool:
 func is_max_cultivation() -> bool:
 	return current_level >= ConfigDatabase.get_stage_count()
 
+func get_current_atk() -> int:
+	return ConfigDatabase.get_stage_atk(current_level)
+
 func get_required_breakthrough_pill() -> int:
 	if not is_breakthrough_ready():
 		return 0

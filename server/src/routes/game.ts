@@ -103,6 +103,10 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
           }
         }
       }
+      // Migrate: board_type string -> int (0=main, 1=battle)
+      if (typeof state.board_type === "string") {
+        state.board_type = state.board_type === "battle" ? 1 : 0;
+      }
       // Migrate: convert old cultivation (current_realm_id + current_level) to flat current_level
       if (state.cultivation && typeof (state.cultivation as any).current_realm_id === "number") {
         const oldRealm = (state.cultivation as any).current_realm_id;
@@ -132,7 +136,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     return {
       grid: state.grid,
       main_grid: state.saved_grid ?? state.grid,
-      battle_grid: (state.saved_grid ? state.grid : (state.battle_grid?.length ? state.battle_grid : engine.createInitialState("battle").grid)),
+      battle_grid: (state.saved_grid ? state.grid : (state.battle_grid?.length ? state.battle_grid : engine.createInitialState(1).grid)),
       pouch: state.pouch,
       cultivation: state.cultivation,
       stamina: state.stamina,
@@ -162,7 +166,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       const userId = req.auth!.userId;
       const state = await getOrCreateState(userId);
       // Restore main grid if returning from battle after reconnect, unless still on battle board
-      if (state.board_type !== "battle" && state.saved_grid && state.saved_grid.length > 0) {
+      if (state.board_type !== 1 && state.saved_grid && state.saved_grid.length > 0) {
         state.grid = state.saved_grid;
         state.saved_grid = undefined;        await storage.saveState(userId, state);
         console.log(`[game] restored main grid for ${userId}: ${state.grid.length} items`);
@@ -391,14 +395,14 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
   // POST /api/game/board/switch
   router.post("/board/switch", op(async (req, res, userId) => {
     const { board_type } = req.body;
-    if (typeof board_type !== "string") {
+    if (typeof board_type !== "number") {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     const state = await getOrCreateState(userId);
     const result = engine.switchBoard(state, board_type, req.body.map_id, req.body.stage);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    if (board_type === "battle") engine.initBattleMonsters(state);
+    if (board_type === 1) engine.initBattleMonsters(state);
     engine.enrichGridWithRechargeRemaining(state.grid);
     res.json({ ok: true, board_type: board_type, grid: state.grid, monsters: state.battle_monsters, battle_map_id: state.battle_map_id, battle_stage: state.battle_stage });
   }));

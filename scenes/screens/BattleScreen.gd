@@ -17,7 +17,7 @@ var _monsters: Array = []
 
 var _pending_stamina_uid: int = -1
 var _pending_attack_uid: int = -1
-var _pending_attack_effect_id: int = -1
+var _pending_attack_pos: Vector2i = Vector2i(-1, -1)
 var _pending_heal_amount: int = 0
 var _item_use_pending: bool = false
 var _load_token: int = -1
@@ -52,7 +52,7 @@ func on_enter() -> void:
 	_monsters = _build_monster_list()
 
 	if CloudService.online:
-		CloudService.submit_board_switch("battle", _current_map_id, _current_stage)
+		CloudService.submit_board_switch(Constants.BoardType.BATTLE, _current_map_id, _current_stage)
 	else:
 		_init_battle_grid()
 
@@ -64,7 +64,7 @@ func on_enter() -> void:
 		_load_token = -1
 
 func _on_board_switch_confirmed(result: Dictionary) -> void:
-	if result.get("board_type", "") != "battle":
+	if result.get("board_type", -1) != Constants.BoardType.BATTLE:
 		return
 	GameState.battle_grid_cache = result.get("grid", [])
 	grid_view.set_skip_animations(true)
@@ -119,7 +119,7 @@ func _build_monster_list() -> Array:
 				"hp": monster_data.hp,
 				"max_hp": monster_data.hp,
 				"atk": monster_data.atk,
-				"accept_effect_ids": monster_data.get("accept_effect_ids", []),
+				"accept_effect_types": monster_data.get("accept_effect_types", []),
 			})
 	var boss_data: Variant = stage_data.get("boss")
 	if boss_data != null:
@@ -131,7 +131,7 @@ func _build_monster_list() -> Array:
 				"hp": boss_monster.hp,
 				"max_hp": boss_monster.hp,
 				"atk": boss_monster.atk,
-				"accept_effect_ids": boss_monster.get("accept_effect_ids", []),
+				"accept_effect_types": boss_monster.get("accept_effect_types", []),
 			})
 	return result
 
@@ -139,33 +139,30 @@ func _build_monster_list() -> Array:
 func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	if _item_use_pending:
 		return
-	var effect_id: int = int(item_data.get("use_effect_id", 0))
-	if effect_id <= 0:
+	var effect_type: int = int(item_data.get("effect_type", 0))
+	print("[BattleScreen] item_use: id=", item_data.get("id", 0), " effect_type=", effect_type, " uid=", item_data.get("_uid", 0))
+	if effect_type <= 0:
 		return
-	var effect: Dictionary = ConfigDatabase.get_effect(effect_id)
-	if effect.is_empty():
-		return
-	var effect_type: String = effect.get("type", "")
 	var uid: int = item_data.get("_uid", 0)
 
 	_item_use_pending = true
 	match effect_type:
-		"damage":
+		Constants.EffectType.DAMAGE:
 			if CloudService.online:
 				_pending_attack_uid = uid
-				_pending_attack_effect_id = effect_id
-				_play_attack_animation(item_data, grid_pos, effect_id)
-		"heal":
-			var heal: int = effect.get("amount", 0)
+				_pending_attack_pos = grid_pos
+				CloudService.submit_battle_attack(item_data.get("id", 0), uid, grid_pos.x, grid_pos.y)
+		Constants.EffectType.HEAL:
+			var heal: int = item_data.get("effect_value", 0)
 			_pending_heal_amount = heal
 			if CloudService.online:
-				CloudService.submit_battle_heal(item_data.get("id", 0), effect_id, uid)
-		"exp":
+				CloudService.submit_battle_heal(item_data.get("id", 0), uid)
+		Constants.EffectType.EXP:
 			CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
-		"stamina":
+		Constants.EffectType.STAMINA:
 			_pending_stamina_uid = uid
 			CloudService.submit_restore_stamina(item_data.get("id", 0), uid)
-		"breakthrough":
+		Constants.EffectType.BREAKTHROUGH:
 			var pill_id: int = item_data.get("id", 0)
 			if uid <= 0:
 				EventBus.show_toast.emit("物品数据异常，请重新登录")
@@ -182,7 +179,14 @@ func _qi_label() -> void:
 		qi_label.text = "灵力 %d/%d" % [CultivationService.current_qi, CultivationService.max_qi]
 
 func _on_battle_attack_confirmed(result: Dictionary) -> void:
+	print("[BattleScreen] attack_confirmed: monsters=", result.get("monsters", []).size(), " loot=", result.get("loot", []), " stage_complete=", result.get("stage_complete", false))
 	_item_use_pending = false
+	if _pending_attack_uid > 0:
+		var item_data: Dictionary = GridManager.find_by_uid(_pending_attack_uid)
+		if not item_data.is_empty() and _pending_attack_pos.x >= 0:
+			_play_attack_animation(item_data, _pending_attack_pos, result)
+		_pending_attack_uid = -1
+		_pending_attack_pos = Vector2i(-1, -1)
 	_sync_grid_from_result(result)
 	var server_monsters: Array = result.get("monsters", [])
 	if not server_monsters.is_empty():
@@ -211,6 +215,8 @@ func _on_battle_attack_confirmed(result: Dictionary) -> void:
 
 func _on_battle_attack_rejected(reason: String) -> void:
 	_item_use_pending = false
+	_pending_attack_uid = -1
+	_pending_attack_pos = Vector2i(-1, -1)
 	EventBus.show_toast.emit("攻击失败：" + reason)
 
 func _sync_grid_from_result(result: Dictionary) -> void:
@@ -273,16 +279,10 @@ func _on_leave_pressed() -> void:
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)
 
-func _play_attack_animation(item_data: Dictionary, grid_pos: Vector2i, effect_id: int) -> void:
+func _play_attack_animation(item_data: Dictionary, grid_pos: Vector2i, result: Dictionary) -> void:
 	var cell_size := Constants.CELL_SIZE
 	var from_pos := grid_view.global_position + Vector2(grid_pos.x * cell_size + cell_size * 0.5, grid_pos.y * cell_size + cell_size * 0.5)
 	var target_pos := _get_monster_target_pos()
-
-	# Capture pending state immediately and clear globals to prevent race with overlapping attacks
-	var captured_uid: int = _pending_attack_uid
-	var captured_eid: int = _pending_attack_effect_id
-	_pending_attack_uid = -1
-	_pending_attack_effect_id = -1
 
 	var proj := ColorRect.new()
 	proj.custom_minimum_size = Vector2(16, 16)
@@ -299,9 +299,6 @@ func _play_attack_animation(item_data: Dictionary, grid_pos: Vector2i, effect_id
 	tween.tween_property(proj, "position", target_pos, 0.3).set_trans(Tween.TRANS_CUBIC)
 	tween.tween_callback(_play_monster_hit)
 	tween.tween_callback(proj.queue_free)
-	tween.tween_callback(func():
-		CloudService.submit_battle_attack(item_data.get("id", 0), captured_eid, captured_uid, grid_pos.x, grid_pos.y)
-	)
 
 func _get_monster_target_pos() -> Vector2:
 	if $MonsterPanel:

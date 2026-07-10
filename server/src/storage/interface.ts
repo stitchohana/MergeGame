@@ -133,7 +133,7 @@ export interface GameState {
   last_stamina_tick: number;
   spirit_stones: number;
   version: number;
-  board_type?: string;
+  board_type?: number;
   uid_counter?: number;
   saved_grid?: GridItem[];
   battle_grid?: GridItem[];
@@ -157,7 +157,7 @@ export interface BattleMonster {
   hp: number;
   max_hp: number;
   atk: number;
-  accept_effect_ids: number[];
+  accept_effect_types: number[];
   is_boss?: boolean;
 }
 

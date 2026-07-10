@@ -52,7 +52,7 @@ func set_selected(active: bool) -> void:
 func setup(data: Dictionary, pos: Vector2i, cell_size: int) -> void:
 	item_data = data
 	grid_position = pos
-	is_launcher = data.get("type", "") == "launcher"
+	is_launcher = data.get("type", 0) == Constants.ItemType.LAUNCHER
 
 	custom_minimum_size = Vector2(cell_size, cell_size)
 	size = Vector2(cell_size, cell_size)
@@ -62,34 +62,8 @@ func setup(data: Dictionary, pos: Vector2i, cell_size: int) -> void:
 
 func _update_visuals() -> void:
 	# Background color by type and group
-	var item_type: String = item_data.get("type", "")
+	var item_type: int = item_data.get("type", 0)
 	var group_id: int = item_data.get("group_id", 0)
-
-	# Character rendering
-	if item_type == "character":
-		color = Color(0.15, 0.5, 0.75, 1)
-		if name_label:
-			name_label.text = item_data.get("name", "")
-			name_label.visible = true
-		var hp: int = item_data.get("hp", 0)
-		var max_hp: int = item_data.get("max_hp", 0)
-		if level_label:
-			level_label.text = "HP %d/%d" % [hp, max_hp]
-			level_label.visible = true
-		return
-
-	# Monster rendering
-	if item_type == "monster":
-		color = Color(0.8, 0.15, 0.15, 1)
-		if name_label:
-			name_label.text = item_data.get("name", "")
-			name_label.visible = true
-		var hp: int = item_data.get("hp", 0)
-		var max_hp: int = item_data.get("max_hp", 0)
-		if level_label:
-			level_label.text = "HP %d/%d" % [hp, max_hp]
-			level_label.visible = true
-		return
 
 	if is_launcher:
 		color = GridUtils.launcher_color(group_id)

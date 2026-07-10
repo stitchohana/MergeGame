@@ -249,7 +249,7 @@ func submit_restore_stamina(pill_id: int, uid: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "uid": uid})
 	_send_authed_request("restore_stamina", "/api/cultivation/consume-stamina", HTTPClient.Method.METHOD_POST, body)
 
-func submit_board_switch(board_type: String, map_id: int = 0, stage: int = 0) -> void:
+func submit_board_switch(board_type: int, map_id: int = 0, stage: int = 0) -> void:
 	var body_data: Dictionary = {"board_type": board_type}
 	if map_id > 0:
 		body_data["map_id"] = map_id
@@ -266,11 +266,11 @@ func submit_pouch_withdraw(uid: int) -> void:
 	var body := JSON.stringify({"uid": uid})
 	_send_authed_request("pouch_withdraw", "/api/game/pouch/withdraw", HTTPClient.Method.METHOD_POST, body)
 
-func submit_battle_heal(item_id: int, effect_id: int, uid: int) -> void:
+func submit_battle_heal(item_id: int, uid: int, effect_id: int = 0) -> void:
 	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "uid": uid})
 	_send_authed_request("battle_heal", "/api/game/battle/heal", HTTPClient.Method.METHOD_POST, body)
 
-func submit_battle_attack(item_id: int, effect_id: int, uid: int, col: int, row: int) -> void:
+func submit_battle_attack(item_id: int, uid: int, col: int, row: int, effect_id: int = 0) -> void:
 	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "uid": uid, "col": col, "row": row})
 	_send_authed_request("battle_attack", "/api/game/battle/attack", HTTPClient.Method.METHOD_POST, body)
 

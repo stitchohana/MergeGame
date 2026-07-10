@@ -3,6 +3,10 @@ class_name Constants
 
 enum BoardType { MAIN = 0, BATTLE = 1 }
 
+enum ItemType { REGULAR = 0, LAUNCHER = 1, CRAFTING = 2 }
+
+enum EffectType { NONE = 0, DAMAGE = 1, HEAL = 2, EXP = 3, STAMINA = 4, BREAKTHROUGH = 5 }
+
 enum TokenType { SPIRIT_STONES = 1, QI = 2, STAMINA = 3, EXP = 4 }
 
 const TOKEN_NAMES := {

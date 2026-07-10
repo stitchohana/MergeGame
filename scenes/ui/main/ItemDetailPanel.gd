@@ -38,7 +38,7 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 	var item_name: String = item_data.get("name", "")
 	var item_level: int = item_data.get("level", 0)
 	var item_desc: String = item_data.get("describe", "")
-	var item_type: String = item_data.get("type", "regular")
+	var item_type: int = item_data.get("type", 0)
 
 	default_label.hide()
 
@@ -49,8 +49,8 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 	if level_label:
 		var type_name := ""
 		match item_type:
-			"launcher": type_name = "发射器"
-			"crafting": type_name = "制作台"
+			Constants.ItemType.LAUNCHER: type_name = "发射器"
+			Constants.ItemType.CRAFTING: type_name = "制作台"
 			_: type_name = "物品"
 		level_label.text = "Lv.%d  %s" % [item_level, type_name]
 		level_label.show()
@@ -58,8 +58,15 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 	if desc_label:
 		desc_label.text = item_desc if item_desc else "暂无描述"
 		desc_label.show()
-
-	if item_type == "crafting":
+		var effect_type: int = item_data.get("effect_type", 0)
+		if effect_type == Constants.EffectType.DAMAGE:
+			var stage_atk := CultivationService.get_current_atk()
+			var item_atk: int = item_data.get("atk", 0)
+			var mult: int = item_data.get("effect_value", 1)
+			var dmg := (stage_atk + item_atk) * mult
+			var damage_text := "伤害：%d（境界%d + 飞剑%d）× %d倍" % [dmg, stage_atk, item_atk, mult]
+			desc_label.text += "\n" + damage_text
+	if item_type == Constants.ItemType.CRAFTING:
 		_current_recipes = ConfigDatabase.get_recipes_for_item(item_data.get("id", 0))
 		recipe_btn.visible = not _current_recipes.is_empty()
 		_refresh_materials()
@@ -144,7 +151,7 @@ func _build_material_icon(item_data: Dictionary, count: int, uid: int) -> Button
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var group_id: int = item_data.get("group_id", 0)
 	var level: int = item_data.get("level", 0)
-	if item_data.get("type", "") == "launcher":
+	if item_data.get("type", 0) == Constants.ItemType.LAUNCHER:
 		rect.color = GridUtils.launcher_color(group_id)
 	else:
 		rect.color = GridUtils.item_color(group_id, level)
@@ -293,8 +300,8 @@ func _on_sell_server_rejected(reason: String) -> void:
 func _update_sell_btn() -> void:
 	if not sell_btn or not sell_price_label:
 		return
-	var item_type: String = _current_item_data.get("type", "")
-	if item_type != "regular":
+	var item_type: int = _current_item_data.get("type", 0)
+	if item_type != Constants.ItemType.REGULAR:
 		sell_btn.hide()
 		sell_price_label.hide()
 		return

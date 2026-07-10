@@ -297,7 +297,7 @@ func has_possible_merge() -> bool:
 			if item == null:
 				continue
 			var item_level: int = item.get("level", 0)
-			var item_type: String = item.get("type", "")
+			var item_type: int = item.get("type", 0)
 			var item_group_id = item.get("group_id", 0)
 			var next_level_data := ConfigDatabase.get_next_level(item_type, item_level, item_group_id)
 			if next_level_data.is_empty():
