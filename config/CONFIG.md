@@ -4,6 +4,16 @@
 
 ## 1. items.json — 物品表
 
+### ItemType 枚举
+
+| 值 | 含义 | 说明 |
+|----|------|------|
+| 0 | REGULAR | 常规合并物品 |
+| 1 | LAUNCHER | 发射器，双击生成物品 |
+| 2 | CRAFTING | 制作台，拖入材料合成 |
+| 4 | RECIPE_PRODUCT | 制作产物（丹药、阵法、飞剑等） |
+| 5 | EFFECT | 效果道具（剑气、回复药等） |
+
 ### 通用字段
 
 | 字段 | 类型 | 说明 |
@@ -14,39 +24,61 @@
 | `group_id` | int | 合并组，同组同 id 可合并 |
 | `icon` | string | 图标路径，空字符串用默认色块 |
 | `describe` | string | 描述文本 |
-| `type` | string | `regular` / `launcher` / `crafting`（加载时自动设置） |
-| `value` | int | 吞噬需求订单价值（可选） |
+| `type` | int | ItemType 枚举值 |
+| `value` | int | 价值 / 攻击力加成（可选） |
 | `sell_price` | int | 出售灵石价格（可选） |
 
-### 发射器附加字段
+### 发射器字段（type=1 或任意 type 配置后即可生效）
+
+发射能力由 `spawns` + `max_charges` 字段决定，不依赖 `type`。任何类型的物品只要配置了这两项即具备发射器行为。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `max_charges` | int | 最大生成次数 |
-| `recharge_time` | int | CD 秒数 |
-| `spawns` | array | 生成表 `[{id, weight}]`，weight 为权重 |
+| `recharge_time` | int | CD 秒数，≤0 时耗尽消失 |
+| `spawns` | array | 随机生成表 `[{id, weight}]`，weight 为权重 |
+| `fixed_spawns` | int[] | 固定顺序生成（替代 spawns，可选） |
 | `no_cost` | bool | true 时不消耗体力/灵力（可选） |
 
-### 效果字段
+### 效果字段（type=5 或 type=4 可配置）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `effect_type` | int | 效果枚举（见下方） |
 | `effect_value` | int | 效果数值 |
-| `atk` | int | 攻击力（仅飞剑/剑气） |
+| `atk` | int | 物品自身攻击力（可选） |
 
 ### EffectType 枚举
 
 | 值 | 含义 | effect_value 含义 |
 |----|------|-------------------|
 | 0 | 无效果 | - |
-| 1 | 攻击 | 攻击力加成 |
+| 1 | 攻击 | 伤害倍率（剑气） |
 | 2 | 治疗 | 恢复 HP 量 |
 | 3 | 修为经验 | 增加修为值 |
 | 4 | 体力 | 恢复体力值 |
 | 5 | 突破 | 突破境界 |
 | 6 | 灵力恢复 | 恢复灵力值 |
-| 7 | 发射剑气 | 消耗灵力，生成剑气到棋盘 |
+| 7 | 攻击力加成 | 飞剑等，value=ATK 加成量 |
+
+### 飞剑（type=4 + effect_type=7）配置示例
+
+飞剑同时是发射器和攻击力加成来源：
+
+```json
+{
+  "id": 28001,
+  "name": "铁木剑",
+  "type": 4,
+  "value": 1,
+  "effect_type": 7,
+  "max_charges": 5,
+  "recharge_time": 60,
+  "spawns": [{"id": 15101, "weight": 100}]
+}
+```
+
+**机制**：飞剑双击发射剑气（effect_type=1 道具），生成时剑气记录 `atk_base = 境界atk + 飞剑value`。使用剑气攻击时，伤害 = `atk_base × 剑气effect_value`。剑气没有 `atk_base` 时无法造成伤害。
 
 ---
 
@@ -72,7 +104,7 @@
 | `name` | string | 名称 |
 | `hp` | int | 生命值 |
 | `atk` | int | 攻击力（预留） |
-| `accept_effect_ids` | int[] | 可接受的效果类型（effect_type 枚举值） |
+| `accept_effect_types` | int[] | 可接受的效果类型（effect_type 枚举值） |
 | `loot` | int[] | 掉落物品 id 列表 |
 | `describe` | string | 描述 |
 
@@ -185,8 +217,8 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `main` | array | 主棋盘初始摆放 `[{id, col, row}]` |
-| `battle` | array | 战斗棋盘初始摆放 `[{id, col, row}]` |
+| `main.items` | array | 主棋盘初始摆放 `[{id, col, row, immovable?}]` |
+| `battle.items` | array | 战斗棋盘初始摆放（可选，缺省时 battle 为空棋盘） |
 
 ---
 

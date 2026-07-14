@@ -127,6 +127,15 @@ func hide_button() -> void:
 	_craft_table_pos = Vector2i(-1, -1)
 	_craft_table_item = {}
 
+func is_button_visible() -> bool:
+	return _craft_button != null and _craft_button.visible
+
+func is_point_over_button(point: Vector2) -> bool:
+	if not is_button_visible():
+		return false
+	var rect := Rect2(_craft_button.position, _craft_button.size)
+	return rect.has_point(point)
+
 # --- Server response handlers ---
 
 func _on_craft_add_confirmed(_result: Dictionary) -> void:

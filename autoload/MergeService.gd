@@ -53,8 +53,11 @@ func _on_merge_confirmed(result: Dictionary) -> void:
 		if not merged_data.is_empty():
 			var item := merged_data.duplicate(true)
 			item["_uid"] = result.get("result_uid", 0)
-			if item.get("type", 0) == Constants.ItemType.LAUNCHER:
+			if Constants.has_launcher_config(item):
 				item["charges"] = item.get("max_charges", 3)
+			var atk_base: int = result.get("atk_base", 0) as int
+			if atk_base > 0:
+				item["atk_base"] = atk_base
 			GridManager.add_item(item, to_pos)
 
 	merge_performed.emit(result, to_pos)

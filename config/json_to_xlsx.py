@@ -99,12 +99,15 @@ for it in regular:
 ws = wb.create_sheet("items_regular")
 add_sheet(ws, hr, rr)
 
-hcons = ["id","name","icon","type","describe","value","effect_type","effect_value"]
+hcons = ["id","name","icon","type","describe","value","effect_type","effect_value","max_charges","recharge_time","no_cost","spawns(id:weight)","fixed_spawns"]
 rcons = []
 for it in consumables:
     rcons.append([it.get("id",""), it.get("name",""), it.get("icon",""),
                   it.get("type",""), it.get("describe",""), it.get("value",""),
-                  it.get("effect_type",""), it.get("effect_value","")])
+                  it.get("effect_type",""), it.get("effect_value",""),
+                  it.get("max_charges",""), it.get("recharge_time",""),
+                  "TRUE" if it.get("no_cost") else "",
+                  join_dict_list(it.get("spawns", [])), join_list(it.get("fixed_spawns", []))])
 ws4 = wb.create_sheet("items_recipe_product")
 add_sheet(ws4, hcons, rcons)
 

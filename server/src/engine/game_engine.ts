@@ -155,8 +155,8 @@ export class GameEngine {
 
   private loadItems(filePath: string): void {
     const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const categories = ["regular", "launcher", "crafting"] as const;
-    const typeMap: Record<string, number> = { regular: 0, launcher: 1, crafting: 2 };
+    const categories = ["regular", "launcher", "crafting", "effect"] as const;
+    const typeMap: Record<string, number> = { regular: 0, launcher: 1, crafting: 2, effect: 5 };
 
     for (const cat of categories) {
       for (const item of data[cat] || []) {
@@ -441,7 +441,7 @@ export class GameEngine {
   }
 
   getInitialSetup(boardType: number = 0) {
-    return this.initialSetups.get(boardType) || this.initialSetups.get(0) || [];
+    return this.initialSetups.get(boardType) ?? [];
   }
 
   getMaxCharges(itemId: number): number {
@@ -486,11 +486,18 @@ export class GameEngine {
     return Math.max(0, nextTick - Date.now());
   }
 
+  private isLauncher(itemDef: ItemDef | null): boolean {
+    if (!itemDef) return false;
+    const spawns = itemDef.spawns;
+    const maxCharges = itemDef.max_charges ?? 0;
+    return (spawns && spawns.length > 0) || maxCharges > 0;
+  }
+
   enrichGridWithRechargeRemaining(grid: any[]): void {
     const now = Date.now();
     for (const item of grid) {
       const itemDef = this.getItemData(item.id);
-      if (!itemDef || itemDef.type !== 1) continue;
+      if (!this.isLauncher(itemDef)) continue;
       const rt = itemDef.recharge_time ?? 0;
       if (rt <= 0) continue;
       const maxC = itemDef.max_charges ?? 3;
@@ -508,7 +515,7 @@ export class GameEngine {
     const now = Date.now();
     for (const item of state.grid) {
       const itemDef = this.getItemData(item.id);
-      if (!itemDef || itemDef.type !== 1) continue;
+      if (!this.isLauncher(itemDef)) continue;
       const rechargeTime = itemDef.recharge_time ?? 0;
       if (rechargeTime <= 0) continue;
       const maxC = itemDef.max_charges ?? 3;
@@ -688,7 +695,7 @@ export class GameEngine {
         state.uid_counter = (state.uid_counter ?? 0) + 1;
         const gitem: GridItem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
         if ((entry as any).immovable) gitem.immovable = true;
-        if (itemDef.type === 1) {
+        if (this.isLauncher(itemDef)) {
           gitem.charges = this.getMaxCharges(entry.id);
           gitem.last_charge_time = now;
         }
@@ -703,9 +710,7 @@ export class GameEngine {
 
   switchBoard(state: GameState, boardType: string, battleMapId?: number, battleStage?: number): { ok: true; newVersion: number } | { ok: false; reason: string } {
     if (boardType === state.board_type) {
-      // Already on the target board — just return
       state.version += 1;
-      console.log(`[engine] board already ${boardType}: ${state.grid.length} items | v${state.version}`);
       return { ok: true, newVersion: state.version };
     }
 
@@ -745,7 +750,7 @@ export class GameEngine {
         state.uid_counter = (state.uid_counter ?? 0) + 1;
         const gitem: GridItem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
         if ((entry as any).immovable) gitem.immovable = true;
-        if (itemDef.type === 1) {
+        if (this.isLauncher(itemDef)) {
           gitem.charges = this.getMaxCharges(entry.id);
           gitem.last_charge_time = now;
         }
@@ -871,9 +876,14 @@ export class GameEngine {
 
     // Add merged item at the target position (where itemB was)
     const mergedItem: GridItem = { uid: this._nextUid(state), id: result.resultItem.id, col: result.toItem.col, row: result.toItem.row };
-    if (result.resultItem.type === 1) {
+    if (result.resultItem.type === 1 || this.isLauncher(result.resultItem)) {
       mergedItem.charges = this.getMaxCharges(result.resultItem.id);
       mergedItem.last_charge_time = Date.now();
+    }
+    const fromAtk = result.fromItem.atk_base ?? 0;
+    const toAtk = result.toItem.atk_base ?? 0;
+    if (fromAtk > 0 || toAtk > 0) {
+      mergedItem.atk_base = fromAtk + toAtk;
     }
     state.grid.push(mergedItem);
 
@@ -891,6 +901,7 @@ export class GameEngine {
       newVersion: state.version,
       resultUid: mergedItem.uid ?? 0,
       resultId: result.resultItem.id,
+      atkBase: mergedItem.atk_base ?? 0,
       fromCol: result.fromItem.col,
       fromRow: result.fromItem.row,
       toCol: result.toItem.col,
@@ -913,7 +924,7 @@ export class GameEngine {
     if (!launcherItem) return { ok: false, reason: "launcher_not_found" };
 
     const launcherData = this.getItemData(launcherItem.id);
-    if (!launcherData || launcherData.type !== 1) {
+    if (!launcherData || !this.isLauncher(launcherData)) {
       return { ok: false, reason: "not_a_launcher" };
     }
 
@@ -992,14 +1003,22 @@ export class GameEngine {
     }
 
     const newItem: GridItem = { uid: this._nextUid(state), id: spawnResult.id, col: target.col, row: target.row };
-    if (spawnResult.type === 1) {
+    if (spawnResult.type === 1 || this.isLauncher(spawnResult)) {
       newItem.charges = this.getMaxCharges(spawnResult.id);
       newItem.last_charge_time = Date.now();
+    }
+    if (launcherData.effect_type === 7) {
+      const stage = this.cultivationStages[state.cultivation.current_level - 1];
+      const stageAtk = (stage as any)?.atk ?? 0;
+      newItem.atk_base = stageAtk + (launcherData.value ?? 0);
+      console.log(`[engine] spawn: atk_base=${newItem.atk_base} (stageAtk=${stageAtk} + swordValue=${launcherData.value}) effect_type=${launcherData.effect_type}`);
+    } else {
+      console.log(`[engine] spawn: launcher #${launcherItem.id} effect_type=${launcherData.effect_type} — NOT atk boost`);
     }
     state.grid.push(newItem);
     state.version += 1;
 
-    console.log(`[engine] spawn: launcher #${launcherItem.id} -> ${spawnResult.name} at (${target.col},${target.row}) | v${state.version}`);
+    console.log(`[engine] spawn: launcher #${launcherItem.id} -> ${spawnResult.name}(#${spawnResult.id}) at (${target.col},${target.row}) | effect_value=${spawnResult.effect_value} atk_base=${newItem.atk_base ?? 0} | v${state.version}`);
 
     this.questEngine.incrementQuestProgress(state, QuestType.SPAWN, 1, this);
 
@@ -1014,6 +1033,7 @@ export class GameEngine {
       charges: launcherItem.charges,
       maxCharges: this.getMaxCharges(launcherItem.id),
       rechargeTime: launcherData.recharge_time ?? 0,
+      atkBase: newItem.atk_base ?? 0,
     };
   }
 
@@ -1600,16 +1620,18 @@ export class GameEngine {
   ): { ok: true; grid: GridItem[]; monsters: BattleMonster[]; stage_complete: boolean; loot: number[] } | { ok: false; reason: string } {
     const itemDef = this.getItemData(itemId);
     if (!itemDef || !itemDef.effect_type || itemDef.effect_type !== 1) return { ok: false, reason: "invalid_effect" };
-    const stage = this.cultivationStages[state.cultivation.current_level - 1];
-    const stageAtk = (stage as any)?.atk ?? 0;
-    const itemAtk = itemDef.atk ?? 0;
-    const dmg = (stageAtk + itemAtk) * (itemDef.effect_value ?? 1);
-    if (dmg <= 0) return { ok: false, reason: "no_damage" };
 
     // Remove used item from grid (prefer uid match, fall back to pos+id)
     const idx = state.grid.findIndex((g) => g.uid === uid);
     if (idx < 0) return { ok: false, reason: "item_not_found" };
     const removedItem = state.grid.splice(idx, 1)[0];
+
+    if (!removedItem.atk_base) {
+      state.grid.push(removedItem);
+      return { ok: false, reason: "no_atk_base" };
+    }
+    const dmg = removedItem.atk_base * (itemDef.effect_value ?? 1);
+    if (dmg <= 0) return { ok: false, reason: "no_damage" };
 
     // Init monsters if needed
     if (!state.battle_monsters || state.battle_monsters.length === 0) {
@@ -1909,7 +1931,7 @@ export class GameEngine {
     const data = this.getItemData(item.id);
     if (!data) return { ok: false, reason: "item_data_not_found" };
 
-    if (data.type === 1 || data.type === 2) {
+    if (data.type === 2 || this.isLauncher(data)) {
       return { ok: false, reason: "cannot_sell" };
     }
 

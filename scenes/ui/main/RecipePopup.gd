@@ -35,7 +35,7 @@ func _build_entry(recipe: Dictionary) -> Control:
 	var craft_time: float = recipe.get("craft_time", 0.0)
 
 	var parts: PackedStringArray = []
-	for ing_id in ingredients:
+	for ing_id: int in ingredients:
 		var ing_data := ConfigDatabase.get_item_data(ing_id)
 		var ing_name: String = ing_data.get("name", "未知")
 		parts.append(ing_name)

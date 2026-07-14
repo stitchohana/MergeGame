@@ -124,7 +124,7 @@ func start_cd_from_restore(item_data: Dictionary) -> void:
 	if _launcher_cd.has(uid):
 		return
 	var cfg: Dictionary = ConfigDatabase.get_item_data(item_data.get("id", 0) as int)
-	if cfg.is_empty() or cfg.get("type", 0) != Constants.ItemType.LAUNCHER:
+	if cfg.is_empty() or not Constants.has_launcher_config(cfg):
 		return
 	var cd_time: float = cfg.get("recharge_time", 0.0) as float
 	if cd_time <= 0:

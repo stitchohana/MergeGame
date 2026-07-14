@@ -51,6 +51,7 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 		match item_type:
 			Constants.ItemType.LAUNCHER: type_name = "发射器"
 			Constants.ItemType.CRAFTING: type_name = "制作台"
+			Constants.ItemType.EFFECT: type_name = "剑气"
 			_: type_name = "物品"
 		level_label.text = "Lv.%d  %s" % [item_level, type_name]
 		level_label.show()
@@ -60,11 +61,14 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 		desc_label.show()
 		var effect_type: int = item_data.get("effect_type", 0)
 		if effect_type == Constants.EffectType.DAMAGE:
-			var stage_atk := CultivationService.get_current_atk()
-			var item_atk: int = item_data.get("atk", 0)
 			var mult: int = item_data.get("effect_value", 1)
-			var dmg := (stage_atk + item_atk) * mult
-			var damage_text := "伤害：%d（境界%d + 飞剑%d）× %d倍" % [dmg, stage_atk, item_atk, mult]
+			var atk_base: int = item_data.get("atk_base", 0)
+			var dmg := atk_base * mult
+			var damage_text := ""
+			if atk_base > 0:
+				damage_text = "伤害：%d × %d = %d" % [atk_base, mult, dmg]
+			else:
+				damage_text = "伤害：? × %d（无基础攻击力）" % mult
 			desc_label.text += "\n" + damage_text
 	if item_type == Constants.ItemType.CRAFTING:
 		_current_recipes = ConfigDatabase.get_recipes_for_item(item_data.get("id", 0))

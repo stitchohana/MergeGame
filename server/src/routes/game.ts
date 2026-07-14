@@ -119,9 +119,10 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
 
       // Re-initialize if grid is empty (stale save)
       if (!state.grid || state.grid.length === 0) {
-        const init = engine.createInitialState();
-        state.grid = init.grid;        await storage.saveState(userId, state);
-        console.log(`[game] re-initialized empty grid for ${userId}: ${state.grid.length} items`);
+        const bt = state.board_type ?? 0;
+        state.grid = engine.createInitialState(bt).grid;
+        await storage.saveState(userId, state);
+        console.log(`[game] re-initialized empty grid for ${userId} (board_type=${bt}): ${state.grid.length} items`);
       }
             if (engine.tickCraftingState(state)) {
         await storage.saveState(userId, state);
@@ -133,10 +134,14 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
   }
 
   function buildStateResponse(state: any, engine: GameEngine, regenRemainingMs: number) {
+    const isBattle = state.board_type === 1;
+    const mainGrid = isBattle ? (state.saved_grid?.length ? state.saved_grid : engine.createInitialState(0).grid) : state.grid;
+    const battleGrid = isBattle ? state.grid : (state.battle_grid?.length ? state.battle_grid : []);
+    console.log(`[game] buildStateResponse: board_type=${state.board_type} isBattle=${isBattle} saved_grid=${state.saved_grid?.length ?? 0} battle_grid_cache=${state.battle_grid?.length ?? 0} mainGrid=${mainGrid.length} battleGrid=${battleGrid.length} grid=${state.grid.length}`);
     return {
       grid: state.grid,
-      main_grid: state.saved_grid ?? state.grid,
-      battle_grid: (state.saved_grid ? state.grid : (state.battle_grid?.length ? state.battle_grid : engine.createInitialState(1).grid)),
+      main_grid: mainGrid,
+      battle_grid: battleGrid,
       pouch: state.pouch,
       cultivation: state.cultivation,
       stamina: state.stamina,
@@ -202,7 +207,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeMerge(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
+    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, atk_base: result.atkBase ?? 0, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
   }));
 
   // POST /api/game/spawn
@@ -218,7 +223,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spawned_uid: result.spawnedUid, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, recharge_time: result.rechargeTime, cultivation: state.cultivation, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
+    res.json({ ok: true, spawned_uid: result.spawnedUid, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, recharge_time: result.rechargeTime, atk_base: result.atkBase, cultivation: state.cultivation, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
   }));
 
   // POST /api/game/craft/add

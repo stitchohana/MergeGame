@@ -3,134 +3,114 @@
 	{
 	  "name": "凡人",
 	  "exp": 20,
-	  "max_qi": 100,
-	  "atk": 5
+	  "max_qi": 100
 	},
 	{
 	  "name": "练气一层",
 	  "exp": 50,
-	  "max_qi": 100,
-	  "atk": 8
+	  "max_qi": 100
 	},
 	{
 	  "name": "练气二层",
 	  "exp": 75,
 	  "max_qi": 110,
-	  "atk": 10,
 	  "breakthrough_pill": 28049
 	},
 	{
 	  "name": "练气三层",
 	  "exp": 100,
-	  "max_qi": 120,
-	  "atk": 12
+	  "max_qi": 120
 	},
 	{
 	  "name": "练气四层",
 	  "exp": 150,
 	  "max_qi": 130,
-	  "atk": 14,
 	  "breakthrough_pill": 28050
 	},
 	{
 	  "name": "练气五层",
 	  "exp": 200,
-	  "max_qi": 140,
-	  "atk": 16
+	  "max_qi": 140
 	},
 	{
 	  "name": "练气六层",
 	  "exp": 300,
-	  "max_qi": 150,
-	  "atk": 18
+	  "max_qi": 150
 	},
 	{
 	  "name": "练气七层",
 	  "exp": 400,
-	  "max_qi": 160,
-	  "atk": 20
+	  "max_qi": 160
 	},
 	{
 	  "name": "练气八层",
 	  "exp": 500,
-	  "max_qi": 180,
-	  "atk": 22
+	  "max_qi": 180
 	},
 	{
 	  "name": "练气九层",
 	  "exp": 600,
 	  "max_qi": 200,
-	  "breakthrough_pill": 28051,
-	  "atk": 25
+	  "breakthrough_pill": 28051
 	},
 	{
 	  "name": "筑基前期",
 	  "exp": 900,
 	  "max_qi": 250,
-	  "atk": 30,
 	  "breakthrough_pill": 28052
 	},
 	{
 	  "name": "筑基中期",
 	  "exp": 2150,
 	  "max_qi": 300,
-	  "atk": 35,
 	  "breakthrough_pill": 28053
 	},
 	{
 	  "name": "筑基后期",
 	  "exp": 3900,
 	  "max_qi": 400,
-	  "breakthrough_pill": 28054,
-	  "atk": 45
+	  "breakthrough_pill": 28054
 	},
 	{
 	  "name": "金丹前期",
 	  "exp": 2200,
 	  "max_qi": 500,
-	  "atk": 55,
 	  "breakthrough_pill": 28055
 	},
 	{
 	  "name": "金丹中期",
 	  "exp": 6300,
 	  "max_qi": 600,
-	  "atk": 65,
 	  "breakthrough_pill": 28056
 	},
 	{
 	  "name": "金丹后期",
 	  "exp": 13600,
 	  "max_qi": 800,
-	  "breakthrough_pill": 28057,
-	  "atk": 80
+	  "breakthrough_pill": 28057
 	},
 	{
 	  "name": "元婴前期",
 	  "exp": 4700,
 	  "max_qi": 1000,
-	  "atk": 100,
 	  "breakthrough_pill": 28058
 	},
 	{
 	  "name": "元婴中期",
 	  "exp": 13700,
 	  "max_qi": 1200,
-	  "atk": 120,
 	  "breakthrough_pill": 28059
 	},
 	{
 	  "name": "元婴后期",
 	  "exp": 31000,
 	  "max_qi": 1500,
-	  "breakthrough_pill": 28060,
-	  "atk": 145
+	  "breakthrough_pill": 28060
 	},
 	{
 	  "name": "化神前期",
 	  "exp": 10000,
-	  "max_qi": 1800,
-	  "atk": 170
+	  "max_qi": 1800
 	}
   ]
 }

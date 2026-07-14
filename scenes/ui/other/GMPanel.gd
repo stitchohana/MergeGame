@@ -12,8 +12,9 @@ func _ready() -> void:
 	if exec_btn:
 		exec_btn.pressed.connect(_on_exec)
 	CloudService.gm_exec_confirmed.connect(_on_gm_confirmed)
-	_populate_cmds()
 	CloudService.gm_exec_rejected.connect(_on_gm_rejected)
+	CloudService.state_loaded.connect(_on_state_sync)
+	_populate_cmds()
 
 func _populate_cmds() -> void:
 	if cmd_option.item_count > 0:
@@ -51,12 +52,10 @@ func _on_exec() -> void:
 	result_label.text = "执行中..."
 	CloudService.submit_gm_exec(cmd_key, amount, item_id, col, row)
 
-func _on_gm_confirmed(result: Dictionary) -> void:
+func _on_gm_confirmed(_result: Dictionary) -> void:
 	if exec_btn:
 		exec_btn.disabled = false
-	result_label.text = result.get("msg", "ok")
-	if not CloudService.state_loaded.is_connected(_on_state_synced):
-		CloudService.state_loaded.connect(_on_state_synced, CONNECT_ONE_SHOT)
+	result_label.text = _result.get("msg", "ok")
 	CloudService.fetch_state()
 
 func _on_gm_rejected(reason: String) -> void:
@@ -64,10 +63,33 @@ func _on_gm_rejected(reason: String) -> void:
 		exec_btn.disabled = false
 	result_label.text = "失败: " + reason
 
-func _on_state_synced(state: Dictionary) -> void:
+func _on_state_sync(state: Dictionary) -> void:
 	var cult = state.get("cultivation", {})
-	print("[GM] synced: level=" + str(cult.get("current_level", -1)) + " exp=" + str(cult.get("current_exp", -1)) + " max_qi=" + str(cult.get("max_qi", -1)))
-	SaveManager._restore_from_server(state)
+	if not cult.is_empty():
+		CultivationService.deserialize(cult)
+	var stam: int = state.get("stamina", -1)
+	if stam >= 0:
+		GameState.stamina = stam
+		GameState.max_stamina = state.get("max_stamina", GameState.max_stamina)
+		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	var stones: int = state.get("spirit_stones", -1)
+	if stones >= 0:
+		GameState.spirit_stones = stones
+		GameState.spirit_stones_changed.emit(stones)
+
+	# Update grid caches
+	GameState.main_grid_cache = state.get("main_grid", [])
+	GameState.battle_grid_cache = state.get("battle_grid", [])
+
+	# Repopulate grid for current board
+	var is_battle := GameState.current_board_type == Constants.BoardType.BATTLE
+	var grid_data: Array = GameState.battle_grid_cache if is_battle else GameState.main_grid_cache
+	if not grid_data.is_empty():
+		GridManager.init_grid()
+		GridManager._skip_anims = true
+		GridManager.populate_from_server(grid_data)
+		GridManager._skip_anims = false
+	print("[GM] synced")
 
 func _on_close() -> void:
 	UIManager.hide_popup(self)

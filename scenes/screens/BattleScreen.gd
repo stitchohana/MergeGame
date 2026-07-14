@@ -214,18 +214,18 @@ func _on_battle_attack_confirmed(result: Dictionary) -> void:
 		_refresh_monster_display()
 
 func _on_battle_attack_rejected(reason: String) -> void:
-	_item_use_pending = false
-	_pending_attack_uid = -1
-	_pending_attack_pos = Vector2i(-1, -1)
-	EventBus.show_toast.emit("攻击失败：" + reason)
+		_item_use_pending = false
+		_pending_attack_uid = -1
+		_pending_attack_pos = Vector2i(-1, -1)
+		EventBus.show_toast.emit("攻击失败：" + reason)
 
 func _sync_grid_from_result(result: Dictionary) -> void:
-	var server_grid: Array = result.get("grid", [])
-	grid_view.set_skip_animations(true)
-	GridManager.init_grid(Constants.BoardType.BATTLE)
-	GridManager.populate_from_server(server_grid)
-	GameState.battle_grid_cache = server_grid
-	grid_view.set_skip_animations(false)
+		var server_grid: Array = result.get("grid", [])
+		grid_view.set_skip_animations(true)
+		GridManager.init_grid(Constants.BoardType.BATTLE)
+		GridManager.populate_from_server(server_grid)
+		GameState.battle_grid_cache = server_grid
+		grid_view.set_skip_animations(false)
 
 func _refresh_char_display() -> void:
 	var realm_name: String = CultivationService.get_stage_name()

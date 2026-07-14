@@ -18,7 +18,7 @@ OUT.mkdir(exist_ok=True)
 def parse_int(v):
     if v is None or v == "" or v == "None":
         return None
-    return int(v)
+    return int(float(v))
 
 
 def parse_bool(v):
@@ -33,6 +33,29 @@ def parse_int_list(v, sep=";"):
     if v is None or v == "":
         return []
     return [int(x.strip()) for x in str(v).split(sep) if x.strip()]
+
+def parse_ingredient_list(v):
+    if v is None or v == "":
+        return []
+    import re
+    result = []
+    for part in str(v).split(";"):
+        part = part.strip()
+        if not part:
+            continue
+        # Handle dict-like: {'id': 1002, 'count': 3} or JSON: {"id": 1002, "count": 3}
+        if part.startswith("{"):
+            m = re.search(r"['\"]id['\"]\s*:\s*(\d+)", part)
+            if m:
+                result.append(int(m.group(1)))
+            continue
+        # Handle id:count format: 1002:3
+        if ":" in part:
+            iid, _ = part.split(":", 1)
+            result.append(int(iid.strip()))
+            continue
+        result.append(int(part))
+    return result
 
 
 def parse_dict_list(v, key1="id", key2="weight", sep=";"):
@@ -131,6 +154,25 @@ if "items_recipe_product" in [ws.title for ws in wb.worksheets]:
                 "name": row["name"], "icon": row.get("icon", ""),
                 "describe": row["describe"],
                 "type": 4}
+        if row.get("value"):
+            item["value"] = parse_int(row["value"])
+        if row.get("effect_type"):
+            item["effect_type"] = parse_int(row["effect_type"])
+        if row.get("effect_value"):
+            item["effect_value"] = parse_int(row["effect_value"])
+        # Optional launcher fields
+        if row.get("max_charges"):
+            item["max_charges"] = parse_int(row["max_charges"])
+        if row.get("recharge_time"):
+            item["recharge_time"] = parse_int(row["recharge_time"])
+        if parse_bool(row.get("no_cost")):
+            item["no_cost"] = True
+        spawns = parse_dict_list(row.get("spawns(id:weight)", ""))
+        fixed = parse_int_list(row.get("fixed_spawns", ""))
+        if fixed:
+            item["fixed_spawns"] = fixed
+        elif spawns:
+            item["spawns"] = spawns
         regular.append(item)
 effect_items = []
 if "items_effect" in [ws.title for ws in wb.worksheets]:
@@ -204,7 +246,7 @@ recipes = []
 for row in read_rows(wb["recipes"]):
     recipes.append({
         "id": parse_int(row["id"]), "name": row["name"],
-        "ingredients": parse_int_list(row["ingredients"]),
+        "ingredients": parse_ingredient_list(row["ingredients"]),
         "result": parse_int(row["result"]),
         "craft_time": parse_int(row["craft_time"]),
     })

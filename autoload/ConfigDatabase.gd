@@ -72,7 +72,8 @@ func _load_items(path: String) -> void:
 		return
 
 	for reg_item in data.get("regular", []):
-		reg_item.type = 0
+		if not reg_item.has("type"):
+			reg_item.type = 0
 		_add_item_by_type_level(reg_item)
 
 	for laun_item in data.get("launcher", []):
@@ -82,6 +83,10 @@ func _load_items(path: String) -> void:
 	for craft_item in data.get("crafting", []):
 		craft_item.type = 2
 		_add_item_by_type_level(craft_item)
+
+	for eff_item in data.get("effect", []):
+		eff_item.type = 5
+		_add_item_by_type_level(eff_item)
 
 	# Recipes now loaded from separate file
 

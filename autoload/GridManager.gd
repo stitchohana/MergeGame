@@ -360,4 +360,6 @@ func populate_from_server(server_grid: Array) -> void:
 		var entry_storage: Variant = entry.get("storage", null)
 		if entry_storage != null:
 			item["storage"] = entry_storage
+		if entry.has("atk_base"):
+			item["atk_base"] = entry.atk_base
 		add_item(item, Vector2i(entry.col, entry.row))

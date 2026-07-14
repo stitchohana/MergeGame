@@ -3,8 +3,8 @@
     "1": {
       "tokens": [
         {
-          "token": 3,
-          "amount": 6
+          "token": 4,
+          "amount": 50
         }
       ]
     },
@@ -12,51 +12,11 @@
       "tokens": [
         {
           "token": 4,
-          "amount": 50
-        }
-      ]
-    },
-    "3": {
-      "tokens": [
-        {
-          "token": 3,
-          "amount": 7
-        }
-      ]
-    },
-    "4": {
-      "tokens": [
-        {
-          "token": 4,
-          "amount": 75
-        }
-      ]
-    },
-    "5": {
-      "tokens": [
-        {
-          "token": 3,
-          "amount": 8
-        }
-      ]
-    },
-    "6": {
-      "tokens": [
-        {
-          "token": 4,
           "amount": 100
         }
       ]
     },
-    "7": {
-      "tokens": [
-        {
-          "token": 3,
-          "amount": 9
-        }
-      ]
-    },
-    "8": {
+    "3": {
       "tokens": [
         {
           "token": 4,
@@ -64,11 +24,51 @@
         }
       ]
     },
+    "4": {
+      "tokens": [
+        {
+          "token": 4,
+          "amount": 200
+        }
+      ]
+    },
+    "5": {
+      "tokens": [
+        {
+          "token": 4,
+          "amount": 250
+        }
+      ]
+    },
+    "6": {
+      "tokens": [
+        {
+          "token": 4,
+          "amount": 300
+        }
+      ]
+    },
+    "7": {
+      "tokens": [
+        {
+          "token": 4,
+          "amount": 400
+        }
+      ]
+    },
+    "8": {
+      "tokens": [
+        {
+          "token": 4,
+          "amount": 500
+        }
+      ]
+    },
     "9": {
       "tokens": [
         {
-          "token": 3,
-          "amount": 10
+          "token": 4,
+          "amount": 600
         }
       ]
     },
@@ -76,7 +76,7 @@
       "tokens": [
         {
           "token": 4,
-          "amount": 200
+          "amount": 800
         }
       ]
     },

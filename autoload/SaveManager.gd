@@ -25,17 +25,10 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.spirit_stones = state.get("spirit_stones", 0)
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 
-	# Grid cache for both boards
+	# Grid cache for both boards (cached only — grid is NOT repopulated here)
 	GameState.main_grid_cache = state.get("main_grid", [])
 	GameState.battle_grid_cache = state.get("battle_grid", [])
 	print("[Save] main_grid_cache=", GameState.main_grid_cache.size(), " battle_grid_cache=", GameState.battle_grid_cache.size())
-
-	# Grid
-	GridManager.init_grid()
-	GridManager._skip_anims = true
-	var grid_data: Array = state.get("grid", [])
-	print("[Save] restore: ", grid_data.size(), " items from server")
-	GridManager.populate_from_server(grid_data)
 
 	# Cultivation
 	var cultivation_data: Dictionary = state.get("cultivation", {})

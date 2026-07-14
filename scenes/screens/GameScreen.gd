@@ -146,18 +146,24 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	var uid: int = item_data.get("_uid", 0)
 	_item_use_pending = true
 	match effect_type:
-		"breakthrough":
+		Constants.EffectType.BREAKTHROUGH:
 				print("[GameScreen] breakthrough click: pill_id=" + str(item_data.get("id",0)) + " uid=" + str(uid) + " pos=" + str(grid_pos))
 				if uid <= 0:
 					EventBus.show_toast.emit("物品数据异常，请重新登录")
 					print("[GameScreen] breakthrough BLOCKED: uid=" + str(uid))
 					return
 				CultivationService.try_breakthrough(item_data.get("id", 0), uid)
-		"exp": CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
-		"stamina":
+		Constants.EffectType.EXP:
+			CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
+		Constants.EffectType.STAMINA:
 			_pending_stamina_uid = uid
 			CloudService.submit_restore_stamina(item_data.get("id", 0), uid)
-		_: EventBus.show_toast.emit("此物品无法在此使用")
+		Constants.EffectType.QI:
+			EventBus.show_toast.emit("灵力恢复")
+		Constants.EffectType.QI:
+			EventBus.show_toast.emit("灵力恢复")
+		_:
+			EventBus.show_toast.emit("此物品无法在此使用")
 
 func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)

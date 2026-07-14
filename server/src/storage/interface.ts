@@ -94,6 +94,7 @@ export interface GridItem {
   storage?: StorageData;
   charges?: number;
   last_charge_time?: number;
+  atk_base?: number;
 }
 
 export interface StorageSlot {

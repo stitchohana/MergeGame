@@ -130,7 +130,11 @@ func _input(event: InputEvent) -> void:
 		var cell_pos := _local_to_grid(local_pos)
 
 		if mb.pressed:
-			if _is_dragging or not GridManager.is_valid_pos(cell_pos) or local_pos.x < 0 or local_pos.y < 0 or local_pos.x > size.x or local_pos.y > size.y:
+			if _is_dragging:
+				return
+			if _craft_ctrl.is_point_over_button(local_pos):
+				return
+			if not GridManager.is_valid_pos(cell_pos) or local_pos.x < 0 or local_pos.y < 0 or local_pos.x > size.x or local_pos.y > size.y:
 				return
 			var item = GridManager.get_item(cell_pos)
 			if item == null:
@@ -160,7 +164,7 @@ func _input(event: InputEvent) -> void:
 				return
 
 			_craft_ctrl.hide_button()
-			if _pressed_item.get("type", 0) == Constants.ItemType.LAUNCHER:
+			if Constants.has_launcher_config(_pressed_item):
 				pass  # handled on double-click via _select_item
 			_pressed_item = {}
 
@@ -228,8 +232,11 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 	if not item_data.is_empty():
 		var new_item: Dictionary = item_data.duplicate(true)
 		new_item["_uid"] = result.get("spawned_uid", 0)
-		if new_item.get("type", 0) == Constants.ItemType.LAUNCHER:
+		if Constants.has_launcher_config(new_item):
 			new_item["charges"] = new_item.get("max_charges", 3)
+		var atk_base: int = result.get("atk_base", 0) as int
+		if atk_base > 0:
+			new_item["atk_base"] = atk_base
 		_is_launcher_spawning = true
 		GridManager.add_item(new_item, target_pos)
 		_is_launcher_spawning = false
@@ -474,7 +481,7 @@ func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
 	CraftingService.restore_craft_timer_for_item(item_data)
 
 func _try_start_launcher_cd(item_data: Dictionary) -> void:
-	if item_data.get("type", 0) != Constants.ItemType.LAUNCHER:
+	if not Constants.has_launcher_config(item_data):
 		return
 	_launcher_ctrl.start_cd_from_restore(item_data)
 
@@ -702,7 +709,7 @@ func _select_item(pos: Vector2i) -> void:
 			if item.get("immovable") == true:
 				EventBus.show_toast.emit("该物品无法使用")
 				return
-			if item.get("type", 0) == Constants.ItemType.LAUNCHER:
+			if Constants.has_launcher_config(item):
 				print("[GridView] double-click spawn: id=" + str(item.get("id",0)))
 				_handle_launcher_click(pos)
 			elif _has_storage_slots(item):
