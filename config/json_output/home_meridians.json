@@ -1,25 +1,767 @@
 {
   "stages": [
 	{
-	  "name": "练气期·经脉初开",
-	  "acupoints": 3,
-	  "qi_cost": 10,
-	  "acupoint_rewards": 1,
-	  "circulation_rewards": 2
-	},
-	{
-	  "name": "筑基期·经脉贯通",
-	  "acupoints": 5,
+	  "name": "练气一层·周天",
+	  "acupoints": 10,
 	  "qi_cost": 15,
 	  "acupoint_rewards": 1,
 	  "circulation_rewards": 2
 	},
 	{
-	  "name": "金丹期·经脉大成",
-	  "acupoints": 7,
+	  "name": "练气二层·周天",
+	  "acupoints": 13,
 	  "qi_cost": 20,
-	  "acupoint_rewards": 1,
-	  "circulation_rewards": 2
+	  "acupoint_rewards": 3,
+	  "circulation_rewards": 4
+	},
+	{
+	  "name": "练气三层·周天",
+	  "acupoints": 16,
+	  "qi_cost": 25,
+	  "acupoint_rewards": 5,
+	  "circulation_rewards": 6
+	},
+	{
+	  "name": "练气四层·周天",
+	  "acupoints": 19,
+	  "qi_cost": 30,
+	  "acupoint_rewards": 7,
+	  "circulation_rewards": 8
+	},
+	{
+	  "name": "练气五层·周天",
+	  "acupoints": 22,
+	  "qi_cost": 35,
+	  "acupoint_rewards": 9,
+	  "circulation_rewards": 10
+	},
+	{
+	  "name": "练气六层·周天",
+	  "acupoints": 25,
+	  "qi_cost": 40,
+	  "acupoint_rewards": 11,
+	  "circulation_rewards": 12
+	},
+	{
+	  "name": "练气七层·周天",
+	  "acupoints": 28,
+	  "qi_cost": 45,
+	  "acupoint_rewards": 13,
+	  "circulation_rewards": 14
+	},
+	{
+	  "name": "练气八层·周天",
+	  "acupoints": 31,
+	  "qi_cost": 50,
+	  "acupoint_rewards": 15,
+	  "circulation_rewards": 16
+	},
+	{
+	  "name": "练气九层·周天",
+	  "acupoints": 34,
+	  "qi_cost": 55,
+	  "acupoint_rewards": 17,
+	  "circulation_rewards": 18
+	},
+	{
+	  "name": "筑基前期·周天1",
+	  "acupoints": 35,
+	  "qi_cost": 130,
+	  "acupoint_rewards": 19,
+	  "circulation_rewards": 20
+	},
+	{
+	  "name": "筑基前期·周天2",
+	  "acupoints": 36,
+	  "qi_cost": 135,
+	  "acupoint_rewards": 21,
+	  "circulation_rewards": 22
+	},
+	{
+	  "name": "筑基前期·周天3",
+	  "acupoints": 37,
+	  "qi_cost": 140,
+	  "acupoint_rewards": 23,
+	  "circulation_rewards": 24
+	},
+	{
+	  "name": "筑基前期·周天4",
+	  "acupoints": 38,
+	  "qi_cost": 145,
+	  "acupoint_rewards": 25,
+	  "circulation_rewards": 26
+	},
+	{
+	  "name": "筑基前期·周天5",
+	  "acupoints": 39,
+	  "qi_cost": 150,
+	  "acupoint_rewards": 27,
+	  "circulation_rewards": 28
+	},
+	{
+	  "name": "筑基前期·周天6",
+	  "acupoints": 40,
+	  "qi_cost": 155,
+	  "acupoint_rewards": 29,
+	  "circulation_rewards": 30
+	},
+	{
+	  "name": "筑基前期·周天7",
+	  "acupoints": 41,
+	  "qi_cost": 160,
+	  "acupoint_rewards": 31,
+	  "circulation_rewards": 32
+	},
+	{
+	  "name": "筑基前期·周天8",
+	  "acupoints": 42,
+	  "qi_cost": 165,
+	  "acupoint_rewards": 33,
+	  "circulation_rewards": 34
+	},
+	{
+	  "name": "筑基前期·周天9",
+	  "acupoints": 43,
+	  "qi_cost": 170,
+	  "acupoint_rewards": 35,
+	  "circulation_rewards": 36
+	},
+	{
+	  "name": "筑基前期·周天10",
+	  "acupoints": 44,
+	  "qi_cost": 175,
+	  "acupoint_rewards": 37,
+	  "circulation_rewards": 38
+	},
+	{
+	  "name": "筑基中期·周天1",
+	  "acupoints": 35,
+	  "qi_cost": 170,
+	  "acupoint_rewards": 39,
+	  "circulation_rewards": 40
+	},
+	{
+	  "name": "筑基中期·周天2",
+	  "acupoints": 36,
+	  "qi_cost": 175,
+	  "acupoint_rewards": 41,
+	  "circulation_rewards": 42
+	},
+	{
+	  "name": "筑基中期·周天3",
+	  "acupoints": 37,
+	  "qi_cost": 180,
+	  "acupoint_rewards": 43,
+	  "circulation_rewards": 44
+	},
+	{
+	  "name": "筑基中期·周天4",
+	  "acupoints": 38,
+	  "qi_cost": 185,
+	  "acupoint_rewards": 45,
+	  "circulation_rewards": 46
+	},
+	{
+	  "name": "筑基中期·周天5",
+	  "acupoints": 39,
+	  "qi_cost": 190,
+	  "acupoint_rewards": 47,
+	  "circulation_rewards": 48
+	},
+	{
+	  "name": "筑基中期·周天6",
+	  "acupoints": 40,
+	  "qi_cost": 195,
+	  "acupoint_rewards": 49,
+	  "circulation_rewards": 50
+	},
+	{
+	  "name": "筑基中期·周天7",
+	  "acupoints": 41,
+	  "qi_cost": 200,
+	  "acupoint_rewards": 51,
+	  "circulation_rewards": 52
+	},
+	{
+	  "name": "筑基中期·周天8",
+	  "acupoints": 42,
+	  "qi_cost": 205,
+	  "acupoint_rewards": 53,
+	  "circulation_rewards": 54
+	},
+	{
+	  "name": "筑基中期·周天9",
+	  "acupoints": 43,
+	  "qi_cost": 210,
+	  "acupoint_rewards": 55,
+	  "circulation_rewards": 56
+	},
+	{
+	  "name": "筑基中期·周天10",
+	  "acupoints": 44,
+	  "qi_cost": 215,
+	  "acupoint_rewards": 57,
+	  "circulation_rewards": 58
+	},
+	{
+	  "name": "筑基后期·周天1",
+	  "acupoints": 35,
+	  "qi_cost": 220,
+	  "acupoint_rewards": 59,
+	  "circulation_rewards": 60
+	},
+	{
+	  "name": "筑基后期·周天2",
+	  "acupoints": 36,
+	  "qi_cost": 225,
+	  "acupoint_rewards": 61,
+	  "circulation_rewards": 62
+	},
+	{
+	  "name": "筑基后期·周天3",
+	  "acupoints": 37,
+	  "qi_cost": 230,
+	  "acupoint_rewards": 63,
+	  "circulation_rewards": 64
+	},
+	{
+	  "name": "筑基后期·周天4",
+	  "acupoints": 38,
+	  "qi_cost": 235,
+	  "acupoint_rewards": 65,
+	  "circulation_rewards": 66
+	},
+	{
+	  "name": "筑基后期·周天5",
+	  "acupoints": 39,
+	  "qi_cost": 240,
+	  "acupoint_rewards": 67,
+	  "circulation_rewards": 68
+	},
+	{
+	  "name": "筑基后期·周天6",
+	  "acupoints": 40,
+	  "qi_cost": 245,
+	  "acupoint_rewards": 69,
+	  "circulation_rewards": 70
+	},
+	{
+	  "name": "筑基后期·周天7",
+	  "acupoints": 41,
+	  "qi_cost": 250,
+	  "acupoint_rewards": 71,
+	  "circulation_rewards": 72
+	},
+	{
+	  "name": "筑基后期·周天8",
+	  "acupoints": 42,
+	  "qi_cost": 255,
+	  "acupoint_rewards": 73,
+	  "circulation_rewards": 74
+	},
+	{
+	  "name": "筑基后期·周天9",
+	  "acupoints": 43,
+	  "qi_cost": 260,
+	  "acupoint_rewards": 75,
+	  "circulation_rewards": 76
+	},
+	{
+	  "name": "筑基后期·周天10",
+	  "acupoints": 44,
+	  "qi_cost": 265,
+	  "acupoint_rewards": 77,
+	  "circulation_rewards": 78
+	},
+	{
+	  "name": "金丹前期·周天1",
+	  "acupoints": 45,
+	  "qi_cost": 280,
+	  "acupoint_rewards": 79,
+	  "circulation_rewards": 80
+	},
+	{
+	  "name": "金丹前期·周天2",
+	  "acupoints": 46,
+	  "qi_cost": 285,
+	  "acupoint_rewards": 81,
+	  "circulation_rewards": 82
+	},
+	{
+	  "name": "金丹前期·周天3",
+	  "acupoints": 47,
+	  "qi_cost": 290,
+	  "acupoint_rewards": 83,
+	  "circulation_rewards": 84
+	},
+	{
+	  "name": "金丹前期·周天4",
+	  "acupoints": 48,
+	  "qi_cost": 295,
+	  "acupoint_rewards": 85,
+	  "circulation_rewards": 86
+	},
+	{
+	  "name": "金丹前期·周天5",
+	  "acupoints": 49,
+	  "qi_cost": 300,
+	  "acupoint_rewards": 87,
+	  "circulation_rewards": 88
+	},
+	{
+	  "name": "金丹前期·周天6",
+	  "acupoints": 50,
+	  "qi_cost": 305,
+	  "acupoint_rewards": 89,
+	  "circulation_rewards": 90
+	},
+	{
+	  "name": "金丹前期·周天7",
+	  "acupoints": 51,
+	  "qi_cost": 310,
+	  "acupoint_rewards": 91,
+	  "circulation_rewards": 92
+	},
+	{
+	  "name": "金丹前期·周天8",
+	  "acupoints": 52,
+	  "qi_cost": 315,
+	  "acupoint_rewards": 93,
+	  "circulation_rewards": 94
+	},
+	{
+	  "name": "金丹前期·周天9",
+	  "acupoints": 53,
+	  "qi_cost": 320,
+	  "acupoint_rewards": 95,
+	  "circulation_rewards": 96
+	},
+	{
+	  "name": "金丹前期·周天10",
+	  "acupoints": 54,
+	  "qi_cost": 325,
+	  "acupoint_rewards": 97,
+	  "circulation_rewards": 98
+	},
+	{
+	  "name": "金丹中期·周天1",
+	  "acupoints": 45,
+	  "qi_cost": 360,
+	  "acupoint_rewards": 99,
+	  "circulation_rewards": 100
+	},
+	{
+	  "name": "金丹中期·周天2",
+	  "acupoints": 46,
+	  "qi_cost": 365,
+	  "acupoint_rewards": 101,
+	  "circulation_rewards": 102
+	},
+	{
+	  "name": "金丹中期·周天3",
+	  "acupoints": 47,
+	  "qi_cost": 370,
+	  "acupoint_rewards": 103,
+	  "circulation_rewards": 104
+	},
+	{
+	  "name": "金丹中期·周天4",
+	  "acupoints": 48,
+	  "qi_cost": 375,
+	  "acupoint_rewards": 105,
+	  "circulation_rewards": 106
+	},
+	{
+	  "name": "金丹中期·周天5",
+	  "acupoints": 49,
+	  "qi_cost": 380,
+	  "acupoint_rewards": 107,
+	  "circulation_rewards": 108
+	},
+	{
+	  "name": "金丹中期·周天6",
+	  "acupoints": 50,
+	  "qi_cost": 385,
+	  "acupoint_rewards": 109,
+	  "circulation_rewards": 110
+	},
+	{
+	  "name": "金丹中期·周天7",
+	  "acupoints": 51,
+	  "qi_cost": 390,
+	  "acupoint_rewards": 111,
+	  "circulation_rewards": 112
+	},
+	{
+	  "name": "金丹中期·周天8",
+	  "acupoints": 52,
+	  "qi_cost": 395,
+	  "acupoint_rewards": 113,
+	  "circulation_rewards": 114
+	},
+	{
+	  "name": "金丹中期·周天9",
+	  "acupoints": 53,
+	  "qi_cost": 400,
+	  "acupoint_rewards": 115,
+	  "circulation_rewards": 116
+	},
+	{
+	  "name": "金丹中期·周天10",
+	  "acupoints": 54,
+	  "qi_cost": 405,
+	  "acupoint_rewards": 117,
+	  "circulation_rewards": 118
+	},
+	{
+	  "name": "金丹后期·周天1",
+	  "acupoints": 45,
+	  "qi_cost": 460,
+	  "acupoint_rewards": 119,
+	  "circulation_rewards": 120
+	},
+	{
+	  "name": "金丹后期·周天2",
+	  "acupoints": 46,
+	  "qi_cost": 465,
+	  "acupoint_rewards": 121,
+	  "circulation_rewards": 122
+	},
+	{
+	  "name": "金丹后期·周天3",
+	  "acupoints": 47,
+	  "qi_cost": 470,
+	  "acupoint_rewards": 123,
+	  "circulation_rewards": 124
+	},
+	{
+	  "name": "金丹后期·周天4",
+	  "acupoints": 48,
+	  "qi_cost": 475,
+	  "acupoint_rewards": 125,
+	  "circulation_rewards": 126
+	},
+	{
+	  "name": "金丹后期·周天5",
+	  "acupoints": 49,
+	  "qi_cost": 480,
+	  "acupoint_rewards": 127,
+	  "circulation_rewards": 128
+	},
+	{
+	  "name": "金丹后期·周天6",
+	  "acupoints": 50,
+	  "qi_cost": 485,
+	  "acupoint_rewards": 129,
+	  "circulation_rewards": 130
+	},
+	{
+	  "name": "金丹后期·周天7",
+	  "acupoints": 51,
+	  "qi_cost": 490,
+	  "acupoint_rewards": 131,
+	  "circulation_rewards": 132
+	},
+	{
+	  "name": "金丹后期·周天8",
+	  "acupoints": 52,
+	  "qi_cost": 495,
+	  "acupoint_rewards": 133,
+	  "circulation_rewards": 134
+	},
+	{
+	  "name": "金丹后期·周天9",
+	  "acupoints": 53,
+	  "qi_cost": 500,
+	  "acupoint_rewards": 135,
+	  "circulation_rewards": 136
+	},
+	{
+	  "name": "金丹后期·周天10",
+	  "acupoints": 54,
+	  "qi_cost": 505,
+	  "acupoint_rewards": 137,
+	  "circulation_rewards": 138
+	},
+	{
+	  "name": "元婴前期·周天1",
+	  "acupoints": 55,
+	  "qi_cost": 600,
+	  "acupoint_rewards": 139,
+	  "circulation_rewards": 140
+	},
+	{
+	  "name": "元婴前期·周天2",
+	  "acupoints": 56,
+	  "qi_cost": 605,
+	  "acupoint_rewards": 141,
+	  "circulation_rewards": 142
+	},
+	{
+	  "name": "元婴前期·周天3",
+	  "acupoints": 57,
+	  "qi_cost": 610,
+	  "acupoint_rewards": 143,
+	  "circulation_rewards": 144
+	},
+	{
+	  "name": "元婴前期·周天4",
+	  "acupoints": 58,
+	  "qi_cost": 615,
+	  "acupoint_rewards": 145,
+	  "circulation_rewards": 146
+	},
+	{
+	  "name": "元婴前期·周天5",
+	  "acupoints": 59,
+	  "qi_cost": 620,
+	  "acupoint_rewards": 147,
+	  "circulation_rewards": 148
+	},
+	{
+	  "name": "元婴前期·周天6",
+	  "acupoints": 60,
+	  "qi_cost": 625,
+	  "acupoint_rewards": 149,
+	  "circulation_rewards": 150
+	},
+	{
+	  "name": "元婴前期·周天7",
+	  "acupoints": 61,
+	  "qi_cost": 630,
+	  "acupoint_rewards": 151,
+	  "circulation_rewards": 152
+	},
+	{
+	  "name": "元婴前期·周天8",
+	  "acupoints": 62,
+	  "qi_cost": 635,
+	  "acupoint_rewards": 153,
+	  "circulation_rewards": 154
+	},
+	{
+	  "name": "元婴前期·周天9",
+	  "acupoints": 63,
+	  "qi_cost": 640,
+	  "acupoint_rewards": 155,
+	  "circulation_rewards": 156
+	},
+	{
+	  "name": "元婴前期·周天10",
+	  "acupoints": 64,
+	  "qi_cost": 645,
+	  "acupoint_rewards": 157,
+	  "circulation_rewards": 158
+	},
+	{
+	  "name": "元婴中期·周天1",
+	  "acupoints": 55,
+	  "qi_cost": 780,
+	  "acupoint_rewards": 159,
+	  "circulation_rewards": 160
+	},
+	{
+	  "name": "元婴中期·周天2",
+	  "acupoints": 56,
+	  "qi_cost": 785,
+	  "acupoint_rewards": 161,
+	  "circulation_rewards": 162
+	},
+	{
+	  "name": "元婴中期·周天3",
+	  "acupoints": 57,
+	  "qi_cost": 790,
+	  "acupoint_rewards": 163,
+	  "circulation_rewards": 164
+	},
+	{
+	  "name": "元婴中期·周天4",
+	  "acupoints": 58,
+	  "qi_cost": 795,
+	  "acupoint_rewards": 165,
+	  "circulation_rewards": 166
+	},
+	{
+	  "name": "元婴中期·周天5",
+	  "acupoints": 59,
+	  "qi_cost": 800,
+	  "acupoint_rewards": 167,
+	  "circulation_rewards": 168
+	},
+	{
+	  "name": "元婴中期·周天6",
+	  "acupoints": 60,
+	  "qi_cost": 805,
+	  "acupoint_rewards": 169,
+	  "circulation_rewards": 170
+	},
+	{
+	  "name": "元婴中期·周天7",
+	  "acupoints": 61,
+	  "qi_cost": 810,
+	  "acupoint_rewards": 171,
+	  "circulation_rewards": 172
+	},
+	{
+	  "name": "元婴中期·周天8",
+	  "acupoints": 62,
+	  "qi_cost": 815,
+	  "acupoint_rewards": 173,
+	  "circulation_rewards": 174
+	},
+	{
+	  "name": "元婴中期·周天9",
+	  "acupoints": 63,
+	  "qi_cost": 820,
+	  "acupoint_rewards": 175,
+	  "circulation_rewards": 176
+	},
+	{
+	  "name": "元婴中期·周天10",
+	  "acupoints": 64,
+	  "qi_cost": 825,
+	  "acupoint_rewards": 177,
+	  "circulation_rewards": 178
+	},
+	{
+	  "name": "元婴后期·周天1",
+	  "acupoints": 55,
+	  "qi_cost": 1000,
+	  "acupoint_rewards": 179,
+	  "circulation_rewards": 180
+	},
+	{
+	  "name": "元婴后期·周天2",
+	  "acupoints": 56,
+	  "qi_cost": 1005,
+	  "acupoint_rewards": 181,
+	  "circulation_rewards": 182
+	},
+	{
+	  "name": "元婴后期·周天3",
+	  "acupoints": 57,
+	  "qi_cost": 1010,
+	  "acupoint_rewards": 183,
+	  "circulation_rewards": 184
+	},
+	{
+	  "name": "元婴后期·周天4",
+	  "acupoints": 58,
+	  "qi_cost": 1015,
+	  "acupoint_rewards": 185,
+	  "circulation_rewards": 186
+	},
+	{
+	  "name": "元婴后期·周天5",
+	  "acupoints": 59,
+	  "qi_cost": 1020,
+	  "acupoint_rewards": 187,
+	  "circulation_rewards": 188
+	},
+	{
+	  "name": "元婴后期·周天6",
+	  "acupoints": 60,
+	  "qi_cost": 1025,
+	  "acupoint_rewards": 189,
+	  "circulation_rewards": 190
+	},
+	{
+	  "name": "元婴后期·周天7",
+	  "acupoints": 61,
+	  "qi_cost": 1030,
+	  "acupoint_rewards": 191,
+	  "circulation_rewards": 192
+	},
+	{
+	  "name": "元婴后期·周天8",
+	  "acupoints": 62,
+	  "qi_cost": 1035,
+	  "acupoint_rewards": 193,
+	  "circulation_rewards": 194
+	},
+	{
+	  "name": "元婴后期·周天9",
+	  "acupoints": 63,
+	  "qi_cost": 1040,
+	  "acupoint_rewards": 195,
+	  "circulation_rewards": 196
+	},
+	{
+	  "name": "元婴后期·周天10",
+	  "acupoints": 64,
+	  "qi_cost": 1045,
+	  "acupoint_rewards": 197,
+	  "circulation_rewards": 198
+	},
+	{
+	  "name": "化神前期·周天1",
+	  "acupoints": 65,
+	  "qi_cost": 1300,
+	  "acupoint_rewards": 199,
+	  "circulation_rewards": 200
+	},
+	{
+	  "name": "化神前期·周天2",
+	  "acupoints": 66,
+	  "qi_cost": 1305,
+	  "acupoint_rewards": 201,
+	  "circulation_rewards": 202
+	},
+	{
+	  "name": "化神前期·周天3",
+	  "acupoints": 67,
+	  "qi_cost": 1310,
+	  "acupoint_rewards": 203,
+	  "circulation_rewards": 204
+	},
+	{
+	  "name": "化神前期·周天4",
+	  "acupoints": 68,
+	  "qi_cost": 1315,
+	  "acupoint_rewards": 205,
+	  "circulation_rewards": 206
+	},
+	{
+	  "name": "化神前期·周天5",
+	  "acupoints": 69,
+	  "qi_cost": 1320,
+	  "acupoint_rewards": 207,
+	  "circulation_rewards": 208
+	},
+	{
+	  "name": "化神前期·周天6",
+	  "acupoints": 70,
+	  "qi_cost": 1325,
+	  "acupoint_rewards": 209,
+	  "circulation_rewards": 210
+	},
+	{
+	  "name": "化神前期·周天7",
+	  "acupoints": 71,
+	  "qi_cost": 1330,
+	  "acupoint_rewards": 211,
+	  "circulation_rewards": 212
+	},
+	{
+	  "name": "化神前期·周天8",
+	  "acupoints": 72,
+	  "qi_cost": 1335,
+	  "acupoint_rewards": 213,
+	  "circulation_rewards": 214
+	},
+	{
+	  "name": "化神前期·周天9",
+	  "acupoints": 73,
+	  "qi_cost": 1340,
+	  "acupoint_rewards": 215,
+	  "circulation_rewards": 216
+	},
+	{
+	  "name": "化神前期·周天10",
+	  "acupoints": 74,
+	  "qi_cost": 1345,
+	  "acupoint_rewards": 217,
+	  "circulation_rewards": 218
 	}
   ]
 }

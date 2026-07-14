@@ -87,14 +87,34 @@ print("Building items.xlsx...")
 data = json.load(open(JSON_DIR / "items.json", encoding="utf-8"))
 wb = new_book()
 
-hr = ["id","level","name","icon","group_id","describe","value","sell_price","use_effect_id","storage_slots"]
+regular = [it for it in data["regular"] if it.get("type", 0) == 0]
+consumables = [it for it in data["regular"] if it.get("type") == 4]
+
+hr = ["id","level","name","icon","group_id","type","describe","value","sell_price"]
 rr = []
-for it in data["regular"]:
+for it in regular:
     rr.append([it.get("id",""), it.get("level",""), it.get("name",""), it.get("icon",""),
-               it.get("group_id",""), it.get("describe",""), it.get("value",""),
-               it.get("sell_price",""), it.get("use_effect_id",""), it.get("storage_slots","")])
+               it.get("group_id",""), it.get("type",""), it.get("describe",""), it.get("value",""),
+               it.get("sell_price","")])
 ws = wb.create_sheet("items_regular")
 add_sheet(ws, hr, rr)
+
+hcons = ["id","name","icon","type","describe","value","effect_type","effect_value"]
+rcons = []
+for it in consumables:
+    rcons.append([it.get("id",""), it.get("name",""), it.get("icon",""),
+                  it.get("type",""), it.get("describe",""), it.get("value",""),
+                  it.get("effect_type",""), it.get("effect_value","")])
+ws4 = wb.create_sheet("items_recipe_product")
+add_sheet(ws4, hcons, rcons)
+
+he = ["id","level","name","icon","group_id","type","describe","effect_type","effect_value"]
+re = []
+for it in data.get("effect", []):
+    re.append([it.get("id",""), it.get("level",""), it.get("name",""), it.get("icon",""),
+               it.get("group_id",""), it.get("type",""), it.get("describe",""), it.get("effect_type",""), it.get("effect_value","")])
+ws5 = wb.create_sheet("items_effect")
+add_sheet(ws5, he, re)
 
 hl = ["id","level","name","icon","group_id","type","max_charges","recharge_time","describe","no_cost","spawns(id:weight)","fixed_spawns"]
 rl = []
@@ -107,11 +127,11 @@ for it in data["launcher"]:
 ws2 = wb.create_sheet("items_launcher")
 add_sheet(ws2, hl, rl)
 
-hc = ["id","level","name","group_id","icon","describe","recipes"]
+hc = ["id","level","name","group_id","type","icon","describe","recipes"]
 rc = []
 for it in data["crafting"]:
     rc.append([it.get("id",""), it.get("level",""), it.get("name",""), it.get("group_id",""),
-               it.get("icon",""), it.get("describe",""), join_list(it.get("recipes", []))])
+               it.get("type",""), it.get("icon",""), it.get("describe",""), join_list(it.get("recipes", []))])
 ws3 = wb.create_sheet("items_crafting")
 add_sheet(ws3, hc, rc)
 
@@ -172,11 +192,11 @@ save(wb, "game_config")
 print("Building recipes.xlsx...")
 data = json.load(open(JSON_DIR / "recipes.json", encoding="utf-8"))
 wb = new_book()
-h = ["id","name","ingredients","result","craft_time","crafting_level"]
+h = ["id","name","ingredients","result","craft_time"]
 r = []
 for rc in data["recipes"]:
     r.append([rc.get("id",""), rc.get("name",""), join_list(rc.get("ingredients",[])),
-              rc.get("result",""), rc.get("craft_time",""), rc.get("crafting_level","")])
+              rc.get("result",""), rc.get("craft_time","")])
 ws = wb.create_sheet("recipes")
 add_sheet(ws, h, r)
 save(wb, "recipes")
@@ -253,20 +273,6 @@ ws3 = wb.create_sheet("map_stages")
 add_sheet(ws3, h3, r3)
 save(wb, "expedition")
 
-# ════════════════════════════════════════════════════════════
-#  effects.xlsx
-# ════════════════════════════════════════════════════════════
-print("Building effects.xlsx...")
-data = json.load(open(JSON_DIR / "effects.json", encoding="utf-8"))
-wb = new_book()
-h = ["id","type","amount","exp_gain","describe"]
-r = []
-for e in data["effects"]:
-    r.append([e.get("id",""), e.get("type",""), e.get("amount",""),
-              e.get("exp_gain",""), e.get("describe","")])
-ws = wb.create_sheet("effects")
-add_sheet(ws, h, r)
-save(wb, "effects")
 
 # ════════════════════════════════════════════════════════════
 #  tokens.xlsx

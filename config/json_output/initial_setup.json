@@ -2,75 +2,74 @@
   "main": {
 	"items": [
 	  {
-		"id": 501,
-		"col": 0,
-		"row": 4,
-		"immovable": false
-	  },
-	  {
-		"id": 504,
-		"col": 3,
-		"row": 0,
-		"immovable": false
-	  },
-	  {
-		"id": 601,
-		"col": 6,
-		"row": 7,
-		"immovable": false
-	  },
-	  {
-		"id": 602,
-		"col": 3,
-		"row": 8,
-		"immovable": false
-	  },
-	  {
-		"id": 603,
+		"id": 11001,
 		"col": 0,
 		"row": 0,
 		"immovable": false
 	  },
 	  {
-		"id": 506,
-		"col": 1,
-		"row": 0,
-		"immovable": false
-	  },
-	  {
-		"id": 21,
-		"col": 2,
-		"row": 4,
-		"immovable": true
-	  },
-	  {
-		"id": 22,
-		"col": 4,
+		"id": 12001,
+		"col": 0,
 		"row": 2,
-		"immovable": true
+		"immovable": false
 	  },
 	  {
-		"id": 23,
-		"col": 4,
-		"row": 8,
-		"immovable": true
+		"id": 13001,
+		"col": 0,
+		"row": 4,
+		"immovable": false
 	  },
 	  {
-		"id": 24,
+		"id": 14001,
+		"col": 3,
+		"row": 0,
+		"immovable": false
+	  },
+	  {
+		"id": 15001,
+		"col": 3,
+		"row": 2,
+		"immovable": false
+	  },
+	  {
+		"id": 16001,
+		"col": 3,
+		"row": 4,
+		"immovable": false
+	  },
+	  {
+		"id": 17001,
 		"col": 6,
 		"row": 0,
-		"immovable": true
+		"immovable": false
+	  },
+	  {
+		"id": 18001,
+		"col": 6,
+		"row": 1,
+		"immovable": false
+	  },
+	  {
+		"id": 19001,
+		"col": 6,
+		"row": 2,
+		"immovable": false
+	  },
+	  {
+		"id": 20001,
+		"col": 6,
+		"row": 3,
+		"immovable": false
+	  },
+	  {
+		"id": 21001,
+		"col": 6,
+		"row": 4,
+		"immovable": false
 	  }
 	]
   },
   "battle": {
-	"items": [
-	  {
-		"id": 505,
-		"col": 0,
-		"row": 4,
-		"immovable": false
-	  }
-	]
+	"items": []
   }
 }

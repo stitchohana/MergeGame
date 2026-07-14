@@ -5,7 +5,7 @@ Usage: cd config && python xlsx_to_json.py
 Output: config/json_output/
 """
 
-import json
+import json, re
 from pathlib import Path
 from openpyxl import load_workbook
 
@@ -84,14 +84,13 @@ for row in read_rows(wb["items_regular"]):
     item = {"id": parse_int(row["id"]), "level": parse_int(row["level"]),
             "name": row["name"], "icon": row.get("icon", ""),
             "group_id": parse_int(row["group_id"]), "describe": row["describe"]}
+    if row.get("type") != "":
+        item["type"] = parse_int(row["type"])
     if row.get("value"):
         item["value"] = parse_int(row["value"])
     if row.get("sell_price"):
         item["sell_price"] = parse_int(row["sell_price"])
-    if row.get("use_effect_id"):
-        item["use_effect_id"] = parse_int(row["use_effect_id"])
-    if row.get("storage_slots"):
-        item["storage_slots"] = parse_int(row["storage_slots"])
+
     regular.append(item)
 
 launcher = []
@@ -116,13 +115,35 @@ for row in read_rows(wb["items_launcher"]):
 
 crafting = []
 for row in read_rows(wb["items_crafting"]):
-    crafting.append({
+    item = {
         "id": parse_int(row["id"]), "level": parse_int(row["level"]),
         "name": row["name"], "group_id": parse_int(row["group_id"]),
         "icon": row.get("icon", ""), "describe": row["describe"],
         "recipes": parse_int_list(row.get("recipes", "")),
-    })
-save_json("items.json", {"regular": regular, "launcher": launcher, "crafting": crafting})
+    }
+    if row.get("type") != "":
+        item["type"] = parse_int(row["type"])
+    crafting.append(item)
+# Read items_recipe_product sheet if it exists
+if "items_recipe_product" in [ws.title for ws in wb.worksheets]:
+    for row in read_rows(wb["items_recipe_product"]):
+        item = {"id": parse_int(row["id"]),
+                "name": row["name"], "icon": row.get("icon", ""),
+                "describe": row["describe"],
+                "type": 4}
+        regular.append(item)
+effect_items = []
+if "items_effect" in [ws.title for ws in wb.worksheets]:
+    for row in read_rows(wb["items_effect"]):
+        item = {"id": parse_int(row["id"]), "level": parse_int(row["level"]),
+                "name": row["name"], "icon": row.get("icon", ""),
+                "group_id": parse_int(row["group_id"]), "describe": row["describe"],
+                "effect_type": parse_int(row["effect_type"]),
+                "effect_value": parse_int(row["effect_value"]),
+                "type": 5}
+
+        effect_items.append(item)
+save_json("items.json", {"regular": regular, "launcher": launcher, "crafting": crafting, "effect": effect_items})
 
 # ─── meridians ─────────────────────────────────────────────
 print("Building meridians.json...")
@@ -186,7 +207,6 @@ for row in read_rows(wb["recipes"]):
         "ingredients": parse_int_list(row["ingredients"]),
         "result": parse_int(row["result"]),
         "craft_time": parse_int(row["craft_time"]),
-        "crafting_level": parse_int(row["crafting_level"]),
     })
 save_json("recipes.json", {"recipes": recipes})
 
@@ -261,18 +281,6 @@ for mid, mp in maps_raw.items():
     })
 save_json("expedition.json", {"monsters": monsters, "maps": maps_list})
 
-# ─── effects ───────────────────────────────────────────────
-print("Building effects.json...")
-wb = open_book("effects")
-effects = []
-for row in read_rows(wb["effects"]):
-    e = {"id": parse_int(row["id"]), "type": row["type"], "describe": row["describe"]}
-    if row.get("amount"):
-        e["amount"] = parse_int(row["amount"])
-    if row.get("exp_gain"):
-        e["exp_gain"] = parse_int(row["exp_gain"])
-    effects.append(e)
-save_json("effects.json", {"effects": effects})
 
 # ─── tokens ────────────────────────────────────────────────
 print("Building tokens.json...")
