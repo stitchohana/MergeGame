@@ -72,6 +72,7 @@ func _ready() -> void:
 	_craft_ctrl.craft_rejected.connect(_on_craft_rejected)
 	_craft_ctrl.craft_retrieve_ready.connect(_on_craft_retrieve_ready)
 	_craft_ctrl.table_visual_update.connect(_on_craft_visual_update)
+	_craft_ctrl.craft_start_requested.connect(_on_craft_start_requested)
 	_craft_ctrl.sync_states()
 
 func _create_grid() -> void:
@@ -671,6 +672,18 @@ func _on_craft_visual_update(table_item: Dictionary, state: int) -> void:
 		if node and is_instance_valid(node) and node.item_data == table_item:
 			node.set_crafting_state(state)
 			break
+
+func _on_craft_start_requested(table_pos: Vector2i) -> void:
+	var key := "%d,%d" % [table_pos.x, table_pos.y]
+	if _selected_key != key:
+		_deselect_all()
+	var node := _item_nodes.get(key) as GridItem
+	if node and is_instance_valid(node):
+		node.set_selected(true)
+		_selected_key = key
+	var table_item: Variant = GridManager.get_item(table_pos)
+	if table_item != null:
+		item_clicked.emit(table_item as Dictionary, table_pos)
 
 # --- End CraftingController signal handlers ---
 

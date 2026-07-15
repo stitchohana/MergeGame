@@ -184,6 +184,9 @@ if "items_effect" in [ws.title for ws in wb.worksheets]:
                 "effect_value": parse_int(row["effect_value"]),
                 "type": 5}
 
+        if row.get("value"):
+            item["value"] = parse_int(row["value"])
+
         effect_items.append(item)
 save_json("items.json", {"regular": regular, "launcher": launcher, "crafting": crafting, "effect": effect_items})
 
@@ -197,7 +200,7 @@ for row in read_rows(wb["meridians"]):
         "item_pool": parse_int_list(row["item_pool"]),
         "count_min": parse_int(row["count_min"]),
         "count_max": parse_int(row["count_max"]),
-        "acupoint_rewards": parse_int(row["acupoint_rewards"]),
+        "qi_per_value": parse_int(row.get("qi_per_value", "")) or 1,
         "order_count": parse_int(row["order_count"]),
     })
 save_json("meridians.json", {"thresholds": thresholds})
@@ -390,11 +393,19 @@ print("Building home_meridians.json...")
 wb = open_book("home_meridians")
 home_stages = []
 for row in read_rows(wb["home_meridians"]):
+    acupoint_exp = parse_int(row.get("acupoint_exp", "")) or 0
+    circulation_exp = parse_int(row.get("circulation_exp", "")) or 0
     home_stages.append({
         "name": row["name"], "acupoints": parse_int(row["acupoints"]),
         "qi_cost": parse_int(row["qi_cost"]),
-        "acupoint_rewards": parse_int(row["acupoint_rewards"]),
-        "circulation_rewards": parse_int(row["circulation_rewards"]),
+        "acupoint_rewards": {"tokens": [
+            {"token": 4, "amount": acupoint_exp},
+            {"token": 3, "amount": 15},
+        ]},
+        "circulation_rewards": {"tokens": [
+            {"token": 4, "amount": circulation_exp},
+            {"token": 3, "amount": 100},
+        ]},
     })
 save_json("home_meridians.json", {"stages": home_stages})
 

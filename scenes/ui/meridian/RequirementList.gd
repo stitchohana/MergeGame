@@ -24,6 +24,7 @@ func set_requirements(reqs: Array) -> void:
 		entry.setup(req.get("items", []), i, req.get("completed", false), req.get("rewards", {}))
 		var idx := i
 		entry.complete_pressed.connect(_emit_complete.bind(idx))
+		entry.item_pressed.connect(_show_item_source)
 
 func _get_entries() -> Array[RequirementEntry]:
 	var entries: Array[RequirementEntry] = []
@@ -40,6 +41,19 @@ func set_entry_available(index: int, available: bool) -> void:
 
 func _emit_complete(idx: int) -> void:
 	complete_clicked.emit(idx)
+
+func _show_item_source(item_id: int) -> void:
+	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
+	if item_data.is_empty():
+		return
+	if int(item_data.get("type", Constants.ItemType.REGULAR)) == Constants.ItemType.RECIPE_PRODUCT:
+		var recipe_popup := preload("res://scenes/ui/main/RecipePopup.tscn").instantiate() as RecipePopup
+		UIManager.show_popup(recipe_popup)
+		recipe_popup.setup_for_item(item_id)
+		return
+	var popup := preload("res://scenes/ui/main/CraftPathView.tscn").instantiate() as CraftPathView
+	UIManager.show_popup(popup)
+	popup.show_for_item(item_data)
 
 func remove_entry(index: int) -> void:
 	var entries := _get_entries()

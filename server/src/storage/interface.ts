@@ -150,6 +150,9 @@ export interface GameState {
   pending_rewards: PendingReward[];
   home_meridian_progress?: HomeMeridianStageProgress[];
   activity_progress?: Record<number, ActivityProgress>;
+  activity_reward_bonuses?: {
+    order_qi?: number;
+  };
 }
 
 export interface BattleMonster {

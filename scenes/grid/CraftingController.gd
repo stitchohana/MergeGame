@@ -7,6 +7,7 @@ signal item_accepted_for_craft(src_key: String, src_pos: Vector2i)
 signal craft_rejected(reason: String)
 signal craft_retrieve_ready(result_id: int, result_uid: int, table_pos: Vector2i)
 signal table_visual_update(table_item: Dictionary, state: int)
+signal craft_start_requested(table_pos: Vector2i)
 
 var _craft_button: Node = null
 var _craft_table_pos: Vector2i = Vector2i(-1, -1)
@@ -179,6 +180,10 @@ func _on_craft_button_pressed() -> void:
 		return
 	_craft_start_pending = true
 	var table_pos: Vector2i = _get_table_grid_pos(_craft_table_item)
+	if table_pos.x < 0 or table_pos.y < 0:
+		_craft_start_pending = false
+		return
+	craft_start_requested.emit(table_pos)
 	if CloudService.online:
 		CloudService.submit_craft_start(table_pos.x, table_pos.y)
 

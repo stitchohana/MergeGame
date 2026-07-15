@@ -211,6 +211,13 @@ func get_all_items_of_type(type: int) -> Array:
 func get_recipes() -> Array:
 	return _items_data.get("_recipes", [])
 
+func get_recipes_for_result(item_id: int) -> Array:
+	var result: Array = []
+	for recipe in get_recipes():
+		if int(recipe.get("result", 0)) == item_id:
+			result.append(recipe)
+	return result
+
 # Get recipes allowed for a specific crafting table item
 func get_recipes_for_item(item_id: int) -> Array:
 	return _recipes_by_table.get(item_id, [])

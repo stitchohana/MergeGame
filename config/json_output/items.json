@@ -19,7 +19,7 @@
 	  "group_id": 1,
 	  "describe": "黄阶中品灵药，花瓣能自动聚拢周围游离灵气，已显灵性",
 	  "type": 0,
-	  "value": 2,
+	  "value": 1,
 	  "sell_price": 15
 	},
 	{
@@ -30,7 +30,7 @@
 	  "group_id": 1,
 	  "describe": "黄阶上品灵药，拇指大小赤红果实，可稳固元气，凡人可服",
 	  "type": 0,
-	  "value": 4,
+	  "value": 1,
 	  "sell_price": 35
 	},
 	{
@@ -41,7 +41,7 @@
 	  "group_id": 1,
 	  "describe": "黄阶极品灵药，通体如白玉，生长于岩石缝隙，灵芝中的极品",
 	  "type": 0,
-	  "value": 8,
+	  "value": 1,
 	  "sell_price": 80
 	},
 	{
@@ -52,7 +52,7 @@
 	  "group_id": 1,
 	  "describe": "玄阶下品灵药，生于极寒之地的冰湖，莲瓣透明如水晶",
 	  "type": 0,
-	  "value": 15,
+	  "value": 1,
 	  "sell_price": 180
 	},
 	{
@@ -63,7 +63,7 @@
 	  "group_id": 1,
 	  "describe": "玄阶中品灵药，吸收地热阳气生长，参体赤红如火，千年成形",
 	  "type": 0,
-	  "value": 25,
+	  "value": 1,
 	  "sell_price": 400
 	},
 	{
@@ -74,7 +74,7 @@
 	  "group_id": 1,
 	  "describe": "玄阶上品灵药，攀附古木而生，藤蔓呈青蓝色，夜晚发出幽光",
 	  "type": 0,
-	  "value": 40,
+	  "value": 1,
 	  "sell_price": 900
 	},
 	{
@@ -85,7 +85,7 @@
 	  "group_id": 1,
 	  "describe": "玄阶极品灵药，只生长在雷击过的灵脉之上，竹身有金色雷纹",
 	  "type": 0,
-	  "value": 65,
+	  "value": 1,
 	  "sell_price": 2000
 	},
 	{
@@ -96,7 +96,7 @@
 	  "group_id": 1,
 	  "describe": "地阶下品灵药，深埋地底三尺，吸取地脉精华，形如老龟",
 	  "type": 0,
-	  "value": 100,
+	  "value": 1,
 	  "sell_price": 4500
 	},
 	{
@@ -107,7 +107,7 @@
 	  "group_id": 1,
 	  "describe": "地阶中品灵药，只在流星坠落地附近开花，花瓣如星图纹路",
 	  "type": 0,
-	  "value": 160,
+	  "value": 1,
 	  "sell_price": 10000
 	},
 	{
@@ -118,7 +118,7 @@
 	  "group_id": 1,
 	  "describe": "地阶上品灵药，三百年开花、三百年结果，果肉蕴含紫气",
 	  "type": 0,
-	  "value": 250,
+	  "value": 1,
 	  "sell_price": 22000
 	},
 	{
@@ -129,7 +129,7 @@
 	  "group_id": 1,
 	  "describe": "地阶极品灵药，石斛上生九孔，每孔吞吐灵气，如活物呼吸",
 	  "type": 0,
-	  "value": 400,
+	  "value": 1,
 	  "sell_price": 50000
 	},
 	{
@@ -140,7 +140,7 @@
 	  "group_id": 1,
 	  "describe": "天阶下品灵药，赤红如火，传闻是凤凰涅槃时滴落的血珠所化",
 	  "type": 0,
-	  "value": 650,
+	  "value": 1,
 	  "sell_price": 110000
 	},
 	{
@@ -151,7 +151,7 @@
 	  "group_id": 1,
 	  "describe": "天阶中品灵药，只长在真龙盘踞过的洞穴中，带有一丝龙威",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 1,
 	  "sell_price": 250000
 	},
 	{
@@ -162,7 +162,7 @@
 	  "group_id": 1,
 	  "describe": "天阶上品灵药，参体生有凤羽状纹路，参须暗红如凝血，万年难遇",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 1,
 	  "sell_price": 550000
 	},
 	{
@@ -173,7 +173,7 @@
 	  "group_id": 1,
 	  "describe": "天阶极品灵药，开天辟地时遗留的一缕本源之气所化，状如新芽，蕴含大道法则",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 1,
 	  "sell_price": 1200000
 	},
 	{
@@ -184,7 +184,7 @@
 	  "group_id": 2,
 	  "describe": "黄阶下品灵露，清晨第一缕灵气凝结的水珠。饮用回复灵力+10，炼丹可替代基础灵液",
 	  "type": 0,
-	  "value": 1,
+	  "value": 9,
 	  "sell_price": 8
 	},
 	{
@@ -195,7 +195,7 @@
 	  "group_id": 2,
 	  "describe": "黄阶中品灵露，百花蜜混合而成，甘甜醇厚。酿酒可替代灵果，赋予灵酒馥郁花甜香",
 	  "type": 0,
-	  "value": 2,
+	  "value": 9,
 	  "sell_price": 20
 	},
 	{
@@ -206,7 +206,7 @@
 	  "group_id": 2,
 	  "describe": "黄阶上品灵露，灵植叶片吐纳精华凝聚。绘符时作润墨液，符箓绘制成功率+5%",
 	  "type": 0,
-	  "value": 4,
+	  "value": 9,
 	  "sell_price": 50
 	},
 	{
@@ -217,7 +217,7 @@
 	  "group_id": 2,
 	  "describe": "黄阶极品灵露，百年灵药根须榨取的浓汁。浸泡灵种后种入药田，下次产出等级+1",
 	  "type": 0,
-	  "value": 8,
+	  "value": 9,
 	  "sell_price": 120
 	},
 	{
@@ -228,7 +228,7 @@
 	  "group_id": 2,
 	  "describe": "玄阶下品灵露，极寒灵草凝结的特殊露水。炼丹加入可令丹药附带冰霜属性",
 	  "type": 0,
-	  "value": 15,
+	  "value": 9,
 	  "sell_price": 250
 	},
 	{
@@ -239,7 +239,7 @@
 	  "group_id": 2,
 	  "describe": "玄阶中品灵露，火属性灵植正午分泌的精华。炼器淬火时涂抹，法器附带微量火属性伤害",
 	  "type": 0,
-	  "value": 25,
+	  "value": 9,
 	  "sell_price": 550
 	},
 	{
@@ -250,7 +250,7 @@
 	  "group_id": 2,
 	  "describe": "玄阶上品灵露，木属性灵气浓缩精华。直接服用回复灵力+200，清除1个负面状态",
 	  "type": 0,
-	  "value": 40,
+	  "value": 9,
 	  "sell_price": 1200
 	},
 	{
@@ -261,7 +261,7 @@
 	  "group_id": 2,
 	  "describe": "玄阶极品灵露，天雷击中灵植残骸提取。绘制雷符必需材料，符箓威力+30%",
 	  "type": 0,
-	  "value": 65,
+	  "value": 9,
 	  "sell_price": 2600
 	},
 	{
@@ -272,7 +272,7 @@
 	  "group_id": 2,
 	  "describe": "地阶下品灵露，大地灵脉挤压渗出的原液。滴入灵田格永久提升该格产出+10%，每格限1次",
 	  "type": 0,
-	  "value": 100,
+	  "value": 9,
 	  "sell_price": 6000
 	},
 	{
@@ -283,7 +283,7 @@
 	  "group_id": 2,
 	  "describe": "地阶中品灵露，月华星辉最浓时灵花吐纳凝结。夜晚服用30分钟内合成暴击率+15%",
 	  "type": 0,
-	  "value": 160,
+	  "value": 9,
 	  "sell_price": 13000
 	},
 	{
@@ -294,7 +294,7 @@
 	  "group_id": 2,
 	  "describe": "地阶上品灵露，紫府仙果窖藏三年自然渗出。酿制紫府醉仙的核心材料，临时提升小境界修为获取速度",
 	  "type": 0,
-	  "value": 250,
+	  "value": 9,
 	  "sell_price": 28000
 	},
 	{
@@ -305,7 +305,7 @@
 	  "group_id": 2,
 	  "describe": "地阶极品灵露，九窍玉斛九窍各凝一滴合而为一。突破金丹时涂抹全身，成功率+10%",
 	  "type": 0,
-	  "value": 400,
+	  "value": 9,
 	  "sell_price": 65000
 	},
 	{
@@ -316,7 +316,7 @@
 	  "group_id": 2,
 	  "describe": "天阶下品灵露，涅槃朱果濒死时渗出的救命精华。订单失败时自动触发，保留本次80%收益",
 	  "type": 0,
-	  "value": 650,
+	  "value": 9,
 	  "sell_price": 140000
 	},
 	{
@@ -327,7 +327,7 @@
 	  "group_id": 2,
 	  "describe": "天阶中品灵露，龙涎灵芝千年凝聚的一滴精髓。炼丹加入1滴，丹药品质强制提升一阶",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 9,
 	  "sell_price": 320000
 	},
 	{
@@ -338,7 +338,7 @@
 	  "group_id": 2,
 	  "describe": "天阶上品灵露，凤羽血参千年凝聚的精华。激活任脉穴窍时消耗灵气减半，一次性效果",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 9,
 	  "sell_price": 700000
 	},
 	{
@@ -349,7 +349,7 @@
 	  "group_id": 2,
 	  "describe": "天阶极品灵露，混沌道芽周围凝聚的最原始灵液。可替代任意材料用于任意制作台最高等级合成",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 9,
 	  "sell_price": 1500000
 	},
 	{
@@ -371,7 +371,7 @@
 	  "group_id": 3,
 	  "describe": "黄阶中品灵矿，深色铁矿，质地坚硬，是制作凡兵的上好材料",
 	  "type": 0,
-	  "value": 2,
+	  "value": 1,
 	  "sell_price": 15
 	},
 	{
@@ -382,7 +382,7 @@
 	  "group_id": 3,
 	  "describe": "黄阶上品灵矿，银白色矿脉，比普通银更轻盈且导灵性更强",
 	  "type": 0,
-	  "value": 4,
+	  "value": 1,
 	  "sell_price": 35
 	},
 	{
@@ -393,7 +393,7 @@
 	  "group_id": 3,
 	  "describe": "黄阶极品灵矿，金色中带暗纹，是黄金矿脉核心的一小块母金",
 	  "type": 0,
-	  "value": 8,
+	  "value": 1,
 	  "sell_price": 80
 	},
 	{
@@ -404,7 +404,7 @@
 	  "group_id": 3,
 	  "describe": "玄阶下品灵矿，产自万米海底深渊，入手冰寒刺骨，千年不锈",
 	  "type": 0,
-	  "value": 15,
+	  "value": 1,
 	  "sell_price": 180
 	},
 	{
@@ -415,7 +415,7 @@
 	  "group_id": 3,
 	  "describe": "玄阶中品灵矿，火山熔岩中凝结的晶体，内部仿佛有火焰流动",
 	  "type": 0,
-	  "value": 25,
+	  "value": 1,
 	  "sell_price": 400
 	},
 	{
@@ -426,7 +426,7 @@
 	  "group_id": 3,
 	  "describe": "玄阶上品灵矿，青色软玉，触摸有生机涌动，佩戴可宁心安神",
 	  "type": 0,
-	  "value": 40,
+	  "value": 1,
 	  "sell_price": 900
 	},
 	{
@@ -437,7 +437,7 @@
 	  "group_id": 3,
 	  "describe": "玄阶极品灵矿，细沙状，每粒都带有雷霆印记，互相摩擦有电光",
 	  "type": 0,
-	  "value": 65,
+	  "value": 1,
 	  "sell_price": 2000
 	},
 	{
@@ -448,7 +448,7 @@
 	  "group_id": 3,
 	  "describe": "地阶下品灵矿，大地灵脉核心凝结的结晶，如琥珀般半透明",
 	  "type": 0,
-	  "value": 100,
+	  "value": 1,
 	  "sell_price": 4500
 	},
 	{
@@ -459,7 +459,7 @@
 	  "group_id": 3,
 	  "describe": "地阶中品灵矿，天外陨石最核心的金属球，含有星辰之力",
 	  "type": 0,
-	  "value": 160,
+	  "value": 1,
 	  "sell_price": 10000
 	},
 	{
@@ -470,7 +470,7 @@
 	  "group_id": 3,
 	  "describe": "地阶上品灵矿，在空间裂缝附近产出，玉中偶尔可见虚空涟漪",
 	  "type": 0,
-	  "value": 250,
+	  "value": 1,
 	  "sell_price": 22000
 	},
 	{
@@ -481,7 +481,7 @@
 	  "group_id": 3,
 	  "describe": "地阶极品灵矿，九幽地底深处挖出的黑色玄铁，重若千钧，阴气环绕",
 	  "type": 0,
-	  "value": 400,
+	  "value": 1,
 	  "sell_price": 50000
 	},
 	{
@@ -492,7 +492,7 @@
 	  "group_id": 3,
 	  "describe": "天阶下品灵矿，只在正午烈日下暴晒千年的大地金脉中提炼，金光耀目",
 	  "type": 0,
-	  "value": 650,
+	  "value": 1,
 	  "sell_price": 110000
 	},
 	{
@@ -503,7 +503,7 @@
 	  "group_id": 3,
 	  "describe": "天阶中品灵矿，月华凝聚万年而成的寒玉，入手冰凉但滋养神魂",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 1,
 	  "sell_price": 250000
 	},
 	{
@@ -514,7 +514,7 @@
 	  "group_id": 3,
 	  "describe": "天阶上品灵矿，每一粒砂都蕴含星辉，是星辰陨灭后的精华残留",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 1,
 	  "sell_price": 550000
 	},
 	{
@@ -525,7 +525,7 @@
 	  "group_id": 3,
 	  "describe": "天阶极品灵矿，混沌初开时第一缕金气凝固而成，晶体内可见鸿蒙气象",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 1,
 	  "sell_price": 1200000
 	},
 	{
@@ -536,7 +536,7 @@
 	  "group_id": 6,
 	  "describe": "黄阶下品矿精，赤铜矿伴生的碎屑。炼器时作填充辅料，降低锻造消耗灵力-10%",
 	  "type": 0,
-	  "value": 1,
+	  "value": 9,
 	  "sell_price": 8
 	},
 	{
@@ -547,7 +547,7 @@
 	  "group_id": 6,
 	  "describe": "黄阶中品矿精，黑铁矿内部最坚硬的核心。布阵时作阵眼压石，小型阵法稳定性+5%",
 	  "type": 0,
-	  "value": 2,
+	  "value": 9,
 	  "sell_price": 20
 	},
 	{
@@ -558,7 +558,7 @@
 	  "group_id": 6,
 	  "describe": "黄阶上品矿精，秘银矿打磨产生的碎屑。绘符时撒在符纸上使符箓发光显形，部分订单要求",
 	  "type": 0,
-	  "value": 4,
+	  "value": 9,
 	  "sell_price": 50
 	},
 	{
@@ -569,7 +569,7 @@
 	  "group_id": 6,
 	  "describe": "黄阶极品矿精，玄金母矿脉边缘剥落的碎块。集齐3粒可直接合成1块玄金母",
 	  "type": 0,
-	  "value": 8,
+	  "value": 9,
 	  "sell_price": 120
 	},
 	{
@@ -580,7 +580,7 @@
 	  "group_id": 6,
 	  "describe": "玄阶下品矿精，寒渊铁锻造时脱落的碎屑。炼器时加入，法器攻击附带冰冻减速效果",
 	  "type": 0,
-	  "value": 15,
+	  "value": 9,
 	  "sell_price": 250
 	},
 	{
@@ -591,7 +591,7 @@
 	  "group_id": 6,
 	  "describe": "玄阶中品矿精，赤炎晶最核心的一粒。激活手三阴经穴窍时额外获得+50%修为经验",
 	  "type": 0,
-	  "value": 25,
+	  "value": 9,
 	  "sell_price": 550
 	},
 	{
@@ -602,7 +602,7 @@
 	  "group_id": 6,
 	  "describe": "玄阶上品矿精，青灵玉内部液态精华凝固而成。放置于棋盘相邻格，周围发射器冷却-10%",
 	  "type": 0,
-	  "value": 40,
+	  "value": 9,
 	  "sell_price": 1200
 	},
 	{
@@ -613,7 +613,7 @@
 	  "group_id": 6,
 	  "describe": "玄阶极品矿精，金雷砂中淬炼出的高纯度精华。炼制法器时掺入有概率获得雷霆词条",
 	  "type": 0,
-	  "value": 65,
+	  "value": 9,
 	  "sell_price": 2600
 	},
 	{
@@ -624,7 +624,7 @@
 	  "group_id": 6,
 	  "describe": "地阶下品矿精，地脉髓晶长期受地气滋养脱落的圆珠。镶嵌发射器，接下来10次产出等级+1",
 	  "type": 0,
-	  "value": 100,
+	  "value": 9,
 	  "sell_price": 6000
 	},
 	{
@@ -635,7 +635,7 @@
 	  "group_id": 6,
 	  "describe": "地阶中品矿精，天陨星核打磨产生的粉末。突破筑基→金丹时服用，额外提升成功率+15%",
 	  "type": 0,
-	  "value": 160,
+	  "value": 9,
 	  "sell_price": 13000
 	},
 	{
@@ -646,7 +646,7 @@
 	  "group_id": 6,
 	  "describe": "地阶上品矿精，虚空碧玉碎裂形成的空间碎片。激活后临时开辟1个额外棋盘格子，持续30分钟",
 	  "type": 0,
-	  "value": 250,
+	  "value": 9,
 	  "sell_price": 28000
 	},
 	{
@@ -657,7 +657,7 @@
 	  "group_id": 6,
 	  "describe": "地阶极品矿精，九幽玄铁研磨而成的细砂。炼制幽冥阵旗核心材料，阵法具有困敌减速效果",
 	  "type": 0,
-	  "value": 400,
+	  "value": 9,
 	  "sell_price": 65000
 	},
 	{
@@ -668,7 +668,7 @@
 	  "group_id": 6,
 	  "describe": "天阶下品矿精，太阳真金经万日暴晒后剥离的碎粒。任何法器炼制加入，成品品质强制提升一阶",
 	  "type": 0,
-	  "value": 650,
+	  "value": 9,
 	  "sell_price": 140000
 	},
 	{
@@ -679,7 +679,7 @@
 	  "group_id": 6,
 	  "describe": "天阶中品矿精，太阴寒玉中心的浓缩精华。激活督脉穴窍时额外点亮相邻1个穴窍",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 9,
 	  "sell_price": 320000
 	},
 	{
@@ -690,7 +690,7 @@
 	  "group_id": 6,
 	  "describe": "天阶上品矿精，星河神砂破碎后的单体。合成棋盘任意物品时，5%概率直接提升2级",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 9,
 	  "sell_price": 700000
 	},
 	{
@@ -701,7 +701,7 @@
 	  "group_id": 6,
 	  "describe": "天阶极品矿精，鸿蒙仙晶逸散出的原始金气。可将任意Lv.15物品直接提升至Lv.16",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 9,
 	  "sell_price": 1500000
 	},
 	{
@@ -723,7 +723,7 @@
 	  "group_id": 7,
 	  "describe": "黄阶中品灵米，洁白饱满，表皮光滑，灵气均匀温和，煮后清香四溢",
 	  "type": 0,
-	  "value": 2,
+	  "value": 1,
 	  "sell_price": 10
 	},
 	{
@@ -734,7 +734,7 @@
 	  "group_id": 7,
 	  "describe": "黄阶上品灵米，淡青色米粒，顶端有一丝嫩芽般的青纹，蕴含微弱催发生机",
 	  "type": 0,
-	  "value": 4,
+	  "value": 1,
 	  "sell_price": 25
 	},
 	{
@@ -745,7 +745,7 @@
 	  "group_id": 7,
 	  "describe": "黄阶极品灵米，通体如玉的半透明米粒，光线下温润有光，灵气充分浸润",
 	  "type": 0,
-	  "value": 8,
+	  "value": 1,
 	  "sell_price": 60
 	},
 	{
@@ -756,7 +756,7 @@
 	  "group_id": 7,
 	  "describe": "玄阶下品灵米，米粒覆着一层薄霜般的白色晶粉，微凉，带有冰属性灵气",
 	  "type": 0,
-	  "value": 15,
+	  "value": 1,
 	  "sell_price": 140
 	},
 	{
@@ -767,7 +767,7 @@
 	  "group_id": 7,
 	  "describe": "玄阶中品灵米，赤红色米粒，饱满如红豆，握之微温，阳气充沛",
 	  "type": 0,
-	  "value": 25,
+	  "value": 1,
 	  "sell_price": 300
 	},
 	{
@@ -778,7 +778,7 @@
 	  "group_id": 7,
 	  "describe": "玄阶上品灵米，青碧色米粒，表面有玄奥的细密纹路，灵气内敛而精纯",
 	  "type": 0,
-	  "value": 40,
+	  "value": 1,
 	  "sell_price": 700
 	},
 	{
@@ -789,7 +789,7 @@
 	  "group_id": 7,
 	  "describe": "玄阶极品灵米，金色米粒，有天然雷霆状暗纹，微泛电光，极其稀少",
 	  "type": 0,
-	  "value": 65,
+	  "value": 1,
 	  "sell_price": 1500
 	},
 	{
@@ -800,7 +800,7 @@
 	  "group_id": 7,
 	  "describe": "地阶下品灵米，土黄色厚重米粒，沉如小石，蕴含大地深层精华",
 	  "type": 0,
-	  "value": 100,
+	  "value": 1,
 	  "sell_price": 3500
 	},
 	{
@@ -811,7 +811,7 @@
 	  "group_id": 7,
 	  "describe": "地阶中品灵米，深蓝色米粒中散布银色星点，如夜空碎屑，含星辰之力",
 	  "type": 0,
-	  "value": 160,
+	  "value": 1,
 	  "sell_price": 8000
 	},
 	{
@@ -822,7 +822,7 @@
 	  "group_id": 7,
 	  "describe": "地阶上品灵米，淡紫色米粒散发微光，暗处如紫宝石，携带一丝紫府之气",
 	  "type": 0,
-	  "value": 250,
+	  "value": 1,
 	  "sell_price": 18000
 	},
 	{
@@ -833,7 +833,7 @@
 	  "group_id": 7,
 	  "describe": "地阶极品灵米，白玉色半透明，表面均匀分布九个细孔，如玉斛般吞吐灵气",
 	  "type": 0,
-	  "value": 400,
+	  "value": 1,
 	  "sell_price": 40000
 	},
 	{
@@ -844,7 +844,7 @@
 	  "group_id": 7,
 	  "describe": "天阶下品灵米，赤红色带金色火焰纹，米内似有火苗跳动，象征毁灭重生",
 	  "type": 0,
-	  "value": 650,
+	  "value": 1,
 	  "sell_price": 90000
 	},
 	{
@@ -855,7 +855,7 @@
 	  "group_id": 7,
 	  "describe": "天阶中品灵米，象牙白色形如龙牙的修长米粒，散发若有若无的龙吟气息",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 1,
 	  "sell_price": 200000
 	},
 	{
@@ -866,7 +866,7 @@
 	  "group_id": 7,
 	  "describe": "天阶上品灵米，金色米粒呈羽状，表面有凤凰羽翼般的细腻纹路",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 1,
 	  "sell_price": 450000
 	},
 	{
@@ -877,7 +877,7 @@
 	  "group_id": 7,
 	  "describe": "天阶极品灵米，灰濛濛不定色，表面有混沌气流转，蕴含开天辟地之本源",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 1,
 	  "sell_price": 1000000
 	},
 	{
@@ -888,7 +888,7 @@
 	  "group_id": 8,
 	  "describe": "黄阶下品灵果，拇指大小青绿色硬果，酸涩难入口，灵气粗糙而杂乱",
 	  "type": 0,
-	  "value": 1,
+	  "value": 9,
 	  "sell_price": 6
 	},
 	{
@@ -899,7 +899,7 @@
 	  "group_id": 8,
 	  "describe": "黄阶中品灵果，鸽蛋大小圆润红亮，果皮薄而光滑，酸甜适口，灵气均衡",
 	  "type": 0,
-	  "value": 2,
+	  "value": 9,
 	  "sell_price": 18
 	},
 	{
@@ -910,7 +910,7 @@
 	  "group_id": 8,
 	  "describe": "黄阶上品灵果，青绿色椭圆如碧玉小球，果肉脆嫩，含精纯木灵气",
 	  "type": 0,
-	  "value": 4,
+	  "value": 9,
 	  "sell_price": 45
 	},
 	{
@@ -921,7 +921,7 @@
 	  "group_id": 8,
 	  "describe": "黄阶极品灵果，金色灯笼形，果皮薄如蝉翼，透出金色果肉，香甜浓郁",
 	  "type": 0,
-	  "value": 8,
+	  "value": 9,
 	  "sell_price": 100
 	},
 	{
@@ -932,7 +932,7 @@
 	  "group_id": 8,
 	  "describe": "玄阶下品灵果，半透明如冰雕，内部果核呈雪花状，入口冰爽直达丹田",
 	  "type": 0,
-	  "value": 15,
+	  "value": 9,
 	  "sell_price": 220
 	},
 	{
@@ -943,7 +943,7 @@
 	  "group_id": 8,
 	  "describe": "玄阶中品灵果，赤红透橙光，表皮温热如握小火，果肉微辣，带火性",
 	  "type": 0,
-	  "value": 25,
+	  "value": 9,
 	  "sell_price": 500
 	},
 	{
@@ -954,7 +954,7 @@
 	  "group_id": 8,
 	  "describe": "玄阶上品灵果，青蓝色果实表面有鳞片状凹凸，形如微型龙鳞，带有鳞甲之气",
 	  "type": 0,
-	  "value": 40,
+	  "value": 9,
 	  "sell_price": 1100
 	},
 	{
@@ -965,7 +965,7 @@
 	  "group_id": 8,
 	  "describe": "玄阶极品灵果，银色果实表面有清晰的雷电裂痕纹路，触碰有轻微酥麻感",
 	  "type": 0,
-	  "value": 65,
+	  "value": 9,
 	  "sell_price": 2500
 	},
 	{
@@ -976,7 +976,7 @@
 	  "group_id": 8,
 	  "describe": "地阶下品灵果，土黄色椭圆果，表皮粗糙如岩石，沉重远胜普通果实，蕴含大地力",
 	  "type": 0,
-	  "value": 100,
+	  "value": 9,
 	  "sell_price": 5500
 	},
 	{
@@ -987,7 +987,7 @@
 	  "group_id": 8,
 	  "describe": "地阶中品灵果，深紫色表皮散布金色星芒斑点，暗夜中微光闪烁，甜中带清冽",
 	  "type": 0,
-	  "value": 160,
+	  "value": 9,
 	  "sell_price": 12000
 	},
 	{
@@ -998,7 +998,7 @@
 	  "group_id": 8,
 	  "describe": "地阶上品灵果，淡紫色浑圆，果皮有天然云纹，散发浓郁药香，几近灵药",
 	  "type": 0,
-	  "value": 250,
+	  "value": 9,
 	  "sell_price": 26000
 	},
 	{
@@ -1009,7 +1009,7 @@
 	  "group_id": 8,
 	  "describe": "地阶极品灵果，白玉色扁圆果，表面均匀分布九个小凹坑，摇之有轻微水声，内有玉液",
 	  "type": 0,
-	  "value": 400,
+	  "value": 9,
 	  "sell_price": 60000
 	},
 	{
@@ -1020,7 +1020,7 @@
 	  "group_id": 8,
 	  "describe": "天阶下品灵果，赤金色浑圆，表面火焰纹跃动，入手温热如卵，蕴含再生之力",
 	  "type": 0,
-	  "value": 650,
+	  "value": 9,
 	  "sell_price": 130000
 	},
 	{
@@ -1031,7 +1031,7 @@
 	  "group_id": 8,
 	  "describe": "天阶中品灵果，乳白色果实散发淡淡龙涎香气，果形如龙珠，久闻灵力流转加速",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 9,
 	  "sell_price": 300000
 	},
 	{
@@ -1042,7 +1042,7 @@
 	  "group_id": 8,
 	  "describe": "天阶上品灵果，金色羽状果实，表面有凤凰羽翼纹路，轻盈如羽，内含涅槃之火",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 9,
 	  "sell_price": 650000
 	},
 	{
@@ -1053,7 +1053,7 @@
 	  "group_id": 8,
 	  "describe": "天阶极品灵果，灰濛濛不定色，内部似有星辰生灭，含大道本源",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 9,
 	  "sell_price": 1500000
 	},
 	{
@@ -1075,7 +1075,7 @@
 	  "group_id": 9,
 	  "describe": "黄阶中品兽皮，灰白色柔软皮毛，毛发细密，触感温顺，带有微弱灵性",
 	  "type": 0,
-	  "value": 2,
+	  "value": 1,
 	  "sell_price": 10
 	},
 	{
@@ -1086,7 +1086,7 @@
 	  "group_id": 9,
 	  "describe": "黄阶上品兽皮，青灰色鳞甲皮，表面有细密鳞片，坚韧且微含木属性灵气",
 	  "type": 0,
-	  "value": 4,
+	  "value": 1,
 	  "sell_price": 25
 	},
 	{
@@ -1097,7 +1097,7 @@
 	  "group_id": 9,
 	  "describe": "黄阶极品兽皮，金黄底色上布满天然金色纹路，皮质柔韧，灵光内蕴",
 	  "type": 0,
-	  "value": 8,
+	  "value": 1,
 	  "sell_price": 60
 	},
 	{
@@ -1108,7 +1108,7 @@
 	  "group_id": 9,
 	  "describe": "玄阶下品兽皮，银白色半透明薄皮，入手冰凉光滑如丝绸，极寒之地灵蚕所蜕",
 	  "type": 0,
-	  "value": 15,
+	  "value": 1,
 	  "sell_price": 140
 	},
 	{
@@ -1119,7 +1119,7 @@
 	  "group_id": 9,
 	  "describe": "玄阶中品兽皮，赤红色毛皮，入火不燃出火自净，带有灼热灵力",
 	  "type": 0,
-	  "value": 25,
+	  "value": 1,
 	  "sell_price": 300
 	},
 	{
@@ -1130,7 +1130,7 @@
 	  "group_id": 9,
 	  "describe": "玄阶上品兽皮，墨绿色龟甲纹硬皮，厚实沉重，纹路如天然盾阵",
 	  "type": 0,
-	  "value": 40,
+	  "value": 1,
 	  "sell_price": 700
 	},
 	{
@@ -1141,7 +1141,7 @@
 	  "group_id": 9,
 	  "describe": "玄阶极品兽皮，暗金色蟒鳞皮，鳞片间有电弧跳跃，触碰有酥麻感",
 	  "type": 0,
-	  "value": 65,
+	  "value": 1,
 	  "sell_price": 1500
 	},
 	{
@@ -1152,7 +1152,7 @@
 	  "group_id": 9,
 	  "describe": "地阶下品兽皮，土黄色厚重革皮，表面如干裂大地，蕴含浑厚地气",
 	  "type": 0,
-	  "value": 100,
+	  "value": 1,
 	  "sell_price": 3500
 	},
 	{
@@ -1163,7 +1163,7 @@
 	  "group_id": 9,
 	  "describe": "地阶中品兽皮，深紫色细绒皮，毛尖带银色星点，暗夜中微微发光",
 	  "type": 0,
-	  "value": 160,
+	  "value": 1,
 	  "sell_price": 8000
 	},
 	{
@@ -1174,7 +1174,7 @@
 	  "group_id": 9,
 	  "describe": "地阶上品兽皮，淡紫色狐皮，九尾灵狐所蜕，毛发如紫烟，散发迷幻异香",
 	  "type": 0,
-	  "value": 250,
+	  "value": 1,
 	  "sell_price": 18000
 	},
 	{
@@ -1185,7 +1185,7 @@
 	  "group_id": 9,
 	  "describe": "地阶极品兽皮，纯白如雪，展开可见九条尾影的灵皮，皮中封存一缕九尾残魂",
 	  "type": 0,
-	  "value": 400,
+	  "value": 1,
 	  "sell_price": 40000
 	},
 	{
@@ -1196,7 +1196,7 @@
 	  "group_id": 9,
 	  "describe": "天阶下品兽皮，五彩斑斓的祥瑞之皮，鳞毛交织如锦绣，带有祥瑞气息",
 	  "type": 0,
-	  "value": 650,
+	  "value": 1,
 	  "sell_price": 90000
 	},
 	{
@@ -1207,7 +1207,7 @@
 	  "group_id": 9,
 	  "describe": "天阶中品兽皮，金色龙鳞状革皮，每片鳞都蕴含真龙威压，坚不可摧",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 1,
 	  "sell_price": 200000
 	},
 	{
@@ -1218,7 +1218,7 @@
 	  "group_id": 9,
 	  "describe": "天阶上品兽皮，赤金色绒羽交织的珍皮，触之温热，凤羽纹路若隐若现",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 1,
 	  "sell_price": 450000
 	},
 	{
@@ -1229,7 +1229,7 @@
 	  "group_id": 9,
 	  "describe": "天阶极品兽皮，灰濛濛不定色皮毛，时而虚幻时而凝实，皮上可见鸿蒙初开之象",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 1,
 	  "sell_price": 1000000
 	},
 	{
@@ -1240,7 +1240,7 @@
 	  "group_id": 10,
 	  "describe": "黄阶下品兽血，暗红浑浊，腥味浓重，灵气稀薄仅带一丝蛮力",
 	  "type": 0,
-	  "value": 1,
+	  "value": 9,
 	  "sell_price": 6
 	},
 	{
@@ -1251,7 +1251,7 @@
 	  "group_id": 10,
 	  "describe": "黄阶中品兽血，鲜红色清透血液，略带草香，含有温和的生机灵气",
 	  "type": 0,
-	  "value": 2,
+	  "value": 9,
 	  "sell_price": 18
 	},
 	{
@@ -1262,7 +1262,7 @@
 	  "group_id": 10,
 	  "describe": "黄阶上品兽血，赤红如丹砂的狐血，微带甜腥，蕴含一丝蛊惑灵性",
 	  "type": 0,
-	  "value": 4,
+	  "value": 9,
 	  "sell_price": 45
 	},
 	{
@@ -1273,7 +1273,7 @@
 	  "group_id": 10,
 	  "describe": "黄阶极品兽血，淡金色黏稠血液，带有金属光泽，蕴含精纯的转化之力",
 	  "type": 0,
-	  "value": 8,
+	  "value": 9,
 	  "sell_price": 100
 	},
 	{
@@ -1284,7 +1284,7 @@
 	  "group_id": 10,
 	  "describe": "玄阶下品兽血，银白色冰冷蛇血，触之如冰，散发幽幽寒气",
 	  "type": 0,
-	  "value": 15,
+	  "value": 9,
 	  "sell_price": 220
 	},
 	{
@@ -1295,7 +1295,7 @@
 	  "group_id": 10,
 	  "describe": "玄阶中品兽血，赤橙色鸦血，温热滚烫，火属性灵力充沛，微泛火光",
 	  "type": 0,
-	  "value": 25,
+	  "value": 9,
 	  "sell_price": 500
 	},
 	{
@@ -1306,7 +1306,7 @@
 	  "group_id": 10,
 	  "describe": "玄阶上品兽血，青碧色灵禽之血，清冽如泉，含一丝风灵之气",
 	  "type": 0,
-	  "value": 40,
+	  "value": 9,
 	  "sell_price": 1100
 	},
 	{
@@ -1317,7 +1317,7 @@
 	  "group_id": 10,
 	  "describe": "玄阶极品兽血，银灰色凶禽之血，含有雷电余威，液体中时有电弧闪过",
 	  "type": 0,
-	  "value": 65,
+	  "value": 9,
 	  "sell_price": 2500
 	},
 	{
@@ -1328,7 +1328,7 @@
 	  "group_id": 10,
 	  "describe": "地阶下品兽血，暗红色厚重如泥浆的龙裔之血，散发浑厚大地气息",
 	  "type": 0,
-	  "value": 100,
+	  "value": 9,
 	  "sell_price": 5500
 	},
 	{
@@ -1339,7 +1339,7 @@
 	  "group_id": 10,
 	  "describe": "地阶中品兽血，深蓝色狼血中悬浮银色星屑，如夜空中的血色银河",
 	  "type": 0,
-	  "value": 160,
+	  "value": 9,
 	  "sell_price": 12000
 	},
 	{
@@ -1350,7 +1350,7 @@
 	  "group_id": 10,
 	  "describe": "地阶上品兽血，淡紫色黏稠毒血，剧毒中蕴含精纯灵力，散发异香",
 	  "type": 0,
-	  "value": 250,
+	  "value": 9,
 	  "sell_price": 26000
 	},
 	{
@@ -1361,7 +1361,7 @@
 	  "group_id": 10,
 	  "describe": "地阶极品兽血，九色交织的奇异猫血，每滴都蕴含一缕不死生机",
 	  "type": 0,
-	  "value": 400,
+	  "value": 9,
 	  "sell_price": 60000
 	},
 	{
@@ -1372,7 +1372,7 @@
 	  "group_id": 10,
 	  "describe": "天阶下品兽血，五彩流光的圣兽之血，每一滴都映照祥瑞虚影",
 	  "type": 0,
-	  "value": 650,
+	  "value": 9,
 	  "sell_price": 130000
 	},
 	{
@@ -1383,7 +1383,7 @@
 	  "group_id": 10,
 	  "describe": "天阶中品兽血，赤金色龙血，灼热滚烫如熔岩，带有真龙威压与远古咆哮之意",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 9,
 	  "sell_price": 300000
 	},
 	{
@@ -1394,7 +1394,7 @@
 	  "group_id": 10,
 	  "describe": "天阶上品兽血，赤金色凤血，内燃不灭之火，滴落如火焰坠落",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 9,
 	  "sell_price": 650000
 	},
 	{
@@ -1405,7 +1405,7 @@
 	  "group_id": 10,
 	  "describe": "天阶极品兽血，灰濛濛不定色血液，内含开天辟地之生机",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 9,
 	  "sell_price": 1500000
 	},
 	{
@@ -1427,7 +1427,7 @@
 	  "group_id": 11,
 	  "describe": "黄阶中品灵液，灵溪中游流水，已初步蕴含地脉渗透的灵机，口感清甜",
 	  "type": 0,
-	  "value": 2,
+	  "value": 1,
 	  "sell_price": 10
 	},
 	{
@@ -1438,7 +1438,7 @@
 	  "group_id": 11,
 	  "describe": "黄阶上品灵液，深潭中央最沉静的一捧水，杂质沉淀殆尽，灵气渐凝",
 	  "type": 0,
-	  "value": 4,
+	  "value": 1,
 	  "sell_price": 25
 	},
 	{
@@ -1449,7 +1449,7 @@
 	  "group_id": 11,
 	  "describe": "黄阶极品灵液，以玉瓶承接月下灵泉封存七日而成，清澈透亮如琉璃",
 	  "type": 0,
-	  "value": 8,
+	  "value": 1,
 	  "sell_price": 60
 	},
 	{
@@ -1460,7 +1460,7 @@
 	  "group_id": 11,
 	  "describe": "玄阶下品灵液，极寒地底涌出的冰泉，入口冰冽，灵力如丝线般顺喉而下",
 	  "type": 0,
-	  "value": 15,
+	  "value": 1,
 	  "sell_price": 140
 	},
 	{
@@ -1471,7 +1471,7 @@
 	  "group_id": 11,
 	  "describe": "玄阶中品灵液，地火加热后涌出的温热灵泉，灵力温和，滋养经脉",
 	  "type": 0,
-	  "value": 25,
+	  "value": 1,
 	  "sell_price": 300
 	},
 	{
@@ -1482,7 +1482,7 @@
 	  "group_id": 11,
 	  "describe": "玄阶上品灵液，青石岩缝中渗出的细流，经千年石髓浸润，灵气醇厚",
 	  "type": 0,
-	  "value": 40,
+	  "value": 1,
 	  "sell_price": 700
 	},
 	{
@@ -1493,7 +1493,7 @@
 	  "group_id": 11,
 	  "describe": "玄阶极品灵液，雷击之地形成的水潭，水质清冽含雷灵，微有电光闪烁",
 	  "type": 0,
-	  "value": 65,
+	  "value": 1,
 	  "sell_price": 1500
 	},
 	{
@@ -1504,7 +1504,7 @@
 	  "group_id": 11,
 	  "describe": "地阶下品灵液，直通大地灵脉深处涌出的髓泉，每一滴都如液态地气",
 	  "type": 0,
-	  "value": 100,
+	  "value": 1,
 	  "sell_price": 3500
 	},
 	{
@@ -1515,7 +1515,7 @@
 	  "group_id": 11,
 	  "describe": "地阶中品灵液，深潭接引星辉经年累月凝结，水中悬有银光星尘",
 	  "type": 0,
-	  "value": 160,
+	  "value": 1,
 	  "sell_price": 8000
 	},
 	{
@@ -1526,7 +1526,7 @@
 	  "group_id": 11,
 	  "describe": "地阶上品灵液，紫气聚集之地涌出的灵泉，水色淡紫如烟，散发异香",
 	  "type": 0,
-	  "value": 250,
+	  "value": 1,
 	  "sell_price": 18000
 	},
 	{
@@ -1537,7 +1537,7 @@
 	  "group_id": 11,
 	  "describe": "地阶极品灵液，九孔玉池中自然汇聚的灵露，水质如脂，似凝非凝",
 	  "type": 0,
-	  "value": 400,
+	  "value": 1,
 	  "sell_price": 40000
 	},
 	{
@@ -1548,7 +1548,7 @@
 	  "group_id": 11,
 	  "describe": "天阶下品灵液，朱果涅槃时落下的泪水所化泉水，蕴含重生后新生的甘冽",
 	  "type": 0,
-	  "value": 650,
+	  "value": 1,
 	  "sell_price": 90000
 	},
 	{
@@ -1559,7 +1559,7 @@
 	  "group_id": 11,
 	  "describe": "天阶中品灵液，龙涎渗入地下泉脉后涌出的灵泉，带一丝真龙威压与甘醇",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 1,
 	  "sell_price": 200000
 	},
 	{
@@ -1570,7 +1570,7 @@
 	  "group_id": 11,
 	  "describe": "天阶上品灵液，凤羽化灰处新生清泉，水面如镜映出凤凰虚影，温热如春",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 1,
 	  "sell_price": 450000
 	},
 	{
@@ -1581,7 +1581,7 @@
 	  "group_id": 11,
 	  "describe": "天阶极品灵液，混沌道芽周围凝聚的原初之水，蕴含开天辟地后的第一滴甘霖",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 1,
 	  "sell_price": 1000000
 	},
 	{
@@ -1592,7 +1592,7 @@
 	  "group_id": 12,
 	  "describe": "黄阶下品灵泉晶，灵泉底部的细碎结晶颗粒，灵力松散如普通河沙",
 	  "type": 0,
-	  "value": 1,
+	  "value": 9,
 	  "sell_price": 6
 	},
 	{
@@ -1603,7 +1603,7 @@
 	  "group_id": 12,
 	  "describe": "黄阶中品灵泉晶，半透明小立方体结晶，结构规整，灵力均匀分布",
 	  "type": 0,
-	  "value": 2,
+	  "value": 9,
 	  "sell_price": 18
 	},
 	{
@@ -1614,7 +1614,7 @@
 	  "group_id": 12,
 	  "describe": "黄阶上品灵泉晶，六棱柱形透明晶体，光线下折射出淡蓝光晕",
 	  "type": 0,
-	  "value": 4,
+	  "value": 9,
 	  "sell_price": 45
 	},
 	{
@@ -1625,7 +1625,7 @@
 	  "group_id": 12,
 	  "describe": "黄阶极品灵泉晶，浑圆光滑的乳白色晶珠，灵力内敛，触之温润如玉",
 	  "type": 0,
-	  "value": 8,
+	  "value": 9,
 	  "sell_price": 100
 	},
 	{
@@ -1636,7 +1636,7 @@
 	  "group_id": 12,
 	  "describe": "玄阶下品灵泉晶，针状冰晶簇拥成团宛如冰花，触碰有刺骨寒意",
 	  "type": 0,
-	  "value": 15,
+	  "value": 9,
 	  "sell_price": 220
 	},
 	{
@@ -1647,7 +1647,7 @@
 	  "group_id": 12,
 	  "describe": "玄阶中品灵泉晶，赤红色六方晶体，握之微热，内部似有火光流动",
 	  "type": 0,
-	  "value": 25,
+	  "value": 9,
 	  "sell_price": 500
 	},
 	{
@@ -1658,7 +1658,7 @@
 	  "group_id": 12,
 	  "describe": "玄阶上品灵泉晶，青绿色半透明髓状晶石，质地柔韧，非金非玉",
 	  "type": 0,
-	  "value": 40,
+	  "value": 9,
 	  "sell_price": 1100
 	},
 	{
@@ -1669,7 +1669,7 @@
 	  "group_id": 12,
 	  "describe": "玄阶极品灵泉晶，正八面体金色晶体，表面有雷纹，轻微震颤时泛出蓝色电弧",
 	  "type": 0,
-	  "value": 65,
+	  "value": 9,
 	  "sell_price": 2500
 	},
 	{
@@ -1680,7 +1680,7 @@
 	  "group_id": 12,
 	  "describe": "地阶下品灵泉晶，土黄色椭圆形柱石，表面有地层环纹，入手沉重大如拳",
 	  "type": 0,
-	  "value": 100,
+	  "value": 9,
 	  "sell_price": 5500
 	},
 	{
@@ -1691,7 +1691,7 @@
 	  "group_id": 12,
 	  "describe": "地阶中品灵泉晶，每粒如微缩星球的圆晶砂，悬浮在灵泉表面不沉不散",
 	  "type": 0,
-	  "value": 160,
+	  "value": 9,
 	  "sell_price": 12000
 	},
 	{
@@ -1702,7 +1702,7 @@
 	  "group_id": 12,
 	  "describe": "地阶上品灵泉晶，形如小葫芦的紫色天然晶簇，口部微张似能吞吐灵气",
 	  "type": 0,
-	  "value": 250,
+	  "value": 9,
 	  "sell_price": 26000
 	},
 	{
@@ -1713,7 +1713,7 @@
 	  "group_id": 12,
 	  "describe": "地阶极品灵泉晶，白玉色浑圆晶球，表面均匀分布九孔，球心似有玉液流转",
 	  "type": 0,
-	  "value": 400,
+	  "value": 9,
 	  "sell_price": 60000
 	},
 	{
@@ -1724,7 +1724,7 @@
 	  "group_id": 12,
 	  "describe": "天阶下品灵泉晶，赤金色不规则晶体，内部有火焰状结晶纹路仿佛永恒燃烧",
 	  "type": 0,
-	  "value": 650,
+	  "value": 9,
 	  "sell_price": 130000
 	},
 	{
@@ -1735,7 +1735,7 @@
 	  "group_id": 12,
 	  "describe": "天阶中品灵泉晶，赤金色圆核，表面龙鳞纹路精细如真，带有淡淡龙威",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 9,
 	  "sell_price": 300000
 	},
 	{
@@ -1746,7 +1746,7 @@
 	  "group_id": 12,
 	  "describe": "天阶上品灵泉晶，赤金色羽状薄晶片，轻盈透亮，反射出凤凰羽翼的光彩",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 9,
 	  "sell_price": 650000
 	},
 	{
@@ -1757,7 +1757,7 @@
 	  "group_id": 12,
 	  "describe": "天阶极品灵泉晶，灰濛濛不定态的晶胚，内含一缕未分化的原始灵气",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 9,
 	  "sell_price": 1500000
 	},
 	{
@@ -1779,7 +1779,7 @@
 	  "group_id": 13,
 	  "describe": "黄阶中品阵法图，黄纸朱砂所绘，能小幅聚拢周围游离灵气，是初学者第一张实用阵图",
 	  "type": 0,
-	  "value": 2,
+	  "value": 1,
 	  "sell_price": 15
 	},
 	{
@@ -1790,7 +1790,7 @@
 	  "group_id": 13,
 	  "describe": "黄阶上品阵法图，兽皮上以铁砂绘制，展开可凝出一道土墙，抵御寻常刀剑",
 	  "type": 0,
-	  "value": 4,
+	  "value": 1,
 	  "sell_price": 35
 	},
 	{
@@ -1801,7 +1801,7 @@
 	  "group_id": 13,
 	  "describe": "黄阶极品阵法图，三色丝线绣于锦缎之上，天地人三才方位锁住一方灵气不外泄",
 	  "type": 0,
-	  "value": 8,
+	  "value": 1,
 	  "sell_price": 80
 	},
 	{
@@ -1812,7 +1812,7 @@
 	  "group_id": 13,
 	  "describe": "玄阶下品阵法图，冰蚕丝织就的阵图，绘有青龙白虎朱雀玄武四象，催动后寒气四溢",
 	  "type": 0,
-	  "value": 15,
+	  "value": 1,
 	  "sell_price": 180
 	},
 	{
@@ -1823,7 +1823,7 @@
 	  "group_id": 13,
 	  "describe": "玄阶中品阵法图，赤红火浣布上以火灵墨绘制，展开如烈火燎原，热浪逼人",
 	  "type": 0,
-	  "value": 25,
+	  "value": 1,
 	  "sell_price": 400
 	},
 	{
@@ -1834,7 +1834,7 @@
 	  "group_id": 13,
 	  "describe": "玄阶上品阵法图，玄龟甲皮上天然纹路稍加勾勒而成，引动地气化为铜墙铁壁",
 	  "type": 0,
-	  "value": 40,
+	  "value": 1,
 	  "sell_price": 900
 	},
 	{
@@ -1845,7 +1845,7 @@
 	  "group_id": 13,
 	  "describe": "玄阶极品阵法图，雷蟒鳞皮上以雷液绘制，雷纹密布，催动时引动天雷之威",
 	  "type": 0,
-	  "value": 65,
+	  "value": 1,
 	  "sell_price": 2000
 	},
 	{
@@ -1856,7 +1856,7 @@
 	  "group_id": 13,
 	  "describe": "地阶下品阵法图，地龙皮上以地髓晶粉绘制，可引大地灵脉共鸣，形成地气护域",
 	  "type": 0,
-	  "value": 100,
+	  "value": 1,
 	  "sell_price": 4500
 	},
 	{
@@ -1867,7 +1867,7 @@
 	  "group_id": 13,
 	  "describe": "地阶中品阵法图，星貂皮上以星屑点绘众星方位，可布下星罗迷阵，困敌幻惑",
 	  "type": 0,
-	  "value": 160,
+	  "value": 1,
 	  "sell_price": 10000
 	},
 	{
@@ -1878,7 +1878,7 @@
 	  "group_id": 13,
 	  "describe": "地阶上品阵法图，紫狐裘上以狐涎绘制的幻阵图，入阵者心神迷乱，难辨真假",
 	  "type": 0,
-	  "value": 250,
+	  "value": 1,
 	  "sell_price": 22000
 	},
 	{
@@ -1889,7 +1889,7 @@
 	  "group_id": 13,
 	  "describe": "地阶极品阵法图，九尾灵皮上以九命猫血绘制，可布下续命阵，重伤者吊住一线生机",
 	  "type": 0,
-	  "value": 400,
+	  "value": 1,
 	  "sell_price": 50000
 	},
 	{
@@ -1900,7 +1900,7 @@
 	  "group_id": 13,
 	  "describe": "天阶下品阵法图，麒麟锦皮上以麒麟真血绘制，布阵后有祥云瑞兽护佑一方",
 	  "type": 0,
-	  "value": 650,
+	  "value": 1,
 	  "sell_price": 110000
 	},
 	{
@@ -1911,7 +1911,7 @@
 	  "group_id": 13,
 	  "describe": "天阶中品阵法图，龙鳞革上以龙血绘制，龙威浩荡，可镇压一方天地灵气为己用",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 1,
 	  "sell_price": 250000
 	},
 	{
@@ -1922,7 +1922,7 @@
 	  "group_id": 13,
 	  "describe": "天阶上品阵法图，凤羽绒皮上以凤血绘制，布阵时有凤影翱翔，涅槃之气生生不息",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 1,
 	  "sell_price": 550000
 	},
 	{
@@ -1933,7 +1933,7 @@
 	  "group_id": 13,
 	  "describe": "天阶极品阵法图，混沌兽皮承载天道法则，阵成时万法归一，方寸之间自成天地宇宙",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 1,
 	  "sell_price": 1200000
 	},
 	{
@@ -1944,7 +1944,7 @@
 	  "group_id": 14,
 	  "describe": "黄阶下品功法，凡间常见的呼吸吐纳法，粗浅简陋，仅能引导微弱灵气入体",
 	  "type": 0,
-	  "value": 1,
+	  "value": 9,
 	  "sell_price": 5
 	},
 	{
@@ -1955,7 +1955,7 @@
 	  "group_id": 14,
 	  "describe": "黄阶中品功法，稳固丹田、滋养元气的入门心法，修仙者第一步的基础功法",
 	  "type": 0,
-	  "value": 2,
+	  "value": 9,
 	  "sell_price": 15
 	},
 	{
@@ -1966,7 +1966,7 @@
 	  "group_id": 14,
 	  "describe": "黄阶上品功法，锤炼体魄的硬功，以灵气淬炼皮肉，修至小成可刀剑难入",
 	  "type": 0,
-	  "value": 4,
+	  "value": 9,
 	  "sell_price": 35
 	},
 	{
@@ -1977,7 +1977,7 @@
 	  "group_id": 14,
 	  "describe": "黄阶极品功法，在丹田中凝聚灵液的小周天功法，灵气转化效率远超常人",
 	  "type": 0,
-	  "value": 8,
+	  "value": 9,
 	  "sell_price": 80
 	},
 	{
@@ -1988,7 +1988,7 @@
 	  "group_id": 14,
 	  "describe": "玄阶下品功法，吸纳天地寒气淬炼经脉，修成后灵力自带冰封之效",
 	  "type": 0,
-	  "value": 15,
+	  "value": 9,
 	  "sell_price": 180
 	},
 	{
@@ -1999,7 +1999,7 @@
 	  "group_id": 14,
 	  "describe": "玄阶中品功法，引地火入丹田，以火炼心，灵力灼热霸道，攻伐无双",
 	  "type": 0,
-	  "value": 25,
+	  "value": 9,
 	  "sell_price": 400
 	},
 	{
@@ -2010,7 +2010,7 @@
 	  "group_id": 14,
 	  "describe": "玄阶上品功法，修得一缕乙木生机，滋养自身脏腑，寿元与恢复力远超同阶",
 	  "type": 0,
-	  "value": 40,
+	  "value": 9,
 	  "sell_price": 900
 	},
 	{
@@ -2021,7 +2021,7 @@
 	  "group_id": 14,
 	  "describe": "玄阶极品功法，以雷霆淬炼神魂与灵力，修成后灵力自带雷鸣，克制邪祟",
 	  "type": 0,
-	  "value": 65,
+	  "value": 9,
 	  "sell_price": 2000
 	},
 	{
@@ -2032,7 +2032,7 @@
 	  "group_id": 14,
 	  "describe": "地阶下品功法，引地脉之力入体，根基如大地般厚重，灵力雄浑绵长",
 	  "type": 0,
-	  "value": 100,
+	  "value": 9,
 	  "sell_price": 4500
 	},
 	{
@@ -2043,7 +2043,7 @@
 	  "group_id": 14,
 	  "describe": "地阶中品功法，引星辰之力修炼身法，身形如星光般飘忽，难以捕捉",
 	  "type": 0,
-	  "value": 160,
+	  "value": 9,
 	  "sell_price": 10000
 	},
 	{
@@ -2054,7 +2054,7 @@
 	  "group_id": 14,
 	  "describe": "地阶上品功法，专修神魂幻术，一念可令对手陷入迷境，防不胜防",
 	  "type": 0,
-	  "value": 250,
+	  "value": 9,
 	  "sell_price": 22000
 	},
 	{
@@ -2065,7 +2065,7 @@
 	  "group_id": 14,
 	  "describe": "地阶极品功法，修成后肉身生机极旺，重伤亦能缓慢自愈，堪称不死之体",
 	  "type": 0,
-	  "value": 400,
+	  "value": 9,
 	  "sell_price": 50000
 	},
 	{
@@ -2076,7 +2076,7 @@
 	  "group_id": 14,
 	  "describe": "天阶下品功法，身法如祥云飘逸，行走间带瑞兽虚影，气势非凡且速度极快",
 	  "type": 0,
-	  "value": 650,
+	  "value": 9,
 	  "sell_price": 110000
 	},
 	{
@@ -2087,7 +2087,7 @@
 	  "group_id": 14,
 	  "describe": "天阶中品功法，以龙威统御万灵，可短暂压制对方修为，霸道至极",
 	  "type": 0,
-	  "value": 1000,
+	  "value": 9,
 	  "sell_price": 250000
 	},
 	{
@@ -2098,7 +2098,7 @@
 	  "group_id": 14,
 	  "describe": "天阶上品功法，濒死时可触发一次涅槃重生，修为不退反进，浴火而更强",
 	  "type": 0,
-	  "value": 1600,
+	  "value": 9,
 	  "sell_price": 550000
 	},
 	{
@@ -2109,7 +2109,7 @@
 	  "group_id": 14,
 	  "describe": "天阶极品功法，直指大道本源的无上功法，修炼至大成可参悟混沌，跳出三界五行",
 	  "type": 0,
-	  "value": 2500,
+	  "value": 9,
 	  "sell_price": 1200000
 	},
 	{
@@ -2118,7 +2118,7 @@
 	  "icon": "",
 	  "describe": "修001·养气散，黄阶下",
 	  "type": 4,
-	  "value": 1,
+	  "value": 2,
 	  "effect_type": 3,
 	  "effect_value": 50
 	},
@@ -2128,7 +2128,7 @@
 	  "icon": "",
 	  "describe": "修002·引气丸，黄阶下",
 	  "type": 4,
-	  "value": 1,
+	  "value": 2,
 	  "effect_type": 3,
 	  "effect_value": 50
 	},
@@ -2138,7 +2138,7 @@
 	  "icon": "",
 	  "describe": "修003·固元粉，黄阶下",
 	  "type": 4,
-	  "value": 1,
+	  "value": 2,
 	  "effect_type": 3,
 	  "effect_value": 50
 	},
@@ -2148,7 +2148,7 @@
 	  "icon": "",
 	  "describe": "修004·培元丹，黄阶中",
 	  "type": 4,
-	  "value": 2,
+	  "value": 3,
 	  "effect_type": 3,
 	  "effect_value": 100
 	},
@@ -2158,7 +2158,7 @@
 	  "icon": "",
 	  "describe": "修005·灵髓丸，黄阶中",
 	  "type": 4,
-	  "value": 2,
+	  "value": 3,
 	  "effect_type": 3,
 	  "effect_value": 100
 	},
@@ -2168,7 +2168,7 @@
 	  "icon": "",
 	  "describe": "修006·黄芽丹，黄阶中",
 	  "type": 4,
-	  "value": 2,
+	  "value": 10,
 	  "effect_type": 3,
 	  "effect_value": 100
 	},
@@ -2178,7 +2178,7 @@
 	  "icon": "",
 	  "describe": "修007·小还丹，黄阶上",
 	  "type": 4,
-	  "value": 4,
+	  "value": 19,
 	  "effect_type": 3,
 	  "effect_value": 200
 	},
@@ -2198,7 +2198,7 @@
 	  "icon": "",
 	  "describe": "修009·青冥丹，黄阶上",
 	  "type": 4,
-	  "value": 4,
+	  "value": 19,
 	  "effect_type": 3,
 	  "effect_value": 200
 	},
@@ -2208,7 +2208,7 @@
 	  "icon": "",
 	  "describe": "修010·玄金散，黄阶极",
 	  "type": 4,
-	  "value": 8,
+	  "value": 11,
 	  "effect_type": 3,
 	  "effect_value": 400
 	},
@@ -2218,7 +2218,7 @@
 	  "icon": "",
 	  "describe": "修011·冰魄丹，玄阶下",
 	  "type": 4,
-	  "value": 15,
+	  "value": 19,
 	  "effect_type": 3,
 	  "effect_value": 750
 	},
@@ -2228,7 +2228,7 @@
 	  "icon": "",
 	  "describe": "修012·火灵丸，玄阶下",
 	  "type": 4,
-	  "value": 15,
+	  "value": 19,
 	  "effect_type": 3,
 	  "effect_value": 750
 	},
@@ -2238,7 +2238,7 @@
 	  "icon": "",
 	  "describe": "修013·青玄丹，玄阶中",
 	  "type": 4,
-	  "value": 25,
+	  "value": 19,
 	  "effect_type": 3,
 	  "effect_value": 1250
 	},
@@ -2248,7 +2248,7 @@
 	  "icon": "",
 	  "describe": "修014·五雷丹，玄阶中",
 	  "type": 4,
-	  "value": 25,
+	  "value": 19,
 	  "effect_type": 3,
 	  "effect_value": 1250
 	},
@@ -2258,7 +2258,7 @@
 	  "icon": "",
 	  "describe": "修015·地龙丹，玄阶上",
 	  "type": 4,
-	  "value": 40,
+	  "value": 27,
 	  "effect_type": 3,
 	  "effect_value": 2000
 	},
@@ -2268,7 +2268,7 @@
 	  "icon": "",
 	  "describe": "修016·星狼丹，玄阶上",
 	  "type": 4,
-	  "value": 40,
+	  "value": 27,
 	  "effect_type": 3,
 	  "effect_value": 2000
 	},
@@ -2278,7 +2278,7 @@
 	  "icon": "",
 	  "describe": "修017·紫狐丹，玄阶上",
 	  "type": 4,
-	  "value": 40,
+	  "value": 27,
 	  "effect_type": 3,
 	  "effect_value": 2000
 	},
@@ -2288,7 +2288,7 @@
 	  "icon": "",
 	  "describe": "修018·九命丹，玄阶极",
 	  "type": 4,
-	  "value": 65,
+	  "value": 19,
 	  "effect_type": 3,
 	  "effect_value": 3250
 	},
@@ -2308,7 +2308,7 @@
 	  "icon": "",
 	  "describe": "修020·星芒丹，地阶下",
 	  "type": 4,
-	  "value": 100,
+	  "value": 3,
 	  "effect_type": 3,
 	  "effect_value": 5000
 	},
@@ -2318,7 +2318,7 @@
 	  "icon": "",
 	  "describe": "修021·紫府金丹，地阶中",
 	  "type": 4,
-	  "value": 160,
+	  "value": 3,
 	  "effect_type": 3,
 	  "effect_value": 8000
 	},
@@ -2328,7 +2328,7 @@
 	  "icon": "",
 	  "describe": "修022·九窍还魂丹，地阶中",
 	  "type": 4,
-	  "value": 160,
+	  "value": 3,
 	  "effect_type": 3,
 	  "effect_value": 8000
 	},
@@ -2358,7 +2358,7 @@
 	  "icon": "",
 	  "describe": "修025·凤凰丹，地阶上",
 	  "type": 4,
-	  "value": 250,
+	  "value": 11,
 	  "effect_type": 3,
 	  "effect_value": 12500
 	},
@@ -2368,7 +2368,7 @@
 	  "icon": "",
 	  "describe": "修026·混沌丹，地阶极",
 	  "type": 4,
-	  "value": 400,
+	  "value": 11,
 	  "effect_type": 3,
 	  "effect_value": 20000
 	},
@@ -2378,7 +2378,7 @@
 	  "icon": "",
 	  "describe": "修027·涅槃丹，天阶下",
 	  "type": 4,
-	  "value": 650,
+	  "value": 18,
 	  "effect_type": 3,
 	  "effect_value": 32500
 	},
@@ -2388,7 +2388,7 @@
 	  "icon": "",
 	  "describe": "修028·龙牙丹，天阶下",
 	  "type": 4,
-	  "value": 650,
+	  "value": 18,
 	  "effect_type": 3,
 	  "effect_value": 32500
 	},
@@ -2398,7 +2398,7 @@
 	  "icon": "",
 	  "describe": "修029·凤羽金丹，天阶中",
 	  "type": 4,
-	  "value": 1000,
+	  "value": 18,
 	  "effect_type": 3,
 	  "effect_value": 50000
 	},
@@ -2408,7 +2408,7 @@
 	  "icon": "",
 	  "describe": "修030·混沌玄丹，天阶中",
 	  "type": 4,
-	  "value": 1000,
+	  "value": 18,
 	  "effect_type": 3,
 	  "effect_value": 50000
 	},
@@ -2618,7 +2618,7 @@
 	  "icon": "",
 	  "describe": "灵001·回灵散，黄阶下",
 	  "type": 4,
-	  "value": 1,
+	  "value": 10,
 	  "effect_type": 6,
 	  "effect_value": 100
 	},
@@ -2628,7 +2628,7 @@
 	  "icon": "",
 	  "describe": "灵002·复灵丸，黄阶下",
 	  "type": 4,
-	  "value": 1,
+	  "value": 10,
 	  "effect_type": 6,
 	  "effect_value": 100
 	},
@@ -2638,7 +2638,7 @@
 	  "icon": "",
 	  "describe": "灵003·清心露，黄阶下",
 	  "type": 4,
-	  "value": 1,
+	  "value": 10,
 	  "effect_type": 6,
 	  "effect_value": 100
 	},
@@ -2648,7 +2648,7 @@
 	  "icon": "",
 	  "describe": "灵004·玉灵丹，黄阶中",
 	  "type": 4,
-	  "value": 2,
+	  "value": 18,
 	  "effect_type": 6,
 	  "effect_value": 200
 	},
@@ -2658,7 +2658,7 @@
 	  "icon": "",
 	  "describe": "灵005·冰心丸，黄阶中",
 	  "type": 4,
-	  "value": 2,
+	  "value": 18,
 	  "effect_type": 6,
 	  "effect_value": 200
 	},
@@ -2678,7 +2678,7 @@
 	  "icon": "",
 	  "describe": "灵007·青木露，黄阶上",
 	  "type": 4,
-	  "value": 4,
+	  "value": 18,
 	  "effect_type": 6,
 	  "effect_value": 400
 	},
@@ -2688,7 +2688,7 @@
 	  "icon": "",
 	  "describe": "灵008·雷光液，黄阶上",
 	  "type": 4,
-	  "value": 4,
+	  "value": 18,
 	  "effect_type": 6,
 	  "effect_value": 400
 	},
@@ -2708,7 +2708,7 @@
 	  "icon": "",
 	  "describe": "灵010·星辉液，黄阶极",
 	  "type": 4,
-	  "value": 8,
+	  "value": 18,
 	  "effect_type": 6,
 	  "effect_value": 800
 	},
@@ -2718,7 +2718,7 @@
 	  "icon": "",
 	  "describe": "灵011·寒泉丹，玄阶下",
 	  "type": 4,
-	  "value": 15,
+	  "value": 19,
 	  "effect_type": 6,
 	  "effect_value": 1500
 	},
@@ -2728,7 +2728,7 @@
 	  "icon": "",
 	  "describe": "灵012·炎泉丹，玄阶下",
 	  "type": 4,
-	  "value": 15,
+	  "value": 19,
 	  "effect_type": 6,
 	  "effect_value": 1500
 	},
@@ -2738,7 +2738,7 @@
 	  "icon": "",
 	  "describe": "灵013·青泉丹，玄阶中",
 	  "type": 4,
-	  "value": 25,
+	  "value": 19,
 	  "effect_type": 6,
 	  "effect_value": 2500
 	},
@@ -2748,7 +2748,7 @@
 	  "icon": "",
 	  "describe": "灵014·雷泉丹，玄阶中",
 	  "type": 4,
-	  "value": 25,
+	  "value": 19,
 	  "effect_type": 6,
 	  "effect_value": 2500
 	},
@@ -2758,7 +2758,7 @@
 	  "icon": "",
 	  "describe": "灵015·地髓大丹，玄阶上",
 	  "type": 4,
-	  "value": 40,
+	  "value": 19,
 	  "effect_type": 6,
 	  "effect_value": 4000
 	},
@@ -2768,7 +2768,7 @@
 	  "icon": "",
 	  "describe": "灵016·星尘大丹，玄阶上",
 	  "type": 4,
-	  "value": 40,
+	  "value": 19,
 	  "effect_type": 6,
 	  "effect_value": 4000
 	},
@@ -2778,7 +2778,7 @@
 	  "icon": "",
 	  "describe": "灵017·紫气大丹，玄阶上",
 	  "type": 4,
-	  "value": 40,
+	  "value": 19,
 	  "effect_type": 6,
 	  "effect_value": 4000
 	},
@@ -2788,7 +2788,7 @@
 	  "icon": "",
 	  "describe": "灵018·九泉大丹，玄阶极",
 	  "type": 4,
-	  "value": 65,
+	  "value": 19,
 	  "effect_type": 6,
 	  "effect_value": 6500
 	},
@@ -2808,7 +2808,7 @@
 	  "icon": "",
 	  "describe": "灵020·星芒灵丹，地阶下",
 	  "type": 4,
-	  "value": 100,
+	  "value": 2,
 	  "effect_type": 6,
 	  "effect_value": 10000
 	},
@@ -2818,7 +2818,7 @@
 	  "icon": "",
 	  "describe": "灵021·紫府灵丹，地阶中",
 	  "type": 4,
-	  "value": 160,
+	  "value": 2,
 	  "effect_type": 6,
 	  "effect_value": 16000
 	},
@@ -2828,7 +2828,7 @@
 	  "icon": "",
 	  "describe": "灵022·九窍灵丹，地阶中",
 	  "type": 4,
-	  "value": 160,
+	  "value": 2,
 	  "effect_type": 6,
 	  "effect_value": 16000
 	},
@@ -2858,7 +2858,7 @@
 	  "icon": "",
 	  "describe": "灵025·凤羽灵丹，地阶上",
 	  "type": 4,
-	  "value": 250,
+	  "value": 11,
 	  "effect_type": 6,
 	  "effect_value": 25000
 	},
@@ -2878,7 +2878,7 @@
 	  "icon": "",
 	  "describe": "灵027·涅槃灵丹，天阶下",
 	  "type": 4,
-	  "value": 650,
+	  "value": 18,
 	  "effect_type": 6,
 	  "effect_value": 65000
 	},
@@ -2888,7 +2888,7 @@
 	  "icon": "",
 	  "describe": "灵028·龙息灵丹，天阶下",
 	  "type": 4,
-	  "value": 650,
+	  "value": 18,
 	  "effect_type": 6,
 	  "effect_value": 65000
 	},
@@ -2898,7 +2898,7 @@
 	  "icon": "",
 	  "describe": "灵029·凤血灵丹，天阶中",
 	  "type": 4,
-	  "value": 1000,
+	  "value": 18,
 	  "effect_type": 6,
 	  "effect_value": 100000
 	},
@@ -2908,7 +2908,7 @@
 	  "icon": "",
 	  "describe": "灵030·混沌灵丹，天阶中",
 	  "type": 4,
-	  "value": 1000,
+	  "value": 11,
 	  "effect_type": 6,
 	  "effect_value": 100000
 	},
@@ -3098,7 +3098,7 @@
 	  "icon": "",
 	  "describe": "灵049·灵气源泉丹，天阶上",
 	  "type": 4,
-	  "value": 1600,
+	  "value": 34,
 	  "effect_type": 6,
 	  "effect_value": 160000
 	},
@@ -3108,7 +3108,7 @@
 	  "icon": "",
 	  "describe": "灵050·生生不息丹，天阶极",
 	  "type": 4,
-	  "value": 2500,
+	  "value": 58,
 	  "effect_type": 6,
 	  "effect_value": 250000
 	},
@@ -3118,7 +3118,7 @@
 	  "icon": "",
 	  "describe": "酒001·黄粱米酒，灵力+30，持续10秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 2
 	},
 	{
 	  "id": 27102,
@@ -3126,7 +3126,7 @@
 	  "icon": "",
 	  "describe": "酒002·清溪果酿，灵力+50，持续20秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 10
 	},
 	{
 	  "id": 27103,
@@ -3134,7 +3134,7 @@
 	  "icon": "",
 	  "describe": "酒003·百花醉，移动速度+10%，持续30秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 10
 	},
 	{
 	  "id": 27104,
@@ -3142,7 +3142,7 @@
 	  "icon": "",
 	  "describe": "酒004·玉露琼浆，灵力+100，持续60秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 10
 	},
 	{
 	  "id": 27105,
@@ -3150,7 +3150,7 @@
 	  "icon": "",
 	  "describe": "酒005·青芽酿，种植产出+15%，持续5分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27106,
@@ -3158,7 +3158,7 @@
 	  "icon": "",
 	  "describe": "酒006·霜华酿，灵力回复速度+20%，持续5分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27107,
@@ -3166,7 +3166,7 @@
 	  "icon": "",
 	  "describe": "酒007·赤阳烧，火属性炼制成功率+10%，持续10分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27108,
@@ -3174,7 +3174,7 @@
 	  "icon": "",
 	  "describe": "酒008·青玄酿，合成暴击率+10%，持续10分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27109,
@@ -3182,7 +3182,7 @@
 	  "icon": "",
 	  "describe": "酒009·雷火酒，雷符威力+30%，持续15分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27110,
@@ -3190,7 +3190,7 @@
 	  "icon": "",
 	  "describe": "酒010·地脉醇，灵力上限+200，持续30分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27111,
@@ -3198,7 +3198,7 @@
 	  "icon": "",
 	  "describe": "酒011·星芒醉，神识清明，订单刷新+30%，持续30分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27112,
@@ -3206,7 +3206,7 @@
 	  "icon": "",
 	  "describe": "酒012·紫府仙酿，修为获取+30%，持续30分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27113,
@@ -3214,7 +3214,7 @@
 	  "icon": "",
 	  "describe": "酒013·九孔玉液酒，全穴窍激活效率+50%，持续20分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27114,
@@ -3222,7 +3222,7 @@
 	  "icon": "",
 	  "describe": "酒014·涅槃重生酿，死亡后保留80%修为，持续1小时",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27115,
@@ -3230,7 +3230,7 @@
 	  "icon": "",
 	  "describe": "酒015·龙息醇，灵力爆发+500%，持续10秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27116,
@@ -3238,7 +3238,7 @@
 	  "icon": "",
 	  "describe": "酒016·凤羽天酿，涅槃护体，死亡重生一次",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27117,
@@ -3246,7 +3246,7 @@
 	  "icon": "",
 	  "describe": "酒017·混沌元酒，顿悟状态，修为×2持续60秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27118,
@@ -3254,7 +3254,7 @@
 	  "icon": "",
 	  "describe": "酒018·冰蚕寒酿，冰属性攻击+20%，持续10分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27119,
@@ -3262,7 +3262,7 @@
 	  "icon": "",
 	  "describe": "酒019·火浣烈酒，火属性攻击+20%，持续10分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27120,
@@ -3270,7 +3270,7 @@
 	  "icon": "",
 	  "describe": "酒020·龟甲养身酒，防御+30%，持续15分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27121,
@@ -3278,7 +3278,7 @@
 	  "icon": "",
 	  "describe": "酒021·雷蟒电光酒，攻击附带雷电伤害+20%，持续15分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27122,
@@ -3286,7 +3286,7 @@
 	  "icon": "",
 	  "describe": "酒022·地龙沉酿，灵力恢复+50%，持续30分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27123,
@@ -3294,7 +3294,7 @@
 	  "icon": "",
 	  "describe": "酒023·星貂幻酒，闪避+20%，持续30分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27124,
@@ -3302,7 +3302,7 @@
 	  "icon": "",
 	  "describe": "酒024·紫狐迷魂酒，幻术抗性+50%，持续30分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27125,
@@ -3310,7 +3310,7 @@
 	  "icon": "",
 	  "describe": "酒025·九尾灵酒，生命回复+100%，持续1分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 3
 	},
 	{
 	  "id": 27126,
@@ -3334,7 +3334,7 @@
 	  "icon": "",
 	  "describe": "酒028·凤羽涅槃酒，濒死自动满血，持续1小时",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27129,
@@ -3342,7 +3342,7 @@
 	  "icon": "",
 	  "describe": "酒029·混沌悟道酒，悟道效率×3，持续60秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27130,
@@ -3350,7 +3350,7 @@
 	  "icon": "",
 	  "describe": "酒030·灵果甘酿，灵力+80，持续30秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27131,
@@ -3366,7 +3366,7 @@
 	  "icon": "",
 	  "describe": "酒032·星辉甘霖酒，暴击率+15%，持续30分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27133,
@@ -3374,7 +3374,7 @@
 	  "icon": "",
 	  "describe": "酒033·紫光仙酒，修为获取+40%，持续1小时",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27134,
@@ -3382,7 +3382,7 @@
 	  "icon": "",
 	  "describe": "酒034·九窍玉髓酒，穴窍激活速度+80%，持续20分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27135,
@@ -3406,7 +3406,7 @@
 	  "icon": "",
 	  "describe": "酒037·凤羽飞天酒，身法速度+50%，持续30分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27138,
@@ -3414,7 +3414,7 @@
 	  "icon": "",
 	  "describe": "酒038·混沌朝圣酒，小境界临时提升1级，持续10分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 18
 	},
 	{
 	  "id": 27139,
@@ -3422,7 +3422,7 @@
 	  "icon": "",
 	  "describe": "酒039·寒泉冻骨酒，冰属性抗性+50%，持续20分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27140,
@@ -3438,7 +3438,7 @@
 	  "icon": "",
 	  "describe": "酒041·青泉生机酒，生命回复速度+50%，持续20分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27142,
@@ -3446,7 +3446,7 @@
 	  "icon": "",
 	  "describe": "酒042·雷泉电身酒，雷属性抗性+50%，持续20分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 27143,
@@ -3454,7 +3454,7 @@
 	  "icon": "",
 	  "describe": "酒043·九转回春酒，灵力回复+500%，持续10秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 47
 	},
 	{
 	  "id": 27144,
@@ -3462,7 +3462,7 @@
 	  "icon": "",
 	  "describe": "酒044·百草灵酒，全异常状态清除，一次性",
 	  "type": 4,
-	  "value": 1
+	  "value": 5
 	},
 	{
 	  "id": 27145,
@@ -3470,7 +3470,7 @@
 	  "icon": "",
 	  "describe": "酒045·五灵合酿酒，全属性+15%，持续1小时",
 	  "type": 4,
-	  "value": 1
+	  "value": 73
 	},
 	{
 	  "id": 27146,
@@ -3478,7 +3478,7 @@
 	  "icon": "",
 	  "describe": "酒046·三花聚顶酒，神识+30%，持续30分钟",
 	  "type": 4,
-	  "value": 1
+	  "value": 26
 	},
 	{
 	  "id": 27147,
@@ -3486,7 +3486,7 @@
 	  "icon": "",
 	  "describe": "酒047·五行调和酒，全抗性+30%，持续1小时",
 	  "type": 4,
-	  "value": 1
+	  "value": 43
 	},
 	{
 	  "id": 27148,
@@ -3502,7 +3502,7 @@
 	  "icon": "",
 	  "describe": "酒049·九凤朝凰酒，凤凰形态，不死不灭持续60秒",
 	  "type": 4,
-	  "value": 1
+	  "value": 48
 	},
 	{
 	  "id": 27150,
@@ -3510,7 +3510,7 @@
 	  "icon": "",
 	  "describe": "酒050·混沌万道酒，大道共鸣，顿悟持续5分钟，突破成功率+50%",
 	  "type": 4,
-	  "value": 1
+	  "value": 48
 	},
 	{
 	  "id": 28001,
@@ -3518,7 +3518,7 @@
 	  "icon": "",
 	  "describe": "黄阶下品飞剑，黑铁矿与山泉水粗炼而成，剑身粗糙如木纹，入门飞剑",
 	  "type": 4,
-	  "value": 1,
+	  "value": 2,
 	  "effect_type": 7,
 	  "effect_value": 5,
 	  "max_charges": 5,
@@ -3536,7 +3536,7 @@
 	  "icon": "",
 	  "describe": "黄阶下品飞剑，秘银为刃，铜砂淬锋，剑身轻盈锋锐初显",
 	  "type": 4,
-	  "value": 1,
+	  "value": 11,
 	  "effect_type": 7,
 	  "effect_value": 6,
 	  "max_charges": 5,
@@ -3554,7 +3554,7 @@
 	  "icon": "",
 	  "describe": "黄阶上品飞剑，秘银为骨玄金为魂，剑身银光流转，尘落如星河",
 	  "type": 4,
-	  "value": 4,
+	  "value": 12,
 	  "effect_type": 7,
 	  "effect_value": 7,
 	  "max_charges": 5,
@@ -3572,7 +3572,7 @@
 	  "icon": "",
 	  "describe": "黄阶极品飞剑，玄金母锻造的三尺短剑，金光暗纹内敛，锐不可当",
 	  "type": 4,
-	  "value": 8,
+	  "value": 11,
 	  "effect_type": 7,
 	  "effect_value": 8,
 	  "max_charges": 5,
@@ -3590,7 +3590,7 @@
 	  "icon": "",
 	  "describe": "玄阶下品飞剑，寒渊铁铸就，剑身冰蓝透骨，挥动时寒气化冰封敌",
 	  "type": 4,
-	  "value": 15,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 9,
 	  "max_charges": 8,
@@ -3608,7 +3608,7 @@
 	  "icon": "",
 	  "describe": "玄阶中品飞剑，赤炎晶熔铸，剑身赤红如焰，斩击时烈焰喷薄",
 	  "type": 4,
-	  "value": 25,
+	  "value": 11,
 	  "effect_type": 7,
 	  "effect_value": 10,
 	  "max_charges": 8,
@@ -3626,7 +3626,7 @@
 	  "icon": "",
 	  "describe": "玄阶上品飞剑，青灵玉为骨嵌青玉髓，剑含生机之力，可滋养持剑者",
 	  "type": 4,
-	  "value": 40,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 11,
 	  "max_charges": 8,
@@ -3644,7 +3644,7 @@
 	  "icon": "",
 	  "describe": "玄阶极品飞剑，金雷砂锻打雷砂金淬锋，剑身雷纹密布，斩邪灭魔",
 	  "type": 4,
-	  "value": 65,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 12,
 	  "max_charges": 8,
@@ -3662,7 +3662,7 @@
 	  "icon": "",
 	  "describe": "地阶下品飞剑，地脉髓晶为核，剑身沉重如山，引地气加持万钧之力",
 	  "type": 4,
-	  "value": 100,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 13,
 	  "max_charges": 10,
@@ -3680,7 +3680,7 @@
 	  "icon": "",
 	  "describe": "地阶中品飞剑，天陨星核熔铸，剑身银星闪烁如银河，暗夜中剑光夺目",
 	  "type": 4,
-	  "value": 160,
+	  "value": 36,
 	  "effect_type": 7,
 	  "effect_value": 14,
 	  "max_charges": 10,
@@ -3698,7 +3698,7 @@
 	  "icon": "",
 	  "describe": "地阶上品飞剑，虚空碧玉为骨，剑身半透明如无物，出剑无声无影",
 	  "type": 4,
-	  "value": 250,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 15,
 	  "max_charges": 10,
@@ -3716,7 +3716,7 @@
 	  "icon": "",
 	  "describe": "地阶极品飞剑，九幽玄铁锻造，剑身墨黑如渊，阴气环绕可冻结神魂",
 	  "type": 4,
-	  "value": 400,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 16,
 	  "max_charges": 10,
@@ -3734,7 +3734,7 @@
 	  "icon": "",
 	  "describe": "天阶下品飞剑，太阳真金熔铸，剑身金光耀目如烈日，至阳至刚",
 	  "type": 4,
-	  "value": 650,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 17,
 	  "max_charges": 15,
@@ -3752,7 +3752,7 @@
 	  "icon": "",
 	  "describe": "天阶中品飞剑，太阴寒玉为核，剑身幽蓝如月华，触之冰寒却滋养神魂",
 	  "type": 4,
-	  "value": 1000,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 18,
 	  "max_charges": 15,
@@ -3770,7 +3770,7 @@
 	  "icon": "",
 	  "describe": "天阶上品飞剑，星河神砂锻打，剑身斑斓如星云，一剑可引动星辰之力",
 	  "type": 4,
-	  "value": 1600,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 19,
 	  "max_charges": 15,
@@ -3788,7 +3788,7 @@
 	  "icon": "",
 	  "describe": "天阶极品飞剑，鸿蒙仙晶铸就，剑中自成混沌天地，可开天辟地",
 	  "type": 4,
-	  "value": 2500,
+	  "value": 19,
 	  "effect_type": 7,
 	  "effect_value": 20,
 	  "max_charges": 15,
@@ -3806,7 +3806,7 @@
 	  "icon": "",
 	  "describe": "黄阶下品阵法，清风障眼图与竹旗所布，可生薄雾遮蔽一方视线",
 	  "type": 4,
-	  "value": 1
+	  "value": 3
 	},
 	{
 	  "id": 28018,
@@ -3814,7 +3814,7 @@
 	  "icon": "",
 	  "describe": "黄阶下品阵法，聚灵引气图为基，小幅聚拢周围灵气，辅助修炼",
 	  "type": 4,
-	  "value": 1
+	  "value": 12
 	},
 	{
 	  "id": 28019,
@@ -3822,7 +3822,7 @@
 	  "icon": "",
 	  "describe": "黄阶上品阵法，铁壁御守图展开，凝土成墙，可抵御寻常刀剑",
 	  "type": 4,
-	  "value": 4
+	  "value": 12
 	},
 	{
 	  "id": 28020,
@@ -3830,7 +3830,7 @@
 	  "icon": "",
 	  "describe": "黄阶极品阵法，三才锁灵图为基，天地人三方位锁住灵气不外泄",
 	  "type": 4,
-	  "value": 8
+	  "value": 12
 	},
 	{
 	  "id": 28021,
@@ -3838,7 +3838,7 @@
 	  "icon": "",
 	  "describe": "玄阶下品阵法，四象寒冰图为基，催动后寒气四溢，可冻结入阵之敌",
 	  "type": 4,
-	  "value": 15
+	  "value": 19
 	},
 	{
 	  "id": 28022,
@@ -3846,7 +3846,7 @@
 	  "icon": "",
 	  "describe": "玄阶中品阵法，烈焰焚天图展开，阵内烈火燎原，焚尽入阵之物",
 	  "type": 4,
-	  "value": 25
+	  "value": 19
 	},
 	{
 	  "id": 28023,
@@ -3854,7 +3854,7 @@
 	  "icon": "",
 	  "describe": "玄阶上品阵法，厚土玄龟图为基，引地气化为铜墙铁壁，固若金汤",
 	  "type": 4,
-	  "value": 40
+	  "value": 19
 	},
 	{
 	  "id": 28024,
@@ -3862,7 +3862,7 @@
 	  "icon": "",
 	  "describe": "玄阶极品阵法，五雷正法图展开，阵内天雷滚滚，可诛邪灭魔",
 	  "type": 4,
-	  "value": 65
+	  "value": 19
 	},
 	{
 	  "id": 28025,
@@ -3870,7 +3870,7 @@
 	  "icon": "",
 	  "describe": "地阶下品阵法，地脉龙吟图为基，引大地灵脉共鸣，形成地气护域",
 	  "type": 4,
-	  "value": 100
+	  "value": 19
 	},
 	{
 	  "id": 28026,
@@ -3878,7 +3878,7 @@
 	  "icon": "",
 	  "describe": "地阶中品阵法，星罗棋布图展开，星斗罗列如天网，困敌幻惑",
 	  "type": 4,
-	  "value": 160
+	  "value": 19
 	},
 	{
 	  "id": 28027,
@@ -3886,7 +3886,7 @@
 	  "icon": "",
 	  "describe": "地阶上品阵法，九幻迷心图为基，入阵者心神迷乱，难辨真假",
 	  "type": 4,
-	  "value": 250
+	  "value": 19
 	},
 	{
 	  "id": 28028,
@@ -3894,7 +3894,7 @@
 	  "icon": "",
 	  "describe": "地阶极品阵法，九命续生图展开，可布续命之阵，重伤者吊住生机",
 	  "type": 4,
-	  "value": 400
+	  "value": 12
 	},
 	{
 	  "id": 28029,
@@ -3902,7 +3902,7 @@
 	  "icon": "",
 	  "describe": "天阶下品阵法，瑞兽祥云图为基，阵成有祥云瑞兽护佑一方",
 	  "type": 4,
-	  "value": 650
+	  "value": 19
 	},
 	{
 	  "id": 28030,
@@ -3910,7 +3910,7 @@
 	  "icon": "",
 	  "describe": "天阶中品阵法，真龙御天图展开，龙威浩荡，可镇压一方天地",
 	  "type": 4,
-	  "value": 1000
+	  "value": 19
 	},
 	{
 	  "id": 28031,
@@ -3918,7 +3918,7 @@
 	  "icon": "",
 	  "describe": "天阶上品阵法，凤舞九天图为基，阵中有凤影翱翔，涅槃之气生生不息",
 	  "type": 4,
-	  "value": 1600
+	  "value": 19
 	},
 	{
 	  "id": 28032,
@@ -3926,7 +3926,7 @@
 	  "icon": "",
 	  "describe": "天阶极品阵法，混沌归一阵图展开，阵成万法归一，方寸自成天地",
 	  "type": 4,
-	  "value": 2500
+	  "value": 19
 	},
 	{
 	  "id": 28033,
@@ -3934,7 +3934,7 @@
 	  "icon": "",
 	  "describe": "黄阶下品符箓，粗兽皮为纸野猪血为墨，可驱散低阶妖兽",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 28034,
@@ -3942,7 +3942,7 @@
 	  "icon": "",
 	  "describe": "黄阶下品符箓，柔毛皮为纸灵鹿血为墨，贴身携带可避尘垢",
 	  "type": 4,
-	  "value": 1
+	  "value": 11
 	},
 	{
 	  "id": 28035,
@@ -3950,7 +3950,7 @@
 	  "icon": "",
 	  "describe": "黄阶上品符箓，青鳞皮为纸赤狐血为墨，激发后射出火球一枚",
 	  "type": 4,
-	  "value": 4
+	  "value": 19
 	},
 	{
 	  "id": 28036,
@@ -3958,7 +3958,7 @@
 	  "icon": "",
 	  "describe": "黄阶极品符箓，金纹皮为纸金蟾血为墨，激发后凝出金色护甲",
 	  "type": 4,
-	  "value": 8
+	  "value": 19
 	},
 	{
 	  "id": 28037,
@@ -3966,7 +3966,7 @@
 	  "icon": "",
 	  "describe": "玄阶下品符箓，冰蚕丝皮为纸冰蛇血为墨，激发后射出冰锥三枚",
 	  "type": 4,
-	  "value": 15
+	  "value": 19
 	},
 	{
 	  "id": 28038,
@@ -3974,7 +3974,7 @@
 	  "icon": "",
 	  "describe": "玄阶中品符箓，火浣皮为纸火鸦血为墨，激发后产生剧烈爆炸",
 	  "type": 4,
-	  "value": 25
+	  "value": 19
 	},
 	{
 	  "id": 28039,
@@ -3982,7 +3982,7 @@
 	  "icon": "",
 	  "describe": "玄阶上品符箓，玄龟甲皮为纸青鸾血为墨，激发后藤蔓破土困敌",
 	  "type": 4,
-	  "value": 40
+	  "value": 19
 	},
 	{
 	  "id": 28040,
@@ -3990,7 +3990,7 @@
 	  "icon": "",
 	  "describe": "玄阶极品符箓，雷蟒鳞皮为纸雷鹏血为墨，激发后五雷从天而降",
 	  "type": 4,
-	  "value": 65
+	  "value": 19
 	},
 	{
 	  "id": 28041,
@@ -3998,7 +3998,7 @@
 	  "icon": "",
 	  "describe": "地阶下品符箓，地龙皮为纸地龙血为墨，激发后大地开裂吞噬敌人",
 	  "type": 4,
-	  "value": 100
+	  "value": 19
 	},
 	{
 	  "id": 28042,
@@ -4006,7 +4006,7 @@
 	  "icon": "",
 	  "describe": "地阶中品符箓，星貂皮为纸星狼血为墨，激发后可瞬移至百里之外",
 	  "type": 4,
-	  "value": 160
+	  "value": 19
 	},
 	{
 	  "id": 28043,
@@ -4014,7 +4014,7 @@
 	  "icon": "",
 	  "describe": "地阶上品符箓，紫狐裘为纸紫蟾血为墨，激发后幻化分身迷惑对手",
 	  "type": 4,
-	  "value": 250
+	  "value": 19
 	},
 	{
 	  "id": 28044,
@@ -4022,7 +4022,7 @@
 	  "icon": "",
 	  "describe": "地阶极品符箓，九尾灵皮为纸九命猫血为墨，濒死时自动触发吊命",
 	  "type": 4,
-	  "value": 400
+	  "value": 12
 	},
 	{
 	  "id": 28045,
@@ -4030,7 +4030,7 @@
 	  "icon": "",
 	  "describe": "天阶下品符箓，麒麟锦皮为纸麒麟真血为墨，符成祥瑞护身万邪不侵",
 	  "type": 4,
-	  "value": 650
+	  "value": 19
 	},
 	{
 	  "id": 28046,
@@ -4038,7 +4038,7 @@
 	  "icon": "",
 	  "describe": "天阶中品符箓，龙鳞革为纸龙血为墨，激发后龙威震天压制敌方修为",
 	  "type": 4,
-	  "value": 1000
+	  "value": 19
 	},
 	{
 	  "id": 28047,
@@ -4046,7 +4046,7 @@
 	  "icon": "",
 	  "describe": "天阶上品符箓，凤羽绒皮为纸凤血为墨，佩戴者濒死触发涅槃重生",
 	  "type": 4,
-	  "value": 1600
+	  "value": 19
 	},
 	{
 	  "id": 28048,
@@ -4054,7 +4054,7 @@
 	  "icon": "",
 	  "describe": "天阶极品符箓，混沌兽皮为纸混沌真血为墨，一符可演化万法",
 	  "type": 4,
-	  "value": 2500
+	  "value": 19
 	},
 	{
 	  "id": 28049,
@@ -4062,7 +4062,7 @@
 	  "icon": "",
 	  "describe": "突001·引气筑基散，练气二层→三层",
 	  "type": 4,
-	  "value": 1,
+	  "value": 3,
 	  "effect_type": 5,
 	  "effect_value": 50
 	},
@@ -4072,7 +4072,7 @@
 	  "icon": "",
 	  "describe": "突002·凝元破境丹，练气四层→五层",
 	  "type": 4,
-	  "value": 2,
+	  "value": 12,
 	  "effect_type": 5,
 	  "effect_value": 100
 	},
@@ -4082,7 +4082,7 @@
 	  "icon": "",
 	  "describe": "突003·筑基破障丹，练气巅峰→筑基",
 	  "type": 4,
-	  "value": 4,
+	  "value": 14,
 	  "effect_type": 5,
 	  "effect_value": 150
 	},
@@ -4092,7 +4092,7 @@
 	  "icon": "",
 	  "describe": "突004·固基培元丹，筑基二层→三层",
 	  "type": 4,
-	  "value": 8,
+	  "value": 12,
 	  "effect_type": 5,
 	  "effect_value": 200
 	},
@@ -4102,7 +4102,7 @@
 	  "icon": "",
 	  "describe": "突005·通玄化灵丹，筑基四层→五层",
 	  "type": 4,
-	  "value": 15,
+	  "value": 12,
 	  "effect_type": 5,
 	  "effect_value": 250
 	},
@@ -4112,7 +4112,7 @@
 	  "icon": "",
 	  "describe": "突006·金丹破障丹，筑基巅峰→金丹",
 	  "type": 4,
-	  "value": 25,
+	  "value": 30,
 	  "effect_type": 5,
 	  "effect_value": 300
 	},
@@ -4122,7 +4122,7 @@
 	  "icon": "",
 	  "describe": "突007·凝丹化形丹，金丹二层→三层",
 	  "type": 4,
-	  "value": 40,
+	  "value": 12,
 	  "effect_type": 5,
 	  "effect_value": 350
 	},
@@ -4132,7 +4132,7 @@
 	  "icon": "",
 	  "describe": "突008·九转金丹，金丹四层→五层",
 	  "type": 4,
-	  "value": 65,
+	  "value": 12,
 	  "effect_type": 5,
 	  "effect_value": 400
 	},
@@ -4142,7 +4142,7 @@
 	  "icon": "",
 	  "describe": "突009·元婴破障丹，金丹巅峰→元婴",
 	  "type": 4,
-	  "value": 100,
+	  "value": 30,
 	  "effect_type": 5,
 	  "effect_value": 450
 	},
@@ -4152,7 +4152,7 @@
 	  "icon": "",
 	  "describe": "突010·元婴凝神丹，元婴二层→三层",
 	  "type": 4,
-	  "value": 160,
+	  "value": 12,
 	  "effect_type": 5,
 	  "effect_value": 500
 	},
@@ -4162,7 +4162,7 @@
 	  "icon": "",
 	  "describe": "突011·元婴归元丹，元婴四层→五层",
 	  "type": 4,
-	  "value": 250,
+	  "value": 12,
 	  "effect_type": 5,
 	  "effect_value": 550
 	},
@@ -4172,7 +4172,7 @@
 	  "icon": "",
 	  "describe": "突012·化神渡劫丹，元婴巅峰→化神",
 	  "type": 4,
-	  "value": 400,
+	  "value": 27,
 	  "effect_type": 5,
 	  "effect_value": 600
 	}
@@ -10447,7 +10447,8 @@
 	  "describe": "飞剑凝聚的剑气，造成1倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 1,
-	  "type": 5
+	  "type": 5,
+	  "value": 1
 	},
 	{
 	  "id": 15102,
@@ -10458,7 +10459,8 @@
 	  "describe": "飞剑凝聚的剑气，造成2倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 2,
-	  "type": 5
+	  "type": 5,
+	  "value": 1
 	},
 	{
 	  "id": 15103,
@@ -10469,7 +10471,8 @@
 	  "describe": "飞剑凝聚的剑气，造成3倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 3,
-	  "type": 5
+	  "type": 5,
+	  "value": 2
 	},
 	{
 	  "id": 15104,
@@ -10480,7 +10483,8 @@
 	  "describe": "飞剑凝聚的剑气，造成4倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 4,
-	  "type": 5
+	  "type": 5,
+	  "value": 1
 	},
 	{
 	  "id": 15105,
@@ -10491,7 +10495,8 @@
 	  "describe": "飞剑凝聚的剑气，造成5倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 5,
-	  "type": 5
+	  "type": 5,
+	  "value": 2
 	},
 	{
 	  "id": 15106,
@@ -10502,7 +10507,8 @@
 	  "describe": "飞剑凝聚的剑气，造成6倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 6,
-	  "type": 5
+	  "type": 5,
+	  "value": 4
 	},
 	{
 	  "id": 15107,
@@ -10513,7 +10519,8 @@
 	  "describe": "飞剑凝聚的剑气，造成7倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 7,
-	  "type": 5
+	  "type": 5,
+	  "value": 8
 	},
 	{
 	  "id": 15108,
@@ -10524,7 +10531,8 @@
 	  "describe": "飞剑凝聚的剑气，造成8倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 8,
-	  "type": 5
+	  "type": 5,
+	  "value": 1
 	},
 	{
 	  "id": 15109,
@@ -10535,7 +10543,8 @@
 	  "describe": "飞剑凝聚的剑气，造成9倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 9,
-	  "type": 5
+	  "type": 5,
+	  "value": 2
 	},
 	{
 	  "id": 15110,
@@ -10546,7 +10555,8 @@
 	  "describe": "飞剑凝聚的剑气，造成10倍伤害",
 	  "effect_type": 1,
 	  "effect_value": 10,
-	  "type": 5
+	  "type": 5,
+	  "value": 4
 	},
 	{
 	  "id": 15201,

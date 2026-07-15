@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cuyl18aoasnb7"]
 
-[ext_resource type="Script" uid="uid://djm2kgq44m3k7" path="res://scenes/ui/main/CraftPathView.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://c52nducodw65c" path="res://scenes/ui/main/CraftPathView.gd" id="1_gd"]
 
 [node name="CraftPathView" type="Control" unique_id=503858451]
 layout_mode = 3
@@ -23,15 +23,18 @@ mouse_filter = 2
 color = Color(0, 0, 0, 0.5)
 
 [node name="Panel" type="Panel" parent="." unique_id=1521435528]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -300.0
-offset_top = -200.0
+offset_top = -588.0
 offset_right = 300.0
-offset_bottom = 200.0
+offset_bottom = 547.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="CloseButton" type="Button" parent="Panel" unique_id=1096101415]
 layout_mode = 0
@@ -50,31 +53,34 @@ offset_bottom = 40.0
 
 [node name="ItemGrid" type="GridContainer" parent="Panel" unique_id=554595106]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 50.0
-offset_right = 580.0
-offset_bottom = 320.0
+offset_left = 15.0
+offset_top = 109.0
+offset_right = 585.0
+offset_bottom = 553.0
 columns = 5
 
 [node name="LauncherSection" type="Control" parent="Panel" unique_id=1511152767]
 anchors_preset = 0
 offset_left = 20.0
-offset_top = 330.0
+offset_top = 555.0
 offset_right = 580.0
-offset_bottom = 390.0
+offset_bottom = 1118.0
 mouse_filter = 2
 
 [node name="Label" type="Label" parent="Panel/LauncherSection" unique_id=805420652]
 layout_mode = 0
-offset_right = 200.0
-offset_bottom = 20.0
+offset_left = 3.0
+offset_top = 91.0
+offset_right = 203.0
+offset_bottom = 111.0
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
 theme_override_font_sizes/font_size = 12
 text = "来源"
 
 [node name="LauncherContainer" type="HBoxContainer" parent="Panel/LauncherSection" unique_id=143011835]
 layout_mode = 0
-offset_left = 1.0
-offset_top = 22.0
-offset_right = 561.0
-offset_bottom = 60.0
+offset_left = 14.0
+offset_top = 128.0
+offset_right = 570.0
+offset_bottom = 570.0
+theme_override_constants/separation = 18

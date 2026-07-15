@@ -1,6 +1,7 @@
 class_name RequirementEntry extends Control
 
 signal complete_pressed()
+signal item_pressed(item_id: int)
 
 var _data: Dictionary = {}
 var _items_setup: Array = []
@@ -39,8 +40,14 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 	for it in items:
 		var item_id: int = int(it.get("item_id", 0))
 		var item_data := ConfigDatabase.get_item_data(item_id)
+		var item_button := Button.new()
+		item_button.custom_minimum_size = Vector2(80, 80)
+		item_button.flat = true
+		item_button.tooltip_text = "查看获取方式"
+		item_button.pressed.connect(_on_item_pressed.bind(item_id))
+		items_container.add_child(item_button)
 		var widget := _item_widget_scene.instantiate() as ItemWidget
-		items_container.add_child(widget)
+		item_button.add_child(widget)
 		if not item_data.is_empty():
 			widget.setup(item_data)
 		else:
@@ -88,6 +95,10 @@ func set_available(available: bool) -> void:
 func _on_btn_pressed() -> void:
 	complete_pressed.emit()
 
+func _on_item_pressed(item_id: int) -> void:
+	if item_id > 0:
+		item_pressed.emit(item_id)
+
 func mark_completed() -> void:
 	var btn: Button = $Panel/CompleteButton
 	btn.text = "✓"
@@ -97,3 +108,7 @@ func mark_completed() -> void:
 	for child in items_container.get_children():
 		if child is ItemWidget:
 			child.modulate = Color(0.5, 0.8, 0.5, 1)
+		elif child is Button:
+			var widget := child.get_child(0) as ItemWidget
+			if widget:
+				widget.modulate = Color(0.5, 0.8, 0.5, 1)

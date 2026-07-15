@@ -4,50 +4,90 @@
 
 [node name="RecipePopup" type="Control"]
 layout_mode = 3
-size = Vector2(780, 1688)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 1
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
 script = ExtResource("1_gd")
 
 [node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0, 0, 0, 0.5)
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 1
+color = Color(0.035, 0.045, 0.055, 0.82)
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(650, 760)
+layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -250.0
-offset_right = 300.0
-offset_bottom = 250.0
+offset_left = -325.0
+offset_top = -380.0
+offset_right = 325.0
+offset_bottom = 380.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="TitleLabel" type="Label" parent="Panel"]
-offset_left = 30.0
-offset_top = 20.0
-offset_right = 570.0
-offset_bottom = 60.0
-theme_override_font_sizes/font_size = 22
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "配方列表"
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 22
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.92, 0.68, 1)
+theme_override_font_sizes/font_size = 24
+text = "制作配方"
 vertical_alignment = 1
 
-[node name="RecipeContainer" type="VBoxContainer" parent="Panel"]
-offset_left = 30.0
-offset_top = 70.0
-offset_right = 570.0
-offset_bottom = 420.0
-theme_override_constants/separation = 8
+[node name="CloseButton" type="Button" parent="Panel/Margin/VBox/Header"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+tooltip_text = "关闭"
+text = "×"
 
-[node name="CloseButton" type="Button" parent="Panel"]
-offset_left = 200.0
-offset_top = 430.0
-offset_right = 400.0
-offset_bottom = 470.0
+[node name="TargetContainer" type="HBoxContainer" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Separator" type="HSeparator" parent="Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="RecipeContainer" type="VBoxContainer" parent="Panel/Margin/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="EmptyLabel" type="Label" parent="Panel/Margin/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.72, 0.76, 1)
 theme_override_font_sizes/font_size = 16
-text = "关闭"
+text = "该道具暂无制作配方"
+horizontal_alignment = 1
