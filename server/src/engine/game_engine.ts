@@ -335,28 +335,17 @@ export class GameEngine {
     const typeMax: number = t.count_max ?? 3;
 
     state.meridian_threshold_idx = foundIdx;
+    const templateRewards: RewardConfig | undefined = t.acupoint_rewards;
     const acupoints: any[] = [];
     for (let i = 0; i < orderCount; i++) {
       const order = this._genOneAcupoint(pool, typeMin, typeMax);
-      if (order.total_value > 0) {
-        Object.assign(order, this._buildMeridianOrderReward(t, order.total_value, state));
+      if (templateRewards && order.total_value > 0) {
+        order.rewards = this._scaleRewardConfig(templateRewards, order.total_value);
       }
       acupoints.push(order);
     }
     state.meridian_acupoints = acupoints;
     return { acupoints };
-  }
-
-  private _buildMeridianOrderReward(threshold: any, totalValue: number, state: GameState): any {
-    const qiPerValue: number = Number(threshold?.qi_per_value ?? 1);
-    const baseQi: number = Math.max(0, Math.round(totalValue * qiPerValue));
-    const activityBonusRate: number = Math.max(0, Number(state.activity_reward_bonuses?.order_qi ?? 0));
-    const activityBonusQi: number = Math.round(baseQi * activityBonusRate);
-    return {
-      rewards: { tokens: [{ token: TokenType.QI, amount: baseQi + activityBonusQi }], items: [] },
-      base_qi: baseQi,
-      activity_bonus_qi: activityBonusQi,
-    };
   }
 
   private _scaleRewardConfig(rewards: RewardConfig | number, multiplier: number): RewardConfig {
@@ -1848,10 +1837,10 @@ export class GameEngine {
     let qiGained = 0;
     let qiFull = false;
     let rewardsApplied: RewardConfig = { tokens: [], items: [] };
-    if (totalValue > 0 && threshold) {
-      const orderReward = this._buildMeridianOrderReward(threshold, totalValue, state);
+    if (totalValue > 0 && threshold?.acupoint_rewards) {
+      const scaledRewards = this._scaleRewardConfig(threshold.acupoint_rewards, totalValue);
       const qiBefore = state.cultivation.current_qi;
-      const r = this.applyRewards(state, orderReward.rewards);
+      const r = this.applyRewards(state, scaledRewards);
       rewardsApplied.tokens!.push(...(r.tokens || []));
       rewardsApplied.items!.push(...(r.items || []));
       qiGained = state.cultivation.current_qi - qiBefore;
@@ -1865,8 +1854,8 @@ export class GameEngine {
     const newTypeMin: number = newThreshold?.count_min ?? 1;
     const newTypeMax: number = newThreshold?.count_max ?? 3;
     const newOrder = this._genOneAcupoint(newPool, newTypeMin, newTypeMax);
-    if (newThreshold && newOrder.total_value > 0) {
-      Object.assign(newOrder, this._buildMeridianOrderReward(newThreshold, newOrder.total_value, state));
+    if (newThreshold?.acupoint_rewards && newOrder.total_value > 0) {
+      newOrder.rewards = this._scaleRewardConfig(newThreshold.acupoint_rewards, newOrder.total_value);
     }
     state.meridian_acupoints.push(newOrder);
     console.log(`[engine] meridian order #${index} completed, new order generated`);
