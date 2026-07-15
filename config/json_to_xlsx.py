@@ -47,6 +47,20 @@ def join_dict_list(lst, sep=";"):
     return sep.join(parts)
 
 
+def format_rewards(obj):
+    """Convert a rewards dict like {tokens: [{token:4,amount:2}]} to string '4:2;3:15'"""
+    if not obj:
+        return ""
+    tokens = obj.get("tokens", [])
+    items = obj.get("items", [])
+    parts = []
+    for t in tokens:
+        parts.append(f"{t.get('token','?')}:{t.get('amount','?')}")
+    for it in items:
+        parts.append(f"item:{it.get('id','?')}:{it.get('count','?')}")
+    return ";".join(parts)
+
+
 def add_sheet(ws, headers, rows):
     """Write headers + rows into a worksheet with formatting."""
     for ci, h in enumerate(headers, 1):
@@ -354,7 +368,7 @@ wb = new_book()
 ws = wb.create_sheet("home_meridians")
 add_sheet(ws, ["name","acupoints","qi_cost","acupoint_rewards","circulation_rewards"],
     [[s.get("name",""), s.get("acupoints",""), s.get("qi_cost",""),
-      s.get("acupoint_rewards",""), s.get("circulation_rewards","")]
+      format_rewards(s.get("acupoint_rewards","")), format_rewards(s.get("circulation_rewards",""))]
      for s in data["stages"]])
 save(wb, "home_meridians")
 

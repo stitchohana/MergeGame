@@ -200,7 +200,7 @@ for row in read_rows(wb["meridians"]):
         "item_pool": parse_int_list(row["item_pool"]),
         "count_min": parse_int(row["count_min"]),
         "count_max": parse_int(row["count_max"]),
-        "qi_per_value": parse_int(row.get("qi_per_value", "")) or 1,
+        "acupoint_rewards": parse_int(row.get("acupoint_rewards", "")),
         "order_count": parse_int(row["order_count"]),
     })
 save_json("meridians.json", {"thresholds": thresholds})
