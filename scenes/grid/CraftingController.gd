@@ -36,7 +36,7 @@ func setup_button(parent: Node) -> void:
 	parent.add_child(_craft_button)
 	_craft_button.hide()
 	_craft_button.craft_pressed.connect(_on_craft_button_pressed)
-	_cell_size = Constants.CELL_SIZE
+	_cell_size = Constants.CELL_STEP
 
 # --- Called by GridView ---
 

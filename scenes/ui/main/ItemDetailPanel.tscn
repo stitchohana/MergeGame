@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://ofi2ei6no4yy"]
 
-[ext_resource type="Script" uid="uid://bkxqpth7x6n8p" path="res://scenes/ui/main/ItemDetailPanel.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://yvf00usf5sm6" path="res://scenes/ui/main/ItemDetailPanel.gd" id="1_gd"]
+[ext_resource type="Texture2D" uid="uid://bjsufih0ix8iq" path="res://assets/common/common_btn_atlas_texture.tres" id="2_wma36"]
+[ext_resource type="Theme" uid="uid://gc2kayu31yh8" path="res://assets/theme/btn_theme.tres" id="3_wngso"]
 
 [node name="ItemDetailPanel" type="Control" unique_id=607450120]
 layout_mode = 3
@@ -9,19 +11,26 @@ offset_right = 780.0
 offset_bottom = 147.0
 script = ExtResource("1_gd")
 
-[node name="Bg" type="ColorRect" parent="." unique_id=98878704]
+[node name="Bg" type="NinePatchRect" parent="." unique_id=366306202]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 2
-color = Color(0.1, 0.1, 0.14, 1)
+offset_bottom = 67.0
+texture = ExtResource("2_wma36")
+patch_margin_left = 40
+patch_margin_top = 50
+patch_margin_right = 57
+patch_margin_bottom = 40
 
 [node name="DefaultLabel" type="Label" parent="." unique_id=1604343573]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = 1.0
+offset_left = 87.0
+offset_top = 81.0
+offset_right = -513.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
@@ -34,20 +43,22 @@ vertical_alignment = 1
 layout_mode = 0
 offset_left = 53.0
 offset_top = 21.0
-offset_right = 318.0
-offset_bottom = 56.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 24
+offset_right = 148.0
+offset_bottom = 49.0
+theme = ExtResource("3_wngso")
+text = "道具名字"
 vertical_alignment = 1
 
 [node name="LevelLabel" type="Label" parent="." unique_id=1221540825]
 layout_mode = 0
-offset_left = 134.0
-offset_top = 8.0
-offset_right = 316.0
-offset_bottom = 38.0
+offset_left = 142.0
+offset_top = 21.0
+offset_right = 198.0
+offset_bottom = 51.0
+theme = ExtResource("3_wngso")
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 16
+text = "lv1"
 vertical_alignment = 1
 
 [node name="DescLabel" type="Label" parent="." unique_id=1583989582]
@@ -58,6 +69,7 @@ offset_right = 742.0
 offset_bottom = 89.0
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
 theme_override_font_sizes/font_size = 14
+text = "描述描述描述描述描述"
 vertical_alignment = 1
 
 [node name="RecipeButton" type="Button" parent="." unique_id=33481762]
@@ -70,6 +82,7 @@ theme_override_font_sizes/font_size = 14
 text = "配方"
 
 [node name="ViewButton" type="Button" parent="." unique_id=690038754]
+visible = false
 layout_mode = 0
 offset_left = 431.0
 offset_top = 20.0

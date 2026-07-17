@@ -5,11 +5,11 @@
 [ext_resource type="PackedScene" path="res://scenes/items/GridItem.tscn" id="3_item"]
 
 [node name="GridView" type="Control" unique_id=891199530]
-custom_minimum_size = Vector2(700, 900)
+custom_minimum_size = Vector2(584, 752)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 700.0
-offset_bottom = 900.0
+offset_right = 584.0
+offset_bottom = 752.0
 script = ExtResource("1_gd")
 grid_cell_scene = ExtResource("2_cell")
 grid_item_scene = ExtResource("3_item")

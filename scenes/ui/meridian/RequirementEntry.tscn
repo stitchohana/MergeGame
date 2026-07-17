@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dtqffbbhnmvni"]
 
-[ext_resource type="Script" uid="uid://ne3jtigjrbwk" path="res://scenes/ui/meridian/RequirementEntry.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://6v7jfvkqce6x" path="res://scenes/ui/meridian/RequirementEntry.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://c4bxt375wgagi" path="res://assets/game/order_requirement_bg_atlas_texture.tres" id="2_eu76h"]
 
 [node name="RequirementEntry" type="Control" unique_id=556992796]
 custom_minimum_size = Vector2(260, 110)
@@ -11,7 +12,7 @@ offset_bottom = 109.0
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="Panel" type="Panel" parent="." unique_id=943656527]
+[node name="Panel" type="Control" parent="." unique_id=1303775029]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -59,3 +60,15 @@ offset_bottom = -9.0
 grow_horizontal = 2
 grow_vertical = 0
 size_flags_horizontal = 4
+
+[node name="TextureRect" type="NinePatchRect" parent="." unique_id=1048133667]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_eu76h")
+region_rect = Rect2(51, 44, 310, 334)

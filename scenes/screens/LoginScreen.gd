@@ -4,6 +4,7 @@ class_name LoginScreen extends BaseScreen
 @onready var login_btn: Button = $LoginButton
 @onready var status_label: Label = $StatusLabel
 @onready var back_btn: Button = $BackButton
+@onready var progress_bar: ProgressBar = $ProgressBar
 
 func _ready() -> void:
 	var device_id := _get_device_id()
@@ -16,6 +17,7 @@ func _ready() -> void:
 
 	CloudService.login_success.connect(_on_login_success)
 	CloudService.login_failed.connect(_on_login_failed)
+	progress_bar.value = 0.0
 
 func on_enter() -> void:
 	if not CloudService.token.is_empty():
@@ -24,7 +26,8 @@ func on_enter() -> void:
 		CloudService.state_loaded.connect(_on_state_loaded_for_skip, CONNECT_ONE_SHOT)
 		CloudService.state_load_failed.connect(_on_state_load_failed_skip, CONNECT_ONE_SHOT)
 	else:
-		_status("请输入设备ID或使用自动生成的ID登录")
+		_status("正在自动登录...")
+		_on_login()
 
 func _get_device_id() -> String:
 	var path := "user://device_id"
@@ -54,10 +57,12 @@ func _on_login() -> void:
 		return
 
 	login_btn.disabled = true
+	_set_progress(0.2)
 	_status("正在连接服务器...")
 	CloudService.login(device_id)
 
 func _on_login_success(user_id: String) -> void:
+	_set_progress(0.5)
 	_status("登录成功，拉取游戏存档...")
 	CloudService.fetch_state()
 	if not CloudService.state_loaded.is_connected(_on_state_loaded):
@@ -68,12 +73,16 @@ func _on_login_success(user_id: String) -> void:
 func _on_state_loaded(state: Dictionary) -> void:
 	_disconnect_state_signals()
 	SaveManager._restore_from_server(state)
-	SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn", UIManager.Transition.FADE)
+	_set_progress(1.0)
+	GameState.skip_next_home_loading = true
+	SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn", Callable(), true)
 
 func _on_state_loaded_for_skip(state: Dictionary) -> void:
 	_disconnect_state_signals()
 	SaveManager._restore_from_server(state)
-	SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn", UIManager.Transition.FADE)
+	_set_progress(1.0)
+	GameState.skip_next_home_loading = true
+	SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn", Callable(), true)
 
 func _on_state_load_failed(reason: String) -> void:
 	_disconnect_state_signals()
@@ -82,17 +91,22 @@ func _on_state_load_failed(reason: String) -> void:
 		_status("加载失败: " + reason)
 	else:
 		_status("存档加载失败，进入离线模式")
-		SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn")
+		SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn", Callable(), true)
 
 func _on_state_load_failed_skip(reason: String) -> void:
 	_on_state_load_failed(reason)
 
 func _on_login_failed(reason: String) -> void:
 	login_btn.disabled = false
+	_set_progress(0.0)
 	_status("登录失败: " + reason)
 
 func _on_back() -> void:
 	UIManager.pop_screen()
+
+func _set_progress(value: float) -> void:
+	if progress_bar:
+		progress_bar.value = value
 
 func _disconnect_state_signals() -> void:
 	if CloudService.state_loaded.is_connected(_on_state_loaded):

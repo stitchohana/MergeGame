@@ -4,12 +4,11 @@ signal complete_clicked(index: int)
 
 var _entry_scene: PackedScene = preload("res://scenes/ui/meridian/RequirementEntry.tscn")
 
-@onready var title_label: Label = $Panel/TitleLabel
 @onready var scroll: ScrollContainer = $Panel/ScrollContainer
 @onready var container: HBoxContainer = $Panel/ScrollContainer/HBoxContainer
 
-func set_title(text: String) -> void:
-	title_label.text = text
+func set_title(_text: String) -> void:
+	pass
 
 func set_requirements(reqs: Array) -> void:
 	for child in container.get_children():

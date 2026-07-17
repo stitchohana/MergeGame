@@ -35,9 +35,11 @@ enum QuestType {
 # Game dimensions — phone portrait (390×844)
 const GRID_COLS := 7
 const GRID_ROWS := 9
-const CELL_SIZE := 100
-const GRID_WIDTH := GRID_COLS * CELL_SIZE
-const GRID_HEIGHT := GRID_ROWS * CELL_SIZE
+const CELL_SIZE := 86
+const CELL_GAP := 3
+const CELL_STEP := CELL_SIZE + CELL_GAP
+const GRID_WIDTH := GRID_COLS * CELL_STEP - CELL_GAP
+const GRID_HEIGHT := GRID_ROWS * CELL_STEP - CELL_GAP
 
 # Animations
 const MERGE_ANIM_DURATION := 0.3

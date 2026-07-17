@@ -12,11 +12,11 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_highlight(HighlightType.NONE)
 
-func setup(pos: Vector2i, cell_size: int) -> void:
+func setup(pos: Vector2i, cell_step: int) -> void:
 	grid_position = pos
-	custom_minimum_size = Vector2(cell_size, cell_size)
-	size = Vector2(cell_size, cell_size)
-	position = Vector2(pos.x * cell_size, pos.y * cell_size)
+	custom_minimum_size = Vector2(Constants.CELL_SIZE, Constants.CELL_SIZE)
+	size = Vector2(Constants.CELL_SIZE, Constants.CELL_SIZE)
+	position = Vector2(pos.x * cell_step, pos.y * cell_step)
 
 func set_highlight(type: HighlightType) -> void:
 	if highlight_rect == null:

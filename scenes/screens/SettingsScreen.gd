@@ -7,4 +7,4 @@ func _ready() -> void:
 		back_btn.pressed.connect(_on_back)
 
 func _on_back() -> void:
-	UIManager.pop_screen(UIManager.Transition.SLIDE_RIGHT)
+	UIManager.pop_screen()

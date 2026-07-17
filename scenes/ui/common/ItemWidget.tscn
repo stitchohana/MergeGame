@@ -1,16 +1,31 @@
 [gd_scene format=3 uid="uid://dbfaocwritemw"]
 
-[ext_resource type="Script" uid="uid://csgm2fbx5sx83" path="res://scenes/ui/common/ItemWidget.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://s3peh3x20qy6" path="res://scenes/ui/common/ItemWidget.gd" id="1_gd"]
+[ext_resource type="Texture2D" uid="uid://er6w8cq78bts" path="res://assets/game/item_bg_atlas_texture.tres" id="2_fkn0s"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_hk2cv"]
 
-[node name="ItemWidget" type="ColorRect" unique_id=648899735]
+[node name="ItemWidget" type="Control" unique_id=1907322053]
 custom_minimum_size = Vector2(80, 80)
+layout_mode = 3
+anchors_preset = 0
 offset_right = 80.0
 offset_bottom = 80.0
 mouse_filter = 1
-color = Color(0.3, 0.3, 0.4, 1)
 script = ExtResource("1_gd")
+
+[node name="IconBg" type="TextureRect" parent="." unique_id=426041861]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_fkn0s")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="IconRect" type="TextureRect" parent="." unique_id=1370072684]
 layout_mode = 1

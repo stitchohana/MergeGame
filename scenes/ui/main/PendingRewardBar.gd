@@ -93,7 +93,7 @@ func _on_claimed(result: Dictionary) -> void:
 	var col: int = result.get("col", -1)
 	var row: int = result.get("row", -1)
 	var grid_origin: Vector2 = grid_view.global_position if grid_view and is_instance_valid(grid_view) else Vector2.ZERO
-	var cell_size: int = Constants.CELL_SIZE
+	var cell_size: int = Constants.CELL_STEP
 	var cell_center: Vector2 = grid_origin + Vector2(col * cell_size + cell_size / 2, row * cell_size + cell_size / 2)
 
 	var on_done := func():

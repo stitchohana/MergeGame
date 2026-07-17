@@ -9,25 +9,28 @@ const MIN_DISPLAY_TIME: float = 0.5
 
 var _is_loading: bool = false
 var _after_load: Callable = Callable()
-var _target_transition: UIManager.Transition = UIManager.Transition.FADE
 var _target_scene: PackedScene = null
+var _skip_loading_overlay: bool = false
 
 
-func load_scene_and_replace(scene_path: String, transition: UIManager.Transition = UIManager.Transition.FADE, after_load: Callable = Callable()) -> void:
+func load_scene_and_replace(scene_path: String, after_load: Callable = Callable(), skip_loading_overlay: bool = false) -> void:
 	if _is_loading:
 		return
 
 	_is_loading = true
-	_target_transition = transition
 	_after_load = after_load
+	_skip_loading_overlay = skip_loading_overlay
 
-	var token := LoadingManager.begin("加载场景...")
+	var token := -1
+	if not skip_loading_overlay:
+		token = LoadingManager.begin("加载场景...")
 
 	_target_scene = load(scene_path)
 	if _target_scene == null:
 		printerr("[SceneTransitionManager] Failed to load: ", scene_path)
 		_is_loading = false
-		LoadingManager.end(token)
+		if not skip_loading_overlay:
+			LoadingManager.end(token)
 		return
 
 	var screen := _target_scene.instantiate()
@@ -36,15 +39,17 @@ func load_scene_and_replace(scene_path: String, transition: UIManager.Transition
 			func(_name: String, _action: String): _after_load.call(),
 			CONNECT_ONE_SHOT
 		)
-	UIManager.replace_top_screen(screen, _target_transition)
+	UIManager.replace_top_screen(screen)
 
-	# Hold loading for min display time, then release
+	print("[STM] load_scene_and_replace: ", scene_path, " skip=", skip_loading_overlay)
 	var timer := Timer.new()
 	timer.one_shot = true
 	timer.wait_time = MIN_DISPLAY_TIME
 	timer.timeout.connect(func():
+		print("[STM] timer fired, ending token=", token)
 		timer.queue_free()
-		LoadingManager.end(token)
+		if not skip_loading_overlay:
+			LoadingManager.end(token)
 		_is_loading = false
 	)
 	add_child(timer)

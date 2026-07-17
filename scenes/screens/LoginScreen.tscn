@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cpq61w6j6i33a"]
 
 [ext_resource type="Script" uid="uid://djfkaf3ggjcl" path="res://scenes/screens/LoginScreen.gd" id="1_ls"]
+[ext_resource type="Texture2D" uid="uid://bjfmfpwnfx22p" path="res://assets/login/login_bg2.png" id="2_p2wte"]
 
 [node name="LoginScreen" type="Control" unique_id=1898501451]
 layout_mode = 3
@@ -12,6 +13,7 @@ grow_vertical = 2
 script = ExtResource("1_ls")
 
 [node name="TitleLabel" type="Label" parent="." unique_id=489151892]
+visible = false
 layout_mode = 0
 offset_left = 265.0
 offset_top = 400.0
@@ -23,6 +25,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DeviceLabel" type="Label" parent="." unique_id=778059788]
+visible = false
 layout_mode = 0
 offset_left = 165.0
 offset_top = 520.0
@@ -34,6 +37,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DeviceInput" type="LineEdit" parent="." unique_id=1037138139]
+visible = false
 layout_mode = 0
 offset_left = 140.0
 offset_top = 560.0
@@ -42,6 +46,7 @@ offset_bottom = 600.0
 theme_override_font_sizes/font_size = 16
 
 [node name="LoginButton" type="Button" parent="." unique_id=759551432]
+visible = false
 layout_mode = 0
 offset_left = 290.0
 offset_top = 660.0
@@ -60,7 +65,17 @@ theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=1905831319]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 840.0
+offset_right = 640.0
+offset_bottom = 870.0
+max_value = 1.0
+show_percentage = false
+
 [node name="BackButton" type="Button" parent="." unique_id=724716177]
+visible = false
 layout_mode = 0
 offset_left = 290.0
 offset_top = 880.0
@@ -68,3 +83,8 @@ offset_right = 490.0
 offset_bottom = 940.0
 theme_override_font_sizes/font_size = 18
 text = "返回"
+
+[node name="LoginBg2" type="Sprite2D" parent="." unique_id=748927094]
+z_index = -1
+position = Vector2(383, 870)
+texture = ExtResource("2_p2wte")

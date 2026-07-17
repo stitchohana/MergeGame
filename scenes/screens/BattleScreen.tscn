@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://deg7lbni32jui" path="res://scenes/grid/GridView.tscn" id="2_grid"]
 [ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/main/ItemDetailPanel.tscn" id="3_detail"]
 [ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/main/PouchDropZone.tscn" id="4_pouch"]
-[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/main/TopBar.tscn" id="5_qxd11"]
+[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/common/TopBar.tscn" id="5_qxd11"]
 
 [node name="BattleScreen" type="Control" unique_id=1668431896]
 layout_mode = 3
@@ -20,8 +20,8 @@ script = ExtResource("1_script")
 layout_mode = 0
 offset_left = 45.0
 offset_top = 358.0
-offset_right = 745.0
-offset_bottom = 1258.0
+offset_right = 629.0
+offset_bottom = 1110.0
 
 [node name="MapHeader" type="ColorRect" parent="." unique_id=1430606215]
 layout_mode = 0

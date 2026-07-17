@@ -280,7 +280,7 @@ func _on_item_clicked(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	detail_panel.show_item(item_data, grid_pos)
 
 func _play_attack_animation(item_data: Dictionary, grid_pos: Vector2i, result: Dictionary) -> void:
-	var cell_size := Constants.CELL_SIZE
+	var cell_size := Constants.CELL_STEP
 	var from_pos := grid_view.global_position + Vector2(grid_pos.x * cell_size + cell_size * 0.5, grid_pos.y * cell_size + cell_size * 0.5)
 	var target_pos := _get_monster_target_pos()
 

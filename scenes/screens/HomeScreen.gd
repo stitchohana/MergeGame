@@ -30,7 +30,10 @@ func _ready() -> void:
 
 func on_enter() -> void:
 	modulate = Color.TRANSPARENT
-	_load_token = LoadingManager.begin("加载数据...")
+	if GameState.skip_next_home_loading:
+		GameState.skip_next_home_loading = false
+	else:
+		_load_token = LoadingManager.begin("加载数据...")
 	if CloudService.online:
 		CloudService.fetch_state()
 
@@ -59,6 +62,7 @@ func _on_state_loaded(state: Dictionary) -> void:
 		_home_progress = state.home_meridian_progress
 	_refresh_display()
 	_refresh_breakthrough_btn()
+	_try_auto_acupoint()
 	var fade := create_tween()
 	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
 
@@ -132,6 +136,29 @@ func _refresh_display() -> void:
 			btn.disabled = false
 			btn.pressed.connect(_on_acupoint_pressed.bind(i))
 
+
+func _try_auto_acupoint() -> void:
+	if not GameState.pending_auto_acupoint:
+		return
+	GameState.pending_auto_acupoint = false
+	if _current_stage_idx < 0 or _home_defs.is_empty():
+		return
+	var def: Dictionary = _home_defs[_current_stage_idx]
+	var qi_cost: int = def.get("qi_cost", 0)
+	if CultivationService.current_qi < qi_cost:
+		return
+	var progress: Dictionary = {}
+	for p in _home_progress:
+		if p.get("stage", -1) == _current_stage_idx:
+			progress = p
+			break
+	var lit: Array = progress.get("lit", [])
+	var total: int = def.get("acupoints", 0)
+	for i in range(total):
+		var is_lit: bool = lit[i] if i < lit.size() else false
+		if not is_lit:
+			_on_acupoint_pressed(i)
+			return
 
 func _on_acupoint_pressed(index: int) -> void:
 	if _current_stage_idx < 0 or _home_defs.is_empty():

@@ -18,7 +18,6 @@ var _item_use_pending: bool = false
 var _load_token: int = -1
 
 func _ready() -> void:
-	modulate = Color.TRANSPARENT
 	randomize()
 
 	GridManager.grid_updated.connect(_on_grid_changed)
@@ -54,7 +53,8 @@ func _ready() -> void:
 	print("[GameScreen] Game initialized!")
 
 func _setup_extras() -> void:
-	# Add activity entry widgets for active activities with widgets configured
+	# Sort order: activity > character > order (pending_bar)
+	var activity_count: int = 0
 	for act in ActivityManager.get_active_activities():
 		var widget: String = act.get("widget", "")
 		if widget.is_empty():
@@ -62,22 +62,31 @@ func _setup_extras() -> void:
 		var entry := _create_activity_entry(act)
 		if entry:
 			requirement_list.container.add_child(entry)
-			requirement_list.container.move_child(entry, 0)
+			requirement_list.container.move_child(entry, activity_count)
 			entry.setup(act)
+			activity_count += 1
+
+	var character_entry := preload("res://scenes/ui/character/CharacterEntry.tscn").instantiate() as CharacterEntry
+	requirement_list.container.add_child(character_entry)
+	requirement_list.container.move_child(character_entry, activity_count)
 
 	if not pending_bar:
 		pending_bar = preload("res://scenes/ui/main/PendingRewardBar.tscn").instantiate() as PendingRewardBar
 		requirement_list.container.add_child(pending_bar)
-		requirement_list.container.move_child(pending_bar, 1)
+		requirement_list.container.move_child(pending_bar, activity_count + 1)
 		pending_bar.setup(grid_view)
 
 func on_enter() -> void:
+	print("[GameScreen] on_enter START")
 	GameState.current_board_type = Constants.BoardType.MAIN
 	GridManager.init_grid(Constants.BoardType.MAIN)
 	grid_view.visible = false
+	print("[GameScreen] grid_view.visible=false, calling LoadingManager.begin")
 	_load_token = LoadingManager.begin("加载棋盘数据...")
+	print("[GameScreen] _load_token=", _load_token, " online=", CloudService.online)
 	if CloudService.online:
 		CloudService.submit_board_switch(Constants.BoardType.MAIN)
+	print("[GameScreen] on_enter DONE")
 
 
 func on_exit() -> void:
@@ -87,7 +96,9 @@ func on_exit() -> void:
 	detail_panel.clear()
 
 func _on_main_board_switch_confirmed(result: Dictionary) -> void:
+	print("[GameScreen] _on_main_board_switch_confirmed: board_type=", result.get("board_type", -1), " items=", result.get("grid", []).size())
 	if result.get("board_type", -1) != Constants.BoardType.MAIN:
+		print("[GameScreen] board_type mismatch, returning")
 		return
 	GameState.main_grid_cache = result.get("grid", [])
 	grid_view.set_skip_animations(true)
@@ -95,10 +106,11 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 	GridManager.populate_from_server(GameState.main_grid_cache)
 	grid_view.set_skip_animations(false)
 	grid_view.visible = true
-	print("[GameScreen] Board synced from server: ", GameState.main_grid_cache.size(), " items")
+	print("[GameScreen] grid_view.visible=true, ending token=", _load_token)
 	if _load_token > 0:
 		LoadingManager.end(_load_token)
 		_load_token = -1
+	print("[GameScreen] board switch done")
 
 func _on_main_board_switch_rejected(_reason: String) -> void:
 	if _load_token > 0:

@@ -49,14 +49,14 @@ func set_selected(active: bool) -> void:
 	if select_icon:
 		select_icon.visible = active
 
-func setup(data: Dictionary, pos: Vector2i, cell_size: int) -> void:
+func setup(data: Dictionary, pos: Vector2i, cell_step: int) -> void:
 	item_data = data
 	grid_position = pos
 	is_launcher = data.get("type", 0) == Constants.ItemType.LAUNCHER
 
-	custom_minimum_size = Vector2(cell_size, cell_size)
-	size = Vector2(cell_size, cell_size)
-	position = Vector2(pos.x * cell_size, pos.y * cell_size)
+	custom_minimum_size = Vector2(Constants.CELL_SIZE, Constants.CELL_SIZE)
+	size = Vector2(Constants.CELL_SIZE, Constants.CELL_SIZE)
+	position = Vector2(pos.x * cell_step, pos.y * cell_step)
 
 	_update_visuals()
 

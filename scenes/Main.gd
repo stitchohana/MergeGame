@@ -20,7 +20,7 @@ func _ready() -> void:
 
 	# Push the login screen first
 	var login := preload("res://scenes/screens/LoginScreen.tscn").instantiate()
-	UIManager.push_screen(login, UIManager.Transition.FADE)
+	UIManager.push_screen(login)
 
 func _setup_toast() -> void:
 	_toast = preload("res://scenes/ui/common/Toast.tscn").instantiate()
@@ -37,19 +37,19 @@ func _on_kicked() -> void:
 	print("[Main] Kicked: connection lost, returning to login")
 	UIManager.clear_all_screens()
 	var login := preload("res://scenes/screens/LoginScreen.tscn").instantiate()
-	UIManager.push_screen(login, UIManager.Transition.FADE)
+	UIManager.push_screen(login)
 
 func _on_screen_change_requested(screen_name: String) -> void:
 	match screen_name:
 		"login":
 			var login := preload("res://scenes/screens/LoginScreen.tscn").instantiate()
-			UIManager.push_screen(login, UIManager.Transition.FADE)
+			UIManager.push_screen(login)
 		"home":
-			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn", UIManager.Transition.FADE)
+			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/HomeScreen.tscn")
 		"game":
-			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/GameScreen.tscn", UIManager.Transition.FADE)
+			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/GameScreen.tscn")
 		"battle":
-			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/BattleScreen.tscn", UIManager.Transition.FADE)
+			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/BattleScreen.tscn")
 		"settings":
 			var settings := preload("res://scenes/screens/SettingsScreen.tscn").instantiate()
-			UIManager.push_screen(settings, UIManager.Transition.SLIDE_LEFT)
+			UIManager.push_screen(settings)

@@ -4,7 +4,7 @@
 
 [node name="GridCell" type="ColorRect"]
 script = ExtResource("1_gd")
-color = Color(0.15, 0.15, 0.18, 1)
+color = Color(0, 0, 0, 0)
 
 [node name="Highlight" type="ColorRect" parent="."]
 mouse_filter = 2

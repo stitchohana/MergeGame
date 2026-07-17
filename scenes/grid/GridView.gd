@@ -5,6 +5,7 @@ class_name GridView extends Control
 const LauncherControllerClass := preload("res://scenes/grid/LauncherController.gd")
 const CraftingControllerClass := preload("res://scenes/grid/CraftingController.gd")
 const CELL_SIZE := Constants.CELL_SIZE
+const CELL_STEP := Constants.CELL_STEP
 const GRID_COLS := Constants.GRID_COLS
 const GRID_ROWS := Constants.GRID_ROWS
 const DRAG_THRESHOLD := 10.0  # pixels before drag starts
@@ -55,6 +56,7 @@ func set_skip_animations(skip: bool) -> void:
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	print("[GridView] _ready: size=", size, " position=", position, " visible=", visible)
 	_create_grid()
 	_launcher_ctrl = LauncherControllerClass.new()
 	add_child(_launcher_ctrl)
@@ -76,26 +78,20 @@ func _ready() -> void:
 	_craft_ctrl.sync_states()
 
 func _create_grid() -> void:
-	var bg := ColorRect.new()
-	bg.name = "GridBackground"
-	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bg.color = Color(0.08, 0.08, 0.12, 1)
-	bg.custom_minimum_size = Vector2(GRID_COLS * CELL_SIZE, GRID_ROWS * CELL_SIZE)
-	bg.size = Vector2(GRID_COLS * CELL_SIZE, GRID_ROWS * CELL_SIZE)
-	bg.position = Vector2.ZERO
-	add_child(bg)
-
+	print("[GridView] _create_grid: CELL_SIZE=", CELL_SIZE, " CELL_STEP=", CELL_STEP, " grid=", GRID_COLS, "x", GRID_ROWS)
 	var cells_layer := Control.new()
 	cells_layer.name = "GridCells"
 	cells_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(cells_layer)
+	print("[GridView] cells_layer created, adding cells...")
 
 	for row in range(GRID_ROWS):
 		for col in range(GRID_COLS):
 			var cell := grid_cell_scene.instantiate()
 			cells_layer.add_child(cell)
-			cell.setup(Vector2i(col, row), CELL_SIZE)
+			cell.setup(Vector2i(col, row), CELL_STEP)
 			_cell_nodes["%d,%d" % [col, row]] = cell
+	print("[GridView] cells done: ", _cell_nodes.size(), " cells")
 
 	var items_layer := Control.new()
 	items_layer.name = "ItemsLayer"
@@ -160,7 +156,7 @@ func _input(event: InputEvent) -> void:
 				if cstate == CraftingService.TableState.HAS_ITEMS:
 					var recipe: Dictionary = _pressed_item.get("_craft_recipe", {})
 					if not recipe.is_empty():
-						_craft_ctrl.show_button_for_table(recipe, _press_start_pos, CELL_SIZE)
+						_craft_ctrl.show_button_for_table(recipe, _press_start_pos, CELL_STEP)
 				_pressed_item = {}
 				return
 
@@ -176,7 +172,7 @@ func _input(event: InputEvent) -> void:
 			var drag_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 			var drag_node = _item_nodes.get(drag_key)
 			if drag_node and is_instance_valid(drag_node):
-				drag_node.position = get_global_mouse_position() - global_position - Vector2(CELL_SIZE * 0.5, CELL_SIZE * 0.5)
+				drag_node.position = get_global_mouse_position() - global_position - Vector2(CELL_STEP * 0.5, CELL_STEP * 0.5)
 			_update_highlights(local_pos)
 		elif not _pressed_item.is_empty() and not _pressed_has_moved:
 			if local_pos.distance_to(_press_screen_pos) > DRAG_THRESHOLD:
@@ -187,7 +183,7 @@ func _to_local(global_pos: Vector2) -> Vector2:
 	return global_pos - global_position
 
 func _local_to_grid(local_pos: Vector2) -> Vector2i:
-	return Vector2i(int(local_pos.x / CELL_SIZE), int(local_pos.y / CELL_SIZE))
+	return Vector2i(int(local_pos.x / CELL_STEP), int(local_pos.y / CELL_STEP))
 
 
 func _handle_crafting_drop(table_pos: Vector2i, table_item: Dictionary) -> void:
@@ -249,11 +245,11 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 	var fly_key := "%d,%d" % [target_pos.x, target_pos.y]
 	var fly_node: GridItem = _item_nodes.get(fly_key)
 	if fly_node and is_instance_valid(fly_node) and launcher_pos.x >= 0:
-		fly_node.position = Vector2(launcher_pos.x * CELL_SIZE, launcher_pos.y * CELL_SIZE)
+		fly_node.position = Vector2(launcher_pos.x * CELL_STEP, launcher_pos.y * CELL_STEP)
 		fly_node.scale = Vector2(0.7, 0.7)
 		var tween := create_tween()
 		tween.set_parallel(true)
-		tween.tween_property(fly_node, "position", Vector2(target_pos.x * CELL_SIZE, target_pos.y * CELL_SIZE), 0.35).set_trans(Tween.TRANS_CUBIC)
+		tween.tween_property(fly_node, "position", Vector2(target_pos.x * CELL_STEP, target_pos.y * CELL_STEP), 0.35).set_trans(Tween.TRANS_CUBIC)
 		tween.tween_property(fly_node, "scale", Vector2(1, 1), 0.35).set_trans(Tween.TRANS_BOUNCE)
 
 	# Update stamina
@@ -373,7 +369,7 @@ func _place_dragged_item(target_pos: Vector2i) -> void:
 	var src_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 	var node = _item_nodes.get(src_key)
 	if node and is_instance_valid(node):
-		node.position = Vector2(target_pos.x * CELL_SIZE, target_pos.y * CELL_SIZE)
+		node.position = Vector2(target_pos.x * CELL_STEP, target_pos.y * CELL_STEP)
 	_pending_move_src = _drag_source_pos
 	_pending_move_target = target_pos
 	if CloudService.online:
@@ -444,7 +440,7 @@ func _snap_back_to(pos: Vector2i) -> void:
 	var key := "%d,%d" % [pos.x, pos.y]
 	var item_node = _item_nodes.get(key)
 	if item_node and is_instance_valid(item_node):
-		var target := Vector2(pos.x * CELL_SIZE, pos.y * CELL_SIZE)
+		var target := Vector2(pos.x * CELL_STEP, pos.y * CELL_STEP)
 		var tween := create_tween()
 		tween.tween_property(item_node, "position", target, 0.2)
 
@@ -472,7 +468,7 @@ func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
 	var layer := _get_items_layer()
 	if layer:
 		layer.add_child(item)
-	item.setup(item_data, pos, CELL_SIZE)
+	item.setup(item_data, pos, CELL_STEP)
 	if GameState.current_board_type != Constants.BoardType.MAIN:
 		item.set_required(false)
 	if not _is_launcher_spawning and not _skip_anims and not GridManager._skip_anims:
@@ -507,7 +503,7 @@ func _on_item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i)
 		node.grid_position = to_pos
 		_item_nodes.erase(key)
 		_item_nodes["%d,%d" % [to_pos.x, to_pos.y]] = node
-		var target := Vector2(to_pos.x * CELL_SIZE, to_pos.y * CELL_SIZE)
+		var target := Vector2(to_pos.x * CELL_STEP, to_pos.y * CELL_STEP)
 		if _skip_anims:
 			node.position = target
 		else:
@@ -527,7 +523,7 @@ func _sync_all_items() -> void:
 	for entry in GridManager.get_all_items():
 		var item := grid_item_scene.instantiate()
 		layer.add_child(item)
-		item.setup(entry.data, entry.pos, CELL_SIZE)
+		item.setup(entry.data, entry.pos, CELL_STEP)
 		_item_nodes["%d,%d" % [entry.pos.x, entry.pos.y]] = item
 		_try_start_launcher_cd(entry.data)
 

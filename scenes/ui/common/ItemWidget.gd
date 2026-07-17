@@ -1,4 +1,4 @@
-class_name ItemWidget extends ColorRect
+class_name ItemWidget extends Control
 
 # ItemWidget: Reusable item display for grid and UI. Shows icon, name, level,
 # selection indicator, charge status, and crafting state.
@@ -10,8 +10,6 @@ var grid_position: Vector2i
 var is_launcher: bool = false
 
 var _is_selected: bool = false
-var _orig_modulate: Color
-var _orig_scale: Vector2
 
 @onready var icon_rect: TextureRect = $IconRect
 @onready var name_label: Label = $NameLabel
@@ -21,8 +19,6 @@ var _orig_scale: Vector2
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_orig_modulate = modulate
-	_orig_scale = scale
 
 func setup(data: Dictionary, pos: Vector2i = Vector2i(-1, -1), cell_size: int = 80) -> void:
 	item_data = data
@@ -53,27 +49,6 @@ func _si() -> TextureRect:
 	return select_icon if select_icon else get_node_or_null("SelectIcon") as TextureRect
 
 func _update_visuals() -> void:
-	var item_type: int = item_data.get("type", 0)
-	var group_id: int = item_data.get("group_id", 0)
-
-	# Background color
-	if is_launcher:
-		match group_id:
-			1: color = Color(0.6, 0.3, 0.8, 1)
-			2: color = Color(1.0, 0.6, 0.2, 1)
-			_: color = Color(0.5, 0.5, 0.5, 1)
-	else:
-		var level: int = item_data.get("level", 0)
-		var hue := 0.0
-		match group_id:
-			1: hue = float(level - 1) / 8.0
-			2: hue = 0.25 + float(level - 1) / 6.0 * 0.15
-			_: hue = float(level - 1) / 8.0
-		color = Color.from_hsv(hue, 0.6, 0.7)
-		var cs: int = item_data.get("_craft_state", -1)
-		if cs >= 0 and cs <= 3:
-			set_crafting_state(cs)
-
 	# Icon
 	var icon_path: String = item_data.get("icon", "")
 	var ic := _ic()
@@ -109,10 +84,8 @@ func _update_visuals() -> void:
 				ch.visible = true
 				if item_charges <= 0:
 					ch.text = "空"
-					ch.add_theme_color_override("font_color", Color(1, 0.3, 0.3, 1))
 				else:
 					ch.text = "%d/%d" % [item_charges, max_c]
-					ch.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
 			else:
 				ch.visible = false
 		else:
@@ -126,27 +99,16 @@ func set_selected(active: bool) -> void:
 
 func set_drag_active(active: bool) -> void:
 	if active:
-		modulate = Color(1, 1, 1, 0.4)
 		scale = Vector2(0.9, 0.9)
 	else:
-		modulate = Color.WHITE
 		scale = Vector2(1, 1)
-
-func set_crafting_state(state: int) -> void:
-	match state:
-		1: modulate = Color(1.0, 1.0, 0.8, 1)
-		2: modulate = Color(0.6, 0.6, 0.7, 1)
-		3: modulate = Color(1.0, 1.0, 0.6, 1)
-		_: modulate = Color.WHITE
 
 func set_visual_position(pos: Vector2) -> void:
 	position = pos
 
 func play_merge_animation() -> void:
 	var tween := create_tween()
-	tween.set_parallel(true)
 	tween.tween_property(self, "scale", Vector2(1.3, 1.3), 0.15)
-	tween.tween_property(self, "modulate", Color(1, 1, 1, 0), 0.15)
 	tween.tween_callback(queue_free)
 
 func play_spawn_animation() -> void:

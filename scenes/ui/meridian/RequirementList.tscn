@@ -1,17 +1,18 @@
 [gd_scene format=3 uid="uid://bf6fe2778glgu"]
 
-[ext_resource type="Script" uid="uid://682ipjl0uefm" path="res://scenes/ui/meridian/RequirementList.gd" id="1_script"]
-[ext_resource type="Script" uid="uid://ne3jtigjrbwk" path="res://scenes/ui/meridian/RequirementEntry.gd" id="2_gffl3"]
+[ext_resource type="Script" uid="uid://c1erxgeju8ecu" path="res://scenes/ui/meridian/RequirementList.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://6v7jfvkqce6x" path="res://scenes/ui/meridian/RequirementEntry.gd" id="2_gffl3"]
+[ext_resource type="Texture2D" uid="uid://difuk4yxtjxr2" path="res://assets/game/order_bg_atlas_texture.tres" id="3_ucgqv"]
 
 [node name="RequirementList" type="Control" unique_id=1307681079]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 785.0
-offset_bottom = 245.0
+offset_bottom = 202.0
 script = ExtResource("1_script")
 
-[node name="Panel" type="Panel" parent="." unique_id=713523825]
+[node name="Panel" type="Control" parent="." unique_id=15083050]
 custom_minimum_size = Vector2(1.455, 0)
 layout_mode = 1
 anchors_preset = 15
@@ -20,16 +21,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TitleLabel" type="Label" parent="Panel" unique_id=1139437144]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 4.0
-offset_right = 292.0
-offset_bottom = 28.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "需求"
-
 [node name="ScrollContainer" type="ScrollContainer" parent="Panel" unique_id=171782156]
 custom_minimum_size = Vector2(700, 150)
 layout_mode = 1
@@ -37,7 +28,7 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -392.5
-offset_top = 38.6
+offset_top = 19.0
 offset_right = 392.5
 offset_bottom = 188.6
 grow_horizontal = 2
@@ -50,3 +41,16 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 20
 script = ExtResource("2_gffl3")
+
+[node name="TextureRect" type="TextureRect" parent="Panel" unique_id=822805744]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 710.0
+offset_bottom = 188.14285
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.525, 0.525)
+texture = ExtResource("3_ucgqv")
+expand_mode = 1

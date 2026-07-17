@@ -1,0 +1,7 @@
+[gd_resource type="AtlasTexture" format=3 uid="uid://difuk4yxtjxr2"]
+
+[ext_resource type="Texture2D" uid="uid://chsw1u3otfqpo" path="res://assets/game/game_order_bg.png" id="1_gyblk"]
+
+[resource]
+atlas = ExtResource("1_gyblk")
+region = Rect2(36, 37, 1495, 416)

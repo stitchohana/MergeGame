@@ -31,7 +31,6 @@ func _ready() -> void:
 
 func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> void:
 	if item_data.is_empty():
-		clear()
 		return
 	_current_item_data = item_data
 	_update_sell_btn()

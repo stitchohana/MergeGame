@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dx74q48vv12nw"]
 
-[ext_resource type="Script" uid="uid://ljne0cjopn7u" path="res://scenes/ui/cultivation/CultivationPanel.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://b3dy5awn5yhbd" path="res://scenes/ui/cultivation/CultivationPanel.gd" id="1_gd"]
 
 [node name="CultivationPanel" type="Control" unique_id=1214071501]
 layout_mode = 3

@@ -16,6 +16,7 @@ const write = (name, data) => {
 const items = read("items.json");
 const recipes = read("recipes.json").recipes;
 const meridians = read("meridians.json");
+const rewards = read("rewards.json");
 const home = read("home_meridians.json");
 const cultivation = read("cultivation.json");
 const gameConfig = read("game_config.json");
@@ -78,6 +79,8 @@ for (const item of allItems) {
 }
 
 const qiPerValue = 10;
+const orderRewardId = 219;
+rewards.rewards[String(orderRewardId)] = { tokens: [{ token: 2, amount: qiPerValue }] };
 const isOrderExcluded = id => {
   const item = byId.get(id);
   const groupId = Number(item?.group_id ?? 0);
@@ -125,8 +128,8 @@ for (const threshold of meridians.thresholds) {
     .filter(id => Number(byId.get(id)?.effect_type ?? 0) !== 5);
   threshold.item_pool = [...new Set([...launcherProducts, ...craftedProducts])].sort((a, b) => a - b);
   threshold.order_count = Math.max(5, Number(threshold.order_count ?? 5));
-  delete threshold.acupoint_rewards;
-  threshold.qi_per_value = qiPerValue;
+  threshold.acupoint_rewards = orderRewardId;
+  delete threshold.qi_per_value;
 }
 
 // Small early-game adjustments let integer EXP rewards stay close to a 70/30 split.
@@ -174,6 +177,7 @@ for (let i = 0; i < cultivation.stages.length; i++) {
 
 write("items.json", items);
 write("meridians.json", meridians);
+write("rewards.json", rewards);
 write("home_meridians.json", home);
 write("cultivation.json", cultivation);
 

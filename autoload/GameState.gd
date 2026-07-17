@@ -23,6 +23,10 @@ var activity_defs: Array = []
 var activity_progress: Dictionary = {}
 var activity_current_day: int = 0
 
+# Auto-acupoint activation from CharacterEntry
+var pending_auto_acupoint: bool = false
+var skip_next_home_loading: bool = false
+
 signal meridian_updated()
 signal pending_rewards_changed(count: int)
 

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bfrasromb4gf7"]
 
 [ext_resource type="Script" uid="uid://bm7eaym0h864p" path="res://scenes/screens/HomeScreen.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/main/TopBar.tscn" id="2_qahno"]
+[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/common/TopBar.tscn" id="2_qahno"]
 [ext_resource type="PackedScene" uid="uid://dx74q48vv12nw" path="res://scenes/ui/cultivation/CultivationPanel.tscn" id="3_cul"]
 
 [node name="HomeScreen" type="Control" unique_id=65201493]

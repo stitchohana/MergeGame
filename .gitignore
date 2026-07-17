@@ -13,6 +13,11 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+*.tmp
+
+# Python
+__pycache__/
+*.py[cod]
 
 # Server
 server/node_modules/

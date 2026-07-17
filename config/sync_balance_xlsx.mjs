@@ -54,6 +54,7 @@ if (process.argv.includes("--render-before")) {
   await render("meridians", "meridians", "before");
   await render("home_meridians", "home_meridians", "before");
   await render("cultivation", "cultivation", "before");
+  await render("rewards", "rewards", "before");
   process.exit(0);
 }
 
@@ -67,8 +68,21 @@ await save(itemBook, "items");
 
 const meridians = await readJson("meridians.json");
 const meridianBook = await open("meridians");
-updateById(meridianBook.worksheets.getItem("meridians"), "stage", "qi_per_value", new Map(meridians.thresholds.map(stage => [stage.stage, stage.qi_per_value])));
+updateById(meridianBook.worksheets.getItem("meridians"), "stage", "acupoint_rewards", new Map(meridians.thresholds.map(stage => [stage.stage, stage.acupoint_rewards])));
 await save(meridianBook, "meridians");
+
+const rewards = await readJson("rewards.json");
+const rewardBook = await open("rewards");
+const rewardSheet = rewardBook.worksheets.getItem("rewards");
+const rewardRows = rewardSheet.getUsedRange().values;
+const rewardHeaders = rewardRows[0].map(value => String(value ?? "").trim());
+const rewardIdCol = rewardHeaders.indexOf("reward_id");
+const tokenCol = rewardHeaders.indexOf("tokens(token:amount)");
+let orderRewardRow = rewardRows.findIndex((row, index) => index > 0 && Number(row[rewardIdCol]) === 219);
+if (orderRewardRow < 0) orderRewardRow = rewardRows.length;
+rewardSheet.getCell(orderRewardRow, rewardIdCol).values = [[219]];
+rewardSheet.getCell(orderRewardRow, tokenCol).values = [["2:10"]];
+await save(rewardBook, "rewards");
 
 const home = await readJson("home_meridians.json");
 const homeBook = await open("home_meridians");
@@ -89,3 +103,4 @@ await render("items", "items_regular", "after");
 await render("meridians", "meridians", "after");
 await render("home_meridians", "home_meridians", "after");
 await render("cultivation", "cultivation", "after");
+await render("rewards", "rewards", "after");
