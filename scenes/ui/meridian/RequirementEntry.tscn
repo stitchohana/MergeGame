@@ -1,74 +1,61 @@
 [gd_scene format=3 uid="uid://dtqffbbhnmvni"]
 
 [ext_resource type="Script" uid="uid://6v7jfvkqce6x" path="res://scenes/ui/meridian/RequirementEntry.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://c4bxt375wgagi" path="res://assets/game/order_requirement_bg_atlas_texture.tres" id="2_eu76h"]
+[ext_resource type="Texture2D" uid="uid://c4bxt375wgagi" path="res://assets/game/order_requirement_bg_atlas_texture.tres" id="2_bg"]
 
-[node name="RequirementEntry" type="Control" unique_id=556992796]
-custom_minimum_size = Vector2(260, 110)
-layout_mode = 3
-anchors_preset = 0
-offset_right = 169.0
-offset_bottom = 109.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_entry"]
+texture = ExtResource("2_bg")
+texture_margin_left = 24.0
+texture_margin_top = 24.0
+texture_margin_right = 24.0
+texture_margin_bottom = 24.0
+
+[node name="RequirementEntry" type="PanelContainer" unique_id=1441229549]
+custom_minimum_size = Vector2(190, 138)
+size_flags_vertical = 4
 mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_entry")
 script = ExtResource("1_script")
 
-[node name="Panel" type="Control" parent="." unique_id=1303775029]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 1.0
-offset_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 1
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=888763391]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
 
-[node name="ItemsContainer" type="HBoxContainer" parent="Panel" unique_id=604598871]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -81.0
-offset_right = 81.0
-offset_bottom = 80.0
-grow_horizontal = 2
-theme_override_constants/separation = 5
-
-[node name="RewardBox" type="HBoxContainer" parent="Panel" unique_id=1054805201]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -80.5
-offset_top = 77.0
-offset_right = 81.5
-offset_bottom = 100.0
-grow_horizontal = 2
+[node name="VBox" type="VBoxContainer" parent="MarginContainer" unique_id=1849371797]
+layout_mode = 2
 theme_override_constants/separation = 3
 
-[node name="CompleteButton" type="Button" parent="Panel" unique_id=1290879304]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -27.5
-offset_top = -23.0
-offset_right = 22.5
-offset_bottom = -9.0
-grow_horizontal = 2
-grow_vertical = 0
-size_flags_horizontal = 4
+[node name="ItemsContainer" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=604598871]
+custom_minimum_size = Vector2(0, 88)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+alignment = 1
 
-[node name="TextureRect" type="NinePatchRect" parent="." unique_id=1048133667]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 2.0
-offset_bottom = 2.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("2_eu76h")
-region_rect = Rect2(51, 44, 310, 334)
+[node name="RewardRow" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=438150708]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="RewardTitle" type="Label" parent="MarginContainer/VBox/RewardRow" unique_id=1598400311]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.2, 0.16, 1)
+theme_override_font_sizes/font_size = 13
+text = "奖励："
+vertical_alignment = 1
+
+[node name="RewardBox" type="HBoxContainer" parent="MarginContainer/VBox/RewardRow" unique_id=1054805201]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="CompleteButton" type="Button" parent="MarginContainer/VBox" unique_id=1290879304]
+visible = false
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8

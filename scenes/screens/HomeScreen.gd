@@ -4,8 +4,10 @@ class_name HomeScreen extends BaseScreen
 @onready var battle_btn: Button = $BattleButton
 @onready var cultivation_panel: CultivationPanel = $CultivationPanel
 @onready var meridian_container: VBoxContainer = $MeridianContainer
+@onready var acupoint_layer: Control = $AcupointLayer
 @onready var meridian_title: Label
-@onready var nodes_box: HBoxContainer
+
+var acupoint_nodes: Array[AcupointNode] = []
 
 var _home_defs: Array = []
 var _home_progress: Array = []
@@ -47,9 +49,12 @@ func _setup_meridian_ui() -> void:
 	meridian_title.add_theme_color_override("font_color", Color(1, 0.85, 0.2, 1))
 	meridian_container.add_child(meridian_title)
 
-	nodes_box = HBoxContainer.new()
-	nodes_box.add_theme_constant_override("separation", 12)
-	meridian_container.add_child(nodes_box)
+	for child in acupoint_layer.get_children():
+		var acupoint_node := child as AcupointNode
+		if not acupoint_node:
+			continue
+		acupoint_nodes.append(acupoint_node)
+		acupoint_node.acupoint_selected.connect(_on_acupoint_pressed)
 
 
 func _on_state_loaded(state: Dictionary) -> void:
@@ -70,8 +75,11 @@ func _on_state_loaded(state: Dictionary) -> void:
 func _refresh_display() -> void:
 	if CultivationService.is_breakthrough_ready():
 		meridian_container.hide()
+		acupoint_layer.hide()
 		return
 	meridian_container.show()
+	acupoint_layer.show()
+	_set_acupoint_nodes([], 0)
 	if _home_defs.is_empty():
 		meridian_title.text = "经脉：无"
 		return
@@ -107,34 +115,16 @@ func _refresh_display() -> void:
 	var qi_str: String = "灵气：%d/%d 消耗：%d" % [CultivationService.current_qi, CultivationService.max_qi, def.get("qi_cost", 0)]
 	meridian_title.text += "\n" + qi_str
 
-	# Update existing buttons, create/remove as needed
-	var existing := nodes_box.get_children()
-	var count := lit.size()
-	while existing.size() > count:
-		var extra: Node = existing.pop_back()
-		if is_instance_valid(extra):
-			extra.queue_free()
-	for i in range(count):
-		var btn: Button
-		if i < existing.size():
-			btn = existing[i] as Button
-			# Disconnect all existing connections before re-binding
-			for conn in btn.pressed.get_connections():
-				btn.pressed.disconnect(conn.callable)
-		else:
-			btn = Button.new()
-			btn.custom_minimum_size = Vector2(40, 40)
-			btn.add_theme_font_size_override("font_size", 18)
-			nodes_box.add_child(btn)
-		if lit[i]:
-			btn.text = "●"
-			btn.add_theme_color_override("font_color", Color(1, 0.75, 0.2, 1))
-			btn.disabled = true
-		else:
-			btn.text = "○"
-			btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1))
-			btn.disabled = false
-			btn.pressed.connect(_on_acupoint_pressed.bind(i))
+	_set_acupoint_nodes(lit, int(def.get("acupoints", 0)))
+
+
+func _set_acupoint_nodes(lit: Array, count: int) -> void:
+	for node in acupoint_nodes:
+		var is_active: bool = node.acupoint_index < count
+		node.visible = is_active
+		if is_active:
+			var is_lit: bool = node.acupoint_index < lit.size() and bool(lit[node.acupoint_index])
+			node.set_lit(is_lit)
 
 
 func _try_auto_acupoint() -> void:

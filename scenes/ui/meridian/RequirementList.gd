@@ -3,9 +3,42 @@ class_name RequirementList extends Control
 signal complete_clicked(index: int)
 
 var _entry_scene: PackedScene = preload("res://scenes/ui/meridian/RequirementEntry.tscn")
+var _dragging: bool = false
+var _drag_start_x: float = 0.0
+var _drag_start_scroll: int = 0
 
 @onready var scroll: ScrollContainer = $Panel/ScrollContainer
 @onready var container: HBoxContainer = $Panel/ScrollContainer/HBoxContainer
+
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton or event is InputEventMouseMotion):
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		_dragging = false
+	if not is_inside_tree() or not scroll.get_global_rect().has_point(event.position):
+		return
+
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_dragging = true
+				_drag_start_x = event.position.x
+				_drag_start_scroll = scroll.scroll_horizontal
+			return
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
+			scroll.scroll_horizontal = maxi(scroll.scroll_horizontal - 80, 0)
+			get_viewport().set_input_as_handled()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
+			scroll.scroll_horizontal = mini(scroll.scroll_horizontal + 80, scroll.get_h_scroll_bar().max_value)
+			get_viewport().set_input_as_handled()
+		return
+
+	if event is InputEventMouseMotion and _dragging:
+		var delta_x: float = _drag_start_x - event.position.x
+		var target_scroll: int = int(_drag_start_scroll + delta_x)
+		var max_scroll: int = int(scroll.get_h_scroll_bar().max_value)
+		scroll.scroll_horizontal = clampi(target_scroll, 0, max_scroll)
+		get_viewport().set_input_as_handled()
 
 func set_title(_text: String) -> void:
 	pass

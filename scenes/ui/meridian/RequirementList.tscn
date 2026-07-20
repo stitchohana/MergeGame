@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://c1erxgeju8ecu" path="res://scenes/ui/meridian/RequirementList.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://6v7jfvkqce6x" path="res://scenes/ui/meridian/RequirementEntry.gd" id="2_gffl3"]
-[ext_resource type="Texture2D" uid="uid://difuk4yxtjxr2" path="res://assets/game/order_bg_atlas_texture.tres" id="3_ucgqv"]
 
 [node name="RequirementList" type="Control" unique_id=1307681079]
 custom_minimum_size = Vector2(100, 100)
@@ -22,35 +21,24 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Panel" unique_id=171782156]
+z_index = 1
 custom_minimum_size = Vector2(700, 150)
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -392.5
-offset_top = 19.0
-offset_right = 392.5
-offset_bottom = 188.6
+offset_left = -370.5
+offset_top = 4.0
+offset_right = 368.5
+offset_bottom = 203.0
 grow_horizontal = 2
 follow_focus = true
 horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Panel/ScrollContainer" unique_id=1482081189]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+size_flags_horizontal = 0
+size_flags_vertical = 4
 theme_override_constants/separation = 20
 script = ExtResource("2_gffl3")
-
-[node name="TextureRect" type="TextureRect" parent="Panel" unique_id=822805744]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 710.0
-offset_bottom = 188.14285
-grow_horizontal = 2
-grow_vertical = 2
-scale = Vector2(0.525, 0.525)
-texture = ExtResource("3_ucgqv")
-expand_mode = 1

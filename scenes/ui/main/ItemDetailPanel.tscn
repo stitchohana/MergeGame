@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://ofi2ei6no4yy"]
 
 [ext_resource type="Script" uid="uid://yvf00usf5sm6" path="res://scenes/ui/main/ItemDetailPanel.gd" id="1_gd"]
-[ext_resource type="Texture2D" uid="uid://bjsufih0ix8iq" path="res://assets/common/common_btn_atlas_texture.tres" id="2_wma36"]
+[ext_resource type="Texture2D" uid="uid://cywrwm4abfk5b" path="res://assets/game/item_detail_bg_atlas_texture.tres" id="2_wngso"]
 [ext_resource type="Theme" uid="uid://gc2kayu31yh8" path="res://assets/theme/btn_theme.tres" id="3_wngso"]
 
 [node name="ItemDetailPanel" type="Control" unique_id=607450120]
@@ -12,15 +12,13 @@ offset_bottom = 147.0
 script = ExtResource("1_gd")
 
 [node name="Bg" type="NinePatchRect" parent="." unique_id=366306202]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = 67.0
-texture = ExtResource("2_wma36")
-patch_margin_left = 40
-patch_margin_top = 50
-patch_margin_right = 57
-patch_margin_bottom = 40
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_wngso")
 
 [node name="DefaultLabel" type="Label" parent="." unique_id=1604343573]
 visible = false

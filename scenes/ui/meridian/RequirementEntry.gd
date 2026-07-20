@@ -28,9 +28,9 @@ func setup(items: Array, index: int, completed: bool, rewards: Dictionary = {}) 
 func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -> void:
 	_data = {"items": items, "index": index, "completed": completed}
 
-	var items_container: HBoxContainer = $Panel/ItemsContainer
-	var reward_box: HBoxContainer = $Panel/RewardBox
-	var complete_btn: Button = $Panel/CompleteButton
+	var items_container: HBoxContainer = $MarginContainer/VBox/ItemsContainer
+	var reward_box: HBoxContainer = $MarginContainer/VBox/RewardRow/RewardBox
+	var complete_btn: Button = $MarginContainer/VBox/CompleteButton
 
 	for child in items_container.get_children():
 		child.queue_free()
@@ -41,13 +41,17 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 		var item_id: int = int(it.get("item_id", 0))
 		var item_data := ConfigDatabase.get_item_data(item_id)
 		var item_button := Button.new()
-		item_button.custom_minimum_size = Vector2(80, 80)
+		item_button.custom_minimum_size = Vector2(68, 84)
+		item_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		item_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		item_button.flat = true
 		item_button.tooltip_text = "查看获取方式"
 		item_button.pressed.connect(_on_item_pressed.bind(item_id))
 		items_container.add_child(item_button)
 		var widget := _item_widget_scene.instantiate() as ItemWidget
 		item_button.add_child(widget)
+		widget.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_style_item_widget(widget)
 		if not item_data.is_empty():
 			widget.setup(item_data)
 		else:
@@ -55,7 +59,7 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 		widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		if widget.name_label:
 			widget.name_label.visible = true
-			widget.name_label.add_theme_font_size_override("font_size", 9)
+			widget.name_label.add_theme_font_size_override("font_size", 8)
 
 	# Reward preview
 	if not rewards.is_empty():
@@ -89,7 +93,7 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 
 func set_available(available: bool) -> void:
 	if not _data.get("completed", false):
-		var btn: Button = $Panel/CompleteButton
+		var btn: Button = $MarginContainer/VBox/CompleteButton
 		btn.visible = available
 
 func _on_btn_pressed() -> void:
@@ -100,11 +104,11 @@ func _on_item_pressed(item_id: int) -> void:
 		item_pressed.emit(item_id)
 
 func mark_completed() -> void:
-	var btn: Button = $Panel/CompleteButton
+	var btn: Button = $MarginContainer/VBox/CompleteButton
 	btn.text = "✓"
 	btn.disabled = true
 	btn.visible = true
-	var items_container: HBoxContainer = $Panel/ItemsContainer
+	var items_container: HBoxContainer = $MarginContainer/VBox/ItemsContainer
 	for child in items_container.get_children():
 		if child is ItemWidget:
 			child.modulate = Color(0.5, 0.8, 0.5, 1)
@@ -112,3 +116,34 @@ func mark_completed() -> void:
 			var widget := child.get_child(0) as ItemWidget
 			if widget:
 				widget.modulate = Color(0.5, 0.8, 0.5, 1)
+
+func _style_item_widget(widget: ItemWidget) -> void:
+	var icon_bg: TextureRect = widget.get_node_or_null("IconBg") as TextureRect
+	if icon_bg:
+		icon_bg.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+		icon_bg.anchor_right = 1.0
+		icon_bg.offset_bottom = 62.0
+	var icon_rect: TextureRect = widget.get_node_or_null("IconRect") as TextureRect
+	if icon_rect:
+		icon_rect.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+		icon_rect.anchor_right = 1.0
+		icon_rect.offset_left = 6.0
+		icon_rect.offset_top = 6.0
+		icon_rect.offset_right = -6.0
+		icon_rect.offset_bottom = 59.0
+	var name_label: Label = widget.get_node_or_null("NameLabel") as Label
+	if name_label:
+		name_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+		name_label.anchor_right = 1.0
+		name_label.offset_top = 63.0
+		name_label.offset_bottom = 83.0
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var level_label: Label = widget.get_node_or_null("LevelLabel") as Label
+	if level_label:
+		level_label.position = Vector2(5.0, 3.0)
+		level_label.size = Vector2(18.0, 17.0)
+		level_label.add_theme_color_override("font_color", Color(0.2, 0.2, 0.16, 1))
+		level_label.add_theme_font_size_override("font_size", 13)
+	var charge_label: Label = widget.get_node_or_null("ChargeLabel") as Label
+	if charge_label:
+		charge_label.hide()

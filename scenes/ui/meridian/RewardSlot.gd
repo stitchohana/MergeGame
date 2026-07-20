@@ -22,10 +22,15 @@ func setup(item_id: int, amount: int) -> void:
 			return
 
 	# Fallback: colored rect based on item name
-	var fallback := ColorRect.new()
-	fallback.custom_minimum_size = Vector2(18, 18)
-	fallback.size = Vector2(18, 18)
-	fallback.color = Color.from_hsv(float(item_id % 13) / 13.0, 0.5, 0.6)
+	var fallback := Panel.new()
+	fallback.custom_minimum_size = Vector2(14, 14)
+	fallback.size = Vector2(14, 14)
+	var fallback_style := StyleBoxFlat.new()
+	fallback_style.bg_color = Color(0.38, 0.62, 0.38, 1)
+	fallback_style.border_color = Color(0.2, 0.38, 0.22, 1)
+	fallback_style.set_border_width_all(1)
+	fallback_style.set_corner_radius_all(7)
+	fallback.add_theme_stylebox_override("panel", fallback_style)
 	fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(fallback)
 	move_child(fallback, 0)
