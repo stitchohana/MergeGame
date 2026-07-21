@@ -41,7 +41,7 @@ offset_left = 110
 offset_top = 56
 offset_right = 380
 offset_bottom = 88
-item_count = 8
+item_count = 9
 text = "增加经验"
 popup/item_0/text = "增加经验"
 popup/item_1/text = "增加灵石"
@@ -51,6 +51,8 @@ popup/item_4/text = "升级"
 popup/item_5/text = "突破"
 popup/item_6/text = "添加道具"
 popup/item_7/text = "重置发射器CD"
+
+popup/item_8/text = "激活穴位节点"
 
 [node name="AmountLabel" type="Label" parent="Panel"]
 offset_left = 20

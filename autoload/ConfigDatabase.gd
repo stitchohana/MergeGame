@@ -331,6 +331,12 @@ func get_stage_breakthrough_pill(level: int) -> int:
 		return 0
 	return int(s.get("breakthrough_pill", 0))
 
+func get_stage_breakthrough_reward(level: int) -> int:
+	var s: Dictionary = _get_stage(level)
+	if s.is_empty():
+		return 0
+	return int(s.get("breakthrough_reward_id", 0))
+
 
 func _load_weekly_tasks(path: String) -> void:
 	var data := _load_json(path)

@@ -278,6 +278,8 @@ for row in read_rows(wb["cultivation"]):
              "max_qi": parse_int(row["max_qi"])}
     if row.get("breakthrough_pill"):
         stage["breakthrough_pill"] = parse_int(row["breakthrough_pill"])
+    if row.get("breakthrough_reward_id"):
+        stage["breakthrough_reward_id"] = parse_int(row["breakthrough_reward_id"])
     stages.append(stage)
 save_json("cultivation.json", {"stages": stages})
 

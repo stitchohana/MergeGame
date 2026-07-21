@@ -11,10 +11,17 @@ func _ready() -> void:
 		close_btn.pressed.connect(_on_close)
 	if exec_btn:
 		exec_btn.pressed.connect(_on_exec)
+	if cmd_option:
+		cmd_option.item_selected.connect(_on_cmd_selected)
 	CloudService.gm_exec_confirmed.connect(_on_gm_confirmed)
 	CloudService.gm_exec_rejected.connect(_on_gm_rejected)
 	CloudService.state_loaded.connect(_on_state_sync)
 	_populate_cmds()
+
+
+func _on_cmd_selected(index: int) -> void:
+	if index == 8:
+		amount_spin.value = 1.0
 
 func _populate_cmds() -> void:
 	if cmd_option.item_count > 0:
@@ -50,6 +57,8 @@ func _on_exec() -> void:
 		"重置发射器CD": cmd_key = "reset_launcher_cd"
 	var amount: int = 1 if cmd == "添加道具" else int(amount_spin.value)
 	result_label.text = "执行中..."
+	if cmd_option.selected == 8:
+		cmd_key = "activate_home_acupoints"
 	CloudService.submit_gm_exec(cmd_key, amount, item_id, col, row)
 
 func _on_gm_confirmed(_result: Dictionary) -> void:

@@ -2,7 +2,9 @@ class_name HomeScreen extends BaseScreen
 
 @onready var game_btn: Button = $GameButton
 @onready var battle_btn: Button = $BattleButton
-@onready var cultivation_panel: CultivationPanel = $CultivationPanel
+@onready var realm_label: Label = $RealmLabel
+@onready var exp_bar: ProgressBar = $ExpBar
+@onready var exp_label: Label = $ExpLabel
 @onready var meridian_container: VBoxContainer = $MeridianContainer
 @onready var acupoint_layer: Control = $AcupointLayer
 @onready var meridian_title: Label
@@ -19,15 +21,42 @@ func _ready() -> void:
 	modulate = Color.TRANSPARENT
 	game_btn.pressed.connect(_on_game_pressed)
 	battle_btn.pressed.connect(_on_battle_pressed)
-	cultivation_panel.cultivation_clicked.connect(_on_cultivation_clicked)
 	CloudService.state_loaded.connect(_on_state_loaded)
 	CloudService.home_meridian_light_confirmed.connect(_on_light_confirmed)
 	CloudService.breakthrough_confirmed.connect(_on_breakthrough_done)
 	CloudService.breakthrough_rejected.connect(_on_breakthrough_rejected)
-	CultivationService.exp_changed.connect(func(_c, _t): _refresh_breakthrough_btn())
-	CultivationService.stage_changed.connect(func(_l, _n): _refresh_breakthrough_btn())
+	CultivationService.exp_changed.connect(_on_cultivation_exp_changed)
+	CultivationService.stage_changed.connect(_on_cultivation_stage_changed)
 	_setup_meridian_ui()
 	_setup_breakthrough_btn()
+	_refresh_cultivation_info()
+
+
+func _refresh_cultivation_info() -> void:
+	realm_label.text = CultivationService.get_stage_name()
+	_update_exp_display(CultivationService.current_exp, CultivationService.get_exp_to_next_level())
+
+
+func _update_exp_display(current_exp: int, exp_to_next: int) -> void:
+	if exp_to_next > 0:
+		exp_bar.value = (float(current_exp) / float(exp_to_next)) * 100.0
+		exp_label.text = "%d/%d" % [current_exp, exp_to_next]
+	else:
+		exp_bar.value = 0.0
+		exp_label.text = "%d" % current_exp
+
+
+func _on_cultivation_exp_changed(current_exp: int, exp_to_next: int) -> void:
+	_update_exp_display(current_exp, exp_to_next)
+	_refresh_breakthrough_btn()
+	_refresh_display()
+
+
+func _on_cultivation_stage_changed(_level: int, stage_name: String) -> void:
+	realm_label.text = stage_name
+	_update_exp_display(CultivationService.current_exp, CultivationService.get_exp_to_next_level())
+	_refresh_breakthrough_btn()
+	_refresh_display()
 
 
 func on_enter() -> void:
@@ -65,6 +94,7 @@ func _on_state_loaded(state: Dictionary) -> void:
 		_home_defs = state.home_meridian_defs
 	if state.has("home_meridian_progress"):
 		_home_progress = state.home_meridian_progress
+	_refresh_cultivation_info()
 	_refresh_display()
 	_refresh_breakthrough_btn()
 	_try_auto_acupoint()
@@ -119,12 +149,36 @@ func _refresh_display() -> void:
 
 
 func _set_acupoint_nodes(lit: Array, count: int) -> void:
+	var visible_slot_count: int = _get_visible_slot_count(count)
 	for node in acupoint_nodes:
-		var is_active: bool = node.acupoint_index < count
+		var slot_index: int = node.acupoint_index
+		var is_active: bool = slot_index < visible_slot_count
 		node.visible = is_active
 		if is_active:
-			var is_lit: bool = node.acupoint_index < lit.size() and bool(lit[node.acupoint_index])
-			node.set_lit(is_lit)
+			var config_range: Vector2i = _get_config_range(slot_index, count)
+			var completed: int = _count_lit_in_range(lit, config_range)
+			node.set_progress(completed, config_range.y - config_range.x)
+
+
+func _get_visible_slot_count(config_count: int) -> int:
+	return mini(maxi(config_count, 0), acupoint_nodes.size())
+
+
+func _get_config_range(slot_index: int, config_count: int) -> Vector2i:
+	var slot_count: int = _get_visible_slot_count(config_count)
+	if slot_count <= 0 or slot_index < 0 or slot_index >= slot_count:
+		return Vector2i(-1, -1)
+	var range_start: int = floori(float(slot_index * config_count) / float(slot_count))
+	var range_end: int = floori(float((slot_index + 1) * config_count) / float(slot_count))
+	return Vector2i(range_start, range_end)
+
+
+func _count_lit_in_range(lit: Array, config_range: Vector2i) -> int:
+	var completed: int = 0
+	for config_index in range(config_range.x, config_range.y):
+		if config_index < lit.size() and bool(lit[config_index]):
+			completed += 1
+	return completed
 
 
 func _try_auto_acupoint() -> void:
@@ -144,22 +198,46 @@ func _try_auto_acupoint() -> void:
 			break
 	var lit: Array = progress.get("lit", [])
 	var total: int = def.get("acupoints", 0)
-	for i in range(total):
-		var is_lit: bool = lit[i] if i < lit.size() else false
-		if not is_lit:
-			_on_acupoint_pressed(i)
-			return
+	for slot_index in range(_get_visible_slot_count(total)):
+		var config_range: Vector2i = _get_config_range(slot_index, total)
+		for config_index in range(config_range.x, config_range.y):
+			var is_lit: bool = lit[config_index] if config_index < lit.size() else false
+			if not is_lit:
+				_on_acupoint_pressed(slot_index)
+				return
 
-func _on_acupoint_pressed(index: int) -> void:
+
+func _on_acupoint_pressed(slot_index: int) -> void:
 	if _current_stage_idx < 0 or _home_defs.is_empty():
 		return
 	var def: Dictionary = _home_defs[_current_stage_idx]
+	var config_count: int = int(def.get("acupoints", 0))
+	var config_range: Vector2i = _get_config_range(slot_index, config_count)
+	if config_range.x < 0:
+		return
+	var progress: Dictionary = {}
+	for stage_progress in _home_progress:
+		if stage_progress.get("stage", -1) == _current_stage_idx:
+			progress = stage_progress
+			break
+	var lit: Array = progress.get("lit", [])
+	var target_index: int = -1
+	for config_index in range(config_range.x, config_range.y):
+		if config_index >= lit.size() or not bool(lit[config_index]):
+			target_index = config_index
+			break
+	if target_index < 0:
+		return
 	var qi_cost: int = def.get("qi_cost", 0)
-	var title: String = def.get("name", "穴位") + " 第%d穴" % (index + 1)
+	var completed: int = _count_lit_in_range(lit, config_range)
+	var group_total: int = config_range.y - config_range.x
+	var title: String = def.get("name", "穴位") + " 第%d穴" % (target_index + 1)
 	var cost: String = "消耗灵气：%d  当前：%d/%d" % [qi_cost, CultivationService.current_qi, CultivationService.max_qi]
+	if group_total > 1:
+		cost += "\n点位进度：%d/%d" % [completed, group_total]
 	var popup := preload("res://scenes/ui/home/AcupointActivatePopup.tscn").instantiate() as AcupointActivatePopup
 	UIManager.show_popup(popup)
-	popup.setup(title, cost, def.get("acupoint_rewards", {}), "激活", func(): CloudService.submit_light_home_acupoint(_current_stage_idx, index))
+	popup.setup(title, cost, def.get("acupoint_rewards", {}), "激活", func(): CloudService.submit_light_home_acupoint(_current_stage_idx, target_index))
 
 
 func _on_light_confirmed(result: Dictionary) -> void:
@@ -168,10 +246,6 @@ func _on_light_confirmed(result: Dictionary) -> void:
 	if result.has("cultivation"):
 		CultivationService.deserialize(result.cultivation)
 	_refresh_display()
-
-
-func _on_cultivation_clicked() -> void:
-	pass
 
 
 func _on_game_pressed() -> void:
@@ -219,10 +293,7 @@ func _on_breakthrough_pressed() -> void:
 		var pill_data := ConfigDatabase.get_item_data(pill_id)
 		popup.setup("突破确认", "确定使用" + pill_data.get("name", "丹药") + "进行突破吗？", func(): _do_breakthrough(pill_id))
 	else:
-		# No pill needed — just confirm
-		var popup := preload("res://scenes/ui/common/ConfirmPopup.tscn").instantiate() as ConfirmPopup
-		UIManager.show_popup(popup)
-		popup.setup("突破确认", "确定进行突破吗？", func(): _do_breakthrough(0))
+		_do_breakthrough(0)
 
 func _do_breakthrough(pill_id: int) -> void:
 	CultivationService.try_breakthrough(pill_id, 0)

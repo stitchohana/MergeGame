@@ -18,6 +18,8 @@ func _ready() -> void:
 		CloudService.quest_claim_confirmed.connect(_on_reward_response)
 	if not CloudService.home_meridian_light_confirmed.is_connected(_on_reward_response):
 		CloudService.home_meridian_light_confirmed.connect(_on_reward_response)
+	if not CloudService.breakthrough_confirmed.is_connected(_on_reward_response):
+		CloudService.breakthrough_confirmed.connect(_on_reward_response)
 	if not CloudService.battle_attack_confirmed.is_connected(_on_reward_response):
 		CloudService.battle_attack_confirmed.connect(_on_reward_response)
 	if not CloudService.pending_reward_claimed.is_connected(_on_reward_response):

@@ -91,6 +91,7 @@
 | `max_qi` | int | 灵力上限 |
 | `atk` | int | 攻击力 |
 | `breakthrough_pill` | int | 突破所需丹药 item id（可选） |
+| `breakthrough_reward_id` | int | 突破成功后发放的 reward id（可选） |
 
 ---
 

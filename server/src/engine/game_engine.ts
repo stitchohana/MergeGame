@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { GameState, GridItem, CultivationData, QuestType, TokenType, RewardConfig, BattleMonster } from "../storage/interface";
+import { GameState, GridItem, CultivationData, QuestType, TokenType, RewardConfig, BattleMonster, HomeMeridianStageProgress } from "../storage/interface";
 import { QuestEngine } from "./quest_engine";
 import { ActivityEngine } from "./activity_engine";
 
@@ -41,6 +41,7 @@ interface StageDef {
   exp: number;
   max_qi: number;
   breakthrough_pill?: number;
+  breakthrough_reward_id?: number;
 }
 
 interface CultivationConfig {
@@ -316,6 +317,56 @@ export class GameEngine {
       pending_rewards: state.pending_rewards,
       home_meridian_progress: state.home_meridian_progress,
     };
+  }
+
+  gmActivateHomeAcupoints(state: GameState, amount: number): { activated: number; completed_stages: number } {
+    const requestedAmount = Math.max(0, amount);
+    let activated = 0;
+    let completedStages = 0;
+    state.home_meridian_progress = state.home_meridian_progress || [];
+
+    // Preserve normal activation rewards, while letting the GM command bypass qi costs.
+    for (let stageIndex = 0; stageIndex < this.homeMeridianDefs.length && activated < requestedAmount; stageIndex++) {
+      const def = this.homeMeridianDefs[stageIndex];
+      let stageProgress = state.home_meridian_progress.find(progress => progress.stage === stageIndex);
+      if (!stageProgress) {
+        stageProgress = { stage: stageIndex, lit: new Array(def.acupoints).fill(false), circulation_completed: false };
+        state.home_meridian_progress.push(stageProgress);
+      }
+
+      const normalizedProgress: HomeMeridianStageProgress = stageProgress;
+      normalizedProgress.lit = Array.from(
+        { length: def.acupoints },
+        (_value, acupointIndex) => Boolean(normalizedProgress.lit[acupointIndex]),
+      );
+      if (normalizedProgress.circulation_completed) {
+        continue;
+      }
+
+      for (let acupointIndex = 0; acupointIndex < def.acupoints && activated < requestedAmount; acupointIndex++) {
+        if (normalizedProgress.lit[acupointIndex]) {
+          continue;
+        }
+        normalizedProgress.lit[acupointIndex] = true;
+        activated += 1;
+        if (def.acupoint_rewards) {
+          this.applyRewards(state, def.acupoint_rewards);
+        }
+      }
+
+      if (normalizedProgress.lit.every(isLit => isLit)) {
+        normalizedProgress.circulation_completed = true;
+        completedStages += 1;
+        if (def.circulation_rewards) {
+          this.applyRewards(state, def.circulation_rewards);
+        }
+      }
+    }
+
+    if (activated > 0) {
+      state.version += 1;
+    }
+    return { activated, completed_stages: completedStages };
   }
 
   getMonster(id: number): any {
@@ -1364,6 +1415,13 @@ export class GameEngine {
     return stages[level - 1]?.breakthrough_pill ?? 0;
   }
 
+  getStageBreakthroughReward(level: number): number {
+    if (!this.cultivation) return 0;
+    const stages = this.cultivation.stages;
+    if (!stages || level < 1 || level > stages.length) return 0;
+    return stages[level - 1]?.breakthrough_reward_id ?? 0;
+  }
+
   getExpToNextLevel(level: number): number {
     if (!this.cultivation) return 999999;
     const stages = this.cultivation.stages;
@@ -1402,7 +1460,7 @@ export class GameEngine {
     uid: number,
     level: number,
     exp: number
-  ): { ok: true; newCultivation: CultivationData } | { ok: false; reason: string } {
+  ): { ok: true; newCultivation: CultivationData; rewards: RewardConfig } | { ok: false; reason: string } {
     console.log(`[engine] tryBreakthrough: pill=${pillId} uid=${uid} level=${level} exp=${exp}`);
     if (!this.isBreakthroughReady(level, exp)) {
       console.log(`[engine] tryBreakthrough: not ready (need exp=${this.getExpToNextLevel(level)} have=${exp})`);
@@ -1418,7 +1476,7 @@ export class GameEngine {
     // Find and remove the pill (only if required)
     if (required > 0) {
       if (uid > 0) {
-      const pillIdx = state.grid.findIndex(g => g.uid === uid);
+      const pillIdx = state.grid.findIndex(g => g.uid === uid && g.id === required);
       if (pillIdx >= 0) {
         state.grid.splice(pillIdx, 1);
         console.log(`[engine]   breakthrough pill #${pillId} removed from grid, uid=${uid}`);
@@ -1459,6 +1517,8 @@ export class GameEngine {
     };
 
     state.cultivation = newCultivation;
+    const rewardId = this.getStageBreakthroughReward(level);
+    const rewards = rewardId > 0 ? this.applyRewards(state, rewardId) : { tokens: [], items: [] };
     state.version += 1;
 
     const stageName = nextStage?.name ?? `stage_${newLevel}`;
@@ -1466,7 +1526,7 @@ export class GameEngine {
 
     this.questEngine.incrementQuestProgress(state, QuestType.BREAKTHROUGH, 1, this);
 
-    return { ok: true, newCultivation };
+    return { ok: true, newCultivation, rewards };
   }
 
 
@@ -1738,26 +1798,9 @@ export class GameEngine {
     if (!this.cultivation) return;
     if (this.isMaxCultivation(c.current_level)) return;
 
-    c.current_exp += amount;
+    const expNeeded = this.getExpToNextLevel(c.current_level);
+    c.current_exp = Math.min(c.current_exp + amount, expNeeded);
     c.total_exp += amount;
-
-    const maxLevel = this.cultivation.stages.length;
-    while (c.current_exp >= this.getExpToNextLevel(c.current_level)) {
-      if (this.isMaxCultivation(c.current_level)) break;
-      if (this.needsBreakthroughPill(c.current_level)) {
-        c.current_exp = this.getExpToNextLevel(c.current_level);
-        break;
-      }
-
-      c.current_exp -= this.getExpToNextLevel(c.current_level);
-      c.current_level += 1;
-      if (c.current_level > maxLevel) break;
-
-      const newStage = this.cultivation.stages[c.current_level - 1];
-      c.max_qi = newStage?.max_qi ?? c.max_qi;
-      c.current_qi = Math.min(c.current_qi, c.max_qi);
-      console.log(`[engine] level up: ${newStage?.name ?? "?"} | qi=${c.max_qi}`);
-    }
   }
 
   pushAndPlace(state: GameState, fromCol: number, fromRow: number, toCol: number, toRow: number): { ok: true; newVersion: number; pushed_col: number; pushed_row: number; from_col: number; from_row: number; to_col: number; to_row: number } | { ok: false; reason: string } {

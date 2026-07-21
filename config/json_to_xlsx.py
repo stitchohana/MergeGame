@@ -240,11 +240,11 @@ save(wb, "initial_setup")
 print("Building cultivation.xlsx...")
 data = json.load(open(JSON_DIR / "cultivation.json", encoding="utf-8"))
 wb = new_book()
-h = ["stage_index","name","exp","max_qi","breakthrough_pill"]
+h = ["stage_index","name","exp","max_qi","breakthrough_pill","breakthrough_reward_id"]
 r = []
 for i, s in enumerate(data["stages"]):
     r.append([i, s.get("name",""), s.get("exp",""), s.get("max_qi",""),
-              s.get("breakthrough_pill","")])
+              s.get("breakthrough_pill",""), s.get("breakthrough_reward_id","")])
 ws = wb.create_sheet("cultivation")
 add_sheet(ws, h, r)
 save(wb, "cultivation")

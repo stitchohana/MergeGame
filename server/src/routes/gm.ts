@@ -75,17 +75,11 @@ export function createGMRouter(storage: IStorage, engine: GameEngine): Router {
             const c = state.cultivation;
             const maxLevel = engine.cultivationStages.length;
             if (c.current_level >= maxLevel) { res.status(400).json({ error: "already_max" }); return; }
-            const pill = engine.getStageBreakthroughPill(c.current_level);
-            if (pill > 0) {
-              c.current_level += 1;
-              const s = engine.cultivationStages[c.current_level - 1];
-              c.max_qi = s?.max_qi ?? c.max_qi;
-              c.current_qi = c.max_qi;
-              c.current_exp = 0;
-            } else {
-              const needed = engine.getExpToNextLevel(c.current_level);
-              engine._addExp(c, needed);
-            }
+            c.current_level += 1;
+            const s = engine.cultivationStages[c.current_level - 1];
+            c.max_qi = s?.max_qi ?? c.max_qi;
+            c.current_qi = c.max_qi;
+            c.current_exp = 0;
             msg = `Level up: ${engine.cultivationStages[c.current_level - 1]?.name}`;
             break;
           }
@@ -142,8 +136,15 @@ export function createGMRouter(storage: IStorage, engine: GameEngine): Router {
             msg = "Grid cleared";
             break;
           }
+          case "activate_home_acupoints": {
+            const amt = parseInt(amount, 10);
+            if (isNaN(amt) || amt <= 0) { res.status(400).json({ error: "invalid_amount" }); return; }
+            const result = engine.gmActivateHomeAcupoints(state, amt);
+            msg = `Activated ${result.activated} home acupoints, completed ${result.completed_stages} stages`;
+            break;
+          }
           default:
-            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid"] });
+            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid","activate_home_acupoints"] });
             return;
         }
 

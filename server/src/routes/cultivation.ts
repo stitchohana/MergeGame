@@ -77,7 +77,15 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine): 
     );
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, cultivation: state.cultivation, quest_progress: state.quest_progress });
+    res.json({
+      ok: true,
+      cultivation: state.cultivation,
+      rewards: result.rewards,
+      spirit_stones: state.spirit_stones,
+      stamina: state.stamina,
+      pending_rewards: state.pending_rewards,
+      quest_progress: state.quest_progress,
+    });
   }));
 
   return router;
