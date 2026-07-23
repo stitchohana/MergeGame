@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://dh7pcck0eqawn"]
+[gd_scene load_steps=11 format=3 uid="uid://dh7pcck0eqawn"]
 
 [ext_resource type="Script" uid="uid://dmv0t71np61ym" path="res://scenes/screens/GameScreen.gd" id="1_gs"]
 [ext_resource type="PackedScene" uid="uid://deg7lbni32jui" path="res://scenes/grid/GridView.tscn" id="2_grid"]
@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://bf6fe2778glgu" path="res://scenes/ui/meridian/RequirementList.tscn" id="8_req"]
 [ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/main/PouchDropZone.tscn" id="10_pouch"]
 
-[node name="GameScreen" type="Control" unique_id=1938900574]
+[node name="GameScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_gs")
 
-[node name="GameBg" type="TextureRect" parent="." unique_id=2054573597]
+[node name="GameBg" type="TextureRect" parent="."]
 z_index = -1
 layout_mode = 1
 anchors_preset = 15
@@ -33,7 +33,7 @@ texture = ExtResource("7_0wecs")
 expand_mode = 1
 stretch_mode = 4
 
-[node name="GridBackground" type="TextureRect" parent="." unique_id=892972631]
+[node name="GridBackground" type="TextureRect" parent="."]
 z_index = 5
 layout_mode = 1
 anchors_preset = 7
@@ -52,7 +52,7 @@ texture = ExtResource("8_gljsl")
 expand_mode = 1
 stretch_mode = 4
 
-[node name="GridView" parent="." unique_id=644218555 instance=ExtResource("2_grid")]
+[node name="GridView" parent="." instance=ExtResource("2_grid")]
 z_index = 10
 layout_mode = 1
 anchors_preset = 7
@@ -67,14 +67,14 @@ offset_bottom = -375.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="PouchDropZone" parent="." unique_id=134967436 instance=ExtResource("10_pouch")]
+[node name="PouchDropZone" parent="." instance=ExtResource("10_pouch")]
 anchors_preset = 0
 offset_left = 631.0
 offset_top = 115.0
 offset_right = 695.0
 offset_bottom = 179.0
 
-[node name="HomeButton" type="Button" parent="." unique_id=745559034]
+[node name="HomeButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 34.0
 offset_top = 1620.0
@@ -86,7 +86,7 @@ flat = true
 icon_alignment = 1
 expand_icon = true
 
-[node name="BattleButton" type="Button" parent="." unique_id=769599351]
+[node name="BattleButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 640.0
 offset_top = 1620.0
@@ -98,7 +98,7 @@ flat = true
 icon_alignment = 1
 expand_icon = true
 
-[node name="ShopButton" type="Button" parent="." unique_id=299862124]
+[node name="ShopButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 493.0
 offset_top = 1617.0
@@ -111,7 +111,7 @@ flat = true
 icon_alignment = 1
 expand_icon = true
 
-[node name="RequirementList" parent="." unique_id=1650475559 instance=ExtResource("8_req")]
+[node name="RequirementList" parent="." instance=ExtResource("8_req")]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -123,14 +123,14 @@ offset_bottom = 461.0
 grow_horizontal = 2
 size_flags_horizontal = 2
 
-[node name="ItemDetailPanel" parent="." unique_id=607450120 instance=ExtResource("5_pbayp")]
+[node name="ItemDetailPanel" parent="." instance=ExtResource("5_pbayp")]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 1405.0
 offset_right = 790.0
 offset_bottom = 1552.0
 
-[node name="TopBar" parent="." unique_id=1995499029 instance=ExtResource("6_0wecs")]
+[node name="TopBar" parent="." instance=ExtResource("6_0wecs")]
 layout_mode = 0
 offset_left = -10.0
 offset_top = 3.0

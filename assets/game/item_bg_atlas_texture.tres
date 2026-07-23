@@ -1,4 +1,4 @@
-[gd_resource type="AtlasTexture" format=3 uid="uid://er6w8cq78bts"]
+[gd_resource type="AtlasTexture" load_steps=2 format=3 uid="uid://er6w8cq78bts"]
 
 [ext_resource type="Texture2D" uid="uid://bnjmp6yth1vo7" path="res://assets/game/item_bg.png" id="1_f0dmh"]
 

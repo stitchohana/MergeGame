@@ -1,17 +1,17 @@
-[gd_scene format=3 uid="uid://ofi2ei6no4yy"]
+[gd_scene load_steps=4 format=3 uid="uid://ofi2ei6no4yy"]
 
 [ext_resource type="Script" uid="uid://yvf00usf5sm6" path="res://scenes/ui/main/ItemDetailPanel.gd" id="1_gd"]
 [ext_resource type="Texture2D" uid="uid://cywrwm4abfk5b" path="res://assets/game/item_detail_bg_atlas_texture.tres" id="2_wngso"]
 [ext_resource type="Theme" uid="uid://gc2kayu31yh8" path="res://assets/theme/btn_theme.tres" id="3_wngso"]
 
-[node name="ItemDetailPanel" type="Control" unique_id=607450120]
+[node name="ItemDetailPanel" type="Control"]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 780.0
 offset_bottom = 147.0
 script = ExtResource("1_gd")
 
-[node name="Bg" type="NinePatchRect" parent="." unique_id=366306202]
+[node name="Bg" type="NinePatchRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_wngso")
 
-[node name="DefaultLabel" type="Label" parent="." unique_id=1604343573]
+[node name="DefaultLabel" type="Label" parent="."]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -37,7 +37,7 @@ text = "点击物品查看详情"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="NameLabel" type="Label" parent="." unique_id=849360258]
+[node name="NameLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 53.0
 offset_top = 21.0
@@ -47,7 +47,7 @@ theme = ExtResource("3_wngso")
 text = "道具名字"
 vertical_alignment = 1
 
-[node name="LevelLabel" type="Label" parent="." unique_id=1221540825]
+[node name="LevelLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 142.0
 offset_top = 21.0
@@ -59,7 +59,7 @@ theme_override_font_sizes/font_size = 16
 text = "lv1"
 vertical_alignment = 1
 
-[node name="DescLabel" type="Label" parent="." unique_id=1583989582]
+[node name="DescLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 51.0
 offset_top = 53.0
@@ -70,7 +70,7 @@ theme_override_font_sizes/font_size = 14
 text = "描述描述描述描述描述"
 vertical_alignment = 1
 
-[node name="RecipeButton" type="Button" parent="." unique_id=33481762]
+[node name="RecipeButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 307.0
 offset_top = 22.0
@@ -79,7 +79,7 @@ offset_bottom = 52.0
 theme_override_font_sizes/font_size = 14
 text = "配方"
 
-[node name="ViewButton" type="Button" parent="." unique_id=690038754]
+[node name="ViewButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 431.0
 offset_top = 20.0
@@ -88,7 +88,7 @@ offset_bottom = 50.0
 theme_override_font_sizes/font_size = 14
 text = "查看"
 
-[node name="MaterialsLabel" type="Label" parent="." unique_id=1916841941]
+[node name="MaterialsLabel" type="Label" parent="."]
 visible = false
 layout_mode = 0
 offset_left = 118.0
@@ -99,7 +99,7 @@ theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 13
 text = "已放入材料"
 
-[node name="StatusLabel" type="Label" parent="." unique_id=1845956393]
+[node name="StatusLabel" type="Label" parent="."]
 visible = false
 layout_mode = 0
 offset_left = 127.0
@@ -110,7 +110,7 @@ theme_override_colors/font_color = Color(0.9, 0.9, 0.2, 1)
 theme_override_font_sizes/font_size = 16
 vertical_alignment = 1
 
-[node name="MaterialsContainer" type="FlowContainer" parent="." unique_id=334365544]
+[node name="MaterialsContainer" type="FlowContainer" parent="."]
 visible = false
 layout_mode = 0
 offset_left = 89.0
@@ -118,7 +118,7 @@ offset_top = 86.0
 offset_right = 709.0
 offset_bottom = 152.0
 
-[node name="SellPriceLabel" type="Label" parent="." unique_id=1374639230]
+[node name="SellPriceLabel" type="Label" parent="."]
 visible = false
 layout_mode = 0
 offset_left = 659.0
@@ -130,7 +130,7 @@ theme_override_font_sizes/font_size = 14
 text = "灵石 10"
 horizontal_alignment = 2
 
-[node name="SellButton" type="Button" parent="." unique_id=1661140912]
+[node name="SellButton" type="Button" parent="."]
 visible = false
 layout_mode = 0
 offset_left = 614.0

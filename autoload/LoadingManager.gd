@@ -12,11 +12,6 @@ var _next_token: int = 1
 var _progress_tween: Tween = null
 var _current_progress: float = 0.0
 
-
-func _ready() -> void:
-	_loading_scene = preload("res://scenes/screens/LoadingScreen.tscn")
-
-
 func begin(message: String = "加载中") -> int:
 	var token := _next_token
 	_next_token += 1
@@ -49,6 +44,11 @@ func end(token: int) -> void:
 func _show() -> void:
 	if _loading_screen and is_instance_valid(_loading_screen):
 		return
+	if _loading_scene == null:
+		_loading_scene = load("res://scenes/screens/LoadingScreen.tscn") as PackedScene
+		if _loading_scene == null:
+			push_error("[LoadingManager] Loading screen is unavailable")
+			return
 
 	_loading_screen = _loading_scene.instantiate()
 	var layer := UIManager.get_layer(UIManager.Layer.LOADING)

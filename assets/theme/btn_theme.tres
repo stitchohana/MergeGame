@@ -1,4 +1,4 @@
-[gd_resource type="Theme" format=3 uid="uid://gc2kayu31yh8"]
+[gd_resource type="Theme" load_steps=5 format=3 uid="uid://gc2kayu31yh8"]
 
 [ext_resource type="Texture2D" uid="uid://bjsufih0ix8iq" path="res://assets/common/common_btn_atlas_texture.tres" id="1_83bw8"]
 
@@ -26,15 +26,6 @@ expand_margin_bottom = 2.0
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wpo27"]
 
 [sub_resource type="FontFile" id="FontFile_o0kps"]
-cache/0/variation_coordinates = {}
-cache/0/face_index = 0
-cache/0/embolden = 0.0
-cache/0/transform = Transform2D(1, 0, 0, 1, 0, 0)
-cache/0/spacing_top = 0
-cache/0/spacing_bottom = 0
-cache/0/spacing_space = 0
-cache/0/spacing_glyph = 0
-cache/0/baseline_offset = 0.0
 cache/0/16/0/ascent = 0.0
 cache/0/16/0/descent = 0.0
 cache/0/16/0/underline_position = 0.0
@@ -84,12 +75,12 @@ cache/0/12/0/scale = 1.0
 [resource]
 default_font = SubResource("FontFile_o0kps")
 default_font_size = 20
-Button/colors/font_color = Color(0.36078432, 0.4392157, 0.36078432, 1)
+Button/colors/font_color = Color(0.360784, 0.439216, 0.360784, 1)
 Button/colors/font_outline_color = Color(0, 0, 0, 1)
 Button/constants/outline_size = 0
 Button/font_sizes/font_size = 16
 Button/icons/icon = ExtResource("1_83bw8")
-Label/colors/font_color = Color(0.36078432, 0.4392157, 0.36078432, 1)
+Label/colors/font_color = Color(0.360784, 0.439216, 0.360784, 1)
 Label/colors/font_outline_color = Color(0, 0, 0, 1)
 Label/colors/font_shadow_color = Color(0, 0, 0, 0)
 Label/constants/line_spacing = 3

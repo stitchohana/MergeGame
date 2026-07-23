@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bfrasromb4gf7"]
+[gd_scene load_steps=9 format=3 uid="uid://bfrasromb4gf7"]
 
 [ext_resource type="Script" uid="uid://bm7eaym0h864p" path="res://scenes/screens/HomeScreen.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/common/TopBar.tscn" id="2_qahno"]
@@ -31,7 +31,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="HomeScreen" type="Control" unique_id=65201493]
+[node name="HomeScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -51,7 +51,7 @@ mouse_filter = 2
 texture = ExtResource("6_panel")
 expand_mode = 1
 
-[node name="RealmLabel" type="Label" parent="." unique_id=1051055480]
+[node name="RealmLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 198.0
 offset_top = 276.0
@@ -64,7 +64,7 @@ theme_override_font_sizes/font_size = 26
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ExpBar" type="ProgressBar" parent="." unique_id=102096883]
+[node name="ExpBar" type="ProgressBar" parent="."]
 layout_mode = 0
 offset_left = 218.0
 offset_top = 326.0
@@ -75,13 +75,12 @@ theme_override_styles/background = SubResource("StyleBoxFlat_exp_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_exp_fill")
 show_percentage = false
 
-[node name="ExpLabel" type="Label" parent="." unique_id=947468609]
+[node name="ExpLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 218.0
 offset_top = 326.0
 offset_right = 542.0
 offset_bottom = 346.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.98, 0.84, 1)
 theme_override_colors/font_outline_color = Color(0.16, 0.28, 0.2, 0.9)
 theme_override_constants/outline_size = 2
@@ -90,7 +89,7 @@ text = "0/0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AcupointLayer" type="Control" parent="." unique_id=869113625]
+[node name="AcupointLayer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -100,118 +99,134 @@ grow_vertical = 2
 mouse_filter = 2
 metadata/_edit_lock_ = true
 
-[node name="AcupointPoint00" parent="AcupointLayer" unique_id=577144338 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint00" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 426.0
 offset_top = 824.0
 offset_right = 482.0
 offset_bottom = 880.0
 
-[node name="AcupointPoint01" parent="AcupointLayer" unique_id=636960495 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint01" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 321.0
 offset_top = 824.0
 offset_right = 377.0
 offset_bottom = 880.0
 acupoint_index = 1
 
-[node name="AcupointPoint02" parent="AcupointLayer" unique_id=234941136 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint02" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 519.0
 offset_top = 952.0
 offset_right = 575.0
 offset_bottom = 1008.0
 acupoint_index = 2
 
-[node name="AcupointPoint03" parent="AcupointLayer" unique_id=49012886 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint03" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 246.0
 offset_top = 906.0
 offset_right = 302.0
 offset_bottom = 962.0
 acupoint_index = 3
 
-[node name="AcupointPoint04" parent="AcupointLayer" unique_id=1380700858 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint04" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 212.0
 offset_top = 1025.0
 offset_right = 268.0
 offset_bottom = 1081.0
 acupoint_index = 4
 
-[node name="AcupointPoint05" parent="AcupointLayer" unique_id=194392078 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint05" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 576.0
 offset_top = 1060.0
 offset_right = 632.0
 offset_bottom = 1116.0
 acupoint_index = 5
 
-[node name="AcupointPoint06" parent="AcupointLayer" unique_id=885112503 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint06" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 342.0
 offset_top = 896.0
 offset_right = 398.0
 offset_bottom = 952.0
 acupoint_index = 6
 
-[node name="AcupointPoint07" parent="AcupointLayer" unique_id=83784643 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint07" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 415.0
 offset_top = 896.0
 offset_right = 471.0
 offset_bottom = 952.0
 acupoint_index = 7
 
-[node name="AcupointPoint08" parent="AcupointLayer" unique_id=639841904 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint08" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 321.0
 offset_top = 978.0
 offset_right = 377.0
 offset_bottom = 1034.0
 acupoint_index = 8
 
-[node name="AcupointPoint09" parent="AcupointLayer" unique_id=622123577 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint09" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 372.0
 offset_top = 1060.0
 offset_right = 428.0
 offset_bottom = 1116.0
 acupoint_index = 9
 
-[node name="AcupointPoint10" parent="AcupointLayer" unique_id=766490050 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint10" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 428.0
 offset_top = 978.0
 offset_right = 484.0
 offset_bottom = 1034.0
 acupoint_index = 10
 
-[node name="AcupointPoint11" parent="AcupointLayer" unique_id=1966546405 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint11" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 286.0
 offset_top = 1136.0
 offset_right = 342.0
 offset_bottom = 1192.0
 acupoint_index = 11
 
-[node name="AcupointPoint12" parent="AcupointLayer" unique_id=782173499 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint12" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 450.0
 offset_top = 1136.0
 offset_right = 506.0
 offset_bottom = 1192.0
 acupoint_index = 12
 
-[node name="AcupointPoint13" parent="AcupointLayer" unique_id=2082429239 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint13" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 156.0
 offset_top = 1166.0
 offset_right = 212.0
 offset_bottom = 1222.0
 acupoint_index = 13
 
-[node name="AcupointPoint14" parent="AcupointLayer" unique_id=1622400660 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint14" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 576.0
 offset_top = 1202.0
 offset_right = 632.0
 offset_bottom = 1258.0
 acupoint_index = 14
 
-[node name="AcupointPoint15" parent="AcupointLayer" unique_id=583378385 instance=ExtResource("5_acupoint")]
+[node name="AcupointPoint15" parent="AcupointLayer" instance=ExtResource("5_acupoint")]
+anchors_preset = 0
 offset_left = 372.0
 offset_top = 1212.0
 offset_right = 428.0
 offset_bottom = 1268.0
 acupoint_index = 15
 
-[node name="GameButton" type="Button" parent="." unique_id=1411331884]
+[node name="GameButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 74.0
 offset_top = 1581.0
@@ -224,7 +239,7 @@ flat = true
 icon_alignment = 1
 expand_icon = true
 
-[node name="BattleButton" type="Button" parent="." unique_id=413815188]
+[node name="BattleButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 396.0
 offset_top = 1581.0
@@ -237,7 +252,7 @@ flat = true
 icon_alignment = 1
 expand_icon = true
 
-[node name="HomeBg" type="TextureRect" parent="." unique_id=1802941946]
+[node name="HomeBg" type="TextureRect" parent="."]
 z_index = -2
 layout_mode = 1
 anchors_preset = 15
@@ -251,5 +266,5 @@ expand_mode = 1
 stretch_mode = 6
 metadata/_edit_lock_ = true
 
-[node name="TopBar" parent="." unique_id=1995499029 instance=ExtResource("2_qahno")]
+[node name="TopBar" parent="." instance=ExtResource("2_qahno")]
 layout_mode = 0

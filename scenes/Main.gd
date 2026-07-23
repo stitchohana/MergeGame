@@ -51,5 +51,8 @@ func _on_screen_change_requested(screen_name: String) -> void:
 		"battle":
 			SceneTransitionManager.load_scene_and_replace("res://scenes/screens/BattleScreen.tscn")
 		"settings":
-			var settings := preload("res://scenes/screens/SettingsScreen.tscn").instantiate()
-			UIManager.push_screen(settings)
+			var settings_scene := load("res://scenes/screens/SettingsScreen.tscn") as PackedScene
+			if settings_scene:
+				UIManager.push_screen(settings_scene.instantiate())
+			else:
+				push_error("[Main] Settings scene is unavailable")
