@@ -80,7 +80,6 @@ theme_override_font_sizes/font_size = 14
 text = "配方"
 
 [node name="ViewButton" type="Button" parent="." unique_id=690038754]
-visible = false
 layout_mode = 0
 offset_left = 431.0
 offset_top = 20.0

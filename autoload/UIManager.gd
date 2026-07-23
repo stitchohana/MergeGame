@@ -19,6 +19,7 @@ var _canvas_layer: CanvasLayer = null
 var _layers: Dictionary = {}
 var _screen_stack: Array[BaseScreen] = []
 var _active_popups: Array[BasePopup] = []
+var _closing_popups: Array[BasePopup] = []
 
 signal pre_screen_changed(screen_name: String, action: String)
 signal post_screen_changed(screen_name: String, action: String)
@@ -157,7 +158,12 @@ func show_popup(popup: BasePopup, layer: Layer = Layer.POPUP) -> void:
 
 
 func hide_popup(popup: BasePopup) -> void:
+	if not _active_popups.has(popup) or _closing_popups.has(popup):
+		return
+	_closing_popups.append(popup)
 	popup.hide_animated()
+	await popup.hide_animation_finished
+	_closing_popups.erase(popup)
 	_active_popups.erase(popup)
 	_update_input_gating()
 	input_blocked_changed.emit(is_input_blocked())

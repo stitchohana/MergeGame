@@ -11,6 +11,9 @@ var _drag_start_scroll: int = 0
 @onready var container: HBoxContainer = $Panel/ScrollContainer/HBoxContainer
 
 func _input(event: InputEvent) -> void:
+	if UIManager.is_input_blocked():
+		_dragging = false
+		return
 	if not (event is InputEventMouseButton or event is InputEventMouseMotion):
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:

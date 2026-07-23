@@ -1,7 +1,7 @@
-class_name GridItem extends ColorRect
+class_name GridItem extends Control
 
 # GridItem: A single item on the game board.
-# Shows colored background, item name, level, and optional icon.
+# Shows item icon, name, level, and optional status overlays.
 
 var item_data: Dictionary = {}
 var grid_position: Vector2i
@@ -61,16 +61,8 @@ func setup(data: Dictionary, pos: Vector2i, cell_step: int) -> void:
 	_update_visuals()
 
 func _update_visuals() -> void:
-	# Background color by type and group
-	var item_type: int = item_data.get("type", 0)
-	var group_id: int = item_data.get("group_id", 0)
-
-	if is_launcher:
-		color = GridUtils.launcher_color(group_id)
-	else:
-		var level: int = item_data.get("level", 0)
-		color = GridUtils.item_color(group_id, level)
-		# Apply crafting state visual if present (restored from server)
+	# Apply crafting state visual if present (restored from server).
+	if not is_launcher:
 		var cs: int = item_data.get("_craft_state", -1)
 		if cs >= 0 and cs <= 3:
 			set_crafting_state(cs)
@@ -83,38 +75,13 @@ func _update_visuals() -> void:
 			icon_rect.texture = tex
 			icon_rect.show()
 
-	# Item name
-	var item_name: String = item_data.get("name", "")
-	var item_id: int = item_data.get("id", 0)
+	# The board shows item art only; text details live in the item detail panel.
 	if name_label:
-		name_label.text = item_name + (" [#%d]" % item_id if item_id > 0 else "")
-		name_label.visible = true
-
-	# Level label
-	var level: int = item_data.get("level", 0)
+		name_label.hide()
 	if level_label:
-		level_label.text = str(level)
-		level_label.visible = true
-
-	# Charge indicator for launchers (uses node from scene)
+		level_label.hide()
 	if charge_label:
-		if is_launcher:
-			var item_charges: int = item_data.get("charges", -1) as int
-			var config := ConfigDatabase.get_item_data(item_data.get("id", 0))
-			var max_c: int = config.get("max_charges", 0) if not config.is_empty() else 0
-			if item_charges >= 0 and max_c > 0:
-				charge_label.visible = true
-				if item_charges <= 0:
-					charge_label.text = "空"
-					charge_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3, 1))
-				else:
-					charge_label.text = "%d/%d" % [item_charges, max_c]
-					charge_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
-			else:
-				charge_label.visible = false
-
-		else:
-			charge_label.visible = false
+		charge_label.hide()
 
 	if immovable_icon:
 		immovable_icon.visible = item_data.get("immovable") == true

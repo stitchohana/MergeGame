@@ -269,11 +269,19 @@ export class GameEngine {
       stageProgress = { stage: stageIndex, lit: new Array(def.acupoints).fill(false), circulation_completed: false };
       state.home_meridian_progress.push(stageProgress);
     }
+    stageProgress.lit = Array.from(
+      { length: def.acupoints },
+      (_value, index) => Boolean(stageProgress.lit[index]),
+    );
     if (stageProgress.lit[acupointIndex]) {
       return { ok: false, reason: "already_lit" };
     }
     if (stageProgress.circulation_completed) {
       return { ok: false, reason: "circulation_completed" };
+    }
+    const nextAcupointIndex = stageProgress.lit.findIndex(isLit => !isLit);
+    if (acupointIndex !== nextAcupointIndex) {
+      return { ok: false, reason: "out_of_order" };
     }
 
     // Check qi

@@ -3,22 +3,19 @@
 *.translation
 *.import
 *.uid
-
 # OS
 Thumbs.db
 .DS_Store
-
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *.tmp
-
 # Python
 __pycache__/
 *.py[cod]
-
 # Server
 server/node_modules/
 server/data/
+wxgame

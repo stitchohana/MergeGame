@@ -7,7 +7,6 @@ class_name AcupointActivatePopup extends BasePopup
 @onready var cancel_btn: Button = $Panel/VBox/BtnBox/CancelButton
 
 var _on_action: Callable = Callable()
-var _on_rejected: Callable = Callable()
 var _item_widget_scene := preload("res://scenes/ui/common/ItemWidget.tscn")
 
 
@@ -19,6 +18,7 @@ func _ready() -> void:
 func _on_success(_result: Dictionary) -> void:
 	_disconnect_signals()
 	UIManager.hide_popup(self)
+
 
 func _disconnect_signals() -> void:
 	if CloudService.home_meridian_light_confirmed.is_connected(_on_success):
@@ -34,6 +34,10 @@ func _on_rejected_handler(reason: String) -> void:
 		EventBus.show_toast.emit("灵气不足")
 	elif reason == "breakthrough_needed":
 		EventBus.show_toast.emit("请先突破境界")
+	elif reason == "out_of_order":
+		EventBus.show_toast.emit("请按顺序激活穴位")
+	else:
+		EventBus.show_toast.emit("激活失败")
 
 
 func _on_cancel() -> void:
@@ -63,9 +67,9 @@ func setup(title: String, cost: String, rewards: Dictionary, action_text: String
 					tw.tooltip_text = "%s x%d" % [token_data.get("name", "?"), amount]
 					rewards_box.add_child(tw)
 		if rewards.has("items"):
-			for ri in rewards.items:
-				var item_id: int = int(ri.get("id", 0))
-				var count: int = int(ri.get("count", 0))
+			for reward_item in rewards.items:
+				var item_id: int = int(reward_item.get("id", 0))
+				var count: int = int(reward_item.get("count", 0))
 				var item_data := ConfigDatabase.get_item_data(item_id)
 				if not item_data.is_empty():
 					var iw := _item_widget_scene.instantiate() as ItemWidget
@@ -89,4 +93,5 @@ func _on_action_btn() -> void:
 
 
 func _on_close() -> void:
+	_disconnect_signals()
 	UIManager.hide_popup(self)
