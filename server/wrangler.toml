@@ -1,0 +1,17 @@
+name = "mergegame-api"
+main = "src/worker/index.ts"
+compatibility_date = "2026-07-23"
+workers_dev = true
+account_id = "c3aa375d1bed60155274ca9efcd57275"
+
+routes = [
+	{ pattern = "234575.xyz", custom_domain = true }
+]
+
+[vars]
+MAINTENANCE_MODE = "false"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mergegame-db-apac"
+database_id = "d3f0180a-7bdc-4d39-b5fc-291dae9f4251"

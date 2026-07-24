@@ -1,7 +1,8 @@
-[gd_scene format=3 uid="uid://cpq61w6j6i33a"]
+[gd_scene load_steps=4 format=3 uid="uid://cpq61w6j6i33a"]
 
 [ext_resource type="Script" uid="uid://djfkaf3ggjcl" path="res://scenes/screens/LoginScreen.gd" id="1_ls"]
 [ext_resource type="Texture2D" uid="uid://bjfmfpwnfx22p" path="res://assets/login/login_bg2.png" id="2_p2wte"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="3_theme"]
 
 [node name="LoginScreen" type="Control" unique_id=1898501451]
 layout_mode = 3
@@ -11,6 +12,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ls")
+theme = ExtResource("3_theme")
 
 [node name="TitleLabel" type="Label" parent="." unique_id=489151892]
 visible = false
@@ -71,6 +73,7 @@ offset_left = 140.0
 offset_top = 840.0
 offset_right = 640.0
 offset_bottom = 870.0
+custom_minimum_size = Vector2(0, 24)
 max_value = 1.0
 show_percentage = false
 

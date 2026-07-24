@@ -1,6 +1,6 @@
-import { Router, Request, Response } from "express";
+import { Router, WorkerRequest as Request, WorkerResponse as Response } from "../worker/http";
 import { IStorage } from "../storage/interface";
-import { authRequired } from "../middleware/auth";
+import { createAuthRequired } from "../middleware/auth";
 import { GameEngine, TableState } from "../engine/game_engine";
 import { enqueue } from "./queue";
 
@@ -17,10 +17,10 @@ function op(handler: (req: Request, res: Response, userId: string) => Promise<vo
   };
 }
 
-export function createGameRouter(storage: IStorage, engine: GameEngine): Router {
-  const router = Router();
+export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecret: string): Router {
+  const router = new Router();
 
-  router.use(authRequired);
+  router.use(createAuthRequired(jwtSecret));
 
   async function getOrCreateState(userId: string) {
     let state = await storage.loadState(userId);
@@ -29,6 +29,19 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       await storage.saveState(userId, state);
       console.log(`[game] new player ${userId}, init with ${state.grid.length} items | v0`);
     } else {
+      let spawnStateMigrated = false;
+      if (!Number.isInteger(state.spawn_seed) || (state.spawn_seed ?? 0) <= 0) {
+        state.spawn_seed = engine.createSpawnSeed();
+        spawnStateMigrated = true;
+      }
+      if (!Number.isInteger(state.spawn_sequence) || (state.spawn_sequence ?? 0) < 0) {
+        state.spawn_sequence = 0;
+        spawnStateMigrated = true;
+      }
+      if (!Array.isArray(state.spawn_history)) {
+        state.spawn_history = [];
+        spawnStateMigrated = true;
+      }
       // Migrate: add pouch if missing (old saves)
       if (!state.pouch) {
         state.pouch = [];
@@ -129,6 +142,9 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       }
       engine.tickStamina(state);
       engine.tickLauncherRecharge(state);
+      if (spawnStateMigrated) {
+        await storage.saveState(userId, state);
+      }
     }
     return state;
   }
@@ -157,6 +173,8 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
       quest_defs: engine.questEngine.getResolvedQuestDefs(engine), home_meridian_defs: engine.getHomeMeridianDefs(),
       activity_defs: engine.activityEngine.getActivities().map(a => ({ ...a, active: engine.activityEngine.isActive(a) })),
       activity_progress: state.activity_progress,
+      spawn_seed: state.spawn_seed,
+      spawn_sequence: state.spawn_sequence,
       activity_current_day: (() => {
         const active = engine.activityEngine.getActivities().find((a: any) => engine.activityEngine.isActive(a) && engine.activityEngine.hasWeeklyTasks(a.id));
         return active ? engine.activityEngine.getCurrentDay(active.id, engine.questResetHour) : 0;
@@ -210,20 +228,128 @@ export function createGameRouter(storage: IStorage, engine: GameEngine): Router 
     res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, atk_base: result.atkBase ?? 0, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
   }));
 
+  // POST /api/game/actions/batch
+  router.post("/actions/batch", op(async (req, res, userId) => {
+    const { operations } = req.body;
+    if (!Array.isArray(operations) || operations.length < 1 || operations.length > 32) {
+      res.status(400).json({ error: "invalid_operations" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const workingState = structuredClone(state);
+    const results: any[] = [];
+
+    for (let index = 0; index < operations.length; index++) {
+      const operation = operations[index];
+      const from = operation?.from;
+      const to = operation?.to;
+      if (!operation || !["move", "merge"].includes(operation.type)
+        || !Array.isArray(from) || from.length !== 2
+        || !Array.isArray(to) || to.length !== 2
+        || !from.every(Number.isInteger) || !to.every(Number.isInteger)) {
+        res.status(400).json({ error: "invalid_operation", failed_index: index, grid: state.grid }); return;
+      }
+
+      if (operation.type === "move") {
+        const result = engine.executeMove(workingState, from[0], from[1], to[0], to[1]);
+        if (!result.ok) {
+          res.status(409).json({ error: result.reason, failed_index: index, grid: state.grid }); return;
+        }
+        results.push({ type: "move", from, to, new_version: result.newVersion });
+        continue;
+      }
+
+      const result = engine.executeMerge(workingState, from[0], from[1], to[0], to[1]);
+      if (!result.ok) {
+        res.status(409).json({ error: result.reason, failed_index: index, grid: state.grid }); return;
+      }
+      results.push({
+        type: "merge",
+        from,
+        to,
+        result_uid: result.resultUid,
+        result_id: result.resultId,
+        atk_base: result.atkBase ?? 0,
+        new_version: result.newVersion,
+      });
+    }
+
+    await storage.saveState(userId, workingState);
+    res.json({
+      ok: true,
+      results,
+      grid: workingState.grid,
+      stamina: workingState.stamina,
+      cultivation: workingState.cultivation,
+      regen_remaining_ms: engine.getRegenRemainingMs(workingState),
+      quest_progress: workingState.quest_progress,
+    });
+  }));
+
   // POST /api/game/spawn
   router.post("/spawn", op(async (req, res, userId) => {
-    const { launcher_pos } = req.body;
+    const { launcher_pos, request_id, expected_sequence, predicted_id, predicted_target } = req.body;
     if (!Array.isArray(launcher_pos) || launcher_pos.length !== 2) {
       res.status(400).json({ error: "invalid_params" }); return;
     }
     if (!engine.isInBounds(launcher_pos[0], launcher_pos[1])) {
       res.status(400).json({ error: "out_of_bounds" }); return;
     }
+    if (request_id !== undefined && (typeof request_id !== "string" || !/^[A-Za-z0-9._:-]{1,96}$/.test(request_id))) {
+      res.status(400).json({ error: "invalid_request_id" }); return;
+    }
+    if (expected_sequence !== undefined && (!Number.isInteger(expected_sequence) || expected_sequence < 0)) {
+      res.status(400).json({ error: "invalid_spawn_sequence" }); return;
+    }
     const state = await getOrCreateState(userId);
-    const result = engine.executeSpawn(state, launcher_pos[0], launcher_pos[1]);
-    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    const cached = request_id ? state.spawn_history?.find(entry => entry.request_id === request_id) : undefined;
+    const result: any = cached?.result ?? engine.executeSpawn(state, launcher_pos[0], launcher_pos[1], expected_sequence);
+    if (!result.ok) {
+      res.status(result.reason === "spawn_sequence_mismatch" ? 409 : 400).json({
+        error: result.reason,
+        request_id,
+        spawn_seed: state.spawn_seed,
+        spawn_sequence: state.spawn_sequence,
+      });
+      return;
+    }
+    if (!cached && request_id) {
+      state.spawn_history = state.spawn_history ?? [];
+      state.spawn_history.push({ request_id, result: { ...result } });
+      if (state.spawn_history.length > 32) state.spawn_history.splice(0, state.spawn_history.length - 32);
+    }
+    const hasPrediction = Number.isInteger(predicted_id)
+      && Array.isArray(predicted_target)
+      && predicted_target.length === 2;
+    const predictionMatches = !hasPrediction || (
+      predicted_id === result.spawnedId
+      && predicted_target[0] === result.targetCol
+      && predicted_target[1] === result.targetRow
+    );
     await storage.saveState(userId, state);
-    res.json({ ok: true, spawned_uid: result.spawnedUid, spawned_id: result.spawnedId, spawned_name: result.spawnedName, target_col: result.targetCol, target_row: result.targetRow, stamina: state.stamina, max_stamina: state.max_stamina, charges: result.charges, max_charges: result.maxCharges, recharge_time: result.rechargeTime, atk_base: result.atkBase, cultivation: state.cultivation, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
+    res.json({
+      ok: true,
+      request_id,
+      replayed: Boolean(cached),
+      prediction_matches: predictionMatches,
+      spawned_uid: result.spawnedUid,
+      spawned_id: result.spawnedId,
+      spawned_name: result.spawnedName,
+      target_col: result.targetCol,
+      target_row: result.targetRow,
+      stamina: state.stamina,
+      max_stamina: state.max_stamina,
+      charges: result.charges,
+      max_charges: result.maxCharges,
+      recharge_time: result.rechargeTime,
+      atk_base: result.atkBase,
+      cultivation: state.cultivation,
+      regen_remaining_ms: engine.getRegenRemainingMs(state),
+      quest_progress: state.quest_progress,
+      spawn_seed: state.spawn_seed,
+      spawn_sequence: state.spawn_sequence,
+      sequence_used: result.sequenceUsed,
+      ...(predictionMatches ? {} : { grid: state.grid }),
+    });
   }));
 
   // POST /api/game/craft/add

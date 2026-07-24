@@ -9,7 +9,7 @@ script = ExtResource("1_gd")
 
 [node name="IconRect" type="TextureRect" parent="."]
 layout_mode = 2
-custom_minimum_size = Vector2(14, 14)
+custom_minimum_size = Vector2(22, 22)
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5

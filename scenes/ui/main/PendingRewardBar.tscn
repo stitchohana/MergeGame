@@ -1,11 +1,13 @@
-[gd_scene format=3 uid="uid://pending_reward_bar"]
+[gd_scene load_steps=3 format=3 uid="uid://pending_reward_bar"]
 
 [ext_resource type="Script" path="res://scenes/ui/main/PendingRewardBar.gd" id="1_gd"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
 
 [node name="PendingRewardBar" type="Control"]
-custom_minimum_size = Vector2(200, 80)
+custom_minimum_size = Vector2(240, 96)
 layout_mode = 3
 script = ExtResource("1_gd")
+theme = ExtResource("2_theme")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -18,10 +20,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 4.0
-offset_right = -8.0
-offset_bottom = -4.0
+offset_left = 18.0
+offset_top = 12.0
+offset_right = -18.0
+offset_bottom = -12.0
 
 [node name="TitleLabel" type="Label" parent="Panel/VBox"]
 layout_mode = 2

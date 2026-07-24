@@ -19,6 +19,7 @@ func _build_ui() -> void:
 		child.queue_free()
 	for i in range(7):
 		var btn := Button.new()
+		btn.custom_minimum_size = Vector2(66, 44)
 		btn.text = "第%d天" % (i + 1)
 		btn.add_theme_font_size_override("font_size", 14)
 		btn.pressed.connect(_on_day_pressed.bind(i))
@@ -28,11 +29,16 @@ func _build_ui() -> void:
 	_show_day(_current_day)
 	if not CloudService.quest_claim_confirmed.is_connected(_on_claim_done):
 		CloudService.quest_claim_confirmed.connect(_on_claim_done)
+	if not CloudService.state_loaded.is_connected(_on_state_synced):
+		CloudService.state_loaded.connect(_on_state_synced)
 	if not close_btn.pressed.is_connected(_on_close):
 		close_btn.pressed.connect(_on_close)
 
 
 func _on_claim_done(_result: Dictionary) -> void:
+	_show_day(_current_day)
+
+func _on_state_synced(_state: Dictionary) -> void:
 	_show_day(_current_day)
 
 
@@ -82,4 +88,6 @@ func _on_day_pressed(day: int) -> void:
 func _on_close() -> void:
 	if CloudService.quest_claim_confirmed.is_connected(_on_claim_done):
 		CloudService.quest_claim_confirmed.disconnect(_on_claim_done)
+	if CloudService.state_loaded.is_connected(_on_state_synced):
+		CloudService.state_loaded.disconnect(_on_state_synced)
 	UIManager.hide_popup(self)

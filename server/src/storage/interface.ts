@@ -150,6 +150,14 @@ export interface GameState {
   pending_rewards: PendingReward[];
   home_meridian_progress?: HomeMeridianStageProgress[];
   activity_progress?: Record<number, ActivityProgress>;
+  spawn_seed?: number;
+  spawn_sequence?: number;
+  spawn_history?: SpawnHistoryEntry[];
+}
+
+export interface SpawnHistoryEntry {
+  request_id: string;
+  result: Record<string, unknown>;
 }
 
 export interface BattleMonster {

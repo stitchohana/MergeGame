@@ -1,5 +1,3 @@
-import * as fs from "fs";
-import * as path from "path";
 import { GameState, RewardConfig, ResetCycle, QuestProgress, PendingReward } from "../storage/interface";
 import { GameEngine } from "./game_engine";
 
@@ -16,13 +14,12 @@ interface QuestDef {
 
 export class QuestEngine {
   private quests: QuestDef[] = [];
-  constructor(configDir: string) {
-    this.loadQuests(configDir);
+  constructor(data: any) {
+    this.loadQuests(data);
   }
 
-  private loadQuests(configDir: string): void {
+  private loadQuests(data: any): void {
     try {
-      const data = JSON.parse(fs.readFileSync(path.join(configDir, "json_output", "quests.json"), "utf-8"));
       this.quests = data.quests || [];
       console.log(`[quest] Loaded ${this.quests.length} quests`);
     } catch { /* quests.json optional */ }

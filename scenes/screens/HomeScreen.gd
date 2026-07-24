@@ -61,9 +61,15 @@ func _on_cultivation_stage_changed(_level: int, stage_name: String) -> void:
 
 func on_enter() -> void:
 	modulate = Color.TRANSPARENT
+	if not GameState.home_meridian_defs.is_empty():
+		_home_defs = GameState.home_meridian_defs.duplicate(true)
+		_home_progress = GameState.home_meridian_progress.duplicate(true)
+		_refresh_display()
+		_refresh_breakthrough_btn()
+		modulate = Color.WHITE
 	if GameState.skip_next_home_loading:
 		GameState.skip_next_home_loading = false
-	else:
+	elif GameState.home_meridian_defs.is_empty():
 		_load_token = LoadingManager.begin("加载数据...")
 	if CloudService.online:
 		CloudService.fetch_state()
@@ -84,8 +90,10 @@ func _on_state_loaded(state: Dictionary) -> void:
 		_load_token = -1
 	if state.has("home_meridian_defs"):
 		_home_defs = state.home_meridian_defs
+		GameState.home_meridian_defs = _home_defs.duplicate(true)
 	if state.has("home_meridian_progress"):
 		_home_progress = state.home_meridian_progress
+		GameState.home_meridian_progress = _home_progress.duplicate(true)
 	_refresh_cultivation_info()
 	_refresh_display()
 	_refresh_breakthrough_btn()
@@ -247,6 +255,7 @@ func _on_light_confirmed(result: Dictionary) -> void:
 	_activation_pending = false
 	if result.has("home_meridian_progress"):
 		_home_progress = result.home_meridian_progress
+		GameState.home_meridian_progress = _home_progress.duplicate(true)
 	if result.has("cultivation"):
 		CultivationService.deserialize(result.cultivation)
 	_refresh_display()

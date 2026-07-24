@@ -1,6 +1,6 @@
-import { Router, Request, Response } from "express";
+import { Router, WorkerRequest as Request, WorkerResponse as Response } from "../worker/http";
 import { IStorage } from "../storage/interface";
-import { authRequired } from "../middleware/auth";
+import { createAuthRequired } from "../middleware/auth";
 import { GameEngine } from "../engine/game_engine";
 import { enqueue } from "./queue";
 
@@ -17,9 +17,9 @@ function op(handler: (req: Request, res: Response, userId: string) => Promise<vo
   };
 }
 
-export function createCultivationRouter(storage: IStorage, engine: GameEngine): Router {
-  const router = Router();
-  router.use(authRequired);
+export function createCultivationRouter(storage: IStorage, engine: GameEngine, jwtSecret: string): Router {
+  const router = new Router();
+  router.use(createAuthRequired(jwtSecret));
 
   async function getOrCreateState(userId: string) {
     let state = await storage.loadState(userId);

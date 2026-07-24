@@ -1,5 +1,3 @@
-import * as fs from "fs";
-import * as path from "path";
 import { GameState, ActivityDef, WeeklyTask, ActivityCycle, ActivityProgress } from "../storage/interface";
 import { GameEngine } from "./game_engine";
 
@@ -7,22 +5,20 @@ export class ActivityEngine {
   private activities: ActivityDef[] = [];
   private weeklyTasks = new Map<number, number[][]>();
 
-  constructor(configDir: string) {
-    this.loadActivities(configDir);
-    this.loadWeeklyTasks(configDir);
+  constructor(activitiesData: any, weeklyTasksData: any) {
+    this.loadActivities(activitiesData);
+    this.loadWeeklyTasks(weeklyTasksData);
   }
 
-  private loadActivities(configDir: string): void {
+  private loadActivities(data: any): void {
     try {
-      const data = JSON.parse(fs.readFileSync(path.join(configDir, "json_output", "activities.json"), "utf-8"));
       this.activities = data.activities || [];
       console.log(`[activity] Loaded ${this.activities.length} activities`);
     } catch { /* optional */ }
   }
 
-  private loadWeeklyTasks(configDir: string): void {
+  private loadWeeklyTasks(data: any): void {
     try {
-      const data = JSON.parse(fs.readFileSync(path.join(configDir, "json_output", "weekly_tasks.json"), "utf-8"));
       for (const wt of data.weekly_tasks || []) {
         this.weeklyTasks.set(wt.activity_id, wt.daily_quests);
       }

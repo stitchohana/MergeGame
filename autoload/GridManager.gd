@@ -69,8 +69,14 @@ func add_item(item_data: Dictionary, pos: Vector2i) -> bool:
 	item_data = item_data.duplicate(true)
 	if not is_valid_pos(pos) or not is_empty(pos):
 		return false
-	if not item_data.has("_uid") or item_data["_uid"] <= 0:
-		print("[ERROR] GridManager.add_item: no server uid for id=#" + str(item_data.get("id", 0)) + " has no server uid!")
+	var has_valid_uid: bool = item_data.has("_uid") and item_data["_uid"] > 0
+	if not has_valid_uid:
+		var is_optimistic: bool = (
+			item_data.get("_pending_spawn", false)
+			or item_data.get("_optimistic_action", false)
+		)
+		if not is_optimistic:
+			print("[ERROR] GridManager.add_item: no server uid for id=#" + str(item_data.get("id", 0)) + " has no server uid!")
 	_grid[pos.y][pos.x] = item_data
 
 	# Track position for this item_id
@@ -85,6 +91,23 @@ func add_item(item_data: Dictionary, pos: Vector2i) -> bool:
 		_uid_to_pos[uid] = pos
 
 	item_added.emit(item_data, pos)
+	grid_updated.emit()
+	return true
+
+func confirm_optimistic_item(pos: Vector2i, temp_uid: int, server_uid: int,
+		atk_base: int = 0) -> bool:
+	if not is_valid_pos(pos) or is_empty(pos) or server_uid <= 0:
+		return false
+	var item: Dictionary = _grid[pos.y][pos.x]
+	if item.get("_uid", 0) != temp_uid or not item.get("_pending_spawn", false):
+		return false
+	item["_uid"] = server_uid
+	item.erase("_pending_spawn")
+	item.erase("_spawn_request_id")
+	item.erase("_spawn_origin")
+	if atk_base > 0:
+		item["atk_base"] = atk_base
+	_uid_to_pos[server_uid] = pos
 	grid_updated.emit()
 	return true
 

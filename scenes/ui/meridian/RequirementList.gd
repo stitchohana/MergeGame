@@ -2,8 +2,11 @@ class_name RequirementList extends Control
 
 signal complete_clicked(index: int)
 
+const DRAG_THRESHOLD: float = 8.0
+
 var _entry_scene: PackedScene = preload("res://scenes/ui/meridian/RequirementEntry.tscn")
 var _dragging: bool = false
+var _drag_moved: bool = false
 var _drag_start_x: float = 0.0
 var _drag_start_scroll: int = 0
 
@@ -18,6 +21,7 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		_dragging = false
+		call_deferred("_reset_drag_gesture")
 	if not is_inside_tree() or not scroll.get_global_rect().has_point(event.position):
 		return
 
@@ -25,6 +29,7 @@ func _input(event: InputEvent) -> void:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				_dragging = true
+				_drag_moved = false
 				_drag_start_x = event.position.x
 				_drag_start_scroll = scroll.scroll_horizontal
 			return
@@ -38,6 +43,8 @@ func _input(event: InputEvent) -> void:
 
 	if event is InputEventMouseMotion and _dragging:
 		var delta_x: float = _drag_start_x - event.position.x
+		if absf(delta_x) >= DRAG_THRESHOLD:
+			_drag_moved = true
 		var target_scroll: int = int(_drag_start_scroll + delta_x)
 		var max_scroll: int = int(scroll.get_h_scroll_bar().max_value)
 		scroll.scroll_horizontal = clampi(target_scroll, 0, max_scroll)
@@ -59,7 +66,15 @@ func set_requirements(reqs: Array) -> void:
 		entry.setup(req.get("items", []), i, req.get("completed", false), req.get("rewards", {}))
 		var idx := i
 		entry.complete_pressed.connect(_emit_complete.bind(idx))
-		entry.item_pressed.connect(_show_item_source)
+		entry.item_pressed.connect(_on_entry_item_pressed)
+
+func _on_entry_item_pressed(item_id: int) -> void:
+	if _drag_moved:
+		return
+	_show_item_source(item_id)
+
+func _reset_drag_gesture() -> void:
+	_drag_moved = false
 
 func _get_entries() -> Array[RequirementEntry]:
 	var entries: Array[RequirementEntry] = []

@@ -178,12 +178,17 @@ func _on_craft_button_pressed() -> void:
 		return
 	if _craft_start_pending:
 		return
-	_craft_start_pending = true
 	var table_pos: Vector2i = _get_table_grid_pos(_craft_table_item)
 	if table_pos.x < 0 or table_pos.y < 0:
-		_craft_start_pending = false
 		return
 	craft_start_requested.emit(table_pos)
+
+func submit_craft_start(table_item: Dictionary, table_pos: Vector2i) -> void:
+	if _craft_start_pending or table_item.is_empty() or table_pos.x < 0:
+		return
+	_craft_start_pending = true
+	_craft_table_item = table_item
+	_craft_table_pos = table_pos
 	if CloudService.online:
 		CloudService.submit_craft_start(table_pos.x, table_pos.y)
 

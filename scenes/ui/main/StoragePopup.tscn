@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://blb6ivmmge672"]
+[gd_scene load_steps=3 format=3 uid="uid://blb6ivmmge672"]
 
 [ext_resource type="Script" uid="uid://qwgsnbltxaqh" path="res://scenes/ui/main/StoragePopup.gd" id="1_sp"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
 
 [node name="StoragePopup" type="Control" unique_id=1440782534]
 layout_mode = 3
@@ -10,6 +11,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_sp")
+theme = ExtResource("2_theme")
 
 [node name="Dim" type="ColorRect" parent="." unique_id=326572577]
 layout_mode = 1
@@ -22,33 +24,43 @@ mouse_filter = 2
 color = Color(0, 0, 0, 0.5)
 
 [node name="Panel" type="Panel" parent="." unique_id=540019380]
-layout_mode = 0
-offset_left = 80.0
-offset_top = 200.0
-offset_right = 700.0
-offset_bottom = 1200.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -310.0
+offset_top = -500.0
+offset_right = 310.0
+offset_bottom = 500.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TitleLabel" type="Label" parent="Panel" unique_id=1288797185]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 15.0
-offset_right = 580.0
-offset_bottom = 45.0
-theme_override_font_sizes/font_size = 22
+offset_left = 28.0
+offset_top = 24.0
+offset_right = 548.0
+offset_bottom = 64.0
+theme_override_font_sizes/font_size = 24
 text = "仓库"
 
 [node name="CloseButton" type="Button" parent="Panel" unique_id=985783851]
 layout_mode = 0
-offset_left = 580.0
-offset_top = 15.0
-offset_right = 620.0
-offset_bottom = 45.0
+offset_left = 548.0
+offset_top = 18.0
+offset_right = 604.0
+offset_bottom = 70.0
+theme_override_font_sizes/font_size = 20
 text = "X"
 
 [node name="ItemContainer" type="GridContainer" parent="Panel" unique_id=193982151]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 60.0
-offset_right = 600.0
-offset_bottom = 980.0
+offset_left = 28.0
+offset_top = 84.0
+offset_right = 592.0
+offset_bottom = 960.0
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 14
 columns = 5

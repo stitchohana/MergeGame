@@ -24,10 +24,14 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 	GameState.spirit_stones = state.get("spirit_stones", 0)
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+	GameState.spawn_seed = state.get("spawn_seed", 0)
+	GameState.spawn_sequence = state.get("spawn_sequence", 0)
 
 	# Grid cache for both boards (cached only — grid is NOT repopulated here)
 	GameState.main_grid_cache = state.get("main_grid", [])
 	GameState.battle_grid_cache = state.get("battle_grid", [])
+	GameState.home_meridian_defs = state.get("home_meridian_defs", [])
+	GameState.home_meridian_progress = state.get("home_meridian_progress", [])
 	print("[Save] main_grid_cache=", GameState.main_grid_cache.size(), " battle_grid_cache=", GameState.battle_grid_cache.size())
 
 	# Cultivation

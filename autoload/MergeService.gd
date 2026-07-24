@@ -5,6 +5,16 @@ extends Node
 signal merge_performed(result_data: Dictionary, pos: Vector2i)
 signal merge_failed(reason: String)
 
+var _pending_merge: Dictionary = {}
+
+func is_position_pending(pos: Vector2i) -> bool:
+	if _pending_merge.is_empty():
+		return false
+	return (
+		pos == _pending_merge.get("from_pos", Vector2i(-1, -1))
+		or pos == _pending_merge.get("to_pos", Vector2i(-1, -1))
+	)
+
 func _ready() -> void:
 	CloudService.merge_confirmed.connect(_on_merge_confirmed)
 	CloudService.merge_rejected.connect(_on_merge_rejected)
@@ -32,6 +42,30 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		print("[MergeService] can_merge failed: #" + str(item_a.get("id",0)) + " vs #" + str(item_b.get("id",0)))
 		merge_failed.emit("Cannot merge")
 		return false
+	if not _pending_merge.is_empty():
+		merge_failed.emit("merge_pending")
+		return false
+
+	var next_item: Dictionary = ConfigDatabase.get_next_level(
+		item_a.get("type", 0) as int,
+		item_a.get("level", 0) as int,
+		item_a.get("group_id", 0) as int
+	)
+	if next_item.is_empty():
+		merge_failed.emit("Cannot merge")
+		return false
+	_pending_merge = {
+		"from_pos": from_pos,
+		"to_pos": to_pos,
+		"from_item": item_a.duplicate(true),
+		"to_item": item_b.duplicate(true),
+	}
+	GridManager.remove_item(from_pos)
+	GridManager.remove_item(to_pos)
+	var predicted: Dictionary = next_item.duplicate(true)
+	predicted["_uid"] = item_b.get("_uid", 0)
+	predicted["_pending_merge"] = true
+	GridManager.add_item(predicted, to_pos)
 
 	print("[MergeService] submit_merge: from=" + str(from_pos) + " id=" + str(item_a.get("id",0)) + " to=" + str(to_pos) + " id=" + str(item_b.get("id",0)))
 	CloudService.submit_merge(from_pos.x, from_pos.y, to_pos.x, to_pos.y)
@@ -45,6 +79,7 @@ func _on_merge_confirmed(result: Dictionary) -> void:
 	var result_id: int = result.get("result_id", 0)
 	var from_pos := Vector2i(result.get("from_col", -1), result.get("from_row", -1))
 	var to_pos := Vector2i(result.get("to_col", -1), result.get("to_row", -1))
+	_pending_merge = {}
 
 	if result_id > 0 and from_pos.x >= 0:
 		GridManager.remove_item(from_pos)
@@ -63,8 +98,24 @@ func _on_merge_confirmed(result: Dictionary) -> void:
 	merge_performed.emit(result, to_pos)
 
 func _on_merge_rejected(reason: String) -> void:
+	_rollback_pending_merge()
 	EventBus.show_toast.emit(_merge_error_text(reason))
 	merge_failed.emit(reason)
+
+func _rollback_pending_merge() -> void:
+	if _pending_merge.is_empty():
+		return
+	var from_pos: Vector2i = _pending_merge.get("from_pos", Vector2i(-1, -1))
+	var to_pos: Vector2i = _pending_merge.get("to_pos", Vector2i(-1, -1))
+	var from_item: Dictionary = _pending_merge.get("from_item", {})
+	var to_item: Dictionary = _pending_merge.get("to_item", {})
+	_pending_merge = {}
+	if GridManager.is_valid_pos(to_pos) and not GridManager.is_empty(to_pos):
+		GridManager.remove_item(to_pos)
+	if not from_item.is_empty() and GridManager.is_empty(from_pos):
+		GridManager.add_item(from_item, from_pos)
+	if not to_item.is_empty() and GridManager.is_empty(to_pos):
+		GridManager.add_item(to_item, to_pos)
 
 func _merge_error_text(reason: String) -> String:
 	match reason:

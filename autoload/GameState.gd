@@ -8,6 +8,8 @@ var spirit_stones: int = 0
 var regen_remaining_ms: float = 0.0
 var current_board_type: int = Constants.BoardType.MAIN
 var previous_screen_name: String = ""
+var spawn_seed: int = 0
+var spawn_sequence: int = 0
 
 # Meridian cultivation
 var meridian_circulations: int = 0
@@ -17,6 +19,8 @@ var meridian_threshold_idx: int = 0
 # Grid caching for screen switching
 var main_grid_cache: Array = []
 var battle_grid_cache: Array = []
+var home_meridian_defs: Array = []
+var home_meridian_progress: Array = []
 
 # Activity system
 var activity_defs: Array = []

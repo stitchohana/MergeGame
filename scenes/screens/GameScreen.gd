@@ -79,15 +79,28 @@ func _setup_extras() -> void:
 func on_enter() -> void:
 	print("[GameScreen] on_enter START")
 	GameState.current_board_type = Constants.BoardType.MAIN
+	if not GridManager.grid_updated.is_connected(_on_grid_changed):
+		GridManager.grid_updated.connect(_on_grid_changed)
 	GridManager.init_grid(Constants.BoardType.MAIN)
 	grid_view.visible = false
 	print("[GameScreen] grid_view.visible=false, calling LoadingManager.begin")
 	_load_token = LoadingManager.begin("加载棋盘数据...")
+	if not GameState.main_grid_cache.is_empty():
+		if _load_token > 0:
+			LoadingManager.end(_load_token)
+			_load_token = -1
+		_render_main_grid_cache()
+		grid_view.visible = true
 	print("[GameScreen] _load_token=", _load_token, " online=", CloudService.online)
 	if CloudService.online:
 		CloudService.submit_board_switch(Constants.BoardType.MAIN)
 	print("[GameScreen] on_enter DONE")
 
+func _render_main_grid_cache() -> void:
+	grid_view.set_skip_animations(true)
+	GridManager.init_grid(Constants.BoardType.MAIN)
+	GridManager.populate_from_server(GameState.main_grid_cache)
+	grid_view.set_skip_animations(false)
 
 func on_exit() -> void:
 	if GridManager.grid_updated.is_connected(_on_grid_changed):
@@ -119,6 +132,19 @@ func _on_main_board_switch_rejected(_reason: String) -> void:
 
 func _on_material_clicked(uid: int, item_id: int) -> void:
 	var table_pos := detail_panel.get_current_craft_pos()
+	var table_item: Variant = GridManager.get_item(table_pos)
+	if table_item == null:
+		return
+	var table_uid: int = table_item.get("_uid", 0)
+	grid_view.run_after_action_sync(func():
+		var synced_table_pos: Vector2i = GridManager.find_pos_by_uid(table_uid)
+		if synced_table_pos.x < 0:
+			EventBus.show_toast.emit("制作台状态已变化，请重试")
+			return
+		_submit_material_remove(synced_table_pos, uid, item_id)
+	)
+
+func _submit_material_remove(table_pos: Vector2i, _uid: int, item_id: int) -> void:
 	var spawn_pos := GridManager.find_nearest_empty(table_pos)
 	if spawn_pos == Vector2i(-1, -1):
 		EventBus.show_toast.emit("棋盘已满，无法取出材料")
@@ -275,6 +301,9 @@ func _display_meridian() -> void:
 	_refresh_requirement_buttons()
 
 func _on_meridian_complete(display_index: int) -> void:
+	grid_view.run_after_action_sync(_submit_meridian_complete.bind(display_index))
+
+func _submit_meridian_complete(display_index: int) -> void:
 	if display_index < 0 or display_index >= _display_index_map.size():
 		return
 	var data_index: int = _display_index_map[display_index]

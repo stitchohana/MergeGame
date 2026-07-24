@@ -10,6 +10,7 @@ import { createAuthRouter } from "./routes/auth";
 import { createGameRouter } from "./routes/game";
 import { createCultivationRouter } from "./routes/cultivation";
 import { createGMRouter } from "./routes/gm";
+import { gameConfigTables } from "./worker/config_data";
 
 function createStorage(): IStorage {
   switch (config.dbType) {
@@ -78,19 +79,17 @@ function main(): void {
 
   // Dependencies
   const storage = createStorage();
-  const engine = new GameEngine(
-    path.resolve(__dirname, "../../config")
-  );
+  const engine = new GameEngine(gameConfigTables);
 
   console.log("[server] Game engine loaded");
   console.log(`[server] Grid: ${engine.GRID_COLS}x${engine.GRID_ROWS}`);
   console.log(`[server] Initial setup: ${engine.getInitialSetup().length} items`);
 
   // Routes
-  app.use("/api/auth", createAuthRouter(storage));
-  app.use("/api/game", createGameRouter(storage, engine));
-  app.use("/api/cultivation", createCultivationRouter(storage, engine));
-  app.use("/api/gm", createGMRouter(storage, engine));
+  app.use("/api/auth", createAuthRouter(storage, config.jwtSecret));
+  app.use("/api/game", createGameRouter(storage, engine, config.jwtSecret));
+  app.use("/api/cultivation", createCultivationRouter(storage, engine, config.jwtSecret));
+  app.use("/api/gm", createGMRouter(storage, engine, config.jwtSecret, process.env.GM_KEY || ""));
 
   // Health check
   app.get("/api/health", (_req, res) => {

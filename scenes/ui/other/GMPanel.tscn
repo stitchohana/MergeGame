@@ -1,11 +1,13 @@
-[gd_scene format=3 uid="uid://gm_panel_001"]
+[gd_scene load_steps=3 format=3 uid="uid://gm_panel_001"]
 
 [ext_resource type="Script" path="res://scenes/ui/other/GMPanel.gd" id="1_gm"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
 
 [node name="GMPanel" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 script = ExtResource("1_gm")
+theme = ExtResource("2_theme")
 
 [node name="Dim" type="ColorRect" parent="."]
 layout_mode = 1
@@ -14,11 +16,18 @@ color = Color(0, 0, 0, 0.5)
 mouse_filter = 2
 
 [node name="Panel" type="Panel" parent="."]
-layout_mode = 0
-offset_left = 156
-offset_top = 200
-offset_right = 564
-offset_bottom = 540
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -230.0
+offset_right = 250.0
+offset_bottom = 230.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TitleLabel" type="Label" parent="Panel"]
 offset_left = 20
@@ -37,10 +46,10 @@ offset_bottom = 84
 text = "功能"
 
 [node name="CmdOption" type="OptionButton" parent="Panel"]
-offset_left = 110
-offset_top = 56
-offset_right = 380
-offset_bottom = 88
+offset_left = 120
+offset_top = 66
+offset_right = 468
+offset_bottom = 112
 item_count = 9
 text = "增加经验"
 popup/item_0/text = "增加经验"
@@ -62,31 +71,31 @@ offset_bottom = 130
 text = "数值"
 
 [node name="AmountSpin" type="SpinBox" parent="Panel"]
-offset_left = 110
-offset_top = 102
-offset_right = 380
-offset_bottom = 134
+offset_left = 120
+offset_top = 126
+offset_right = 468
+offset_bottom = 174
 max_value = 999999.0
 value = 1000.0
 
 [node name="ExecButton" type="Button" parent="Panel"]
-offset_left = 20
-offset_top = 156
-offset_right = 200
-offset_bottom = 192
+offset_left = 120
+offset_top = 198
+offset_right = 300
+offset_bottom = 250
 text = "执行"
 
 [node name="ResultLabel" type="Label" parent="Panel"]
 offset_left = 20
-offset_top = 210
-offset_right = 388
-offset_bottom = 260
+offset_top = 274
+offset_right = 480
+offset_bottom = 350
 text = ""
 theme_override_font_sizes/font_size = 14
 
 [node name="CloseButton" type="Button" parent="Panel"]
-offset_left = 320
-offset_top = 290
-offset_right = 388
-offset_bottom = 326
+offset_left = 350
+offset_top = 374
+offset_right = 480
+offset_bottom = 426
 text = "关闭"

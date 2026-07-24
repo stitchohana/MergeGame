@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://b0qwmpp3a264y"]
+[gd_scene load_steps=4 format=3 uid="uid://b0qwmpp3a264y"]
 
 [ext_resource type="Script" uid="uid://82lnsp6iko4i" path="res://scenes/screens/LoadingScreen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/game/game_bg.png" id="2_bg"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="3_theme"]
 
 [node name="LoadingScreen" type="Control"]
 layout_mode = 3
@@ -9,17 +11,22 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 0
 script = ExtResource("1_script")
+theme = ExtResource("3_theme")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.00202959, 0.00215618, 0.00451453, 1)
+mouse_filter = 0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 4
+modulate = Color(0.72, 0.76, 0.7, 1)
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -28,10 +35,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -130.0
-offset_top = -50.0
-offset_right = 130.0
-offset_bottom = 50.0
+offset_left = -190.0
+offset_top = -90.0
+offset_right = 190.0
+offset_bottom = 90.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -42,6 +49,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+offset_left = 24.0
+offset_top = 28.0
+offset_right = -24.0
+offset_bottom = -28.0
 theme_override_constants/separation = 12
 
 [node name="StatusLabel" type="Label" parent="Panel/VBoxContainer"]
@@ -51,6 +62,7 @@ horizontal_alignment = 1
 
 [node name="ProgressBar" type="ProgressBar" parent="Panel/VBoxContainer"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 24)
 size_flags_horizontal = 3
 max_value = 1.0
 show_percentage = false

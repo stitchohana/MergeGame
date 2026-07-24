@@ -1,5 +1,5 @@
 {
-  "base_url": "http://localhost:3000",
+  "base_url": "https://234575.xyz",
   "timeout": 10,
   "max_retries": 2
 }

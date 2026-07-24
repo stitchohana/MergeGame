@@ -1,39 +1,40 @@
-[gd_scene format=3 uid="uid://cvkxld863ewuk"]
+[gd_scene load_steps=4 format=3 uid="uid://cvkxld863ewuk"]
 
 [ext_resource type="Script" uid="uid://b6centcepb1ok" path="res://scenes/ui/common/Toast.gd" id="1_toast"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_3p6y3"]
 font_size = 30
 
 [node name="Toast" type="Panel" unique_id=412002003]
-self_modulate = Color(0, 0, 0, 0.85)
-anchors_preset = 5
+anchors_preset = 0
 anchor_left = 0.5
+anchor_top = 0.16
 anchor_right = 0.5
-offset_top = 50.0
-offset_bottom = 50.0
+anchor_bottom = 0.16
+offset_left = -260.0
+offset_top = -36.0
+offset_right = 260.0
+offset_bottom = 36.0
 mouse_filter = 2
 script = ExtResource("1_toast")
+theme = ExtResource("2_theme")
 
 [node name="HBox" type="HBoxContainer" parent="." unique_id=153446233]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -223.0
-offset_top = 502.0
-offset_right = 223.0
-offset_bottom = 570.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 10.0
+offset_right = -24.0
+offset_bottom = -10.0
 size_flags_horizontal = 4
 
 [node name="Label" type="Label" parent="HBox" unique_id=1604737629]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.2, 0.32, 0.23, 1)
 theme_override_font_sizes/font_size = 18
 text = "11111"
 label_settings = SubResource("LabelSettings_3p6y3")

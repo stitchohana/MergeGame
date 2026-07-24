@@ -1,8 +1,8 @@
-import * as fs from "fs";
-import * as path from "path";
 import { GameState, GridItem, CultivationData, QuestType, TokenType, RewardConfig, BattleMonster, HomeMeridianStageProgress } from "../storage/interface";
 import { QuestEngine } from "./quest_engine";
 import { ActivityEngine } from "./activity_engine";
+import { GameConfigTables } from "./config_tables";
+import { deterministicSpawnRoll } from "./spawn_rng";
 
 // --- Config types ---
 
@@ -23,6 +23,8 @@ interface ItemDef {
   recipes?: number[];
   max_charges?: number;
   recharge_time?: number;
+  fixed_spawns?: number[];
+  no_cost?: boolean;
   storage_slots?: number;
 }
 
@@ -85,31 +87,30 @@ export class GameEngine {
   questEngine: QuestEngine;
   activityEngine: ActivityEngine;
 
-  constructor(configDir: string) {
-    this.loadConfigs(configDir);
-    this.questEngine = new QuestEngine(configDir);
-    this.activityEngine = new ActivityEngine(configDir);
-    this.loadRewards(path.join(configDir, "json_output", "rewards.json"));
-    this.loadHomeMeridians(path.join(configDir, "json_output", "home_meridians.json"));
+  constructor(configTables: GameConfigTables) {
+    this.loadConfigs(configTables);
+    this.questEngine = new QuestEngine(configTables.quests);
+    this.activityEngine = new ActivityEngine(configTables.activities, configTables.weeklyTasks);
+    this.loadRewards(configTables.rewards);
+    this.loadHomeMeridians(configTables.homeMeridians);
   }
 
   // --- Config loading ---
 
-  private loadConfigs(configDir: string): void {
-    this.loadItems(path.join(configDir, "json_output", "items.json"));
-    this.loadCultivation(path.join(configDir, "json_output", "cultivation.json"));
-    this.loadInitialSetup(path.join(configDir, "json_output", "initial_setup.json"));
-    this.loadRecipes(path.join(configDir, "json_output", "recipes.json"));
-    this.loadGameConfig(path.join(configDir, "json_output", "game_config.json"));
-    this.loadShopConfig(path.join(configDir, "json_output", "shop.json"));
-    this.loadMeridians(path.join(configDir, "json_output", "meridians.json"));
-    this.loadExpedition(path.join(configDir, "json_output", "expedition.json"));
+  private loadConfigs(configTables: GameConfigTables): void {
+    this.loadItems(configTables.items);
+    this.loadCultivation(configTables.cultivation);
+    this.loadInitialSetup(configTables.initialSetup);
+    this.loadRecipes(configTables.recipes);
+    this.loadGameConfig(configTables.gameConfig);
+    this.loadShopConfig(configTables.shop);
+    this.loadMeridians(configTables.meridians);
+    this.loadExpedition(configTables.expedition);
     console.log(`[engine] Configs loaded: ${this.itemsById.size} items, ${this.recipes.length} recipes, ${this.cultivation?.stages.length ?? 0} stages, ${this.meridianThresholds.length} meridian thresholds, ${this.maps.size} maps, ${this.monsters.size} monsters`);
   }
 
-  private loadGameConfig(filePath: string): void {
+  private loadGameConfig(data: any): void {
     try {
-      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       const s = data.stamina;
       if (s) {
         this.staminaConfig = {
@@ -127,9 +128,8 @@ export class GameEngine {
     } catch { /* ignore */ }
   }
 
-  private loadShopConfig(filePath: string): void {
+  private loadShopConfig(data: any): void {
     try {
-      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       this.shopConfig = {
         shopItems: data.items ?? [],
         sellPrices: {} as Record<string, number>,
@@ -154,8 +154,7 @@ export class GameEngine {
     return this.shopConfig.shopItems;
   }
 
-  private loadItems(filePath: string): void {
-    const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  private loadItems(data: any): void {
     const categories = ["regular", "launcher", "crafting", "effect"] as const;
     const typeMap: Record<string, number> = { regular: 0, launcher: 1, crafting: 2, effect: 5 };
 
@@ -176,8 +175,7 @@ export class GameEngine {
     }
   }
 
-  private loadRecipes(filePath: string): void {
-    const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  private loadRecipes(data: any): void {
     this.recipes = data.recipes || [];
     this.recipesByTable.clear();
     for (const recipe of this.recipes) {
@@ -193,22 +191,20 @@ export class GameEngine {
     }
   }
 
-  private loadCultivation(filePath: string): void {
-    this.cultivation = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  private loadCultivation(data: any): void {
+    this.cultivation = data;
   }
 
 
 
-  private loadMeridians(filePath: string): void {
+  private loadMeridians(data: any): void {
     try {
-      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       this.meridianThresholds = data.thresholds || [];
     } catch { /* optional */ }
   }
 
-  private loadExpedition(filePath: string): void {
+  private loadExpedition(data: any): void {
     try {
-      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       const maps = data.maps as any[] ?? [];
       for (const m of maps) this.maps.set(m.id, m);
       const monsters = data.monsters as any[] ?? [];
@@ -216,9 +212,8 @@ export class GameEngine {
     } catch { /* optional */ }
   }
 
-  private loadRewards(filePath: string): void {
+  private loadRewards(data: any): void {
     try {
-      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       const rewards = data.rewards || {};
       for (const key of Object.keys(rewards)) {
         this.rewardsTable.set(Number(key), rewards[key] as RewardConfig);
@@ -231,9 +226,8 @@ export class GameEngine {
     return this.rewardsTable.get(rewardId);
   }
 
-  private loadHomeMeridians(filePath: string): void {
+  private loadHomeMeridians(data: any): void {
     try {
-      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
       this.homeMeridianDefs = data.stages || [];
       console.log(`[engine] Loaded ${this.homeMeridianDefs.length} home meridian stages`);
     } catch { /* optional */ }
@@ -446,8 +440,7 @@ export class GameEngine {
     return { item_ids: pickedIds, name: names.join(", "), items, completed: false, total_value: totalValue };
   }
 
-  private loadInitialSetup(filePath: string): void {
-    const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  private loadInitialSetup(data: any): void {
     // Support both old flat format and new board-type format
     if (data.items) {
       this.initialSetups.set(0, data.items);
@@ -744,6 +737,9 @@ export class GameEngine {
       board_type: boardType,
       uid_counter: 0,
       pending_rewards: [],
+      spawn_seed: this.createSpawnSeed(),
+      spawn_sequence: 0,
+      spawn_history: [],
     };
 
     const setup = this.getInitialSetup(boardType);
@@ -764,6 +760,10 @@ export class GameEngine {
     }
     console.log(`[engine] createInitialState(${boardType}): ${state.grid.length} items — ${itemNames.join(", ")}`);
     return state;
+  }
+
+  createSpawnSeed(): number {
+    return Math.floor(Math.random() * 0xffffffff) + 1;
   }
 
 
@@ -973,9 +973,14 @@ export class GameEngine {
   executeSpawn(
     state: GameState,
     launcherCol: number,
-    launcherRow: number
-  ): { ok: true; spawnedUid: number; spawnedId: number; spawnedName: string; targetCol: number; targetRow: number; newVersion: number; charges: number; maxCharges: number; rechargeTime: number }
+    launcherRow: number,
+    expectedSequence?: number,
+  ): { ok: true; spawnedUid: number; spawnedId: number; spawnedName: string; targetCol: number; targetRow: number; newVersion: number; charges: number; maxCharges: number; rechargeTime: number; atkBase: number; sequenceUsed: number; spawnSequence: number }
     | { ok: false; reason: string } {
+    const sequence = state.spawn_sequence ?? 0;
+    if (expectedSequence !== undefined && expectedSequence !== sequence) {
+      return { ok: false, reason: "spawn_sequence_mismatch" };
+    }
     const map = this.gridToMap(state.grid);
     const launcherKey = this.posKey(launcherCol, launcherRow);
     const launcherItem = map.get(launcherKey);
@@ -1007,11 +1012,11 @@ export class GameEngine {
       const spawns = launcherData.spawns;
       if (!spawns || !spawns.length) return { ok: false, reason: "no_spawns" };
       const totalWeight: number = spawns.reduce((sum: number, s: any) => sum + s.weight, 0);
-      let roll = Math.random() * totalWeight;
+      let roll = deterministicSpawnRoll(state.spawn_seed ?? 1, sequence, launcherItem.uid ?? 0, totalWeight);
       rolledId = spawns[0].id;
       for (const s of spawns) {
+        if (roll < s.weight) { rolledId = s.id; break; }
         roll -= s.weight;
-        if (roll <= 0) { rolledId = s.id; break; }
       }
     }
 
@@ -1075,6 +1080,7 @@ export class GameEngine {
       console.log(`[engine] spawn: launcher #${launcherItem.id} effect_type=${launcherData.effect_type} — NOT atk boost`);
     }
     state.grid.push(newItem);
+    state.spawn_sequence = sequence + 1;
     state.version += 1;
 
     console.log(`[engine] spawn: launcher #${launcherItem.id} -> ${spawnResult.name}(#${spawnResult.id}) at (${target.col},${target.row}) | effect_value=${spawnResult.effect_value} atk_base=${newItem.atk_base ?? 0} | v${state.version}`);
@@ -1093,6 +1099,8 @@ export class GameEngine {
       maxCharges: this.getMaxCharges(launcherItem.id),
       rechargeTime: launcherData.recharge_time ?? 0,
       atkBase: newItem.atk_base ?? 0,
+      sequenceUsed: sequence,
+      spawnSequence: state.spawn_sequence,
     };
   }
 

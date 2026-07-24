@@ -1,10 +1,13 @@
-[gd_scene format=3 uid="uid://rvgnrq1q6d55"]
+[gd_scene load_steps=3 format=3 uid="uid://rvgnrq1q6d55"]
 
 [ext_resource type="Script" uid="uid://dm82hgbf2n0ev" path="res://scenes/ui/activity/WeeklyTaskSlot.gd" id="1_gd"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
 
 [node name="WeeklyTaskSlot" type="HBoxContainer" unique_id=364069552]
+custom_minimum_size = Vector2(0, 58)
 theme_override_constants/separation = 12
 script = ExtResource("1_gd")
+theme = ExtResource("2_theme")
 
 [node name="NameLabel" type="Label" parent="." unique_id=2027992513]
 layout_mode = 2
@@ -21,6 +24,7 @@ theme_override_constants/separation = 4
 
 [node name="ClaimButton" type="Button" parent="." unique_id=945952851]
 visible = false
+custom_minimum_size = Vector2(92, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "领取"

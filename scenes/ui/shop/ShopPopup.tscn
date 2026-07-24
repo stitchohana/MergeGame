@@ -1,11 +1,13 @@
-[gd_scene format=3 uid="uid://shop_popup_001"]
+[gd_scene load_steps=3 format=3 uid="uid://shop_popup_001"]
 
 [ext_resource type="Script" path="res://scenes/ui/shop/ShopPopup.gd" id="1_sp"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
 
 [node name="ShopPopup" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 script = ExtResource("1_sp")
+theme = ExtResource("2_theme")
 
 [node name="Dim" type="ColorRect" parent="."]
 layout_mode = 1
@@ -14,30 +16,40 @@ color = Color(0, 0, 0, 0.5)
 mouse_filter = 2
 
 [node name="Panel" type="Panel" parent="."]
-layout_mode = 0
-offset_left = 80
-offset_top = 100
-offset_right = 700
-offset_bottom = 1300
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -310.0
+offset_top = -620.0
+offset_right = 310.0
+offset_bottom = 620.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TitleLabel" type="Label" parent="Panel"]
-offset_left = 20
-offset_top = 15
-offset_right = 580
-offset_bottom = 45
-theme_override_font_sizes/font_size = 22
+offset_left = 28.0
+offset_top = 24.0
+offset_right = 548.0
+offset_bottom = 64.0
+theme_override_font_sizes/font_size = 24
 text = "商店"
 
 [node name="CloseButton" type="Button" parent="Panel"]
-offset_left = 580
-offset_top = 15
-offset_right = 620
-offset_bottom = 45
+offset_left = 548.0
+offset_top = 18.0
+offset_right = 604.0
+offset_bottom = 70.0
+theme_override_font_sizes/font_size = 20
 text = "X"
 
 [node name="ItemContainer" type="GridContainer" parent="Panel"]
-offset_left = 20
-offset_top = 60
-offset_right = 600
-offset_bottom = 1100
+offset_left = 28.0
+offset_top = 84.0
+offset_right = 592.0
+offset_bottom = 1200.0
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 14
 columns = 5

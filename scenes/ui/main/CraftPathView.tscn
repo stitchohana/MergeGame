@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://cuyl18aoasnb7"]
+[gd_scene load_steps=3 format=3 uid="uid://cuyl18aoasnb7"]
 
 [ext_resource type="Script" uid="uid://c52nducodw65c" path="res://scenes/ui/main/CraftPathView.gd" id="1_gd"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
 
 [node name="CraftPathView" type="Control" unique_id=503858451]
 layout_mode = 3
@@ -11,6 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 script = ExtResource("1_gd")
+theme = ExtResource("2_theme")
 
 [node name="Dim" type="ColorRect" parent="." unique_id=2140456588]
 layout_mode = 1
@@ -29,58 +31,61 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -588.0
-offset_right = 300.0
-offset_bottom = 547.0
+offset_left = -310.0
+offset_top = -500.0
+offset_right = 310.0
+offset_bottom = 500.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="CloseButton" type="Button" parent="Panel" unique_id=1096101415]
 layout_mode = 0
-offset_left = 570.0
-offset_top = 10.0
-offset_right = 590.0
-offset_bottom = 30.0
+offset_left = 548.0
+offset_top = 18.0
+offset_right = 604.0
+offset_bottom = 70.0
+theme_override_font_sizes/font_size = 20
 text = "X"
 
 [node name="NameList" type="HBoxContainer" parent="Panel" unique_id=1531799321]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 560.0
-offset_bottom = 40.0
+offset_left = 28.0
+offset_top = 24.0
+offset_right = 536.0
+offset_bottom = 64.0
 
 [node name="ItemGrid" type="GridContainer" parent="Panel" unique_id=554595106]
 layout_mode = 0
-offset_left = 15.0
-offset_top = 109.0
-offset_right = 585.0
-offset_bottom = 553.0
+offset_left = 28.0
+offset_top = 82.0
+offset_right = 592.0
+offset_bottom = 600.0
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
 columns = 5
 
 [node name="LauncherSection" type="Control" parent="Panel" unique_id=1511152767]
 anchors_preset = 0
-offset_left = 20.0
-offset_top = 555.0
-offset_right = 580.0
-offset_bottom = 1118.0
+offset_left = 28.0
+offset_top = 612.0
+offset_right = 592.0
+offset_bottom = 960.0
 mouse_filter = 2
 
 [node name="Label" type="Label" parent="Panel/LauncherSection" unique_id=805420652]
 layout_mode = 0
-offset_left = 3.0
-offset_top = 91.0
-offset_right = 203.0
-offset_bottom = 111.0
-theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_font_sizes/font_size = 12
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 200.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(0.25, 0.38, 0.28, 1)
+theme_override_font_sizes/font_size = 16
 text = "来源"
 
 [node name="LauncherContainer" type="HBoxContainer" parent="Panel/LauncherSection" unique_id=143011835]
 layout_mode = 0
-offset_left = 14.0
-offset_top = 128.0
-offset_right = 570.0
-offset_bottom = 570.0
-theme_override_constants/separation = 18
+offset_left = 0.0
+offset_top = 42.0
+offset_right = 564.0
+offset_bottom = 336.0
+theme_override_constants/separation = 14

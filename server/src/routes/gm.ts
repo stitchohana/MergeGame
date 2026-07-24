@@ -1,30 +1,28 @@
-import { Router, Request, Response } from "express";
+import { Router, WorkerRequest as Request, WorkerResponse as Response } from "../worker/http";
 import { IStorage } from "../storage/interface";
 import { GameEngine } from "../engine/game_engine";
-import { authRequired } from "../middleware/auth";
+import { createAuthRequired } from "../middleware/auth";
 import { enqueue } from "./queue";
 
-const GM_KEY = process.env.GM_KEY || "";
-
-export function createGMRouter(storage: IStorage, engine: GameEngine): Router {
-  const router = Router();
+export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret: string, gmKey: string): Router {
+  const router = new Router();
 
   // If GM_KEY is not configured, disable the GM endpoint entirely
-  if (!GM_KEY) {
+  if (!gmKey) {
     console.log("[gm] GM_KEY not set — GM endpoints disabled");
-    router.use(authRequired);
+    router.use(createAuthRequired(jwtSecret));
     router.post("/exec", (_req: Request, res: Response) => {
       res.status(404).json({ error: "not_found" });
     });
     return router;
   }
 
-  router.use(authRequired);
+  router.use(createAuthRequired(jwtSecret));
 
   // POST /api/gm/exec
   router.post("/exec", async (req: Request, res: Response) => {
     try {
-      if (req.body.gm_key !== GM_KEY) {
+      if (req.body.gm_key !== gmKey) {
         res.status(403).json({ error: "forbidden" });
         return;
       }

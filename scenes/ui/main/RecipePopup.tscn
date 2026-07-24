@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/main/RecipePopup.gd" id="1_gd"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
 
 [node name="RecipePopup" type="Control"]
 layout_mode = 3
@@ -11,6 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 script = ExtResource("1_gd")
+theme = ExtResource("2_theme")
 
 [node name="Dim" type="ColorRect" parent="."]
 layout_mode = 1
@@ -60,14 +62,14 @@ text = "制作配方"
 vertical_alignment = 1
 
 [node name="CloseButton" type="Button" parent="Panel/Margin/VBox/Header"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(56, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 tooltip_text = "关闭"
 text = "×"
 
 [node name="TargetContainer" type="HBoxContainer" parent="Panel/Margin/VBox"]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 84)
 layout_mode = 2
 theme_override_constants/separation = 14
 

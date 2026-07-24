@@ -1,9 +1,9 @@
-import { Router, Request, Response } from "express";
+import { Router, WorkerRequest as Request, WorkerResponse as Response } from "../worker/http";
 import { IStorage } from "../storage/interface";
 import { signToken } from "../middleware/auth";
 
-export function createAuthRouter(storage: IStorage): Router {
-  const router = Router();
+export function createAuthRouter(storage: IStorage, jwtSecret: string): Router {
+  const router = new Router();
 
   // POST /api/auth/login — device ID login
   router.post("/login", async (req: Request, res: Response) => {
@@ -28,7 +28,7 @@ export function createAuthRouter(storage: IStorage): Router {
         console.log(`[auth] user login: ${user.userId} (device=${device_id})`);
       }
 
-      const token = signToken({ userId: user.userId, deviceId: user.deviceId });
+      const token = await signToken({ userId: user.userId, deviceId: user.deviceId }, jwtSecret);
 
       res.json({
         token,

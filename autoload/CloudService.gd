@@ -15,6 +15,9 @@ signal spawn_rejected(reason: String)
 signal craft_add_confirmed(result: Dictionary)
 signal move_confirmed(result: Dictionary)
 signal move_rejected(reason: String)
+signal action_batch_confirmed(result: Dictionary)
+signal action_batch_rejected(reason: String, result: Dictionary)
+signal action_batch_network_failed(reason: String)
 signal push_place_confirmed(result: Dictionary)
 signal push_place_rejected(reason: String)
 signal breakthrough_confirmed(result: Dictionary)
@@ -72,10 +75,16 @@ var _http: HTTPRequest = null
 var _timeout: float = 10.0
 var _max_retries: int = 2
 var _busy: bool = false
-var _callbacks: Dictionary = {}
 var _request_queue: Array[Dictionary] = []
-const QUEUE_MAX := 10
-var _current_tag: String = ""
+const QUEUE_MAX := 64
+const QUERY_CONCURRENCY := 4
+var _active_request: Dictionary = {}
+var _query_requests: Dictionary = {}
+var _query_queue: Array[Dictionary] = []
+var _state_request_in_flight: bool = false
+
+func has_mutation_capacity() -> bool:
+	return not _busy or _request_queue.size() < QUEUE_MAX
 
 # --- Endpoint registry: maps tag -> { response_cb, rejected_signal, network_signal, parse_signal } ---
 var _endpoints: Dictionary = {}
@@ -101,6 +110,7 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("spawn", _on_spawn_response, spawn_rejected, spawn_rejected, spawn_rejected)
 	_register_endpoint("push_place", _on_push_place_response, push_place_rejected, push_place_rejected, push_place_rejected)
 	_register_endpoint("move", _on_move_response, move_rejected, move_rejected, move_rejected)
+	_register_endpoint("action_batch", _on_action_batch_response, Signal(), action_batch_network_failed, action_batch_network_failed)
 	_register_endpoint("breakthrough", _on_breakthrough_response, breakthrough_rejected, breakthrough_rejected, breakthrough_rejected)
 	_register_endpoint("consume_exp_pill", _on_consume_exp_pill_response, exp_pill_consume_rejected, exp_pill_consume_rejected, exp_pill_consume_rejected)
 	_register_endpoint("restore_stamina", _on_restore_stamina_response, stamina_restore_rejected, stamina_restore_rejected, stamina_restore_rejected)
@@ -176,6 +186,9 @@ func _on_login_response(data: Dictionary) -> void:
 # --- Game State ---
 
 func fetch_state() -> void:
+	if _state_request_in_flight:
+		return
+	_state_request_in_flight = true
 	_send_authed_request("fetch_state", "/api/game/state", HTTPClient.Method.METHOD_GET)
 
 func _on_fetch_state_response(data: Dictionary) -> void:
@@ -198,13 +211,25 @@ func _on_merge_response(data: Dictionary) -> void:
 
 # --- Spawn ---
 
-func submit_spawn(launcher_col: int, launcher_row: int) -> void:
-	var body := JSON.stringify({
-		"launcher_pos": [launcher_col, launcher_row]
-	})
+func submit_spawn(launcher_col: int, launcher_row: int, request_id: String = "",
+		expected_sequence: int = -1, predicted_id: int = 0,
+		predicted_target: Vector2i = Vector2i(-1, -1)) -> void:
+	var payload: Dictionary = {"launcher_pos": [launcher_col, launcher_row]}
+	if not request_id.is_empty():
+		payload["request_id"] = request_id
+	if expected_sequence >= 0:
+		payload["expected_sequence"] = expected_sequence
+	if predicted_id > 0 and predicted_target.x >= 0:
+		payload["predicted_id"] = predicted_id
+		payload["predicted_target"] = [predicted_target.x, predicted_target.y]
+	var body := JSON.stringify(payload)
 	_send_authed_request("spawn", "/api/game/spawn", HTTPClient.Method.METHOD_POST, body)
 
 func _on_spawn_response(data: Dictionary) -> void:
+	if data.has("spawn_seed"):
+		GameState.spawn_seed = data.get("spawn_seed", GameState.spawn_seed)
+	if data.has("spawn_sequence"):
+		GameState.spawn_sequence = data.get("spawn_sequence", GameState.spawn_sequence)
 	if data.get("ok", false):
 		spawn_confirmed.emit(data)
 	else:
@@ -222,6 +247,12 @@ func _on_move_response(data: Dictionary) -> void:
 	else:
 		move_rejected.emit(data.get("error", "unknown_error"))
 
+func _on_action_batch_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		action_batch_confirmed.emit(data)
+	else:
+		action_batch_rejected.emit(data.get("error", "unknown_error"), data)
+
 # --- Move ---
 
 func submit_push_place(from_col: int, from_row: int, to_col: int, to_row: int) -> void:
@@ -234,6 +265,12 @@ func submit_move(from_col: int, from_row: int, to_col: int, to_row: int) -> void
 		"to": [to_col, to_row]
 	})
 	_send_authed_request("move", "/api/game/move", HTTPClient.Method.METHOD_POST, body)
+
+func submit_action_batch(operations: Array[Dictionary]) -> void:
+	if operations.is_empty():
+		return
+	var body := JSON.stringify({"operations": operations})
+	_send_authed_request("action_batch", "/api/game/actions/batch", HTTPClient.Method.METHOD_POST, body)
 
 # --- Cultivation ---
 
@@ -436,20 +473,20 @@ func _on_craft_retrieve_response(data: Dictionary) -> void:
 func get_leaderboard(limit: int = 50) -> void:
 	_send_authed_request("leaderboard", "/api/game/leaderboard?limit=" + str(limit), HTTPClient.Method.METHOD_GET)
 
-# --- Request queue ---
-
-var _request_counter: int = 0
+# --- Request lanes ---
 
 func _flush_queue() -> void:
 	if _busy or _request_queue.is_empty():
 		return
 	var req: Dictionary = _request_queue.pop_front()
-	if req.get("authed", false):
-		_send_authed_request(req.tag, req.path, req.method, req.body)
-	else:
-		_send_request(req.tag, req.path, req.method, req.body)
+	_start_mutation_request(req)
+
+func _flush_query_queue() -> void:
+	while _query_requests.size() < QUERY_CONCURRENCY and not _query_queue.is_empty():
+		_start_query_request(_query_queue.pop_front())
 
 func _emit_error(tag: String, error_type: String, reason: String) -> void:
+	_finish_tag(tag)
 	var ep: Dictionary = _endpoints.get(tag, {})
 	var sig: Signal = ep.get(error_type, Signal())
 	if sig.is_null():
@@ -457,99 +494,128 @@ func _emit_error(tag: String, error_type: String, reason: String) -> void:
 	sig.emit(reason)
 
 func _send_request(tag: String, path: String, method: int, body: String = "") -> int:
-	var req_id := _request_counter
-	_request_counter += 1
-	_callbacks[req_id] = {"tag": tag, "retries": 0}
-
+	var req: Dictionary = {"tag": tag, "path": path, "method": method, "body": body, "authed": false}
 	if _busy:
 		if _request_queue.size() < QUEUE_MAX:
-			_request_queue.push_back({"tag": tag, "path": path, "method": method, "body": body, "authed": false})
-		_callbacks.erase(req_id)
+			_request_queue.push_back(req)
+		else:
+			_emit_error(tag, "network", "request_queue_full")
 		return -1
-
-	var full_url := base_url + path
-	var headers: PackedStringArray = ["Content-Type: application/json", "Accept: application/json"]
-
-	_busy = true
-	_current_tag = tag
-
-	var err := _http.request(full_url, headers, method, body)
-	if err != OK:
-		_busy = false
-		_current_tag = ""
-		if err == ERR_CANT_OPEN or err == ERR_CANT_CONNECT:
-			if online:
-				online = false
-				disconnected.emit()
-				kicked.emit()
-		_callbacks.erase(req_id)
-		_emit_error(tag, "network", "network_error")
-		return -1
-
-	return req_id
+	_start_mutation_request(req)
+	return 0
 
 func _send_authed_request(tag: String, path: String, method: int, body: String = "") -> int:
-	var req_id := _request_counter
-	_request_counter += 1
-	_callbacks[req_id] = {"tag": tag, "retries": 0}
-
+	var req: Dictionary = {"tag": tag, "path": path, "method": method, "body": body, "authed": true, "retries": 0}
+	if method == HTTPClient.Method.METHOD_GET:
+		if _query_requests.size() >= QUERY_CONCURRENCY:
+			_query_queue.push_back(req)
+		else:
+			_start_query_request(req)
+		return 0
 	if _busy:
 		if _request_queue.size() < QUEUE_MAX:
-			_request_queue.push_back({"tag": tag, "path": path, "method": method, "body": body, "authed": true})
-		_callbacks.erase(req_id)
+			_request_queue.push_back(req)
+		else:
+			_emit_error(tag, "network", "request_queue_full")
 		return -1
+	_start_mutation_request(req)
+	return 0
 
-	var full_url := base_url + path
-	var headers: PackedStringArray = [
-		"Content-Type: application/json",
-		"Accept: application/json",
-		"Authorization: Bearer " + token,
-	]
+func _request_headers(authed: bool) -> PackedStringArray:
+	var headers: PackedStringArray = ["Content-Type: application/json", "Accept: application/json"]
+	if authed:
+		headers.append("Authorization: Bearer " + token)
+	return headers
 
+func _start_mutation_request(req: Dictionary) -> void:
 	_busy = true
-	_current_tag = tag
-
-	var err := _http.request(full_url, headers, method, body)
+	_active_request = req
+	var err := _http.request(
+		base_url + String(req.get("path", "")),
+		_request_headers(req.get("authed", false)),
+		int(req.get("method", HTTPClient.Method.METHOD_GET)),
+		String(req.get("body", ""))
+	)
 	if err != OK:
 		_busy = false
-		_current_tag = ""
-		if err == ERR_CANT_OPEN or err == ERR_CANT_CONNECT:
-			if online:
-				online = false
-				disconnected.emit()
-				kicked.emit()
-		_callbacks.erase(req_id)
-		_emit_error(tag, "network", "network_error")
-		return -1
+		_active_request = {}
+		if _retry_spawn_request(req):
+			return
+		_emit_error(String(req.get("tag", "")), "network", "network_error")
+		_flush_queue()
 
-	return req_id
+func _start_query_request(req: Dictionary) -> void:
+	var query_http := HTTPRequest.new()
+	query_http.timeout = _timeout
+	add_child(query_http)
+	var query_id: int = query_http.get_instance_id()
+	_query_requests[query_id] = {"http": query_http, "request": req}
+	query_http.request_completed.connect(_on_query_request_completed.bind(query_id))
+	var err := query_http.request(
+		base_url + String(req.get("path", "")),
+		_request_headers(req.get("authed", false)),
+		int(req.get("method", HTTPClient.Method.METHOD_GET)),
+		String(req.get("body", ""))
+	)
+	if err != OK:
+		_query_requests.erase(query_id)
+		query_http.queue_free()
+		_emit_error(String(req.get("tag", "")), "network", "network_error")
+		_flush_query_queue()
 
-func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+func _on_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	var req: Dictionary = _active_request
+	_active_request = {}
+	if result != HTTPRequest.RESULT_SUCCESS:
+		_busy = false
+		if _retry_spawn_request(req):
+			return
+	_handle_response(String(req.get("tag", "")), result, response_code, body)
 	_busy = false
-	_current_tag = ""
 	_flush_queue()
 
-	var req_id: int = _callbacks.keys()[0] if _callbacks.size() > 0 else -1
-	var callback: Dictionary = _callbacks.get(req_id, {})
-	_callbacks.erase(req_id)
+func _retry_spawn_request(req: Dictionary) -> bool:
+	if req.get("tag", "") != "spawn":
+		return false
+	var retries: int = req.get("retries", 0)
+	if retries >= _max_retries:
+		return false
+	req["retries"] = retries + 1
+	_request_queue.push_front(req)
+	_flush_queue()
+	return true
 
+func _on_query_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray, query_id: int) -> void:
+	var context: Dictionary = _query_requests.get(query_id, {})
+	_query_requests.erase(query_id)
+	var query_http: HTTPRequest = context.get("http") as HTTPRequest
+	if query_http:
+		query_http.queue_free()
+	var req: Dictionary = context.get("request", {})
+	_handle_response(String(req.get("tag", "")), result, response_code, body)
+	_flush_query_queue()
+
+func _handle_response(tag: String, result: int, response_code: int, body: PackedByteArray) -> void:
 	if result != HTTPRequest.RESULT_SUCCESS:
-		_handle_network_error(callback.get("tag", ""))
+		_handle_network_error(tag)
 		return
 
 	var body_text := body.get_string_from_utf8()
 	var json := JSON.new()
 	if json.parse(body_text) != OK:
-		_handle_parse_error(callback.get("tag", ""))
+		_handle_parse_error(tag)
 		return
 
 	var data: Dictionary = json.data
 
 	if response_code >= 400:
 		var error_msg: String = data.get("error", "request_failed")
-		var tag: String = callback.get("tag", "")
 		if tag == "login":
+			_finish_tag(tag)
 			login_failed.emit(error_msg)
+		elif tag == "spawn" or tag == "action_batch":
+			_finish_tag(tag)
+			_dispatch_response(tag, data)
 		else:
 			_emit_error(tag, "rejected", error_msg)
 		return
@@ -558,7 +624,12 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 		online = true
 		connected.emit()
 
-	_dispatch_response(callback.get("tag", ""), data)
+	_finish_tag(tag)
+	_dispatch_response(tag, data)
+
+func _finish_tag(tag: String) -> void:
+	if tag == "fetch_state":
+		_state_request_in_flight = false
 
 func _dispatch_response(tag: String, data: Dictionary) -> void:
 	var ep: Dictionary = _endpoints.get(tag, {})
@@ -567,12 +638,14 @@ func _dispatch_response(tag: String, data: Dictionary) -> void:
 		cb.call(data)
 
 func _handle_network_error(tag: String) -> void:
+	_finish_tag(tag)
 	if online:
 		online = false
 		disconnected.emit()
 	_emit_error(tag, "network", "network_error")
 
 func _handle_parse_error(tag: String) -> void:
+	_finish_tag(tag)
 	_emit_error(tag, "parse", "invalid_response")
 
 # --- Storage ---

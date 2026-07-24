@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://djyc00bikcsnc"]
+[gd_scene load_steps=9 format=3 uid="uid://djyc00bikcsnc"]
 
 [ext_resource type="Script" uid="uid://8wyaaqrw8l2j" path="res://scenes/screens/BattleScreen.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://deg7lbni32jui" path="res://scenes/grid/GridView.tscn" id="2_grid"]
 [ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/main/ItemDetailPanel.tscn" id="3_detail"]
 [ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/main/PouchDropZone.tscn" id="4_pouch"]
 [ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/common/TopBar.tscn" id="5_qxd11"]
+[ext_resource type="Texture2D" path="res://assets/game/game_bg.png" id="6_bg"]
+[ext_resource type="Texture2D" path="res://assets/game/game_gridview.png" id="7_grid_bg"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="8_theme"]
 
 [node name="BattleScreen" type="Control"]
 layout_mode = 3
@@ -15,21 +18,46 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_script")
+theme = ExtResource("8_theme")
+
+[node name="GameBg" type="TextureRect" parent="."]
+z_index = -2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_bg")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="GridBackground" type="TextureRect" parent="."]
+z_index = -1
+layout_mode = 0
+offset_left = 52.0
+offset_top = 330.0
+offset_right = 728.0
+offset_bottom = 1170.0
+mouse_filter = 2
+texture = ExtResource("7_grid_bg")
+expand_mode = 1
+stretch_mode = 4
 
 [node name="GridView" parent="." instance=ExtResource("2_grid")]
 layout_mode = 0
-offset_left = 45.0
-offset_top = 358.0
-offset_right = 629.0
-offset_bottom = 1110.0
+offset_left = 98.0
+offset_top = 374.0
+offset_right = 682.0
+offset_bottom = 1126.0
 
-[node name="MapHeader" type="ColorRect" parent="."]
+[node name="MapHeader" type="Panel" parent="."]
 layout_mode = 0
 offset_left = 42.0
-offset_top = 51.0
+offset_top = 62.0
 offset_right = 742.0
-offset_bottom = 111.0
-color = Color(0.1, 0.1, 0.15, 1)
+offset_bottom = 126.0
 
 [node name="MapLabel" type="Label" parent="MapHeader"]
 layout_mode = 1
@@ -40,18 +68,17 @@ offset_top = 9.0
 offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.2, 0.34, 0.24, 1)
+theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CharPanel" type="ColorRect" parent="."]
+[node name="CharPanel" type="Panel" parent="."]
 layout_mode = 0
 offset_left = 37.0
 offset_top = 129.0
 offset_right = 337.0
 offset_bottom = 311.0
-color = Color(0.1, 0.15, 0.25, 1)
 
 [node name="CharLabel" type="Label" parent="CharPanel"]
 layout_mode = 0
@@ -59,7 +86,7 @@ offset_left = 8.0
 offset_top = 6.0
 offset_right = 292.0
 offset_bottom = 30.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.2, 0.34, 0.24, 1)
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
@@ -73,13 +100,12 @@ theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 
-[node name="MonsterPanel" type="ColorRect" parent="."]
+[node name="MonsterPanel" type="Panel" parent="."]
 layout_mode = 0
 offset_left = 360.0
 offset_top = 126.0
 offset_right = 740.0
 offset_bottom = 307.0
-color = Color(0.25, 0.1, 0.1, 1)
 
 [node name="MonsterLabel" type="Label" parent="MonsterPanel"]
 layout_mode = 0
@@ -87,7 +113,7 @@ offset_left = 8.0
 offset_top = 31.0
 offset_right = 372.0
 offset_bottom = 88.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.42, 0.2, 0.16, 1)
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -101,10 +127,11 @@ offset_bottom = 1530.0
 
 [node name="LeaveButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 644.0
-offset_top = 1557.0
-offset_right = 724.0
-offset_bottom = 1591.0
+offset_left = 620.0
+offset_top = 1560.0
+offset_right = 744.0
+offset_bottom = 1614.0
+theme_override_font_sizes/font_size = 16
 text = "离去"
 
 [node name="PouchDropZone" parent="." instance=ExtResource("4_pouch")]

@@ -12,15 +12,18 @@ func _ready() -> void:
 	CultivationService.qi_changed.connect(_refresh_btn)
 	btn.pressed.connect(_on_btn_pressed)
 	btn.visible = false
-	if CloudService.online:
-		CloudService.fetch_state()
+	_home_defs = GameState.home_meridian_defs.duplicate(true)
+	_home_progress = GameState.home_meridian_progress.duplicate(true)
+	_refresh_btn(CultivationService.current_qi, CultivationService.max_qi)
 
 
 func _on_state_loaded(state: Dictionary) -> void:
 	if state.has("home_meridian_defs"):
 		_home_defs = state.home_meridian_defs
+		GameState.home_meridian_defs = _home_defs.duplicate(true)
 	if state.has("home_meridian_progress"):
 		_home_progress = state.home_meridian_progress
+		GameState.home_meridian_progress = _home_progress.duplicate(true)
 	_refresh_btn(CultivationService.current_qi, CultivationService.max_qi)
 
 

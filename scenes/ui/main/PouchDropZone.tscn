@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://byfmp2yrtf3gm"]
+[gd_scene load_steps=3 format=3 uid="uid://byfmp2yrtf3gm"]
 
 [ext_resource type="Script" path="res://scenes/ui/main/PouchDropZone.gd" id="1_gd"]
+[ext_resource type="Texture2D" path="res://assets/game/item_bg_atlas_texture.tres" id="2_bg"]
 
 [node name="PouchDropZone" type="Control"]
 custom_minimum_size = Vector2(64, 64)
@@ -8,13 +9,17 @@ size = Vector2(64, 64)
 mouse_filter = 0
 script = ExtResource("1_gd")
 
-[node name="Bg" type="ColorRect" parent="."]
+[node name="Bg" type="NinePatchRect" parent="."]
 mouse_filter = 2
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.15, 0.12, 0.08, 1)
+texture = ExtResource("2_bg")
+patch_margin_left = 14
+patch_margin_top = 14
+patch_margin_right = 14
+patch_margin_bottom = 14
 
 [node name="IconRect" type="TextureRect" parent="."]
 layout_mode = 1

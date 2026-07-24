@@ -71,15 +71,35 @@ func _build_launcher_section(selected: Dictionary) -> void:
 		_build_spawn_outputs(selected)
 		return
 
-	var launchers: Array = ConfigDatabase.get_launchers_for_item(selected.get("id", 0))
+	var launchers: Array[Dictionary] = _get_present_launchers_for_item(
+		int(selected.get("id", 0))
+	)
 	if launchers.is_empty():
 		launcher_section.hide()
 		return
 
 	launcher_section.show()
 	relation_label.text = "来源"
-	for l in launchers:
-		launcher_container.add_child(_build_relation_item(l, ""))
+	for launcher: Dictionary in launchers:
+		launcher_container.add_child(_build_relation_item(launcher, ""))
+
+func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
+	var present_launcher_ids: Dictionary = {}
+	for entry: Dictionary in GridManager.get_all_items():
+		var board_item: Dictionary = entry.get("data", {})
+		if int(board_item.get("type", 0)) != Constants.ItemType.LAUNCHER:
+			continue
+		var launcher_id: int = int(board_item.get("id", 0))
+		if launcher_id > 0:
+			present_launcher_ids[launcher_id] = true
+
+	var result: Array[Dictionary] = []
+	for launcher: Dictionary in ConfigDatabase.get_launchers_for_item(item_id):
+		var launcher_id: int = int(launcher.get("id", 0))
+		if present_launcher_ids.has(launcher_id):
+			result.append(launcher)
+	return result
+
 func _build_spawn_outputs(launcher: Dictionary) -> void:
 	var spawns: Array = launcher.get("spawns", [])
 	if spawns.is_empty():

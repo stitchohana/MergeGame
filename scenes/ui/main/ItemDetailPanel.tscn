@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://ofi2ei6no4yy"]
+[gd_scene load_steps=5 format=3 uid="uid://ofi2ei6no4yy"]
 
 [ext_resource type="Script" uid="uid://yvf00usf5sm6" path="res://scenes/ui/main/ItemDetailPanel.gd" id="1_gd"]
 [ext_resource type="Texture2D" uid="uid://cywrwm4abfk5b" path="res://assets/game/item_detail_bg_atlas_texture.tres" id="2_wngso"]
 [ext_resource type="Theme" uid="uid://gc2kayu31yh8" path="res://assets/theme/btn_theme.tres" id="3_wngso"]
+[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="4_formal"]
 
 [node name="ItemDetailPanel" type="Control"]
 layout_mode = 3
@@ -10,6 +11,7 @@ anchors_preset = 0
 offset_right = 780.0
 offset_bottom = 147.0
 script = ExtResource("1_gd")
+theme = ExtResource("4_formal")
 
 [node name="Bg" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -72,19 +74,19 @@ vertical_alignment = 1
 
 [node name="RecipeButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 307.0
-offset_top = 22.0
-offset_right = 407.0
-offset_bottom = 52.0
+offset_left = 300.0
+offset_top = 12.0
+offset_right = 414.0
+offset_bottom = 56.0
 theme_override_font_sizes/font_size = 14
 text = "配方"
 
 [node name="ViewButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 431.0
-offset_top = 20.0
-offset_right = 531.0
-offset_bottom = 50.0
+offset_left = 426.0
+offset_top = 12.0
+offset_right = 540.0
+offset_bottom = 56.0
 theme_override_font_sizes/font_size = 14
 text = "查看"
 
@@ -133,9 +135,9 @@ horizontal_alignment = 2
 [node name="SellButton" type="Button" parent="."]
 visible = false
 layout_mode = 0
-offset_left = 614.0
-offset_top = 108.0
-offset_right = 754.0
-offset_bottom = 142.0
+offset_left = 610.0
+offset_top = 100.0
+offset_right = 756.0
+offset_bottom = 144.0
 theme_override_font_sizes/font_size = 14
 text = "出售"

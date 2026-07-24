@@ -1,22 +1,16 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { config } from "../config";
+import { jwtVerify, SignJWT } from "jose";
+import { NextFunction, WorkerRequest as Request, WorkerResponse as Response } from "../worker/http";
 
 export interface AuthPayload {
   userId: string;
   deviceId: string;
 }
 
-// Augment Express Request
-declare global {
-  namespace Express {
-    interface Request {
-      auth?: AuthPayload;
-    }
-  }
-}
+const encoder = new TextEncoder();
 
-export function authRequired(req: Request, res: Response, next: NextFunction): void {
+export function createAuthRequired(jwtSecret: string) {
+  const key = encoder.encode(jwtSecret);
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
     res.status(401).json({ error: "missing_authorization" });
@@ -24,17 +18,23 @@ export function authRequired(req: Request, res: Response, next: NextFunction): v
   }
 
   const token = header.slice(7);
-  try {
-    const payload = jwt.verify(token, config.jwtSecret) as AuthPayload;
-    req.auth = payload;
-    next();
+    try {
+      const { payload } = await jwtVerify(token, key, { algorithms: ["HS256"] });
+      if (typeof payload.userId !== "string" || typeof payload.deviceId !== "string") {
+        throw new Error("invalid_payload");
+      }
+      req.auth = { userId: payload.userId, deviceId: payload.deviceId };
+      await next();
   } catch {
     res.status(401).json({ error: "invalid_token" });
   }
+  };
 }
 
-export function signToken(payload: AuthPayload): string {
-  return jwt.sign(payload, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn as string & { __brand: never }
-      } as jwt.SignOptions);
+export async function signToken(payload: AuthPayload, jwtSecret: string): Promise<string> {
+  return new SignJWT(payload as unknown as Record<string, unknown>)
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(encoder.encode(jwtSecret));
 }
