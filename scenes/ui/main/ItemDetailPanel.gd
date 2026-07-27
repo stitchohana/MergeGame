@@ -6,6 +6,7 @@ signal material_clicked(uid: int, item_id: int)
 @onready var level_label: Label = $LevelLabel
 @onready var desc_label: Label = $DescLabel
 @onready var recipe_btn: Button = $RecipeButton
+@onready var view_btn: Button = $ViewButton
 @onready var materials_label: Label = $MaterialsLabel
 @onready var status_label: Label = $StatusLabel
 @onready var materials_container: FlowContainer = $MaterialsContainer
@@ -22,8 +23,7 @@ func _ready() -> void:
 	recipe_btn.pressed.connect(_on_recipe_btn_pressed)
 	if sell_btn:
 		sell_btn.pressed.connect(_on_sell_pressed)
-	if $ViewButton:
-		$ViewButton.pressed.connect(_on_view_pressed)
+	view_btn.pressed.connect(_on_view_pressed)
 	if not CraftingService.table_state_changed.is_connected(_on_table_state_changed):
 		CraftingService.table_state_changed.connect(_on_table_state_changed)
 	CloudService.sell_confirmed.connect(_on_sell_server_confirmed)
@@ -40,6 +40,7 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 	var item_type: int = item_data.get("type", 0)
 
 	default_label.hide()
+	view_btn.show()
 
 	if name_label:
 		name_label.text = item_name
@@ -327,6 +328,7 @@ func clear() -> void:
 	level_label.hide()
 	desc_label.hide()
 	recipe_btn.hide()
+	view_btn.hide()
 	if sell_btn:
 		sell_btn.hide()
 	if sell_price_label:

@@ -1,8 +1,73 @@
-[gd_scene load_steps=4 format=3 uid="uid://cy22y4f1oscvj"]
+[gd_scene load_steps=8 format=3 uid="uid://cy22y4f1oscvj"]
 
 [ext_resource type="Script" uid="uid://ca3x2ym8hbpn" path="res://scenes/ui/character/CharacterEntry.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/home/ui/character_entry_icon.tres" id="2_icon"]
 [ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="3_theme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_entry_normal"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.15, 0.33, 0.25, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.75, 0.61, 0.28, 0.96)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0.06, 0.12, 0.08, 0.42)
+shadow_size = 3
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_entry_hover"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.24, 0.47, 0.34, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.83, 0.4, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0.9, 0.68, 0.23, 0.3)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_entry_pressed"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 2.0
+bg_color = Color(0.1, 0.23, 0.16, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.63, 0.49, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_entry_focus"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.88, 0.52, 0.9)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [node name="CharacterEntry" type="Control" unique_id=1705527504]
 custom_minimum_size = Vector2(96, 104)
@@ -13,20 +78,28 @@ theme = ExtResource("3_theme")
 
 [node name="Icon" type="TextureRect" parent="." unique_id=1847898878]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 5.0
-offset_right = 70.0
-offset_bottom = 55.0
+offset_left = 18.0
+offset_top = 3.0
+offset_right = 78.0
+offset_bottom = 59.0
 texture = ExtResource("2_icon")
 expand_mode = 1
-stretch_mode = 4
+stretch_mode = 5
 
 [node name="Button" type="Button" parent="." unique_id=504956658]
 visible = false
 layout_mode = 0
-offset_left = 2.0
-offset_top = 52.0
-offset_right = 78.0
-offset_bottom = 96.0
-theme_override_font_sizes/font_size = 12
+offset_left = 4.0
+offset_top = 62.0
+offset_right = 92.0
+offset_bottom = 100.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.76, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.9, 1)
+theme_override_colors/font_pressed_color = Color(0.86, 0.79, 0.55, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBox_entry_normal")
+theme_override_styles/hover = SubResource("StyleBox_entry_hover")
+theme_override_styles/pressed = SubResource("StyleBox_entry_pressed")
+theme_override_styles/focus = SubResource("StyleBox_entry_focus")
 text = "激活穴窍"

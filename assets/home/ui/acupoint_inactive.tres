@@ -1,8 +1,7 @@
-[gd_resource type="AtlasTexture" format=3]
+[gd_resource type="AtlasTexture" format=3 uid="uid://bj4dkalk4qq63"]
 
-[ext_resource type="Texture2D" path="res://assets/home/ui/home_ui_icons.png" id="1_icons"]
+[ext_resource type="Texture2D" uid="uid://dgimvk4xhvc1h" path="res://assets/home/ui/acupoint_inactive_star.svg" id="1_icons"]
 
 [resource]
 atlas = ExtResource("1_icons")
-region = Rect2(0, 645, 418, 430)
-filter_clip = true
+region = Rect2(0, 0, 64, 64)

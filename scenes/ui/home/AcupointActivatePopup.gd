@@ -7,7 +7,7 @@ class_name AcupointActivatePopup extends BasePopup
 @onready var cancel_btn: Button = $Panel/VBox/BtnBox/CancelButton
 
 var _on_action: Callable = Callable()
-var _item_widget_scene := preload("res://scenes/ui/common/ItemWidget.tscn")
+var _reward_slot_scene := preload("res://scenes/ui/meridian/RewardSlot.tscn")
 
 
 func _ready() -> void:
@@ -60,11 +60,8 @@ func setup(title: String, cost: String, rewards: Dictionary, action_text: String
 				var amount: int = int(t.get("amount", 0))
 				var token_data := ConfigDatabase.get_token_data(token_type)
 				if not token_data.is_empty():
-					var tw := _item_widget_scene.instantiate() as ItemWidget
-					tw.setup(token_data, Vector2i(-1, -1), 24)
-					tw.custom_minimum_size = Vector2(24, 24)
-					tw.size = Vector2(24, 24)
-					tw.tooltip_text = "%s x%d" % [token_data.get("name", "?"), amount]
+					var tw := _reward_slot_scene.instantiate() as RewardSlot
+					tw.setup(token_type, amount)
 					rewards_box.add_child(tw)
 		if rewards.has("items"):
 			for reward_item in rewards.items:
@@ -72,11 +69,8 @@ func setup(title: String, cost: String, rewards: Dictionary, action_text: String
 				var count: int = int(reward_item.get("count", 0))
 				var item_data := ConfigDatabase.get_item_data(item_id)
 				if not item_data.is_empty():
-					var iw := _item_widget_scene.instantiate() as ItemWidget
-					iw.setup(item_data, Vector2i(-1, -1), 24)
-					iw.custom_minimum_size = Vector2(24, 24)
-					iw.size = Vector2(24, 24)
-					iw.tooltip_text = "%s x%d" % [item_data.get("name", "?"), count]
+					var iw := _reward_slot_scene.instantiate() as RewardSlot
+					iw.setup(item_id, count)
 					rewards_box.add_child(iw)
 
 	if not action_btn.pressed.is_connected(_on_action_btn):
