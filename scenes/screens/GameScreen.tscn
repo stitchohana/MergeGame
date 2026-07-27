@@ -68,18 +68,26 @@ grow_horizontal = 2
 grow_vertical = 0
 
 [node name="PouchDropZone" parent="." instance=ExtResource("10_pouch")]
-anchors_preset = 0
-offset_left = 631.0
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+grow_horizontal = 0
+offset_left = -149.0
 offset_top = 115.0
-offset_right = 695.0
+offset_right = -85.0
 offset_bottom = 179.0
 
 [node name="HomeButton" type="Button" parent="."]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 6
+anchor_top = 1.0
+anchor_bottom = 1.0
 offset_left = 34.0
-offset_top = 1620.0
+offset_top = -68.0
 offset_right = 130.0
-offset_bottom = 1674.0
+offset_bottom = -14.0
+grow_vertical = 0
 theme = ExtResource("6_hofs8")
 text = "返回"
 flat = true
@@ -87,11 +95,18 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="BattleButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 640.0
-offset_top = 1620.0
-offset_right = 770.0
-offset_bottom = 1678.0
+layout_mode = 1
+anchors_preset = 9
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -68.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
 theme = ExtResource("6_hofs8")
 text = "历练"
 flat = true
@@ -99,11 +114,18 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="ShopButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 493.0
-offset_top = 1617.0
-offset_right = 609.0
-offset_bottom = 1677.0
+layout_mode = 1
+anchors_preset = 9
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -287.0
+offset_top = -71.0
+offset_right = -171.0
+offset_bottom = -11.0
+grow_horizontal = 0
+grow_vertical = 0
 theme = ExtResource("6_hofs8")
 text = "商店"
 icon = ExtResource("6_o0kps")
@@ -124,15 +146,24 @@ grow_horizontal = 2
 size_flags_horizontal = 2
 
 [node name="ItemDetailPanel" parent="." instance=ExtResource("5_pbayp")]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = 10.0
-offset_top = 1405.0
-offset_right = 790.0
-offset_bottom = 1552.0
+offset_top = -283.0
+offset_right = -10.0
+offset_bottom = -136.0
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="TopBar" parent="." instance=ExtResource("6_0wecs")]
-layout_mode = 0
-offset_left = -10.0
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 0.0
 offset_top = 3.0
-offset_right = 770.0
+offset_right = 0.0
 offset_bottom = 53.0
+grow_horizontal = 2

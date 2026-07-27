@@ -42,6 +42,7 @@ ActivityManager="*res://autoload/ActivityManager.gd"
 window/size/viewport_width=780
 window/size/viewport_height=1688
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [input_devices]
 
