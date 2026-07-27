@@ -1,64 +1,18 @@
-[gd_resource type="Theme" load_steps=11 format=3]
+[gd_resource type="Theme" format=3 uid="uid://dhv8eh1s6nl6v"]
 
-[ext_resource type="Texture2D" path="res://assets/game/item_detail_bg_atlas_texture.tres" id="1_panel"]
-[ext_resource type="Texture2D" path="res://assets/common/common_btn_atlas_texture.tres" id="2_button"]
-
-[sub_resource type="StyleBoxTexture" id="StyleBox_panel"]
-texture = ExtResource("1_panel")
-texture_margin_left = 44.0
-texture_margin_top = 44.0
-texture_margin_right = 44.0
-texture_margin_bottom = 44.0
-content_margin_left = 24.0
-content_margin_top = 20.0
-content_margin_right = 24.0
-content_margin_bottom = 20.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBox_button_normal"]
-texture = ExtResource("2_button")
-texture_margin_left = 24.0
-texture_margin_top = 18.0
-texture_margin_right = 24.0
-texture_margin_bottom = 18.0
-content_margin_left = 16.0
-content_margin_top = 8.0
-content_margin_right = 16.0
-content_margin_bottom = 8.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBox_button_hover"]
-texture = ExtResource("2_button")
-texture_margin_left = 24.0
-texture_margin_top = 18.0
-texture_margin_right = 24.0
-texture_margin_bottom = 18.0
-content_margin_left = 16.0
-content_margin_top = 8.0
-content_margin_right = 16.0
-content_margin_bottom = 8.0
-modulate_color = Color(1, 1, 0.92, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBox_button_pressed"]
-texture = ExtResource("2_button")
-texture_margin_left = 24.0
-texture_margin_top = 18.0
-texture_margin_right = 24.0
-texture_margin_bottom = 18.0
-content_margin_left = 16.0
-content_margin_top = 10.0
-content_margin_right = 16.0
-content_margin_bottom = 6.0
-modulate_color = Color(0.82, 0.9, 0.82, 1)
+[ext_resource type="Texture2D" uid="uid://cywrwm4abfk5b" path="res://assets/game/item_detail_bg_atlas_texture.tres" id="1_panel"]
+[ext_resource type="Texture2D" uid="uid://bjsufih0ix8iq" path="res://assets/common/common_btn_atlas_texture.tres" id="2_button"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBox_button_disabled"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
 texture = ExtResource("2_button")
 texture_margin_left = 24.0
 texture_margin_top = 18.0
 texture_margin_right = 24.0
 texture_margin_bottom = 18.0
-content_margin_left = 16.0
-content_margin_top = 8.0
-content_margin_right = 16.0
-content_margin_bottom = 8.0
 modulate_color = Color(0.72, 0.75, 0.7, 0.65)
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_focus"]
@@ -72,6 +26,41 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_hover"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+texture = ExtResource("2_button")
+texture_margin_left = 24.0
+texture_margin_top = 18.0
+texture_margin_right = 24.0
+texture_margin_bottom = 18.0
+modulate_color = Color(1, 1, 0.92, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_normal"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+texture = ExtResource("2_button")
+texture_margin_left = 24.0
+texture_margin_top = 18.0
+texture_margin_right = 24.0
+texture_margin_bottom = 18.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_pressed"]
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 6.0
+texture = ExtResource("2_button")
+texture_margin_left = 24.0
+texture_margin_top = 18.0
+texture_margin_right = 24.0
+texture_margin_bottom = 18.0
+modulate_color = Color(0.82, 0.9, 0.82, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_field"]
 content_margin_left = 10.0
@@ -88,6 +77,17 @@ corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_panel"]
+content_margin_left = 24.0
+content_margin_top = 20.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+texture = ExtResource("1_panel")
+texture_margin_left = 44.0
+texture_margin_top = 44.0
+texture_margin_right = 44.0
+texture_margin_bottom = 44.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_progress_bg"]
 bg_color = Color(0.36, 0.46, 0.35, 0.35)
@@ -116,25 +116,25 @@ corner_radius_bottom_left = 6
 [resource]
 default_font_size = 16
 Button/colors/font_color = Color(0.22, 0.34, 0.25, 1)
+Button/colors/font_disabled_color = Color(0.4, 0.43, 0.38, 0.8)
 Button/colors/font_hover_color = Color(0.16, 0.28, 0.2, 1)
 Button/colors/font_pressed_color = Color(0.12, 0.24, 0.16, 1)
-Button/colors/font_disabled_color = Color(0.4, 0.43, 0.38, 0.8)
 Button/font_sizes/font_size = 16
-Button/styles/normal = SubResource("StyleBox_button_normal")
-Button/styles/hover = SubResource("StyleBox_button_hover")
-Button/styles/pressed = SubResource("StyleBox_button_pressed")
 Button/styles/disabled = SubResource("StyleBox_button_disabled")
 Button/styles/focus = SubResource("StyleBox_focus")
+Button/styles/hover = SubResource("StyleBox_button_hover")
+Button/styles/normal = SubResource("StyleBox_button_normal")
+Button/styles/pressed = SubResource("StyleBox_button_pressed")
+LineEdit/colors/font_color = Color(0.2, 0.3, 0.22, 1)
+LineEdit/styles/focus = SubResource("StyleBox_field")
+LineEdit/styles/normal = SubResource("StyleBox_field")
 OptionButton/colors/font_color = Color(0.22, 0.34, 0.25, 1)
-OptionButton/styles/normal = SubResource("StyleBox_button_normal")
-OptionButton/styles/hover = SubResource("StyleBox_button_hover")
-OptionButton/styles/pressed = SubResource("StyleBox_button_pressed")
 OptionButton/styles/disabled = SubResource("StyleBox_button_disabled")
 OptionButton/styles/focus = SubResource("StyleBox_focus")
+OptionButton/styles/hover = SubResource("StyleBox_button_hover")
+OptionButton/styles/normal = SubResource("StyleBox_button_normal")
+OptionButton/styles/pressed = SubResource("StyleBox_button_pressed")
 Panel/styles/panel = SubResource("StyleBox_panel")
 PanelContainer/styles/panel = SubResource("StyleBox_panel")
-LineEdit/colors/font_color = Color(0.2, 0.3, 0.22, 1)
-LineEdit/styles/normal = SubResource("StyleBox_field")
-LineEdit/styles/focus = SubResource("StyleBox_field")
 ProgressBar/styles/background = SubResource("StyleBox_progress_bg")
 ProgressBar/styles/fill = SubResource("StyleBox_progress_fill")
