@@ -1,37 +1,149 @@
-[gd_scene load_steps=3 format=3 uid="uid://rvgnrq1q6d55"]
+[gd_scene load_steps=10 format=3 uid="uid://rvgnrq1q6d55"]
 
-[ext_resource type="Script" uid="uid://dm82hgbf2n0ev" path="res://scenes/ui/activity/WeeklyTaskSlot.gd" id="1_gd"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://kliba2rwofop" path="res://scenes/ui/activity/WeeklyTaskSlot.gd" id="1_gd"]
+[ext_resource type="Theme" uid="uid://dhv8eh1s6nl6v" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/ui/weekly/weekly_claim_button.png" id="3_claim_texture"]
+[ext_resource type="Texture2D" path="res://assets/ui/weekly/weekly_task_slot_bg.png" id="4_slot_texture"]
 
-[node name="WeeklyTaskSlot" type="HBoxContainer" unique_id=364069552]
-custom_minimum_size = Vector2(0, 58)
-theme_override_constants/separation = 12
-script = ExtResource("1_gd")
+[sub_resource type="StyleBoxTexture" id="StyleBox_claim_normal"]
+texture = ExtResource("3_claim_texture")
+texture_margin_left = 26.0
+texture_margin_top = 18.0
+texture_margin_right = 26.0
+texture_margin_bottom = 18.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_claim_hover"]
+texture = ExtResource("3_claim_texture")
+texture_margin_left = 26.0
+texture_margin_top = 18.0
+texture_margin_right = 26.0
+texture_margin_bottom = 18.0
+modulate_color = Color(1, 1, 0.86, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_claim_pressed"]
+texture = ExtResource("3_claim_texture")
+texture_margin_left = 26.0
+texture_margin_top = 18.0
+texture_margin_right = 26.0
+texture_margin_bottom = 18.0
+modulate_color = Color(0.82, 0.86, 0.82, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_claim_disabled"]
+texture = ExtResource("3_claim_texture")
+texture_margin_left = 26.0
+texture_margin_top = 18.0
+texture_margin_right = 26.0
+texture_margin_bottom = 18.0
+modulate_color = Color(0.58, 0.61, 0.56, 0.78)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBox_focus_empty"]
+
+[node name="WeeklyTaskSlot" type="Control" unique_id=364069552]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 3
+anchors_preset = 0
 theme = ExtResource("2_theme")
+script = ExtResource("1_gd")
 
-[node name="NameLabel" type="Label" parent="." unique_id=2027992513]
+[node name="Background" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_slot_texture")
+patch_margin_left = 60
+patch_margin_top = 36
+patch_margin_right = 60
+patch_margin_bottom = 36
+
+[node name="Content" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 12
+
+[node name="Row" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TaskInfo" type="VBoxContainer" parent="Content/Row"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 14
+theme_override_constants/separation = 6
 
-[node name="ProgressLabel" type="Label" parent="." unique_id=333222226]
+[node name="NameLabel" type="Label" parent="Content/Row/TaskInfo" unique_id=2027992513]
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.18, 0.29, 0.21, 1)
+theme_override_font_sizes/font_size = 15
+text = "任务名称"
+text_overrun_behavior = 3
+vertical_alignment = 1
+
+[node name="MetaRow" type="HBoxContainer" parent="Content/Row/TaskInfo"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ProgressCaption" type="Label" parent="Content/Row/TaskInfo/MetaRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.45, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "进度"
+
+[node name="ProgressLabel" type="Label" parent="Content/Row/TaskInfo/MetaRow" unique_id=333222226]
+custom_minimum_size = Vector2(52, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 
-[node name="RewardsContainer" type="HBoxContainer" parent="." unique_id=563268647]
+[node name="Divider" type="VSeparator" parent="Content/Row/TaskInfo/MetaRow"]
+custom_minimum_size = Vector2(1, 18)
 layout_mode = 2
-theme_override_constants/separation = 4
 
-[node name="ClaimButton" type="Button" parent="." unique_id=945952851]
+[node name="RewardCaption" type="Label" parent="Content/Row/TaskInfo/MetaRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.45, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "奖励"
+
+[node name="RewardsContainer" type="HBoxContainer" parent="Content/Row/TaskInfo/MetaRow" unique_id=563268647]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="ActionArea" type="CenterContainer" parent="Content/Row"]
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+
+[node name="ClaimButton" type="Button" parent="Content/Row/ActionArea" unique_id=945952851]
 visible = false
 custom_minimum_size = Vector2(92, 44)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.96, 0.72, 1)
+theme_override_colors/font_pressed_color = Color(0.92, 0.88, 0.66, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.86, 1)
 theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBox_claim_normal")
+theme_override_styles/pressed = SubResource("StyleBox_claim_pressed")
+theme_override_styles/hover = SubResource("StyleBox_claim_hover")
+theme_override_styles/disabled = SubResource("StyleBox_claim_disabled")
+theme_override_styles/focus = SubResource("StyleBox_focus_empty")
 text = "领取"
 
-[node name="DoneLabel" type="Label" parent="." unique_id=1223414780]
+[node name="DoneLabel" type="Label" parent="Content/Row/ActionArea" unique_id=1223414780]
 visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 1, 0.3, 1)
+theme_override_colors/font_color = Color(0.18, 0.55, 0.25, 1)
 theme_override_font_sizes/font_size = 14
-text = "✓"
+text = "已领取"
+horizontal_alignment = 1
+vertical_alignment = 1

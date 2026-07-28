@@ -1,7 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://cuyl18aoasnb7"]
+[gd_scene load_steps=6 format=3 uid="uid://cuyl18aoasnb7"]
 
 [ext_resource type="Script" uid="uid://c52nducodw65c" path="res://scenes/ui/main/CraftPathView.gd" id="1_gd"]
 [ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/ui/craft_path_panel.png" id="3_panel"]
+[ext_resource type="Theme" path="res://assets/theme/craft_path_button_theme.tres" id="4_button_theme"]
+[ext_resource type="Theme" path="res://assets/theme/craft_path_close_theme.tres" id="5_close_theme"]
 
 [node name="CraftPathView" type="Control" unique_id=503858451]
 layout_mode = 3
@@ -24,7 +27,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.5)
 
-[node name="Panel" type="Panel" parent="." unique_id=1521435528]
+[node name="Panel" type="NinePatchRect" parent="." unique_id=1521435528]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -37,14 +40,19 @@ offset_right = 310.0
 offset_bottom = 500.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("3_panel")
+patch_margin_left = 72
+patch_margin_top = 72
+patch_margin_right = 72
+patch_margin_bottom = 72
 
 [node name="CloseButton" type="Button" parent="Panel" unique_id=1096101415]
 layout_mode = 0
-offset_left = 548.0
+theme = ExtResource("5_close_theme")
+offset_left = 554.0
 offset_top = 18.0
-offset_right = 604.0
-offset_bottom = 70.0
-theme_override_font_sizes/font_size = 20
+offset_right = 600.0
+offset_bottom = 64.0
 text = "X"
 
 [node name="NameList" type="HBoxContainer" parent="Panel" unique_id=1531799321]
@@ -77,15 +85,15 @@ layout_mode = 0
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 200.0
-offset_bottom = 32.0
+offset_bottom = 38.0
 theme_override_colors/font_color = Color(0.25, 0.38, 0.28, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "来源"
 
 [node name="LauncherContainer" type="HBoxContainer" parent="Panel/LauncherSection" unique_id=143011835]
 layout_mode = 0
 offset_left = 0.0
-offset_top = 42.0
+offset_top = 48.0
 offset_right = 564.0
 offset_bottom = 336.0
-theme_override_constants/separation = 14
+theme_override_constants/separation = 20

@@ -1,10 +1,10 @@
-class_name WeeklyTaskSlot extends HBoxContainer
+class_name WeeklyTaskSlot extends Control
 
-@onready var name_label: Label = $NameLabel
-@onready var progress_label: Label = $ProgressLabel
-@onready var rewards_container: HBoxContainer = $RewardsContainer
-@onready var claim_btn: Button = $ClaimButton
-@onready var done_label: Label = $DoneLabel
+@onready var name_label: Label = $Content/Row/TaskInfo/NameLabel
+@onready var progress_label: Label = $Content/Row/TaskInfo/MetaRow/ProgressLabel
+@onready var rewards_container: HBoxContainer = $Content/Row/TaskInfo/MetaRow/RewardsContainer
+@onready var claim_btn: Button = $Content/Row/ActionArea/ClaimButton
+@onready var done_label: Label = $Content/Row/ActionArea/DoneLabel
 
 var _quest_id: int = 0
 
@@ -28,15 +28,15 @@ func setup(quest: Dictionary, progress: Dictionary) -> void:
 	claim_btn.disabled = false
 
 	if claimed:
-		progress_label.self_modulate = Color(0.3, 1, 0.3, 1)
+		progress_label.self_modulate = Color(0.18, 0.55, 0.25, 1)
 		done_label.visible = true
 	elif completed:
-		progress_label.self_modulate = Color(1, 0.85, 0.2, 1)
+		progress_label.self_modulate = Color(0.72, 0.48, 0.08, 1)
 		claim_btn.visible = true
 		if not claim_btn.pressed.is_connected(_on_claim):
 			claim_btn.pressed.connect(_on_claim)
 	else:
-		progress_label.self_modulate = Color(1, 1, 1, 0.6)
+		progress_label.self_modulate = Color(0.24, 0.32, 0.25, 0.72)
 
 
 func _display_rewards(quest: Dictionary) -> void:

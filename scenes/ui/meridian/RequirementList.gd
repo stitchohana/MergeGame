@@ -89,6 +89,10 @@ func set_entry_available(index: int, available: bool) -> void:
 		return
 	entries[index].set_available(available)
 
+func refresh_item_selection(present_item_ids: Dictionary) -> void:
+	for entry in _get_entries():
+		entry.refresh_item_selection(present_item_ids)
+
 func _emit_complete(idx: int) -> void:
 	complete_clicked.emit(idx)
 
@@ -97,9 +101,9 @@ func _show_item_source(item_id: int) -> void:
 	if item_data.is_empty():
 		return
 	if int(item_data.get("type", Constants.ItemType.REGULAR)) == Constants.ItemType.RECIPE_PRODUCT:
-		var recipe_popup := preload("res://scenes/ui/main/RecipePopup.tscn").instantiate() as RecipePopup
-		UIManager.show_popup(recipe_popup)
-		recipe_popup.setup_for_item(item_id)
+		var source_popup := preload("res://scenes/ui/main/RecipeSourcePopup.tscn").instantiate() as RecipeSourcePopup
+		UIManager.show_popup(source_popup)
+		source_popup.setup_for_item(item_id)
 		return
 	var popup := preload("res://scenes/ui/main/CraftPathView.tscn").instantiate() as CraftPathView
 	UIManager.show_popup(popup)

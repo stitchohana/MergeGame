@@ -1,5 +1,7 @@
 class_name ShopPopup extends BasePopup
 
+const SHOP_BUTTON_THEME := preload("res://assets/theme/shop_button_theme.tres")
+
 @onready var title_label: Label = $Panel/TitleLabel
 @onready var item_container = $Panel/ItemContainer
 @onready var close_btn: Button = $Panel/CloseButton
@@ -46,15 +48,12 @@ func show_items(items: Array) -> void:
 		var btn := _build_item_button(item_data, entry.price)
 		item_container.add_child(btn)
 
-func _build_item_button(item_data: Dictionary, price: int) -> Button:
-	var btn := Button.new()
-	btn.flat = true
-	btn.custom_minimum_size = Vector2(80, 110)
-	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-
+func _build_item_button(item_data: Dictionary, price: int) -> VBoxContainer:
 	var vbox := VBoxContainer.new()
-	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	btn.add_child(vbox)
+	vbox.custom_minimum_size = Vector2(116, 132)
+	vbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 5)
 
 	var widget := preload("res://scenes/ui/common/ItemWidget.tscn").instantiate() as ItemWidget
 	vbox.add_child(widget)
@@ -64,16 +63,16 @@ func _build_item_button(item_data: Dictionary, price: int) -> Button:
 	if widget.name_label:
 		widget.name_label.add_theme_font_size_override("font_size", 9)
 
-	var price_label := Label.new()
-	price_label.text = "%d灵石" % price
-	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	price_label.add_theme_font_size_override("font_size", 10)
-	price_label.add_theme_color_override("font_color", Color(1, 0.8, 0.2, 1))
-	vbox.add_child(price_label)
+	var buy_button := Button.new()
+	buy_button.text = "%d 灵石" % price
+	buy_button.theme = SHOP_BUTTON_THEME
+	buy_button.custom_minimum_size = Vector2(108, 36)
+	buy_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vbox.add_child(buy_button)
 
 	var item_id: int = item_data.get("id", 0)
-	btn.pressed.connect(func(): _on_buy_pressed(item_id, price))
-	return btn
+	buy_button.pressed.connect(func(): _on_buy_pressed(item_id, price))
+	return vbox
 
 func _on_buy_pressed(item_id: int, price: int) -> void:
 	if GameState.spirit_stones < price:

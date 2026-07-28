@@ -31,19 +31,23 @@ func _refresh(_count: int) -> void:
 	var item_id: int = r.get("id", 0)
 	var item_data := ConfigDatabase.get_item_data(item_id)
 
-	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(50, 50)
-	btn.tooltip_text = "%s (点击放入棋盘)" % r.get("name", "")
-	btn.pressed.connect(_on_claim.bind(r))
-
 	var widget := _item_widget_scene.instantiate() as ItemWidget
 	widget.setup(item_data, Vector2i(-1, -1), 36)
-	widget.custom_minimum_size = Vector2(36, 36)
-	widget.size = Vector2(36, 36)
-	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	btn.add_child(widget)
-	widget.position = Vector2(7, 7)
-	items_box.add_child(btn)
+	widget.custom_minimum_size = Vector2(50, 50)
+	widget.size = Vector2(50, 50)
+	for node_name: String in ["IconBg", "SelectIcon", "IconRect"]:
+		var texture_rect := widget.get_node_or_null(node_name) as TextureRect
+		if texture_rect:
+			texture_rect.offset_left = 7.0
+			texture_rect.offset_top = 7.0
+			texture_rect.offset_right = -7.0
+			texture_rect.offset_bottom = -7.0
+	widget.set_clickable(true)
+	widget.pressed.connect(_on_claim.bind(r))
+	var click_button := widget.get_node_or_null("ClickButton") as Button
+	if click_button:
+		click_button.tooltip_text = "%s (点击放入棋盘)" % r.get("name", "")
+	items_box.add_child(widget)
 
 
 var _fly_targets: Dictionary = {}  # uid -> (col, row) for fly animation

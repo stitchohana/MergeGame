@@ -45,22 +45,18 @@ func _refresh() -> void:
 		var item_data := ConfigDatabase.get_item_data(slot.id)
 		if item_data.is_empty():
 			continue
-		var btn := _build_item_button(item_data, slot.uid)
-		item_container.add_child(btn)
+		var widget := _build_item_widget(item_data, slot.uid)
+		item_container.add_child(widget)
 
-func _build_item_button(item_data: Dictionary, slot_uid: int) -> Button:
-	var btn := Button.new()
-	btn.flat = true
-	btn.custom_minimum_size = Vector2(80, 100)
-	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-
+func _build_item_widget(item_data: Dictionary, slot_uid: int) -> ItemWidget:
 	var widget := preload("res://scenes/ui/common/ItemWidget.tscn").instantiate() as ItemWidget
+	widget.custom_minimum_size = Vector2(80, 100)
+	widget.size = Vector2(80, 100)
+	widget.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	widget.setup(item_data)
-	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	btn.add_child(widget)
-
-	btn.pressed.connect(func(): _on_item_pressed(slot_uid))
-	return btn
+	widget.set_clickable(true)
+	widget.pressed.connect(func(): _on_item_pressed(slot_uid))
+	return widget
 
 func _on_item_pressed(slot_uid: int) -> void:
 	if _pending_withdraw_uid > 0:

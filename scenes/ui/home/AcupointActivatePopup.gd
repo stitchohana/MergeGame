@@ -61,8 +61,8 @@ func setup(title: String, cost: String, rewards: Dictionary, action_text: String
 				var token_data := ConfigDatabase.get_token_data(token_type)
 				if not token_data.is_empty():
 					var tw := _reward_slot_scene.instantiate() as RewardSlot
-					tw.setup(token_type, amount)
 					rewards_box.add_child(tw)
+					tw.setup(token_type, amount)
 		if rewards.has("items"):
 			for reward_item in rewards.items:
 				var item_id: int = int(reward_item.get("id", 0))
@@ -70,8 +70,8 @@ func setup(title: String, cost: String, rewards: Dictionary, action_text: String
 				var item_data := ConfigDatabase.get_item_data(item_id)
 				if not item_data.is_empty():
 					var iw := _reward_slot_scene.instantiate() as RewardSlot
-					iw.setup(item_id, count)
 					rewards_box.add_child(iw)
+					iw.setup(item_id, count)
 
 	if not action_btn.pressed.is_connected(_on_action_btn):
 		action_btn.pressed.connect(_on_action_btn)

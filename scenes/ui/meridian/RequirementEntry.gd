@@ -40,23 +40,22 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 	for it in items:
 		var item_id: int = int(it.get("item_id", 0))
 		var item_data := ConfigDatabase.get_item_data(item_id)
-		var item_button := Button.new()
-		item_button.custom_minimum_size = Vector2(68, 84)
-		item_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		item_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		item_button.flat = true
-		item_button.tooltip_text = "查看获取方式"
-		item_button.pressed.connect(_on_item_pressed.bind(item_id))
-		items_container.add_child(item_button)
 		var widget := _item_widget_scene.instantiate() as ItemWidget
-		item_button.add_child(widget)
-		widget.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		widget.custom_minimum_size = Vector2(68, 84)
+		widget.size = Vector2(68, 84)
+		widget.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		widget.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		_style_item_widget(widget)
 		if not item_data.is_empty():
 			widget.setup(item_data)
 		else:
 			widget.setup({"name": it.get("name", "?")})
-		widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		widget.set_clickable(true)
+		widget.pressed.connect(_on_item_pressed.bind(item_id))
+		var click_button := widget.get_node_or_null("ClickButton") as Button
+		if click_button:
+			click_button.tooltip_text = "查看获取方式"
+		items_container.add_child(widget)
 		if widget.name_label:
 			widget.name_label.visible = true
 			widget.name_label.add_theme_font_size_override("font_size", 8)
@@ -96,6 +95,14 @@ func set_available(available: bool) -> void:
 		var btn: Button = $MarginContainer/VBox/CompleteButton
 		btn.visible = available
 
+func refresh_item_selection(present_item_ids: Dictionary) -> void:
+	var items_container: HBoxContainer = $MarginContainer/VBox/ItemsContainer
+	for child in items_container.get_children():
+		if child is ItemWidget:
+			var widget := child as ItemWidget
+			var item_id: int = int(widget.item_data.get("id", 0))
+			widget.set_selected(item_id > 0 and present_item_ids.has(item_id))
+
 func _on_btn_pressed() -> void:
 	complete_pressed.emit()
 
@@ -112,17 +119,8 @@ func mark_completed() -> void:
 	for child in items_container.get_children():
 		if child is ItemWidget:
 			child.modulate = Color(0.5, 0.8, 0.5, 1)
-		elif child is Button:
-			var widget := child.get_child(0) as ItemWidget
-			if widget:
-				widget.modulate = Color(0.5, 0.8, 0.5, 1)
 
 func _style_item_widget(widget: ItemWidget) -> void:
-	var icon_bg: TextureRect = widget.get_node_or_null("IconBg") as TextureRect
-	if icon_bg:
-		icon_bg.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-		icon_bg.anchor_right = 1.0
-		icon_bg.offset_bottom = 62.0
 	var icon_rect: TextureRect = widget.get_node_or_null("IconRect") as TextureRect
 	if icon_rect:
 		icon_rect.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)

@@ -1,6 +1,7 @@
 class_name RecipePopup extends BasePopup
 
 const ITEM_WIDGET_SCENE := preload("res://scenes/ui/common/ItemWidget.tscn")
+const ITEM_BUTTON_TEXTURE: Texture2D = preload("res://assets/ui/recipe/recipe_item_button.png")
 
 @onready var title_label: Label = $Panel/Margin/VBox/Header/TitleLabel
 @onready var target_container: HBoxContainer = $Panel/Margin/VBox/TargetContainer
@@ -34,9 +35,9 @@ func _populate_target(item_data: Dictionary) -> void:
 	target_container.add_child(widget)
 	var copy := VBoxContainer.new()
 	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var name_label := _make_label(item_data.get("name", "未知道具"), 18, Color.WHITE)
+	var name_label := _make_label(item_data.get("name", "未知道具"), 18, Color(0.28, 0.14, 0.08, 1))
 	copy.add_child(name_label)
-	var desc_label := _make_label(item_data.get("describe", "订单所需道具"), 13, Color(0.72, 0.75, 0.8, 1))
+	var desc_label := _make_label(item_data.get("describe", "订单所需道具"), 13, Color(0.46, 0.31, 0.2, 1))
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	copy.add_child(desc_label)
 	target_container.add_child(copy)
@@ -51,6 +52,7 @@ func _populate(recipes: Array, show_board_table: bool) -> void:
 func _build_entry(recipe: Dictionary, show_board_table: bool) -> Control:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(0, 150 if show_board_table else 112)
+	panel.add_theme_stylebox_override("panel", _make_recipe_card_style())
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 16)
 	margin.add_theme_constant_override("margin_top", 12)
@@ -62,12 +64,12 @@ func _build_entry(recipe: Dictionary, show_board_table: bool) -> Control:
 	margin.add_child(content)
 
 	var header := HBoxContainer.new()
-	header.add_child(_make_label(recipe.get("name", "未知配方"), 17, Color(1, 0.9, 0.58, 1)))
+	header.add_child(_make_label(recipe.get("name", "未知配方"), 17, Color(0.34, 0.16, 0.08, 1)))
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(spacer)
 	var craft_time: float = float(recipe.get("craft_time", 0.0))
-	header.add_child(_make_label("制作 %s" % _format_time(craft_time), 13, Color(0.68, 0.72, 0.78, 1)))
+	header.add_child(_make_label("制作 %s" % _format_time(craft_time), 13, Color(0.48, 0.32, 0.2, 1)))
 	content.add_child(header)
 
 	var flow := HBoxContainer.new()
@@ -76,7 +78,7 @@ func _build_entry(recipe: Dictionary, show_board_table: bool) -> Control:
 		var ingredient_id: int = int(ingredient_id_value)
 		var ingredient: Dictionary = ConfigDatabase.get_item_data(ingredient_id)
 		flow.add_child(_make_item_widget(ingredient, 58))
-		flow.add_child(_make_label("+", 20, Color(0.65, 0.68, 0.72, 1)))
+		flow.add_child(_make_label("+", 20, Color(0.52, 0.31, 0.16, 1)))
 	if flow.get_child_count() > 0:
 		flow.get_child(flow.get_child_count() - 1).queue_free()
 	content.add_child(flow)
@@ -85,13 +87,13 @@ func _build_entry(recipe: Dictionary, show_board_table: bool) -> Control:
 		var table: Dictionary = _find_highest_board_table(int(recipe.get("id", 0)))
 		var table_row := HBoxContainer.new()
 		table_row.add_theme_constant_override("separation", 10)
-		table_row.add_child(_make_label("放入制作台", 13, Color(0.68, 0.72, 0.78, 1)))
+		table_row.add_child(_make_label("放入制作台", 13, Color(0.48, 0.32, 0.2, 1)))
 		if table.is_empty():
 			table_row.add_child(_make_label("棋盘上暂无可用制作台", 14, Color(1, 0.48, 0.42, 1)))
 		else:
 			table_row.add_child(_make_item_widget(table, 52))
 			var table_name: String = "%s  Lv.%d" % [table.get("name", "制作台"), int(table.get("level", 0))]
-			table_row.add_child(_make_label(table_name, 15, Color(0.56, 0.9, 0.72, 1)))
+			table_row.add_child(_make_label(table_name, 15, Color(0.58, 0.29, 0.12, 1)))
 		content.add_child(table_row)
 
 	return panel
@@ -110,20 +112,57 @@ func _find_highest_board_table(recipe_id: int) -> Dictionary:
 			best = config
 	return best
 
-func _make_item_widget(item_data: Dictionary, size_px: int) -> Button:
-	var button := Button.new()
-	button.flat = true
-	button.custom_minimum_size = Vector2(size_px, size_px)
-	button.tooltip_text = "查看合成链"
-	button.pressed.connect(_open_craft_path.bind(item_data))
-
+func _make_item_widget(item_data: Dictionary, size_px: int) -> ItemWidget:
 	var widget := ITEM_WIDGET_SCENE.instantiate() as ItemWidget
 	widget.custom_minimum_size = Vector2(size_px, size_px)
 	widget.size = Vector2(size_px, size_px)
 	widget.setup(item_data)
-	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	button.add_child(widget)
-	return button
+
+	var padding: int = 6
+	for node_name: String in ["IconBg", "SelectIcon", "IconRect"]:
+		var texture_rect := widget.get_node_or_null(node_name) as TextureRect
+		if texture_rect:
+			texture_rect.offset_left = padding
+			texture_rect.offset_top = padding
+			texture_rect.offset_right = -padding
+			texture_rect.offset_bottom = -padding
+
+	var button := widget.get_node_or_null("ClickButton") as Button
+	button.flat = false
+	button.add_theme_stylebox_override("normal", _make_item_button_style(Color.WHITE))
+	button.add_theme_stylebox_override("hover", _make_item_button_style(Color(1, 0.96, 0.82, 1)))
+	button.add_theme_stylebox_override("pressed", _make_item_button_style(Color(0.82, 0.8, 0.74, 1)))
+	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	button.tooltip_text = "查看合成链"
+	widget.set_clickable(true)
+	widget.pressed.connect(_open_craft_path.bind(item_data))
+	return widget
+
+
+func _make_item_button_style(modulate_color: Color) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = ITEM_BUTTON_TEXTURE
+	style.texture_margin_left = 22.0
+	style.texture_margin_top = 22.0
+	style.texture_margin_right = 22.0
+	style.texture_margin_bottom = 22.0
+	style.modulate_color = modulate_color
+	return style
+
+
+func _make_recipe_card_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.96, 0.9, 0.78, 0.96)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.55, 0.34, 0.16, 0.92)
+	style.corner_radius_top_left = 10
+	style.corner_radius_top_right = 10
+	style.corner_radius_bottom_right = 10
+	style.corner_radius_bottom_left = 10
+	return style
 
 func _open_craft_path(item_data: Dictionary) -> void:
 	if item_data.is_empty():

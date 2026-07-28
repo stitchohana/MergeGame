@@ -7,11 +7,7 @@ const CraftingControllerClass := preload("res://scenes/grid/CraftingController.g
 const ACTION_SYNC_SCREEN_SCENE := preload("res://scenes/screens/ActionSyncScreen.tscn")
 const CELL_SIZE := Constants.CELL_SIZE
 const CELL_STEP := Constants.CELL_STEP
-const GRID_COLS := Constants.GRID_COLS
-const GRID_ROWS := Constants.GRID_ROWS
 const DRAG_THRESHOLD := 10.0  # pixels before drag starts
-
-@export var grid_cell_scene: PackedScene
 
 @export var grid_item_scene: PackedScene
 
@@ -20,7 +16,6 @@ signal pill_dropped_outside(item_data: Dictionary, drop_position: Vector2)
 signal item_use_requested(item_data: Dictionary, grid_pos: Vector2i)
 
 var _item_nodes: Dictionary = {}  # "col,row" -> GridItem
-var _cell_nodes: Dictionary = {}  # "col,row" -> GridCell
 
 var _is_dragging: bool = false
 var _drag_source_pos: Vector2i = Vector2i(-1, -1)
@@ -119,7 +114,7 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	print("[GridView] _ready: size=", size, " position=", position, " visible=", visible)
-	_create_grid()
+	_create_items_layer()
 	_launcher_ctrl = LauncherControllerClass.new()
 	add_child(_launcher_ctrl)
 	_launcher_ctrl.spawn_started.connect(_on_launcher_spawn_started)
@@ -140,22 +135,7 @@ func _ready() -> void:
 	_craft_ctrl.craft_start_requested.connect(_on_craft_start_requested)
 	_craft_ctrl.sync_states()
 
-func _create_grid() -> void:
-	print("[GridView] _create_grid: CELL_SIZE=", CELL_SIZE, " CELL_STEP=", CELL_STEP, " grid=", GRID_COLS, "x", GRID_ROWS)
-	var cells_layer := Control.new()
-	cells_layer.name = "GridCells"
-	cells_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(cells_layer)
-	print("[GridView] cells_layer created, adding cells...")
-
-	for row in range(GRID_ROWS):
-		for col in range(GRID_COLS):
-			var cell := grid_cell_scene.instantiate()
-			cells_layer.add_child(cell)
-			cell.setup(Vector2i(col, row), CELL_STEP)
-			_cell_nodes["%d,%d" % [col, row]] = cell
-	print("[GridView] cells done: ", _cell_nodes.size(), " cells")
-
+func _create_items_layer() -> void:
 	var items_layer := Control.new()
 	items_layer.name = "ItemsLayer"
 	items_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -235,7 +215,6 @@ func _input(event: InputEvent) -> void:
 			var drag_node = _item_nodes.get(drag_key)
 			if drag_node and is_instance_valid(drag_node):
 				drag_node.position = get_global_mouse_position() - global_position - Vector2(CELL_STEP * 0.5, CELL_STEP * 0.5)
-			_update_highlights(local_pos)
 		elif not _pressed_item.is_empty() and not _pressed_has_moved:
 			if local_pos.distance_to(_press_screen_pos) > DRAG_THRESHOLD:
 				_pressed_has_moved = true
@@ -339,7 +318,6 @@ func _finish_drag(target_pos: Vector2i) -> void:
 	if drag_node and is_instance_valid(drag_node):
 		drag_node.z_index = 0
 	_pressed_item = {}
-	_clear_highlights()
 	call_deferred("_finalize_action_sync")
 	if _pouch_zone and _pouch_zone.visible and Rect2(_pouch_zone.global_position, _pouch_zone.size).has_point(get_global_mouse_position()):
 		if _drag_item_data.get("_pending_spawn", false) or _drag_item_data.get("_optimistic_action", false):
@@ -499,22 +477,6 @@ func _snap_back_to(pos: Vector2i) -> void:
 		var tween := create_tween()
 		tween.tween_property(item_node, "position", target, 0.2)
 
-func _update_highlights(local_pos: Vector2) -> void:
-	_clear_highlights()
-	var hover := _local_to_grid(local_pos)
-	if not GridManager.is_valid_pos(hover):
-		return
-	if hover == _drag_source_pos:
-		return
-
-	var target = GridManager.get_item(hover)
-	if target != null and target.get("id") == _drag_item_data.get("id"):
-		_set_cell_highlight(hover, GridCell.HighlightType.MERGE_TARGET)
-	elif target == null:
-		_set_cell_highlight(hover, GridCell.HighlightType.VALID_DROP)
-	else:
-		_set_cell_highlight(hover, GridCell.HighlightType.INVALID)
-
 # --- Item Visual Management ---
 
 func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
@@ -595,15 +557,6 @@ func _clear_all_item_nodes() -> void:
 		if is_instance_valid(node):
 			node.queue_free()
 	_item_nodes.clear()
-
-func _clear_highlights() -> void:
-	for key in _cell_nodes:
-		_cell_nodes[key].set_highlight(GridCell.HighlightType.NONE)
-
-func _set_cell_highlight(pos: Vector2i, type: GridCell.HighlightType) -> void:
-	var cell = _cell_nodes.get("%d,%d" % [pos.x, pos.y])
-	if cell:
-		cell.set_highlight(type)
 
 func _get_items_layer() -> Control:
 	for child in get_children():

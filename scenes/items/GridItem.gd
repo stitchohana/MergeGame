@@ -26,23 +26,6 @@ func _ready() -> void:
 	_orig_scale = scale
 
 	select_icon.visible = false
-	var temp := ColorRect.new()
-	temp.name = "SelectColor"
-	temp.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	temp.anchors_preset = Control.PRESET_FULL_RECT
-	temp.anchor_right = 1.0
-	temp.anchor_bottom = 1.0
-	temp.color = Color(1, 0.85, 0.2, 0.7)
-	select_icon.add_child(temp)
-
-	var lock_bg := ColorRect.new()
-	lock_bg.name = "LockBg"
-	lock_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	lock_bg.anchors_preset = Control.PRESET_FULL_RECT
-	lock_bg.anchor_right = 1.0
-	lock_bg.anchor_bottom = 1.0
-	lock_bg.color = Color(1, 0.2, 0.2, 0.85)
-	immovable_icon.add_child(lock_bg)
 
 func set_selected(active: bool) -> void:
 	_is_selected = active

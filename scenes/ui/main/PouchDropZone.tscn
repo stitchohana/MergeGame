@@ -1,44 +1,30 @@
-[gd_scene load_steps=3 format=3 uid="uid://byfmp2yrtf3gm"]
+[gd_scene format=3 uid="uid://byfmp2yrtf3gm"]
 
-[ext_resource type="Script" path="res://scenes/ui/main/PouchDropZone.gd" id="1_gd"]
-[ext_resource type="Texture2D" path="res://assets/game/item_bg_atlas_texture.tres" id="2_bg"]
+[ext_resource type="Script" uid="uid://cwvl7xr5gblhu" path="res://scenes/ui/main/PouchDropZone.gd" id="1_gd"]
+[ext_resource type="Texture2D" uid="uid://bf1x5r12ih2o8" path="res://assets/game/storage_pouch.png" id="2_tdnjv"]
 
-[node name="PouchDropZone" type="Control"]
+[node name="PouchDropZone" type="Control" unique_id=1772891465]
 custom_minimum_size = Vector2(64, 64)
-size = Vector2(64, 64)
-mouse_filter = 0
+layout_mode = 3
+anchors_preset = 0
+offset_right = 64.0
+offset_bottom = 64.0
 script = ExtResource("1_gd")
 
-[node name="Bg" type="NinePatchRect" parent="."]
-mouse_filter = 2
+[node name="IconRect" type="TextureRect" parent="." unique_id=1522896850]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-texture = ExtResource("2_bg")
-patch_margin_left = 14
-patch_margin_top = 14
-patch_margin_right = 14
-patch_margin_bottom = 14
-
-[node name="IconRect" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
+texture = ExtResource("2_tdnjv")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="CountLabel" type="Label" parent="."]
+[node name="CountLabel" type="Label" parent="." unique_id=596740812]
 layout_mode = 0
-anchors_preset = 6
 anchor_right = 1.0
 offset_left = -24.0
 offset_top = 2.0

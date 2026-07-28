@@ -1,5 +1,7 @@
 class_name WeeklyActivityPanel extends BasePopup
 
+const DAY_BUTTON_TEXTURE: Texture2D = preload("res://assets/ui/weekly/weekly_day_button.png")
+
 
 @onready var day_buttons: HBoxContainer = $Panel/VBox/DayButtons
 @onready var task_list: VBoxContainer = $Panel/VBox/ScrollContainer/TaskList
@@ -22,6 +24,10 @@ func _build_ui() -> void:
 		btn.custom_minimum_size = Vector2(66, 44)
 		btn.text = "第%d天" % (i + 1)
 		btn.add_theme_font_size_override("font_size", 14)
+		btn.add_theme_stylebox_override("normal", _make_day_style(Color.WHITE))
+		btn.add_theme_stylebox_override("hover", _make_day_style(Color(1, 1, 0.86, 1)))
+		btn.add_theme_stylebox_override("pressed", _make_day_style(Color(0.82, 0.86, 0.82, 1)))
+		btn.add_theme_stylebox_override("disabled", _make_day_style(Color(0.56, 0.58, 0.55, 0.72)))
 		btn.pressed.connect(_on_day_pressed.bind(i))
 		day_buttons.add_child(btn)
 
@@ -91,3 +97,14 @@ func _on_close() -> void:
 	if CloudService.state_loaded.is_connected(_on_state_synced):
 		CloudService.state_loaded.disconnect(_on_state_synced)
 	UIManager.hide_popup(self)
+
+
+func _make_day_style(modulate_color: Color) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = DAY_BUTTON_TEXTURE
+	style.texture_margin_left = 20.0
+	style.texture_margin_top = 18.0
+	style.texture_margin_right = 20.0
+	style.texture_margin_bottom = 18.0
+	style.modulate_color = modulate_color
+	return style

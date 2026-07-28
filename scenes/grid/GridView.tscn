@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://deg7lbni32jui"]
+[gd_scene load_steps=3 format=3 uid="uid://deg7lbni32jui"]
 
 [ext_resource type="Script" uid="uid://mns6punohrwf" path="res://scenes/grid/GridView.gd" id="1_gd"]
-[ext_resource type="PackedScene" uid="uid://h2cpm3eo28g3" path="res://scenes/grid/GridCell.tscn" id="2_cell"]
 [ext_resource type="PackedScene" uid="uid://dbfaocwrurvis" path="res://scenes/items/GridItem.tscn" id="3_item"]
 
 [node name="GridView" type="Control"]
@@ -11,5 +10,4 @@ anchors_preset = 0
 offset_right = 584.0
 offset_bottom = 752.0
 script = ExtResource("1_gd")
-grid_cell_scene = ExtResource("2_cell")
 grid_item_scene = ExtResource("3_item")

@@ -1,22 +1,39 @@
-[gd_scene load_steps=3 format=3 uid="uid://mci87qprbawk"]
+[gd_scene format=3 uid="uid://mci87qprbawk"]
 
-[ext_resource type="Script" uid="uid://drrrud8xnblk4" path="res://scenes/ui/activity/WeeklyActivityEntry.gd" id="1_gd"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://bflntwk8j3o0f" path="res://scenes/ui/activity/WeeklyActivityEntry.gd" id="1_gd"]
+[ext_resource type="Theme" uid="uid://dhv8eh1s6nl6v" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://mvtlg6qh3r7d" path="res://assets/ui/weekly/weekly_entry.png" id="3_entry_texture"]
 
 [node name="WeeklyActivityEntry" type="Control" unique_id=1526239037]
-custom_minimum_size = Vector2(80, 80)
+custom_minimum_size = Vector2(112, 112)
 layout_mode = 3
 anchors_preset = 0
-script = ExtResource("1_gd")
 theme = ExtResource("2_theme")
+script = ExtResource("1_gd")
 
-[node name="Button" type="Button" parent="." unique_id=995749296]
-custom_minimum_size = Vector2(96, 80)
+[node name="Icon" type="TextureRect" parent="." unique_id=1044348647]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 32.0
+offset_bottom = 57.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 14
+mouse_filter = 2
+texture = ExtResource("3_entry_texture")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Button" type="Button" parent="." unique_id=995749296]
+custom_minimum_size = Vector2(112, 112)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 24.0
+offset_bottom = 48.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "周常"
+flat = true

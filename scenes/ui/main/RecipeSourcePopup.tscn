@@ -1,0 +1,206 @@
+[gd_scene format=3 uid="uid://bnawplfeb8p6l"]
+
+[ext_resource type="Script" path="res://scenes/ui/main/RecipeSourcePopup.gd" id="1_gd"]
+[ext_resource type="Theme" uid="uid://dhv8eh1s6nl6v" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://cc7dg2q0x1rdw" path="res://assets/ui/recipe/recipe_source_panel_bg.png" id="3_panel_texture"]
+[ext_resource type="Texture2D" uid="uid://cuue1mt3vdb0x" path="res://assets/ui/recipe/recipe_close_button.png" id="4_close_texture"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_close_normal"]
+texture = ExtResource("4_close_texture")
+texture_margin_left = 24.0
+texture_margin_top = 24.0
+texture_margin_right = 24.0
+texture_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_close_pressed"]
+texture = ExtResource("4_close_texture")
+texture_margin_left = 24.0
+texture_margin_top = 24.0
+texture_margin_right = 24.0
+texture_margin_bottom = 24.0
+modulate_color = Color(0.8, 0.8, 0.8, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_close_hover"]
+texture = ExtResource("4_close_texture")
+texture_margin_left = 24.0
+texture_margin_top = 24.0
+texture_margin_right = 24.0
+texture_margin_bottom = 24.0
+modulate_color = Color(1, 0.94, 0.78, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBox_focus_empty"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_target"]
+bg_color = Color(0.91, 0.88, 0.79, 0.62)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.56, 0.25, 0.18, 0.72)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="RecipeSourcePopup" type="Control" unique_id=1012535138]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_gd")
+
+[node name="Dim" type="ColorRect" parent="." unique_id=562906002]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.025, 0.035, 0.055, 0.84)
+
+[node name="Panel" type="TextureRect" parent="." unique_id=402792173]
+custom_minimum_size = Vector2(680, 820)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -410.0
+offset_right = 340.0
+offset_bottom = 410.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_panel_texture")
+expand_mode = 1
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=275114498]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 58
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 46
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1905780114]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1298011683]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox/Header" unique_id=871259882]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.2, 0.14, 0.12, 1)
+theme_override_font_sizes/font_size = 25
+text = "来源配方"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Panel/Margin/VBox/Header" unique_id=923578589]
+custom_minimum_size = Vector2(54, 50)
+layout_mode = 2
+tooltip_text = "关闭"
+theme_override_colors/font_color = Color(1, 0.9, 0.66, 1)
+theme_override_colors/font_pressed_color = Color(0.9, 0.78, 0.56, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.82, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBox_close_normal")
+theme_override_styles/pressed = SubResource("StyleBox_close_pressed")
+theme_override_styles/hover = SubResource("StyleBox_close_hover")
+theme_override_styles/focus = SubResource("StyleBox_focus_empty")
+text = "×"
+
+[node name="TargetCaption" type="Label" parent="Panel/Margin/VBox" unique_id=1965202039]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.21, 0.16, 1)
+theme_override_font_sizes/font_size = 14
+text = "订单目标"
+
+[node name="TargetPanel" type="PanelContainer" parent="Panel/Margin/VBox" unique_id=72600973]
+custom_minimum_size = Vector2(0, 112)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_target")
+
+[node name="TargetMargin" type="MarginContainer" parent="Panel/Margin/VBox/TargetPanel" unique_id=2098381775]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="TargetRow" type="HBoxContainer" parent="Panel/Margin/VBox/TargetPanel/TargetMargin" unique_id=896818014]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TargetItemHost" type="HBoxContainer" parent="Panel/Margin/VBox/TargetPanel/TargetMargin/TargetRow" unique_id=969947458]
+layout_mode = 2
+
+[node name="TargetCopy" type="VBoxContainer" parent="Panel/Margin/VBox/TargetPanel/TargetMargin/TargetRow" unique_id=2049904590]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="TargetName" type="Label" parent="Panel/Margin/VBox/TargetPanel/TargetMargin/TargetRow/TargetCopy" unique_id=1079726548]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.27, 0.14, 0.1, 1)
+theme_override_font_sizes/font_size = 19
+text = "目标道具"
+
+[node name="TargetDescription" type="Label" parent="Panel/Margin/VBox/TargetPanel/TargetMargin/TargetRow/TargetCopy" unique_id=419439453]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.42, 0.32, 0.27, 1)
+theme_override_font_sizes/font_size = 13
+text = "订单所需道具，查看下方制作来源"
+vertical_alignment = 1
+autowrap_mode = 1
+
+[node name="SourceHeading" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1893678658]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HeadingMark" type="Label" parent="Panel/Margin/VBox/SourceHeading" unique_id=528393711]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.67, 0.24, 0.17, 1)
+theme_override_font_sizes/font_size = 18
+text = "◆"
+
+[node name="HeadingLabel" type="Label" parent="Panel/Margin/VBox/SourceHeading" unique_id=775938595]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22, 0.26, 0.37, 1)
+theme_override_font_sizes/font_size = 17
+text = "可由以下配方制作"
+
+[node name="HeadingLine" type="HSeparator" parent="Panel/Margin/VBox/SourceHeading" unique_id=506326743]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Margin/VBox" unique_id=1881021910]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="SourceContainer" type="VBoxContainer" parent="Panel/Margin/VBox/ScrollContainer" unique_id=842818253]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="EmptyLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1565051205]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.3, 0.24, 1)
+theme_override_font_sizes/font_size = 16
+text = "该道具暂无制作来源"
+horizontal_alignment = 1

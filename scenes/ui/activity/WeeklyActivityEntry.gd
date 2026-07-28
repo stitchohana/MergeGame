@@ -8,6 +8,7 @@ var _activity_id: int = -1
 func setup(activity: Dictionary) -> void:
 	_activity_id = activity.get("id", 0)
 	btn.text = activity.get("name", "周常")
+	btn.text = ""
 	btn.pressed.connect(_on_pressed)
 
 

@@ -246,6 +246,7 @@ func _check_can_complete(req: Dictionary) -> bool:
 
 func _refresh_requirement_buttons() -> void:
 	_refresh_required_indicators()
+	_refresh_requirement_item_selection()
 	for i in range(_display_index_map.size()):
 		var data_index: int = _display_index_map[i]
 		if data_index < 0 or data_index >= GameState.meridian_acupoints.size():
@@ -253,6 +254,14 @@ func _refresh_requirement_buttons() -> void:
 		var req: Dictionary = GameState.meridian_acupoints[data_index]
 		if not req.get("completed", false):
 			requirement_list.set_entry_available(i, _check_can_complete(req))
+
+func _refresh_requirement_item_selection() -> void:
+	var present_item_ids: Dictionary = {}
+	for entry in GridManager.get_all_items():
+		var item_id: int = int(entry.data.get("id", 0))
+		if item_id > 0:
+			present_item_ids[item_id] = true
+	requirement_list.refresh_item_selection(present_item_ids)
 
 
 func _refresh_required_indicators() -> void:

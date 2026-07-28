@@ -62,8 +62,8 @@ anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -311.0
 offset_top = -1183.0
-offset_right = 309.0
-offset_bottom = -375.0
+offset_right = 307.0
+offset_bottom = -387.0
 grow_horizontal = 2
 grow_vertical = 0
 
@@ -72,10 +72,10 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -149.0
-offset_top = 115.0
-offset_right = -85.0
-offset_bottom = 179.0
+offset_left = -185.0
+offset_top = 114.0
+offset_right = -56.0
+offset_bottom = 238.0
 grow_horizontal = 0
 
 [node name="HomeButton" type="Button" parent="." unique_id=923494637]

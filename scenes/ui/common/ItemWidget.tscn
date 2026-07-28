@@ -1,9 +1,7 @@
 [gd_scene format=3 uid="uid://dbfaocwritemw"]
 
-[ext_resource type="Script" uid="uid://s3peh3x20qy6" path="res://scenes/ui/common/ItemWidget.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://cj72bopwqqbso" path="res://scenes/ui/common/ItemWidget.gd" id="1_gd"]
 [ext_resource type="Texture2D" uid="uid://er6w8cq78bts" path="res://assets/game/item_bg_atlas_texture.tres" id="2_fkn0s"]
-
-[sub_resource type="CanvasTexture" id="CanvasTexture_hk2cv"]
 
 [node name="ItemWidget" type="Control" unique_id=1907322053]
 custom_minimum_size = Vector2(80, 80)
@@ -14,8 +12,33 @@ offset_bottom = 80.0
 mouse_filter = 1
 script = ExtResource("1_gd")
 
+[node name="ClickButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+focus_mode = 0
+flat = true
+
 [node name="IconBg" type="TextureRect" parent="." unique_id=426041861]
-modulate = Color(0.9607843, 0.9372549, 0.84705883, 1)
+modulate = Color(1.0327082, 0.9059044, 0.6913134, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_fkn0s")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectIcon" type="TextureRect" parent="." unique_id=248669801]
+visible = false
+modulate = Color(0.5597101, 0.90744936, 0.6931449, 1)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,6 +70,7 @@ offset_left = 4.0
 offset_top = 4.0
 offset_right = -4.0
 offset_bottom = -4.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
 text = "道具名称"
@@ -59,6 +83,7 @@ offset_left = 50.0
 offset_top = 2.0
 offset_right = 78.0
 offset_bottom = 18.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 11
 horizontal_alignment = 2
@@ -67,23 +92,6 @@ horizontal_alignment = 2
 layout_mode = 0
 offset_left = 4.0
 offset_top = 4.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-
-[node name="SelectIcon" type="TextureRect" parent="." unique_id=1048013850]
-visible = false
-modulate = Color(0.61960787, 0.40392157, 1, 1)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 39.0
-offset_top = 6.0
-offset_right = -6.0
-offset_bottom = -46.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = SubResource("CanvasTexture_hk2cv")
-expand_mode = 1
-stretch_mode = 5
