@@ -11,6 +11,7 @@ signal material_clicked(uid: int, item_id: int)
 @onready var status_label: Label = $StatusLabel
 @onready var materials_container: FlowContainer = $MaterialsContainer
 @onready var sell_btn: Button = $SellButton
+@onready var delete_btn: Button = $DeleteButton
 @onready var sell_price_label: Label = $SellPriceLabel
 
 var _current_item_data: Dictionary = {}
@@ -23,6 +24,8 @@ func _ready() -> void:
 	recipe_btn.pressed.connect(_on_recipe_btn_pressed)
 	if sell_btn:
 		sell_btn.pressed.connect(_on_sell_pressed)
+	if delete_btn and not delete_btn.pressed.is_connected(_on_sell_pressed):
+		delete_btn.pressed.connect(_on_sell_pressed)
 	view_btn.pressed.connect(_on_view_pressed)
 	if not CraftingService.table_state_changed.is_connected(_on_table_state_changed):
 		CraftingService.table_state_changed.connect(_on_table_state_changed)
@@ -47,13 +50,7 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 		name_label.show()
 
 	if level_label:
-		var type_name := ""
-		match item_type:
-			Constants.ItemType.LAUNCHER: type_name = "发射器"
-			Constants.ItemType.CRAFTING: type_name = "制作台"
-			Constants.ItemType.EFFECT: type_name = "剑气"
-			_: type_name = "物品"
-		level_label.text = "Lv.%d  %s" % [item_level, type_name]
+		level_label.text = "%d级" % item_level
 		level_label.show()
 
 	if desc_label:
@@ -302,22 +299,12 @@ func _on_sell_server_rejected(reason: String) -> void:
 	EventBus.show_toast.emit("出售失败：" + reason)
 
 func _update_sell_btn() -> void:
-	if not sell_btn or not sell_price_label:
-		return
-	var item_type: int = _current_item_data.get("type", 0)
-	if item_type != Constants.ItemType.REGULAR:
+	if sell_btn:
 		sell_btn.hide()
+	if sell_price_label:
 		sell_price_label.hide()
-		return
-	var item_id: int = _current_item_data.get("id", 0)
-	var price: int = _current_item_data.get("sell_price", 0)
-	if price <= 0:
-		sell_btn.hide()
-		sell_price_label.hide()
-		return
-	sell_price_label.text = "灵石 x%d" % price
-	sell_price_label.show()
-	sell_btn.show()
+	if delete_btn:
+		delete_btn.show()
 
 func clear() -> void:
 	_stop_countdown_timer()

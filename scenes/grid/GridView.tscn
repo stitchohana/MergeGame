@@ -1,9 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://deg7lbni32jui"]
+[gd_scene format=3 uid="uid://deg7lbni32jui"]
 
-[ext_resource type="Script" uid="uid://mns6punohrwf" path="res://scenes/grid/GridView.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://65dwhvf1vr8o" path="res://scenes/grid/GridView.gd" id="1_gd"]
 [ext_resource type="PackedScene" uid="uid://dbfaocwrurvis" path="res://scenes/items/GridItem.tscn" id="3_item"]
+[ext_resource type="Texture2D" uid="uid://c8pv8ykogeii8" path="res://assets/ui/xianxia_v3_layers_v2/layers/board_square_cell.png" id="4_cell"]
 
-[node name="GridView" type="Control"]
+[node name="GridView" type="Control" unique_id=1600978689]
 custom_minimum_size = Vector2(584, 752)
 layout_mode = 3
 anchors_preset = 0
@@ -11,3 +12,4 @@ offset_right = 584.0
 offset_bottom = 752.0
 script = ExtResource("1_gd")
 grid_item_scene = ExtResource("3_item")
+grid_cell_texture = ExtResource("4_cell")

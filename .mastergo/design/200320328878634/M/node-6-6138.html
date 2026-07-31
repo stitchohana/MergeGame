@@ -1,0 +1,183 @@
+<main data-name="仙侠合成游戏-结构设计稿" class="flex flex-col justify-start items-center w-[853px] h-[1844px] overflow-hidden bg-[linear-gradient(180deg,#DCEAE2,#C7DDD5)]">
+  <div data-name="顶部仙境与功能区" class="flex flex-col justify-start items-center w-[853px] h-[590px] bg-[linear-gradient(180deg,#EAF0E2,#C6DED5)] overflow-hidden">
+    <div data-name="抽象仙山背景" class="flex flex-row justify-around items-end w-[853px] h-[126px] px-[28px] pb-[8px] text-[#75A293]">
+      <i data-name="左云" class="fas fa-cloud text-[54px] text-[#FFFFFF]"></i>
+      <i data-name="左仙山" class="fas fa-mountain-sun text-[76px] text-[#88AA9E]"></i>
+      <i data-name="仙鹤" class="fas fa-dove text-[24px] text-[#547D78]"></i>
+      <i data-name="中日轮" class="fas fa-sun text-[66px] text-[#E8C982]"></i>
+      <i data-name="右仙山" class="fas fa-mountain text-[82px] text-[#70988D]"></i>
+      <i data-name="右亭台" class="fas fa-torii-gate text-[62px] text-[#3E8074]"></i>
+      <i data-name="右云" class="fas fa-cloud text-[50px] text-[#FFFFFF]"></i>
+    </div>
+    <div data-name="顶部资源栏" class="flex flex-row justify-center items-center w-[853px] h-[108px] gap-[12px]">
+      <div data-name="体力资源卡" class="flex flex-row justify-start items-center w-[162px] h-[82px] bg-[#FFF9E9] border-[3px] border-[#4D9084] rounded-[18px] px-[8px] gap-[7px] shadow-[0_5px_0_#C79E50]">
+        <div data-name="体力图标底" class="flex flex-row justify-center items-center w-[56px] h-[68px] rounded-[16px] bg-[#D9F1E5] border-[2px] border-[#E0B858]">
+          <i data-name="体力闪电图标" class="fas fa-bolt text-[43px] text-[#27B9B2]"></i>
+        </div>
+        <div data-name="体力文本组" class="flex flex-col justify-center items-center w-[52px] h-[66px] gap-[1px]">
+          <span data-name="体力标题" class="text-[18px] leading-[20px] font-[700] text-[#633623] text-center">体力</span>
+          <span data-name="体力数值" class="text-[27px] leading-[28px] font-[800] text-[#3F2D22] text-center">74</span>
+          <span data-name="体力恢复时间" class="text-[12px] leading-[14px] font-[600] text-[#8A4B2D] text-center">00:24</span>
+        </div>
+        <div data-name="体力增加按钮" class="flex flex-row justify-center items-center w-[32px] h-[32px] rounded-[32px] bg-[#35AD73] border-[2px] border-[#E9D58E] shadow-[0_2px_0_#2B7656]">
+          <i data-name="体力增加图标" class="fas fa-plus text-[17px] text-[#FFFFFF]"></i>
+        </div>
+      </div>
+      <div data-name="灵气资源卡" class="flex flex-row justify-start items-center w-[176px] h-[82px] bg-[#FFF9E9] border-[3px] border-[#4D9084] rounded-[18px] px-[8px] gap-[7px] shadow-[0_5px_0_#C79E50]">
+        <div data-name="灵气图标底" class="flex flex-row justify-center items-center w-[62px] h-[68px] rounded-[16px] bg-[#DDF4F2] border-[2px] border-[#E0B858]">
+          <i data-name="灵气图标" class="fas fa-fire-flame-curved text-[42px] text-[#28B9D1]"></i>
+        </div>
+        <div data-name="灵气文本组" class="flex flex-col justify-center items-center w-[52px] h-[60px] gap-[2px]">
+          <span data-name="灵气标题" class="text-[18px] leading-[21px] font-[700] text-[#633623] text-center">灵气</span>
+          <span data-name="灵气数值" class="text-[27px] leading-[30px] font-[800] text-[#3F2D22] text-center">27</span>
+        </div>
+        <div data-name="灵气增加按钮" class="flex flex-row justify-center items-center w-[32px] h-[32px] rounded-[32px] bg-[#35AD73] border-[2px] border-[#E9D58E] shadow-[0_2px_0_#2B7656]">
+          <i data-name="灵气增加图标" class="fas fa-plus text-[17px] text-[#FFFFFF]"></i>
+        </div>
+      </div>
+      <div data-name="灵石资源卡" class="flex flex-row justify-start items-center w-[182px] h-[82px] bg-[#FFF9E9] border-[3px] border-[#4D9084] rounded-[18px] px-[8px] gap-[7px] shadow-[0_5px_0_#C79E50]">
+        <div data-name="灵石图标底" class="flex flex-row justify-center items-center w-[64px] h-[68px] rounded-[16px] bg-[#DEF1DF] border-[2px] border-[#E0B858]">
+          <i data-name="灵石图标" class="fas fa-gem text-[42px] text-[#38A973]"></i>
+        </div>
+        <div data-name="灵石文本组" class="flex flex-col justify-center items-center w-[52px] h-[60px] gap-[2px]">
+          <span data-name="灵石标题" class="text-[18px] leading-[21px] font-[700] text-[#633623] text-center">灵石</span>
+          <span data-name="灵石数值" class="text-[27px] leading-[30px] font-[800] text-[#3F2D22] text-center">33</span>
+        </div>
+        <div data-name="灵石增加按钮" class="flex flex-row justify-center items-center w-[32px] h-[32px] rounded-[32px] bg-[#35AD73] border-[2px] border-[#E9D58E] shadow-[0_2px_0_#2B7656]">
+          <i data-name="灵石增加图标" class="fas fa-plus text-[17px] text-[#FFFFFF]"></i>
+        </div>
+      </div>
+    </div>
+    <div data-name="顶部留白云雾" class="flex flex-row justify-between items-center w-[853px] h-[54px] px-[40px]">
+      <i data-name="左薄云" class="fas fa-cloud text-[38px] text-[#FFFFFF]"></i>
+      <i data-name="中亭台" class="fas fa-torii-gate text-[42px] text-[#4C8A7E]"></i>
+      <i data-name="右薄云" class="fas fa-cloud text-[34px] text-[#F7FBF7]"></i>
+    </div>
+    <div data-name="角色订单区域" class="flex flex-row justify-start items-end w-[853px] h-[302px] px-[14px] pb-[8px] gap-[12px] overflow-hidden">
+      <div data-name="修炼角色区" class="flex flex-col justify-end items-center w-[208px] h-[286px] gap-[5px]">
+        <div data-name="打坐角色光环" class="flex flex-col justify-center items-center w-[188px] h-[218px] rounded-[94px] bg-[#F5F3D8] border-[3px] border-[#D0B35F] shadow-[0_0_24px_rgba(225,208,112,0.55)]">
+          <i data-name="打坐角色占位" class="fas fa-om text-[104px] text-[#3F786F]"></i>
+          <span data-name="修炼状态" class="text-[15px] leading-[20px] font-[700] text-[#6B442E] text-center">静心修炼</span>
+        </div>
+        <div data-name="修炼进度组" class="flex flex-row justify-start items-center w-[208px] h-[52px] gap-[6px]">
+          <div data-name="修炼进度外框" class="flex flex-row justify-center items-center w-[157px] h-[40px] bg-[#FFF8E5] border-[3px] border-[#D4B765] rounded-[20px] p-[4px]">
+            <div data-name="修炼进度填充" class="flex flex-row justify-center items-center w-[143px] h-[26px] bg-[#70BE49] rounded-[14px] shadow-[inset_0_3px_0_rgba(255,255,255,0.35)]">
+              <span data-name="修炼进度文字" class="text-[20px] leading-[24px] font-[800] text-[#FFFFFF] text-center">4/7</span>
+            </div>
+          </div>
+          <div data-name="修炼奖励图标" class="flex flex-row justify-center items-center w-[45px] h-[45px] rounded-[23px] bg-[#E9B93F] border-[3px] border-[#FFF0A8] shadow-[0_3px_0_#AE762A]">
+            <i data-name="奖励图标" class="fas fa-gift text-[22px] text-[#2F88B8]"></i>
+          </div>
+        </div>
+      </div>
+      <div data-name="订单横向列表" class="flex flex-row justify-start items-end w-[605px] h-[236px] gap-[12px] overflow-hidden">
+        <div data-name="订单卡一" class="flex flex-col justify-between items-stretch w-[326px] h-[212px] bg-[#FFF7E6] border-[4px] border-[#4D8E83] rounded-[24px] overflow-hidden shadow-[0_5px_0_#C29B4F]">
+          <div data-name="订单一内容" class="flex flex-row justify-center items-center self-stretch h-[145px] gap-[18px] px-[18px]">
+            <div data-name="订单物品茶" class="flex flex-row justify-center items-center w-[72px] h-[72px] rounded-[18px] bg-[#F4E6BC] border-[2px] border-[#E2C57C]">
+              <i data-name="茶图标" class="fas fa-mug-hot text-[37px] text-[#D49A37]"></i>
+            </div>
+            <div data-name="订单物品丹" class="flex flex-row justify-center items-center w-[72px] h-[72px] rounded-[18px] bg-[#EAF0D6] border-[2px] border-[#D7C47E]">
+              <i data-name="丹药图标" class="fas fa-bowl-food text-[37px] text-[#C46F4D]"></i>
+            </div>
+            <div data-name="订单一确认按钮" class="flex flex-row justify-center items-center w-[92px] h-[58px] rounded-[19px] bg-[#6AC23F] border-[3px] border-[#3E8D34] shadow-[0_5px_0_#37732E]">
+              <i data-name="订单一确认图标" class="fas fa-check text-[34px] text-[#FFFFFF]"></i>
+            </div>
+          </div>
+          <div data-name="订单一奖励条" class="flex flex-row justify-center items-center self-stretch h-[59px] bg-[#EBCB77] border-t-[2px] border-[#D5A94E] gap-[12px]">
+            <i data-name="订单一金币图标" class="fas fa-coins text-[23px] text-[#D89A18]"></i>
+            <span data-name="订单一金币" class="text-[25px] leading-[30px] font-[800] text-[#704128] text-center">227</span>
+            <i data-name="订单一书卷" class="fas fa-book text-[20px] text-[#3B7FA7]"></i>
+            <span data-name="订单一数量一" class="text-[20px] leading-[24px] font-[700] text-[#704128] text-center">1</span>
+            <i data-name="订单一肉" class="fas fa-drumstick-bite text-[20px] text-[#D75D47]"></i>
+            <span data-name="订单一数量二" class="text-[20px] leading-[24px] font-[700] text-[#704128] text-center">2</span>
+            <i data-name="订单一材料" class="fas fa-candy-cane text-[20px] text-[#C95244]"></i>
+            <span data-name="订单一数量三" class="text-[20px] leading-[24px] font-[700] text-[#704128] text-center">31</span>
+          </div>
+        </div>
+        <div data-name="订单卡二" class="flex flex-col justify-between items-stretch w-[326px] h-[212px] bg-[#FFF7E6] border-[4px] border-[#4D8E83] rounded-[24px] overflow-hidden shadow-[0_5px_0_#C29B4F]">
+          <div data-name="订单二内容" class="flex flex-row justify-center items-center self-stretch h-[145px] gap-[18px] px-[18px]">
+            <div data-name="订单物品果" class="flex flex-row justify-center items-center w-[72px] h-[72px] rounded-[18px] bg-[#F4E6BC] border-[2px] border-[#E2C57C]">
+              <i data-name="灵果图标" class="fas fa-apple-whole text-[37px] text-[#E89B2F]"></i>
+            </div>
+            <div data-name="订单物品包" class="flex flex-row justify-center items-center w-[72px] h-[72px] rounded-[18px] bg-[#F1E4CF] border-[2px] border-[#D7C47E]">
+              <i data-name="灵包图标" class="fas fa-cookie text-[37px] text-[#D6924D]"></i>
+            </div>
+            <div data-name="订单二确认按钮" class="flex flex-row justify-center items-center w-[92px] h-[58px] rounded-[19px] bg-[#6AC23F] border-[3px] border-[#3E8D34] shadow-[0_5px_0_#37732E]">
+              <i data-name="订单二确认图标" class="fas fa-check text-[34px] text-[#FFFFFF]"></i>
+            </div>
+          </div>
+          <div data-name="订单二奖励条" class="flex flex-row justify-center items-center self-stretch h-[59px] bg-[#EBCB77] border-t-[2px] border-[#D5A94E] gap-[12px]">
+            <i data-name="订单二金币图标" class="fas fa-coins text-[23px] text-[#D89A18]"></i>
+            <span data-name="订单二金币" class="text-[25px] leading-[30px] font-[800] text-[#704128] text-center">258</span>
+            <div data-name="订单二奖励徽章一" class="flex flex-row justify-center items-center w-[32px] h-[32px] rounded-[16px] bg-[#2F91C8] border-[2px] border-[#E7C65B]">
+              <i data-name="水奖励图标" class="fas fa-droplet text-[15px] text-[#FFFFFF]"></i>
+            </div>
+            <div data-name="订单二奖励徽章二" class="flex flex-row justify-center items-center w-[32px] h-[32px] rounded-[16px] bg-[#388FCC] border-[2px] border-[#E7C65B]">
+              <i data-name="风奖励图标" class="fas fa-wind text-[15px] text-[#FFFFFF]"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div data-name="棋盘区域" class="flex flex-col justify-center items-center w-[853px] h-[1060px] px-[8px] py-[8px]">
+    <div data-name="棋盘金玉外框" class="flex flex-col justify-center items-center w-[837px] h-[1044px] bg-[#FFF9EA] border-[5px] border-[#4A8B7E] rounded-[30px] p-[14px] gap-[8px] shadow-[0_7px_0_#C5A150,0_0_0_3px_#F2D78F]">
+      <div data-name="棋盘第1行" class="flex flex-row justify-center items-center w-[776px] h-[104px] gap-[8px]">
+        <div data-name="格子-1-1" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-1-2" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-1-3" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-1-4" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-1-5" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-1-6" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-1-7" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div>
+      </div>
+      <div data-name="棋盘第2行" class="flex flex-row justify-center items-center w-[776px] h-[104px] gap-[8px]">
+        <div data-name="格子-2-1" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-2-2" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-2-3" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-2-4" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-2-5" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-2-6" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-2-7" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div>
+      </div>
+      <div data-name="棋盘第3行" class="flex flex-row justify-center items-center w-[776px] h-[104px] gap-[8px]">
+        <div data-name="格子-3-1" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-3-2" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-3-3" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-3-4" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-3-5" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-3-6" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-3-7" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div>
+      </div>
+      <div data-name="棋盘第4行" class="flex flex-row justify-center items-center w-[776px] h-[104px] gap-[8px]">
+        <div data-name="格子-4-1" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-4-2" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-4-3" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-4-4" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-4-5" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-4-6" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-4-7" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div>
+      </div>
+      <div data-name="棋盘第5行" class="flex flex-row justify-center items-center w-[776px] h-[104px] gap-[8px]">
+        <div data-name="格子-5-1" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-5-2" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-5-3" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-5-4" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-5-5" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-5-6" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-5-7" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div>
+      </div>
+      <div data-name="棋盘第6行" class="flex flex-row justify-center items-center w-[776px] h-[104px] gap-[8px]">
+        <div data-name="格子-6-1" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-6-2" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-6-3" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-6-4" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-6-5" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-6-6" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-6-7" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div>
+      </div>
+      <div data-name="棋盘第7行" class="flex flex-row justify-center items-center w-[776px] h-[104px] gap-[8px]">
+        <div data-name="格子-7-1" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-7-2" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-7-3" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-7-4" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-7-5" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-7-6" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-7-7" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div>
+      </div>
+      <div data-name="棋盘第8行" class="flex flex-row justify-center items-center w-[776px] h-[104px] gap-[8px]">
+        <div data-name="格子-8-1" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-8-2" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-8-3" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-8-4" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-8-5" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-8-6" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-8-7" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div>
+      </div>
+      <div data-name="棋盘第9行" class="flex flex-row justify-center items-center w-[776px] h-[104px] gap-[8px]">
+        <div data-name="格子-9-1" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-9-2" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-9-3" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-9-4" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-9-5" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-9-6" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div><div data-name="格子-9-7" class="w-[104px] h-[104px] bg-[#F4ECDD] border-[2px] border-[#E5DBC7] rounded-[16px]"></div>
+      </div>
+    </div>
+  </div>
+  <div data-name="底部操作区域" class="flex flex-row justify-center items-center w-[853px] h-[194px] px-[12px] py-[10px] gap-[10px] bg-[#C8DDD3]">
+    <div data-name="修炼入口按钮" class="flex flex-col justify-center items-center w-[104px] h-[172px] bg-[#FFF9E9] border-[4px] border-[#4D8E83] rounded-[22px] gap-[8px] shadow-[0_5px_0_#C29B4F]">
+      <div data-name="修炼入口光环" class="flex flex-row justify-center items-center w-[70px] h-[70px] rounded-[35px] bg-[#E1F0DF] border-[3px] border-[#D7B85C]">
+        <i data-name="修炼入口图标" class="fas fa-om text-[43px] text-[#356E64]"></i>
+      </div>
+      <span data-name="修炼入口文字" class="text-[16px] leading-[20px] font-[700] text-[#704128] text-center">修炼</span>
+    </div>
+    <div data-name="物品详情面板" class="flex flex-col justify-between items-stretch w-[605px] h-[172px] bg-[#FFF9E9] border-[4px] border-[#4D8E83] rounded-[22px] overflow-hidden shadow-[0_5px_0_#C29B4F]">
+      <div data-name="物品详情标题栏" class="flex flex-row justify-between items-center self-stretch h-[48px] bg-[#3F776B] px-[18px]">
+        <div data-name="标题与信息" class="flex flex-row justify-start items-center gap-[10px]">
+          <span data-name="物品标题" class="text-[21px] leading-[26px] font-[700] text-[#FFF4CB] text-left">糖浆 3级</span>
+          <div data-name="信息按钮" class="flex flex-row justify-center items-center w-[32px] h-[32px] rounded-[16px] bg-[#2D8BC2] border-[2px] border-[#E7C55A]">
+            <i data-name="信息图标" class="fas fa-info text-[16px] text-[#FFFFFF]"></i>
+          </div>
+        </div>
+        <span data-name="删除标题" class="text-[16px] leading-[20px] font-[600] text-[#FFF0D0] text-right">删除</span>
+      </div>
+      <div data-name="物品详情内容" class="flex flex-row justify-between items-center self-stretch h-[116px] px-[18px] gap-[14px]">
+        <p data-name="物品描述" class="w-[430px] text-[20px] leading-[29px] font-[600] text-[#764126] text-left">浓稠的琥珀色液体糖浆。</p>
+        <div data-name="删除按钮" class="flex flex-row justify-center items-center w-[78px] h-[78px] rounded-[18px] bg-[#D75B55] border-[3px] border-[#A83E3B] shadow-[0_5px_0_#8D3534]">
+          <i data-name="删除图标" class="fas fa-trash-can text-[35px] text-[#FFF7E7]"></i>
+        </div>
+      </div>
+    </div>
+    <div data-name="商店入口按钮" class="flex flex-col justify-center items-center w-[104px] h-[172px] bg-[#FFF9E9] border-[4px] border-[#4D8E83] rounded-[22px] gap-[8px] shadow-[0_5px_0_#C29B4F]">
+      <i data-name="商店亭台图标" class="fas fa-torii-gate text-[48px] text-[#3E7E72]"></i>
+      <span data-name="商店入口文字" class="text-[16px] leading-[20px] font-[700] text-[#704128] text-center">商店</span>
+    </div>
+  </div>
+</main>

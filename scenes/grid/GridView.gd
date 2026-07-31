@@ -10,6 +10,7 @@ const CELL_STEP := Constants.CELL_STEP
 const DRAG_THRESHOLD := 10.0  # pixels before drag starts
 
 @export var grid_item_scene: PackedScene
+@export var grid_cell_texture: Texture2D
 
 signal item_clicked(item_data: Dictionary, grid_pos: Vector2i)
 signal pill_dropped_outside(item_data: Dictionary, drop_position: Vector2)
@@ -114,6 +115,7 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	print("[GridView] _ready: size=", size, " position=", position, " visible=", visible)
+	_create_cells_layer()
 	_create_items_layer()
 	_launcher_ctrl = LauncherControllerClass.new()
 	add_child(_launcher_ctrl)
@@ -140,6 +142,23 @@ func _create_items_layer() -> void:
 	items_layer.name = "ItemsLayer"
 	items_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(items_layer)
+
+func _create_cells_layer() -> void:
+	var cells_layer: Control = Control.new()
+	cells_layer.name = "CellsLayer"
+	cells_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(cells_layer)
+	for row: int in range(Constants.GRID_ROWS):
+		for col: int in range(Constants.GRID_COLS):
+			var cell: TextureRect = TextureRect.new()
+			cell.name = "Cell_%d_%d" % [col, row]
+			cell.position = Vector2(col * CELL_STEP, row * CELL_STEP)
+			cell.size = Vector2(CELL_SIZE, CELL_SIZE)
+			cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			cell.texture = grid_cell_texture
+			cell.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			cell.stretch_mode = TextureRect.STRETCH_SCALE
+			cells_layer.add_child(cell)
 
 func _connect_signals() -> void:
 	GridManager.item_added.connect(_on_item_added)
@@ -214,14 +233,14 @@ func _input(event: InputEvent) -> void:
 			var drag_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 			var drag_node = _item_nodes.get(drag_key)
 			if drag_node and is_instance_valid(drag_node):
-				drag_node.position = get_global_mouse_position() - global_position - Vector2(CELL_STEP * 0.5, CELL_STEP * 0.5)
+				drag_node.position = _to_local(get_viewport().get_mouse_position()) - Vector2(CELL_STEP * 0.5, CELL_STEP * 0.5)
 		elif not _pressed_item.is_empty() and not _pressed_has_moved:
 			if local_pos.distance_to(_press_screen_pos) > DRAG_THRESHOLD:
 				_pressed_has_moved = true
 				_start_drag(_press_start_pos)
 
 func _to_local(global_pos: Vector2) -> Vector2:
-	return global_pos - global_position
+	return get_global_transform_with_canvas().affine_inverse() * global_pos
 
 func _local_to_grid(local_pos: Vector2) -> Vector2i:
 	return Vector2i(int(local_pos.x / CELL_STEP), int(local_pos.y / CELL_STEP))
@@ -326,7 +345,7 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		_do_pouch_deposit()
 		return
 
-	if not GridManager.is_valid_pos(target_pos) or not Rect2(global_position, size).has_point(get_global_mouse_position()):
+	if not GridManager.is_valid_pos(target_pos) or not Rect2(Vector2.ZERO, size).has_point(_to_local(get_viewport().get_mouse_position())):
 		_snap_back()
 		return
 	if target_pos == _drag_source_pos:

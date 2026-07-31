@@ -1,63 +1,134 @@
-[gd_scene load_steps=4 format=3 uid="uid://dtqffbbhnmvni"]
+[gd_scene format=3 uid="uid://dtqffbbhnmvni"]
 
-[ext_resource type="Script" uid="uid://6v7jfvkqce6x" path="res://scenes/ui/meridian/RequirementEntry.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://c4bxt375wgagi" path="res://assets/game/order_requirement_bg_atlas_texture.tres" id="2_bg"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="3_theme"]
+[ext_resource type="Script" uid="uid://cay5k0cwiv2xn" path="res://scenes/ui/meridian/RequirementEntry.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://bfe0jhjhpqcxe" path="res://assets/ui/xianxia_v3_layers_v2/layers/order_frame_empty.png" id="2_fg5j4"]
+[ext_resource type="PackedScene" uid="uid://dbfaocwritemw" path="res://scenes/ui/common/ItemWidget.tscn" id="3_1wybe"]
+[ext_resource type="Texture2D" uid="uid://bd26lxg240mco" path="res://assets/ui/xianxia_v3_layers_v2/layers/confirm_button.png" id="3_3rcl3"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_entry"]
-texture = ExtResource("2_bg")
-texture_margin_left = 24.0
-texture_margin_top = 24.0
-texture_margin_right = 24.0
-texture_margin_bottom = 24.0
+[sub_resource type="StyleBoxFlat" id="StyleBox_complete_normal"]
+bg_color = Color(0.416, 0.761, 0.247, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.243, 0.553, 0.204, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.216, 0.451, 0.18, 1)
+shadow_offset = Vector2(0, 5)
 
-[node name="RequirementEntry" type="PanelContainer" unique_id=1441229549]
-custom_minimum_size = Vector2(190, 138)
-size_flags_vertical = 4
+[sub_resource type="StyleBoxFlat" id="StyleBox_complete_pressed"]
+bg_color = Color(0.29, 0.616, 0.18, 1)
+border_width_left = 3
+border_width_top = 4
+border_width_right = 3
+border_width_bottom = 2
+border_color = Color(0.2, 0.455, 0.169, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_complete_hover"]
+bg_color = Color(0.506, 0.839, 0.306, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.306, 0.635, 0.239, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxEmpty" id="StyleBox_empty"]
+
+[node name="RequirementEntry" type="Control" unique_id=1441229549]
+custom_minimum_size = Vector2(298, 159)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 298.0
+offset_bottom = 181.0
+size_flags_vertical = 8
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_entry")
 script = ExtResource("1_script")
-theme = ExtResource("3_theme")
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=888763391]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 6
+[node name="Background" type="TextureRect" parent="." unique_id=1630624346]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_fg5j4")
+expand_mode = 1
 
-[node name="VBox" type="VBoxContainer" parent="MarginContainer" unique_id=1849371797]
-layout_mode = 2
-theme_override_constants/separation = 3
-
-[node name="ItemsContainer" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=604598871]
-custom_minimum_size = Vector2(0, 88)
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 5
+[node name="ItemsContainer" type="HBoxContainer" parent="." unique_id=1605351161]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -102.0
+offset_top = 18.0
+offset_right = 100.0
+offset_bottom = 112.0
+grow_horizontal = 2
+theme_override_constants/separation = 8
 alignment = 1
 
-[node name="RewardRow" type="HBoxContainer" parent="MarginContainer/VBox" unique_id=438150708]
-custom_minimum_size = Vector2(0, 24)
+[node name="ItemWidget" parent="ItemsContainer" unique_id=1907322053 instance=ExtResource("3_1wybe")]
 layout_mode = 2
-size_flags_vertical = 8
+
+[node name="ItemWidget2" parent="ItemsContainer" unique_id=1828562869 instance=ExtResource("3_1wybe")]
+layout_mode = 2
+
+[node name="RewardRow" type="HBoxContainer" parent="." unique_id=438150708]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -107.0
+offset_top = -48.0
+offset_right = 107.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
 theme_override_constants/separation = 4
 alignment = 1
 
-[node name="RewardTitle" type="Label" parent="MarginContainer/VBox/RewardRow" unique_id=1598400311]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.2, 0.16, 1)
-theme_override_font_sizes/font_size = 13
-text = "奖励："
-vertical_alignment = 1
-
-[node name="RewardBox" type="HBoxContainer" parent="MarginContainer/VBox/RewardRow" unique_id=1054805201]
+[node name="RewardBox" type="HBoxContainer" parent="RewardRow" unique_id=1054805201]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="CompleteButton" type="Button" parent="MarginContainer/VBox" unique_id=1290879304]
-visible = false
-custom_minimum_size = Vector2(112, 44)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 8
+[node name="CompleteButton" type="Button" parent="." unique_id=1290879304]
+z_index = 2
+custom_minimum_size = Vector2(94, 58)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -71.5
+offset_top = -15.0
+offset_right = 71.5
+offset_bottom = 49.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.192, 0.345, 0.133, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 28
+theme_override_icons/icon = ExtResource("3_3rcl3")
+theme_override_styles/normal = SubResource("StyleBox_complete_normal")
+theme_override_styles/pressed = SubResource("StyleBox_complete_pressed")
+theme_override_styles/hover = SubResource("StyleBox_complete_hover")
+theme_override_styles/focus = SubResource("StyleBox_empty")
+flat = true
+expand_icon = true

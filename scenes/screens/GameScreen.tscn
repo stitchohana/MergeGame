@@ -1,15 +1,57 @@
 [gd_scene format=3 uid="uid://dh7pcck0eqawn"]
 
 [ext_resource type="Script" uid="uid://c0fvg1gpl04q2" path="res://scenes/screens/GameScreen.gd" id="1_gs"]
+[ext_resource type="Texture2D" uid="uid://dp4olli5ovml3" path="res://assets/ui/xianxia_v3_layers_v2/background.png" id="2_gljsl"]
 [ext_resource type="PackedScene" uid="uid://deg7lbni32jui" path="res://scenes/grid/GridView.tscn" id="2_grid"]
-[ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/main/ItemDetailPanel.tscn" id="5_pbayp"]
-[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/common/TopBar.tscn" id="6_0wecs"]
-[ext_resource type="Theme" uid="uid://gc2kayu31yh8" path="res://assets/theme/btn_theme.tres" id="6_hofs8"]
-[ext_resource type="Texture2D" uid="uid://bjsufih0ix8iq" path="res://assets/common/common_btn_atlas_texture.tres" id="6_o0kps"]
-[ext_resource type="Texture2D" uid="uid://c322oi4ma1cgh" path="res://assets/game/game_bg.png" id="7_0wecs"]
-[ext_resource type="Texture2D" uid="uid://d0qdupxvrr37w" path="res://assets/game/game_gridview.png" id="8_gljsl"]
-[ext_resource type="PackedScene" uid="uid://bf6fe2778glgu" path="res://scenes/ui/meridian/RequirementList.tscn" id="8_req"]
-[ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/main/PouchDropZone.tscn" id="10_pouch"]
+[ext_resource type="PackedScene" uid="uid://ofi2ei6no4yy" path="res://scenes/ui/main/ItemDetailPanel.tscn" id="3_detail"]
+[ext_resource type="PackedScene" uid="uid://c7qk1jsxa0n3r" path="res://scenes/ui/common/TopBar.tscn" id="4_topbar"]
+[ext_resource type="Texture2D" uid="uid://bnhnnfit6sd7q" path="res://assets/ui/xianxia_v3_layers_v2/layers/board_frame_empty.png" id="5_gljsl"]
+[ext_resource type="PackedScene" uid="uid://bf6fe2778glgu" path="res://scenes/ui/meridian/RequirementList.tscn" id="7_req"]
+[ext_resource type="Texture2D" uid="uid://d4bv61jk3x6ah" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_button.png" id="8_hofs8"]
+[ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/main/PouchDropZone.tscn" id="8_pouch"]
+[ext_resource type="Texture2D" uid="uid://cv2pn225isxby" path="res://assets/ui/xianxia_v3_layers_v2/layers/shop_button.png" id="10_ehb84"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_nav_normal"]
+bg_color = Color(1, 0.976, 0.902, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.302, 0.557, 0.514, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.761, 0.608, 0.31, 1)
+shadow_offset = Vector2(0, 5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_nav_pressed"]
+bg_color = Color(0.929, 0.902, 0.792, 1)
+border_width_left = 4
+border_width_top = 5
+border_width_right = 4
+border_width_bottom = 3
+border_color = Color(0.251, 0.478, 0.439, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_nav_hover"]
+bg_color = Color(1, 0.992, 0.941, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.373, 0.663, 0.584, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.812, 0.655, 0.337, 1)
+shadow_offset = Vector2(0, 5)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBox_empty"]
 
 [node name="GameScreen" type="Control" unique_id=928882506]
 layout_mode = 3
@@ -21,7 +63,7 @@ grow_vertical = 2
 script = ExtResource("1_gs")
 
 [node name="GameBg" type="TextureRect" parent="." unique_id=910326177]
-z_index = -1
+z_index = -2
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,143 +71,124 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("7_0wecs")
+texture = ExtResource("2_gljsl")
 expand_mode = 1
-stretch_mode = 4
+stretch_mode = 6
+
+[node name="TopTint" type="ColorRect" parent="." unique_id=2006103041]
+z_index = -1
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 470.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.831, 0.91, 0.867, 0.18)
+
+[node name="TopBar" parent="." unique_id=2060651743 instance=ExtResource("4_topbar")]
+z_index = 10
+layout_mode = 0
+offset_top = 158.0
+offset_bottom = 250.0
+
+[node name="RequirementList" parent="." unique_id=2099547480 instance=ExtResource("7_req")]
+z_index = 10
+layout_mode = 0
+offset_top = 314.0
+offset_bottom = 549.0
 
 [node name="GridBackground" type="TextureRect" parent="." unique_id=793604160]
 z_index = 5
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -339.255
-offset_top = -1215.0
-offset_right = 336.385
-offset_bottom = -322.0
-grow_horizontal = 2
-grow_vertical = 0
+layout_mode = 0
+offset_left = 6.0
+offset_top = 540.0
+offset_right = 774.0
+offset_bottom = 1500.0
 mouse_filter = 2
-texture = ExtResource("8_gljsl")
+texture = ExtResource("5_gljsl")
 expand_mode = 1
-stretch_mode = 4
 
 [node name="GridView" parent="." unique_id=532438857 instance=ExtResource("2_grid")]
 z_index = 10
 layout_mode = 1
-anchors_preset = 7
+anchors_preset = 8
 anchor_left = 0.5
-anchor_top = 1.0
+anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -311.0
-offset_top = -1183.0
-offset_right = 307.0
-offset_bottom = -387.0
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -265.0
+offset_right = 256.4912
+offset_bottom = 504.29834
 grow_horizontal = 2
-grow_vertical = 0
+grow_vertical = 2
+scale = Vector2(1.14, 1.14)
 
-[node name="PouchDropZone" parent="." unique_id=1901697533 instance=ExtResource("10_pouch")]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -185.0
-offset_top = 114.0
-offset_right = -56.0
-offset_bottom = 238.0
-grow_horizontal = 0
+[node name="PouchDropZone" parent="." unique_id=1901697533 instance=ExtResource("8_pouch")]
+visible = false
+layout_mode = 0
+offset_left = 664.0
+offset_top = 255.0
+offset_right = 774.0
+offset_bottom = 365.0
 
 [node name="HomeButton" type="Button" parent="." unique_id=923494637]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -679.0
-offset_top = -70.0
-offset_right = -583.0
-offset_bottom = -16.0
-grow_horizontal = 0
-grow_vertical = 0
-theme = ExtResource("6_hofs8")
-text = "返回"
+z_index = 10
+layout_mode = 0
+offset_left = 12.0
+offset_top = 1512.0
+offset_right = 108.0
+offset_bottom = 1674.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.247, 0.467, 0.42, 1)
+theme_override_colors/font_pressed_color = Color(0.137, 0.306, 0.267, 1)
+theme_override_colors/font_hover_color = Color(0.18, 0.392, 0.345, 1)
+theme_override_colors/font_outline_color = Color(1, 0.925, 0.659, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+theme_override_icons/icon = ExtResource("8_hofs8")
+theme_override_styles/normal = SubResource("StyleBox_nav_normal")
+theme_override_styles/pressed = SubResource("StyleBox_nav_pressed")
+theme_override_styles/hover = SubResource("StyleBox_nav_hover")
+theme_override_styles/focus = SubResource("StyleBox_empty")
 flat = true
 icon_alignment = 1
 expand_icon = true
 
 [node name="BattleButton" type="Button" parent="." unique_id=1742900908]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -140.0
-offset_top = -68.0
-offset_right = -10.0
-offset_bottom = -10.0
-grow_horizontal = 0
-grow_vertical = 0
-theme = ExtResource("6_hofs8")
+visible = false
+layout_mode = 0
+offset_right = 1.0
+offset_bottom = 1.0
 text = "历练"
-flat = true
-icon_alignment = 1
-expand_icon = true
+
+[node name="ItemDetailPanel" parent="." unique_id=28393900 instance=ExtResource("3_detail")]
+z_index = 10
+layout_mode = 0
+offset_left = 118.0
+offset_top = 1512.0
+offset_right = 662.0
+offset_bottom = 1674.0
 
 [node name="ShopButton" type="Button" parent="." unique_id=90913210]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -287.0
-offset_top = -71.0
-offset_right = -171.0
-offset_bottom = -11.0
-grow_horizontal = 0
-grow_vertical = 0
-theme = ExtResource("6_hofs8")
-text = "商店"
-icon = ExtResource("6_o0kps")
+z_index = 10
+layout_mode = 0
+offset_left = 672.0
+offset_top = 1512.0
+offset_right = 768.0
+offset_bottom = 1674.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.247, 0.467, 0.42, 1)
+theme_override_colors/font_pressed_color = Color(0.137, 0.306, 0.267, 1)
+theme_override_colors/font_hover_color = Color(0.18, 0.392, 0.345, 1)
+theme_override_colors/font_outline_color = Color(1, 0.925, 0.659, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+theme_override_icons/icon = ExtResource("10_ehb84")
+theme_override_styles/normal = SubResource("StyleBox_nav_normal")
+theme_override_styles/pressed = SubResource("StyleBox_nav_pressed")
+theme_override_styles/hover = SubResource("StyleBox_nav_hover")
+theme_override_styles/focus = SubResource("StyleBox_empty")
 flat = true
 icon_alignment = 1
 expand_icon = true
-
-[node name="RequirementList" parent="." unique_id=2099547480 instance=ExtResource("8_req")]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -389.0
-offset_top = 246.0
-offset_right = 388.0
-offset_bottom = 461.0
-grow_horizontal = 2
-size_flags_horizontal = 2
-
-[node name="ItemDetailPanel" parent="." unique_id=28393900 instance=ExtResource("5_pbayp")]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = -283.0
-offset_right = -10.0
-offset_bottom = -136.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="TopBar" parent="." unique_id=2060651743 instance=ExtResource("6_0wecs")]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 3.0
-offset_right = 0.0
-offset_bottom = 53.0
-grow_horizontal = 2

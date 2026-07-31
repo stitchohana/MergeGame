@@ -1,225 +1,237 @@
-[gd_scene load_steps=9 format=3 uid="uid://ofi2ei6no4yy"]
+[gd_scene format=3 uid="uid://ofi2ei6no4yy"]
 
-[ext_resource type="Script" uid="uid://yvf00usf5sm6" path="res://scenes/ui/main/ItemDetailPanel.gd" id="1_gd"]
-[ext_resource type="Texture2D" uid="uid://cywrwm4abfk5b" path="res://assets/game/item_detail_bg_atlas_texture.tres" id="2_wngso"]
-[ext_resource type="Theme" uid="uid://gc2kayu31yh8" path="res://assets/theme/btn_theme.tres" id="3_wngso"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="4_formal"]
+[ext_resource type="Script" uid="uid://bxh0rwgaf7y8h" path="res://scenes/ui/main/ItemDetailPanel.gd" id="1_gd"]
+[ext_resource type="Texture2D" uid="uid://27006gdh4afr" path="res://assets/ui/xianxia_v3_layers_v2/layers/item_detail_frame_empty.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://ma5pat5jkyx5" path="res://assets/ui/xianxia_v3_layers_v2/layers/item_detail_title_tab.png" id="3_title_tab"]
+[ext_resource type="Texture2D" uid="uid://clkswadmuea3b" path="res://assets/ui/xianxia_v3_layers_v2/layers/info_button.png" id="4_6mkhk"]
+[ext_resource type="Texture2D" uid="uid://s2wwq5e054lc" path="res://assets/ui/xianxia_v3_layers_v2/layers/delete_button.png" id="5_2s8xv"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_action_normal"]
-content_margin_left = 12.0
-content_margin_top = 6.0
-content_margin_right = 12.0
-content_margin_bottom = 6.0
-bg_color = Color(0.18, 0.34, 0.25, 0.98)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.78, 0.65, 0.32, 0.95)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
-shadow_color = Color(0.08, 0.16, 0.11, 0.4)
-shadow_size = 3
-shadow_offset = Vector2(0, 2)
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_action_hover"]
-content_margin_left = 12.0
-content_margin_top = 6.0
-content_margin_right = 12.0
-content_margin_bottom = 6.0
-bg_color = Color(0.26, 0.46, 0.33, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBox_info"]
+bg_color = Color(0.176, 0.545, 0.761, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(1, 0.85, 0.45, 1)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
-shadow_color = Color(0.87, 0.68, 0.25, 0.28)
-shadow_size = 5
-shadow_offset = Vector2(0, 1)
+border_color = Color(0.906, 0.773, 0.349, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_action_pressed"]
-content_margin_left = 12.0
-content_margin_top = 8.0
-content_margin_right = 12.0
-content_margin_bottom = 4.0
-bg_color = Color(0.11, 0.25, 0.17, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.65, 0.52, 0.23, 1)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
+[sub_resource type="StyleBoxEmpty" id="StyleBox_empty"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_action_focus"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
+[sub_resource type="StyleBoxFlat" id="StyleBox_delete_normal"]
+bg_color = Color(0.843, 0.357, 0.333, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.659, 0.243, 0.231, 1)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
+shadow_color = Color(0.553, 0.208, 0.204, 1)
+shadow_offset = Vector2(0, 5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_delete_pressed"]
+bg_color = Color(0.671, 0.247, 0.235, 1)
+border_width_left = 3
+border_width_top = 4
+border_width_right = 3
 border_width_bottom = 2
-border_color = Color(1, 0.88, 0.52, 0.9)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+border_color = Color(0.529, 0.18, 0.18, 1)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
 
-[node name="ItemDetailPanel" type="Control"]
+[sub_resource type="StyleBoxFlat" id="StyleBox_delete_hover"]
+bg_color = Color(0.929, 0.431, 0.392, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.722, 0.286, 0.255, 1)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
+
+[node name="ItemDetailPanel" type="Control" unique_id=124785875]
+custom_minimum_size = Vector2(544, 162)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 780.0
-offset_bottom = 147.0
+offset_right = 544.0
+offset_bottom = 162.0
 script = ExtResource("1_gd")
-theme = ExtResource("4_formal")
 
-[node name="Bg" type="NinePatchRect" parent="."]
+[node name="Bg" type="TextureRect" parent="." unique_id=1404966037]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_wngso")
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
 
-[node name="DefaultLabel" type="Label" parent="."]
+[node name="Header" type="TextureRect" parent="." unique_id=1087536762]
+layout_mode = 0
+offset_left = -1.0
+offset_right = 149.0
+offset_bottom = 46.0
+mouse_filter = 2
+texture = ExtResource("3_title_tab")
+expand_mode = 1
+
+[node name="DefaultLabel" type="Label" parent="." unique_id=1849935955]
 visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 87.0
-offset_top = 81.0
-offset_right = -513.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
-theme_override_font_sizes/font_size = 18
+layout_mode = 0
+offset_left = 24.0
+offset_top = 61.0
+offset_right = 438.0
+offset_bottom = 137.0
+theme_override_colors/font_color = Color(0.46, 0.42, 0.33, 1)
+theme_override_font_sizes/font_size = 17
 text = "点击物品查看详情"
-horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="NameLabel" type="Label" parent="."]
+[node name="NameLabel" type="Label" parent="." unique_id=1966959930]
 layout_mode = 0
-offset_left = 53.0
-offset_top = 21.0
-offset_right = 148.0
-offset_bottom = 49.0
-theme = ExtResource("3_wngso")
-text = "道具名字"
+offset_left = 39.0
+offset_top = 10.0
+offset_right = 123.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(1, 0.957, 0.796, 1)
+theme_override_colors/font_outline_color = Color(0.247, 0.29, 0.18, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "糖浆"
 vertical_alignment = 1
 
-[node name="LevelLabel" type="Label" parent="."]
+[node name="LevelLabel" type="Label" parent="." unique_id=374669382]
 layout_mode = 0
-offset_left = 142.0
-offset_top = 21.0
-offset_right = 198.0
-offset_bottom = 51.0
-theme = ExtResource("3_wngso")
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-theme_override_font_sizes/font_size = 16
-text = "lv1"
+offset_left = 116.0
+offset_top = 10.0
+offset_right = 152.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(1, 0.957, 0.796, 1)
+theme_override_font_sizes/font_size = 17
+text = "3级"
 vertical_alignment = 1
 
-[node name="DescLabel" type="Label" parent="."]
+[node name="DescLabel" type="Label" parent="." unique_id=497603057]
 layout_mode = 0
-offset_left = 51.0
-offset_top = 53.0
-offset_right = 742.0
-offset_bottom = 89.0
-theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_font_sizes/font_size = 14
-text = "描述描述描述描述描述"
+offset_left = 22.0
+offset_top = 64.0
+offset_right = 440.0
+offset_bottom = 139.0
+theme_override_colors/font_color = Color(0.463, 0.255, 0.149, 1)
+theme_override_font_sizes/font_size = 18
+text = "浓稠的琥珀色液体糖浆。"
 vertical_alignment = 1
+autowrap_mode = 2
 
-[node name="RecipeButton" type="Button" parent="."]
+[node name="RecipeButton" type="Button" parent="." unique_id=1550742024]
+visible = false
 layout_mode = 0
 offset_left = 304.0
 offset_top = 12.0
 offset_right = 406.0
 offset_bottom = 54.0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.77, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.88, 0.82, 0.59, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBox_action_normal")
-theme_override_styles/hover = SubResource("StyleBox_action_hover")
-theme_override_styles/pressed = SubResource("StyleBox_action_pressed")
-theme_override_styles/focus = SubResource("StyleBox_action_focus")
 text = "配方"
 
-[node name="ViewButton" type="Button" parent="."]
+[node name="ViewButton" type="Button" parent="." unique_id=1949603087]
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 0
-offset_left = 418.0
-offset_top = 12.0
-offset_right = 520.0
-offset_bottom = 54.0
+offset_left = 139.0
+offset_top = 1.0
+offset_right = 191.0
+offset_bottom = 49.0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.77, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.88, 0.82, 0.59, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBox_action_normal")
-theme_override_styles/hover = SubResource("StyleBox_action_hover")
-theme_override_styles/pressed = SubResource("StyleBox_action_pressed")
-theme_override_styles/focus = SubResource("StyleBox_action_focus")
-text = "查看"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_icons/icon = ExtResource("4_6mkhk")
+theme_override_styles/hover = SubResource("StyleBox_info")
+theme_override_styles/focus = SubResource("StyleBox_empty")
+flat = true
+expand_icon = true
 
-[node name="MaterialsLabel" type="Label" parent="."]
+[node name="MaterialsLabel" type="Label" parent="." unique_id=1282213730]
 visible = false
 layout_mode = 0
 offset_left = 118.0
 offset_top = 64.0
 offset_right = 378.0
 offset_bottom = 83.0
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-theme_override_font_sizes/font_size = 13
 text = "已放入材料"
 
-[node name="StatusLabel" type="Label" parent="."]
+[node name="StatusLabel" type="Label" parent="." unique_id=909442379]
 visible = false
 layout_mode = 0
-offset_left = 127.0
-offset_top = 69.0
-offset_right = 747.0
-offset_bottom = 105.0
-theme_override_colors/font_color = Color(0.9, 0.9, 0.2, 1)
+offset_left = 22.0
+offset_top = 64.0
+offset_right = 440.0
+offset_bottom = 104.0
+theme_override_colors/font_color = Color(0.75, 0.45, 0.15, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="MaterialsContainer" type="FlowContainer" parent="." unique_id=451883358]
+visible = false
+layout_mode = 0
+offset_left = 22.0
+offset_top = 91.0
+offset_right = 440.0
+offset_bottom = 151.0
+
+[node name="SellPriceLabel" type="Label" parent="." unique_id=921787493]
+visible = false
+layout_mode = 0
+offset_left = 452.0
+offset_top = 11.0
+offset_right = 526.0
+offset_bottom = 43.0
+theme_override_colors/font_color = Color(1, 0.941, 0.816, 1)
 theme_override_font_sizes/font_size = 16
+text = "删除"
+horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="MaterialsContainer" type="FlowContainer" parent="."]
+[node name="SellButton" type="Button" parent="." unique_id=1537363349]
 visible = false
 layout_mode = 0
-offset_left = 89.0
-offset_top = 86.0
-offset_right = 709.0
-offset_bottom = 152.0
+offset_left = 458.0
+offset_top = 69.0
+offset_right = 530.0
+offset_bottom = 143.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.965, 0.902, 1)
+theme_override_colors/font_outline_color = Color(0.58, 0.18, 0.18, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBox_delete_normal")
+theme_override_styles/pressed = SubResource("StyleBox_delete_pressed")
+theme_override_styles/hover = SubResource("StyleBox_delete_hover")
+theme_override_styles/focus = SubResource("StyleBox_empty")
+text = "删"
 
-[node name="SellPriceLabel" type="Label" parent="."]
-visible = false
+[node name="DeleteButton" type="Button" parent="." unique_id=879457221]
 layout_mode = 0
-offset_left = 659.0
-offset_top = 80.0
-offset_right = 715.0
-offset_bottom = 105.0
-theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-theme_override_font_sizes/font_size = 14
-text = "灵石 10"
-horizontal_alignment = 2
-
-[node name="SellButton" type="Button" parent="."]
-visible = false
-layout_mode = 0
-offset_left = 610.0
-offset_top = 100.0
-offset_right = 756.0
-offset_bottom = 144.0
-theme_override_font_sizes/font_size = 14
-text = "出售"
+offset_left = 427.0
+offset_top = 74.0
+offset_right = 495.0
+offset_bottom = 133.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.965, 0.902, 1)
+theme_override_colors/font_outline_color = Color(0.58, 0.18, 0.18, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 30
+theme_override_icons/icon = ExtResource("5_2s8xv")
+theme_override_styles/normal = SubResource("StyleBox_delete_normal")
+theme_override_styles/pressed = SubResource("StyleBox_delete_pressed")
+theme_override_styles/hover = SubResource("StyleBox_delete_hover")
+theme_override_styles/focus = SubResource("StyleBox_empty")
+flat = true
+expand_icon = true

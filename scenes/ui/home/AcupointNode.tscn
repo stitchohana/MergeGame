@@ -1,33 +1,41 @@
-[gd_scene load_steps=3 format=3 uid="uid://dahr254epq0xl"]
+[gd_scene format=3 uid="uid://dahr254epq0xl"]
 
-[ext_resource type="Script" uid="uid://bsla5p313ud2d" path="res://scenes/ui/home/AcupointNode.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://5yum42i4evsd" path="res://scenes/ui/home/AcupointNode.gd" id="1_script"]
 [ext_resource type="Theme" uid="uid://gc2kayu31yh8" path="res://assets/theme/btn_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://cho2xr5djgd4s" path="res://assets/ui/cultivation_screen_v3/layers/cultivation_star_cyan.png" id="3_nom7w"]
+[ext_resource type="Texture2D" uid="uid://d2wl0oyu4h3t" path="res://assets/ui/cultivation_screen_v3/layers/cultivation_star_gold.png" id="4_ue3xj"]
+[ext_resource type="Shader" uid="uid://dhdcx38cmwbt7" path="res://shaders/acupoint_glow.gdshader" id="5_acupoint_glow"]
 
-[node name="AcupointNode" type="Control"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cyan_glow"]
+shader = ExtResource("5_acupoint_glow")
+shader_parameter/glow_color = Color(0.28, 0.9, 1, 1)
+shader_parameter/core_radius = 0.0150000007125
+shader_parameter/outer_radius = 0.40000001574012
+shader_parameter/glow_intensity = 0.2000000095
+shader_parameter/glow_opacity = 1.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gold_glow"]
+shader = ExtResource("5_acupoint_glow")
+shader_parameter/glow_color = Color(1, 0.76, 0.28, 1)
+shader_parameter/core_radius = 0.01600000076
+shader_parameter/outer_radius = 0.40000001574012
+shader_parameter/glow_intensity = 0.2000000095
+shader_parameter/glow_opacity = 1.0
+
+[node name="AcupointNode" type="Control" unique_id=1681379173]
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="PointTexture" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="ActivateButton" type="Button" parent="."]
+[node name="ActivateButton" type="Button" parent="." unique_id=1954480713]
 z_index = 10
 layout_mode = 0
-offset_left = -47.0
-offset_top = -58.0
-offset_right = 103.0
-offset_bottom = -4.0
+offset_left = -38.0
+offset_top = -55.0
+offset_right = 112.0
+offset_bottom = -1.0
 mouse_default_cursor_shape = 2
 theme = ExtResource("2_theme")
 theme_override_font_sizes/font_size = 13
@@ -36,3 +44,16 @@ text = "激活
 flat = true
 icon_alignment = 1
 expand_icon = true
+
+[node name="CultivationStarCyan" type="Sprite2D" parent="." unique_id=2010987024]
+material = SubResource("ShaderMaterial_cyan_glow")
+position = Vector2(38, 56)
+scale = Vector2(0.10007974, 0.118421055)
+texture = ExtResource("3_nom7w")
+
+[node name="CultivationStarGold" type="Sprite2D" parent="." unique_id=1707927255]
+visible = false
+material = SubResource("ShaderMaterial_gold_glow")
+position = Vector2(38, 56)
+scale = Vector2(0.07894734, 0.1024721)
+texture = ExtResource("4_ue3xj")

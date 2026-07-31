@@ -2,18 +2,16 @@ class_name AcupointNode extends Control
 
 signal acupoint_selected(index: int)
 
-const ACUPOINT_INACTIVE: Texture2D = preload("res://assets/home/ui/acupoint_inactive.tres")
-const ACUPOINT_ACTIVE: Texture2D = preload("res://assets/home/ui/acupoint_active.tres")
-const ACUPOINT_CURRENT: Texture2D = preload("res://assets/home/ui/acupoint_current.tres")
-
 @export_range(0, 99) var acupoint_index: int = 0
 
-@onready var point_texture: TextureRect = $PointTexture
 @onready var activate_button: Button = $ActivateButton
+@onready var cyan_icon: Sprite2D = $CultivationStarCyan
+@onready var gold_icon: Sprite2D = $CultivationStarGold
 
 var _lit: bool = false
 var _completed: int = 0
 var _total: int = 1
+var _pulse_time: float = 0.0
 
 
 func _ready() -> void:
@@ -37,7 +35,6 @@ func show_activation(completed: int, total: int, qi_cost: int, pending: bool) ->
 	activate_button.text = "激活中...\n%d/%d · 灵气 %d" % [completed, total, qi_cost] if pending else "激活\n%d/%d · 灵气 %d" % [completed, total, qi_cost]
 	activate_button.disabled = pending
 	activate_button.show()
-	point_texture.texture = ACUPOINT_CURRENT
 
 
 func hide_activation() -> void:
@@ -49,10 +46,19 @@ func _on_activate_pressed() -> void:
 	acupoint_selected.emit(acupoint_index)
 
 
-func _apply_visuals() -> void:
-	if not is_instance_valid(point_texture):
+func _process(delta: float) -> void:
+	_pulse_time += delta
+	var icon: Sprite2D = gold_icon if _lit else cyan_icon
+	if not is_instance_valid(icon) or not icon.visible:
 		return
-	if _lit:
-		point_texture.texture = ACUPOINT_ACTIVE
-	else:
-		point_texture.texture = ACUPOINT_INACTIVE
+	var pulse: float = (sin(_pulse_time * 2.5) + 1.0) * 0.5
+	var glow_material := icon.material as ShaderMaterial
+	if glow_material:
+		glow_material.set_shader_parameter("glow_intensity", lerpf(0.65, 1.1, pulse))
+
+
+func _apply_visuals() -> void:
+	if is_instance_valid(cyan_icon):
+		cyan_icon.visible = not _lit
+	if is_instance_valid(gold_icon):
+		gold_icon.visible = _lit

@@ -1,0 +1,57 @@
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+[ConfigDatabase] Loaded 210 recipes
+[ConfigDatabase] Loaded 3 expedition maps
+[ConfigDatabase] Loaded 11 monsters
+[CloudService] Configured: https://234575.xyz
+[UIAudit] args=["res://scenes/screens/GameScreen.tscn", "D:\\GodotProject\\MergeGame6\\MergeGame\\tmp_game_screen.png"]
+WARNING: res://assets/game/item_bg_atlas_texture.tres:3 - ext_resource, invalid UID: uid://bnjmp6yth1vo7 - using text path instead: res://assets/game/item_bg.png
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+WARNING: res://assets/game/item_detail_bg_atlas_texture.tres:3 - ext_resource, invalid UID: uid://cyncbv7few0yb - using text path instead: res://assets/game/game_item_detail_panel.png
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+WARNING: res://assets/common/common_btn_atlas_texture.tres:3 - ext_resource, invalid UID: uid://7tfcbiyg78sr - using text path instead: res://assets/common/common_btn_bg.png
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+WARNING: res://scenes/ui/main/CraftPathView.tscn:3 - ext_resource, invalid UID: uid://c52nducodw65c - using text path instead: res://scenes/ui/main/CraftPathView.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+WARNING: res://scenes/ui/main/StoragePopup.tscn:3 - ext_resource, invalid UID: uid://qwgsnbltxaqh - using text path instead: res://scenes/ui/main/StoragePopup.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+WARNING: res://scenes/ui/meridian/RequirementEntry.tscn:3 - ext_resource, invalid UID: uid://6v7jfvkqce6x - using text path instead: res://scenes/ui/meridian/RequirementEntry.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+WARNING: res://scenes/grid/GridView.tscn:3 - ext_resource, invalid UID: uid://mns6punohrwf - using text path instead: res://scenes/grid/GridView.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+WARNING: res://scenes/ui/main/ItemDetailPanel.tscn:3 - ext_resource, invalid UID: uid://yvf00usf5sm6 - using text path instead: res://scenes/ui/main/ItemDetailPanel.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+WARNING: res://scenes/ui/common/TopBar.tscn:3 - ext_resource, invalid UID: uid://1xutafdvaacs - using text path instead: res://scenes/ui/common/TopBar.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+WARNING: res://scenes/ui/meridian/RequirementList.tscn:3 - ext_resource, invalid UID: uid://c1erxgeju8ecu - using text path instead: res://scenes/ui/meridian/RequirementList.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:15)
+ERROR: Parameter "t" is null.
+   at: texture_2d_get (./servers/rendering/dummy/storage/texture_storage.h:110)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:32)
+SCRIPT ERROR: Cannot call method 'save_png' on a null value.
+   at: _capture (res://tools/ui_audit_capture.gd:33)
+   GDScript backtrace (most recent call first):
+       [0] _capture (res://tools/ui_audit_capture.gd:33)

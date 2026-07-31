@@ -1,0 +1,7 @@
+[gd_resource type="AtlasTexture" format=3 uid="uid://dajh1ksc8xxv6"]
+
+[ext_resource type="Texture2D" uid="uid://dwkquclk8ih4h" path="res://assets/ui/cultivation_screen_v3/layers/enter_board_button_empty.png" id="1_r08rv"]
+
+[resource]
+atlas = ExtResource("1_r08rv")
+region = Rect2(0, 0, 871.6364, 293.1462)

@@ -3,7 +3,7 @@ class_name HomeScreen extends BaseScreen
 @onready var game_btn: Button = $GameButton
 @onready var battle_btn: Button = $BattleButton
 @onready var realm_label: Label = $RealmLabel
-@onready var exp_bar: ProgressBar = $ExpBar
+@onready var exp_bar: TextureProgressBar = $ExpBar
 @onready var exp_label: Label = $ExpLabel
 @onready var acupoint_layer: Control = $AcupointLayer
 

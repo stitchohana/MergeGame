@@ -1,0 +1,223 @@
+{
+  "version": 2,
+  "description": "Fresh ImageGen assets exported as independently layered transparent PNG files.",
+  "background": "background.png",
+  "assets": [
+    {
+      "name": "resource_panel_empty",
+      "kind": "layer",
+      "file": "layers/resource_panel_empty.png",
+      "width": 508,
+      "height": 201,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1713
+    },
+    {
+      "name": "energy_lightning_icon",
+      "kind": "layer",
+      "file": "layers/energy_lightning_icon.png",
+      "width": 190,
+      "height": 275,
+      "has_alpha": true,
+      "partially_transparent_pixels": 991
+    },
+    {
+      "name": "qi_spirit_flame_icon",
+      "kind": "layer",
+      "file": "layers/qi_spirit_flame_icon.png",
+      "width": 269,
+      "height": 328,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1123
+    },
+    {
+      "name": "spirit_stone_icon",
+      "kind": "layer",
+      "file": "layers/spirit_stone_icon.png",
+      "width": 231,
+      "height": 321,
+      "has_alpha": true,
+      "partially_transparent_pixels": 862
+    },
+    {
+      "name": "order_frame_empty",
+      "kind": "layer",
+      "file": "layers/order_frame_empty.png",
+      "width": 499,
+      "height": 370,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1688
+    },
+    {
+      "name": "cultivation_progress_empty",
+      "kind": "layer",
+      "file": "layers/cultivation_progress_empty.png",
+      "width": 543,
+      "height": 125,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1536
+    },
+    {
+      "name": "cultivator_character",
+      "kind": "layer",
+      "file": "layers/cultivator_character.png",
+      "width": 401,
+      "height": 519,
+      "has_alpha": true,
+      "partially_transparent_pixels": 17106
+    },
+    {
+      "name": "cultivation_progress_4_of_7",
+      "kind": "layer",
+      "file": "layers/cultivation_progress_4_of_7.png",
+      "width": 472,
+      "height": 152,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1330
+    },
+    {
+      "name": "cultivation_reward_icon",
+      "kind": "layer",
+      "file": "layers/cultivation_reward_icon.png",
+      "width": 232,
+      "height": 252,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1099
+    },
+    {
+      "name": "confirm_button",
+      "kind": "layer",
+      "file": "layers/confirm_button.png",
+      "width": 380,
+      "height": 181,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1856
+    },
+    {
+      "name": "board_frame_empty",
+      "kind": "layer",
+      "file": "layers/board_frame_empty.png",
+      "width": 496,
+      "height": 459,
+      "has_alpha": true,
+      "partially_transparent_pixels": 4192
+    },
+    {
+      "name": "board_square_cell",
+      "kind": "layer",
+      "file": "layers/board_square_cell.png",
+      "width": 243,
+      "height": 243,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1716
+    },
+    {
+      "name": "item_detail_frame_empty",
+      "kind": "layer",
+      "file": "layers/item_detail_frame_empty.png",
+      "width": 760,
+      "height": 241,
+      "has_alpha": true,
+      "partially_transparent_pixels": 4748
+    },
+    {
+      "name": "cultivation_button",
+      "kind": "layer",
+      "file": "layers/cultivation_button.png",
+      "width": 290,
+      "height": 451,
+      "has_alpha": true,
+      "partially_transparent_pixels": 979
+    },
+    {
+      "name": "delete_button",
+      "kind": "layer",
+      "file": "layers/delete_button.png",
+      "width": 295,
+      "height": 295,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1489
+    },
+    {
+      "name": "shop_button",
+      "kind": "layer",
+      "file": "layers/shop_button.png",
+      "width": 287,
+      "height": 450,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1373
+    },
+    {
+      "name": "info_button",
+      "kind": "layer",
+      "file": "layers/info_button.png",
+      "width": 213,
+      "height": 213,
+      "has_alpha": true,
+      "partially_transparent_pixels": 687
+    },
+    {
+      "name": "item_detail_title_tab",
+      "kind": "layer",
+      "file": "layers/item_detail_title_tab.png",
+      "width": 433,
+      "height": 157,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1395
+    },
+    {
+      "name": "add_button",
+      "kind": "layer",
+      "file": "layers/add_button.png",
+      "width": 207,
+      "height": 207,
+      "has_alpha": true,
+      "partially_transparent_pixels": 705
+    },
+    {
+      "name": "resource_energy_composite",
+      "kind": "composite",
+      "file": "composites/resource_energy_composite.png",
+      "width": 425,
+      "height": 237,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1602
+    },
+    {
+      "name": "resource_qi_composite",
+      "kind": "composite",
+      "file": "composites/resource_qi_composite.png",
+      "width": 441,
+      "height": 251,
+      "has_alpha": true,
+      "partially_transparent_pixels": 3430
+    },
+    {
+      "name": "resource_stone_composite",
+      "kind": "composite",
+      "file": "composites/resource_stone_composite.png",
+      "width": 421,
+      "height": 225,
+      "has_alpha": true,
+      "partially_transparent_pixels": 1641
+    },
+    {
+      "name": "order_left_composite",
+      "kind": "composite",
+      "file": "composites/order_left_composite.png",
+      "width": 555,
+      "height": 388,
+      "has_alpha": true,
+      "partially_transparent_pixels": 4028
+    },
+    {
+      "name": "order_right_composite",
+      "kind": "composite",
+      "file": "composites/order_right_composite.png",
+      "width": 531,
+      "height": 388,
+      "has_alpha": true,
+      "partially_transparent_pixels": 3815
+    }
+  ]
+}

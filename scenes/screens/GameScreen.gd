@@ -53,28 +53,14 @@ func _ready() -> void:
 	print("[GameScreen] Game initialized!")
 
 func _setup_extras() -> void:
-	# Sort order: activity > character > order (pending_bar)
-	var activity_count: int = 0
-	for act in ActivityManager.get_active_activities():
-		var widget: String = act.get("widget", "")
-		if widget.is_empty():
-			continue
-		var entry := _create_activity_entry(act)
-		if entry:
-			requirement_list.container.add_child(entry)
-			requirement_list.container.move_child(entry, activity_count)
-			entry.setup(act)
-			activity_count += 1
-
-	var character_entry := preload("res://scenes/ui/character/CharacterEntry.tscn").instantiate() as CharacterEntry
+	# Design order: cultivation character -> order cards.
+	for child: Node in requirement_list.container.get_children():
+		if child is CharacterEntry:
+			requirement_list.container.move_child(child, 0)
+			return
+	var character_entry: CharacterEntry = preload("res://scenes/ui/character/CharacterEntry.tscn").instantiate() as CharacterEntry
 	requirement_list.container.add_child(character_entry)
-	requirement_list.container.move_child(character_entry, activity_count)
-
-	if not pending_bar:
-		pending_bar = preload("res://scenes/ui/main/PendingRewardBar.tscn").instantiate() as PendingRewardBar
-		requirement_list.container.add_child(pending_bar)
-		requirement_list.container.move_child(pending_bar, activity_count + 1)
-		pending_bar.setup(grid_view)
+	requirement_list.container.move_child(character_entry, 0)
 
 func on_enter() -> void:
 	print("[GameScreen] on_enter START")

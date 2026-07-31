@@ -1,0 +1,22 @@
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+WARNING: res://assets/game/item_bg_atlas_texture.tres:3 - ext_resource, invalid UID: uid://bnjmp6yth1vo7 - using text path instead: res://assets/game/item_bg.png
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://assets/game/item_detail_bg_atlas_texture.tres:3 - ext_resource, invalid UID: uid://cyncbv7few0yb - using text path instead: res://assets/game/game_item_detail_panel.png
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://assets/common/common_btn_atlas_texture.tres:3 - ext_resource, invalid UID: uid://7tfcbiyg78sr - using text path instead: res://assets/common/common_btn_bg.png
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/ui/main/CraftPathView.tscn:3 - ext_resource, invalid UID: uid://c52nducodw65c - using text path instead: res://scenes/ui/main/CraftPathView.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/ui/main/StoragePopup.tscn:3 - ext_resource, invalid UID: uid://qwgsnbltxaqh - using text path instead: res://scenes/ui/main/StoragePopup.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+WARNING: res://scenes/ui/meridian/RequirementList.tscn:3 - ext_resource, invalid UID: uid://c1erxgeju8ecu - using text path instead: res://scenes/ui/meridian/RequirementList.gd
+   at: load (scene/resources/resource_format_text.cpp:501)
+[ConfigDatabase] Loaded 210 recipes
+[ConfigDatabase] Loaded 3 expedition maps
+[ConfigDatabase] Loaded 11 monsters
+[CloudService] Configured: https://234575.xyz
+[GridView] _ready: size=(620.0, 798.0) position=(36.0, 562.0) visible=true
+[GameScreen] Game initialized!

@@ -1,0 +1,23 @@
+{
+  "version": 3,
+  "description": "Text-free cultivation screen assets. UI labels and values are rendered by Godot Controls.",
+  "background": "background.png",
+  "assets": [
+    { "name": "resource_panel_empty", "kind": "layer", "file": "layers/resource_panel_empty.png" },
+    { "name": "energy_lightning_icon", "kind": "icon", "file": "layers/energy_lightning_icon.png" },
+    { "name": "qi_spirit_flame_icon", "kind": "icon", "file": "layers/qi_spirit_flame_icon.png" },
+    { "name": "spirit_stone_icon", "kind": "icon", "file": "layers/spirit_stone_icon.png" },
+    { "name": "add_button", "kind": "icon", "file": "layers/add_button.png" },
+    { "name": "realm_banner_empty", "kind": "layer", "file": "layers/realm_banner_empty.png" },
+    { "name": "cultivation_progress_empty", "kind": "layer", "file": "layers/cultivation_progress_empty.png" },
+    { "name": "cultivation_progress_fill", "kind": "layer", "file": "layers/cultivation_progress_fill.png" },
+    { "name": "cultivator_character", "kind": "layer", "file": "layers/cultivator_character.png" },
+    { "name": "cultivation_array", "kind": "layer", "file": "layers/cultivation_array.png" },
+    { "name": "enter_board_button_empty", "kind": "layer", "file": "layers/enter_board_button_empty.png" },
+    { "name": "enter_trial_button_empty", "kind": "layer", "file": "layers/enter_trial_button_empty.png" },
+    { "name": "enter_board_icon", "kind": "icon", "file": "layers/enter_board_icon.png" },
+    { "name": "enter_trial_icon", "kind": "icon", "file": "layers/enter_trial_icon.png" },
+    { "name": "cultivation_star_cyan", "kind": "icon", "file": "layers/cultivation_star_cyan.png" },
+    { "name": "cultivation_star_gold", "kind": "icon", "file": "layers/cultivation_star_gold.png" }
+  ]
+}

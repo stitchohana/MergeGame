@@ -1,106 +1,154 @@
 [gd_scene format=3 uid="uid://cy22y4f1oscvj"]
 
 [ext_resource type="Script" uid="uid://s7dc248mbwlm" path="res://scenes/ui/character/CharacterEntry.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://cw8q3nl3u2ata" path="res://assets/home/ui/character_meditation.png" id="3_6hi3c"]
-[ext_resource type="Theme" uid="uid://dhv8eh1s6nl6v" path="res://assets/theme/formal_ui_theme.tres" id="3_theme"]
+[ext_resource type="Texture2D" uid="uid://c0vhl52uy7jaj" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivator_character.png" id="2_ky4o6"]
+[ext_resource type="Texture2D" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_progress_empty_bar.png" id="3_progress_empty"]
+[ext_resource type="Texture2D" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_progress_fill.png" id="4_progress_fill"]
+[ext_resource type="Texture2D" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_reward_icon.png" id="5_reward_icon"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_entry_normal"]
-content_margin_left = 6.0
-content_margin_top = 4.0
-content_margin_right = 6.0
-content_margin_bottom = 4.0
-bg_color = Color(0.15, 0.33, 0.25, 0.98)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.75, 0.61, 0.28, 0.96)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_color = Color(0.06, 0.12, 0.08, 0.42)
-shadow_size = 3
-shadow_offset = Vector2(0, 2)
+[sub_resource type="StyleBoxFlat" id="StyleBox_glow"]
+bg_color = Color(0.957, 0.953, 0.843, 0.78)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.816, 0.706, 0.373, 1)
+corner_radius_top_left = 88
+corner_radius_top_right = 88
+corner_radius_bottom_right = 88
+corner_radius_bottom_left = 88
+shadow_color = Color(0.882, 0.816, 0.439, 0.42)
+shadow_size = 13
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_entry_pressed"]
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 2.0
-bg_color = Color(0.1, 0.23, 0.16, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.63, 0.49, 0.2, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[sub_resource type="StyleBoxFlat" id="StyleBox_progress_outer"]
+bg_color = Color(1, 0.973, 0.875, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.831, 0.718, 0.396, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_entry_hover"]
-content_margin_left = 6.0
-content_margin_top = 4.0
-content_margin_right = 6.0
-content_margin_bottom = 4.0
-bg_color = Color(0.24, 0.47, 0.34, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBox_progress_fill"]
+bg_color = Color(0.439, 0.745, 0.286, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(1, 1, 1, 0.32)
+shadow_offset = Vector2(0, -3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_reward"]
+bg_color = Color(0.914, 0.725, 0.247, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.929, 0.659, 1)
+corner_radius_top_left = 23
+corner_radius_top_right = 23
+corner_radius_bottom_right = 23
+corner_radius_bottom_left = 23
+shadow_color = Color(0.682, 0.463, 0.165, 1)
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_action"]
+bg_color = Color(0.282, 0.565, 0.388, 0.96)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(1, 0.83, 0.4, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_color = Color(0.9, 0.68, 0.23, 0.3)
-shadow_size = 5
+border_color = Color(0.878, 0.718, 0.322, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_entry_focus"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.88, 0.52, 0.9)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
+[sub_resource type="StyleBoxEmpty" id="StyleBox_empty"]
 
 [node name="CharacterEntry" type="Control" unique_id=1705527504]
-custom_minimum_size = Vector2(96, 104)
+custom_minimum_size = Vector2(195, 230)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 195.0
-offset_bottom = 249.0
-theme = ExtResource("3_theme")
+offset_bottom = 230.0
 script = ExtResource("1_script")
+
+[node name="GlowPanel" type="Panel" parent="." unique_id=2095482128]
+visible = false
+layout_mode = 0
+offset_left = 8.0
+offset_top = 2.0
+offset_right = 187.0
+offset_bottom = 184.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_glow")
 
 [node name="Icon" type="TextureRect" parent="." unique_id=1847898878]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 3.0
-offset_right = 140.0
-offset_bottom = 125.0
-texture = ExtResource("3_6hi3c")
+offset_left = 13.0
+offset_right = 182.0
+offset_bottom = 188.0
+mouse_filter = 2
+texture = ExtResource("2_ky4o6")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ProgressOuter" type="TextureProgressBar" parent="." unique_id=220302097]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 185.0
+offset_right = 151.0
+offset_bottom = 225.0
+mouse_filter = 2
+value = 57.1429
+fill_mode = 0
+texture_under = ExtResource("3_progress_empty")
+texture_progress = ExtResource("4_progress_fill")
+nine_patch_stretch = true
+show_percentage = false
+
+[node name="ProgressLabel" type="Label" parent="ProgressOuter" unique_id=699105576]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.388, 0.333, 0.133, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 20
+text = "4/7"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardBadge" type="TextureRect" parent="." unique_id=1203585249]
+layout_mode = 0
+offset_left = 151.0
+offset_top = 181.0
+offset_right = 195.0
+offset_bottom = 225.0
+mouse_filter = 2
+texture = ExtResource("5_reward_icon")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Button" type="Button" parent="." unique_id=504956658]
+visible = false
 layout_mode = 0
-offset_left = 29.0
-offset_top = 152.0
-offset_right = 131.0
-offset_bottom = 195.0
+offset_left = 16.0
+offset_top = 146.0
+offset_right = 179.0
+offset_bottom = 181.0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.76, 1)
-theme_override_colors/font_pressed_color = Color(0.86, 0.79, 0.55, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 0.9, 1)
+theme_override_colors/font_color = Color(1, 0.961, 0.784, 1)
 theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBox_entry_normal")
-theme_override_styles/pressed = SubResource("StyleBox_entry_pressed")
-theme_override_styles/hover = SubResource("StyleBox_entry_hover")
-theme_override_styles/focus = SubResource("StyleBox_entry_focus")
-text = "激活穴窍"
+theme_override_styles/normal = SubResource("StyleBox_action")
+theme_override_styles/pressed = SubResource("StyleBox_action")
+theme_override_styles/hover = SubResource("StyleBox_action")
+theme_override_styles/focus = SubResource("StyleBox_empty")
+text = "可修炼"
