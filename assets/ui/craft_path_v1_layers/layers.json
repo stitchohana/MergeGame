@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "description": "Craft path UI layers cut directly from the supplied reference. background.png is the rear panel; craft_path_panel_frame.png is a separate transparent outer and title frame.",
+  "background": "background.png",
+  "assets": [
+    {
+      "name": "craft_path_panel_frame",
+      "kind": "layer",
+      "file": "layers/craft_path_panel_frame.png",
+      "width": 967,
+      "height": 1626,
+      "has_alpha": true,
+      "usage": "Transparent outer jade-and-gold border including the top title plaque border, without title text or ivory fills."
+    },
+    {
+      "name": "craft_path_title_banner",
+      "kind": "layer",
+      "file": "layers/craft_path_title_banner.png",
+      "width": 1974,
+      "height": 797,
+      "has_alpha": true,
+      "usage": "Transparent ornate title banner with blank ivory interior."
+    },
+    {
+      "name": "craft_path_slot_empty",
+      "kind": "layer",
+      "file": "layers/craft_path_slot_empty.png",
+      "width": 1037,
+      "height": 1037,
+      "has_alpha": true,
+      "usage": "Reusable square recipe/source slot background."
+    },
+    {
+      "name": "craft_path_arrow",
+      "kind": "icon",
+      "file": "layers/craft_path_arrow.png",
+      "width": 380,
+      "height": 287,
+      "has_alpha": true,
+      "usage": "Single right arrow between recipe slots."
+    },
+    {
+      "name": "craft_path_unknown",
+      "kind": "icon",
+      "file": "layers/craft_path_unknown.png",
+      "width": 44,
+      "height": 73,
+      "has_alpha": true,
+      "usage": "Unknown recipe-state question-mark icon."
+    },
+    {
+      "name": "craft_path_source_label",
+      "kind": "layer",
+      "file": "layers/craft_path_source_label.png",
+      "width": 1750,
+      "height": 380,
+      "has_alpha": true,
+      "usage": "Decorative source-section plaque without label text."
+    }
+  ]
+}

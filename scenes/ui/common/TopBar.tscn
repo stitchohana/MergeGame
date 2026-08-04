@@ -1,16 +1,9 @@
 [gd_scene format=3 uid="uid://c7qk1jsxa0n3r"]
 
 [ext_resource type="Script" uid="uid://b2s47v1wor4j1" path="res://scenes/ui/common/TopBar.gd" id="1_gd"]
-[ext_resource type="Texture2D" uid="uid://u1gun7yqya6w" path="res://assets/ui/cultivation_screen_v3/layers/resource_panel_empty.png" id="2_ld3lv"]
-[ext_resource type="Texture2D" uid="uid://bpeho5q2e1agr" path="res://assets/ui/xianxia_v3_layers_v2/layers/energy_lightning_icon.png" id="3_qxwoj"]
-[ext_resource type="Texture2D" uid="uid://bfw2x0eoooupv" path="res://assets/ui/xianxia_v3_layers_v2/layers/qi_spirit_flame_icon.png" id="4_pevw4"]
-[ext_resource type="Texture2D" uid="uid://ofjththyotb2" path="res://assets/ui/cultivation_screen_v3/layers/add_button.png" id="4_t2iam"]
-[ext_resource type="Texture2D" uid="uid://cr7bpkpx4stwc" path="res://assets/ui/xianxia_v3_layers_v2/layers/spirit_stone_icon.png" id="5_ld3lv"]
-
-[sub_resource type="StyleBoxTexture" id="StyleBox_resource"]
-texture = ExtResource("2_ld3lv")
-
-[sub_resource type="StyleBoxEmpty" id="StyleBox_empty"]
+[ext_resource type="PackedScene" path="res://scenes/ui/common/TopResource.tscn" id="2_resource"]
+[ext_resource type="Texture2D" uid="uid://bfw2x0eoooupv" path="res://assets/ui/xianxia_v3_layers_v2/layers/qi_spirit_flame_icon.png" id="3_qi"]
+[ext_resource type="Texture2D" uid="uid://cr7bpkpx4stwc" path="res://assets/ui/xianxia_v3_layers_v2/layers/spirit_stone_icon.png" id="4_stones"]
 
 [node name="TopBar" type="Control" unique_id=1995499029]
 custom_minimum_size = Vector2(780, 92)
@@ -20,148 +13,34 @@ offset_right = 780.0
 offset_bottom = 92.0
 script = ExtResource("1_gd")
 
-[node name="StaminaCard" type="Panel" parent="." unique_id=1655352710]
+[node name="StaminaResource" parent="." instance=ExtResource("2_resource")]
 layout_mode = 0
-offset_left = 42.0
-offset_top = 12.0
 offset_right = 246.0
 offset_bottom = 81.0
-theme_override_styles/panel = SubResource("StyleBox_resource")
 
-[node name="QiCard" type="Panel" parent="." unique_id=55988235]
+[node name="QiResource" parent="." instance=ExtResource("2_resource")]
 layout_mode = 0
-offset_left = 290.0
-offset_top = 13.0
+offset_left = 248.0
 offset_right = 496.0
-offset_bottom = 79.0
-theme_override_styles/panel = SubResource("StyleBox_resource")
+offset_bottom = 81.0
 
-[node name="StoneCard" type="Panel" parent="." unique_id=428128784]
-layout_mode = 0
-offset_left = 525.0
-offset_top = 12.0
-offset_right = 726.0
-offset_bottom = 80.0
-theme_override_styles/panel = SubResource("StyleBox_resource")
+[node name="Icon" parent="QiResource" index="1"]
+texture = ExtResource("3_qi")
 
-[node name="StaminaIcon" type="TextureRect" parent="." unique_id=1176530702]
-layout_mode = 0
-offset_left = 72.0
-offset_top = 24.0
-offset_right = 121.0
-offset_bottom = 72.0
-mouse_filter = 2
-texture = ExtResource("3_qxwoj")
-expand_mode = 1
-stretch_mode = 5
+[node name="RegenTimerLabel" parent="QiResource" index="3"]
+visible = false
 
-[node name="StaminaLabel" type="Label" parent="." unique_id=1284118726]
+[node name="StonesResource" parent="." instance=ExtResource("2_resource")]
 layout_mode = 0
-offset_left = 102.0
-offset_top = 33.0
-offset_right = 166.0
-offset_bottom = 60.0
-theme_override_colors/font_color = Color(0.247, 0.176, 0.133, 1)
-theme_override_colors/font_outline_color = Color(1, 0.973, 0.878, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 24
-text = "74"
-horizontal_alignment = 1
+offset_left = 483.0
+offset_right = 729.0
+offset_bottom = 81.0
 
-[node name="RegenTimerLabel" type="Label" parent="." unique_id=1930460830]
-layout_mode = 0
-offset_left = 144.0
-offset_top = 54.0
-offset_right = 206.0
-offset_bottom = 70.0
-theme_override_colors/font_color = Color(0.541, 0.294, 0.176, 1)
-theme_override_font_sizes/font_size = 11
-text = "00:24"
-horizontal_alignment = 1
+[node name="Icon" parent="StonesResource" index="1"]
+texture = ExtResource("4_stones")
 
-[node name="StaminaAddButton" type="Button" parent="." unique_id=1183338833]
-layout_mode = 0
-offset_left = 193.0
-offset_top = 23.0
-offset_right = 243.0
-offset_bottom = 68.0
-mouse_default_cursor_shape = 2
-theme_override_styles/focus = SubResource("StyleBox_empty")
-icon = ExtResource("4_t2iam")
-flat = true
-expand_icon = true
-
-[node name="QiIcon" type="TextureRect" parent="." unique_id=500123]
-layout_mode = 0
-offset_left = 317.0
-offset_top = 18.0
-offset_right = 364.0
-offset_bottom = 65.0
-mouse_filter = 2
-texture = ExtResource("4_pevw4")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="QiLabel" type="Label" parent="." unique_id=500124]
-layout_mode = 0
-offset_left = 344.0
-offset_top = 32.0
-offset_right = 408.0
-offset_bottom = 62.0
-theme_override_colors/font_color = Color(0.247, 0.176, 0.133, 1)
-theme_override_colors/font_outline_color = Color(1, 0.973, 0.878, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 24
-text = "27"
-horizontal_alignment = 1
-
-[node name="QiAddButton" type="Button" parent="." unique_id=796236136]
-layout_mode = 0
-offset_left = 444.0
-offset_top = 22.0
-offset_right = 494.0
-offset_bottom = 67.0
-mouse_default_cursor_shape = 2
-theme_override_styles/focus = SubResource("StyleBox_empty")
-icon = ExtResource("4_t2iam")
-flat = true
-expand_icon = true
-
-[node name="StoneIcon" type="TextureRect" parent="." unique_id=1167827054]
-layout_mode = 0
-offset_left = 549.0
-offset_top = 25.0
-offset_right = 594.0
-offset_bottom = 66.0
-mouse_filter = 2
-texture = ExtResource("5_ld3lv")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="StonesLabel" type="Label" parent="." unique_id=1383043845]
-layout_mode = 0
-offset_left = 575.0
-offset_top = 33.0
-offset_right = 642.0
-offset_bottom = 63.0
-theme_override_colors/font_color = Color(0.247, 0.176, 0.133, 1)
-theme_override_colors/font_outline_color = Color(1, 0.973, 0.878, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 24
-text = "33"
-horizontal_alignment = 1
-
-[node name="StoneAddButton" type="Button" parent="." unique_id=1568217330]
-layout_mode = 0
-offset_left = 675.0
-offset_top = 22.0
-offset_right = 725.0
-offset_bottom = 67.0
-mouse_default_cursor_shape = 2
-theme_override_styles/focus = SubResource("StyleBox_empty")
-icon = ExtResource("4_t2iam")
-flat = true
-expand_icon = true
+[node name="RegenTimerLabel" parent="StonesResource" index="3"]
+visible = false
 
 [node name="GMButton" type="Button" parent="." unique_id=1538700097]
 visible = false

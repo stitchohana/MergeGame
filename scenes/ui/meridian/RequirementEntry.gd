@@ -9,6 +9,7 @@ var _index_setup: int = -1
 var _completed_setup: bool = false
 var _rewards_setup: Dictionary = {}
 var _ready_done: bool = false
+var _available: bool = false
 var _item_widget_scene: PackedScene = preload("res://scenes/ui/common/ItemWidget.tscn")
 var _reward_slot_scene: PackedScene = preload("res://scenes/ui/meridian/RewardSlot.tscn")
 
@@ -61,9 +62,6 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 		if click_button:
 			click_button.tooltip_text = "查看获取方式"
 		items_container.add_child(widget)
-		if widget.name_label:
-			widget.name_label.visible = true
-			widget.name_label.add_theme_font_size_override("font_size", 8)
 
 	if not rewards.is_empty():
 		if rewards.has("tokens"):
@@ -86,11 +84,11 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 				slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	if completed:
-		complete_btn.text = "✓"
+		complete_btn.text = ""
 		complete_btn.disabled = true
 		complete_btn.visible = true
 	else:
-		complete_btn.text = "✓"
+		complete_btn.text = ""
 		complete_btn.disabled = false
 		if complete_btn.pressed.is_connected(_on_btn_pressed):
 			complete_btn.pressed.disconnect(_on_btn_pressed)
@@ -98,10 +96,21 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 		complete_btn.visible = false
 
 
-func set_available(available: bool) -> void:
+func set_available(available: bool) -> bool:
+	var changed: bool = _available != available
+	_available = available
 	if not bool(_data.get("completed", false)):
 		var btn: Button = $CompleteButton
 		btn.visible = available
+	return changed
+
+
+func is_available() -> bool:
+	return _available
+
+
+func get_display_index() -> int:
+	return int(_data.get("index", -1))
 
 
 func refresh_item_selection(present_item_ids: Dictionary) -> void:
@@ -124,7 +133,7 @@ func _on_item_pressed(item_id: int) -> void:
 
 func mark_completed() -> void:
 	var btn: Button = $CompleteButton
-	btn.text = "✓"
+	btn.text = ""
 	btn.disabled = true
 	btn.visible = true
 	var items_container: HBoxContainer = $ItemsContainer
@@ -136,25 +145,8 @@ func mark_completed() -> void:
 func _style_item_widget(widget: ItemWidget) -> void:
 	var icon_rect: TextureRect = widget.get_node_or_null("IconRect") as TextureRect
 	if icon_rect:
-		icon_rect.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-		icon_rect.anchor_right = 1.0
-		icon_rect.offset_left = 6.0
-		icon_rect.offset_top = 6.0
-		icon_rect.offset_right = -6.0
-		icon_rect.offset_bottom = 59.0
-	var name_label: Label = widget.get_node_or_null("NameLabel") as Label
-	if name_label:
-		name_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-		name_label.anchor_right = 1.0
-		name_label.offset_top = 63.0
-		name_label.offset_bottom = 83.0
-		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	var level_label: Label = widget.get_node_or_null("LevelLabel") as Label
-	if level_label:
-		level_label.position = Vector2(5.0, 3.0)
-		level_label.size = Vector2(18.0, 17.0)
-		level_label.add_theme_color_override("font_color", Color(0.2, 0.2, 0.16, 1))
-		level_label.add_theme_font_size_override("font_size", 13)
-	var charge_label: Label = widget.get_node_or_null("ChargeLabel") as Label
-	if charge_label:
-		charge_label.hide()
+		icon_rect.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		icon_rect.offset_left = -28.0
+		icon_rect.offset_top = -28.0
+		icon_rect.offset_right = 28.0
+		icon_rect.offset_bottom = 28.0

@@ -1,10 +1,24 @@
-[gd_scene load_steps=6 format=3 uid="uid://cuyl18aoasnb7"]
+[gd_scene format=3 uid="uid://cuyl18aoasnb7"]
 
-[ext_resource type="Script" uid="uid://c52nducodw65c" path="res://scenes/ui/main/CraftPathView.gd" id="1_gd"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
-[ext_resource type="Texture2D" path="res://assets/ui/craft_path_panel.png" id="3_panel"]
-[ext_resource type="Theme" path="res://assets/theme/craft_path_button_theme.tres" id="4_button_theme"]
-[ext_resource type="Theme" path="res://assets/theme/craft_path_close_theme.tres" id="5_close_theme"]
+[ext_resource type="Script" uid="uid://diy31evxxenwe" path="res://scenes/ui/main/CraftPathView.gd" id="1_gd"]
+[ext_resource type="Theme" uid="uid://dhv8eh1s6nl6v" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://caif7biq12qid" path="res://assets/ui/craft_path_v1_layers/layers/craft_path_panel_frame.png" id="3_hylo6"]
+[ext_resource type="Texture2D" uid="uid://c4w5j8gveuyq7" path="res://assets/ui/craft_path_v1_layers/layers/craft_path_source_label.png" id="5_fhnhr"]
+[ext_resource type="Texture2D" uid="uid://cbk1p0my0xd1a" path="res://assets/ui/craft_path_v1_layers/layers/close_button.png" id="5_ydomw"]
+[ext_resource type="PackedScene" uid="uid://dbfaocwritemw" path="res://scenes/ui/common/ItemWidget.tscn" id="6_item_widget"]
+
+[sub_resource type="Gradient" id="Gradient_dim"]
+colors = PackedColorArray(0, 0, 0, 0.58, 0, 0, 0, 0.58)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_dim"]
+gradient = SubResource("Gradient_dim")
+width = 2
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_jq6f7"]
+
+[sub_resource type="Theme" id="Theme_ab1am"]
+Button/icons/icon = ExtResource("5_ydomw")
+Button/styles/normal = SubResource("StyleBoxTexture_jq6f7")
 
 [node name="CraftPathView" type="Control" unique_id=503858451]
 layout_mode = 3
@@ -13,11 +27,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
-script = ExtResource("1_gd")
 theme = ExtResource("2_theme")
+script = ExtResource("1_gd")
 
-[node name="Dim" type="ColorRect" parent="." unique_id=2140456588]
+[node name="DimTexture" type="TextureRect" parent="." unique_id=53657402]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,75 +38,125 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.5)
+texture = SubResource("GradientTexture_dim")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="Panel" type="NinePatchRect" parent="." unique_id=1521435528]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 329.0
+offset_right = 759.2
+offset_bottom = 1549.6
+texture = ExtResource("3_hylo6")
+patch_margin_left = 72
+patch_margin_top = 72
+patch_margin_right = 72
+patch_margin_bottom = 72
+
+[node name="HeaderSurface" type="Control" parent="Panel" unique_id=1737271604]
+anchors_preset = 0
+offset_left = 29.999998
+offset_top = -5.9999924
+offset_right = 710.16003
+offset_bottom = 114.640015
+
+[node name="TitleGroup" type="Control" parent="Panel/HeaderSurface" unique_id=1733690420]
+anchors_preset = 0
+offset_left = 144.0
+offset_top = 40.999985
+offset_right = 539.2
+offset_bottom = 128.35999
+mouse_filter = 2
+
+[node name="TitleLabel" type="Label" parent="Panel/HeaderSurface/TitleGroup" unique_id=1517432377]
+layout_mode = 0
+offset_left = -6.399994
+offset_top = 14.800003
+offset_right = 388.80002
+offset_bottom = 70.96001
+theme_override_colors/font_color = Color(0.23, 0.39, 0.31, 1)
+theme_override_font_sizes/font_size = 42
+text = "物品"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="TextureButton" parent="Panel/HeaderSurface" unique_id=1096101415]
+layout_mode = 0
+offset_left = 556.0
+offset_top = 153.0
+offset_right = 613.0
+offset_bottom = 205.0
+focus_mode = 0
+theme = SubResource("Theme_ab1am")
+texture_normal = ExtResource("5_ydomw")
+texture_pressed = ExtResource("5_ydomw")
+texture_hover = ExtResource("5_ydomw")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=1784514623]
+custom_minimum_size = Vector2(655.2, 511.68)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -310.0
-offset_top = -500.0
-offset_right = 310.0
-offset_bottom = 500.0
+offset_left = -327.6
+offset_top = -353.29996
+offset_right = 327.6
+offset_bottom = 158.38007
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("3_panel")
-patch_margin_left = 72
-patch_margin_top = 72
-patch_margin_right = 72
-patch_margin_bottom = 72
+theme_override_constants/separation = 19
 
-[node name="CloseButton" type="Button" parent="Panel" unique_id=1096101415]
+[node name="TitleSurface" type="TextureRect" parent="Panel" unique_id=643860229]
 layout_mode = 0
-theme = ExtResource("5_close_theme")
-offset_left = 554.0
-offset_top = 18.0
-offset_right = 600.0
-offset_bottom = 64.0
-text = "X"
+offset_left = 209.0
+offset_top = 775.0
+offset_right = 562.0
+offset_bottom = 844.88
+texture = ExtResource("5_fhnhr")
+expand_mode = 1
 
-[node name="NameList" type="HBoxContainer" parent="Panel" unique_id=1531799321]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 24.0
-offset_right = 536.0
-offset_bottom = 64.0
-
-[node name="ItemGrid" type="GridContainer" parent="Panel" unique_id=554595106]
-layout_mode = 0
-offset_left = 28.0
-offset_top = 82.0
-offset_right = 592.0
-offset_bottom = 600.0
-theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 10
-columns = 5
-
-[node name="LauncherSection" type="Control" parent="Panel" unique_id=1511152767]
-anchors_preset = 0
-offset_left = 28.0
-offset_top = 612.0
-offset_right = 592.0
-offset_bottom = 960.0
-mouse_filter = 2
-
-[node name="Label" type="Label" parent="Panel/LauncherSection" unique_id=805420652]
-layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 200.0
-offset_bottom = 38.0
-theme_override_colors/font_color = Color(0.25, 0.38, 0.28, 1)
-theme_override_font_sizes/font_size = 20
+[node name="RelationLabel" type="Label" parent="Panel/TitleSurface" unique_id=76715149]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 91.07997
+offset_top = 3.880005
+offset_right = -88.000015
+offset_bottom = -0.23999023
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.36, 0.27, 0.17, 1)
+theme_override_font_sizes/font_size = 27
 text = "来源"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="LauncherContainer" type="HBoxContainer" parent="Panel/LauncherSection" unique_id=143011835]
+[node name="SourceItem" parent="Panel/TitleSurface" unique_id=280618145 instance=ExtResource("6_item_widget")]
+custom_minimum_size = Vector2(93, 102)
 layout_mode = 0
-offset_left = 0.0
-offset_top = 48.0
-offset_right = 564.0
-offset_bottom = 336.0
-theme_override_constants/separation = 20
+offset_left = 104.0
+offset_top = 117.0
+offset_right = 197.0
+offset_bottom = 219.0
+
+[node name="DescriptLabel" type="Label" parent="Panel" unique_id=1245103295]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -257.6
+offset_top = 167.0
+offset_right = 258.4
+offset_bottom = 253.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.36, 0.27, 0.17, 1)
+theme_override_font_sizes/font_size = 20
+text = "描述"
+horizontal_alignment = 1
+vertical_alignment = 1

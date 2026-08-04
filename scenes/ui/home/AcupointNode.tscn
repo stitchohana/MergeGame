@@ -6,20 +6,13 @@
 [ext_resource type="Texture2D" uid="uid://d2wl0oyu4h3t" path="res://assets/ui/cultivation_screen_v3/layers/cultivation_star_gold.png" id="4_ue3xj"]
 [ext_resource type="Shader" uid="uid://dhdcx38cmwbt7" path="res://shaders/acupoint_glow.gdshader" id="5_acupoint_glow"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_cyan_glow"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_acupoint_glow"]
+resource_local_to_scene = true
 shader = ExtResource("5_acupoint_glow")
 shader_parameter/glow_color = Color(0.28, 0.9, 1, 1)
 shader_parameter/core_radius = 0.0150000007125
 shader_parameter/outer_radius = 0.40000001574012
-shader_parameter/glow_intensity = 0.2000000095
-shader_parameter/glow_opacity = 1.0
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_gold_glow"]
-shader = ExtResource("5_acupoint_glow")
-shader_parameter/glow_color = Color(1, 0.76, 0.28, 1)
-shader_parameter/core_radius = 0.01600000076
-shader_parameter/outer_radius = 0.40000001574012
-shader_parameter/glow_intensity = 0.2000000095
+shader_parameter/glow_intensity = 0.65
 shader_parameter/glow_opacity = 1.0
 
 [node name="AcupointNode" type="Control" unique_id=1681379173]
@@ -45,15 +38,22 @@ flat = true
 icon_alignment = 1
 expand_icon = true
 
+[node name="CultivationGlow" type="ColorRect" parent="." unique_id=1912721229]
+material = SubResource("ShaderMaterial_acupoint_glow")
+layout_mode = 0
+offset_left = -26.0
+offset_top = -8.0
+offset_right = 102.0
+offset_bottom = 120.0
+mouse_filter = 2
+
 [node name="CultivationStarCyan" type="Sprite2D" parent="." unique_id=2010987024]
-material = SubResource("ShaderMaterial_cyan_glow")
 position = Vector2(38, 56)
 scale = Vector2(0.10007974, 0.118421055)
 texture = ExtResource("3_nom7w")
 
 [node name="CultivationStarGold" type="Sprite2D" parent="." unique_id=1707927255]
 visible = false
-material = SubResource("ShaderMaterial_gold_glow")
 position = Vector2(38, 56)
 scale = Vector2(0.07894734, 0.1024721)
 texture = ExtResource("4_ue3xj")

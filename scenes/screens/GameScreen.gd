@@ -287,12 +287,15 @@ func _display_meridian() -> void:
 			completed += 1
 	requirement_list.set_title("修炼需求 %d/%d" % [completed, GameState.meridian_acupoints.size()])
 	var display_reqs: Array = []
+	var available_indices: Dictionary = {}
 	for i in range(GameState.meridian_acupoints.size()):
 		var req: Dictionary = GameState.meridian_acupoints[i]
 		if not req.get("completed", false):
+			var display_index: int = display_reqs.size()
 			display_reqs.append(req.duplicate())
 			_display_index_map.append(i)
-	requirement_list.set_requirements(display_reqs)
+			available_indices[display_index] = _check_can_complete(req)
+	requirement_list.set_requirements(display_reqs, available_indices)
 	_refresh_requirement_buttons()
 
 func _on_meridian_complete(display_index: int) -> void:

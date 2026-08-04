@@ -1,1 +1,149 @@
-<main data-name="仙侠合成游戏最终界面" class="flex flex-col justify-start items-center w-[375px] h-[812px] bg-[#E9E6D7] overflow-hidden"><img data-name="仙侠界面完整视觉稿" src="./assets/ui/concepts/xianxia-ui-skin-v3-refined.png" class="w-[375px] h-[812px] object-cover" /></main>
+<main data-name="番茄合成图鉴界面" class="flex flex-col justify-start items-center w-[375px] h-[812px] overflow-hidden bg-[linear-gradient(180deg,#B9D7CD_0%,#47665F_100%)] p-[10px] gap-[8px]">
+  <div data-name="暗化顶部资源栏" class="flex flex-row justify-between items-center w-[355px] h-[52px] opacity-[0.42]">
+    <div data-name="体力资源" class="flex flex-row justify-center items-center w-[109px] h-[42px] rounded-[14px] border-[2px] border-[#D7B35D] bg-[#F7EED3] gap-[6px]">
+      <i data-name="体力图标" class="fa-solid fa-bolt text-[20px] leading-[20px] text-[#F4B72B]"></i>
+      <div data-name="体力数据" class="flex flex-col justify-center items-start w-[57px] h-[34px]">
+        <span data-name="体力标题" class="text-[10px] leading-[12px] font-[700] text-[#5A3B22] text-left">体力</span>
+        <span data-name="体力数值" class="text-[14px] leading-[16px] font-[800] text-[#3F3428] text-left">97/100</span>
+      </div>
+    </div>
+    <div data-name="灵气资源" class="flex flex-row justify-center items-center w-[109px] h-[42px] rounded-[14px] border-[2px] border-[#D7B35D] bg-[#F7EED3] gap-[6px]">
+      <i data-name="灵气图标" class="fa-solid fa-fire-flame-curved text-[20px] leading-[20px] text-[#35BFD0]"></i>
+      <div data-name="灵气数据" class="flex flex-col justify-center items-start w-[57px] h-[34px]">
+        <span data-name="灵气标题" class="text-[10px] leading-[12px] font-[700] text-[#5A3B22] text-left">灵气</span>
+        <span data-name="灵气数值" class="text-[14px] leading-[16px] font-[800] text-[#3F3428] text-left">51</span>
+      </div>
+    </div>
+    <div data-name="灵石资源" class="flex flex-row justify-center items-center w-[109px] h-[42px] rounded-[14px] border-[2px] border-[#D7B35D] bg-[#F7EED3] gap-[6px]">
+      <i data-name="灵石图标" class="fa-solid fa-gem text-[20px] leading-[20px] text-[#45B988]"></i>
+      <div data-name="灵石数据" class="flex flex-col justify-center items-start w-[57px] h-[34px]">
+        <span data-name="灵石标题" class="text-[10px] leading-[12px] font-[700] text-[#5A3B22] text-left">灵石</span>
+        <span data-name="灵石数值" class="text-[14px] leading-[16px] font-[800] text-[#3F3428] text-left">1415</span>
+      </div>
+    </div>
+  </div>
+
+  <section data-name="番茄图鉴弹窗" class="flex flex-col justify-start items-center w-[355px] h-[675px] rounded-[28px] border-[3px] border-[#C99F4D] bg-[#FFF9E9] p-[12px] gap-[9px] shadow-[0_18px_45px_rgba(21,43,38,0.46),inset_0_0_0_3px_#F0D994]">
+    <div data-name="弹窗标题栏" class="flex flex-row justify-between items-center w-[327px] h-[58px] rounded-[18px] border-[2px] border-[#D8B86A] bg-[linear-gradient(135deg,#1C766C_0%,#48B6A1_100%)] p-[8px] shadow-[0_5px_12px_rgba(35,112,101,0.34)]">
+      <div data-name="标题装饰图标" class="flex flex-row justify-center items-center w-[40px] h-[40px] rounded-[20px] border-[2px] border-[#F2D787] bg-[#155B56]">
+        <i data-name="番茄叶片纹章" class="fa-solid fa-leaf text-[20px] leading-[20px] text-[#F6D979]"></i>
+      </div>
+      <div data-name="标题文字组" class="flex flex-col justify-center items-center w-[190px] h-[42px]">
+        <span data-name="番茄标题" class="text-[22px] leading-[26px] font-[900] text-[#FFF4C7] text-center">番茄</span>
+        <span data-name="图鉴副标题" class="text-[10px] leading-[12px] font-[700] tracking-[2px] text-[#C9F1E5] text-center">合 成 图 鉴</span>
+      </div>
+      <div data-name="关闭按钮" class="flex flex-row justify-center items-center w-[40px] h-[40px] rounded-[20px] border-[2px] border-[#F2D787] bg-[#8B4A32]">
+        <i data-name="关闭图标" class="fa-solid fa-xmark text-[21px] leading-[21px] text-[#FFF1D2]"></i>
+      </div>
+    </div>
+
+    <div data-name="番茄描述卡" class="flex flex-row justify-center items-center w-[315px] h-[45px] rounded-[14px] border-[1px] border-[#E7D19B] bg-[#F8EAC5] p-[8px]">
+      <p data-name="番茄描述" class="w-[285px] text-[14px] leading-[20px] font-[700] text-[#775137] text-center">果实鲜红酸甜，饱满多汁。</p>
+    </div>
+
+    <div data-name="第一组合成链" class="flex flex-row justify-between items-center w-[315px] h-[76px]">
+      <div data-name="青菜节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#E7C881] bg-[#F4E4B8] gap-[3px]">
+        <i data-name="青菜图标" class="fa-solid fa-leaf text-[29px] leading-[30px] text-[#69B948]"></i>
+        <span data-name="青菜等级" class="text-[9px] leading-[11px] font-[700] text-[#806441] text-center">一阶</span>
+      </div>
+      <i data-name="青菜至番茄箭头" class="fa-solid fa-chevron-right text-[13px] leading-[14px] text-[#D9B861]"></i>
+      <div data-name="番茄选中节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[3px] border-[#F2C759] bg-[#65C77B] gap-[3px] shadow-[0_0_16px_rgba(91,211,147,0.65)]">
+        <i data-name="番茄图标" class="fa-solid fa-apple-whole text-[30px] leading-[30px] text-[#E8413C]"></i>
+        <span data-name="番茄等级" class="text-[9px] leading-[11px] font-[800] text-[#163E31] text-center">二阶</span>
+      </div>
+      <i data-name="番茄至彩椒箭头" class="fa-solid fa-chevron-right text-[13px] leading-[14px] text-[#D9B861]"></i>
+      <div data-name="彩椒节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#E7C881] bg-[#F4E4B8] gap-[3px]">
+        <i data-name="彩椒图标" class="fa-solid fa-pepper-hot text-[29px] leading-[30px] text-[#F0A52E]"></i>
+        <span data-name="彩椒等级" class="text-[9px] leading-[11px] font-[700] text-[#806441] text-center">三阶</span>
+      </div>
+      <i data-name="彩椒至胡萝卜箭头" class="fa-solid fa-chevron-right text-[13px] leading-[14px] text-[#D9B861]"></i>
+      <div data-name="胡萝卜节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#E7C881] bg-[#F4E4B8] gap-[3px]">
+        <i data-name="胡萝卜图标" class="fa-solid fa-carrot text-[29px] leading-[30px] text-[#EE8E32]"></i>
+        <span data-name="胡萝卜等级" class="text-[9px] leading-[11px] font-[700] text-[#806441] text-center">四阶</span>
+      </div>
+    </div>
+
+    <div data-name="第二组合成链" class="flex flex-row justify-between items-center w-[315px] h-[76px]">
+      <div data-name="灵菇节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#E7C881] bg-[#F4E4B8] gap-[3px]">
+        <i data-name="灵菇图标" class="fa-solid fa-cloud text-[29px] leading-[30px] text-[#9A6B4B]"></i>
+        <span data-name="灵菇等级" class="text-[9px] leading-[11px] font-[700] text-[#806441] text-center">五阶</span>
+      </div>
+      <i data-name="灵菇至玉米箭头" class="fa-solid fa-chevron-right text-[13px] leading-[14px] text-[#D9B861]"></i>
+      <div data-name="灵谷节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#E7C881] bg-[#F4E4B8] gap-[3px]">
+        <i data-name="灵谷图标" class="fa-solid fa-wheat-awn text-[29px] leading-[30px] text-[#EAB642]"></i>
+        <span data-name="灵谷等级" class="text-[9px] leading-[11px] font-[700] text-[#806441] text-center">六阶</span>
+      </div>
+      <i data-name="灵谷至土豆箭头" class="fa-solid fa-chevron-right text-[13px] leading-[14px] text-[#D9B861]"></i>
+      <div data-name="灵薯节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#E7C881] bg-[#F4E4B8] gap-[3px]">
+        <i data-name="灵薯图标" class="fa-solid fa-seedling text-[29px] leading-[30px] text-[#B78B4E]"></i>
+        <span data-name="灵薯等级" class="text-[9px] leading-[11px] font-[700] text-[#806441] text-center">七阶</span>
+      </div>
+      <i data-name="灵薯至紫甘蓝箭头" class="fa-solid fa-chevron-right text-[13px] leading-[14px] text-[#D9B861]"></i>
+      <div data-name="紫甘蓝节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#E7C881] bg-[#F4E4B8] gap-[3px]">
+        <i data-name="紫甘蓝图标" class="fa-solid fa-circle-nodes text-[29px] leading-[30px] text-[#8C57B7]"></i>
+        <span data-name="紫甘蓝等级" class="text-[9px] leading-[11px] font-[700] text-[#806441] text-center">八阶</span>
+      </div>
+    </div>
+
+    <div data-name="第三组合成链" class="flex flex-row justify-between items-center w-[315px] h-[76px]">
+      <div data-name="灵花菜节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#E7C881] bg-[#F4E4B8] gap-[3px]">
+        <i data-name="灵花菜图标" class="fa-solid fa-tree text-[29px] leading-[30px] text-[#2F9D68]"></i>
+        <span data-name="灵花菜等级" class="text-[9px] leading-[11px] font-[700] text-[#806441] text-center">九阶</span>
+      </div>
+      <i data-name="灵花菜至豆荚箭头" class="fa-solid fa-chevron-right text-[13px] leading-[14px] text-[#D9B861]"></i>
+      <div data-name="灵豆荚节点" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#E7C881] bg-[#F4E4B8] gap-[3px]">
+        <i data-name="灵豆荚图标" class="fa-solid fa-leaf text-[29px] leading-[30px] text-[#3FAE61]"></i>
+        <span data-name="灵豆荚等级" class="text-[9px] leading-[11px] font-[700] text-[#806441] text-center">十阶</span>
+      </div>
+      <i data-name="豆荚至未知箭头" class="fa-solid fa-chevron-right text-[13px] leading-[14px] text-[#D9B861]"></i>
+      <div data-name="未知节点一" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#D8C99D] bg-[#EDE4C9] gap-[3px]">
+        <i data-name="未知图标一" class="fa-solid fa-question text-[28px] leading-[30px] text-[#C7B78B]"></i>
+        <span data-name="未知等级一" class="text-[9px] leading-[11px] font-[700] text-[#A79976] text-center">未解锁</span>
+      </div>
+      <i data-name="未知节点连接箭头" class="fa-solid fa-chevron-right text-[13px] leading-[14px] text-[#CFC29F]"></i>
+      <div data-name="未知节点二" class="flex flex-col justify-center items-center w-[62px] h-[68px] rounded-[14px] border-[2px] border-[#D8C99D] bg-[#EDE4C9] gap-[3px]">
+        <i data-name="未知图标二" class="fa-solid fa-question text-[28px] leading-[30px] text-[#C7B78B]"></i>
+        <span data-name="未知等级二" class="text-[9px] leading-[11px] font-[700] text-[#A79976] text-center">未解锁</span>
+      </div>
+    </div>
+
+    <div data-name="来源标题分隔栏" class="flex flex-row justify-center items-center w-[315px] h-[30px] gap-[10px]">
+      <div data-name="左侧分隔线" class="flex flex-row justify-center items-center w-[94px] h-[2px] bg-[#D7B968]"></div>
+      <div data-name="来源标题胶囊" class="flex flex-row justify-center items-center w-[82px] h-[28px] rounded-[14px] bg-[#EED99D]">
+        <span data-name="来源标题" class="text-[14px] leading-[18px] font-[800] text-[#845837] text-center">产自</span>
+      </div>
+      <div data-name="右侧分隔线" class="flex flex-row justify-center items-center w-[94px] h-[2px] bg-[#D7B968]"></div>
+    </div>
+
+    <div data-name="灵田菜圃来源卡" class="flex flex-row justify-center items-center w-[315px] h-[105px] rounded-[18px] border-[2px] border-[#D7B969] bg-[linear-gradient(135deg,#E7F0D9_0%,#F7E5B8_100%)] gap-[16px]">
+      <div data-name="来源建筑图标底座" class="flex flex-row justify-center items-center w-[70px] h-[70px] rounded-[18px] border-[2px] border-[#3E8D76] bg-[#216B61] shadow-[0_0_18px_rgba(54,173,142,0.48)]">
+        <i data-name="灵田菜圃图标" class="fa-solid fa-shop text-[34px] leading-[36px] text-[#F2D26F]"></i>
+      </div>
+      <div data-name="来源建筑信息" class="flex flex-col justify-center items-start w-[174px] h-[70px] gap-[5px]">
+        <span data-name="来源建筑名称" class="text-[19px] leading-[23px] font-[900] text-[#295C50] text-left">灵田菜圃</span>
+        <span data-name="来源建筑说明" class="text-[12px] leading-[16px] font-[600] text-[#795E42] text-left">采收灵蔬，解锁更高阶食材</span>
+      </div>
+      <div data-name="来源详情入口" class="flex flex-row justify-center items-center w-[30px] h-[30px] rounded-[15px] bg-[#D7A641]">
+        <i data-name="来源详情图标" class="fa-solid fa-circle-info text-[17px] leading-[18px] text-[#FFF7DA]"></i>
+      </div>
+    </div>
+
+    <div data-name="底部灵纹装饰" class="flex flex-row justify-center items-center w-[315px] h-[28px] gap-[9px]">
+      <i data-name="左侧灵纹" class="fa-solid fa-feather-pointed text-[16px] leading-[18px] text-[#69B8A6]"></i>
+      <div data-name="底部灵纹线" class="flex flex-row justify-center items-center w-[210px] h-[2px] bg-[#B9D8C8]"></div>
+      <i data-name="右侧灵纹" class="fa-solid fa-feather-pointed text-[16px] leading-[18px] text-[#69B8A6]"></i>
+    </div>
+  </section>
+
+  <div data-name="暗化底部操作栏" class="flex flex-row justify-between items-center w-[355px] h-[49px] opacity-[0.34]">
+    <div data-name="底部返回按钮" class="flex flex-row justify-center items-center w-[62px] h-[42px] rounded-[13px] border-[2px] border-[#D7B35D] bg-[#F7EED3]">
+      <i data-name="返回图标" class="fa-solid fa-hammer text-[20px] leading-[20px] text-[#76513B]"></i>
+    </div>
+    <div data-name="底部说明栏" class="flex flex-row justify-center items-center w-[211px] h-[42px] rounded-[13px] border-[2px] border-[#D7B35D] bg-[#F7EED3]">
+      <span data-name="底部说明文本" class="text-[12px] leading-[15px] font-[700] text-[#76513B] text-center">番茄 2级 · 果实鲜红酸甜</span>
+    </div>
+    <div data-name="底部商店按钮" class="flex flex-row justify-center items-center w-[62px] h-[42px] rounded-[13px] border-[2px] border-[#D7B35D] bg-[#F7EED3]">
+      <i data-name="商店图标" class="fa-solid fa-store text-[20px] leading-[20px] text-[#4A8B72]"></i>
+    </div>
+  </div>
+</main>

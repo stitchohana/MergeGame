@@ -2,6 +2,7 @@ class_name ItemDetailPanel extends BaseHUD
 signal material_clicked(uid: int, item_id: int)
 
 @onready var default_label: Label = $DefaultLabel
+@onready var header: NinePatchRect = $Header
 @onready var name_label: Label = $NameLabel
 @onready var level_label: Label = $LevelLabel
 @onready var desc_label: Label = $DescLabel
@@ -37,6 +38,7 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 		return
 	_current_item_data = item_data
 	_update_sell_btn()
+	header.show()
 	var item_name: String = item_data.get("name", "")
 	var item_level: int = item_data.get("level", 0)
 	var item_desc: String = item_data.get("describe", "")
@@ -310,6 +312,7 @@ func clear() -> void:
 	_stop_countdown_timer()
 	_current_item_data = {}
 	_current_recipes = []
+	header.hide()
 	default_label.show()
 	name_label.hide()
 	level_label.hide()

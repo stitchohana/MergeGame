@@ -53,17 +53,26 @@ func _input(event: InputEvent) -> void:
 func set_title(_text: String) -> void:
 	pass
 
-func set_requirements(reqs: Array) -> void:
+func set_requirements(reqs: Array, available_indices: Dictionary = {}) -> void:
 	for child in container.get_children():
 		if child is RequirementEntry:
 			container.remove_child(child)
 			child.queue_free()
 
+	var ordered_indices: Array[int] = []
 	for i in range(reqs.size()):
+		if bool(available_indices.get(i, false)):
+			ordered_indices.append(i)
+	for i in range(reqs.size()):
+		if not bool(available_indices.get(i, false)):
+			ordered_indices.append(i)
+
+	for i in ordered_indices:
 		var req: Dictionary = reqs[i]
 		var entry: RequirementEntry = _entry_scene.instantiate()
 		container.add_child(entry)
 		entry.setup(req.get("items", []), i, req.get("completed", false), req.get("rewards", {}))
+		entry.set_available(bool(available_indices.get(i, false)))
 		var idx := i
 		entry.complete_pressed.connect(_emit_complete.bind(idx))
 		entry.item_pressed.connect(_on_entry_item_pressed)
@@ -84,14 +93,53 @@ func _get_entries() -> Array[RequirementEntry]:
 	return entries
 
 func set_entry_available(index: int, available: bool) -> void:
-	var entries := _get_entries()
-	if index < 0 or index >= entries.size():
+	var entry := _get_entry_by_display_index(index)
+	if entry == null:
 		return
-	entries[index].set_available(available)
+	var changed: bool = entry.set_available(available)
+	if not changed:
+		return
+	if available:
+		_promote_entry(entry)
+	else:
+		_move_entry_after_available(entry)
 
 func refresh_item_selection(present_item_ids: Dictionary) -> void:
 	for entry in _get_entries():
 		entry.refresh_item_selection(present_item_ids)
+
+
+func _get_entry_by_display_index(index: int) -> RequirementEntry:
+	for entry in _get_entries():
+		if entry.get_display_index() == index:
+			return entry
+	return null
+
+
+func _promote_entry(entry: RequirementEntry) -> void:
+	var start_position: Vector2 = entry.position
+	container.move_child(entry, 1)
+	_animate_promoted_entry(entry, start_position)
+
+
+func _move_entry_after_available(entry: RequirementEntry) -> void:
+	var available_count: int = 0
+	for child in _get_entries():
+		if child != entry and child.is_available():
+			available_count += 1
+	container.move_child(entry, available_count + 1)
+
+
+func _animate_promoted_entry(entry: RequirementEntry, start_position: Vector2) -> void:
+	await get_tree().process_frame
+	if not is_instance_valid(entry):
+		return
+	var target_position: Vector2 = entry.position
+	entry.position = start_position
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(entry, "position", target_position, 0.28)
 
 func _emit_complete(idx: int) -> void:
 	complete_clicked.emit(idx)

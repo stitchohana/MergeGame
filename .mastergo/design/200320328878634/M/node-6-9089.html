@@ -1,0 +1,108 @@
+<main data-name="合成配方弹窗-780x1688" class="relative flex flex-col justify-center items-center w-[780px] h-[1688px] overflow-hidden bg-[#DDE8DD]">
+  <img data-name="游戏背景-仙山" src="./assets/ui/cultivation_screen_v3/background.png" class="absolute left-[0px] top-[0px] w-[780px] h-[1688px] object-cover" />
+  <div data-name="背景界面虚化层" class="absolute left-[30px] top-[120px] flex flex-col justify-start items-stretch w-[720px] h-[1450px] gap-[24px] opacity-[0.62]">
+    <div data-name="顶部资源占位" class="flex flex-row justify-between items-center self-stretch h-[92px] bg-[#F3E8CF]/90 border-[2px] border-[#B68A48] rounded-[24px] p-[16px] shadow-[0_8px_20px_rgba(42,28,15,0.20)]">
+      <div data-name="资源胶囊一" class="flex flex-row justify-center items-center w-[190px] h-[58px] rounded-[29px] bg-[#DCEBE0] border-[2px] border-[#89A995] gap-[12px]">
+        <i data-name="资源图标一" class="fas fa-bolt text-[24px] text-[#3D8C87]"></i>
+        <span data-name="资源数值一" class="text-[22px] leading-[26px] font-[700] text-[#37584D] text-center">50</span>
+      </div>
+      <div data-name="资源胶囊二" class="flex flex-row justify-center items-center w-[190px] h-[58px] rounded-[29px] bg-[#F3E5BE] border-[2px] border-[#B58A37] gap-[12px]">
+        <i data-name="资源图标二" class="fas fa-coins text-[24px] text-[#BB7E21]"></i>
+        <span data-name="资源数值二" class="text-[22px] leading-[26px] font-[700] text-[#6F4A1F] text-center">1415</span>
+      </div>
+      <div data-name="资源胶囊三" class="flex flex-row justify-center items-center w-[190px] h-[58px] rounded-[29px] bg-[#E6DBE8] border-[2px] border-[#9B6DA1] gap-[12px]">
+        <i data-name="资源图标三" class="fas fa-gem text-[24px] text-[#9B557F]"></i>
+        <span data-name="资源数值三" class="text-[22px] leading-[26px] font-[700] text-[#694263] text-center">38</span>
+      </div>
+    </div>
+    <div data-name="棋盘背景占位" class="flex flex-col justify-start items-stretch self-stretch h-[1040px] bg-[#CCDBC9]/80 border-[8px] border-[#856344] rounded-[32px] p-[20px] gap-[14px] shadow-[0_16px_40px_rgba(35,24,16,0.28)]">
+      <div data-name="棋盘行一" class="flex flex-row justify-between items-center self-stretch h-[112px] gap-[12px]">
+        <div data-name="格子一" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+        <div data-name="格子二" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+        <div data-name="格子三" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+        <div data-name="格子四" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+        <div data-name="格子五" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+      </div>
+      <div data-name="棋盘行二" class="flex flex-row justify-between items-center self-stretch h-[112px] gap-[12px]">
+        <div data-name="格子六" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+        <div data-name="格子七" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+        <div data-name="格子八" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+        <div data-name="格子九" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+        <div data-name="格子十" class="flex flex-row justify-center items-center w-[112px] h-[112px] rounded-[18px] bg-[#EDF0D9] border-[2px] border-[#9EB08F]"></div>
+      </div>
+    </div>
+  </div>
+  <div data-name="全屏暗色遮罩" class="absolute left-[0px] top-[0px] w-[780px] h-[1688px] bg-[#101713]/75 backdrop-blur-[3px]"></div>
+
+  <div data-name="配方弹窗主体" class="relative flex flex-col justify-start items-center w-[650px] h-[1080px] bg-[#4B2918] border-[5px] border-[#C9953D] rounded-[42px] p-[12px] gap-[0px] shadow-[0_28px_64px_rgba(8,10,8,0.58)]">
+    <div data-name="鎏金外沿" class="flex flex-col justify-start items-center self-stretch h-[1056px] bg-[#E6C071] border-[3px] border-[#FFE7A5] rounded-[34px] p-[10px] gap-[0px]">
+      <div data-name="宣纸内页" class="flex flex-col justify-start items-center self-stretch h-[1030px] overflow-hidden bg-[#F8EED5] border-[3px] border-[#9C6531] rounded-[27px] p-[22px] gap-[14px]">
+        
+        <div data-name="顶部标题区" class="flex flex-row justify-between items-center self-stretch h-[104px] gap-[12px]">
+          <div data-name="帮助按钮" class="flex flex-row justify-center items-center w-[64px] h-[64px] rounded-[32px] bg-[#E9D19B] border-[3px] border-[#FFF0C5] shadow-[0_4px_0_#A86F2F]">
+            <i data-name="帮助图标" class="fas fa-question text-[28px] text-[#70451F]"></i>
+          </div>
+          <div data-name="标题牌" class="flex flex-row justify-center items-center w-[430px] h-[94px] bg-[linear-gradient(135deg,#F5D174_0%,#D99A38_100%)] border-[4px] border-[#7E481E] rounded-[26px] shadow-[0_7px_0_#6B3A19]">
+            <i data-name="标题左纹样" class="fas fa-diamond text-[14px] text-[#FFF0B6]"></i>
+            <span data-name="标题文字" class="text-[36px] leading-[42px] font-[800] text-[#5B311A] text-center">甜蛋酒</span>
+            <i data-name="标题右纹样" class="fas fa-diamond text-[14px] text-[#FFF0B6]"></i>
+          </div>
+          <div data-name="关闭按钮" class="flex flex-row justify-center items-center w-[64px] h-[64px] rounded-[32px] bg-[#9F3325] border-[3px] border-[#F6C469] shadow-[0_4px_0_#5B2119]">
+            <i data-name="关闭图标" class="fas fa-xmark text-[32px] text-[#FFE7A8]"></i>
+          </div>
+        </div>
+
+        <div data-name="物品说明区" class="flex flex-row justify-start items-center self-stretch h-[190px] bg-[#F4E1BD] border-[2px] border-[#C99854] rounded-[24px] p-[20px] gap-[20px]">
+          <div data-name="成品图标框" class="flex flex-row justify-center items-center w-[132px] h-[132px] rounded-[66px] bg-[#D6EEE2] border-[5px] border-[#719B8A] shadow-[inset_0_0_0_5px_#F7F1D5]">
+            <i data-name="甜蛋酒图标" class="fas fa-bowl-food text-[70px] text-[#D69B43]"></i>
+          </div>
+          <div data-name="说明文字卡" class="flex flex-col justify-center items-start flex-1 h-[132px] bg-[#E8CDB3] border-[1px] border-[#D3A779] rounded-[18px] p-[18px] gap-[8px]">
+            <span data-name="物品类型" class="text-[17px] leading-[22px] font-[700] text-[#8B5A34] text-left">温养食膳</span>
+            <p data-name="物品描述" class="self-stretch text-[24px] leading-[34px] font-[600] text-[#75452B] text-left">甜甜酒酿卧灵禽蛋，暖胃又温养灵脉。</p>
+          </div>
+        </div>
+
+        <div data-name="配方标题区" class="flex flex-row justify-center items-center self-stretch h-[60px] gap-[20px]">
+          <i data-name="左云纹" class="fas fa-cloud text-[26px] text-[#C79652]"></i>
+          <div data-name="配方标题底" class="flex flex-row justify-center items-center w-[270px] h-[48px] rounded-[24px] bg-[#F1D9A6] border-[1px] border-[#D2A462]">
+            <span data-name="配方标题" class="text-[26px] leading-[32px] font-[700] text-[#6D3E23] text-center">配方</span>
+          </div>
+          <i data-name="右云纹" class="fas fa-cloud text-[26px] text-[#C79652]"></i>
+        </div>
+
+        <div data-name="材料配方区" class="flex flex-row justify-center items-center self-stretch h-[210px] bg-[#E9C78E]/70 border-[2px] border-[#D0A65D] rounded-[22px] p-[22px] gap-[42px]">
+          <div data-name="材料一" class="flex flex-col justify-center items-center w-[170px] h-[166px] bg-[#DCECB6] border-[4px] border-[#72A44D] rounded-[22px] p-[12px] gap-[8px] shadow-[0_6px_0_#557B3C]">
+            <i data-name="灵禽蛋图标" class="fas fa-egg text-[72px] text-[#F6E7CE]"></i>
+            <span data-name="灵禽蛋名称" class="text-[19px] leading-[22px] font-[700] text-[#466A32] text-center">灵禽蛋</span>
+            <span data-name="灵禽蛋数量" class="text-[18px] leading-[22px] font-[700] text-[#315623] text-center">1 / 1</span>
+          </div>
+          <div data-name="材料二" class="flex flex-col justify-center items-center w-[170px] h-[166px] bg-[#F4E3B7] border-[4px] border-[#AF7B37] rounded-[22px] p-[12px] gap-[8px] shadow-[0_6px_0_#7D552A]">
+            <i data-name="仙谷粉图标" class="fas fa-bag-shopping text-[68px] text-[#E9CC8B]"></i>
+            <span data-name="仙谷粉名称" class="text-[19px] leading-[22px] font-[700] text-[#6A4828] text-center">仙谷粉</span>
+            <span data-name="仙谷粉数量" class="text-[18px] leading-[22px] font-[700] text-[#5A3A21] text-center">5 / 5</span>
+          </div>
+        </div>
+
+        <div data-name="合成箭头区" class="flex flex-row justify-center items-center self-stretch h-[66px]">
+          <i data-name="向下合成箭头" class="fas fa-arrow-down text-[54px] text-[#5A9D52] drop-shadow-[0_4px_0_#326B3A]"></i>
+        </div>
+
+        <div data-name="产物与计时区" class="flex flex-col justify-center items-center self-stretch h-[224px] bg-[#F9F2DD] border-[2px] border-[#D9BA7B] rounded-[22px] p-[18px] gap-[12px]">
+          <div data-name="炼制炉图标框" class="flex flex-row justify-center items-center w-[132px] h-[132px] rounded-[24px] bg-[#DDEAE0] border-[4px] border-[#71917B] shadow-[0_7px_0_#4C6B58]">
+            <i data-name="炼制炉图标" class="fas fa-box-open text-[74px] text-[#A96C37]"></i>
+          </div>
+          <div data-name="计时信息" class="flex flex-row justify-center items-center h-[42px] gap-[10px]">
+            <i data-name="计时图标" class="fas fa-clock text-[28px] text-[#C4862E]"></i>
+            <span data-name="计时时间" class="text-[25px] leading-[30px] font-[800] text-[#6F3F23] text-center">1分24秒</span>
+          </div>
+        </div>
+
+        <div data-name="底部装饰线" class="flex flex-row justify-center items-center self-stretch h-[30px] gap-[14px]">
+          <div data-name="左装饰线" class="w-[220px] h-[2px] bg-[#C0904D]"></div>
+          <i data-name="底部装饰图标" class="fas fa-fan text-[24px] text-[#9E6D36]"></i>
+          <div data-name="右装饰线" class="w-[220px] h-[2px] bg-[#C0904D]"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

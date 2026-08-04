@@ -77,33 +77,31 @@ mouse_filter = 2
 texture = ExtResource("2_bg")
 expand_mode = 1
 
-[node name="Header" type="TextureRect" parent="." unique_id=1087536762]
-layout_mode = 0
+[node name="Header" type="NinePatchRect" parent="." unique_id=1180294576]
+layout_mode = 1
 offset_left = -1.0
-offset_right = 149.0
+offset_right = 185.0
 offset_bottom = 46.0
-mouse_filter = 2
 texture = ExtResource("3_title_tab")
-expand_mode = 1
+region_rect = Rect2(0, 0, 433, 157)
 
 [node name="DefaultLabel" type="Label" parent="." unique_id=1849935955]
-visible = false
 layout_mode = 0
-offset_left = 24.0
-offset_top = 61.0
-offset_right = 438.0
-offset_bottom = 137.0
+offset_left = 47.0
+offset_top = 43.0
+offset_right = 461.0
+offset_bottom = 119.0
 theme_override_colors/font_color = Color(0.46, 0.42, 0.33, 1)
 theme_override_font_sizes/font_size = 17
 text = "点击物品查看详情"
 vertical_alignment = 1
 
 [node name="NameLabel" type="Label" parent="." unique_id=1966959930]
-layout_mode = 0
-offset_left = 39.0
-offset_top = 10.0
-offset_right = 123.0
-offset_bottom = 42.0
+layout_mode = 1
+offset_left = 35.0
+offset_top = 5.0
+offset_right = 119.0
+offset_bottom = 37.0
 theme_override_colors/font_color = Color(1, 0.957, 0.796, 1)
 theme_override_colors/font_outline_color = Color(0.247, 0.29, 0.18, 1)
 theme_override_constants/outline_size = 2
@@ -112,22 +110,23 @@ text = "糖浆"
 vertical_alignment = 1
 
 [node name="LevelLabel" type="Label" parent="." unique_id=374669382]
-layout_mode = 0
-offset_left = 116.0
-offset_top = 10.0
-offset_right = 152.0
-offset_bottom = 42.0
+layout_mode = 1
+offset_left = 134.0
+offset_top = 5.0
+offset_right = 170.0
+offset_bottom = 37.0
 theme_override_colors/font_color = Color(1, 0.957, 0.796, 1)
 theme_override_font_sizes/font_size = 17
 text = "3级"
 vertical_alignment = 1
 
 [node name="DescLabel" type="Label" parent="." unique_id=497603057]
+visible = false
 layout_mode = 0
-offset_left = 22.0
-offset_top = 64.0
-offset_right = 440.0
-offset_bottom = 139.0
+offset_left = 38.0
+offset_top = 37.0
+offset_right = 456.0
+offset_bottom = 126.0
 theme_override_colors/font_color = Color(0.463, 0.255, 0.149, 1)
 theme_override_font_sizes/font_size = 18
 text = "浓稠的琥珀色液体糖浆。"
@@ -146,10 +145,9 @@ text = "配方"
 [node name="ViewButton" type="Button" parent="." unique_id=1949603087]
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 0
-offset_left = 139.0
-offset_top = 1.0
-offset_right = 191.0
-offset_bottom = 49.0
+offset_left = 165.0
+offset_right = 217.0
+offset_bottom = 48.0
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18

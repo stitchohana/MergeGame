@@ -5,6 +5,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
+from remove_item_icon_backgrounds import make_transparent
+
 
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS_PATH = ROOT / "config" / "json_output" / "items.json"
@@ -13,6 +15,8 @@ ICON_DIR = ROOT / "assets" / "items" / "icons"
 MANIFEST_PATH = ROOT / "assets" / "items" / "icon_manifest.json"
 PREVIEW_PATH = ROOT / "assets" / "items" / "icons_preview.png"
 ICON_SIZE = 256
+VISIBLE_ALPHA_THRESHOLD = 16
+MAX_CENTER_OFFSET = 0.06
 
 
 def load_items() -> tuple[dict, dict[int, dict]]:
@@ -67,6 +71,29 @@ def build_jobs(data: dict) -> list[tuple[str, list[int]]]:
 	return jobs
 
 
+def center_visible_content(image: Image.Image) -> Image.Image:
+	"""Center material whose transparent bounds visibly drift inside the icon canvas."""
+	image = image.convert("RGBA")
+	alpha = image.getchannel("A")
+	bounds = alpha.point(lambda value: 255 if value > VISIBLE_ALPHA_THRESHOLD else 0).getbbox()
+	if bounds is None:
+		return image
+
+	left, top, right, bottom = bounds
+	content_center_x = (left + right - 1) / 2.0
+	content_center_y = (top + bottom - 1) / 2.0
+	canvas_center_x = (image.width - 1) / 2.0
+	canvas_center_y = (image.height - 1) / 2.0
+	offset_x = canvas_center_x - content_center_x
+	offset_y = canvas_center_y - content_center_y
+	if max(abs(offset_x) / image.width, abs(offset_y) / image.height) < MAX_CENTER_OFFSET:
+		return image
+
+	centered = Image.new("RGBA", image.size)
+	centered.alpha_composite(image, (round(offset_x), round(offset_y)))
+	return centered
+
+
 def crop_icons(jobs: list[tuple[str, list[int]]], by_id: dict[int, dict]) -> list[dict]:
 	ICON_DIR.mkdir(parents=True, exist_ok=True)
 	manifest: list[dict] = []
@@ -97,6 +124,7 @@ def crop_icons(jobs: list[tuple[str, list[int]]], by_id: dict[int, dict]) -> lis
 				bottom = atlas.height if row == 3 else (row + 1) * cell_height
 				icon = atlas.crop((left, top, right, bottom))
 				icon = icon.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
+				icon = center_visible_content(make_transparent(icon, threshold=38.0, feather=18.0))
 				output_path = ICON_DIR / f"{item_id}.png"
 				icon.save(output_path, format="PNG", optimize=True)
 

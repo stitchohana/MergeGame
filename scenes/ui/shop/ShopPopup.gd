@@ -60,8 +60,6 @@ func _build_item_button(item_data: Dictionary, price: int) -> VBoxContainer:
 	widget.setup(item_data)
 
 	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if widget.name_label:
-		widget.name_label.add_theme_font_size_override("font_size", 9)
 
 	var buy_button := Button.new()
 	buy_button.text = "%d 灵石" % price

@@ -1,9 +1,8 @@
 class_name TopBar extends BaseHUD
 
-@onready var qi_label: Label = $QiLabel
-@onready var stamina_label: Label = $StaminaLabel
-@onready var stones_label: Label = $StonesLabel
-@onready var regen_timer_label: Label = $RegenTimerLabel
+@onready var stamina_resource: TopResource = $StaminaResource
+@onready var qi_resource: TopResource = $QiResource
+@onready var stones_resource: TopResource = $StonesResource
 @onready var gm_btn: Button = $GMButton
 
 var _regen_remaining: float = 0.0
@@ -65,27 +64,16 @@ func _on_qi_changed(_current: int, _max: int) -> void:
 
 
 func _update_qi() -> void:
-	if qi_label:
-		qi_label.text = "%d/%d" % [CultivationService.current_qi, CultivationService.max_qi]
+	qi_resource.set_value(CultivationService.current_qi)
 
 
 func _update_stones() -> void:
-	if stones_label:
-		stones_label.text = "%d" % GameState.spirit_stones
+	stones_resource.set_value(GameState.spirit_stones)
 
 
 func _update_stamina() -> void:
-	if stamina_label:
-		stamina_label.text = "%d/%d" % [GameState.stamina, GameState.max_stamina]
+	stamina_resource.set_value(GameState.stamina)
 
 
 func _update_regen_timer() -> void:
-	if not regen_timer_label:
-		return
-	if _regen_remaining <= 0:
-		regen_timer_label.text = ""
-		return
-	var secs: int = int(ceil(_regen_remaining))
-	var m: int = secs / 60
-	var s: int = secs % 60
-	regen_timer_label.text = "%02d:%02d" % [m, s]
+	stamina_resource.set_regen_timer(_regen_remaining)

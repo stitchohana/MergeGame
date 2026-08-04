@@ -1,42 +1,21 @@
 [gd_scene format=3 uid="uid://bnawplfeb8p6l"]
 
-[ext_resource type="Script" path="res://scenes/ui/main/RecipeSourcePopup.gd" id="1_gd"]
+[ext_resource type="Script" uid="uid://cld4x8arvcdlo" path="res://scenes/ui/main/RecipeSourcePopup.gd" id="1_gd"]
 [ext_resource type="Theme" uid="uid://dhv8eh1s6nl6v" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
-[ext_resource type="Texture2D" uid="uid://cc7dg2q0x1rdw" path="res://assets/ui/recipe/recipe_source_panel_bg.png" id="3_panel_texture"]
-[ext_resource type="Texture2D" uid="uid://cuue1mt3vdb0x" path="res://assets/ui/recipe/recipe_close_button.png" id="4_close_texture"]
+[ext_resource type="Texture2D" uid="uid://caif7biq12qid" path="res://assets/ui/craft_path_v1_layers/layers/craft_path_panel_frame.png" id="3_l0p3r"]
+[ext_resource type="Texture2D" uid="uid://cbk1p0my0xd1a" path="res://assets/ui/craft_path_v1_layers/layers/close_button.png" id="4_wc2cq"]
+[ext_resource type="Texture2D" uid="uid://c4w5j8gveuyq7" path="res://assets/ui/craft_path_v1_layers/layers/craft_path_source_label.png" id="5_wc2cq"]
+[ext_resource type="Texture2D" uid="uid://ct35385qcfrv7" path="res://assets/ui/craft_path_v1_layers/layers/craft_path_down_arrow.png" id="6_wc2cq"]
+[ext_resource type="PackedScene" uid="uid://dbfaocwritemw" path="res://scenes/ui/common/ItemWidget.tscn" id="7_wc2cq"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBox_close_normal"]
-texture = ExtResource("4_close_texture")
-texture_margin_left = 24.0
-texture_margin_top = 24.0
-texture_margin_right = 24.0
-texture_margin_bottom = 24.0
+[sub_resource type="Gradient" id="Gradient_dim"]
+colors = PackedColorArray(0.025, 0.035, 0.055, 0.84, 0.025, 0.035, 0.055, 0.84)
 
-[sub_resource type="StyleBoxTexture" id="StyleBox_close_pressed"]
-texture = ExtResource("4_close_texture")
-texture_margin_left = 24.0
-texture_margin_top = 24.0
-texture_margin_right = 24.0
-texture_margin_bottom = 24.0
-modulate_color = Color(0.8, 0.8, 0.8, 1)
+[sub_resource type="GradientTexture1D" id="GradientTexture_dim"]
+gradient = SubResource("Gradient_dim")
 
-[sub_resource type="StyleBoxTexture" id="StyleBox_close_hover"]
-texture = ExtResource("4_close_texture")
-texture_margin_left = 24.0
-texture_margin_top = 24.0
-texture_margin_right = 24.0
-texture_margin_bottom = 24.0
-modulate_color = Color(1, 0.94, 0.78, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBox_focus_empty"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_target"]
-bg_color = Color(0.91, 0.88, 0.79, 0.62)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.56, 0.25, 0.18, 0.72)
+[sub_resource type="StyleBoxFlat" id="StyleBox_description_background"]
+bg_color = Color(0.929412, 0.858824, 0.721569, 1)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
@@ -52,155 +31,184 @@ grow_vertical = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_gd")
 
-[node name="Dim" type="ColorRect" parent="." unique_id=562906002]
+[node name="Dim" type="TextureRect" parent="." unique_id=1895918297]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
-color = Color(0.025, 0.035, 0.055, 0.84)
+texture = SubResource("GradientTexture_dim")
+expand_mode = 1
 
 [node name="Panel" type="TextureRect" parent="." unique_id=402792173]
-custom_minimum_size = Vector2(680, 820)
+custom_minimum_size = Vector2(650, 1080)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -340.0
-offset_top = -410.0
-offset_right = 340.0
-offset_bottom = 410.0
+offset_left = -325.0
+offset_top = -540.0
+offset_right = 325.0
+offset_bottom = 540.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("3_panel_texture")
+texture = ExtResource("3_l0p3r")
 expand_mode = 1
 
-[node name="Margin" type="MarginContainer" parent="Panel" unique_id=275114498]
+[node name="CloseButton" type="TextureButton" parent="Panel" unique_id=923578589]
+layout_mode = 0
+offset_left = 526.0
+offset_top = 104.0
+offset_right = 581.0
+offset_bottom = 153.0
+tooltip_text = "关闭"
+focus_mode = 0
+texture_normal = ExtResource("4_wc2cq")
+texture_pressed = ExtResource("4_wc2cq")
+texture_hover = ExtResource("4_wc2cq")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="TitleLabel" type="Label" parent="Panel" unique_id=871259882]
+layout_mode = 0
+offset_left = 110.0
+offset_top = 14.0
+offset_right = 540.0
+offset_bottom = 108.0
+theme_override_colors/font_color = Color(0.357, 0.192, 0.102, 1)
+theme_override_font_sizes/font_size = 36
+text = "来源配方"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TargetArea" type="Control" parent="Panel" unique_id=90139399]
+anchors_preset = 0
+offset_left = 45.0
+offset_top = 162.0
+offset_right = 605.0
+offset_bottom = 352.0
+
+[node name="DescriptionBackground" type="Panel" parent="Panel/TargetArea" unique_id=1965902312]
+layout_mode = 0
+offset_left = 172.0
+offset_top = 29.0
+offset_right = 540.0
+offset_bottom = 161.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_description_background")
+
+[node name="TargetDescript" type="Label" parent="Panel/TargetArea" unique_id=1079726548]
+layout_mode = 0
+offset_left = 183.0
+offset_top = 39.0
+offset_right = 531.0
+offset_bottom = 154.0
+theme_override_colors/font_color = Color(0.365, 0.212, 0.129, 1)
+theme_override_font_sizes/font_size = 23
+text = "目标道具"
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="TargetItem" parent="Panel/TargetArea" unique_id=1907322053 instance=ExtResource("7_wc2cq")]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 57.0
+offset_right = 129.0
+offset_bottom = 137.0
+
+[node name="RecipeHeading" type="Control" parent="Panel" unique_id=2064603456]
+anchors_preset = 0
+offset_left = 45.0
+offset_top = 368.0
+offset_right = 605.0
+offset_bottom = 428.0
+
+[node name="HeadingBackground" type="TextureRect" parent="Panel/RecipeHeading" unique_id=1622017360]
+layout_mode = 0
+offset_left = 147.0
+offset_top = 6.0
+offset_right = 417.0
+offset_bottom = 54.0
+mouse_filter = 2
+texture = ExtResource("5_wc2cq")
+expand_mode = 1
+
+[node name="HeadingLabel" type="Label" parent="Panel/RecipeHeading" unique_id=518451573]
+layout_mode = 0
+offset_left = 147.0
+offset_top = 6.0
+offset_right = 417.0
+offset_bottom = 54.0
+theme_override_colors/font_color = Color(0.427, 0.243, 0.137, 1)
+theme_override_font_sizes/font_size = 26
+text = "配方"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SourceContainer" type="VBoxContainer" parent="Panel" unique_id=842818253]
+layout_mode = 0
+offset_left = 45.0
+offset_top = 441.0
+offset_right = 605.0
+offset_bottom = 969.0
+size_flags_horizontal = 3
+theme_override_constants/separation = 18
+
+[node name="SourceBg" type="Panel" parent="Panel/SourceContainer" unique_id=1900882396]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_description_background")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/SourceContainer/SourceBg" unique_id=52573731]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 100
-theme_override_constants/margin_top = 58
-theme_override_constants/margin_right = 100
-theme_override_constants/margin_bottom = 46
+size_flags_stretch_ratio = 1.35
+alignment = 1
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=1905780114]
+[node name="RecipeRegionsTemplate" type="Control" parent="Panel/SourceContainer" unique_id=309401511]
+custom_minimum_size = Vector2(560, 528)
 layout_mode = 2
-theme_override_constants/separation = 12
+mouse_filter = 2
 
-[node name="Header" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1298011683]
-custom_minimum_size = Vector2(0, 54)
-layout_mode = 2
+[node name="CraftArrowArea" type="TextureRect" parent="Panel/SourceContainer/RecipeRegionsTemplate" unique_id=309401514]
+layout_mode = 0
+offset_left = 182.0
+offset_top = -9.0
+offset_right = 368.0
+offset_bottom = 111.0
+mouse_filter = 2
+texture = ExtResource("6_wc2cq")
+expand_mode = 1
 
-[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox/Header" unique_id=871259882]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.2, 0.14, 0.12, 1)
+[node name="ProductTimerArea" type="Control" parent="Panel/SourceContainer/RecipeRegionsTemplate" unique_id=309401515]
+anchors_preset = 0
+offset_left = -2.0
+offset_top = 114.0
+offset_right = 558.0
+offset_bottom = 338.0
+mouse_filter = 2
+
+[node name="CraftTime" type="Label" parent="Panel/SourceContainer/RecipeRegionsTemplate/ProductTimerArea" unique_id=309401517]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 109.0
+offset_right = 542.0
+offset_bottom = 151.0
+theme_override_colors/font_color = Color(0.427, 0.243, 0.137, 1)
 theme_override_font_sizes/font_size = 25
-text = "来源配方"
+text = "耗时"
 horizontal_alignment = 1
-vertical_alignment = 1
 
-[node name="CloseButton" type="Button" parent="Panel/Margin/VBox/Header" unique_id=923578589]
-custom_minimum_size = Vector2(54, 50)
-layout_mode = 2
-tooltip_text = "关闭"
-theme_override_colors/font_color = Color(1, 0.9, 0.66, 1)
-theme_override_colors/font_pressed_color = Color(0.9, 0.78, 0.56, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 0.82, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBox_close_normal")
-theme_override_styles/pressed = SubResource("StyleBox_close_pressed")
-theme_override_styles/hover = SubResource("StyleBox_close_hover")
-theme_override_styles/focus = SubResource("StyleBox_focus_empty")
-text = "×"
-
-[node name="TargetCaption" type="Label" parent="Panel/Margin/VBox" unique_id=1965202039]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.21, 0.16, 1)
-theme_override_font_sizes/font_size = 14
-text = "订单目标"
-
-[node name="TargetPanel" type="PanelContainer" parent="Panel/Margin/VBox" unique_id=72600973]
-custom_minimum_size = Vector2(0, 112)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBox_target")
-
-[node name="TargetMargin" type="MarginContainer" parent="Panel/Margin/VBox/TargetPanel" unique_id=2098381775]
-layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 12
-
-[node name="TargetRow" type="HBoxContainer" parent="Panel/Margin/VBox/TargetPanel/TargetMargin" unique_id=896818014]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="TargetItemHost" type="HBoxContainer" parent="Panel/Margin/VBox/TargetPanel/TargetMargin/TargetRow" unique_id=969947458]
-layout_mode = 2
-
-[node name="TargetCopy" type="VBoxContainer" parent="Panel/Margin/VBox/TargetPanel/TargetMargin/TargetRow" unique_id=2049904590]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 4
-
-[node name="TargetName" type="Label" parent="Panel/Margin/VBox/TargetPanel/TargetMargin/TargetRow/TargetCopy" unique_id=1079726548]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.27, 0.14, 0.1, 1)
-theme_override_font_sizes/font_size = 19
-text = "目标道具"
-
-[node name="TargetDescription" type="Label" parent="Panel/Margin/VBox/TargetPanel/TargetMargin/TargetRow/TargetCopy" unique_id=419439453]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.42, 0.32, 0.27, 1)
-theme_override_font_sizes/font_size = 13
-text = "订单所需道具，查看下方制作来源"
-vertical_alignment = 1
-autowrap_mode = 1
-
-[node name="SourceHeading" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1893678658]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="HeadingMark" type="Label" parent="Panel/Margin/VBox/SourceHeading" unique_id=528393711]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.67, 0.24, 0.17, 1)
-theme_override_font_sizes/font_size = 18
-text = "◆"
-
-[node name="HeadingLabel" type="Label" parent="Panel/Margin/VBox/SourceHeading" unique_id=775938595]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.22, 0.26, 0.37, 1)
-theme_override_font_sizes/font_size = 17
-text = "可由以下配方制作"
-
-[node name="HeadingLine" type="HSeparator" parent="Panel/Margin/VBox/SourceHeading" unique_id=506326743]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Margin/VBox" unique_id=1881021910]
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="SourceContainer" type="VBoxContainer" parent="Panel/Margin/VBox/ScrollContainer" unique_id=842818253]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 12
-
-[node name="EmptyLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1565051205]
-visible = false
-layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.3, 0.24, 1)
-theme_override_font_sizes/font_size = 16
-text = "该道具暂无制作来源"
-horizontal_alignment = 1
+[node name="ProductIcon" parent="Panel/SourceContainer/RecipeRegionsTemplate/ProductTimerArea" unique_id=819250411 instance=ExtResource("7_wc2cq")]
+layout_mode = 0
+offset_left = 236.0
+offset_top = 6.0
+offset_right = 328.0
+offset_bottom = 99.0

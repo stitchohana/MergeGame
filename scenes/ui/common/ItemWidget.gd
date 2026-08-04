@@ -1,7 +1,6 @@
 class_name ItemWidget extends Control
 
-# ItemWidget: Reusable item display for grid and UI. Shows icon, name, level,
-# selection indicator, charge status, and crafting state.
+# Reusable item icon with selection and click handling.
 
 signal selected(item_data: Dictionary)
 signal pressed
@@ -9,121 +8,80 @@ signal pressed
 var item_data: Dictionary = {}
 var grid_position: Vector2i
 var is_launcher: bool = false
-
 var _is_selected: bool = false
 
 @onready var icon_rect: TextureRect = $IconRect
-@onready var name_label: Label = $NameLabel
-@onready var charge_label: Label = $ChargeLabel
-@onready var level_label: Label = $LevelLabel
 @onready var select_icon: TextureRect = $SelectIcon
 @onready var click_button: Button = $ClickButton
+
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	click_button.pressed.connect(_on_click_button_pressed)
 
+
 func setup(data: Dictionary, pos: Vector2i = Vector2i(-1, -1), cell_size: int = 80) -> void:
 	item_data = data
 	is_launcher = data.get("type", 0) == Constants.ItemType.LAUNCHER
-
 	if pos.x >= 0:
 		grid_position = pos
 		custom_minimum_size = Vector2(cell_size, cell_size)
 		size = Vector2(cell_size, cell_size)
 		position = Vector2(pos.x * cell_size, pos.y * cell_size)
-
 	_update_visuals()
 
-# Lazy accessors — fall back to get_node_or_null when @onready hasn't fired
-func _ic() -> TextureRect:
+
+func _icon() -> TextureRect:
 	return icon_rect if icon_rect else get_node_or_null("IconRect") as TextureRect
 
-func _nm() -> Label:
-	return name_label if name_label else get_node_or_null("NameLabel") as Label
 
-func _ch() -> Label:
-	return charge_label if charge_label else get_node_or_null("ChargeLabel") as Label
-
-func _lv() -> Label:
-	return level_label if level_label else get_node_or_null("LevelLabel") as Label
-
-func _si() -> TextureRect:
+func _selection() -> TextureRect:
 	return select_icon if select_icon else get_node_or_null("SelectIcon") as TextureRect
 
+
 func _update_visuals() -> void:
-	# Icon
 	var icon_path: String = item_data.get("icon", "")
-	var ic := _ic()
-	if icon_path and ic:
-		var tex := load(icon_path) as Texture2D
-		if tex:
-			ic.texture = tex
-			ic.show()
+	var icon: TextureRect = _icon()
+	if not icon_path.is_empty() and icon:
+		var texture: Texture2D = load(icon_path) as Texture2D
+		if texture:
+			icon.texture = texture
+			icon.show()
 
-	# Name
-	var item_name: String = item_data.get("name", "")
-	var item_id: int = item_data.get("id", 0)
-	var nm := _nm()
-	if nm:
-		nm.text = item_name if item_id <= 0 else item_name
-		nm.visible = true
-
-	# Level
-	var lv: int = item_data.get("level", 0)
-	var ll := _lv()
-	if ll:
-		ll.text = str(lv)
-		ll.visible = true
-
-	# Charge
-	var ch := _ch()
-	if ch:
-		if is_launcher:
-			var item_charges: int = item_data.get("charges", -1)
-			var config := ConfigDatabase.get_item_data(item_data.get("id", 0))
-			var max_c: int = config.get("max_charges", 0) if not config.is_empty() else 0
-			if item_charges >= 0 and max_c > 0:
-				ch.visible = true
-				if item_charges <= 0:
-					ch.text = "空"
-				else:
-					ch.text = "%d/%d" % [item_charges, max_c]
-			else:
-				ch.visible = false
-		else:
-			ch.visible = false
 
 func set_selected(active: bool) -> void:
 	_is_selected = active
-	var si := _si()
-	if si:
-		si.visible = active
+	var selection: TextureRect = _selection()
+	if selection:
+		selection.visible = active
+
 
 func set_clickable(active: bool) -> void:
-	var button := click_button if click_button else get_node_or_null("ClickButton") as Button
+	var button: Button = click_button if click_button else get_node_or_null("ClickButton") as Button
 	if button:
 		button.mouse_filter = Control.MOUSE_FILTER_STOP if active else Control.MOUSE_FILTER_IGNORE
+
 
 func _on_click_button_pressed() -> void:
 	pressed.emit()
 
+
 func set_drag_active(active: bool) -> void:
-	if active:
-		scale = Vector2(0.9, 0.9)
-	else:
-		scale = Vector2(1, 1)
+	scale = Vector2(0.9, 0.9) if active else Vector2.ONE
+
 
 func set_visual_position(pos: Vector2) -> void:
 	position = pos
 
+
 func play_merge_animation() -> void:
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(self, "scale", Vector2(1.3, 1.3), 0.15)
 	tween.tween_callback(queue_free)
 
+
 func play_spawn_animation() -> void:
-	scale = Vector2(0, 0)
-	var tween := create_tween()
+	scale = Vector2.ZERO
+	var tween: Tween = create_tween()
 	tween.set_trans(Tween.TRANS_BOUNCE)
-	tween.tween_property(self, "scale", Vector2(1, 1), 0.25)
+	tween.tween_property(self, "scale", Vector2.ONE, 0.25)

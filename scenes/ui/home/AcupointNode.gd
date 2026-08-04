@@ -5,16 +5,23 @@ signal acupoint_selected(index: int)
 @export_range(0, 99) var acupoint_index: int = 0
 
 @onready var activate_button: Button = $ActivateButton
+@onready var glow_control: ColorRect = $CultivationGlow
 @onready var cyan_icon: Sprite2D = $CultivationStarCyan
 @onready var gold_icon: Sprite2D = $CultivationStarGold
+
+const CYAN_GLOW_COLOR: Color = Color(0.28, 0.9, 1.0, 1.0)
+const GOLD_GLOW_COLOR: Color = Color(1.0, 0.76, 0.28, 1.0)
 
 var _lit: bool = false
 var _completed: int = 0
 var _total: int = 1
 var _pulse_time: float = 0.0
+var _glow_material: ShaderMaterial
 
 
 func _ready() -> void:
+	_glow_material = glow_control.material as ShaderMaterial
+	glow_control.show()
 	activate_button.pressed.connect(_on_activate_pressed)
 	activate_button.hide()
 	_apply_visuals()
@@ -48,13 +55,10 @@ func _on_activate_pressed() -> void:
 
 func _process(delta: float) -> void:
 	_pulse_time += delta
-	var icon: Sprite2D = gold_icon if _lit else cyan_icon
-	if not is_instance_valid(icon) or not icon.visible:
+	if not is_instance_valid(_glow_material):
 		return
 	var pulse: float = (sin(_pulse_time * 2.5) + 1.0) * 0.5
-	var glow_material := icon.material as ShaderMaterial
-	if glow_material:
-		glow_material.set_shader_parameter("glow_intensity", lerpf(0.65, 1.1, pulse))
+	_glow_material.set_shader_parameter("glow_opacity", lerpf(0.6, 1.0, pulse))
 
 
 func _apply_visuals() -> void:
@@ -62,3 +66,5 @@ func _apply_visuals() -> void:
 		cyan_icon.visible = not _lit
 	if is_instance_valid(gold_icon):
 		gold_icon.visible = _lit
+	if is_instance_valid(_glow_material):
+		_glow_material.set_shader_parameter("glow_color", GOLD_GLOW_COLOR if _lit else CYAN_GLOW_COLOR)

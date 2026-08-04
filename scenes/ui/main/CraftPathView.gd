@@ -1,119 +1,199 @@
 class_name CraftPathView extends BasePopup
 
-# CraftPathView: Shows all items in the same group as the selected item,
-# plus launchers that can spawn them.
+# CraftPathView mirrors the 780x1688 MasterGo layout. Visual surfaces are
+# texture-backed so final sliced art can replace the current placeholders
+# without changing the scene hierarchy or data logic.
 
 signal item_selected(item_data: Dictionary)
 
-var _items: Array = []
-var _item_widgets: Array = []
+const COLUMNS: int = 4
+const MIN_VISIBLE_SLOTS: int = 12
+const COMPACT_LAYOUT_ROWS: int = 4
+const PATH_WIDTH: float = 655.2
+const PATH_HEIGHT: float = 511.68
+const ROW_HEIGHT: float = 158.08
+const ROW_SEPARATION: float = 19.0
+const NODE_SIZE: Vector2 = Vector2(128.96, 141.44)
+const ARROW_SIZE: Vector2 = Vector2(27.04, 27.04)
+const ITEM_WIDGET_SCENE: PackedScene = preload("res://scenes/ui/common/ItemWidget.tscn")
 
-@onready var name_list: HBoxContainer = $Panel/NameList
-@onready var item_grid: GridContainer = $Panel/ItemGrid
-@onready var launcher_container: HBoxContainer = $Panel/LauncherSection/LauncherContainer
-@onready var launcher_section: Control = $Panel/LauncherSection
-@onready var relation_label: Label = $Panel/LauncherSection/Label
-@onready var close_btn: Button = $Panel/CloseButton
+@export_group("Design Textures")
+@export var arrow_texture: Texture2D = preload("res://assets/ui/craft_path_v1_layers/layers/craft_path_arrow.png")
+
+var _items: Array[Dictionary] = []
+var _item_controls: Array[ItemWidget] = []
+
+@onready var title_label: Label = get_node_or_null("Panel/HeaderSurface/TitleGroup/TitleLabel") as Label
+@onready var descript_label: Label = $Panel/DescriptLabel
+@onready var close_button: TextureButton = $Panel/HeaderSurface/CloseButton
+@onready var rows_container: VBoxContainer = $Panel/Rows
+@onready var relation_label: Label = get_node_or_null("Panel/TitleSurface/RelationLabel") as Label
+@onready var source_item: ItemWidget = $Panel/TitleSurface/SourceItem
+@onready var source_name_label: Label = get_node_or_null("Panel/SourceCard/SourceNameLabel") as Label
+
 
 func _ready() -> void:
-	if close_btn:
-		close_btn.pressed.connect(_on_close)
+	close_button.pressed.connect(_on_close)
+
 
 func show_for_item(item_data: Dictionary) -> void:
-	var group_id: int = item_data.get("group_id", 0)
-	_items = ConfigDatabase.get_items_by_group(group_id) if group_id > 0 else [item_data]
+	var group_id: int = int(item_data.get("group_id", 0))
+	var source_items: Array = ConfigDatabase.get_items_by_group(group_id) if group_id > 0 else [item_data]
+	_items.clear()
+	for raw_item: Variant in source_items:
+		if raw_item is Dictionary:
+			_items.append(raw_item as Dictionary)
 	if _items.is_empty():
 		return
 
-	# Sort by level then id
-	_items.sort_custom(func(a, b): return a.get("level", 0) < b.get("level", 0) if a.get("level", 0) != b.get("level", 0) else a.get("id", 0) < b.get("id", 0))
+	_items.sort_custom(_sort_items)
+	_update_selected_item(item_data)
 
-	_build_name_list(item_data)
-	_build_item_grid(item_data)
-	_build_launcher_section(item_data)
 
-func _build_name_list(selected: Dictionary) -> void:
-	for child in name_list.get_children():
+func _sort_items(left: Dictionary, right: Dictionary) -> bool:
+	var left_level: int = int(left.get("level", 0))
+	var right_level: int = int(right.get("level", 0))
+	if left_level != right_level:
+		return left_level < right_level
+	return int(left.get("id", 0)) < int(right.get("id", 0))
+
+
+func _update_selected_item(selected: Dictionary) -> void:
+	if title_label:
+		title_label.text = String(selected.get("name", ""))
+	descript_label.text = String(selected.get("describe", ""))
+	_build_path(selected)
+	_build_source_section(selected)
+
+
+func _build_path(selected: Dictionary) -> void:
+	for child: Node in rows_container.get_children():
 		child.queue_free()
+	_item_controls.clear()
 
-	var lbl := Label.new()
-	lbl.text = selected.get("name", "")
-	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	lbl.add_theme_font_size_override("font_size", 22)
-	lbl.add_theme_color_override("font_color", Color(0.16, 0.28, 0.2, 1))
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name_list.add_child(lbl)
-
-func _style_grid_item(widget: ItemWidget) -> void:
-	var icon_bg := widget.get_node_or_null("IconBg") as TextureRect
-	if icon_bg:
-		icon_bg.show()
-		icon_bg.offset_left = 10.0
-		icon_bg.offset_top = 10.0
-		icon_bg.offset_right = -10.0
-		icon_bg.offset_bottom = -10.0
-	var select_icon := widget.get_node_or_null("SelectIcon") as TextureRect
-	if select_icon:
-		select_icon.offset_left = 10.0
-		select_icon.offset_top = 10.0
-		select_icon.offset_right = -10.0
-		select_icon.offset_bottom = -10.0
-	var icon_rect := widget.get_node_or_null("IconRect") as TextureRect
-	if icon_rect:
-		icon_rect.offset_left = 10.0
-		icon_rect.offset_top = 10.0
-		icon_rect.offset_right = -10.0
-		icon_rect.offset_bottom = -10.0
-	var name_label := widget.get_node_or_null("NameLabel") as Label
-	if name_label:
-		name_label.hide()
-	var level_label := widget.get_node_or_null("LevelLabel") as Label
-	if level_label:
-		level_label.hide()
-	var charge_label := widget.get_node_or_null("ChargeLabel") as Label
-	if charge_label:
-		charge_label.position += Vector2(10, 10)
-		charge_label.add_theme_color_override("font_color", Color(0.15, 0.3, 0.24, 1))
-
-func _build_item_grid(selected: Dictionary) -> void:
-	for child in item_grid.get_children():
-		child.queue_free()
-	_item_widgets.clear()
-
-	for i in range(_items.size()):
-		var it: Dictionary = _items[i]
-		var widget := preload("res://scenes/ui/common/ItemWidget.tscn").instantiate() as ItemWidget
-		widget.custom_minimum_size = Vector2(100, 100)
-		widget.size = Vector2(100, 100)
-		widget.setup(it)
-		_style_grid_item(widget)
-		widget.set_clickable(true)
-		if it.get("id", 0) == selected.get("id", 0):
-			widget.set_selected(true)
-		widget.pressed.connect(_on_item_clicked.bind(i))
-		item_grid.add_child(widget)
-		_item_widgets.append(widget)
-
-func _build_launcher_section(selected: Dictionary) -> void:
-	for child in launcher_container.get_children():
-		child.queue_free()
-
-	if int(selected.get("type", 0)) == Constants.ItemType.LAUNCHER:
-		_build_spawn_outputs(selected)
-		return
-
-	var launchers: Array[Dictionary] = _get_present_launchers_for_item(
-		int(selected.get("id", 0))
+	var selected_id: int = int(selected.get("id", 0))
+	var slot_count: int = maxi(MIN_VISIBLE_SLOTS, _items.size())
+	var row_count: int = ceili(float(slot_count) / float(COLUMNS))
+	var layout_row_count: int = maxi(row_count, COMPACT_LAYOUT_ROWS)
+	var row_height: float = minf(
+		ROW_HEIGHT,
+		(PATH_HEIGHT - float(maxi(0, layout_row_count - 1)) * ROW_SEPARATION) / float(layout_row_count)
 	)
-	if launchers.is_empty():
-		launcher_section.hide()
+	var scale_factor: float = row_height / ROW_HEIGHT
+	var node_size: Vector2 = NODE_SIZE * scale_factor
+	var arrow_size: Vector2 = ARROW_SIZE * scale_factor
+	rows_container.custom_minimum_size = Vector2(PATH_WIDTH, PATH_HEIGHT)
+
+	for row_index: int in range(row_count):
+		var row := HBoxContainer.new()
+		row.name = "PathRow%d" % (row_index + 1)
+		row.custom_minimum_size = Vector2(PATH_WIDTH, row_height)
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 9)
+
+		for column_index: int in range(COLUMNS):
+			var item_index: int = row_index * COLUMNS + column_index
+			var item_data: Dictionary = _items[item_index] if item_index < _items.size() else {}
+			var is_selected: bool = (
+				not item_data.is_empty()
+				and int(item_data.get("id", 0)) == selected_id
+			)
+			var item_control: ItemWidget = _create_path_node(item_data, item_index, is_selected, node_size)
+			row.add_child(item_control)
+			if not item_data.is_empty():
+				_item_controls.append(item_control)
+			if column_index < COLUMNS - 1:
+				row.add_child(_create_arrow(arrow_size))
+
+		rows_container.add_child(row)
+
+func _create_path_node(item_data: Dictionary, item_index: int, is_selected: bool, node_size: Vector2) -> ItemWidget:
+	var widget: ItemWidget = ITEM_WIDGET_SCENE.instantiate() as ItemWidget
+	widget.name = "UnknownNode" if item_data.is_empty() else "ItemNode%d" % int(item_data.get("level", item_index + 1))
+	widget.custom_minimum_size = node_size
+	widget.size = node_size
+	widget.setup(item_data)
+	widget.set_selected(is_selected)
+	widget.set_clickable(not item_data.is_empty())
+	var lock_icon: TextureRect = widget.get_node_or_null("IconLock") as TextureRect
+	if lock_icon:
+		lock_icon.visible = item_data.is_empty()
+	if not item_data.is_empty():
+		widget.pressed.connect(_on_item_clicked.bind(item_index))
+	return widget
+
+
+func _create_arrow(arrow_size: Vector2) -> Control:
+	var holder := Control.new()
+	holder.name = "PathArrow"
+	holder.custom_minimum_size = arrow_size
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var texture_rect := TextureRect.new()
+	texture_rect.name = "ArrowTexture"
+	texture_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	texture_rect.texture = arrow_texture
+	texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	texture_rect.visible = arrow_texture != null
+	holder.add_child(texture_rect)
+
+	var fallback := Label.new()
+	fallback.name = "ArrowFallback"
+	fallback.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fallback.add_theme_font_size_override("font_size", 28)
+	fallback.add_theme_color_override("font_color", Color(0.66, 0.49, 0.24, 1.0))
+	fallback.text = "›"
+	fallback.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	fallback.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	fallback.visible = arrow_texture == null
+	holder.add_child(fallback)
+	return holder
+
+
+func _build_source_section(selected: Dictionary) -> void:
+	var entries: Array[Dictionary] = []
+	var selected_type: int = int(selected.get("type", 0))
+	if selected_type == Constants.ItemType.LAUNCHER:
+		if relation_label:
+			relation_label.text = "可产出"
+		var spawns: Array = selected.get("spawns", [])
+		for spawn: Dictionary in spawns:
+			var output_id: int = int(spawn.get("id", 0))
+			var output_data: Dictionary = ConfigDatabase.get_item_data(output_id)
+			if not output_data.is_empty():
+				entries.append(output_data)
+	else:
+		if relation_label:
+			relation_label.text = "来源"
+		entries = _get_present_launchers_for_item(int(selected.get("id", 0)))
+
+	_update_source_card(entries)
+
+
+func _update_source_card(entries: Array[Dictionary]) -> void:
+	if entries.is_empty():
+		source_item.hide()
+		if source_name_label:
+			source_name_label.text = "暂无来源"
 		return
 
-	launcher_section.show()
-	relation_label.text = "来源"
-	for launcher: Dictionary in launchers:
-		launcher_container.add_child(_build_relation_item(launcher, ""))
+	var first_entry: Dictionary = entries[0]
+	source_item.show()
+	source_item.setup(first_entry)
+	source_item.set_selected(false)
+	source_item.set_clickable(false)
+	var lock_icon: TextureRect = source_item.get_node_or_null("IconLock") as TextureRect
+	if lock_icon:
+		lock_icon.hide()
+	var names: PackedStringArray = PackedStringArray()
+	for entry: Dictionary in entries:
+		names.append(String(entry.get("name", "")))
+	if source_name_label:
+		source_name_label.text = "、".join(names)
+
 
 func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 	var present_launcher_ids: Dictionary = {}
@@ -126,79 +206,24 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 			present_launcher_ids[launcher_id] = true
 
 	var result: Array[Dictionary] = []
-	for launcher: Dictionary in ConfigDatabase.get_launchers_for_item(item_id):
+	var launchers: Array = ConfigDatabase.get_launchers_for_item(item_id)
+	for raw_launcher: Variant in launchers:
+		if not raw_launcher is Dictionary:
+			continue
+		var launcher: Dictionary = raw_launcher as Dictionary
 		var launcher_id: int = int(launcher.get("id", 0))
 		if present_launcher_ids.has(launcher_id):
 			result.append(launcher)
 	return result
 
-func _build_spawn_outputs(launcher: Dictionary) -> void:
-	var spawns: Array = launcher.get("spawns", [])
-	if spawns.is_empty():
-		launcher_section.hide()
-		return
-
-	var total_weight: int = 0
-	for spawn: Dictionary in spawns:
-		total_weight += int(spawn.get("weight", 0))
-
-	launcher_section.show()
-	relation_label.text = "可产出"
-	for spawn: Dictionary in spawns:
-		var output_id: int = int(spawn.get("id", 0))
-		var output_data: Dictionary = ConfigDatabase.get_item_data(output_id)
-		if output_data.is_empty():
-			continue
-		var weight: int = int(spawn.get("weight", 0))
-		var probability_text: String = ""
-		if total_weight > 0:
-			probability_text = "%.1f%%" % (float(weight) * 100.0 / float(total_weight))
-		launcher_container.add_child(_build_relation_item(output_data, probability_text))
-
-func _build_relation_item(item_data: Dictionary, detail_text: String) -> VBoxContainer:
-	var widget := preload("res://scenes/ui/common/ItemWidget.tscn").instantiate() as ItemWidget
-	widget.setup(item_data)
-	widget.custom_minimum_size = Vector2(88, 88)
-	widget.size = Vector2(88, 88)
-	widget.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var embedded_name := widget.get_node_or_null("NameLabel") as Label
-	if embedded_name:
-		embedded_name.hide()
-	var level_label := widget.get_node_or_null("LevelLabel") as Label
-	if level_label:
-		level_label.hide()
-
-	var name_label := Label.new()
-	name_label.text = item_data.get("name", "")
-	name_label.custom_minimum_size = Vector2(112, 24)
-	name_label.add_theme_font_size_override("font_size", 15)
-	name_label.add_theme_color_override("font_color", Color(0.16, 0.27, 0.2, 1))
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-
-	var vbox := VBoxContainer.new()
-	vbox.custom_minimum_size = Vector2(112, 124)
-	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_theme_constant_override("separation", 4)
-	vbox.add_child(widget)
-	vbox.add_child(name_label)
-	if not detail_text.is_empty():
-		var detail_label := Label.new()
-		detail_label.text = detail_text
-		detail_label.add_theme_font_size_override("font_size", 13)
-		detail_label.add_theme_color_override("font_color", Color(0.18, 0.42, 0.34, 1))
-		detail_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		vbox.add_child(detail_label)
-	return vbox
 
 func _on_item_clicked(index: int) -> void:
 	if index < 0 or index >= _items.size():
 		return
-	var item := _items[index] as Dictionary
+	var item: Dictionary = _items[index]
 	item_selected.emit(item)
-	_build_name_list(item)
-	_build_item_grid(item)
-	_build_launcher_section(item)
+	_update_selected_item(item)
+
 
 func _on_close() -> void:
 	UIManager.hide_popup(self)
