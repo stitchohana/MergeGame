@@ -879,7 +879,9 @@ func _on_action_batch_confirmed(result: Dictionary) -> void:
 	_apply_spawn_resources(result)
 	if _pending_spawn_actions.is_empty() and not _launcher_ctrl.is_spawn_in_flight() and not _is_dragging:
 		_action_sync_needed = false
-		_sync_grid_from_server(result)
+		var server_grid: Array = result.get("grid", [])
+		if not GridManager.reconcile_from_server(server_grid):
+			_sync_grid_from_server(result)
 		_try_finish_action_sync_barrier()
 	else:
 		_action_sync_needed = true

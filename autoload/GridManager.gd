@@ -386,3 +386,58 @@ func populate_from_server(server_grid: Array) -> void:
 		if entry.has("atk_base"):
 			item["atk_base"] = entry.atk_base
 		add_item(item, Vector2i(entry.col, entry.row))
+
+
+# Apply an authoritative snapshot without clearing the board when the optimistic
+# layout already matches. Returns false when a full rebuild is required.
+func reconcile_from_server(server_grid: Array) -> bool:
+	var entries: Array[Dictionary] = []
+	var seen_positions: Dictionary = {}
+	for raw_entry in server_grid:
+		var entry: Dictionary = _sanitize_json_ints(raw_entry) as Dictionary
+		var pos := Vector2i(int(entry.get("col", -1)), int(entry.get("row", -1)))
+		var pos_key: int = hash_pos(pos)
+		if not is_valid_pos(pos) or seen_positions.has(pos_key) or is_empty(pos):
+			return false
+		var local_item: Dictionary = _grid[pos.y][pos.x]
+		if int(local_item.get("id", 0)) != int(entry.get("id", 0)):
+			return false
+		if int(entry.get("uid", 0)) <= 0:
+			return false
+		if ConfigDatabase.get_item_data(int(entry.get("id", 0))).is_empty():
+			return false
+		seen_positions[pos_key] = true
+		entries.append(entry)
+
+	if entries.size() != get_all_items().size():
+		return false
+
+	_uid_to_pos.clear()
+	for entry in entries:
+		var pos := Vector2i(int(entry.get("col", -1)), int(entry.get("row", -1)))
+		var local_item: Dictionary = _grid[pos.y][pos.x]
+		var authoritative: Dictionary = ConfigDatabase.get_item_data(int(entry.get("id", 0))).duplicate(true)
+		authoritative["_uid"] = int(entry.get("uid", 0))
+		if entry.has("charges"):
+			authoritative["charges"] = entry.charges
+		if entry.has("immovable"):
+			authoritative["immovable"] = entry.immovable
+		var craft_data: Variant = entry.get("craft", null)
+		if craft_data is Dictionary and not (craft_data as Dictionary).is_empty():
+			for key in craft_data as Dictionary:
+				authoritative[key] = craft_data[key]
+		var recharge_remaining: Variant = entry.get("_recharge_remaining", null)
+		if recharge_remaining != null:
+			authoritative["_recharge_remaining"] = recharge_remaining
+		var storage_data: Variant = entry.get("storage", null)
+		if storage_data != null:
+			authoritative["storage"] = storage_data
+		if entry.has("atk_base"):
+			authoritative["atk_base"] = entry.atk_base
+
+		local_item.clear()
+		local_item.merge(authoritative, true)
+		_uid_to_pos[int(authoritative["_uid"])] = pos
+
+	grid_updated.emit()
+	return true
