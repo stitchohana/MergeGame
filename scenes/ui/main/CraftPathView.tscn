@@ -145,6 +145,17 @@ offset_top = 117.0
 offset_right = 197.0
 offset_bottom = 219.0
 
+[node name="OutputList" type="FlowContainer" parent="Panel" unique_id=568992110]
+visible = false
+layout_mode = 0
+offset_left = 82.0
+offset_top = 864.0
+offset_right = 665.0
+offset_bottom = 1110.0
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+alignment = 1
+
 [node name="DescriptLabel" type="Label" parent="Panel" unique_id=1245103295]
 layout_mode = 1
 anchors_preset = 5

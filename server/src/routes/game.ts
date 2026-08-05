@@ -29,18 +29,22 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       await storage.saveState(userId, state);
       console.log(`[game] new player ${userId}, init with ${state.grid.length} items | v0`);
     } else {
-      let spawnStateMigrated = false;
+      let stateMigrated = false;
       if (!Number.isInteger(state.spawn_seed) || (state.spawn_seed ?? 0) <= 0) {
         state.spawn_seed = engine.createSpawnSeed();
-        spawnStateMigrated = true;
+        stateMigrated = true;
       }
       if (!Number.isInteger(state.spawn_sequence) || (state.spawn_sequence ?? 0) < 0) {
         state.spawn_sequence = 0;
-        spawnStateMigrated = true;
+        stateMigrated = true;
       }
       if (!Array.isArray(state.spawn_history)) {
         state.spawn_history = [];
-        spawnStateMigrated = true;
+        stateMigrated = true;
+      }
+      if (!Array.isArray(state.crafted_item_ids)) {
+        state.crafted_item_ids = [];
+        stateMigrated = true;
       }
       // Migrate: add pouch if missing (old saves)
       if (!state.pouch) {
@@ -142,7 +146,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       }
       engine.tickStamina(state);
       engine.tickLauncherRecharge(state);
-      if (spawnStateMigrated) {
+      if (stateMigrated) {
         await storage.saveState(userId, state);
       }
     }
@@ -175,6 +179,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       activity_progress: state.activity_progress,
       spawn_seed: state.spawn_seed,
       spawn_sequence: state.spawn_sequence,
+      crafted_item_ids: state.crafted_item_ids,
       activity_current_day: (() => {
         const active = engine.activityEngine.getActivities().find((a: any) => engine.activityEngine.isActive(a) && engine.activityEngine.hasWeeklyTasks(a.id));
         return active ? engine.activityEngine.getCurrentDay(active.id, engine.questResetHour) : 0;
@@ -225,7 +230,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     const result = engine.executeMerge(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, atk_base: result.atkBase ?? 0, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress });
+    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, atk_base: result.atkBase ?? 0, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress, crafted_item_ids: state.crafted_item_ids });
   }));
 
   // POST /api/game/actions/batch
@@ -282,6 +287,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       cultivation: workingState.cultivation,
       regen_remaining_ms: engine.getRegenRemainingMs(workingState),
       quest_progress: workingState.quest_progress,
+      crafted_item_ids: workingState.crafted_item_ids,
     });
   }));
 

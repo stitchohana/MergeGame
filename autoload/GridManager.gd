@@ -441,3 +441,41 @@ func reconcile_from_server(server_grid: Array) -> bool:
 
 	grid_updated.emit()
 	return true
+
+
+# Confirm surviving optimistic merge results without rebuilding the grid. This
+# is used when a successful batch snapshot cannot be reconciled structurally.
+func confirm_action_batch_results(server_results: Array) -> void:
+	var changed: bool = false
+	for raw_result in server_results:
+		var result: Dictionary = _sanitize_json_ints(raw_result) as Dictionary
+		if str(result.get("type", "")) != "merge":
+			continue
+		var target_data: Array = result.get("to", [])
+		if target_data.size() != 2:
+			continue
+		var target := Vector2i(int(target_data[0]), int(target_data[1]))
+		if not is_valid_pos(target) or is_empty(target):
+			continue
+		var item: Dictionary = _grid[target.y][target.x]
+		if int(item.get("id", 0)) != int(result.get("result_id", 0)):
+			continue
+		var server_uid: int = int(result.get("result_uid", 0))
+		if server_uid <= 0:
+			continue
+		var old_uid: int = int(item.get("_uid", 0))
+		if old_uid > 0:
+			_uid_to_pos.erase(old_uid)
+		item["_uid"] = server_uid
+		item.erase("_optimistic_action")
+		item.erase("_spawn_request_ids")
+		item.erase("_pending_spawn")
+		item.erase("_spawn_request_id")
+		item.erase("_spawn_origin")
+		if result.has("atk_base"):
+			item["atk_base"] = result.atk_base
+		_uid_to_pos[server_uid] = target
+		changed = true
+
+	if changed:
+		grid_updated.emit()

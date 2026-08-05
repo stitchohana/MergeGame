@@ -877,11 +877,16 @@ func _on_action_batch_confirmed(result: Dictionary) -> void:
 	_active_spawn_actions.clear()
 	_spawn_action_batch_in_flight = false
 	_apply_spawn_resources(result)
+	if result.has("crafted_item_ids"):
+		var crafted_item_ids: Array = result.get("crafted_item_ids", [])
+		GameState.set_crafted_item_ids(crafted_item_ids)
 	if _pending_spawn_actions.is_empty() and not _launcher_ctrl.is_spawn_in_flight() and not _is_dragging:
 		_action_sync_needed = false
 		var server_grid: Array = result.get("grid", [])
 		if not GridManager.reconcile_from_server(server_grid):
-			_sync_grid_from_server(result)
+			var batch_results: Array = result.get("results", [])
+			GridManager.confirm_action_batch_results(batch_results)
+			push_warning("[GridView] Successful action batch snapshot did not match the optimistic board; kept local nodes")
 		_try_finish_action_sync_barrier()
 	else:
 		_action_sync_needed = true
@@ -1014,16 +1019,12 @@ func _on_launcher_depleted_removed(uid: int, grid_pos: Vector2i) -> void:
 	EventBus.show_toast.emit("礼包已耗尽")
 
 func _select_item(pos: Vector2i) -> void:
-	var current_item: Variant = GridManager.get_item(pos)
-	if current_item != null and (
-			current_item.get("_pending_spawn", false)
-			or current_item.get("_optimistic_action", false)
-	):
-		return
 	var key := "%d,%d" % [pos.x, pos.y]
 	if key == _selected_key and not _selected_key.is_empty():
 		var item: Variant = GridManager.get_item(pos)
 		if item != null:
+			if item.get("_pending_spawn", false) or item.get("_optimistic_action", false):
+				return
 			if item.get("immovable") == true:
 				EventBus.show_toast.emit("该物品无法使用")
 				return

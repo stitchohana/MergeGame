@@ -740,6 +740,7 @@ export class GameEngine {
       spawn_seed: this.createSpawnSeed(),
       spawn_sequence: 0,
       spawn_history: [],
+      crafted_item_ids: [],
     };
 
     const setup = this.getInitialSetup(boardType);
@@ -945,6 +946,11 @@ export class GameEngine {
       mergedItem.atk_base = fromAtk + toAtk;
     }
     state.grid.push(mergedItem);
+
+    state.crafted_item_ids ??= [];
+    if (!state.crafted_item_ids.includes(mergedItem.id)) {
+      state.crafted_item_ids.push(mergedItem.id);
+    }
 
     state.version += 1;
 

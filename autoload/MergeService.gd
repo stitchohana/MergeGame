@@ -75,6 +75,9 @@ func _on_merge_confirmed(result: Dictionary) -> void:
 	var regen: float = result.get("regen_remaining_ms", 0.0)
 	if regen > 0:
 		GameState.regen_remaining_ms = regen
+	if result.has("crafted_item_ids"):
+		var crafted_item_ids: Array = result.get("crafted_item_ids", [])
+		GameState.set_crafted_item_ids(crafted_item_ids)
 
 	var result_id: int = result.get("result_id", 0)
 	var from_pos := Vector2i(result.get("from_col", -1), result.get("from_row", -1))

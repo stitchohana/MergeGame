@@ -10,6 +10,7 @@ var current_board_type: int = Constants.BoardType.MAIN
 var previous_screen_name: String = ""
 var spawn_seed: int = 0
 var spawn_sequence: int = 0
+var crafted_item_ids: Dictionary = {}
 
 # Meridian cultivation
 var meridian_circulations: int = 0
@@ -36,3 +37,15 @@ signal pending_rewards_changed(count: int)
 
 signal stamina_changed(current: int, max: int)
 signal spirit_stones_changed(amount: int)
+
+
+func set_crafted_item_ids(ids: Array) -> void:
+	crafted_item_ids.clear()
+	for value: Variant in ids:
+		var item_id: int = int(value)
+		if item_id > 0:
+			crafted_item_ids[item_id] = true
+
+
+func has_crafted_item(item_id: int) -> bool:
+	return item_id > 0 and crafted_item_ids.has(item_id)

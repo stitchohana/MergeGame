@@ -30,6 +30,7 @@ var _item_controls: Array[ItemWidget] = []
 @onready var relation_label: Label = get_node_or_null("Panel/TitleSurface/RelationLabel") as Label
 @onready var source_item: ItemWidget = $Panel/TitleSurface/SourceItem
 @onready var source_name_label: Label = get_node_or_null("Panel/SourceCard/SourceNameLabel") as Label
+@onready var output_list: FlowContainer = $Panel/OutputList
 
 
 func _ready() -> void:
@@ -115,9 +116,7 @@ func _create_path_node(item_data: Dictionary, item_index: int, is_selected: bool
 	widget.setup(item_data)
 	widget.set_selected(is_selected)
 	widget.set_clickable(not item_data.is_empty())
-	var lock_icon: TextureRect = widget.get_node_or_null("IconLock") as TextureRect
-	if lock_icon:
-		lock_icon.visible = item_data.is_empty()
+	_configure_discovery_visual(widget, item_data)
 	if not item_data.is_empty():
 		widget.pressed.connect(_on_item_clicked.bind(item_index))
 	return widget
@@ -170,7 +169,43 @@ func _build_source_section(selected: Dictionary) -> void:
 			relation_label.text = "来源"
 		entries = _get_present_launchers_for_item(int(selected.get("id", 0)))
 
-	_update_source_card(entries)
+	if selected_type == Constants.ItemType.LAUNCHER:
+		_update_output_list(entries)
+	else:
+		_clear_output_list()
+		_update_source_card(entries)
+
+
+func _update_output_list(entries: Array[Dictionary]) -> void:
+	_clear_output_list()
+	source_item.hide()
+	if entries.is_empty():
+		return
+
+	output_list.show()
+	for entry: Dictionary in entries:
+		var output: ItemWidget = ITEM_WIDGET_SCENE.instantiate() as ItemWidget
+		output.custom_minimum_size = Vector2(84, 84)
+		output.size = Vector2(84, 84)
+		output.setup(entry)
+		output.set_clickable(true)
+		_configure_discovery_visual(output, entry)
+		var click_button: Button = output.get_node_or_null("ClickButton") as Button
+		if click_button:
+			click_button.tooltip_text = String(entry.get("name", ""))
+		output.pressed.connect(_on_output_clicked.bind(entry))
+		output_list.add_child(output)
+
+
+func _clear_output_list() -> void:
+	for child: Node in output_list.get_children():
+		child.queue_free()
+	output_list.hide()
+
+
+func _on_output_clicked(output: Dictionary) -> void:
+	item_selected.emit(output)
+	show_for_item(output)
 
 
 func _update_source_card(entries: Array[Dictionary]) -> void:
@@ -185,14 +220,27 @@ func _update_source_card(entries: Array[Dictionary]) -> void:
 	source_item.setup(first_entry)
 	source_item.set_selected(false)
 	source_item.set_clickable(false)
-	var lock_icon: TextureRect = source_item.get_node_or_null("IconLock") as TextureRect
-	if lock_icon:
-		lock_icon.hide()
+	_configure_discovery_visual(source_item, first_entry)
 	var names: PackedStringArray = PackedStringArray()
 	for entry: Dictionary in entries:
 		names.append(String(entry.get("name", "")))
 	if source_name_label:
 		source_name_label.text = "、".join(names)
+
+
+func _configure_discovery_visual(widget: ItemWidget, item_data: Dictionary) -> void:
+	var icon_rect: TextureRect = widget.get_node_or_null("IconRect") as TextureRect
+	var lock_icon: TextureRect = widget.get_node_or_null("IconLock") as TextureRect
+	var item_id: int = int(item_data.get("id", 0))
+	var item_level: int = int(item_data.get("level", 0))
+	var is_discovered: bool = not item_data.is_empty() and (
+		item_level <= 1 or GameState.has_crafted_item(item_id)
+	)
+	if icon_rect:
+		icon_rect.visible = is_discovered
+	if lock_icon:
+		lock_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		lock_icon.visible = not is_discovered
 
 
 func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:

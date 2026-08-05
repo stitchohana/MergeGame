@@ -153,6 +153,7 @@ export interface GameState {
   spawn_seed?: number;
   spawn_sequence?: number;
   spawn_history?: SpawnHistoryEntry[];
+  crafted_item_ids: number[];
 }
 
 export interface SpawnHistoryEntry {

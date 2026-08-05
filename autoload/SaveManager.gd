@@ -26,6 +26,8 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 	GameState.spawn_seed = state.get("spawn_seed", 0)
 	GameState.spawn_sequence = state.get("spawn_sequence", 0)
+	var crafted_item_ids: Array = state.get("crafted_item_ids", [])
+	GameState.set_crafted_item_ids(crafted_item_ids)
 
 	# Grid cache for both boards (cached only — grid is NOT repopulated here)
 	GameState.main_grid_cache = state.get("main_grid", [])
