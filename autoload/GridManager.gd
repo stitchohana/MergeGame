@@ -21,6 +21,7 @@ var _uid_to_pos: Dictionary = {}  # int uid -> Vector2i
 signal item_added(item_data: Dictionary, pos: Vector2i)
 signal item_removed(item_data: Dictionary, pos: Vector2i)
 signal item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i)
+signal items_swapped(item_a: Dictionary, item_b: Dictionary, pos_a: Vector2i, pos_b: Vector2i)
 signal grid_updated()
 
 var _skip_anims: bool = false
@@ -29,6 +30,10 @@ func _ready() -> void:
 	init_grid(current_board_type)
 
 func init_grid(board_type: int = Constants.BoardType.MAIN) -> void:
+	var previous_item_count: int = count_items() if _grid.size() == GRID_ROWS else 0
+	print("[GridManager] init_grid: board=", board_type,
+		" previous_items=", previous_item_count,
+		" caller=", get_stack())
 	current_board_type = board_type
 	# Emit removal signals for all existing items before clearing
 	if not _grid.is_empty():
@@ -191,8 +196,7 @@ func swap_items(pos_a: Vector2i, pos_b: Vector2i) -> void:
 		_uid_to_pos[uid_a] = pos_b
 	if uid_b > 0:
 		_uid_to_pos[uid_b] = pos_a
-	item_moved.emit(item_a, pos_a, pos_b)
-	item_moved.emit(item_b, pos_b, pos_a)
+	items_swapped.emit(item_a, item_b, pos_a, pos_b)
 	grid_updated.emit()
 
 # --- Queries ---
@@ -234,6 +238,24 @@ func find_nearest_empty(from_pos: Vector2i) -> Vector2i:
 				queue.append(n)
 
 	return Vector2i(-1, -1)  # No empty cell found
+
+
+func find_nearest_empty_after_removing(removed_pos: Vector2i, from_pos: Vector2i) -> Vector2i:
+	var visited: Dictionary = {}
+	var queue: Array = [from_pos]
+	visited[hash_pos(from_pos)] = true
+
+	while not queue.is_empty():
+		var current: Vector2i = queue.pop_front()
+		if current == removed_pos or is_empty(current):
+			return current
+		for neighbor: Vector2i in get_neighbors(current):
+			var key: int = hash_pos(neighbor)
+			if not visited.has(key):
+				visited[key] = true
+				queue.append(neighbor)
+
+	return Vector2i(-1, -1)
 
 func find_empty_by_row() -> Vector2i:
 	for row in range(GRID_ROWS):
@@ -362,6 +384,7 @@ static func _sanitize_json_ints(data: Variant) -> Variant:
 
 # Populate grid from server entries — shared by all screen restore paths
 func populate_from_server(server_grid: Array) -> void:
+	print("[GridManager] populate_from_server: entries=", server_grid.size())
 	for raw_entry in server_grid:
 		var entry: Dictionary = _sanitize_json_ints(raw_entry) as Dictionary
 		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)

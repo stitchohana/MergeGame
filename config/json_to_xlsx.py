@@ -366,9 +366,10 @@ print("Building home_meridians.xlsx...")
 data = json.load(open(JSON_DIR / "home_meridians.json", encoding="utf-8"))
 wb = new_book()
 ws = wb.create_sheet("home_meridians")
-add_sheet(ws, ["name","acupoints","qi_cost","acupoint_rewards","circulation_rewards"],
+add_sheet(ws, ["name","acupoints","qi_cost","acupoint_exp","circulation_exp"],
     [[s.get("name",""), s.get("acupoints",""), s.get("qi_cost",""),
-      format_rewards(s.get("acupoint_rewards","")), format_rewards(s.get("circulation_rewards",""))]
+      next((t.get("amount", 0) for t in s.get("acupoint_rewards", {}).get("tokens", []) if t.get("token") == 4), 0),
+      next((t.get("amount", 0) for t in s.get("circulation_rewards", {}).get("tokens", []) if t.get("token") == 4), 0)]
      for s in data["stages"]])
 save(wb, "home_meridians")
 

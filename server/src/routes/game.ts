@@ -247,7 +247,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       const operation = operations[index];
       const from = operation?.from;
       const to = operation?.to;
-      if (!operation || !["move", "merge"].includes(operation.type)
+      if (!operation || !["move", "merge", "push_place"].includes(operation.type)
         || !Array.isArray(from) || from.length !== 2
         || !Array.isArray(to) || to.length !== 2
         || !from.every(Number.isInteger) || !to.every(Number.isInteger)) {
@@ -260,6 +260,22 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
           res.status(409).json({ error: result.reason, failed_index: index, grid: state.grid }); return;
         }
         results.push({ type: "move", from, to, new_version: result.newVersion });
+        continue;
+      }
+
+      if (operation.type === "push_place") {
+        const result = engine.pushAndPlace(workingState, from[0], from[1], to[0], to[1]);
+        if (!result.ok) {
+          res.status(409).json({ error: result.reason, failed_index: index, grid: state.grid }); return;
+        }
+        results.push({
+          type: "push_place",
+          from,
+          to,
+          pushed_col: result.pushed_col,
+          pushed_row: result.pushed_row,
+          new_version: result.newVersion,
+        });
         continue;
       }
 

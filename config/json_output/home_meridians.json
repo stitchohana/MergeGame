@@ -3,7 +3,7 @@
 	{
 	  "name": "练气一层·周天",
 	  "acupoints": 10,
-	  "qi_cost": 14,
+	  "qi_cost": 42,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -32,7 +32,7 @@
 	{
 	  "name": "练气二层·周天",
 	  "acupoints": 13,
-	  "qi_cost": 19,
+	  "qi_cost": 57,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -61,7 +61,7 @@
 	{
 	  "name": "练气三层·周天",
 	  "acupoints": 16,
-	  "qi_cost": 24,
+	  "qi_cost": 72,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -90,7 +90,7 @@
 	{
 	  "name": "练气四层·周天",
 	  "acupoints": 19,
-	  "qi_cost": 29,
+	  "qi_cost": 87,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -119,7 +119,7 @@
 	{
 	  "name": "练气五层·周天",
 	  "acupoints": 22,
-	  "qi_cost": 34,
+	  "qi_cost": 102,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -148,7 +148,7 @@
 	{
 	  "name": "练气六层·周天",
 	  "acupoints": 25,
-	  "qi_cost": 38,
+	  "qi_cost": 114,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -177,7 +177,7 @@
 	{
 	  "name": "练气七层·周天",
 	  "acupoints": 28,
-	  "qi_cost": 43,
+	  "qi_cost": 129,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -206,7 +206,7 @@
 	{
 	  "name": "练气八层·周天",
 	  "acupoints": 31,
-	  "qi_cost": 48,
+	  "qi_cost": 144,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -235,7 +235,7 @@
 	{
 	  "name": "练气九层·周天",
 	  "acupoints": 34,
-	  "qi_cost": 53,
+	  "qi_cost": 159,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -264,7 +264,7 @@
 	{
 	  "name": "筑基前期·周天1",
 	  "acupoints": 35,
-	  "qi_cost": 125,
+	  "qi_cost": 375,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -293,7 +293,7 @@
 	{
 	  "name": "筑基前期·周天2",
 	  "acupoints": 36,
-	  "qi_cost": 130,
+	  "qi_cost": 390,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -322,7 +322,7 @@
 	{
 	  "name": "筑基前期·周天3",
 	  "acupoints": 37,
-	  "qi_cost": 134,
+	  "qi_cost": 402,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -351,7 +351,7 @@
 	{
 	  "name": "筑基前期·周天4",
 	  "acupoints": 38,
-	  "qi_cost": 139,
+	  "qi_cost": 417,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -380,7 +380,7 @@
 	{
 	  "name": "筑基前期·周天5",
 	  "acupoints": 39,
-	  "qi_cost": 144,
+	  "qi_cost": 432,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -409,7 +409,7 @@
 	{
 	  "name": "筑基前期·周天6",
 	  "acupoints": 40,
-	  "qi_cost": 149,
+	  "qi_cost": 447,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -438,7 +438,7 @@
 	{
 	  "name": "筑基前期·周天7",
 	  "acupoints": 41,
-	  "qi_cost": 154,
+	  "qi_cost": 462,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -467,7 +467,7 @@
 	{
 	  "name": "筑基前期·周天8",
 	  "acupoints": 42,
-	  "qi_cost": 158,
+	  "qi_cost": 474,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -496,7 +496,7 @@
 	{
 	  "name": "筑基前期·周天9",
 	  "acupoints": 43,
-	  "qi_cost": 163,
+	  "qi_cost": 489,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -525,7 +525,7 @@
 	{
 	  "name": "筑基前期·周天10",
 	  "acupoints": 44,
-	  "qi_cost": 168,
+	  "qi_cost": 504,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -554,7 +554,7 @@
 	{
 	  "name": "筑基中期·周天1",
 	  "acupoints": 35,
-	  "qi_cost": 163,
+	  "qi_cost": 489,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -583,7 +583,7 @@
 	{
 	  "name": "筑基中期·周天2",
 	  "acupoints": 36,
-	  "qi_cost": 168,
+	  "qi_cost": 504,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -612,7 +612,7 @@
 	{
 	  "name": "筑基中期·周天3",
 	  "acupoints": 37,
-	  "qi_cost": 173,
+	  "qi_cost": 519,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -641,7 +641,7 @@
 	{
 	  "name": "筑基中期·周天4",
 	  "acupoints": 38,
-	  "qi_cost": 178,
+	  "qi_cost": 534,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -670,7 +670,7 @@
 	{
 	  "name": "筑基中期·周天5",
 	  "acupoints": 39,
-	  "qi_cost": 183,
+	  "qi_cost": 549,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -699,7 +699,7 @@
 	{
 	  "name": "筑基中期·周天6",
 	  "acupoints": 40,
-	  "qi_cost": 187,
+	  "qi_cost": 561,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -728,7 +728,7 @@
 	{
 	  "name": "筑基中期·周天7",
 	  "acupoints": 41,
-	  "qi_cost": 192,
+	  "qi_cost": 576,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -757,7 +757,7 @@
 	{
 	  "name": "筑基中期·周天8",
 	  "acupoints": 42,
-	  "qi_cost": 197,
+	  "qi_cost": 591,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -786,7 +786,7 @@
 	{
 	  "name": "筑基中期·周天9",
 	  "acupoints": 43,
-	  "qi_cost": 202,
+	  "qi_cost": 606,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -815,7 +815,7 @@
 	{
 	  "name": "筑基中期·周天10",
 	  "acupoints": 44,
-	  "qi_cost": 207,
+	  "qi_cost": 621,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -844,7 +844,7 @@
 	{
 	  "name": "筑基后期·周天1",
 	  "acupoints": 35,
-	  "qi_cost": 211,
+	  "qi_cost": 633,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -873,7 +873,7 @@
 	{
 	  "name": "筑基后期·周天2",
 	  "acupoints": 36,
-	  "qi_cost": 216,
+	  "qi_cost": 648,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -902,7 +902,7 @@
 	{
 	  "name": "筑基后期·周天3",
 	  "acupoints": 37,
-	  "qi_cost": 221,
+	  "qi_cost": 663,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -931,7 +931,7 @@
 	{
 	  "name": "筑基后期·周天4",
 	  "acupoints": 38,
-	  "qi_cost": 226,
+	  "qi_cost": 678,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -960,7 +960,7 @@
 	{
 	  "name": "筑基后期·周天5",
 	  "acupoints": 39,
-	  "qi_cost": 231,
+	  "qi_cost": 693,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -989,7 +989,7 @@
 	{
 	  "name": "筑基后期·周天6",
 	  "acupoints": 40,
-	  "qi_cost": 235,
+	  "qi_cost": 705,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1018,7 +1018,7 @@
 	{
 	  "name": "筑基后期·周天7",
 	  "acupoints": 41,
-	  "qi_cost": 240,
+	  "qi_cost": 720,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1047,7 +1047,7 @@
 	{
 	  "name": "筑基后期·周天8",
 	  "acupoints": 42,
-	  "qi_cost": 245,
+	  "qi_cost": 735,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1076,7 +1076,7 @@
 	{
 	  "name": "筑基后期·周天9",
 	  "acupoints": 43,
-	  "qi_cost": 250,
+	  "qi_cost": 750,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1105,7 +1105,7 @@
 	{
 	  "name": "筑基后期·周天10",
 	  "acupoints": 44,
-	  "qi_cost": 255,
+	  "qi_cost": 765,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1134,7 +1134,7 @@
 	{
 	  "name": "金丹前期·周天1",
 	  "acupoints": 45,
-	  "qi_cost": 269,
+	  "qi_cost": 807,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1163,7 +1163,7 @@
 	{
 	  "name": "金丹前期·周天2",
 	  "acupoints": 46,
-	  "qi_cost": 274,
+	  "qi_cost": 822,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1192,7 +1192,7 @@
 	{
 	  "name": "金丹前期·周天3",
 	  "acupoints": 47,
-	  "qi_cost": 279,
+	  "qi_cost": 837,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1221,7 +1221,7 @@
 	{
 	  "name": "金丹前期·周天4",
 	  "acupoints": 48,
-	  "qi_cost": 283,
+	  "qi_cost": 849,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1250,7 +1250,7 @@
 	{
 	  "name": "金丹前期·周天5",
 	  "acupoints": 49,
-	  "qi_cost": 288,
+	  "qi_cost": 864,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1279,7 +1279,7 @@
 	{
 	  "name": "金丹前期·周天6",
 	  "acupoints": 50,
-	  "qi_cost": 293,
+	  "qi_cost": 879,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1308,7 +1308,7 @@
 	{
 	  "name": "金丹前期·周天7",
 	  "acupoints": 51,
-	  "qi_cost": 298,
+	  "qi_cost": 894,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1337,7 +1337,7 @@
 	{
 	  "name": "金丹前期·周天8",
 	  "acupoints": 52,
-	  "qi_cost": 303,
+	  "qi_cost": 909,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1366,7 +1366,7 @@
 	{
 	  "name": "金丹前期·周天9",
 	  "acupoints": 53,
-	  "qi_cost": 307,
+	  "qi_cost": 921,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1395,7 +1395,7 @@
 	{
 	  "name": "金丹前期·周天10",
 	  "acupoints": 54,
-	  "qi_cost": 312,
+	  "qi_cost": 936,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1424,7 +1424,7 @@
 	{
 	  "name": "金丹中期·周天1",
 	  "acupoints": 45,
-	  "qi_cost": 346,
+	  "qi_cost": 1038,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1453,7 +1453,7 @@
 	{
 	  "name": "金丹中期·周天2",
 	  "acupoints": 46,
-	  "qi_cost": 351,
+	  "qi_cost": 1053,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1482,7 +1482,7 @@
 	{
 	  "name": "金丹中期·周天3",
 	  "acupoints": 47,
-	  "qi_cost": 355,
+	  "qi_cost": 1065,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1511,7 +1511,7 @@
 	{
 	  "name": "金丹中期·周天4",
 	  "acupoints": 48,
-	  "qi_cost": 360,
+	  "qi_cost": 1080,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1540,7 +1540,7 @@
 	{
 	  "name": "金丹中期·周天5",
 	  "acupoints": 49,
-	  "qi_cost": 365,
+	  "qi_cost": 1095,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1569,7 +1569,7 @@
 	{
 	  "name": "金丹中期·周天6",
 	  "acupoints": 50,
-	  "qi_cost": 370,
+	  "qi_cost": 1110,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1598,7 +1598,7 @@
 	{
 	  "name": "金丹中期·周天7",
 	  "acupoints": 51,
-	  "qi_cost": 375,
+	  "qi_cost": 1125,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1627,7 +1627,7 @@
 	{
 	  "name": "金丹中期·周天8",
 	  "acupoints": 52,
-	  "qi_cost": 379,
+	  "qi_cost": 1137,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1656,7 +1656,7 @@
 	{
 	  "name": "金丹中期·周天9",
 	  "acupoints": 53,
-	  "qi_cost": 384,
+	  "qi_cost": 1152,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1685,7 +1685,7 @@
 	{
 	  "name": "金丹中期·周天10",
 	  "acupoints": 54,
-	  "qi_cost": 389,
+	  "qi_cost": 1167,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1714,7 +1714,7 @@
 	{
 	  "name": "金丹后期·周天1",
 	  "acupoints": 45,
-	  "qi_cost": 442,
+	  "qi_cost": 1326,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1743,7 +1743,7 @@
 	{
 	  "name": "金丹后期·周天2",
 	  "acupoints": 46,
-	  "qi_cost": 447,
+	  "qi_cost": 1341,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1772,7 +1772,7 @@
 	{
 	  "name": "金丹后期·周天3",
 	  "acupoints": 47,
-	  "qi_cost": 451,
+	  "qi_cost": 1353,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1801,7 +1801,7 @@
 	{
 	  "name": "金丹后期·周天4",
 	  "acupoints": 48,
-	  "qi_cost": 456,
+	  "qi_cost": 1368,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1830,7 +1830,7 @@
 	{
 	  "name": "金丹后期·周天5",
 	  "acupoints": 49,
-	  "qi_cost": 461,
+	  "qi_cost": 1383,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1859,7 +1859,7 @@
 	{
 	  "name": "金丹后期·周天6",
 	  "acupoints": 50,
-	  "qi_cost": 466,
+	  "qi_cost": 1398,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1888,7 +1888,7 @@
 	{
 	  "name": "金丹后期·周天7",
 	  "acupoints": 51,
-	  "qi_cost": 471,
+	  "qi_cost": 1413,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1917,7 +1917,7 @@
 	{
 	  "name": "金丹后期·周天8",
 	  "acupoints": 52,
-	  "qi_cost": 475,
+	  "qi_cost": 1425,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1946,7 +1946,7 @@
 	{
 	  "name": "金丹后期·周天9",
 	  "acupoints": 53,
-	  "qi_cost": 480,
+	  "qi_cost": 1440,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -1975,7 +1975,7 @@
 	{
 	  "name": "金丹后期·周天10",
 	  "acupoints": 54,
-	  "qi_cost": 485,
+	  "qi_cost": 1455,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2004,7 +2004,7 @@
 	{
 	  "name": "元婴前期·周天1",
 	  "acupoints": 55,
-	  "qi_cost": 576,
+	  "qi_cost": 1728,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2033,7 +2033,7 @@
 	{
 	  "name": "元婴前期·周天2",
 	  "acupoints": 56,
-	  "qi_cost": 581,
+	  "qi_cost": 1743,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2062,7 +2062,7 @@
 	{
 	  "name": "元婴前期·周天3",
 	  "acupoints": 57,
-	  "qi_cost": 586,
+	  "qi_cost": 1758,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2091,7 +2091,7 @@
 	{
 	  "name": "元婴前期·周天4",
 	  "acupoints": 58,
-	  "qi_cost": 591,
+	  "qi_cost": 1773,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2120,7 +2120,7 @@
 	{
 	  "name": "元婴前期·周天5",
 	  "acupoints": 59,
-	  "qi_cost": 596,
+	  "qi_cost": 1788,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2149,7 +2149,7 @@
 	{
 	  "name": "元婴前期·周天6",
 	  "acupoints": 60,
-	  "qi_cost": 600,
+	  "qi_cost": 1800,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2178,7 +2178,7 @@
 	{
 	  "name": "元婴前期·周天7",
 	  "acupoints": 61,
-	  "qi_cost": 605,
+	  "qi_cost": 1815,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2207,7 +2207,7 @@
 	{
 	  "name": "元婴前期·周天8",
 	  "acupoints": 62,
-	  "qi_cost": 610,
+	  "qi_cost": 1830,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2236,7 +2236,7 @@
 	{
 	  "name": "元婴前期·周天9",
 	  "acupoints": 63,
-	  "qi_cost": 615,
+	  "qi_cost": 1845,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2265,7 +2265,7 @@
 	{
 	  "name": "元婴前期·周天10",
 	  "acupoints": 64,
-	  "qi_cost": 620,
+	  "qi_cost": 1860,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2294,7 +2294,7 @@
 	{
 	  "name": "元婴中期·周天1",
 	  "acupoints": 55,
-	  "qi_cost": 749,
+	  "qi_cost": 2247,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2323,7 +2323,7 @@
 	{
 	  "name": "元婴中期·周天2",
 	  "acupoints": 56,
-	  "qi_cost": 754,
+	  "qi_cost": 2262,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2352,7 +2352,7 @@
 	{
 	  "name": "元婴中期·周天3",
 	  "acupoints": 57,
-	  "qi_cost": 759,
+	  "qi_cost": 2277,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2381,7 +2381,7 @@
 	{
 	  "name": "元婴中期·周天4",
 	  "acupoints": 58,
-	  "qi_cost": 764,
+	  "qi_cost": 2292,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2410,7 +2410,7 @@
 	{
 	  "name": "元婴中期·周天5",
 	  "acupoints": 59,
-	  "qi_cost": 768,
+	  "qi_cost": 2304,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2439,7 +2439,7 @@
 	{
 	  "name": "元婴中期·周天6",
 	  "acupoints": 60,
-	  "qi_cost": 773,
+	  "qi_cost": 2319,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2468,7 +2468,7 @@
 	{
 	  "name": "元婴中期·周天7",
 	  "acupoints": 61,
-	  "qi_cost": 778,
+	  "qi_cost": 2334,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2497,7 +2497,7 @@
 	{
 	  "name": "元婴中期·周天8",
 	  "acupoints": 62,
-	  "qi_cost": 783,
+	  "qi_cost": 2349,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2526,7 +2526,7 @@
 	{
 	  "name": "元婴中期·周天9",
 	  "acupoints": 63,
-	  "qi_cost": 788,
+	  "qi_cost": 2364,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2555,7 +2555,7 @@
 	{
 	  "name": "元婴中期·周天10",
 	  "acupoints": 64,
-	  "qi_cost": 792,
+	  "qi_cost": 2376,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2584,7 +2584,7 @@
 	{
 	  "name": "元婴后期·周天1",
 	  "acupoints": 55,
-	  "qi_cost": 961,
+	  "qi_cost": 2883,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2613,7 +2613,7 @@
 	{
 	  "name": "元婴后期·周天2",
 	  "acupoints": 56,
-	  "qi_cost": 965,
+	  "qi_cost": 2895,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2642,7 +2642,7 @@
 	{
 	  "name": "元婴后期·周天3",
 	  "acupoints": 57,
-	  "qi_cost": 970,
+	  "qi_cost": 2910,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2671,7 +2671,7 @@
 	{
 	  "name": "元婴后期·周天4",
 	  "acupoints": 58,
-	  "qi_cost": 975,
+	  "qi_cost": 2925,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2700,7 +2700,7 @@
 	{
 	  "name": "元婴后期·周天5",
 	  "acupoints": 59,
-	  "qi_cost": 980,
+	  "qi_cost": 2940,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2729,7 +2729,7 @@
 	{
 	  "name": "元婴后期·周天6",
 	  "acupoints": 60,
-	  "qi_cost": 985,
+	  "qi_cost": 2955,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2758,7 +2758,7 @@
 	{
 	  "name": "元婴后期·周天7",
 	  "acupoints": 61,
-	  "qi_cost": 989,
+	  "qi_cost": 2967,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2787,7 +2787,7 @@
 	{
 	  "name": "元婴后期·周天8",
 	  "acupoints": 62,
-	  "qi_cost": 994,
+	  "qi_cost": 2982,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2816,7 +2816,7 @@
 	{
 	  "name": "元婴后期·周天9",
 	  "acupoints": 63,
-	  "qi_cost": 999,
+	  "qi_cost": 2997,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2845,7 +2845,7 @@
 	{
 	  "name": "元婴后期·周天10",
 	  "acupoints": 64,
-	  "qi_cost": 1004,
+	  "qi_cost": 3012,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2874,7 +2874,7 @@
 	{
 	  "name": "化神前期·周天1",
 	  "acupoints": 65,
-	  "qi_cost": 1249,
+	  "qi_cost": 3747,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2903,7 +2903,7 @@
 	{
 	  "name": "化神前期·周天2",
 	  "acupoints": 66,
-	  "qi_cost": 1254,
+	  "qi_cost": 3762,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2932,7 +2932,7 @@
 	{
 	  "name": "化神前期·周天3",
 	  "acupoints": 67,
-	  "qi_cost": 1258,
+	  "qi_cost": 3774,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2961,7 +2961,7 @@
 	{
 	  "name": "化神前期·周天4",
 	  "acupoints": 68,
-	  "qi_cost": 1263,
+	  "qi_cost": 3789,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -2990,7 +2990,7 @@
 	{
 	  "name": "化神前期·周天5",
 	  "acupoints": 69,
-	  "qi_cost": 1268,
+	  "qi_cost": 3804,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -3019,7 +3019,7 @@
 	{
 	  "name": "化神前期·周天6",
 	  "acupoints": 70,
-	  "qi_cost": 1273,
+	  "qi_cost": 3819,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -3048,7 +3048,7 @@
 	{
 	  "name": "化神前期·周天7",
 	  "acupoints": 71,
-	  "qi_cost": 1278,
+	  "qi_cost": 3834,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -3077,7 +3077,7 @@
 	{
 	  "name": "化神前期·周天8",
 	  "acupoints": 72,
-	  "qi_cost": 1282,
+	  "qi_cost": 3846,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -3106,7 +3106,7 @@
 	{
 	  "name": "化神前期·周天9",
 	  "acupoints": 73,
-	  "qi_cost": 1287,
+	  "qi_cost": 3861,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {
@@ -3135,7 +3135,7 @@
 	{
 	  "name": "化神前期·周天10",
 	  "acupoints": 74,
-	  "qi_cost": 1292,
+	  "qi_cost": 3876,
 	  "acupoint_rewards": {
 		"tokens": [
 		  {

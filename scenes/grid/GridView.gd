@@ -47,6 +47,7 @@ var _action_sync_waiters: Array[Callable] = []
 var _action_sync_screen: Control = null
 var _cancel_waiters_after_recovery: bool = false
 var _action_recovery_in_flight: bool = false
+var _latest_action_batch_result: Dictionary = {}
 var _pending_storage_deposit_src: Vector2i = Vector2i(-1, -1)
 var _pending_storage_storage_pos: Vector2i = Vector2i(-1, -1)
 
@@ -164,6 +165,7 @@ func _connect_signals() -> void:
 	GridManager.item_added.connect(_on_item_added)
 	GridManager.item_removed.connect(_on_item_removed)
 	GridManager.item_moved.connect(_on_item_moved)
+	GridManager.items_swapped.connect(_on_items_swapped)
 	GridManager.grid_updated.connect(_on_grid_updated)
 	CloudService.action_batch_confirmed.connect(_on_action_batch_confirmed)
 	CloudService.action_batch_rejected.connect(_on_action_batch_rejected)
@@ -366,16 +368,14 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		if _drag_item_data.get("type", 0) == Constants.ItemType.CRAFTING:
 			item_clicked.emit(_drag_item_data, target_pos)
 	else:
-		_merge_failed_is_push = true
+		_merge_failed_is_push = false
 		if not _try_optimistic_merge(_drag_source_pos, target_pos):
-			if target != null and target.get("immovable") == true:
+			if target.get("immovable") == true:
 				_snap_back()
 			elif CloudService.online:
-				_pending_push_src = _drag_source_pos
-				_pending_push_target = target_pos
-				CloudService.submit_push_place(_drag_source_pos.x, _drag_source_pos.y, target_pos.x, target_pos.y)
-		else:
-			_merge_failed_is_push = false
+				_try_optimistic_push(_drag_source_pos, target_pos)
+			else:
+				_snap_back()
 
 func _try_optimistic_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	var from_item: Variant = GridManager.get_item(from_pos)
@@ -409,6 +409,45 @@ func _try_optimistic_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	}, {
 		"kind": "merge",
 		"target_pos": to_pos,
+		"spawn_request_ids": spawn_requests,
+	})
+	return true
+
+
+func _try_optimistic_push(from_pos: Vector2i, to_pos: Vector2i) -> bool:
+	var source_item: Variant = GridManager.get_item(from_pos)
+	var target_item: Variant = GridManager.get_item(to_pos)
+	if source_item == null or target_item == null:
+		_snap_back()
+		return false
+	var pushed_pos: Vector2i = GridManager.find_nearest_empty(to_pos)
+	if pushed_pos.x < 0:
+		pushed_pos = GridManager.find_nearest_empty_after_removing(from_pos, to_pos)
+	if pushed_pos.x < 0:
+		_snap_back()
+		return false
+
+	var spawn_requests: Array[String] = _collect_spawn_requests(source_item as Dictionary, target_item as Dictionary)
+	if pushed_pos == from_pos:
+		# Full-board fallback is a swap. Animate both items together.
+		_skip_anims = false
+		GridManager.swap_items(from_pos, to_pos)
+	else:
+		# Animate the displaced item, then place the dragged item without a
+		# second tween because its drag motion has already ended at the target.
+		_skip_anims = false
+		GridManager.move_item(to_pos, pushed_pos)
+		_skip_anims = true
+		GridManager.move_item(from_pos, to_pos)
+	_skip_anims = false
+	_queue_spawn_action({
+		"type": "push_place",
+		"from": [from_pos.x, from_pos.y],
+		"to": [to_pos.x, to_pos.y],
+	}, {
+		"kind": "push_place",
+		"target_pos": to_pos,
+		"pushed_pos": pushed_pos,
 		"spawn_request_ids": spawn_requests,
 	})
 	return true
@@ -547,6 +586,32 @@ func _on_item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i)
 			tween.tween_property(node, "position", target, 0.15)
 	else:
 		_sync_all_items()
+
+
+func _on_items_swapped(_item_a: Dictionary, _item_b: Dictionary, pos_a: Vector2i, pos_b: Vector2i) -> void:
+	var key_a: String = "%d,%d" % [pos_a.x, pos_a.y]
+	var key_b: String = "%d,%d" % [pos_b.x, pos_b.y]
+	var node_a: GridItem = _item_nodes.get(key_a) as GridItem
+	var node_b: GridItem = _item_nodes.get(key_b) as GridItem
+	if not is_instance_valid(node_a) or not is_instance_valid(node_b):
+		_sync_all_items()
+		return
+
+	_item_nodes.erase(key_a)
+	_item_nodes.erase(key_b)
+	_item_nodes[key_a] = node_b
+	_item_nodes[key_b] = node_a
+	node_a.grid_position = pos_b
+	node_b.grid_position = pos_a
+	var target_a: Vector2 = Vector2(pos_b.x * CELL_STEP, pos_b.y * CELL_STEP)
+	var target_b: Vector2 = Vector2(pos_a.x * CELL_STEP, pos_a.y * CELL_STEP)
+	if _skip_anims:
+		node_a.position = target_a
+		node_b.position = target_b
+	else:
+		var tween: Tween = create_tween().set_parallel(true)
+		tween.tween_property(node_a, "position", target_a, 0.15)
+		tween.tween_property(node_b, "position", target_b, 0.15)
 
 func _on_grid_updated() -> void:
 	pass
@@ -785,9 +850,20 @@ func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> 
 	var predicted_pos: Vector2i = prediction.get("target_pos", Vector2i(-1, -1))
 	var predicted_id: int = prediction.get("predicted_id", 0)
 	var spawned_id: int = result.get("spawned_id", 0)
-	var prediction_matches: bool = result.get("prediction_matches", true)
-	prediction_matches = prediction_matches and predicted_id == spawned_id and predicted_pos == target_pos
+	var server_prediction_matches: bool = result.get("prediction_matches", true)
+	var prediction_matches: bool = server_prediction_matches and predicted_id == spawned_id and predicted_pos == target_pos
 	var request_id: String = prediction.get("request_id", "")
+	if not prediction_matches:
+		print("[GridView] spawn prediction mismatch: request=", request_id,
+			" predicted_id=", predicted_id,
+			" actual_id=", spawned_id,
+			" predicted_target=", predicted_pos,
+			" actual_target=", target_pos,
+			" server_reported_match=", server_prediction_matches,
+			" client_seed=", GameState.spawn_seed,
+			" client_sequence=", prediction.get("sequence", -1),
+			" server_sequence_used=", result.get("sequence_used", -1),
+			" server_next_sequence=", result.get("spawn_sequence", -1))
 
 	var current_pos: Vector2i = _find_temp_spawn_pos(prediction.get("temp_uid", -1))
 
@@ -798,11 +874,16 @@ func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> 
 		result.get("atk_base", 0)
 	):
 		return
-	if prediction_matches and _has_pending_spawn_dependency(request_id):
+	# A later optimistic action may already consume this spawned item. Wait for
+	# the action batch to reconcile it even when the spawn prediction differed.
+	if _has_pending_spawn_dependency(request_id):
 		return
 
-	_rollback_spawn_prediction(prediction)
 	if result.has("grid"):
+		if _has_unsynced_actions():
+			print("[GridView] spawn snapshot recovery deferred: unsynced actions still pending, request=", request_id)
+			return
+		_rollback_spawn_prediction(prediction)
 		_sync_grid_from_server(result)
 		return
 
@@ -811,8 +892,13 @@ func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> 
 		if occupying != null and occupying.get("_pending_spawn", false):
 			GridManager.remove_item(target_pos)
 		else:
+			if _has_unsynced_actions():
+				print("[GridView] spawn recovery deferred: unsynced actions still pending, request=", request_id)
+				return
+			_rollback_spawn_prediction(prediction)
 			CloudService.fetch_state()
 			return
+	_rollback_spawn_prediction(prediction)
 	var authoritative_item: Dictionary = _build_spawn_item(
 		spawned_id, result.get("spawned_uid", 0), result.get("atk_base", 0), false
 	)
@@ -825,9 +911,17 @@ func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> 
 		_play_spawn_fly(target_pos, prediction.get("launcher_pos", Vector2i(-1, -1)))
 
 func _on_launcher_spawn_failed(reason: String, prediction: Dictionary) -> void:
+	print("[GridView] launcher spawn failed: reason=", reason,
+		" request=", prediction.get("request_id", ""),
+		" launcher_uid=", prediction.get("launcher_uid", -1),
+		" client_sequence=", prediction.get("sequence", -1),
+		" client_spawn_sequence=", GameState.spawn_sequence)
 	call_deferred("_flush_spawn_action_batch")
-	_action_sync_needed = false
 	_rollback_spawn_prediction(prediction)
+	if reason in ["no_charges", "no_more_fixed_spawns", "insufficient_stamina",
+			"insufficient_qi", "request_queue_full", "item_immovable", "no_empty_cell"]:
+		return
+	_action_sync_needed = false
 	_pending_spawn_actions.clear()
 	_active_spawn_actions.clear()
 	_spawn_action_batch_in_flight = false
@@ -877,16 +971,13 @@ func _on_action_batch_confirmed(result: Dictionary) -> void:
 	_active_spawn_actions.clear()
 	_spawn_action_batch_in_flight = false
 	_apply_spawn_resources(result)
+	_latest_action_batch_result = result.duplicate(true)
 	if result.has("crafted_item_ids"):
 		var crafted_item_ids: Array = result.get("crafted_item_ids", [])
 		GameState.set_crafted_item_ids(crafted_item_ids)
 	if _pending_spawn_actions.is_empty() and not _launcher_ctrl.is_spawn_in_flight() and not _is_dragging:
 		_action_sync_needed = false
-		var server_grid: Array = result.get("grid", [])
-		if not GridManager.reconcile_from_server(server_grid):
-			var batch_results: Array = result.get("results", [])
-			GridManager.confirm_action_batch_results(batch_results)
-			push_warning("[GridView] Successful action batch snapshot did not match the optimistic board; kept local nodes")
+		_apply_latest_action_batch_snapshot()
 		_try_finish_action_sync_barrier()
 	else:
 		_action_sync_needed = true
@@ -897,6 +988,7 @@ func _on_action_batch_rejected(reason: String, result: Dictionary) -> void:
 	_pending_spawn_actions.clear()
 	_spawn_action_batch_in_flight = false
 	_action_sync_needed = false
+	_latest_action_batch_result.clear()
 	EventBus.show_toast.emit("操作同步失败：" + reason)
 	if result.has("grid"):
 		_sync_grid_from_server(result)
@@ -910,6 +1002,7 @@ func _on_action_batch_network_failed(reason: String) -> void:
 	_pending_spawn_actions.clear()
 	_spawn_action_batch_in_flight = false
 	_action_sync_needed = false
+	_latest_action_batch_result.clear()
 	EventBus.show_toast.emit("操作同步失败：" + reason)
 	_cancel_waiters_after_recovery = true
 	_request_action_recovery_state()
@@ -949,7 +1042,19 @@ func _finalize_action_sync() -> void:
 	if not _pending_spawn_actions.is_empty() or _launcher_ctrl.is_spawn_in_flight():
 		return
 	_action_sync_needed = false
-	_request_action_recovery_state()
+	_apply_latest_action_batch_snapshot()
+	_try_finish_action_sync_barrier()
+
+
+func _apply_latest_action_batch_snapshot() -> void:
+	if _latest_action_batch_result.is_empty():
+		return
+	var server_grid: Array = _latest_action_batch_result.get("grid", [])
+	if not GridManager.reconcile_from_server(server_grid):
+		var batch_results: Array = _latest_action_batch_result.get("results", [])
+		GridManager.confirm_action_batch_results(batch_results)
+		push_warning("[GridView] Successful action batch snapshot did not match the optimistic board; kept local nodes")
+	_latest_action_batch_result.clear()
 
 func _build_spawn_item(item_id: int, uid: int, atk_base: int, pending: bool) -> Dictionary:
 	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
@@ -1046,7 +1151,14 @@ func _select_item(pos: Vector2i) -> void:
 func _sync_grid_from_server(result: Dictionary) -> void:
 	var server_grid: Array = result.get("grid", [])
 	if server_grid.is_empty():
+		print("[GridView] _sync_grid_from_server skipped: empty snapshot")
 		return
+	if GridManager.reconcile_from_server(server_grid):
+		print("[GridView] _sync_grid_from_server reconciled in place: entries=", server_grid.size())
+		return
+	print("[GridView] _sync_grid_from_server rebuilding: entries=", server_grid.size(),
+		" local_items=", GridManager.count_items(),
+		" caller=", get_stack())
 	_skip_anims = true
 	GridManager.init_grid(GameState.current_board_type)
 	for entry in server_grid:

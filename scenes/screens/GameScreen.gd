@@ -71,12 +71,12 @@ func on_enter() -> void:
 	grid_view.visible = false
 	print("[GameScreen] grid_view.visible=false, calling LoadingManager.begin")
 	_load_token = LoadingManager.begin("加载棋盘数据...")
-	if not GameState.main_grid_cache.is_empty():
-		if _load_token > 0:
-			LoadingManager.end(_load_token)
-			_load_token = -1
+	if not CloudService.online and not GameState.main_grid_cache.is_empty():
 		_render_main_grid_cache()
+	if not CloudService.online and _load_token > 0:
 		grid_view.visible = true
+		LoadingManager.end(_load_token)
+		_load_token = -1
 	print("[GameScreen] _load_token=", _load_token, " online=", CloudService.online)
 	if CloudService.online:
 		CloudService.submit_board_switch(Constants.BoardType.MAIN)
@@ -95,7 +95,7 @@ func on_exit() -> void:
 	detail_panel.clear()
 
 func _on_main_board_switch_confirmed(result: Dictionary) -> void:
-	print("[GameScreen] _on_main_board_switch_confirmed: board_type=", result.get("board_type", -1), " items=", result.get("grid", []).size())
+	print("[GameScreen] _on_main_board_switch_confirmed rebuilding board: board_type=", result.get("board_type", -1), " items=", result.get("grid", []).size(), " caller=", get_stack())
 	if result.get("board_type", -1) != Constants.BoardType.MAIN:
 		print("[GameScreen] board_type mismatch, returning")
 		return
@@ -112,6 +112,9 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 	print("[GameScreen] board switch done")
 
 func _on_main_board_switch_rejected(_reason: String) -> void:
+	if not GameState.main_grid_cache.is_empty():
+		_render_main_grid_cache()
+	grid_view.visible = true
 	if _load_token > 0:
 		LoadingManager.end(_load_token)
 		_load_token = -1
