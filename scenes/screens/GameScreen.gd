@@ -339,7 +339,7 @@ func _capture_order_animation(display_index: int) -> void:
 	var previous_positions: Dictionary = {}
 	for old_entry in entries:
 		previous_positions[old_entry.get_display_index()] = old_entry.position
-	_pending_order_animation = {"entry": entry, "sources": sources, "required_ids": required_ids, "previous_positions": previous_positions}
+	_pending_order_animation = {"entry": entry, "sources": sources, "required_ids": required_ids, "completed_display_index": display_index, "previous_positions": previous_positions}
 	print("[GameScreen] order animation: captured index=", display_index, " required_ids=", required_ids, " sources=", sources.size())
 	if sources.is_empty():
 		print("[GameScreen] order animation: no matching board items for ids=", required_ids, " grid_nodes=", grid_view._item_nodes.size())
@@ -409,6 +409,8 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 		animation["sources"] = sources
 		print("[GameScreen] order animation: recovered sources=", sources.size(), " required_ids=", required_ids)
 	print("[GameScreen] order animation: confirmed sources=", animation.get("sources", []).size(), " qi=", result.get("qi_gained", 0))
+	var cult: Dictionary = result.get("cultivation", {})
+	animation["target_qi"] = int(cult.get("current_qi", CultivationService.current_qi))
 	await _play_order_completion_animation(animation, int(result.get("qi_gained", 0)))
 	_meridian_submit_pending = false
 
@@ -419,14 +421,13 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 	GridManager.populate_from_server(server_grid)
 	grid_view.set_skip_animations(false)
 
-	var cult: Dictionary = result.get("cultivation", {})
 	if not cult.is_empty():
 		CultivationService.deserialize(cult)
 
 	# Server returns updated list (completed order removed, new order added)
 	GameState.meridian_acupoints = result.get("meridian_acupoints", [])
 	_display_meridian()
-	requirement_list.animate_reflow_from(animation.get("previous_positions", {}))
+	requirement_list.animate_reflow_from(animation.get("previous_positions", {}), int(animation.get("completed_display_index", -1)))
 
 	var qi_gained: int = result.get("qi_gained", 0)
 	if qi_gained > 0:
@@ -452,11 +453,15 @@ func _play_order_completion_animation(animation: Dictionary, qi_gained: int) -> 
 		entry.play_complete_animation()
 	await get_tree().create_timer(0.24).timeout
 	if qi_gained > 0 and top_bar:
+		var target_qi: int = int(animation.get("target_qi", CultivationService.current_qi))
+		top_bar.qi_resource.set_value(target_qi)
 		var qi_icon: TextureRect = top_bar.qi_resource.get_node_or_null("Icon") as TextureRect
 		if qi_icon and qi_icon.texture:
 			var from_pos: Vector2 = entry.get_global_rect().get_center() if entry and is_instance_valid(entry) else top_bar.global_position
-			_play_flying_texture(qi_icon.texture, from_pos, qi_icon.get_global_rect().get_center(), 0.42)
-			await get_tree().create_timer(0.44).timeout
+			var to_pos: Vector2 = qi_icon.get_global_rect().get_center()
+			_play_qi_reward_pile(qi_icon.texture, from_pos, to_pos)
+			var qi_batch_duration: float = Constants.QI_REWARD_FLY_DURATION + float(maxi(Constants.QI_REWARD_FLY_COUNT - 1, 0)) * Constants.QI_REWARD_FLY_STAGGER
+			await get_tree().create_timer(qi_batch_duration + 0.05).timeout
 
 func _hide_order_source_items(animation: Dictionary, duration: float) -> void:
 	for source in animation.get("sources", []):
@@ -510,14 +515,32 @@ func _get_order_animation_host() -> Control:
 	var overlay: Control = UIManager.get_layer(UIManager.Layer.OVERLAY)
 	return overlay if overlay != null else self
 
-func _play_flying_texture(texture: Texture2D, from_pos: Vector2, to_pos: Vector2, duration: float) -> void:
+func _play_qi_reward_pile(texture: Texture2D, from_pos: Vector2, to_pos: Vector2) -> void:
+	if texture == null:
+		return
+	var count: int = maxi(Constants.QI_REWARD_FLY_COUNT, 1)
+	print("[GameScreen] order animation: qi pile count=", count, " duration=", Constants.QI_REWARD_FLY_DURATION, " stagger=", Constants.QI_REWARD_FLY_STAGGER)
+	for index in range(count):
+		var angle: float = -PI * 0.5 + TAU * float(index) / float(count)
+		var offset: Vector2 = Vector2(cos(angle), sin(angle)) * Constants.QI_REWARD_FLY_SPREAD
+		var delay: float = float(index) * Constants.QI_REWARD_FLY_STAGGER
+		_play_flying_texture(
+			texture,
+			from_pos + offset,
+			to_pos,
+			Constants.QI_REWARD_FLY_DURATION,
+			delay,
+			Vector2(Constants.QI_REWARD_FLY_ICON_SIZE, Constants.QI_REWARD_FLY_ICON_SIZE)
+		)
+
+func _play_flying_texture(texture: Texture2D, from_pos: Vector2, to_pos: Vector2, duration: float, start_delay: float = 0.0, icon_size: Vector2 = Vector2(52.0, 52.0)) -> void:
 	if texture == null:
 		return
 	var fly: TextureRect = TextureRect.new()
 	fly.texture = texture
 	fly.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	fly.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	fly.size = Vector2(52, 52)
+	fly.size = icon_size
 	fly.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fly.z_index = 1000
 	var host: Control = _get_order_animation_host()
@@ -530,6 +553,8 @@ func _play_flying_texture(texture: Texture2D, from_pos: Vector2, to_pos: Vector2
 	var tween: Tween = create_tween()
 	tween.set_trans(Tween.TRANS_CUBIC)
 	tween.set_ease(Tween.EASE_IN_OUT)
+	if start_delay > 0.0:
+		tween.tween_interval(start_delay)
 	tween.tween_property(fly, "global_position", to_global, duration)
 	tween.tween_callback(fly.queue_free)
 

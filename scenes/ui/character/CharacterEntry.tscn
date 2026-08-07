@@ -55,18 +55,6 @@ corner_radius_bottom_left = 23
 shadow_color = Color(0.682, 0.463, 0.165, 1)
 shadow_offset = Vector2(0, 3)
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_action"]
-bg_color = Color(0.282, 0.565, 0.388, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.878, 0.718, 0.322, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-
 [sub_resource type="StyleBoxEmpty" id="StyleBox_empty"]
 
 [node name="CharacterEntry" type="Control" unique_id=1705527504]
@@ -136,19 +124,3 @@ mouse_filter = 2
 texture = ExtResource("5_reward_icon")
 expand_mode = 1
 stretch_mode = 5
-
-[node name="Button" type="Button" parent="." unique_id=504956658]
-visible = false
-layout_mode = 0
-offset_left = 16.0
-offset_top = 146.0
-offset_right = 179.0
-offset_bottom = 181.0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(1, 0.961, 0.784, 1)
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBox_action")
-theme_override_styles/pressed = SubResource("StyleBox_action")
-theme_override_styles/hover = SubResource("StyleBox_action")
-theme_override_styles/focus = SubResource("StyleBox_empty")
-text = "可修炼"

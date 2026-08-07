@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bssru0o50tk8e" path="res://scenes/ui/meridian/RequirementList.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://cy22y4f1oscvj" path="res://scenes/ui/character/CharacterEntry.tscn" id="2_character"]
 [ext_resource type="PackedScene" uid="uid://dtqffbbhnmvni" path="res://scenes/ui/meridian/RequirementEntry.tscn" id="3_order"]
+[ext_resource type="Texture2D" uid="uid://d4bv61jk3x6ah" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_button.png" id="4_cultivation"]
 
 [node name="RequirementList" type="Control" unique_id=1307681079]
 custom_minimum_size = Vector2(780, 235)
@@ -40,6 +41,18 @@ theme_override_constants/separation = 12
 
 [node name="CharacterEntry" parent="Panel/ScrollContainer/HBoxContainer" unique_id=1961193974 instance=ExtResource("2_character")]
 layout_mode = 2
+
+[node name="CultivationButton" type="TextureButton" parent="Panel/ScrollContainer/HBoxContainer" unique_id=2053081073]
+visible = false
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+tooltip_text = "去修炼"
+texture_normal = ExtResource("4_cultivation")
+ignore_texture_size = true
+stretch_mode = 5
 
 [node name="OrderCard1" parent="Panel/ScrollContainer/HBoxContainer" unique_id=1005764239 instance=ExtResource("3_order")]
 custom_minimum_size = Vector2(298, 160)

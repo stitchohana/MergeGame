@@ -3,9 +3,42 @@ class_name TopResource extends Control
 @onready var value_label: Label = $Label
 @onready var regen_timer_label: Label = $RegenTimerLabel
 
+var _displayed_value: int = 0
+var _value_initialized: bool = false
+var _value_tween: Tween = null
+var _value_pulse_tween: Tween = null
+
+func _ready() -> void:
+	value_label.pivot_offset = value_label.size * 0.5
 
 func set_value(value: int) -> void:
-	value_label.text = "%d" % value
+	if not _value_initialized:
+		_displayed_value = value
+		_value_initialized = true
+		value_label.text = "%d" % value
+		return
+	if value == _displayed_value:
+		return
+	var start_value: int = _displayed_value
+	if _value_tween and _value_tween.is_valid():
+		_value_tween.kill()
+	if _value_pulse_tween and _value_pulse_tween.is_valid():
+		_value_pulse_tween.kill()
+	value_label.scale = Vector2.ONE
+	_value_tween = create_tween()
+	_value_tween.set_trans(Tween.TRANS_QUAD)
+	_value_tween.set_ease(Tween.EASE_OUT)
+	_value_tween.tween_method(_set_displayed_value, float(start_value), float(value), Constants.TOP_RESOURCE_VALUE_ANIM_DURATION)
+	_value_pulse_tween = create_tween()
+	_value_pulse_tween.set_trans(Tween.TRANS_QUAD)
+	_value_pulse_tween.set_ease(Tween.EASE_OUT)
+	_value_pulse_tween.tween_property(value_label, "scale", Vector2.ONE * Constants.TOP_RESOURCE_VALUE_PULSE_SCALE, Constants.TOP_RESOURCE_VALUE_ANIM_DURATION * 0.3)
+	_value_pulse_tween.set_ease(Tween.EASE_IN)
+	_value_pulse_tween.tween_property(value_label, "scale", Vector2.ONE, Constants.TOP_RESOURCE_VALUE_ANIM_DURATION * 0.7)
+
+func _set_displayed_value(value: float) -> void:
+	_displayed_value = int(round(value))
+	value_label.text = "%d" % _displayed_value
 
 
 func set_regen_timer(time_left: float) -> void:

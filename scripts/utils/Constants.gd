@@ -47,6 +47,13 @@ const SPAWN_ANIM_DURATION := 0.25
 const SNAP_BACK_DURATION := 0.2
 const ORDER_SOURCE_HIDE_DURATION := 0.12
 const ORDER_ITEM_FLY_DURATION := 0.7
+const QI_REWARD_FLY_COUNT := 5
+const QI_REWARD_FLY_DURATION := 0.5
+const QI_REWARD_FLY_STAGGER := 0.06
+const QI_REWARD_FLY_SPREAD := 24.0
+const QI_REWARD_FLY_ICON_SIZE := 34.0
+const TOP_RESOURCE_VALUE_ANIM_DURATION := 0.35
+const TOP_RESOURCE_VALUE_PULSE_SCALE := 1.12
 
 # Check if an item has launcher config fields (spawns + max_charges)
 static func has_launcher_config(item_data: Dictionary) -> bool:

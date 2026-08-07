@@ -85,15 +85,12 @@ const isOrderExcluded = id => {
   const item = byId.get(id);
   const groupId = Number(item?.group_id ?? 0);
   const isEffectItem = Number(item?.type ?? 0) === 5;
+  const effectType = Number(item?.effect_type ?? 0);
   const isManualOrFormationScroll = groupId === 13 || groupId === 14;
   const isSwordFormationOrTalisman = id >= 28001 && id <= 28048;
-  return isEffectItem || isManualOrFormationScroll || isSwordFormationOrTalisman;
+  const isStaminaOrBreakthroughPill = effectType === 4 || effectType === 5;
+  return isEffectItem || isManualOrFormationScroll || isSwordFormationOrTalisman || isStaminaOrBreakthroughPill;
 };
-const launcherOutputIds = new Set();
-for (const launcher of [...items.launcher, ...items.regular]) {
-  for (const spawn of launcher.spawns ?? []) launcherOutputIds.add(spawn.id);
-  for (const id of launcher.fixed_spawns ?? []) launcherOutputIds.add(id);
-}
 
 // A crafted product inherits the highest progression tier of its ingredients.
 const itemTier = new Map();
@@ -114,19 +111,36 @@ for (let pass = 0; pass < 100; pass++) {
   if (!changed) break;
 }
 
+const uniqueRecipeResults = [...new Set(recipes.map(recipe => recipe.result))];
+const makeOrderPool = (regularTiers, craftedMinTier, craftedMaxTier) => {
+  const regularProducts = items.regular
+    .filter(item => Number(item.type ?? 0) === 0)
+    .filter(item => regularTiers.has(Number(item.level)))
+    .map(item => item.id)
+    .filter(id => !isOrderExcluded(id));
+  const craftedProducts = uniqueRecipeResults
+    .filter(id => itemTier.has(id))
+    .filter(id => itemTier.get(id) >= craftedMinTier && itemTier.get(id) <= craftedMaxTier)
+    .filter(id => !isOrderExcluded(id));
+  return [...new Set([...regularProducts, ...craftedProducts])].sort((a, b) => a - b);
+};
+
+const orderPoolsByPeriod = {
+  qi: makeOrderPool(new Set([4]), 1, 4),
+  foundation: makeOrderPool(new Set([7, 8]), 5, 8),
+  goldenCore: makeOrderPool(new Set([10, 11, 12]), 9, 12),
+  nascentSoul: makeOrderPool(new Set([13, 14, 15, 16]), 13, 16),
+};
+const orderPoolForStage = stage => {
+  if (stage <= 10) return orderPoolsByPeriod.qi;
+  if (stage <= 13) return orderPoolsByPeriod.foundation;
+  if (stage <= 16) return orderPoolsByPeriod.goldenCore;
+  return orderPoolsByPeriod.nascentSoul;
+};
+
 for (const threshold of meridians.thresholds) {
   const stage = Number(threshold.stage);
-  const requiredTier = stage <= 10 ? Math.ceil(stage / 2) : stage - 5;
-  const launcherProducts = [...launcherOutputIds]
-    .filter(id => itemTier.get(id) === requiredTier)
-    .filter(id => !isOrderExcluded(id));
-  const craftedProducts = recipes
-    .map(recipe => recipe.result)
-    .filter((id, index, values) => values.indexOf(id) === index)
-    .filter(id => itemTier.get(id) === requiredTier)
-    .filter(id => !isOrderExcluded(id))
-    .filter(id => Number(byId.get(id)?.effect_type ?? 0) !== 5);
-  threshold.item_pool = [...new Set([...launcherProducts, ...craftedProducts])].sort((a, b) => a - b);
+  threshold.item_pool = orderPoolForStage(stage);
   threshold.order_count = Math.max(5, Number(threshold.order_count ?? 5));
   threshold.acupoint_rewards = orderRewardId;
   delete threshold.qi_per_value;

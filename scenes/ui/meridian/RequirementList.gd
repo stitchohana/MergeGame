@@ -12,6 +12,15 @@ var _drag_start_scroll: int = 0
 
 @onready var scroll: ScrollContainer = $Panel/ScrollContainer
 @onready var container: HBoxContainer = $Panel/ScrollContainer/HBoxContainer
+@onready var cultivation_button: TextureButton = $Panel/ScrollContainer/HBoxContainer/CultivationButton
+
+func _ready() -> void:
+	cultivation_button.pressed.connect(_on_cultivation_pressed)
+	CultivationService.qi_changed.connect(_on_cultivation_changed)
+	CultivationService.stage_changed.connect(_on_cultivation_changed)
+	CloudService.state_loaded.connect(func(_state: Dictionary): call_deferred("_refresh_cultivation_button"))
+	CloudService.home_meridian_light_confirmed.connect(func(_result: Dictionary): call_deferred("_refresh_cultivation_button"))
+	_refresh_cultivation_button()
 
 func _input(event: InputEvent) -> void:
 	if UIManager.is_input_blocked():
@@ -52,6 +61,60 @@ func _input(event: InputEvent) -> void:
 
 func set_title(_text: String) -> void:
 	pass
+
+func _on_cultivation_changed(_first: Variant = null, _second: Variant = null) -> void:
+	_refresh_cultivation_button()
+
+func _refresh_cultivation_button() -> void:
+	if cultivation_button:
+		cultivation_button.visible = _can_activate_acupoint()
+
+func _can_activate_acupoint() -> bool:
+	var home_defs: Array = GameState.home_meridian_defs
+	if home_defs.is_empty():
+		return false
+	var stage_idx: int = _get_active_stage_index(home_defs, GameState.home_meridian_progress)
+	if stage_idx < 0 or stage_idx >= home_defs.size():
+		return false
+	var def: Dictionary = home_defs[stage_idx]
+	var qi_cost: int = int(def.get("qi_cost", 0))
+	if qi_cost <= 0 or CultivationService.current_qi < qi_cost:
+		return false
+	var lit: Array = _get_stage_lit(GameState.home_meridian_progress, stage_idx)
+	var total: int = int(def.get("acupoints", 0))
+	for index in range(total):
+		if index >= lit.size() or not bool(lit[index]):
+			return true
+	return false
+
+func _get_active_stage_index(home_defs: Array, home_progress: Array) -> int:
+	for stage_idx in range(home_defs.size()):
+		var has_progress: bool = false
+		for progress_variant in home_progress:
+			var progress: Dictionary = progress_variant
+			if int(progress.get("stage", -1)) != stage_idx:
+				continue
+			has_progress = true
+			if not bool(progress.get("circulation_completed", false)):
+				return stage_idx
+			break
+		if not has_progress:
+			return stage_idx
+	return home_defs.size() - 1
+
+func _get_stage_lit(home_progress: Array, stage_idx: int) -> Array:
+	for progress_variant in home_progress:
+		var progress: Dictionary = progress_variant
+		if int(progress.get("stage", -1)) == stage_idx:
+			return progress.get("lit", [])
+	return []
+
+func _on_cultivation_pressed() -> void:
+	if not _can_activate_acupoint():
+		_refresh_cultivation_button()
+		return
+	GameState.pending_auto_acupoint = true
+	EventBus.screen_change_requested.emit("home")
 
 func set_requirements(reqs: Array, available_indices: Dictionary = {}) -> void:
 	for child in container.get_children():
@@ -95,18 +158,37 @@ func _get_entries() -> Array[RequirementEntry]:
 func get_order_entries() -> Array[RequirementEntry]:
 	return _get_entries()
 
-func animate_reflow_from(previous_positions: Dictionary) -> void:
-	await get_tree().process_frame
+func animate_reflow_from(previous_positions: Dictionary, removed_index: int = -1) -> void:
+	var pending: Array[Dictionary] = []
 	for entry in _get_entries():
-		var old_position: Variant = previous_positions.get(entry.get_display_index() + 1, null)
-		if old_position == null:
+		var old_index: int = entry.get_display_index()
+		if removed_index >= 0 and old_index >= removed_index:
+			old_index += 1
+		var old_position_variant: Variant = previous_positions.get(old_index, null)
+		if not old_position_variant is Vector2:
 			continue
-		var target_position: Vector2 = entry.position
+		var old_position: Vector2 = old_position_variant
+		var target_modulate: Color = entry.modulate
+		var hidden_modulate: Color = target_modulate
+		hidden_modulate.a = 0.0
+		entry.modulate = hidden_modulate
 		entry.position = old_position
-		var tween: Tween = create_tween()
+		pending.append({"entry": entry, "from": old_position, "modulate": target_modulate})
+	await get_tree().process_frame
+	for pending_variant in pending:
+		var data: Dictionary = pending_variant
+		var entry: RequirementEntry = data.get("entry") as RequirementEntry
+		if entry == null or not is_instance_valid(entry):
+			continue
+		var from_position: Vector2 = data.get("from", Vector2.ZERO)
+		var to_position: Vector2 = entry.position
+		var target_modulate: Color = data.get("modulate", Color.WHITE)
+		entry.position = from_position
+		var tween: Tween = create_tween().set_parallel(true)
 		tween.set_trans(Tween.TRANS_CUBIC)
 		tween.set_ease(Tween.EASE_OUT)
-		tween.tween_property(entry, "position", target_position, 0.28)
+		tween.tween_property(entry, "position", to_position, 0.28)
+		tween.tween_property(entry, "modulate:a", target_modulate.a, 0.18)
 
 func set_entry_available(index: int, available: bool) -> void:
 	var entry := _get_entry_by_display_index(index)
@@ -134,8 +216,12 @@ func _get_entry_by_display_index(index: int) -> RequirementEntry:
 
 func _promote_entry(entry: RequirementEntry) -> void:
 	var start_position: Vector2 = entry.position
-	container.move_child(entry, 1)
-	_animate_promoted_entry(entry, start_position)
+	var target_modulate: Color = entry.modulate
+	var hidden_modulate: Color = target_modulate
+	hidden_modulate.a = 0.0
+	entry.modulate = hidden_modulate
+	container.move_child(entry, _get_order_start_index())
+	_animate_promoted_entry(entry, start_position, target_modulate)
 
 
 func _move_entry_after_available(entry: RequirementEntry) -> void:
@@ -143,19 +229,27 @@ func _move_entry_after_available(entry: RequirementEntry) -> void:
 	for child in _get_entries():
 		if child != entry and child.is_available():
 			available_count += 1
-	container.move_child(entry, available_count + 1)
+	container.move_child(entry, _get_order_start_index() + available_count)
+
+func _get_order_start_index() -> int:
+	var fixed_child_count: int = 0
+	for child in container.get_children():
+		if not child is RequirementEntry:
+			fixed_child_count += 1
+	return fixed_child_count
 
 
-func _animate_promoted_entry(entry: RequirementEntry, start_position: Vector2) -> void:
+func _animate_promoted_entry(entry: RequirementEntry, start_position: Vector2, target_modulate: Color) -> void:
 	await get_tree().process_frame
 	if not is_instance_valid(entry):
 		return
 	var target_position: Vector2 = entry.position
 	entry.position = start_position
-	var tween: Tween = create_tween()
+	var tween: Tween = create_tween().set_parallel(true)
 	tween.set_trans(Tween.TRANS_CUBIC)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.tween_property(entry, "position", target_position, 0.28)
+	tween.tween_property(entry, "modulate:a", target_modulate.a, 0.18)
 
 func _emit_complete(idx: int) -> void:
 	complete_clicked.emit(idx)
