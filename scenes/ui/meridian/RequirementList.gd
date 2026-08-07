@@ -92,6 +92,22 @@ func _get_entries() -> Array[RequirementEntry]:
 			entries.append(child as RequirementEntry)
 	return entries
 
+func get_order_entries() -> Array[RequirementEntry]:
+	return _get_entries()
+
+func animate_reflow_from(previous_positions: Dictionary) -> void:
+	await get_tree().process_frame
+	for entry in _get_entries():
+		var old_position: Variant = previous_positions.get(entry.get_display_index() + 1, null)
+		if old_position == null:
+			continue
+		var target_position: Vector2 = entry.position
+		entry.position = old_position
+		var tween: Tween = create_tween()
+		tween.set_trans(Tween.TRANS_CUBIC)
+		tween.set_ease(Tween.EASE_OUT)
+		tween.tween_property(entry, "position", target_position, 0.28)
+
 func set_entry_available(index: int, available: bool) -> void:
 	var entry := _get_entry_by_display_index(index)
 	if entry == null:

@@ -167,22 +167,20 @@ offset_bottom = 83.0
 text = "已放入材料"
 
 [node name="StatusLabel" type="Label" parent="." unique_id=909442379]
-visible = false
 layout_mode = 0
-offset_left = 22.0
+offset_left = 52.0
 offset_top = 64.0
-offset_right = 440.0
+offset_right = 366.0
 offset_bottom = 104.0
 theme_override_colors/font_color = Color(0.75, 0.45, 0.15, 1)
 theme_override_font_sizes/font_size = 15
 
 [node name="MaterialsContainer" type="FlowContainer" parent="." unique_id=451883358]
-visible = false
 layout_mode = 0
-offset_left = 22.0
-offset_top = 91.0
-offset_right = 440.0
-offset_bottom = 151.0
+offset_left = 46.0
+offset_top = 46.0
+offset_right = 423.0
+offset_bottom = 127.0
 
 [node name="SellPriceLabel" type="Label" parent="." unique_id=921787493]
 visible = false

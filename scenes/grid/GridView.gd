@@ -136,6 +136,7 @@ func _ready() -> void:
 	_craft_ctrl.craft_retrieve_ready.connect(_on_craft_retrieve_ready)
 	_craft_ctrl.table_visual_update.connect(_on_craft_visual_update)
 	_craft_ctrl.craft_start_requested.connect(_on_craft_start_requested)
+	_craft_ctrl.craft_add_queued.connect(_on_craft_add_queued)
 	_craft_ctrl.sync_states()
 
 func _create_items_layer() -> void:
@@ -276,11 +277,47 @@ func _submit_crafting_drop(table_pos: Vector2i, table_item: Dictionary,
 	)
 	if not ok:
 		return
-	else:
-		var table_key := "%d,%d" % [table_pos.x, table_pos.y]
-		var table_node = _item_nodes.get(table_key)
-		if table_node and is_instance_valid(table_node):
-			table_node.set_crafting_state(CraftingService.TableState.HAS_ITEMS)
+
+func _on_craft_add_queued(from_pos: Vector2i, table_pos: Vector2i, ingredient_id: int) -> void:
+	_queue_spawn_action({
+		"type": "craft_add",
+		"from": [from_pos.x, from_pos.y],
+		"to": [table_pos.x, table_pos.y],
+		"ingredient_id": ingredient_id,
+	}, {"kind": "craft_add"})
+
+func queue_craft_remove(table_pos: Vector2i, ingredient_id: int, target_pos: Vector2i) -> void:
+	var table_item: Variant = GridManager.get_item(table_pos)
+	if table_item == null:
+		return
+	var removed: Dictionary = CraftingService.remove_ingredient(table_item as Dictionary, ingredient_id)
+	if removed.is_empty():
+		return
+	var item_data: Dictionary = ConfigDatabase.get_item_data(ingredient_id)
+	var new_item: Dictionary = item_data.duplicate(true) if not item_data.is_empty() else {"id": ingredient_id}
+	new_item["_uid"] = removed.get("uid", removed.get("_uid", 0))
+	_skip_anims = true
+	var added: bool = GridManager.add_item(new_item, target_pos)
+	_skip_anims = false
+	if added:
+		_play_craft_remove_fly(table_pos, target_pos)
+	_queue_spawn_action({
+		"type": "craft_remove",
+		"from": [table_pos.x, table_pos.y],
+		"to": [target_pos.x, target_pos.y],
+		"ingredient_id": ingredient_id,
+	}, {"kind": "craft_remove"})
+
+func _play_craft_remove_fly(from_pos: Vector2i, target_pos: Vector2i) -> void:
+	var key: String = "%d,%d" % [target_pos.x, target_pos.y]
+	var item_node: GridItem = _item_nodes.get(key) as GridItem
+	if item_node == null or not is_instance_valid(item_node):
+		return
+	item_node.position = Vector2(from_pos.x * CELL_STEP, from_pos.y * CELL_STEP)
+	item_node.scale = Vector2(0.72, 0.72)
+	var tween: Tween = create_tween().set_parallel(true)
+	tween.tween_property(item_node, "position", Vector2(target_pos.x * CELL_STEP, target_pos.y * CELL_STEP), 0.32).set_trans(Tween.TRANS_CUBIC)
+	tween.tween_property(item_node, "scale", Vector2.ONE, 0.32).set_trans(Tween.TRANS_BACK)
 
 func _handle_launcher_click(pos: Vector2i) -> void:
 	_pressed_item = {}
@@ -749,8 +786,10 @@ func _on_craft_retrieve_ready(result_id: int, result_uid: int, table_pos: Vector
 	var new_item: Dictionary = result_data.duplicate(true)
 	new_item["_uid"] = result_uid
 	_is_launcher_spawning = true
-	GridManager.add_item(new_item, spawn_pos)
+	var added: bool = GridManager.add_item(new_item, spawn_pos)
 	_is_launcher_spawning = false
+	if added:
+		_play_craft_remove_fly(table_pos, spawn_pos)
 	item_clicked.emit({}, Vector2i(-1, -1))
 	EventBus.show_toast.emit("制作完成：%s" % result_data.get("name", "未知"))
 

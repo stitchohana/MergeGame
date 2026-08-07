@@ -247,7 +247,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       const operation = operations[index];
       const from = operation?.from;
       const to = operation?.to;
-      if (!operation || !["move", "merge", "push_place"].includes(operation.type)
+      if (!operation || !["move", "merge", "push_place", "craft_add", "craft_remove"].includes(operation.type)
         || !Array.isArray(from) || from.length !== 2
         || !Array.isArray(to) || to.length !== 2
         || !from.every(Number.isInteger) || !to.every(Number.isInteger)) {
@@ -275,6 +275,33 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
           pushed_col: result.pushed_col,
           pushed_row: result.pushed_row,
           new_version: result.newVersion,
+        });
+        continue;
+      }
+
+      if (operation.type === "craft_add") {
+        if (!Number.isInteger(operation.ingredient_id)) {
+          res.status(400).json({ error: "invalid_operation", failed_index: index, grid: state.grid }); return;
+        }
+        const result = engine.addIngredientToTable(workingState, to[0], to[1], operation.ingredient_id, from[0], from[1]);
+        if (!result.ok) {
+          res.status(409).json({ error: result.reason, failed_index: index, grid: state.grid }); return;
+        }
+        results.push({ type: "craft_add", from, to, ingredient_id: operation.ingredient_id, new_version: result.newVersion });
+        continue;
+      }
+
+      if (operation.type === "craft_remove") {
+        if (!Number.isInteger(operation.ingredient_id)) {
+          res.status(400).json({ error: "invalid_operation", failed_index: index, grid: state.grid }); return;
+        }
+        const result = engine.removeIngredientFromTable(workingState, from[0], from[1], operation.ingredient_id, to[0], to[1]);
+        if (!result.ok) {
+          res.status(409).json({ error: result.reason, failed_index: index, grid: state.grid }); return;
+        }
+        results.push({
+          type: "craft_remove", from, to, ingredient_id: operation.ingredient_id,
+          removed_uid: result.removed_uid, new_version: result.newVersion,
         });
         continue;
       }

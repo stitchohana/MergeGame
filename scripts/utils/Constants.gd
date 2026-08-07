@@ -45,6 +45,8 @@ const GRID_HEIGHT := GRID_ROWS * CELL_STEP - CELL_GAP
 const MERGE_ANIM_DURATION := 0.3
 const SPAWN_ANIM_DURATION := 0.25
 const SNAP_BACK_DURATION := 0.2
+const ORDER_SOURCE_HIDE_DURATION := 0.12
+const ORDER_ITEM_FLY_DURATION := 0.7
 
 # Check if an item has launcher config fields (spawns + max_charges)
 static func has_launcher_config(item_data: Dictionary) -> bool:

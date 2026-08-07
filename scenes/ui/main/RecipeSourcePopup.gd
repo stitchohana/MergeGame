@@ -1,7 +1,7 @@
 class_name RecipeSourcePopup extends BasePopup
 
 const ITEM_WIDGET_SCENE := preload("res://scenes/ui/common/ItemWidget.tscn")
-const INGREDIENT_SIZE: int = 96
+const INGREDIENT_SIZE: int = 112
 
 @onready var title_label: Label = $Panel/TitleLabel
 @onready var target_item: ItemWidget = $Panel/TargetArea/TargetItem
@@ -58,8 +58,25 @@ func _populate_sources(recipes: Array, result_data: Dictionary) -> void:
 		widget.show()
 		_configure_item_widget(widget, ConfigDatabase.get_item_data(ingredient_id), true)
 
-	_configure_item_widget(product_icon, result_data, false)
+	var table_data: Dictionary = _find_crafting_table_for_recipe(int(recipe.get("id", 0)))
+	product_icon.visible = not table_data.is_empty()
+	if not table_data.is_empty():
+		_configure_item_widget(product_icon, table_data, false)
 	craft_time_label.text = _format_time(float(recipe.get("craft_time", 0.0)))
+
+func _find_crafting_table_for_recipe(recipe_id: int) -> Dictionary:
+	var best: Dictionary = {}
+	for entry in GridManager.get_all_items():
+		var board_item: Dictionary = entry.get("data", {})
+		if int(board_item.get("type", 0)) != Constants.ItemType.CRAFTING:
+			continue
+		var candidate: Dictionary = ConfigDatabase.get_item_data(int(board_item.get("id", 0)))
+		var recipe_ids: Array = candidate.get("recipes", [])
+		if not recipe_ids.has(recipe_id):
+			continue
+		if best.is_empty() or int(candidate.get("level", 0)) > int(best.get("level", 0)):
+			best = candidate
+	return best
 
 
 func _get_material_widgets() -> Array[ItemWidget]:

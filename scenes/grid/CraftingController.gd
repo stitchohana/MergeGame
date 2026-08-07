@@ -8,6 +8,7 @@ signal craft_rejected(reason: String)
 signal craft_retrieve_ready(result_id: int, result_uid: int, table_pos: Vector2i)
 signal table_visual_update(table_item: Dictionary, state: int)
 signal craft_start_requested(table_pos: Vector2i)
+signal craft_add_queued(from_pos: Vector2i, table_pos: Vector2i, ingredient_id: int)
 
 var _craft_button: Node = null
 var _craft_table_pos: Vector2i = Vector2i(-1, -1)
@@ -96,16 +97,9 @@ func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Ve
 			craft_rejected.emit("无法与已有材料形成配方")
 			return false
 
-	# Save pending state and submit to server
-	_pending_src_key = "%d,%d" % [src_pos.x, src_pos.y]
-	_pending_src_pos = src_pos
-	_pending_table_item = table_item
-	_pending_dragged_item = drag_item_data
-	_pending_table_pos = table_pos
-	_pending_ingredient_id = ingredient_id
-
-	if CloudService.online:
-		CloudService.submit_craft_add(src_pos.x, src_pos.y, table_pos.x, table_pos.y, ingredient_id)
+	craft_add_queued.emit(src_pos, table_pos, ingredient_id)
+	item_accepted_for_craft.emit("%d,%d" % [src_pos.x, src_pos.y], src_pos)
+	CraftingService.add_ingredient(table_item, drag_item_data)
 
 	return true
 

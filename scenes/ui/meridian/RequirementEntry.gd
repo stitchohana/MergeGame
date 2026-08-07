@@ -121,6 +121,17 @@ func refresh_item_selection(present_item_ids: Dictionary) -> void:
 			var item_id: int = int(widget.item_data.get("id", 0))
 			widget.set_selected(item_id > 0 and present_item_ids.has(item_id))
 
+func get_item_widget_center(item_id: int) -> Vector2:
+	for child in $ItemsContainer.get_children():
+		if child is ItemWidget and int((child as ItemWidget).item_data.get("id", 0)) == item_id:
+			return (child as Control).get_global_rect().get_center()
+	return get_global_rect().get_center()
+
+func play_complete_animation() -> void:
+	var tween: Tween = create_tween().set_parallel(true)
+	tween.tween_property(self, "modulate:a", 0.0, 0.22)
+	tween.tween_property(self, "scale", Vector2(1.08, 1.08), 0.22)
+
 
 func _on_btn_pressed() -> void:
 	complete_pressed.emit()

@@ -8,6 +8,7 @@ class_name GameScreen extends BaseScreen
 @onready var shop_btn: Button = $ShopButton
 @onready var pouch_zone: PouchDropZone = $PouchDropZone
 @onready var pending_bar: PendingRewardBar
+@onready var top_bar: TopBar = $TopBar
 
 var _pending_item_ids: Array = []
 var _meridian_submit_pending: bool = false
@@ -16,6 +17,7 @@ var _pending_stamina_uid: int = -1
 var _meridian_waiting_breakthrough: bool = false
 var _item_use_pending: bool = false
 var _load_token: int = -1
+var _pending_order_animation: Dictionary = {}
 
 func _ready() -> void:
 	randomize()
@@ -139,7 +141,7 @@ func _submit_material_remove(table_pos: Vector2i, _uid: int, item_id: int) -> vo
 		EventBus.show_toast.emit("棋盘已满，无法取出材料")
 		return
 	if CloudService.online:
-		CloudService.submit_craft_remove(table_pos.x, table_pos.y, item_id, spawn_pos.x, spawn_pos.y)
+		grid_view.queue_craft_remove(table_pos, item_id, spawn_pos)
 
 func _on_craft_remove_confirmed(result: Dictionary) -> void:
 	var table_col: int = result.get("table_col", -1)
@@ -302,7 +304,79 @@ func _display_meridian() -> void:
 	_refresh_requirement_buttons()
 
 func _on_meridian_complete(display_index: int) -> void:
+	if _meridian_submit_pending:
+		return
+	_pending_order_animation.clear()
+	_capture_order_animation(display_index)
 	grid_view.run_after_action_sync(_submit_meridian_complete.bind(display_index))
+
+func _capture_order_animation(display_index: int) -> void:
+	var entries: Array[RequirementEntry] = requirement_list.get_order_entries()
+	var entry: RequirementEntry = null
+	for candidate in entries:
+		if candidate.get_display_index() == display_index:
+			entry = candidate
+			break
+	if entry == null:
+		print("[GameScreen] order animation: entry not found display_index=", display_index, " entries=", entries.size())
+		return
+	var sources: Array[Dictionary] = []
+	var used_grid_keys: Dictionary = {}
+	var required_ids: Array = []
+	for item_variant in entry._items_setup:
+		if not item_variant is Dictionary:
+			continue
+		var item: Dictionary = item_variant
+		var item_id: int = int(item.get("item_id", 0))
+		if item_id <= 0:
+			continue
+		required_ids.append(item_id)
+		var source: Dictionary = _find_grid_item_source(item_id, used_grid_keys)
+		if not source.is_empty():
+			source["item_id"] = item_id
+			source["to"] = entry.get_item_widget_center(item_id)
+			sources.append(source)
+	var previous_positions: Dictionary = {}
+	for old_entry in entries:
+		previous_positions[old_entry.get_display_index()] = old_entry.position
+	_pending_order_animation = {"entry": entry, "sources": sources, "required_ids": required_ids, "previous_positions": previous_positions}
+	print("[GameScreen] order animation: captured index=", display_index, " required_ids=", required_ids, " sources=", sources.size())
+	if sources.is_empty():
+		print("[GameScreen] order animation: no matching board items for ids=", required_ids, " grid_nodes=", grid_view._item_nodes.size())
+
+func _find_grid_item_source(item_id: int, used_grid_keys: Dictionary) -> Dictionary:
+	for key in grid_view._item_nodes:
+		var key_string: String = str(key)
+		if used_grid_keys.has(key_string):
+			continue
+		var node: GridItem = grid_view._item_nodes[key] as GridItem
+		if node == null or not is_instance_valid(node) or int(node.item_data.get("id", 0)) != item_id:
+			continue
+		var icon_rect: TextureRect = node.get_node_or_null("IconRect") as TextureRect
+		var texture: Texture2D = icon_rect.texture if icon_rect else null
+		var item_center: Vector2 = icon_rect.get_global_rect().get_center() if icon_rect else node.get_global_rect().get_center()
+		used_grid_keys[key_string] = true
+		return {"from": item_center, "texture": texture, "node": node, "grid_key": key_string}
+	for grid_entry in GridManager.get_all_items():
+		if int(grid_entry.data.get("id", 0)) == item_id:
+			var fallback_center: Vector2 = grid_view.to_global(Vector2(grid_entry.pos.x * Constants.CELL_STEP, grid_entry.pos.y * Constants.CELL_STEP) + Vector2(Constants.CELL_SIZE * 0.5, Constants.CELL_SIZE * 0.5))
+			return {"from": fallback_center}
+	return {}
+
+func _build_order_sources(entry: RequirementEntry, required_ids: Array) -> Array[Dictionary]:
+	var sources: Array[Dictionary] = []
+	var used_grid_keys: Dictionary = {}
+	for item_id_variant in required_ids:
+		var item_id: int = int(item_id_variant)
+		if item_id <= 0:
+			continue
+		var source: Dictionary = _find_grid_item_source(item_id, used_grid_keys)
+		if source.is_empty():
+			continue
+		source["item_id"] = item_id
+		source["to"] = entry.get_item_widget_center(item_id)
+		sources.append(source)
+	return sources
 
 func _submit_meridian_complete(display_index: int) -> void:
 	if display_index < 0 or display_index >= _display_index_map.size():
@@ -321,9 +395,22 @@ func _submit_meridian_complete(display_index: int) -> void:
 		CloudService.submit_meridian_complete(data_index, _pending_item_ids)
 
 func _on_meridian_confirmed(result: Dictionary) -> void:
-	_meridian_submit_pending = false
 	if CloudService.meridian_complete_rejected.is_connected(_on_meridian_rejected):
 		CloudService.meridian_complete_rejected.disconnect(_on_meridian_rejected)
+	var animation: Dictionary = _pending_order_animation.duplicate(true)
+	_pending_order_animation.clear()
+	var animation_entry: RequirementEntry = animation.get("entry") as RequirementEntry
+	var sources: Array = animation.get("sources", [])
+	if sources.is_empty() and animation_entry and is_instance_valid(animation_entry):
+		var required_ids: Array = animation.get("required_ids", [])
+		if required_ids.is_empty():
+			required_ids = _pending_item_ids
+		sources = _build_order_sources(animation_entry, required_ids)
+		animation["sources"] = sources
+		print("[GameScreen] order animation: recovered sources=", sources.size(), " required_ids=", required_ids)
+	print("[GameScreen] order animation: confirmed sources=", animation.get("sources", []).size(), " qi=", result.get("qi_gained", 0))
+	await _play_order_completion_animation(animation, int(result.get("qi_gained", 0)))
+	_meridian_submit_pending = false
 
 	var server_grid: Array = result.get("grid", [])
 	print("[GameScreen] meridian confirmed, server grid size=", server_grid.size())
@@ -339,12 +426,112 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 	# Server returns updated list (completed order removed, new order added)
 	GameState.meridian_acupoints = result.get("meridian_acupoints", [])
 	_display_meridian()
+	requirement_list.animate_reflow_from(animation.get("previous_positions", {}))
 
 	var qi_gained: int = result.get("qi_gained", 0)
 	if qi_gained > 0:
 		EventBus.show_toast.emit("灵力 +%d" % qi_gained)
 		if result.get("qi_full", false):
 			EventBus.show_toast.emit("灵力已满，尽快使用！")
+
+func _play_order_completion_animation(animation: Dictionary, qi_gained: int) -> void:
+	if animation.is_empty():
+		return
+	var sources: Array = animation.get("sources", [])
+	if not bool(animation.get("materials_played", false)) and not sources.is_empty():
+		var hide_duration: float = Constants.ORDER_SOURCE_HIDE_DURATION
+		var fly_duration: float = Constants.ORDER_ITEM_FLY_DURATION
+		print("[GameScreen] order animation: hide sources=", sources.size(), " hide_duration=", hide_duration, " fly_duration=", fly_duration)
+		_hide_order_source_items(animation, hide_duration)
+		await get_tree().create_timer(hide_duration).timeout
+		_play_order_material_fly(animation, fly_duration)
+		await get_tree().create_timer(fly_duration).timeout
+	var entry: RequirementEntry = animation.get("entry") as RequirementEntry
+	if entry and is_instance_valid(entry):
+		print("[GameScreen] order animation: card disappear index=", entry.get_display_index())
+		entry.play_complete_animation()
+	await get_tree().create_timer(0.24).timeout
+	if qi_gained > 0 and top_bar:
+		var qi_icon: TextureRect = top_bar.qi_resource.get_node_or_null("Icon") as TextureRect
+		if qi_icon and qi_icon.texture:
+			var from_pos: Vector2 = entry.get_global_rect().get_center() if entry and is_instance_valid(entry) else top_bar.global_position
+			_play_flying_texture(qi_icon.texture, from_pos, qi_icon.get_global_rect().get_center(), 0.42)
+			await get_tree().create_timer(0.44).timeout
+
+func _hide_order_source_items(animation: Dictionary, duration: float) -> void:
+	for source in animation.get("sources", []):
+		var node: GridItem = source.get("node") as GridItem
+		if node == null or not is_instance_valid(node):
+			continue
+		var tween: Tween = node.create_tween()
+		tween.set_trans(Tween.TRANS_QUAD)
+		tween.set_ease(Tween.EASE_IN)
+		tween.tween_property(node, "modulate:a", 0.0, duration)
+		tween.tween_callback(node.hide)
+
+func _play_order_material_fly(animation: Dictionary, duration: float) -> void:
+	for source in animation.get("sources", []):
+		var texture: Texture2D = source.get("texture") as Texture2D
+		_play_flying_item(int(source.get("item_id", 0)), source.get("from", Vector2.ZERO), source.get("to", Vector2.ZERO), duration, texture)
+
+func _play_flying_item(item_id: int, from_pos: Vector2, to_pos: Vector2, duration: float, texture_override: Texture2D = null) -> void:
+	var texture: Texture2D = texture_override
+	if texture == null:
+		var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
+		if item_data.is_empty():
+			print("[GameScreen] order animation: missing item data id=", item_id)
+			return
+		var icon_path: String = item_data.get("icon", "")
+		texture = load(icon_path) as Texture2D
+	if texture == null:
+		print("[GameScreen] order animation: missing item texture id=", item_id)
+		return
+	var fly: TextureRect = TextureRect.new()
+	fly.texture = texture
+	fly.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fly.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	fly.size = Vector2(52, 52)
+	fly.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fly.z_index = 1000
+	var host: Control = _get_order_animation_host()
+	host.add_child(fly)
+	fly.show()
+	var from_global: Vector2 = from_pos - fly.size / 2.0
+	var to_global: Vector2 = to_pos - fly.size / 2.0
+	fly.global_position = from_global
+	print("[GameScreen] order animation: item fly id=", item_id, " from=", from_pos, " to=", to_pos)
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(fly, "global_position", to_global, duration)
+	tween.tween_callback(fly.queue_free)
+
+func _get_order_animation_host() -> Control:
+	var overlay: Control = UIManager.get_layer(UIManager.Layer.OVERLAY)
+	return overlay if overlay != null else self
+
+func _play_flying_texture(texture: Texture2D, from_pos: Vector2, to_pos: Vector2, duration: float) -> void:
+	if texture == null:
+		return
+	var fly: TextureRect = TextureRect.new()
+	fly.texture = texture
+	fly.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fly.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	fly.size = Vector2(52, 52)
+	fly.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fly.z_index = 1000
+	var host: Control = _get_order_animation_host()
+	host.add_child(fly)
+	fly.show()
+	var from_global: Vector2 = from_pos - fly.size / 2.0
+	var to_global: Vector2 = to_pos - fly.size / 2.0
+	fly.global_position = from_global
+	print("[GameScreen] order animation: fly from=", from_pos, " to=", to_pos)
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(fly, "global_position", to_global, duration)
+	tween.tween_callback(fly.queue_free)
 
 func _on_stage_changed_for_meridian(_level: int, _name: String) -> void:
 	if _meridian_waiting_breakthrough and not CultivationService._needs_breakthrough_pill():
@@ -353,6 +540,7 @@ func _on_stage_changed_for_meridian(_level: int, _name: String) -> void:
 
 func _on_meridian_rejected(reason: String) -> void:
 	_meridian_submit_pending = false
+	_pending_order_animation.clear()
 	if CloudService.meridian_complete_confirmed.is_connected(_on_meridian_confirmed):
 		CloudService.meridian_complete_confirmed.disconnect(_on_meridian_confirmed)
 	_pending_item_ids.clear()

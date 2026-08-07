@@ -71,7 +71,7 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 			desc_label.text += "\n" + damage_text
 	if item_type == Constants.ItemType.CRAFTING:
 		_current_recipes = ConfigDatabase.get_recipes_for_item(item_data.get("id", 0))
-		recipe_btn.visible = not _current_recipes.is_empty()
+		recipe_btn.hide()
 		_refresh_materials()
 	else:
 		_current_recipes = []
@@ -94,6 +94,7 @@ func _refresh_materials() -> void:
 		status_label.show()
 		materials_label.hide()
 		materials_container.hide()
+		desc_label.hide()
 		for child in materials_container.get_children():
 			child.queue_free()
 		if not timer_exists or not timer_in_tree:
@@ -105,19 +106,23 @@ func _refresh_materials() -> void:
 		status_label.show()
 		materials_label.hide()
 		materials_container.hide()
+		desc_label.hide()
 		for child in materials_container.get_children():
 			child.queue_free()
 		return
 	_stop_countdown_timer()
 	status_label.hide()
 	var stored: Array = CraftingService.get_stored_items(_current_item_data)
-	materials_label.visible = true
-	materials_container.visible = true
+	materials_label.hide()
+	materials_container.visible = not stored.is_empty()
+	desc_label.visible = stored.is_empty()
 	_populate_materials(stored)
 
 func _populate_materials(items: Array) -> void:
 	for child in materials_container.get_children():
 		child.queue_free()
+	if items.is_empty():
+		return
 
 	if items.is_empty():
 		var hint := Label.new()
@@ -127,60 +132,94 @@ func _populate_materials(items: Array) -> void:
 		materials_container.add_child(hint)
 		return
 
-	var uid_map: Dictionary = {}
 	for item in items:
 		var iid: int = item.get("id", 0) as int
-		if not uid_map.has(iid):
-			uid_map[iid] = {"count": 1, "uid": item.get("uid", item.get("_uid", 0)) as int}
-		else:
-			uid_map[iid]["count"] += 1
-
-	for iid in uid_map:
-		var info: Dictionary = uid_map[iid]
-		var data := ConfigDatabase.get_item_data(iid)
-		var entry := _build_material_icon(data, info["count"], info["uid"])
+		var data: Dictionary = ConfigDatabase.get_item_data(iid)
+		var uid: int = item.get("uid", item.get("_uid", 0)) as int
+		var entry: ItemWidget = _build_material_icon(data, uid)
 		materials_container.add_child(entry)
 
-func _build_material_icon(item_data: Dictionary, count: int, uid: int) -> Button:
-	var entry := Button.new()
-	entry.flat = true
+	var matching_recipe: Dictionary = _find_order_recipe(items)
+	if matching_recipe.is_empty():
+		return
+	var stored_counts: Dictionary = _count_stored_item_ids(items)
+	for ingredient_variant in matching_recipe.get("ingredients", []):
+		var ingredient_id: int = int(ingredient_variant)
+		var remaining: int = int(stored_counts.get(ingredient_id, 0))
+		if remaining > 0:
+			stored_counts[ingredient_id] = remaining - 1
+			continue
+		var ghost_data: Dictionary = ConfigDatabase.get_item_data(ingredient_id)
+		var ghost: ItemWidget = _build_material_icon(ghost_data, -1, true)
+		materials_container.add_child(ghost)
+
+func _count_stored_item_ids(items: Array) -> Dictionary:
+	var counts: Dictionary = {}
+	for item_variant in items:
+		var item: Dictionary = item_variant as Dictionary
+		var item_id: int = int(item.get("id", 0))
+		counts[item_id] = int(counts.get(item_id, 0)) + 1
+	return counts
+
+func _count_recipe_ingredients(ingredients: Array) -> Dictionary:
+	var counts: Dictionary = {}
+	for ingredient_variant in ingredients:
+		var ingredient_id: int = int(ingredient_variant)
+		counts[ingredient_id] = int(counts.get(ingredient_id, 0)) + 1
+	return counts
+
+func _get_active_order_item_ids() -> Dictionary:
+	var order_item_ids: Dictionary = {}
+	for order_variant in GameState.meridian_acupoints:
+		var order: Dictionary = order_variant as Dictionary
+		if bool(order.get("completed", false)):
+			continue
+		for item_variant in order.get("items", []):
+			var item: Dictionary = item_variant as Dictionary
+			var item_id: int = int(item.get("item_id", 0))
+			if item_id > 0:
+				order_item_ids[item_id] = true
+	return order_item_ids
+
+func _find_order_recipe(items: Array) -> Dictionary:
+	var order_item_ids: Dictionary = _get_active_order_item_ids()
+	if order_item_ids.is_empty():
+		return {}
+	var stored_counts: Dictionary = _count_stored_item_ids(items)
+	var best_recipe: Dictionary = {}
+	var fewest_missing: int = 2147483647
+	for recipe_variant in _current_recipes:
+		var recipe: Dictionary = recipe_variant as Dictionary
+		if not order_item_ids.has(int(recipe.get("result", 0))):
+			continue
+		var recipe_ingredients: Array = recipe.get("ingredients", [])
+		var required_counts: Dictionary = _count_recipe_ingredients(recipe_ingredients)
+		var compatible: bool = true
+		for item_id_variant in stored_counts.keys():
+			var item_id: int = int(item_id_variant)
+			if int(stored_counts[item_id]) > int(required_counts.get(item_id, 0)):
+				compatible = false
+				break
+		if not compatible:
+			continue
+		var missing: int = recipe_ingredients.size() - items.size()
+		if missing < fewest_missing:
+			fewest_missing = missing
+			best_recipe = recipe
+	return best_recipe
+
+func _build_material_icon(item_data: Dictionary, uid: int, ghost: bool = false) -> ItemWidget:
+	var entry: ItemWidget = preload("res://scenes/ui/common/ItemWidget.tscn").instantiate() as ItemWidget
 	entry.custom_minimum_size = Vector2(60, 60)
+	entry.size = Vector2(60, 60)
 	entry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	entry.setup(item_data)
+	entry.set_clickable(not ghost)
+	if ghost:
+		entry.modulate = Color(1, 1, 1, 0.35)
 
-	var rect := ColorRect.new()
-	rect.custom_minimum_size = Vector2(36, 36)
-	rect.size = Vector2(36, 36)
-	rect.position = Vector2(12, 0)
-	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var group_id: int = item_data.get("group_id", 0)
-	var level: int = item_data.get("level", 0)
-	if item_data.get("type", 0) == Constants.ItemType.LAUNCHER:
-		rect.color = GridUtils.launcher_color(group_id)
-	else:
-		rect.color = GridUtils.item_color(group_id, level)
-
-	var name_label := Label.new()
-	name_label.text = item_data.get("name", "")
-	name_label.position = Vector2(0, 38)
-	name_label.size = Vector2(60, 12)
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 10)
-	name_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8, 1))
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	var count_label := Label.new()
-	count_label.text = "x%d" % count
-	count_label.position = Vector2(0, 50)
-	count_label.size = Vector2(60, 12)
-	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	count_label.add_theme_font_size_override("font_size", 10)
-	count_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	entry.add_child(rect)
-	entry.add_child(name_label)
-	entry.add_child(count_label)
-	entry.pressed.connect(func(): material_clicked.emit(uid, item_data.get("id", 0)))
+	if not ghost:
+		entry.pressed.connect(func(): material_clicked.emit(uid, int(item_data.get("id", 0))))
 	return entry
 
 func get_current_craft_table() -> Dictionary:
