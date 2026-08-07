@@ -1,0 +1,17 @@
+D:\GodotProject\MergeGame6\MergeGame\server\node_modules\express\lib\router\index.js:469
+      throw new TypeError('Router.use() requires a middleware function but got a ' + gettype(fn))
+      ^
+
+TypeError: Router.use() requires a middleware function but got a Object
+    at router.use (D:\GodotProject\MergeGame6\MergeGame\server\node_modules\express\lib\router\index.js:469:13)
+    at app.<anonymous> (D:\GodotProject\MergeGame6\MergeGame\server\node_modules\express\lib\application.js:227:21)
+    at Array.forEach (<anonymous>)
+    at app.use (D:\GodotProject\MergeGame6\MergeGame\server\node_modules\express\lib\application.js:224:7)
+    at main (D:\GodotProject\MergeGame6\MergeGame\server\dist\index.js:81:9)
+    at Object.<anonymous> (D:\GodotProject\MergeGame6\MergeGame\server\dist\index.js:107:1)
+    at Module._compile (node:internal/modules/cjs/loader:1812:14)
+    at Object..js (node:internal/modules/cjs/loader:1943:10)
+    at Module.load (node:internal/modules/cjs/loader:1533:32)
+    at Module._load (node:internal/modules/cjs/loader:1335:12)
+
+Node.js v24.14.0

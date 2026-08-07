@@ -13,6 +13,7 @@ var _drag_start_scroll: int = 0
 @onready var scroll: ScrollContainer = $Panel/ScrollContainer
 @onready var container: HBoxContainer = $Panel/ScrollContainer/HBoxContainer
 @onready var cultivation_button: TextureButton = $Panel/ScrollContainer/HBoxContainer/CultivationButton
+@onready var pending_reward_bar: PendingRewardBar = $Panel/ScrollContainer/HBoxContainer/PendingRewardBar
 
 func _ready() -> void:
 	cultivation_button.pressed.connect(_on_cultivation_pressed)
@@ -21,6 +22,10 @@ func _ready() -> void:
 	CloudService.state_loaded.connect(func(_state: Dictionary): call_deferred("_refresh_cultivation_button"))
 	CloudService.home_meridian_light_confirmed.connect(func(_result: Dictionary): call_deferred("_refresh_cultivation_button"))
 	_refresh_cultivation_button()
+
+func setup_pending_reward_bar(grid: Control) -> void:
+	if pending_reward_bar:
+		pending_reward_bar.setup(grid)
 
 func _input(event: InputEvent) -> void:
 	if UIManager.is_input_blocked():
@@ -96,11 +101,24 @@ func _get_active_stage_index(home_defs: Array, home_progress: Array) -> int:
 				continue
 			has_progress = true
 			if not bool(progress.get("circulation_completed", false)):
-				return stage_idx
+				return _clamp_unlocked_stage_index(stage_idx, home_defs.size())
 			break
 		if not has_progress:
-			return stage_idx
-	return home_defs.size() - 1
+			return _clamp_unlocked_stage_index(stage_idx, home_defs.size())
+	return _clamp_unlocked_stage_index(home_defs.size() - 1, home_defs.size())
+
+func _clamp_unlocked_stage_index(stage_idx: int, stage_count: int) -> int:
+	if stage_count <= 0:
+		return -1
+	return clampi(stage_idx, 0, mini(stage_count - 1, _max_unlocked_home_stage_index()))
+
+func _max_unlocked_home_stage_index() -> int:
+	var cultivation_level: int = CultivationService.current_level
+	if cultivation_level <= 1:
+		return 0
+	if cultivation_level <= 10:
+		return cultivation_level - 1
+	return 9 + (cultivation_level - 10) * 10
 
 func _get_stage_lit(home_progress: Array, stage_idx: int) -> Array:
 	for progress_variant in home_progress:

@@ -1,72 +1,96 @@
 {
   "main": {
-	"items": [
-	  {
-		"id": 11001,
-		"col": 0,
-		"row": 0,
-		"immovable": false
-	  },
-	  {
-		"id": 12001,
-		"col": 0,
-		"row": 2,
-		"immovable": false
-	  },
-	  {
-		"id": 13001,
-		"col": 0,
-		"row": 4,
-		"immovable": false
-	  },
-	  {
-		"id": 14001,
-		"col": 3,
-		"row": 0,
-		"immovable": false
-	  },
-	  {
-		"id": 15001,
-		"col": 3,
-		"row": 2,
-		"immovable": false
-	  },
-	  {
-		"id": 16001,
-		"col": 3,
-		"row": 4,
-		"immovable": false
-	  },
-	  {
-		"id": 17001,
-		"col": 6,
-		"row": 0,
-		"immovable": false
-	  },
-	  {
-		"id": 18001,
-		"col": 6,
-		"row": 1,
-		"immovable": false
-	  },
-	  {
-		"id": 19001,
-		"col": 6,
-		"row": 2,
-		"immovable": false
-	  },
-	  {
-		"id": 20001,
-		"col": 6,
-		"row": 3,
-		"immovable": false
-	  },
-	  {
-		"id": 21001,
-		"col": 6,
-		"row": 4,
-		"immovable": false
-	  }
-	]
+    "items": [
+      {
+        "id": 11002,
+        "col": 1,
+        "row": 1,
+        "immovable": true
+      },
+      {
+        "id": 12002,
+        "col": 1,
+        "row": 3,
+        "immovable": true
+      },
+      {
+        "id": 11003,
+        "col": 5,
+        "row": 1,
+        "immovable": true
+      },
+      {
+        "id": 12003,
+        "col": 5,
+        "row": 3,
+        "immovable": true
+      },
+      {
+        "id": 11001,
+        "col": 1,
+        "row": 7,
+        "immovable": true
+      },
+      {
+        "id": 12001,
+        "col": 5,
+        "row": 7,
+        "immovable": true
+      },
+      {
+        "id": 11001,
+        "col": 3,
+        "row": 7,
+        "immovable": false
+      },
+      {
+        "id": 5001,
+        "col": 0,
+        "row": 0,
+        "immovable": true
+      },
+      {
+        "id": 5002,
+        "col": 0,
+        "row": 2,
+        "immovable": true
+      },
+      {
+        "id": 5003,
+        "col": 0,
+        "row": 4,
+        "immovable": true
+      },
+      {
+        "id": 5004,
+        "col": 0,
+        "row": 6,
+        "immovable": true
+      },
+      {
+        "id": 9001,
+        "col": 2,
+        "row": 0,
+        "immovable": true
+      },
+      {
+        "id": 9002,
+        "col": 2,
+        "row": 2,
+        "immovable": true
+      },
+      {
+        "id": 9003,
+        "col": 2,
+        "row": 4,
+        "immovable": true
+      },
+      {
+        "id": 9004,
+        "col": 2,
+        "row": 6,
+        "immovable": true
+      }
+    ]
   }
 }

@@ -74,6 +74,37 @@ def parse_dict_list(v, key1="id", key2="weight", sep=";"):
     return result
 
 
+def parse_reward_config(v):
+    if v is None or v == "":
+        return None
+    text = str(v).strip()
+    if text.startswith("{") or text.startswith("["):
+        return json.loads(text)
+    if re.fullmatch(r"\d+", text):
+        return parse_int(text)
+    return None
+
+
+def parse_fixed_orders(v):
+    if v is None or v == "":
+        return []
+    text = str(v).strip()
+    if text.startswith("["):
+        parsed = json.loads(text)
+        result = []
+        for entry in parsed:
+            if isinstance(entry, dict):
+                item_ids = parse_int_list(entry.get("item_ids", [])) if isinstance(entry.get("item_ids"), str) else [int(x) for x in entry.get("item_ids", [])]
+            elif isinstance(entry, list):
+                item_ids = [int(x) for x in entry]
+            else:
+                item_ids = [int(entry)]
+            if item_ids:
+                result.append({"item_ids": item_ids})
+        return result
+    return [{"item_ids": [int(x.strip())]} for x in text.split(";") if x.strip()]
+
+
 def read_rows(ws):
     headers = [str(c.value).strip() if c.value else "" for c in ws[1]]
     rows = []
@@ -195,14 +226,18 @@ print("Building meridians.json...")
 wb = open_book("meridians")
 thresholds = []
 for row in read_rows(wb["meridians"]):
-    thresholds.append({
+    threshold = {
         "stage": parse_int(row["stage"]),
         "item_pool": parse_int_list(row["item_pool"]),
         "count_min": parse_int(row["count_min"]),
         "count_max": parse_int(row["count_max"]),
         "acupoint_rewards": parse_int(row.get("acupoint_rewards", "")),
         "order_count": parse_int(row["order_count"]),
-    })
+    }
+    fixed_orders = parse_fixed_orders(row.get("fixed_orders", ""))
+    if fixed_orders:
+        threshold["fixed_orders"] = fixed_orders
+    thresholds.append(threshold)
 save_json("meridians.json", {"thresholds": thresholds})
 
 # ─── rewards ───────────────────────────────────────────────
@@ -397,13 +432,16 @@ home_stages = []
 for row in read_rows(wb["home_meridians"]):
     acupoint_exp = parse_int(row.get("acupoint_exp", "")) or 0
     circulation_exp = parse_int(row.get("circulation_exp", "")) or 0
+    acupoint_rewards = parse_reward_config(row.get("acupoint_rewards", ""))
+    if acupoint_rewards is None:
+        acupoint_rewards = {"tokens": [
+            {"token": 4, "amount": acupoint_exp},
+            {"token": 3, "amount": 15},
+        ]}
     home_stages.append({
         "name": row["name"], "acupoints": parse_int(row["acupoints"]),
         "qi_cost": parse_int(row["qi_cost"]),
-        "acupoint_rewards": {"tokens": [
-            {"token": 4, "amount": acupoint_exp},
-            {"token": 3, "amount": 15},
-        ]},
+        "acupoint_rewards": acupoint_rewards,
         "circulation_rewards": {"tokens": [
             {"token": 4, "amount": circulation_exp},
             {"token": 3, "amount": 100},

@@ -4,6 +4,7 @@
 	  "name": "凡人",
 	  "exp": 30,
 	  "max_qi": 400,
+	  "breakthrough_pill": 14101,
 	  "breakthrough_reward_id": 220
 	},
 	{

@@ -1,5 +1,6 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
+import type { Application, NextFunction as ExpressNextFunction, Request as ExpressRequest, Response as ExpressResponse } from "express";
 import * as path from "path";
 import { config } from "./config";
 import { IStorage } from "./storage/interface";
@@ -11,6 +12,70 @@ import { createGameRouter } from "./routes/game";
 import { createCultivationRouter } from "./routes/cultivation";
 import { createGMRouter } from "./routes/gm";
 import { gameConfigTables } from "./worker/config_data";
+import { Router, WorkerResponse, type WorkerRequest } from "./worker/http";
+
+class ExpressWorkerResponse extends WorkerResponse {
+  constructor(private readonly expressResponse: ExpressResponse) {
+    super();
+  }
+
+  override status(code: number): this {
+    this.statusCode = code;
+    this.expressResponse.status(code);
+    return this;
+  }
+
+  override header(name: string, value: string): this {
+    this.expressResponse.setHeader(name, value);
+    return this;
+  }
+
+  override json(value: unknown): this {
+    this.headersSent = true;
+    this.expressResponse.status(this.statusCode).json(value);
+    return this;
+  }
+
+  override sendStatus(code: number): this {
+    this.status(code);
+    this.headersSent = true;
+    this.expressResponse.sendStatus(code);
+    return this;
+  }
+}
+
+function toWorkerRequest(req: ExpressRequest): WorkerRequest {
+  const headers: Record<string, string | undefined> = {};
+  for (const [name, value] of Object.entries(req.headers)) {
+    headers[name.toLowerCase()] = Array.isArray(value) ? value.join(", ") : value;
+  }
+
+  const query: Record<string, string | undefined> = {};
+  for (const [name, value] of Object.entries(req.query)) {
+    query[name] = typeof value === "string"
+      ? value
+      : Array.isArray(value) && typeof value[0] === "string" ? value[0] : undefined;
+  }
+
+  return {
+    method: req.method,
+    path: req.path,
+    headers,
+    body: req.body ?? {},
+    query,
+  };
+}
+
+function mountRouter(app: Application, prefix: string, router: Router): void {
+  app.use(prefix, async (req: ExpressRequest, res: ExpressResponse, next: ExpressNextFunction) => {
+    try {
+      const handled = await router.handle(toWorkerRequest(req), new ExpressWorkerResponse(res));
+      if (!handled && !res.headersSent) next();
+    } catch (error) {
+      next(error);
+    }
+  });
+}
 
 function createStorage(): IStorage {
   switch (config.dbType) {
@@ -86,10 +151,10 @@ function main(): void {
   console.log(`[server] Initial setup: ${engine.getInitialSetup().length} items`);
 
   // Routes
-  app.use("/api/auth", createAuthRouter(storage, config.jwtSecret));
-  app.use("/api/game", createGameRouter(storage, engine, config.jwtSecret));
-  app.use("/api/cultivation", createCultivationRouter(storage, engine, config.jwtSecret));
-  app.use("/api/gm", createGMRouter(storage, engine, config.jwtSecret, process.env.GM_KEY || ""));
+  mountRouter(app, "/api/auth", createAuthRouter(storage, config.jwtSecret));
+  mountRouter(app, "/api/game", createGameRouter(storage, engine, config.jwtSecret));
+  mountRouter(app, "/api/cultivation", createCultivationRouter(storage, engine, config.jwtSecret));
+  mountRouter(app, "/api/gm", createGMRouter(storage, engine, config.jwtSecret, process.env.GM_KEY || ""));
 
   // Health check
   app.get("/api/health", (_req, res) => {

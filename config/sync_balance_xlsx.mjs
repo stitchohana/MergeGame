@@ -43,6 +43,18 @@ function updateById(sheet, idHeader, valueHeader, values) {
   }
 }
 
+const homeAcupointExp = stage => {
+  const rewards = stage.acupoint_rewards;
+  if (Array.isArray(rewards)) {
+    for (const reward of rewards) {
+      const amount = homeAcupointExp({ acupoint_rewards: reward });
+      if (amount > 0) return amount;
+    }
+    return 0;
+  }
+  return rewards?.tokens?.find(token => token.token === 4)?.amount ?? 0;
+};
+
 async function save(workbook, name) {
   await fs.mkdir(balancedDir, { recursive: true });
   const output = await SpreadsheetFile.exportXlsx(workbook);
@@ -88,8 +100,12 @@ const home = await readJson("home_meridians.json");
 const homeBook = await open("home_meridians");
 const homeSheet = homeBook.worksheets.getItem("home_meridians");
 updateById(homeSheet, "name", "qi_cost", new Map(home.stages.map(stage => [stage.name, stage.qi_cost])));
-updateById(homeSheet, "name", "acupoint_exp", new Map(home.stages.map(stage => [stage.name, stage.acupoint_rewards.tokens[0].amount])));
+updateById(homeSheet, "name", "acupoint_exp", new Map(home.stages.map(stage => [stage.name, homeAcupointExp(stage)])));
 updateById(homeSheet, "name", "circulation_exp", new Map(home.stages.map(stage => [stage.name, stage.circulation_rewards.tokens[0].amount])));
+updateById(homeSheet, "name", "acupoint_rewards", new Map(home.stages.map(stage => [
+  stage.name,
+  Array.isArray(stage.acupoint_rewards) ? JSON.stringify(stage.acupoint_rewards) : "",
+])));
 await save(homeBook, "home_meridians");
 
 const cultivation = await readJson("cultivation.json");

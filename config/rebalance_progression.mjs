@@ -153,18 +153,21 @@ for (let i = 0; i < earlyExpTargets.length; i++) cultivation.stages[i].exp = ear
 const regenInterval = gameConfig.stamina.regen_interval;
 const targetDays = 300;
 const naturalStamina = Math.floor(targetDays * 86400 / regenInterval) * gameConfig.stamina.regen_amount;
-const homeStamina = home.stages.reduce((sum, stage) => sum + stage.acupoints * 15 + 100, 0);
+const progressionHomeStages = String(home.stages[0]?.name ?? "").startsWith("凡人")
+  ? home.stages.slice(1)
+  : home.stages;
+const homeStamina = progressionHomeStages.reduce((sum, stage) => sum + stage.acupoints * 15 + 100, 0);
 const targetQi = (naturalStamina + homeStamina) * qiPerValue;
-const oldQi = home.stages.reduce((sum, stage) => sum + stage.acupoints * stage.qi_cost, 0);
+const oldQi = progressionHomeStages.reduce((sum, stage) => sum + stage.acupoints * stage.qi_cost, 0);
 const qiScale = targetQi / oldQi;
-for (const stage of home.stages) stage.qi_cost = Math.max(1, Math.round(stage.qi_cost * qiScale));
+for (const stage of progressionHomeStages) stage.qi_cost = Math.max(1, Math.round(stage.qi_cost * qiScale));
 
 // Home has 19 cultivation groups: nine single cycles, then ten groups of ten cycles.
 let homeIndex = 0;
 for (let groupIndex = 0; groupIndex < 19; groupIndex++) {
   const cycleCount = groupIndex < 9 ? 1 : 10;
-  const stages = home.stages.slice(homeIndex, homeIndex + cycleCount);
-  const targetExp = cultivation.stages[groupIndex].exp;
+  const stages = progressionHomeStages.slice(homeIndex, homeIndex + cycleCount);
+  const targetExp = cultivation.stages[groupIndex + 1]?.exp ?? cultivation.stages[groupIndex].exp;
   for (let i = 0; i < stages.length; i++) {
     const stage = stages[i];
     const cycleBudget = Math.floor(targetExp / cycleCount) + (i < targetExp % cycleCount ? 1 : 0);

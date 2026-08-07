@@ -24,6 +24,7 @@ func _ready() -> void:
 
 	GridManager.grid_updated.connect(_on_grid_changed)
 	grid_view.set_pouch_zone(pouch_zone)
+	requirement_list.setup_pending_reward_bar(grid_view)
 
 
 	EventBus.restart_requested.connect(_on_restart)
@@ -222,7 +223,8 @@ func _on_grid_changed() -> void:
 func _count_grid_item(item_id: int) -> int:
 	var count := 0
 	for entry in GridManager.get_all_items():
-		if entry.data.get("id", 0) == item_id:
+		var item_data: Dictionary = entry.data
+		if not bool(item_data.get("immovable", false)) and int(item_data.get("id", 0)) == item_id:
 			count += 1
 	return count
 
@@ -249,7 +251,10 @@ func _refresh_requirement_buttons() -> void:
 func _refresh_requirement_item_selection() -> void:
 	var present_item_ids: Dictionary = {}
 	for entry in GridManager.get_all_items():
-		var item_id: int = int(entry.data.get("id", 0))
+		var item_data: Dictionary = entry.data
+		if bool(item_data.get("immovable", false)):
+			continue
+		var item_id: int = int(item_data.get("id", 0))
 		if item_id > 0:
 			present_item_ids[item_id] = true
 	requirement_list.refresh_item_selection(present_item_ids)
@@ -269,7 +274,8 @@ func _refresh_required_indicators() -> void:
 	for entry in GridManager.get_all_items():
 		var node: GridItem = grid_view._item_nodes.get("%d,%d" % [entry.pos.x, entry.pos.y])
 		if node and is_instance_valid(node):
-			node.set_required(required_ids.has(entry.data.get("id", 0)))
+			var item_data: Dictionary = entry.data
+			node.set_required(not bool(item_data.get("immovable", false)) and required_ids.has(int(item_data.get("id", 0))))
 
 func _refresh_meridian() -> void:
 	if not GameState.meridian_acupoints.is_empty():
@@ -350,7 +356,7 @@ func _find_grid_item_source(item_id: int, used_grid_keys: Dictionary) -> Diction
 		if used_grid_keys.has(key_string):
 			continue
 		var node: GridItem = grid_view._item_nodes[key] as GridItem
-		if node == null or not is_instance_valid(node) or int(node.item_data.get("id", 0)) != item_id:
+		if node == null or not is_instance_valid(node) or bool(node.item_data.get("immovable", false)) or int(node.item_data.get("id", 0)) != item_id:
 			continue
 		var icon_rect: TextureRect = node.get_node_or_null("IconRect") as TextureRect
 		var texture: Texture2D = icon_rect.texture if icon_rect else null
@@ -358,7 +364,8 @@ func _find_grid_item_source(item_id: int, used_grid_keys: Dictionary) -> Diction
 		used_grid_keys[key_string] = true
 		return {"from": item_center, "texture": texture, "node": node, "grid_key": key_string}
 	for grid_entry in GridManager.get_all_items():
-		if int(grid_entry.data.get("id", 0)) == item_id:
+		var item_data: Dictionary = grid_entry.data
+		if not bool(item_data.get("immovable", false)) and int(item_data.get("id", 0)) == item_id:
 			var fallback_center: Vector2 = grid_view.to_global(Vector2(grid_entry.pos.x * Constants.CELL_STEP, grid_entry.pos.y * Constants.CELL_STEP) + Vector2(Constants.CELL_SIZE * 0.5, Constants.CELL_SIZE * 0.5))
 			return {"from": fallback_center}
 	return {}

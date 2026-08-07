@@ -228,6 +228,7 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `stages` | array | 阶段列表 `[{name, acupoints, qi_cost, acupoint_rewards, circulation_rewards}]` |
+| `acupoint_rewards` | number/object/array | 单个奖励配置会应用到所有穴位；数组时按穴位下标逐点发放奖励 |
 
 ---
 

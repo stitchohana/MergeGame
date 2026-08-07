@@ -1,0 +1,14 @@
+◇ injected env (5) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+[server] Using JSON file storage: ./data
+[engine] Stamina config: max=100 cost=1 regen=1/120s
+[engine] Daily reset hour: 5
+[engine] Shop config: 16 items
+[engine] Configs loaded: 593 items, 210 recipes, 20 stages, 20 meridian thresholds, 3 maps, 11 monsters
+[quest] Loaded 46 quests
+[activity] Loaded 3 activities
+[activity] Loaded 1 weekly task sets
+[engine] Loaded 4 reward configs
+[engine] Loaded 110 home meridian stages
+[server] Game engine loaded
+[server] Grid: 7x9
+[server] Initial setup: 22 items

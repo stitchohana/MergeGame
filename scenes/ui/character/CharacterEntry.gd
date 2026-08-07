@@ -64,11 +64,26 @@ func _get_active_stage_index() -> int:
 			if int(progress.get("stage", -1)) == stage_idx:
 				has_progress = true
 				if not bool(progress.get("circulation_completed", false)):
-					return stage_idx
+					return _clamp_unlocked_stage_index(stage_idx)
 				break
 		if not has_progress:
-			return stage_idx
-	return _home_defs.size() - 1
+			return _clamp_unlocked_stage_index(stage_idx)
+	return _clamp_unlocked_stage_index(_home_defs.size() - 1)
+
+
+func _clamp_unlocked_stage_index(stage_idx: int) -> int:
+	if _home_defs.is_empty():
+		return -1
+	return clampi(stage_idx, 0, mini(_home_defs.size() - 1, _max_unlocked_home_stage_index()))
+
+
+func _max_unlocked_home_stage_index() -> int:
+	var cultivation_level: int = CultivationService.current_level
+	if cultivation_level <= 1:
+		return 0
+	if cultivation_level <= 10:
+		return cultivation_level - 1
+	return 9 + (cultivation_level - 10) * 10
 
 
 func _get_stage_lit(stage_idx: int) -> Array:

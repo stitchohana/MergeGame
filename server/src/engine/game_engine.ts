@@ -236,9 +236,33 @@ export class GameEngine {
   getHomeMeridianDefs(): any[] {
     return this.homeMeridianDefs.map(s => ({
       ...s,
-      acupoint_rewards: typeof s.acupoint_rewards === "number" ? (this.rewardsTable.get(s.acupoint_rewards) ?? s.acupoint_rewards) : s.acupoint_rewards,
+      acupoint_rewards: this._resolveRewardConfig(s.acupoint_rewards),
       circulation_rewards: typeof s.circulation_rewards === "number" ? (this.rewardsTable.get(s.circulation_rewards) ?? s.circulation_rewards) : s.circulation_rewards,
     }));
+  }
+
+  private _resolveRewardConfig(rewards: RewardConfig | number | Array<RewardConfig | number> | undefined): RewardConfig | number | Array<RewardConfig | number> | undefined {
+    if (Array.isArray(rewards)) {
+      return rewards.map(reward => this._resolveRewardConfig(reward) as RewardConfig | number);
+    }
+    if (typeof rewards === "number") {
+      return this.rewardsTable.get(rewards) ?? rewards;
+    }
+    return rewards;
+  }
+
+  private _getAcupointReward(def: any, acupointIndex: number): RewardConfig | number | undefined {
+    const rewards = def.acupoint_rewards;
+    if (Array.isArray(rewards)) {
+      return rewards[acupointIndex];
+    }
+    return rewards;
+  }
+
+  private _maxUnlockedHomeStageIndex(cultivationLevel: number): number {
+    if (cultivationLevel <= 1) return 0;
+    if (cultivationLevel <= 10) return cultivationLevel - 1;
+    return 9 + (cultivationLevel - 10) * 10;
   }
 
   lightHomeAcupoint(state: GameState, stageIndex: number, acupointIndex: number):
@@ -250,6 +274,9 @@ export class GameEngine {
     }
     if (stageIndex < 0 || stageIndex >= this.homeMeridianDefs.length) {
       return { ok: false, reason: "invalid_stage" };
+    }
+    if (stageIndex > this._maxUnlockedHomeStageIndex(state.cultivation.current_level)) {
+      return { ok: false, reason: "stage_locked" };
     }
     const def = this.homeMeridianDefs[stageIndex];
     if (acupointIndex < 0 || acupointIndex >= def.acupoints) {
@@ -292,8 +319,9 @@ export class GameEngine {
 
     // Acupoint reward
     let rewardsApplied: RewardConfig = { tokens: [], items: [] };
-    if (def.acupoint_rewards) {
-      const r = this.applyRewards(state, def.acupoint_rewards);
+    const acupointReward = this._getAcupointReward(def, acupointIndex);
+    if (acupointReward) {
+      const r = this.applyRewards(state, acupointReward);
       rewardsApplied.tokens!.push(...(r.tokens || []));
       rewardsApplied.items!.push(...(r.items || []));
     }
@@ -328,7 +356,8 @@ export class GameEngine {
     state.home_meridian_progress = state.home_meridian_progress || [];
 
     // Preserve normal activation rewards, while letting the GM command bypass qi costs.
-    for (let stageIndex = 0; stageIndex < this.homeMeridianDefs.length && activated < requestedAmount; stageIndex++) {
+    const maxStageIndex = this._maxUnlockedHomeStageIndex(state.cultivation.current_level);
+    for (let stageIndex = 0; stageIndex < this.homeMeridianDefs.length && stageIndex <= maxStageIndex && activated < requestedAmount; stageIndex++) {
       const def = this.homeMeridianDefs[stageIndex];
       let stageProgress = state.home_meridian_progress.find(progress => progress.stage === stageIndex);
       if (!stageProgress) {
@@ -351,8 +380,9 @@ export class GameEngine {
         }
         normalizedProgress.lit[acupointIndex] = true;
         activated += 1;
-        if (def.acupoint_rewards) {
-          this.applyRewards(state, def.acupoint_rewards);
+        const acupointReward = this._getAcupointReward(def, acupointIndex);
+        if (acupointReward) {
+          this.applyRewards(state, acupointReward);
         }
       }
 
@@ -386,12 +416,15 @@ export class GameEngine {
     const pool: number[] = t.item_pool ?? [];
     const typeMin: number = t.count_min ?? 1;
     const typeMax: number = t.count_max ?? 3;
+    const fixedOrders: any[] = Array.isArray(t.fixed_orders) ? t.fixed_orders : [];
 
     state.meridian_threshold_idx = foundIdx;
+    state.meridian_fixed_order_cursor = Math.min(orderCount, fixedOrders.length);
     const templateRewards: RewardConfig | undefined = t.acupoint_rewards;
     const acupoints: any[] = [];
     for (let i = 0; i < orderCount; i++) {
-      const order = this._genOneAcupoint(pool, typeMin, typeMax);
+      const fixedOrder = fixedOrders[i];
+      const order = fixedOrder ? this._genFixedAcupoint(fixedOrder) : this._genOneAcupoint(pool, typeMin, typeMax);
       if (templateRewards && order.total_value > 0) {
         order.rewards = this._scaleRewardConfig(templateRewards, order.total_value);
       }
@@ -438,6 +471,25 @@ export class GameEngine {
       items.push({ item_id: itemId, name, value });
     }
     return { item_ids: pickedIds, name: names.join(", "), items, completed: false, total_value: totalValue };
+  }
+
+  private _genFixedAcupoint(fixedOrder: any): any {
+    const configuredIds: unknown = Array.isArray(fixedOrder) ? fixedOrder : fixedOrder?.item_ids;
+    const itemIds: number[] = Array.isArray(configuredIds)
+      ? configuredIds.map((id: unknown) => Number(id)).filter((id: number) => Number.isInteger(id))
+      : [];
+    const names: string[] = [];
+    const items: any[] = [];
+    let totalValue = 0;
+    for (const itemId of itemIds) {
+      const itemData = this.getItemData(itemId);
+      const name = itemData?.name ?? `#${itemId}`;
+      const value = itemData?.value ?? 0;
+      totalValue += value;
+      names.push(name);
+      items.push({ item_id: itemId, name, value });
+    }
+    return { item_ids: itemIds, name: names.join(", "), items, completed: false, total_value: totalValue };
   }
 
   private loadInitialSetup(data: any): void {
@@ -1874,7 +1926,7 @@ export class GameEngine {
     for (const reqItemId of itemIds) {
       let found = false;
       for (let i = 0; i < state.grid.length; i++) {
-        if (!toRemove.includes(i) && state.grid[i].id === reqItemId) {
+        if (!toRemove.includes(i) && state.grid[i].id === reqItemId && state.grid[i].immovable !== true) {
           toRemove.push(i);
           found = true;
           break;
@@ -1912,18 +1964,23 @@ export class GameEngine {
       qiFull = state.cultivation.current_qi >= state.cultivation.max_qi && qiBefore < state.cultivation.max_qi;
     }
 
-    // Remove completed order, generate replacement using current stage
+    // Fixed onboarding orders are a finite set; only random stages refill slots.
     state.meridian_acupoints.splice(index, 1);
     const newThreshold = this._findMeridianThreshold(state.cultivation.current_level);
-    const newPool: number[] = newThreshold?.item_pool ?? [];
-    const newTypeMin: number = newThreshold?.count_min ?? 1;
-    const newTypeMax: number = newThreshold?.count_max ?? 3;
-    const newOrder = this._genOneAcupoint(newPool, newTypeMin, newTypeMax);
-    if (newThreshold?.acupoint_rewards && newOrder.total_value > 0) {
-      newOrder.rewards = this._scaleRewardConfig(newThreshold.acupoint_rewards, newOrder.total_value);
+    const fixedOrders: any[] = Array.isArray(newThreshold?.fixed_orders) ? newThreshold.fixed_orders : [];
+    if (fixedOrders.length === 0) {
+      const newPool: number[] = newThreshold?.item_pool ?? [];
+      const newTypeMin: number = newThreshold?.count_min ?? 1;
+      const newTypeMax: number = newThreshold?.count_max ?? 3;
+      const newOrder = this._genOneAcupoint(newPool, newTypeMin, newTypeMax);
+      if (newThreshold?.acupoint_rewards && newOrder.total_value > 0) {
+        newOrder.rewards = this._scaleRewardConfig(newThreshold.acupoint_rewards, newOrder.total_value);
+      }
+      state.meridian_acupoints.push(newOrder);
+      console.log(`[engine] meridian order #${index} completed, new random order generated`);
+    } else {
+      console.log(`[engine] meridian onboarding order #${index} completed, no replacement generated`);
     }
-    state.meridian_acupoints.push(newOrder);
-    console.log(`[engine] meridian order #${index} completed, new order generated`);
 
     return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina };
   }

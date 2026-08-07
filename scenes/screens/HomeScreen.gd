@@ -122,6 +122,7 @@ func _refresh_display() -> void:
 				break
 	if stage_idx >= _home_defs.size():
 		stage_idx = _home_defs.size() - 1
+	stage_idx = mini(stage_idx, _max_unlocked_home_stage_index())
 
 	_current_stage_idx = stage_idx
 	var def: Dictionary = _home_defs[stage_idx]
@@ -139,6 +140,15 @@ func _refresh_display() -> void:
 			lit.append(false)
 
 	_set_acupoint_nodes(lit, int(def.get("acupoints", 0)), int(def.get("qi_cost", 0)))
+
+
+func _max_unlocked_home_stage_index() -> int:
+	var cultivation_level: int = CultivationService.current_level
+	if cultivation_level <= 1:
+		return 0
+	if cultivation_level <= 10:
+		return cultivation_level - 1
+	return 9 + (cultivation_level - 10) * 10
 
 
 func _set_acupoint_nodes(lit: Array, count: int, qi_cost: int) -> void:
@@ -236,11 +246,23 @@ func _on_acupoint_pressed(slot_index: int) -> void:
 	var qi_cost: int = int(def.get("qi_cost", 0))
 	var title: String = "%s · 第%d穴" % [String(def.get("name", "穴位")), target_index + 1]
 	var cost: String = "进度：%d/%d\n消耗灵气：%d　当前：%d/%d" % [target_index, config_count, qi_cost, CultivationService.current_qi, CultivationService.max_qi]
-	var rewards: Dictionary = def.get("acupoint_rewards", {})
+	var rewards: Dictionary = _get_acupoint_rewards(def, target_index)
 	var stage_index: int = _current_stage_idx
 	var popup := preload("res://scenes/ui/home/AcupointActivatePopup.tscn").instantiate() as AcupointActivatePopup
 	UIManager.show_popup(popup)
 	popup.setup(title, cost, rewards, "激活", func(): _submit_acupoint(stage_index, target_index))
+
+
+func _get_acupoint_rewards(def: Dictionary, target_index: int) -> Dictionary:
+	var rewards_variant: Variant = def.get("acupoint_rewards", {})
+	if rewards_variant is Array:
+		var rewards_array: Array = rewards_variant
+		if target_index >= 0 and target_index < rewards_array.size() and rewards_array[target_index] is Dictionary:
+			return rewards_array[target_index]
+		return {}
+	if rewards_variant is Dictionary:
+		return rewards_variant
+	return {}
 
 
 func _submit_acupoint(stage_index: int, target_index: int) -> void:

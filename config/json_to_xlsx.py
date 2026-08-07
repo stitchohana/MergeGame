@@ -61,6 +61,20 @@ def format_rewards(obj):
     return ";".join(parts)
 
 
+def reward_json_for_xlsx(obj):
+    if isinstance(obj, list):
+        return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
+    return ""
+
+
+def reward_exp_amount(obj):
+    if isinstance(obj, dict):
+        return next((t.get("amount", 0) for t in obj.get("tokens", []) if t.get("token") == 4), 0)
+    if isinstance(obj, list):
+        return next((reward_exp_amount(entry) for entry in obj if reward_exp_amount(entry) > 0), 0)
+    return 0
+
+
 def add_sheet(ws, headers, rows):
     """Write headers + rows into a worksheet with formatting."""
     for ci, h in enumerate(headers, 1):
@@ -160,12 +174,13 @@ save(wb, "items")
 print("Building meridians.xlsx...")
 data = json.load(open(JSON_DIR / "meridians.json", encoding="utf-8"))
 wb = new_book()
-h = ["stage","item_pool","count_min","count_max","acupoint_rewards","order_count"]
+h = ["stage","item_pool","count_min","count_max","acupoint_rewards","order_count","fixed_orders"]
 r = []
 for t in data["thresholds"]:
     r.append([t.get("stage",""), join_list(t.get("item_pool",[])),
               t.get("count_min",""), t.get("count_max",""),
-              t.get("acupoint_rewards",""), t.get("order_count","")])
+              t.get("acupoint_rewards",""), t.get("order_count",""),
+              json.dumps(t.get("fixed_orders", []), ensure_ascii=False, separators=(",", ":")) if t.get("fixed_orders") else ""])
 ws = wb.create_sheet("meridians")
 add_sheet(ws, h, r)
 save(wb, "meridians")
@@ -366,10 +381,11 @@ print("Building home_meridians.xlsx...")
 data = json.load(open(JSON_DIR / "home_meridians.json", encoding="utf-8"))
 wb = new_book()
 ws = wb.create_sheet("home_meridians")
-add_sheet(ws, ["name","acupoints","qi_cost","acupoint_exp","circulation_exp"],
+add_sheet(ws, ["name","acupoints","qi_cost","acupoint_exp","circulation_exp","acupoint_rewards"],
     [[s.get("name",""), s.get("acupoints",""), s.get("qi_cost",""),
-      next((t.get("amount", 0) for t in s.get("acupoint_rewards", {}).get("tokens", []) if t.get("token") == 4), 0),
-      next((t.get("amount", 0) for t in s.get("circulation_rewards", {}).get("tokens", []) if t.get("token") == 4), 0)]
+      reward_exp_amount(s.get("acupoint_rewards", {})),
+      next((t.get("amount", 0) for t in s.get("circulation_rewards", {}).get("tokens", []) if t.get("token") == 4), 0),
+      reward_json_for_xlsx(s.get("acupoint_rewards", {}))]
      for s in data["stages"]])
 save(wb, "home_meridians")
 
