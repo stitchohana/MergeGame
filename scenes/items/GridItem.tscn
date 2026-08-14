@@ -4,6 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://bhq7awkeut0a7" path="res://assets/items/immovable_dust.svg" id="2_dust"]
 [ext_resource type="Texture2D" uid="uid://drug5qerw1xuv" path="res://assets/items/require_base.svg" id="3_require"]
 [ext_resource type="Texture2D" uid="uid://ry5x76xel18m" path="res://assets/items/select_corners.svg" id="4_select"]
+[ext_resource type="Texture2D" uid="uid://byjk7x3yiktxd" path="res://assets/items/launcher_ready.svg" id="5_launcher_ready"]
+[ext_resource type="Texture2D" uid="uid://bo7jrqn0d2tu2" path="res://assets/items/crafting_idle.svg" id="6_crafting_idle"]
 
 [node name="GridItem" type="Control" unique_id=2063488489]
 custom_minimum_size = Vector2(100, 100)
@@ -96,5 +98,31 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("4_select")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LaunchReadyIcon" type="TextureRect" parent="." unique_id=2040073961]
+visible = false
+z_index = 2
+layout_mode = 0
+offset_left = 66.0
+offset_top = 2.0
+offset_right = 94.0
+offset_bottom = 30.0
+mouse_filter = 2
+texture = ExtResource("5_launcher_ready")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CraftingIdleIcon" type="TextureRect" parent="." unique_id=2040073962]
+visible = false
+z_index = 2
+layout_mode = 0
+offset_left = 66.0
+offset_top = 70.0
+offset_right = 94.0
+offset_bottom = 98.0
+mouse_filter = 2
+texture = ExtResource("6_crafting_idle")
 expand_mode = 1
 stretch_mode = 5

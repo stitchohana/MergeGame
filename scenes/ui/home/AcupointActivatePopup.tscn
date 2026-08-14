@@ -1,94 +1,477 @@
-[gd_scene format=3 uid="uid://acupoint_activate_popup"]
+[gd_scene format=3 uid="uid://vcrr0o18a8c"]
 
-[ext_resource type="Script" path="res://scenes/ui/home/AcupointActivatePopup.gd" id="1_gd"]
-[ext_resource type="Theme" uid="uid://gc2kayu31yh8" path="res://assets/theme/btn_theme.tres" id="2_theme"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="3_formal"]
+[ext_resource type="Script" uid="uid://c46ec7qwtgtxq" path="res://scenes/ui/home/AcupointActivatePopup.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://dhv8eh1s6nl6v" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://caif7biq12qid" path="res://assets/ui/craft_path_v1_layers/layers/craft_path_panel_frame.png" id="3_6oyi0"]
+[ext_resource type="Texture2D" uid="uid://d2wl0oyu4h3t" path="res://assets/ui/cultivation_screen_v3/layers/cultivation_star_gold.png" id="4_mxe4s"]
+[ext_resource type="Texture2D" uid="uid://55jl7ig8f4aa" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_reward_icon.png" id="4_reward"]
+[ext_resource type="Texture2D" uid="uid://ca3v17s2q3ku4" path="res://assets/ui/cultivation_screen_v3/layers/qi_spirit_flame_icon.png" id="6_mxe4s"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_popup"]
-bg_color = Color(0.96, 0.94, 0.82, 0.98)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mxe4s"]
+texture = ExtResource("3_6oyi0")
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_art_frame"]
+bg_color = Color(1, 0.974, 0.67, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.94, 0.78, 0.13, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_progress_area"]
+bg_color = Color(0.958, 0.9, 0.8, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.86, 0.77, 0.62, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_progress_background"]
+bg_color = Color(0.78, 0.37, 0.15, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.62, 0.25, 0.09, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_progress_fill"]
+bg_color = Color(0.55, 0.82, 0.18, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.34, 0.61, 0.08, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_gift_frame"]
+bg_color = Color(1, 0.91, 0.5, 1)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
 border_width_bottom = 3
-border_color = Color(0.52, 0.66, 0.52, 1)
+border_color = Color(0.87, 0.62, 0.12, 1)
 corner_radius_top_left = 18
 corner_radius_top_right = 18
 corner_radius_bottom_right = 18
 corner_radius_bottom_left = 18
-shadow_color = Color(0.08, 0.18, 0.12, 0.45)
-shadow_size = 12
 
-[node name="AcupointActivatePopup" type="Control"]
+[sub_resource type="StyleBoxFlat" id="StyleBox_action_normal"]
+bg_color = Color(0.48, 0.79, 0.08, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 7
+border_color = Color(0.29, 0.56, 0.06, 1)
+corner_radius_top_left = 40
+corner_radius_top_right = 40
+corner_radius_bottom_right = 40
+corner_radius_bottom_left = 40
+shadow_color = Color(0.23, 0.45, 0.05, 0.5)
+shadow_size = 7
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_action_pressed"]
+bg_color = Color(0.37, 0.66, 0.05, 1)
+border_width_left = 5
+border_width_top = 7
+border_width_right = 5
+border_width_bottom = 4
+border_color = Color(0.24, 0.47, 0.04, 1)
+corner_radius_top_left = 40
+corner_radius_top_right = 40
+corner_radius_bottom_right = 40
+corner_radius_bottom_left = 40
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_action_hover"]
+bg_color = Color(0.59, 0.87, 0.13, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 7
+border_color = Color(0.35, 0.66, 0.07, 1)
+corner_radius_top_left = 40
+corner_radius_top_right = 40
+corner_radius_bottom_right = 40
+corner_radius_bottom_left = 40
+shadow_color = Color(0.23, 0.45, 0.05, 0.45)
+shadow_size = 8
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_action_disabled"]
+bg_color = Color(0.62, 0.67, 0.45, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 6
+border_color = Color(0.42, 0.5, 0.28, 1)
+corner_radius_top_left = 40
+corner_radius_top_right = 40
+corner_radius_bottom_right = 40
+corner_radius_bottom_left = 40
+
+[sub_resource type="StyleBoxEmpty" id="StyleBox_focus_empty"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_close_normal"]
+bg_color = Color(0.89, 0.31, 0.08, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.72, 0.22, 0.04, 1)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_close_pressed"]
+bg_color = Color(0.76, 0.24, 0.05, 1)
+border_width_left = 4
+border_width_top = 5
+border_width_right = 4
+border_width_bottom = 3
+border_color = Color(0.6, 0.16, 0.02, 1)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_close_hover"]
+bg_color = Color(0.98, 0.4, 0.1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.79, 0.25, 0.04, 1)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+
+[node name="AcupointActivatePopup" type="Control" unique_id=1092580884]
 layout_mode = 3
 anchors_preset = 15
-script = ExtResource("1_gd")
-theme = ExtResource("3_formal")
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
 
-[node name="Dim" type="ColorRect" parent="."]
+[node name="Dim" type="ColorRect" parent="." unique_id=163427995]
 layout_mode = 1
 anchors_preset = 15
-color = Color(0, 0, 0, 0.5)
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
+color = Color(0.035, 0.045, 0.055, 0.78)
 
-[node name="Panel" type="Panel" parent="."]
+[node name="PopupFrame" type="Control" parent="." unique_id=2100000001]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -180.0
-offset_right = 200.0
-offset_bottom = 180.0
+offset_left = -325.0
+offset_top = -560.0
+offset_right = 325.0
+offset_bottom = 560.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
+[node name="PopupPanel" type="Panel" parent="PopupFrame" unique_id=2100000004]
+layout_mode = 0
+offset_top = 18.0
+offset_right = 650.0
+offset_bottom = 978.0
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxTexture_mxe4s")
+
+[node name="Content" type="VBoxContainer" parent="PopupFrame/PopupPanel" unique_id=2100000005]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 22.0
-offset_right = -24.0
-offset_bottom = -22.0
+offset_left = 26.0
+offset_top = 114.0
+offset_right = -26.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 14
 
-[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+[node name="TaskOverview" type="HBoxContainer" parent="PopupFrame/PopupPanel/Content" unique_id=2100000006]
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.23, 0.36, 0.27, 1)
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
-
-[node name="CostLabel" type="Label" parent="Panel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.36, 0.43, 0.34, 1)
-theme_override_font_sizes/font_size = 14
-horizontal_alignment = 1
-
-[node name="RewardsBox" type="HBoxContainer" parent="Panel/VBox"]
-layout_mode = 2
+theme_override_constants/separation = 18
 alignment = 1
 
-[node name="BtnBox" type="HBoxContainer" parent="Panel/VBox"]
+[node name="ArtMargin" type="MarginContainer" parent="PopupFrame/PopupPanel/Content/TaskOverview" unique_id=2100000008]
+custom_minimum_size = Vector2(200, 200)
 layout_mode = 2
+theme_override_constants/margin_left = 62
+theme_override_constants/margin_top = 23
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="ArtFrame" type="PanelContainer" parent="PopupFrame/PopupPanel/Content/TaskOverview/ArtMargin" unique_id=2100000007]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_art_frame")
+
+[node name="ArtTexture" type="TextureRect" parent="PopupFrame/PopupPanel/Content/TaskOverview/ArtMargin/ArtFrame" unique_id=2100000009]
+custom_minimum_size = Vector2(174, 174)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("4_mxe4s")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TaskCopy" type="VBoxContainer" parent="PopupFrame/PopupPanel/Content/TaskOverview" unique_id=2100000010]
+custom_minimum_size = Vector2(0, 190)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 8
 alignment = 1
-theme_override_constants/separation = 20
 
-[node name="ActionButton" type="Button" parent="Panel/VBox/BtnBox"]
+[node name="TitleLabel" type="Label" parent="PopupFrame/PopupPanel/Content/TaskOverview/TaskCopy" unique_id=2100000011]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-custom_minimum_size = Vector2(132, 52)
-theme = ExtResource("2_theme")
-theme_override_font_sizes/font_size = 15
-flat = true
-icon_alignment = 1
-expand_icon = true
+theme_override_colors/font_color = Color(0.58, 0.31, 0.08, 1)
+theme_override_colors/font_outline_color = Color(1, 0.95, 0.78, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 30
+text = "穴位"
+vertical_alignment = 1
+autowrap_mode = 2
 
-[node name="CancelButton" type="Button" parent="Panel/VBox/BtnBox"]
+[node name="RewardDivider" type="HBoxContainer" parent="PopupFrame/PopupPanel/Content" unique_id=2100000013]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-custom_minimum_size = Vector2(132, 52)
-theme = ExtResource("2_theme")
-theme_override_font_sizes/font_size = 15
-text = "取消"
-flat = true
-icon_alignment = 1
-expand_icon = true
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="LeftLine" type="ColorRect" parent="PopupFrame/PopupPanel/Content/RewardDivider" unique_id=2100000014]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.95, 0.76, 0.59, 1)
+
+[node name="RewardTitle" type="Label" parent="PopupFrame/PopupPanel/Content/RewardDivider" unique_id=2100000015]
+custom_minimum_size = Vector2(110, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.69, 0.43, 0.2, 1)
+theme_override_font_sizes/font_size = 24
+text = "激活奖励"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightLine" type="ColorRect" parent="PopupFrame/PopupPanel/Content/RewardDivider" unique_id=2100000016]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.95, 0.76, 0.59, 1)
+
+[node name="RewardsBox" type="HBoxContainer" parent="PopupFrame/PopupPanel/Content" unique_id=2100000017]
+clip_contents = true
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="ProgressArea" type="PanelContainer" parent="PopupFrame/PopupPanel/Content" unique_id=2100000018]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_progress_area")
+
+[node name="ProgressMargin" type="MarginContainer" parent="PopupFrame/PopupPanel/Content/ProgressArea" unique_id=2100000019]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 12
+
+[node name="ProgressVBox" type="VBoxContainer" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin" unique_id=2100000020]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ProgressHeader" type="HBoxContainer" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox" unique_id=2100000021]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+
+[node name="ProgressTitle" type="Label" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox/ProgressHeader" unique_id=2100000022]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.65, 0.39, 0.19, 1)
+theme_override_font_sizes/font_size = 23
+text = "进度奖励"
+vertical_alignment = 1
+
+[node name="ProgressLabel" type="Label" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox/ProgressHeader" unique_id=2100000023]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.29, 0.11, 1)
+theme_override_font_sizes/font_size = 23
+text = "0/0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ProgressRow" type="HBoxContainer" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox" unique_id=2100000024]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox/ProgressRow" unique_id=2100000025]
+custom_minimum_size = Vector2(470, 48)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBox_progress_background")
+theme_override_styles/fill = SubResource("StyleBox_progress_fill")
+value = 28.0
+show_percentage = false
+
+[node name="GiftFrame" type="PanelContainer" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox/ProgressRow" unique_id=2100000026]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBox_gift_frame")
+
+[node name="GiftIcon" type="TextureRect" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox/ProgressRow/GiftFrame" unique_id=2100000027]
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("4_reward")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="OperationArea" type="VBoxContainer" parent="PopupFrame/PopupPanel/Content" unique_id=2100000028]
+custom_minimum_size = Vector2(0, 162)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ActionButton" type="Button" parent="PopupFrame/PopupPanel/Content/OperationArea" unique_id=2100000029]
+custom_minimum_size = Vector2(420, 92)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.88, 0.92, 0.76, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.43, 0.05, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBox_action_normal")
+theme_override_styles/pressed = SubResource("StyleBox_action_pressed")
+theme_override_styles/hover = SubResource("StyleBox_action_hover")
+theme_override_styles/disabled = SubResource("StyleBox_action_disabled")
+theme_override_styles/focus = SubResource("StyleBox_focus_empty")
+
+[node name="ActionContent" type="HBoxContainer" parent="PopupFrame/PopupPanel/Content/OperationArea/ActionButton" unique_id=2100000035]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="ActionTextLabel" type="Label" parent="PopupFrame/PopupPanel/Content/OperationArea/ActionButton/ActionContent" unique_id=2100000036]
+custom_minimum_size = Vector2(116, 68)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.43, 0.05, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 32
+text = "激活"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ActionCostIcon" type="TextureRect" parent="PopupFrame/PopupPanel/Content/OperationArea/ActionButton/ActionContent" unique_id=2100000037]
+custom_minimum_size = Vector2(42, 42)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_mxe4s")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ActionCostLabel" type="Label" parent="PopupFrame/PopupPanel/Content/OperationArea/ActionButton/ActionContent" unique_id=2100000038]
+custom_minimum_size = Vector2(86, 68)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.98, 0.83, 1)
+theme_override_colors/font_outline_color = Color(0.55, 0.32, 0.04, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 30
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BannerTitleLabel" type="Label" parent="PopupFrame" unique_id=2100000033]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 250.0
+offset_top = 48.0
+offset_right = -243.0
+offset_bottom = -1022.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.98, 0.87, 1)
+theme_override_colors/font_outline_color = Color(0.65, 0.31, 0.06, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 30
+text = "穴位激活"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="PopupFrame" unique_id=2100000034]
+layout_mode = 0
+offset_left = 572.0
+offset_top = 66.0
+offset_right = 632.0
+offset_bottom = 126.0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.7, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.84, 0.6, 1)
+theme_override_colors/font_hover_color = Color(1, 0.98, 0.82, 1)
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBox_close_normal")
+theme_override_styles/pressed = SubResource("StyleBox_close_pressed")
+theme_override_styles/hover = SubResource("StyleBox_close_hover")
+theme_override_styles/focus = SubResource("StyleBox_focus_empty")
+text = "×"

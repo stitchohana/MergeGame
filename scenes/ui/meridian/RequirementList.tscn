@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cy22y4f1oscvj" path="res://scenes/ui/character/CharacterEntry.tscn" id="2_character"]
 [ext_resource type="PackedScene" uid="uid://dtqffbbhnmvni" path="res://scenes/ui/meridian/RequirementEntry.tscn" id="3_order"]
 [ext_resource type="Texture2D" uid="uid://d4bv61jk3x6ah" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_button.png" id="4_cultivation"]
-[ext_resource type="PackedScene" path="res://scenes/ui/main/PendingRewardBar.tscn" id="5_pending_rewards"]
+[ext_resource type="PackedScene" uid="uid://bof11cd54u80c" path="res://scenes/ui/main/PendingRewardBar.tscn" id="5_pending_rewards"]
 
 [node name="RequirementList" type="Control" unique_id=1307681079]
 custom_minimum_size = Vector2(780, 235)
@@ -49,14 +49,14 @@ custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-mouse_default_cursor_shape = 2
 tooltip_text = "去修炼"
+mouse_default_cursor_shape = 2
 texture_normal = ExtResource("4_cultivation")
 ignore_texture_size = true
 stretch_mode = 5
 
 [node name="PendingRewardBar" parent="Panel/ScrollContainer/HBoxContainer" unique_id=2087902455 instance=ExtResource("5_pending_rewards")]
-custom_minimum_size = Vector2(240, 96)
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 size_flags_vertical = 4
 

@@ -73,17 +73,27 @@ export class GameEngine {
   private cultivation: CultivationConfig | null = null;
 
   get cultivationStages() { return this.cultivation?.stages ?? []; }
-  private initialSetups = new Map<string, { id: number; col: number; row: number }[]>();
+  private initialSetups = new Map<string, { id: number; col: number; row: number; atk_base?: number }[]>();
   staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
   questResetHour = 0;
   private shopConfig = { shopItems: [] as any[], sellPrices: {} as Record<string, number>, buyPrices: {} as Record<string, number> };
 
 
   private meridianThresholds: any[] = [];
+  private meridianOrderItemTypes = new Set<number>([0, 4]);
+  private meridianOrderLevelRanges: Array<{
+    cultivation_min: number;
+    cultivation_max: number;
+    regular_min: number;
+    regular_max: number;
+    recipe_product_min: number;
+    recipe_product_max: number;
+  }> = [];
   private maps = new Map<number, any>();
   private monsters = new Map<number, any>();
   private rewardsTable = new Map<number, RewardConfig>();
   private homeMeridianDefs: any[] = [];
+  private battleTutorial: any = null;
   questEngine: QuestEngine;
   activityEngine: ActivityEngine;
 
@@ -122,6 +132,7 @@ export class GameEngine {
         console.log(`[engine] Stamina config: max=${this.staminaConfig.max} cost=${this.staminaConfig.spawnCost} regen=${this.staminaConfig.regenAmount}/${this.staminaConfig.regenInterval}s`);
       }
       this.questResetHour = data.reset_hour ?? 0;
+      this.battleTutorial = data.battle_tutorial ?? null;
       if (this.questResetHour > 0) {
         console.log(`[engine] Daily reset hour: ${this.questResetHour}`);
       }
@@ -160,7 +171,10 @@ export class GameEngine {
 
     for (const cat of categories) {
       for (const item of data[cat] || []) {
-        item.type = typeMap[cat];
+        const configuredType = Number(item.type);
+        item.type = cat === "regular" && configuredType === 4
+          ? 4
+          : typeMap[cat];
         this.itemsById.set(item.id, item);
 
         if (!this.itemsByTypeLevel.has(item.type)) {
@@ -200,6 +214,38 @@ export class GameEngine {
   private loadMeridians(data: any): void {
     try {
       this.meridianThresholds = data.thresholds || [];
+      const sourceTypes: Record<string, number> = {
+        items_regular: 0,
+        items_recipe_product: 4,
+      };
+      const configuredSources: unknown[] = Array.isArray(data.order_pool?.sources)
+        ? data.order_pool.sources
+        : [];
+      const configuredTypes = configuredSources
+        .map((source: unknown) => sourceTypes[String(source)])
+        .filter((type: number | undefined): type is number => type !== undefined);
+      if (configuredTypes.length > 0) {
+        this.meridianOrderItemTypes = new Set(configuredTypes);
+      }
+      const configuredRanges: unknown[] = Array.isArray(data.order_pool?.level_ranges)
+        ? data.order_pool.level_ranges
+        : [];
+      this.meridianOrderLevelRanges = configuredRanges
+        .map((entry: any) => ({
+          cultivation_min: Number(entry.cultivation_min),
+          cultivation_max: Number(entry.cultivation_max),
+          regular_min: Number(entry.items_regular?.[0]),
+          regular_max: Number(entry.items_regular?.[1]),
+          recipe_product_min: Number(entry.items_recipe_product?.[0]),
+          recipe_product_max: Number(entry.items_recipe_product?.[1]),
+        }))
+        .filter((entry) => Number.isInteger(entry.cultivation_min)
+          && Number.isInteger(entry.cultivation_max)
+          && entry.cultivation_min <= entry.cultivation_max
+          && Number.isInteger(entry.regular_min)
+          && Number.isInteger(entry.regular_max)
+          && Number.isInteger(entry.recipe_product_min)
+          && Number.isInteger(entry.recipe_product_max));
     } catch { /* optional */ }
   }
 
@@ -229,8 +275,66 @@ export class GameEngine {
   private loadHomeMeridians(data: any): void {
     try {
       this.homeMeridianDefs = data.stages || [];
+      const productionRewards: any[] = Array.isArray(data.production_rewards)
+        ? [...data.production_rewards]
+        : [];
+      for (const rule of data.production_reward_rules || []) {
+        const prefixes: number[] = Array.isArray(rule.facility_prefixes)
+          ? rule.facility_prefixes.map((prefix: unknown) => Number(prefix)).filter((prefix: number) => Number.isInteger(prefix))
+          : [];
+        const levels: number[] = Array.isArray(rule.levels)
+          ? rule.levels.map((level: unknown) => Number(level)).filter((level: number) => Number.isInteger(level))
+          : [];
+        const count = Number(rule.count ?? 2);
+        const items: { id: number; count: number }[] = [];
+        for (const prefix of prefixes) {
+          for (const level of levels) {
+            const itemId = prefix * 100 + level;
+            if (count > 0) items.push({ id: itemId, count });
+          }
+        }
+        if (items.length > 0) {
+          productionRewards.push({ stage: rule.stage, index: rule.index, items });
+        }
+      }
+      for (const productionReward of productionRewards) {
+        const stageIndex = Number(productionReward.stage);
+        const acupointIndex = Number(productionReward.index);
+        const stage = this.homeMeridianDefs[stageIndex];
+        if (!stage || acupointIndex < 0 || acupointIndex >= stage.acupoints) continue;
+
+        const baseRewards = Array.isArray(stage.acupoint_rewards)
+          ? stage.acupoint_rewards
+          : Array.from({ length: stage.acupoints }, () => stage.acupoint_rewards || {});
+        stage.acupoint_rewards = Array.from(
+          { length: stage.acupoints },
+          (_value, index) => this._copyRewardConfig(baseRewards[index] || {}),
+        );
+        const target: RewardConfig = stage.acupoint_rewards[acupointIndex];
+        for (const item of productionReward.items || []) {
+          const itemId = Number(item.id);
+          const count = Number(item.count ?? 1);
+          if (!Number.isInteger(itemId) || count <= 0) continue;
+          const existing = (target.items || []).find(entry => entry.id === itemId);
+          if (existing) existing.count += count;
+          else {
+            target.items = target.items || [];
+            target.items.push({ id: itemId, count });
+          }
+        }
+      }
       console.log(`[engine] Loaded ${this.homeMeridianDefs.length} home meridian stages`);
     } catch { /* optional */ }
+  }
+
+  private _copyRewardConfig(rewards: RewardConfig | number): RewardConfig {
+    const resolved: RewardConfig = typeof rewards === "number"
+      ? (this.rewardsTable.get(rewards) || {})
+      : rewards;
+    return {
+      tokens: (resolved.tokens || []).map(token => ({ ...token })),
+      items: (resolved.items || []).map(item => ({ ...item })),
+    };
   }
 
   getHomeMeridianDefs(): any[] {
@@ -413,10 +517,19 @@ export class GameEngine {
     const t = this._findMeridianThreshold(stageLevel) ?? thresholds[0];
     const foundIdx = thresholds.indexOf(t);
     const orderCount: number = t.order_count ?? t.acupoints ?? 3;
-    const pool: number[] = t.item_pool ?? [];
+    const fixedOrders: any[] = Array.isArray(t.fixed_orders) ? t.fixed_orders : [];
+    const fixedOrderCursor = Number(state.meridian_fixed_order_cursor ?? 0);
+    if (fixedOrders.length > 0
+      && Array.isArray(state.meridian_acupoints)
+      && state.meridian_acupoints.length === 0
+      && fixedOrderCursor >= fixedOrders.length) {
+      state.meridian_threshold_idx = foundIdx;
+      return { acupoints: [] };
+    }
+    const unlockedPool: number[] = this.getUnlockedOrderPool(state);
+    const pool: number[] = unlockedPool;
     const typeMin: number = t.count_min ?? 1;
     const typeMax: number = t.count_max ?? 3;
-    const fixedOrders: any[] = Array.isArray(t.fixed_orders) ? t.fixed_orders : [];
 
     state.meridian_threshold_idx = foundIdx;
     state.meridian_fixed_order_cursor = Math.min(orderCount, fixedOrders.length);
@@ -425,7 +538,7 @@ export class GameEngine {
     for (let i = 0; i < orderCount; i++) {
       const fixedOrder = fixedOrders[i];
       const order = fixedOrder ? this._genFixedAcupoint(fixedOrder) : this._genOneAcupoint(pool, typeMin, typeMax);
-      if (templateRewards && order.total_value > 0) {
+      if (!order.fixed_order_rewards && templateRewards && order.total_value > 0) {
         order.rewards = this._scaleRewardConfig(templateRewards, order.total_value);
       }
       acupoints.push(order);
@@ -489,7 +602,114 @@ export class GameEngine {
       names.push(name);
       items.push({ item_id: itemId, name, value });
     }
-    return { item_ids: itemIds, name: names.join(", "), items, completed: false, total_value: totalValue };
+    const rewards: RewardConfig | undefined = fixedOrder?.rewards
+      ? this._copyRewardConfig(fixedOrder.rewards)
+      : undefined;
+    return {
+      item_ids: itemIds,
+      name: names.join(", "),
+      items,
+      completed: false,
+      total_value: totalValue,
+      ...(rewards ? { rewards, fixed_order_rewards: true } : {}),
+    };
+  }
+
+  private isOrderCandidate(itemDef: ItemDef | null, cultivationLevel = 0, sourceLevel?: number): boolean {
+    if (!itemDef) return false;
+    // The order source is exactly items_regular + items_recipe_product.
+    // Recipe products are represented as type=4 in items.json by the current
+    // XLSX converter, so no group_id-based filtering is needed here.
+    if (!this.meridianOrderItemTypes.has(itemDef.type)) return false;
+    const levelRange = this.meridianOrderLevelRanges.find((range) =>
+      cultivationLevel >= range.cultivation_min && cultivationLevel <= range.cultivation_max);
+    if (!levelRange) return true;
+    const itemLevel = Number(itemDef.type === 4 ? (sourceLevel ?? itemDef.level) : itemDef.level);
+    if (!Number.isFinite(itemLevel)) return false;
+    if (itemDef.type === 0) {
+      return itemLevel >= levelRange.regular_min && itemLevel <= levelRange.regular_max;
+    }
+    if (itemDef.type === 4) {
+      return itemLevel >= levelRange.recipe_product_min && itemLevel <= levelRange.recipe_product_max;
+    }
+    return false;
+  }
+
+  private registerProductionUnlock(state: GameState, itemId: number): boolean {
+    const itemDef = this.getItemData(itemId);
+    if (!itemDef || (!this.isLauncher(itemDef) && itemDef.type !== 2)) return false;
+    state.unlocked_production_item_ids = state.unlocked_production_item_ids || [];
+    if (state.unlocked_production_item_ids.includes(itemId)) return false;
+    state.unlocked_production_item_ids.push(itemId);
+    state.unlocked_production_item_ids.sort((a, b) => a - b);
+    return true;
+  }
+
+  /** Backfill the unlock history for old saves and initialize new saves. */
+  initializeProductionUnlocks(state: GameState): boolean {
+    const previousIds: unknown[] = Array.isArray(state.unlocked_production_item_ids)
+      ? state.unlocked_production_item_ids
+      : [];
+    const normalizedIds = [...new Set(previousIds.filter((id): id is number => Number.isInteger(id)))];
+    let changed = !Array.isArray(state.unlocked_production_item_ids) || normalizedIds.length !== previousIds.length;
+    state.unlocked_production_item_ids = normalizedIds;
+
+    const grids: GridItem[][] = [];
+    if (Array.isArray(state.grid)) grids.push(state.grid);
+    if (state.saved_grid) grids.push(state.saved_grid);
+    if (state.battle_grid) grids.push(state.battle_grid);
+    for (const grid of grids) {
+      for (const item of grid) {
+        changed = this.registerProductionUnlock(state, item.id) || changed;
+        for (const stored of item.craft?._craft_stored || []) {
+          changed = this.registerProductionUnlock(state, Number(stored.id ?? 0)) || changed;
+        }
+        for (const stored of item.storage?.items || []) {
+          changed = this.registerProductionUnlock(state, Number(stored.id ?? 0)) || changed;
+        }
+      }
+    }
+    for (const reward of state.pending_rewards || []) {
+      changed = this.registerProductionUnlock(state, reward.id) || changed;
+    }
+    for (const entry of (state.pouch || []) as unknown[]) {
+      const itemId: number = typeof entry === "number"
+        ? entry
+        : Number((entry as { id?: unknown }).id ?? 0);
+      if (itemId > 0) changed = this.registerProductionUnlock(state, itemId) || changed;
+    }
+    return changed;
+  }
+
+  private getUnlockedOrderPool(state: GameState): number[] {
+    this.initializeProductionUnlocks(state);
+    const orderIds = new Set<number>();
+    const cultivationLevel = Number(state.cultivation?.current_level ?? 1);
+    const addIfCandidate = (itemId: number, sourceLevel?: number): void => {
+      const itemDef = this.getItemData(itemId);
+      if (this.isOrderCandidate(itemDef, cultivationLevel, sourceLevel)) orderIds.add(itemId);
+    };
+
+    const unlockedIds = state.unlocked_production_item_ids || [];
+    const productionIds = unlockedIds.length > 0
+      ? unlockedIds
+      : this.getInitialSetup(0).map(entry => entry.id);
+    for (const productionId of productionIds) {
+      const production = this.getItemData(productionId);
+      if (!production) continue;
+
+      if (this.isLauncher(production)) {
+        for (const spawn of production.spawns || []) addIfCandidate(spawn.id);
+        for (const spawnId of production.fixed_spawns || []) addIfCandidate(spawnId);
+      }
+      if (production.type === 2) {
+        for (const recipe of this.getRecipesForTable(production.id)) {
+          addIfCandidate(recipe.result, production.level);
+        }
+      }
+    }
+
+    return [...orderIds].sort((a, b) => a - b);
   }
 
   private loadInitialSetup(data: any): void {
@@ -751,6 +971,7 @@ export class GameEngine {
       for (const ri of rewards.items) {
         const itemData = this.getItemData(ri.id);
         const name = itemData?.name ?? `#${ri.id}`;
+        this.registerProductionUnlock(state, ri.id);
         for (let i = 0; i < ri.count; i++) {
           state.pending_rewards.push({
             uid: this._nextUid(state),
@@ -793,6 +1014,7 @@ export class GameEngine {
       spawn_sequence: 0,
       spawn_history: [],
       crafted_item_ids: [],
+      unlocked_production_item_ids: [],
     };
 
     const setup = this.getInitialSetup(boardType);
@@ -808,6 +1030,7 @@ export class GameEngine {
           gitem.last_charge_time = now;
         }
         state.grid.push(gitem);
+        this.registerProductionUnlock(state, entry.id);
         itemNames.push(`${itemDef.name}(#${entry.id})@(${entry.col},${entry.row})${gitem.immovable ? " [immovable]" : ""}`);
       }
     }
@@ -867,6 +1090,7 @@ export class GameEngine {
           gitem.last_charge_time = now;
         }
         grid.push(gitem);
+        this.registerProductionUnlock(state, entry.id);
       }
     }
     return grid;
@@ -998,6 +1222,7 @@ export class GameEngine {
       mergedItem.atk_base = fromAtk + toAtk;
     }
     state.grid.push(mergedItem);
+    this.registerProductionUnlock(state, mergedItem.id);
 
     state.crafted_item_ids ??= [];
     if (!state.crafted_item_ids.includes(mergedItem.id)) {
@@ -1138,6 +1363,7 @@ export class GameEngine {
       console.log(`[engine] spawn: launcher #${launcherItem.id} effect_type=${launcherData.effect_type} — NOT atk boost`);
     }
     state.grid.push(newItem);
+    this.registerProductionUnlock(state, newItem.id);
     state.spawn_sequence = sequence + 1;
     state.version += 1;
 
@@ -1360,6 +1586,7 @@ export class GameEngine {
     const craftUid = this._nextUid(state);
     if (target) {
       state.grid.push({ uid: craftUid, id: resultId, col: target.col, row: target.row });
+      this.registerProductionUnlock(state, resultId);
     }
 
     // Clear craft state
@@ -1799,6 +2026,7 @@ export class GameEngine {
           const emptyPos = this.findEmptyPos(state.grid);
           if (emptyPos) {
             state.grid.push({ uid: this._nextUid(state), id: lootId, col: emptyPos.col, row: emptyPos.row });
+            this.registerProductionUnlock(state, lootId);
             loot.push(lootId);
           }
         }
@@ -1954,10 +2182,14 @@ export class GameEngine {
     let qiGained = 0;
     let qiFull = false;
     let rewardsApplied: RewardConfig = { tokens: [], items: [] };
-    if (totalValue > 0 && threshold?.acupoint_rewards) {
-      const scaledRewards = this._scaleRewardConfig(threshold.acupoint_rewards, totalValue);
+    const orderRewards: RewardConfig | undefined = (req as any).fixed_order_rewards
+      ? this._copyRewardConfig((req as any).rewards || {})
+      : (totalValue > 0 && threshold?.acupoint_rewards
+        ? this._scaleRewardConfig(threshold.acupoint_rewards, totalValue)
+        : undefined);
+    if (orderRewards) {
       const qiBefore = state.cultivation.current_qi;
-      const r = this.applyRewards(state, scaledRewards);
+      const r = this.applyRewards(state, orderRewards);
       rewardsApplied.tokens!.push(...(r.tokens || []));
       rewardsApplied.items!.push(...(r.items || []));
       qiGained = state.cultivation.current_qi - qiBefore;
@@ -1969,7 +2201,7 @@ export class GameEngine {
     const newThreshold = this._findMeridianThreshold(state.cultivation.current_level);
     const fixedOrders: any[] = Array.isArray(newThreshold?.fixed_orders) ? newThreshold.fixed_orders : [];
     if (fixedOrders.length === 0) {
-      const newPool: number[] = newThreshold?.item_pool ?? [];
+      const newPool: number[] = this.getUnlockedOrderPool(state);
       const newTypeMin: number = newThreshold?.count_min ?? 1;
       const newTypeMax: number = newThreshold?.count_max ?? 3;
       const newOrder = this._genOneAcupoint(newPool, newTypeMin, newTypeMax);
@@ -2090,6 +2322,7 @@ export class GameEngine {
     state.spirit_stones -= price;
     const buyUid = this._nextUid(state);
     state.grid.push({ uid: buyUid, id: itemId, col: targetCol, row: targetRow });
+    this.registerProductionUnlock(state, itemId);
     state.version += 1;
 
     console.log(`[engine] buy: ${itemData.name} at (${targetCol},${targetRow}) -> -${price} stones | total=${state.spirit_stones}`);

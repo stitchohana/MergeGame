@@ -17,6 +17,8 @@ var _orig_scale: Vector2
 @onready var immovable_icon: TextureRect = $ImmovableIcon
 @onready var select_icon: TextureRect = $SelectIcon
 @onready var require_icon: TextureRect = $RequireIcon
+@onready var launch_ready_icon: TextureRect = $LaunchReadyIcon
+@onready var crafting_idle_icon: TextureRect = $CraftingIdleIcon
 
 var _is_selected: bool = false
 
@@ -26,6 +28,8 @@ func _ready() -> void:
 	_orig_scale = scale
 
 	select_icon.visible = false
+	launch_ready_icon.visible = false
+	crafting_idle_icon.visible = false
 
 func set_selected(active: bool) -> void:
 	_is_selected = active
@@ -35,7 +39,7 @@ func set_selected(active: bool) -> void:
 func setup(data: Dictionary, pos: Vector2i, cell_step: int) -> void:
 	item_data = data
 	grid_position = pos
-	is_launcher = data.get("type", 0) == Constants.ItemType.LAUNCHER
+	is_launcher = _item_type() == Constants.ItemType.LAUNCHER
 
 	custom_minimum_size = Vector2(Constants.CELL_SIZE, Constants.CELL_SIZE)
 	size = Vector2(Constants.CELL_SIZE, Constants.CELL_SIZE)
@@ -45,10 +49,9 @@ func setup(data: Dictionary, pos: Vector2i, cell_step: int) -> void:
 
 func _update_visuals() -> void:
 	# Apply crafting state visual if present (restored from server).
-	if not is_launcher:
-		var cs: int = item_data.get("_craft_state", -1)
-		if cs >= 0 and cs <= 3:
-			set_crafting_state(cs)
+	if _item_type() == Constants.ItemType.CRAFTING:
+		var cs: int = int(item_data.get("_craft_state", 0))
+		set_crafting_state(cs)
 
 	# Optional icon overlay
 	var icon_path: String = item_data.get("icon", "")
@@ -68,6 +71,25 @@ func _update_visuals() -> void:
 
 	if immovable_icon:
 		immovable_icon.visible = item_data.get("immovable") == true
+
+	_update_status_icons()
+
+func _update_status_icons() -> void:
+	var is_immovable: bool = bool(item_data.get("immovable", false))
+	if launch_ready_icon:
+		# Initial/immovable launchers may not have a runtime `charges` field yet.
+		var charges: int = int(item_data.get("charges", item_data.get("max_charges", 0)))
+		launch_ready_icon.visible = not is_immovable and is_launcher and charges > 0
+	if crafting_idle_icon:
+		var is_crafting_table: bool = _item_type() == Constants.ItemType.CRAFTING
+		var craft_state: int = int(item_data.get("_craft_state", 0))
+		crafting_idle_icon.visible = not is_immovable and is_crafting_table and craft_state == 0
+
+func _item_type() -> int:
+	return int(item_data.get("type", Constants.ItemType.REGULAR))
+
+func refresh_status_icons() -> void:
+	_update_status_icons()
 
 # Called by GridView during drag
 func set_drag_active(active: bool) -> void:
@@ -89,6 +111,8 @@ func set_crafting_state(state: int) -> void:
 			modulate = Color(1.0, 1.0, 0.6, 1)
 		_:  # IDLE or unknown — reset
 			modulate = Color.WHITE
+
+	_update_status_icons()
 
 func set_visual_position(pos: Vector2) -> void:
 	position = pos

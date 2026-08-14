@@ -5,5 +5,37 @@
 	"regen_interval": 120,
 	"regen_amount": 1
   },
-  "reset_hour": 5
+  "reset_hour": 5,
+  "battle_tutorial": {
+	"enabled": true,
+	"map_id": 0,
+	"next_map_id": 1,
+	"max_hp": 100,
+	"steps": [
+	  {
+		"instruction": "点击剑气，完成第一次攻击",
+		"player_hp": 100,
+		"monsters": [{ "monster_id": 1, "count": 1, "hp": 300 }],
+		"items": [{ "id": 15101, "col": 2, "row": 3, "atk_base": 300 }]
+	  },
+	  {
+		"instruction": "将两个同级剑气合成后再攻击",
+		"player_hp": 100,
+		"monsters": [{ "monster_id": 1, "count": 1, "hp": 600 }],
+		"items": [
+		  { "id": 15101, "col": 2, "row": 3, "atk_base": 150 },
+		  { "id": 15101, "col": 3, "row": 3, "atk_base": 150 }
+		]
+	  },
+	  {
+		"instruction": "先使用恢复道具，再击败敌人",
+		"player_hp": 60,
+		"monsters": [{ "monster_id": 2, "count": 1, "hp": 300 }],
+		"items": [
+		  { "id": 15101, "col": 2, "row": 3, "atk_base": 300 },
+		  { "id": 15204, "col": 3, "row": 3 }
+		]
+	  }
+	]
+  }
 }

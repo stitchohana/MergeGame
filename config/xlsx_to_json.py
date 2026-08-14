@@ -14,6 +14,17 @@ XLSX_DIR = BASE / "xlsx"
 OUT = BASE / "json_output"
 OUT.mkdir(exist_ok=True)
 
+ITEM_ICON_DIRECTORY = "icons_simple"
+
+
+def item_icon_path(item_id):
+    return f"res://assets/items/{ITEM_ICON_DIRECTORY}/{item_id}.png"
+
+
+def normalized_item_icon(row):
+    item_id = parse_int(row["id"])
+    return item_icon_path(item_id) if item_id is not None else row.get("icon", "")
+
 
 def parse_int(v):
     if v is None or v == "" or v == "None":
@@ -136,7 +147,7 @@ wb = open_book("items")
 regular = []
 for row in read_rows(wb["items_regular"]):
     item = {"id": parse_int(row["id"]), "level": parse_int(row["level"]),
-            "name": row["name"], "icon": row.get("icon", ""),
+            "name": row["name"], "icon": normalized_item_icon(row),
             "group_id": parse_int(row["group_id"]), "describe": row["describe"]}
     if row.get("type") != "":
         item["type"] = parse_int(row["type"])
@@ -150,7 +161,7 @@ for row in read_rows(wb["items_regular"]):
 launcher = []
 for row in read_rows(wb["items_launcher"]):
     item = {"id": parse_int(row["id"]), "level": parse_int(row["level"]),
-            "name": row["name"], "icon": row.get("icon", ""),
+            "name": row["name"], "icon": normalized_item_icon(row),
             "group_id": parse_int(row["group_id"]),
             "max_charges": parse_int(row["max_charges"]),
             "recharge_time": parse_int(row["recharge_time"]),
@@ -172,7 +183,7 @@ for row in read_rows(wb["items_crafting"]):
     item = {
         "id": parse_int(row["id"]), "level": parse_int(row["level"]),
         "name": row["name"], "group_id": parse_int(row["group_id"]),
-        "icon": row.get("icon", ""), "describe": row["describe"],
+        "icon": normalized_item_icon(row), "describe": row["describe"],
         "recipes": parse_int_list(row.get("recipes", "")),
     }
     if row.get("type") != "":
@@ -182,7 +193,7 @@ for row in read_rows(wb["items_crafting"]):
 if "items_recipe_product" in [ws.title for ws in wb.worksheets]:
     for row in read_rows(wb["items_recipe_product"]):
         item = {"id": parse_int(row["id"]),
-                "name": row["name"], "icon": row.get("icon", ""),
+                "name": row["name"], "icon": normalized_item_icon(row),
                 "describe": row["describe"],
                 "type": 4}
         if row.get("value"):
@@ -209,7 +220,7 @@ effect_items = []
 if "items_effect" in [ws.title for ws in wb.worksheets]:
     for row in read_rows(wb["items_effect"]):
         item = {"id": parse_int(row["id"]), "level": parse_int(row["level"]),
-                "name": row["name"], "icon": row.get("icon", ""),
+                "name": row["name"], "icon": normalized_item_icon(row),
                 "group_id": parse_int(row["group_id"]), "describe": row["describe"],
                 "effect_type": parse_int(row["effect_type"]),
                 "effect_value": parse_int(row["effect_value"]),
@@ -235,10 +246,31 @@ for row in read_rows(wb["meridians"]):
         "order_count": parse_int(row["order_count"]),
     }
     fixed_orders = parse_fixed_orders(row.get("fixed_orders", ""))
+    if threshold["stage"] == 1:
+        # Keep the beginner path deterministic: finish the spirit field line,
+        # introduce its companion product, then complete the spirit spring line.
+        fixed_orders = [
+            {"item_ids": [5003]}, {"item_ids": [5004]}, {"item_ids": [6001]},
+            {"item_ids": [9003]}, {"item_ids": [9004]}, {"item_ids": [10001]},
+            {"item_ids": [27001]},
+        ]
+        threshold["order_count"] = len(fixed_orders)
     if fixed_orders:
         threshold["fixed_orders"] = fixed_orders
     thresholds.append(threshold)
-save_json("meridians.json", {"thresholds": thresholds})
+save_json("meridians.json", {
+    "order_pool": {
+        "sources": ["items_regular", "items_recipe_product"],
+        "unlock_by": ["items_launcher", "items_crafting"],
+        "level_ranges": [
+            {"cultivation_min": 2, "cultivation_max": 10, "items_regular": [4, 4], "items_recipe_product": [1, 4]},
+            {"cultivation_min": 11, "cultivation_max": 13, "items_regular": [7, 8], "items_recipe_product": [5, 8]},
+            {"cultivation_min": 14, "cultivation_max": 16, "items_regular": [10, 12], "items_recipe_product": [9, 12]},
+            {"cultivation_min": 17, "cultivation_max": 19, "items_regular": [13, 16], "items_recipe_product": [13, 16]},
+        ],
+    },
+    "thresholds": thresholds,
+})
 
 # ─── rewards ───────────────────────────────────────────────
 print("Building rewards.json...")
@@ -447,6 +479,45 @@ for row in read_rows(wb["home_meridians"]):
             {"token": 3, "amount": 100},
         ]},
     })
-save_json("home_meridians.json", {"stages": home_stages})
+production_rewards = [
+    {"stage": 1, "index": 0, "items": [{"id": 13001, "count": 2}, {"id": 18001, "count": 2}]},
+    {"stage": 1, "index": 4, "items": [{"id": 13002, "count": 2}, {"id": 18002, "count": 2}]},
+    {"stage": 1, "index": 8, "items": [{"id": 13003, "count": 2}, {"id": 18003, "count": 2}]},
+    {"stage": 2, "index": 0, "items": [{"id": 11001, "count": 2}, {"id": 12001, "count": 2}, {"id": 16001, "count": 2}, {"id": 17001, "count": 2}]},
+    {"stage": 2, "index": 4, "items": [{"id": 11002, "count": 2}, {"id": 12002, "count": 2}, {"id": 16002, "count": 2}, {"id": 17002, "count": 2}]},
+    {"stage": 2, "index": 8, "items": [{"id": 11003, "count": 2}, {"id": 12003, "count": 2}, {"id": 16003, "count": 2}, {"id": 17003, "count": 2}]},
+    {"stage": 3, "index": 0, "items": [{"id": 14001, "count": 2}, {"id": 19001, "count": 2}]},
+    {"stage": 3, "index": 5, "items": [{"id": 14002, "count": 2}, {"id": 19002, "count": 2}]},
+    {"stage": 3, "index": 10, "items": [{"id": 14003, "count": 2}, {"id": 19003, "count": 2}]},
+    {"stage": 5, "index": 0, "items": [{"id": 15001, "count": 2}]},
+    {"stage": 5, "index": 7, "items": [{"id": 15002, "count": 2}]},
+    {"stage": 5, "index": 14, "items": [{"id": 15003, "count": 2}]},
+]
+production_reward_rules = [
+    {"stage": 10, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190], "levels": [4], "count": 2},
+    {"stage": 10, "index": 0, "facility_prefixes": [200, 210], "levels": [1], "count": 2},
+    {"stage": 10, "index": 1, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190], "levels": [5], "count": 2},
+    {"stage": 10, "index": 1, "facility_prefixes": [200, 210], "levels": [2], "count": 2},
+    {"stage": 10, "index": 2, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190], "levels": [6], "count": 2},
+    {"stage": 10, "index": 2, "facility_prefixes": [200, 210], "levels": [3], "count": 2},
+    {"stage": 13, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190], "levels": [7], "count": 2},
+    {"stage": 13, "index": 0, "facility_prefixes": [200, 210], "levels": [4], "count": 2},
+    {"stage": 16, "index": 0, "facility_prefixes": [200, 210], "levels": [5], "count": 2},
+    {"stage": 19, "index": 0, "facility_prefixes": [200, 210], "levels": [6], "count": 2},
+    {"stage": 22, "index": 0, "facility_prefixes": [200, 210], "levels": [7], "count": 2},
+    {"stage": 40, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [8], "count": 2},
+    {"stage": 43, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [9], "count": 2},
+    {"stage": 46, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [10], "count": 2},
+    {"stage": 49, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [11], "count": 2},
+    {"stage": 70, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [12], "count": 2},
+    {"stage": 73, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [13], "count": 2},
+    {"stage": 76, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [14], "count": 2},
+    {"stage": 79, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [15], "count": 2},
+]
+save_json("home_meridians.json", {
+    "production_rewards": production_rewards,
+    "production_reward_rules": production_reward_rules,
+    "stages": home_stages,
+})
 
 print(f"\nDone! JSON files written to {OUT}")

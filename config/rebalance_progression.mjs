@@ -81,15 +81,11 @@ for (const item of allItems) {
 const qiPerValue = 10;
 const orderRewardId = 219;
 rewards.rewards[String(orderRewardId)] = { tokens: [{ token: 2, amount: qiPerValue }] };
-const isOrderExcluded = id => {
+// Order eligibility is category-driven. Facility unlock state is applied by
+// the server at runtime, so this balance script must not filter by group_id.
+const isOrderCandidate = id => {
   const item = byId.get(id);
-  const groupId = Number(item?.group_id ?? 0);
-  const isEffectItem = Number(item?.type ?? 0) === 5;
-  const effectType = Number(item?.effect_type ?? 0);
-  const isManualOrFormationScroll = groupId === 13 || groupId === 14;
-  const isSwordFormationOrTalisman = id >= 28001 && id <= 28048;
-  const isStaminaOrBreakthroughPill = effectType === 4 || effectType === 5;
-  return isEffectItem || isManualOrFormationScroll || isSwordFormationOrTalisman || isStaminaOrBreakthroughPill;
+  return item && (Number(item.type ?? 0) === 0 || Number(item.type ?? 0) === 4);
 };
 
 // A crafted product inherits the highest progression tier of its ingredients.
@@ -117,11 +113,11 @@ const makeOrderPool = (regularTiers, craftedMinTier, craftedMaxTier) => {
     .filter(item => Number(item.type ?? 0) === 0)
     .filter(item => regularTiers.has(Number(item.level)))
     .map(item => item.id)
-    .filter(id => !isOrderExcluded(id));
+    .filter(isOrderCandidate);
   const craftedProducts = uniqueRecipeResults
     .filter(id => itemTier.has(id))
     .filter(id => itemTier.get(id) >= craftedMinTier && itemTier.get(id) <= craftedMaxTier)
-    .filter(id => !isOrderExcluded(id));
+    .filter(isOrderCandidate);
   return [...new Set([...regularProducts, ...craftedProducts])].sort((a, b) => a - b);
 };
 

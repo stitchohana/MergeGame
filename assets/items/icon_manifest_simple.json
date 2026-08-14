@@ -1,0 +1,4153 @@
+[
+  {
+    "id": 1001,
+    "name": "雾芽草",
+    "icon": "res://assets/items/icons_simple/1001.png",
+    "atlas": "atlas_016",
+    "cell": 0
+  },
+  {
+    "id": 1002,
+    "name": "青络花",
+    "icon": "res://assets/items/icons_simple/1002.png",
+    "atlas": "atlas_016",
+    "cell": 1
+  },
+  {
+    "id": 1003,
+    "name": "石髓果",
+    "icon": "res://assets/items/icons_simple/1003.png",
+    "atlas": "atlas_016",
+    "cell": 2
+  },
+  {
+    "id": 1004,
+    "name": "玉蟾芝",
+    "icon": "res://assets/items/icons_simple/1004.png",
+    "atlas": "atlas_016",
+    "cell": 3
+  },
+  {
+    "id": 1005,
+    "name": "雪魄莲",
+    "icon": "res://assets/items/icons_simple/1005.png",
+    "atlas": "atlas_016",
+    "cell": 4
+  },
+  {
+    "id": 1006,
+    "name": "丹霞叶",
+    "icon": "res://assets/items/icons_simple/1006.png",
+    "atlas": "atlas_016",
+    "cell": 5
+  },
+  {
+    "id": 1007,
+    "name": "苍梧藤",
+    "icon": "res://assets/items/icons_simple/1007.png",
+    "atlas": "atlas_016",
+    "cell": 6
+  },
+  {
+    "id": 1008,
+    "name": "霆光竹",
+    "icon": "res://assets/items/icons_simple/1008.png",
+    "atlas": "atlas_016",
+    "cell": 7
+  },
+  {
+    "id": 1009,
+    "name": "坤灵苓",
+    "icon": "res://assets/items/icons_simple/1009.png",
+    "atlas": "atlas_016",
+    "cell": 8
+  },
+  {
+    "id": 1010,
+    "name": "星坠蕊",
+    "icon": "res://assets/items/icons_simple/1010.png",
+    "atlas": "atlas_016",
+    "cell": 9
+  },
+  {
+    "id": 1011,
+    "name": "紫府参",
+    "icon": "res://assets/items/icons_simple/1011.png",
+    "atlas": "atlas_016",
+    "cell": 10
+  },
+  {
+    "id": 1012,
+    "name": "九曲槲",
+    "icon": "res://assets/items/icons_simple/1012.png",
+    "atlas": "atlas_016",
+    "cell": 11
+  },
+  {
+    "id": 1013,
+    "name": "涅火朱实",
+    "icon": "res://assets/items/icons_simple/1013.png",
+    "atlas": "atlas_016",
+    "cell": 12
+  },
+  {
+    "id": 1014,
+    "name": "螭涎兰",
+    "icon": "res://assets/items/icons_simple/1014.png",
+    "atlas": "atlas_016",
+    "cell": 13
+  },
+  {
+    "id": 1015,
+    "name": "鸾羽血藤",
+    "icon": "res://assets/items/icons_simple/1015.png",
+    "atlas": "atlas_016",
+    "cell": 14
+  },
+  {
+    "id": 1016,
+    "name": "太初道种",
+    "icon": "res://assets/items/icons_simple/1016.png",
+    "atlas": "atlas_016",
+    "cell": 15
+  },
+  {
+    "id": 2001,
+    "name": "赤髓铜",
+    "icon": "res://assets/items/icons_simple/2001.png",
+    "atlas": "atlas_014",
+    "cell": 0
+  },
+  {
+    "id": 2002,
+    "name": "乌纹铁",
+    "icon": "res://assets/items/icons_simple/2002.png",
+    "atlas": "atlas_014",
+    "cell": 1
+  },
+  {
+    "id": 2003,
+    "name": "月蚀银",
+    "icon": "res://assets/items/icons_simple/2003.png",
+    "atlas": "atlas_014",
+    "cell": 2
+  },
+  {
+    "id": 2004,
+    "name": "太白金母",
+    "icon": "res://assets/items/icons_simple/2004.png",
+    "atlas": "atlas_014",
+    "cell": 3
+  },
+  {
+    "id": 2005,
+    "name": "玄冰陨铁",
+    "icon": "res://assets/items/icons_simple/2005.png",
+    "atlas": "atlas_014",
+    "cell": 4
+  },
+  {
+    "id": 2006,
+    "name": "地火炎晶",
+    "icon": "res://assets/items/icons_simple/2006.png",
+    "atlas": "atlas_014",
+    "cell": 5
+  },
+  {
+    "id": 2007,
+    "name": "青罡玉",
+    "icon": "res://assets/items/icons_simple/2007.png",
+    "atlas": "atlas_014",
+    "cell": 6
+  },
+  {
+    "id": 2008,
+    "name": "雷极砂",
+    "icon": "res://assets/items/icons_simple/2008.png",
+    "atlas": "atlas_014",
+    "cell": 7
+  },
+  {
+    "id": 2009,
+    "name": "坤元髓晶",
+    "icon": "res://assets/items/icons_simple/2009.png",
+    "atlas": "atlas_014",
+    "cell": 8
+  },
+  {
+    "id": 2010,
+    "name": "星陨铁核",
+    "icon": "res://assets/items/icons_simple/2010.png",
+    "atlas": "atlas_014",
+    "cell": 9
+  },
+  {
+    "id": 2011,
+    "name": "太虚碧玉",
+    "icon": "res://assets/items/icons_simple/2011.png",
+    "atlas": "atlas_014",
+    "cell": 10
+  },
+  {
+    "id": 2012,
+    "name": "九幽沉铁",
+    "icon": "res://assets/items/icons_simple/2012.png",
+    "atlas": "atlas_014",
+    "cell": 11
+  },
+  {
+    "id": 2013,
+    "name": "日精真金",
+    "icon": "res://assets/items/icons_simple/2013.png",
+    "atlas": "atlas_014",
+    "cell": 12
+  },
+  {
+    "id": 2014,
+    "name": "月魄寒玉",
+    "icon": "res://assets/items/icons_simple/2014.png",
+    "atlas": "atlas_014",
+    "cell": 13
+  },
+  {
+    "id": 2015,
+    "name": "天河神砂",
+    "icon": "res://assets/items/icons_simple/2015.png",
+    "atlas": "atlas_014",
+    "cell": 14
+  },
+  {
+    "id": 2016,
+    "name": "鸿蒙母晶",
+    "icon": "res://assets/items/icons_simple/2016.png",
+    "atlas": "atlas_014",
+    "cell": 15
+  },
+  {
+    "id": 3001,
+    "name": "晨岚露",
+    "icon": "res://assets/items/icons_simple/3001.png",
+    "atlas": "atlas_021",
+    "cell": 0
+  },
+  {
+    "id": 3002,
+    "name": "青荷浆",
+    "icon": "res://assets/items/icons_simple/3002.png",
+    "atlas": "atlas_021",
+    "cell": 1
+  },
+  {
+    "id": 3003,
+    "name": "木心液",
+    "icon": "res://assets/items/icons_simple/3003.png",
+    "atlas": "atlas_021",
+    "cell": 2
+  },
+  {
+    "id": 3004,
+    "name": "白石髓",
+    "icon": "res://assets/items/icons_simple/3004.png",
+    "atlas": "atlas_021",
+    "cell": 3
+  },
+  {
+    "id": 3005,
+    "name": "霜潭凝",
+    "icon": "res://assets/items/icons_simple/3005.png",
+    "atlas": "atlas_021",
+    "cell": 4
+  },
+  {
+    "id": 3006,
+    "name": "丹泉脂",
+    "icon": "res://assets/items/icons_simple/3006.png",
+    "atlas": "atlas_021",
+    "cell": 5
+  },
+  {
+    "id": 3007,
+    "name": "苍露膏",
+    "icon": "res://assets/items/icons_simple/3007.png",
+    "atlas": "atlas_021",
+    "cell": 6
+  },
+  {
+    "id": 3008,
+    "name": "雷池津",
+    "icon": "res://assets/items/icons_simple/3008.png",
+    "atlas": "atlas_021",
+    "cell": 7
+  },
+  {
+    "id": 3009,
+    "name": "地乳浆",
+    "icon": "res://assets/items/icons_simple/3009.png",
+    "atlas": "atlas_021",
+    "cell": 8
+  },
+  {
+    "id": 3010,
+    "name": "星砂液",
+    "icon": "res://assets/items/icons_simple/3010.png",
+    "atlas": "atlas_021",
+    "cell": 9
+  },
+  {
+    "id": 3011,
+    "name": "紫烟醴",
+    "icon": "res://assets/items/icons_simple/3011.png",
+    "atlas": "atlas_021",
+    "cell": 10
+  },
+  {
+    "id": 3012,
+    "name": "九曲玉津",
+    "icon": "res://assets/items/icons_simple/3012.png",
+    "atlas": "atlas_021",
+    "cell": 11
+  },
+  {
+    "id": 3013,
+    "name": "涅火琼浆",
+    "icon": "res://assets/items/icons_simple/3013.png",
+    "atlas": "atlas_021",
+    "cell": 12
+  },
+  {
+    "id": 3014,
+    "name": "螭息灵涎",
+    "icon": "res://assets/items/icons_simple/3014.png",
+    "atlas": "atlas_021",
+    "cell": 13
+  },
+  {
+    "id": 3015,
+    "name": "鸾华甘露",
+    "icon": "res://assets/items/icons_simple/3015.png",
+    "atlas": "atlas_021",
+    "cell": 14
+  },
+  {
+    "id": 3016,
+    "name": "太素元液",
+    "icon": "res://assets/items/icons_simple/3016.png",
+    "atlas": "atlas_021",
+    "cell": 15
+  },
+  {
+    "id": 4001,
+    "name": "红铜砾",
+    "icon": "res://assets/items/icons_simple/4001.png",
+    "atlas": "atlas_017",
+    "cell": 0
+  },
+  {
+    "id": 4002,
+    "name": "乌铁芯",
+    "icon": "res://assets/items/icons_simple/4002.png",
+    "atlas": "atlas_017",
+    "cell": 1
+  },
+  {
+    "id": 4003,
+    "name": "月银尘",
+    "icon": "res://assets/items/icons_simple/4003.png",
+    "atlas": "atlas_017",
+    "cell": 2
+  },
+  {
+    "id": 4004,
+    "name": "白金碎髓",
+    "icon": "res://assets/items/icons_simple/4004.png",
+    "atlas": "atlas_017",
+    "cell": 3
+  },
+  {
+    "id": 4005,
+    "name": "冰陨屑",
+    "icon": "res://assets/items/icons_simple/4005.png",
+    "atlas": "atlas_017",
+    "cell": 4
+  },
+  {
+    "id": 4006,
+    "name": "炎晶砂",
+    "icon": "res://assets/items/icons_simple/4006.png",
+    "atlas": "atlas_017",
+    "cell": 5
+  },
+  {
+    "id": 4007,
+    "name": "青罡髓",
+    "icon": "res://assets/items/icons_simple/4007.png",
+    "atlas": "atlas_017",
+    "cell": 6
+  },
+  {
+    "id": 4008,
+    "name": "雷砂精",
+    "icon": "res://assets/items/icons_simple/4008.png",
+    "atlas": "atlas_017",
+    "cell": 7
+  },
+  {
+    "id": 4009,
+    "name": "坤髓珠",
+    "icon": "res://assets/items/icons_simple/4009.png",
+    "atlas": "atlas_017",
+    "cell": 8
+  },
+  {
+    "id": 4010,
+    "name": "星核粉",
+    "icon": "res://assets/items/icons_simple/4010.png",
+    "atlas": "atlas_017",
+    "cell": 9
+  },
+  {
+    "id": 4011,
+    "name": "虚玉片",
+    "icon": "res://assets/items/icons_simple/4011.png",
+    "atlas": "atlas_017",
+    "cell": 10
+  },
+  {
+    "id": 4012,
+    "name": "幽铁鳞",
+    "icon": "res://assets/items/icons_simple/4012.png",
+    "atlas": "atlas_017",
+    "cell": 11
+  },
+  {
+    "id": 4013,
+    "name": "日金砂",
+    "icon": "res://assets/items/icons_simple/4013.png",
+    "atlas": "atlas_017",
+    "cell": 12
+  },
+  {
+    "id": 4014,
+    "name": "月玉屑",
+    "icon": "res://assets/items/icons_simple/4014.png",
+    "atlas": "atlas_017",
+    "cell": 13
+  },
+  {
+    "id": 4015,
+    "name": "天河晶砾",
+    "icon": "res://assets/items/icons_simple/4015.png",
+    "atlas": "atlas_017",
+    "cell": 14
+  },
+  {
+    "id": 4016,
+    "name": "鸿蒙金炁",
+    "icon": "res://assets/items/icons_simple/4016.png",
+    "atlas": "atlas_017",
+    "cell": 15
+  },
+  {
+    "id": 5001,
+    "name": "露芽米",
+    "icon": "res://assets/items/icons_simple/5001.png",
+    "atlas": "atlas_032",
+    "cell": 0
+  },
+  {
+    "id": 5002,
+    "name": "青禾米",
+    "icon": "res://assets/items/icons_simple/5002.png",
+    "atlas": "atlas_032",
+    "cell": 1
+  },
+  {
+    "id": 5003,
+    "name": "玉穗米",
+    "icon": "res://assets/items/icons_simple/5003.png",
+    "atlas": "atlas_032",
+    "cell": 2
+  },
+  {
+    "id": 5004,
+    "name": "白露米",
+    "icon": "res://assets/items/icons_simple/5004.png",
+    "atlas": "atlas_032",
+    "cell": 3
+  },
+  {
+    "id": 5005,
+    "name": "雪纹米",
+    "icon": "res://assets/items/icons_simple/5005.png",
+    "atlas": "atlas_032",
+    "cell": 4
+  },
+  {
+    "id": 5006,
+    "name": "赤霞米",
+    "icon": "res://assets/items/icons_simple/5006.png",
+    "atlas": "atlas_032",
+    "cell": 5
+  },
+  {
+    "id": 5007,
+    "name": "苍梧米",
+    "icon": "res://assets/items/icons_simple/5007.png",
+    "atlas": "atlas_032",
+    "cell": 6
+  },
+  {
+    "id": 5008,
+    "name": "雷芒米",
+    "icon": "res://assets/items/icons_simple/5008.png",
+    "atlas": "atlas_032",
+    "cell": 7
+  },
+  {
+    "id": 5009,
+    "name": "坤穗米",
+    "icon": "res://assets/items/icons_simple/5009.png",
+    "atlas": "atlas_032",
+    "cell": 8
+  },
+  {
+    "id": 5010,
+    "name": "星子米",
+    "icon": "res://assets/items/icons_simple/5010.png",
+    "atlas": "atlas_032",
+    "cell": 9
+  },
+  {
+    "id": 5011,
+    "name": "紫烟米",
+    "icon": "res://assets/items/icons_simple/5011.png",
+    "atlas": "atlas_032",
+    "cell": 10
+  },
+  {
+    "id": 5012,
+    "name": "九曲米",
+    "icon": "res://assets/items/icons_simple/5012.png",
+    "atlas": "atlas_032",
+    "cell": 11
+  },
+  {
+    "id": 5013,
+    "name": "涅火米",
+    "icon": "res://assets/items/icons_simple/5013.png",
+    "atlas": "atlas_032",
+    "cell": 12
+  },
+  {
+    "id": 5014,
+    "name": "龙牙米",
+    "icon": "res://assets/items/icons_simple/5014.png",
+    "atlas": "atlas_032",
+    "cell": 13
+  },
+  {
+    "id": 5015,
+    "name": "鸾翎米",
+    "icon": "res://assets/items/icons_simple/5015.png",
+    "atlas": "atlas_032",
+    "cell": 14
+  },
+  {
+    "id": 5016,
+    "name": "太初玄粟",
+    "icon": "res://assets/items/icons_simple/5016.png",
+    "atlas": "atlas_032",
+    "cell": 15
+  },
+  {
+    "id": 6001,
+    "name": "山青果",
+    "icon": "res://assets/items/icons_simple/6001.png",
+    "atlas": "atlas_008",
+    "cell": 0
+  },
+  {
+    "id": 6002,
+    "name": "青玉梨",
+    "icon": "res://assets/items/icons_simple/6002.png",
+    "atlas": "atlas_008",
+    "cell": 1
+  },
+  {
+    "id": 6003,
+    "name": "绛珠实",
+    "icon": "res://assets/items/icons_simple/6003.png",
+    "atlas": "atlas_008",
+    "cell": 2
+  },
+  {
+    "id": 6004,
+    "name": "金铃果",
+    "icon": "res://assets/items/icons_simple/6004.png",
+    "atlas": "atlas_008",
+    "cell": 3
+  },
+  {
+    "id": 6005,
+    "name": "霜晶莓",
+    "icon": "res://assets/items/icons_simple/6005.png",
+    "atlas": "atlas_008",
+    "cell": 4
+  },
+  {
+    "id": 6006,
+    "name": "火枣",
+    "icon": "res://assets/items/icons_simple/6006.png",
+    "atlas": "atlas_008",
+    "cell": 5
+  },
+  {
+    "id": 6007,
+    "name": "苍梧子",
+    "icon": "res://assets/items/icons_simple/6007.png",
+    "atlas": "atlas_008",
+    "cell": 6
+  },
+  {
+    "id": 6008,
+    "name": "雷纹桃",
+    "icon": "res://assets/items/icons_simple/6008.png",
+    "atlas": "atlas_008",
+    "cell": 7
+  },
+  {
+    "id": 6009,
+    "name": "地灵瓜",
+    "icon": "res://assets/items/icons_simple/6009.png",
+    "atlas": "atlas_008",
+    "cell": 8
+  },
+  {
+    "id": 6010,
+    "name": "星核果",
+    "icon": "res://assets/items/icons_simple/6010.png",
+    "atlas": "atlas_008",
+    "cell": 9
+  },
+  {
+    "id": 6011,
+    "name": "紫烟葡",
+    "icon": "res://assets/items/icons_simple/6011.png",
+    "atlas": "atlas_008",
+    "cell": 10
+  },
+  {
+    "id": 6012,
+    "name": "九窍莲实",
+    "icon": "res://assets/items/icons_simple/6012.png",
+    "atlas": "atlas_008",
+    "cell": 11
+  },
+  {
+    "id": 6013,
+    "name": "涅火朱果",
+    "icon": "res://assets/items/icons_simple/6013.png",
+    "atlas": "atlas_008",
+    "cell": 12
+  },
+  {
+    "id": 6014,
+    "name": "螭珠",
+    "icon": "res://assets/items/icons_simple/6014.png",
+    "atlas": "atlas_008",
+    "cell": 13
+  },
+  {
+    "id": 6015,
+    "name": "鸾心果",
+    "icon": "res://assets/items/icons_simple/6015.png",
+    "atlas": "atlas_008",
+    "cell": 14
+  },
+  {
+    "id": 6016,
+    "name": "太初道果",
+    "icon": "res://assets/items/icons_simple/6016.png",
+    "atlas": "atlas_008",
+    "cell": 15
+  },
+  {
+    "id": 7001,
+    "name": "岩豕皮",
+    "icon": "res://assets/items/icons_simple/7001.png",
+    "atlas": "atlas_012",
+    "cell": 0
+  },
+  {
+    "id": 7002,
+    "name": "云鹿绒",
+    "icon": "res://assets/items/icons_simple/7002.png",
+    "atlas": "atlas_012",
+    "cell": 1
+  },
+  {
+    "id": 7003,
+    "name": "苍蛇蜕",
+    "icon": "res://assets/items/icons_simple/7003.png",
+    "atlas": "atlas_012",
+    "cell": 2
+  },
+  {
+    "id": 7004,
+    "name": "金蟾革",
+    "icon": "res://assets/items/icons_simple/7004.png",
+    "atlas": "atlas_012",
+    "cell": 3
+  },
+  {
+    "id": 7005,
+    "name": "冰蚕锦",
+    "icon": "res://assets/items/icons_simple/7005.png",
+    "atlas": "atlas_012",
+    "cell": 4
+  },
+  {
+    "id": 7006,
+    "name": "火浣裘",
+    "icon": "res://assets/items/icons_simple/7006.png",
+    "atlas": "atlas_012",
+    "cell": 5
+  },
+  {
+    "id": 7007,
+    "name": "玄龟甲",
+    "icon": "res://assets/items/icons_simple/7007.png",
+    "atlas": "atlas_012",
+    "cell": 6
+  },
+  {
+    "id": 7008,
+    "name": "雷蛟鳞",
+    "icon": "res://assets/items/icons_simple/7008.png",
+    "atlas": "atlas_012",
+    "cell": 7
+  },
+  {
+    "id": 7009,
+    "name": "地龙蜕",
+    "icon": "res://assets/items/icons_simple/7009.png",
+    "atlas": "atlas_012",
+    "cell": 8
+  },
+  {
+    "id": 7010,
+    "name": "星貂裘",
+    "icon": "res://assets/items/icons_simple/7010.png",
+    "atlas": "atlas_012",
+    "cell": 9
+  },
+  {
+    "id": 7011,
+    "name": "紫狸毫",
+    "icon": "res://assets/items/icons_simple/7011.png",
+    "atlas": "atlas_012",
+    "cell": 10
+  },
+  {
+    "id": 7012,
+    "name": "九尾灵裘",
+    "icon": "res://assets/items/icons_simple/7012.png",
+    "atlas": "atlas_012",
+    "cell": 11
+  },
+  {
+    "id": 7013,
+    "name": "麟纹锦",
+    "icon": "res://assets/items/icons_simple/7013.png",
+    "atlas": "atlas_012",
+    "cell": 12
+  },
+  {
+    "id": 7014,
+    "name": "苍龙逆鳞",
+    "icon": "res://assets/items/icons_simple/7014.png",
+    "atlas": "atlas_012",
+    "cell": 13
+  },
+  {
+    "id": 7015,
+    "name": "鸾羽绒",
+    "icon": "res://assets/items/icons_simple/7015.png",
+    "atlas": "atlas_012",
+    "cell": 14
+  },
+  {
+    "id": 7016,
+    "name": "太古兽革",
+    "icon": "res://assets/items/icons_simple/7016.png",
+    "atlas": "atlas_012",
+    "cell": 15
+  },
+  {
+    "id": 8001,
+    "name": "山豕血",
+    "icon": "res://assets/items/icons_simple/8001.png",
+    "atlas": "atlas_005",
+    "cell": 0
+  },
+  {
+    "id": 8002,
+    "name": "云鹿灵血",
+    "icon": "res://assets/items/icons_simple/8002.png",
+    "atlas": "atlas_005",
+    "cell": 1
+  },
+  {
+    "id": 8003,
+    "name": "丹狐血",
+    "icon": "res://assets/items/icons_simple/8003.png",
+    "atlas": "atlas_005",
+    "cell": 2
+  },
+  {
+    "id": 8004,
+    "name": "金蟾髓",
+    "icon": "res://assets/items/icons_simple/8004.png",
+    "atlas": "atlas_005",
+    "cell": 3
+  },
+  {
+    "id": 8005,
+    "name": "冰蛇寒血",
+    "icon": "res://assets/items/icons_simple/8005.png",
+    "atlas": "atlas_005",
+    "cell": 4
+  },
+  {
+    "id": 8006,
+    "name": "火鸦精血",
+    "icon": "res://assets/items/icons_simple/8006.png",
+    "atlas": "atlas_005",
+    "cell": 5
+  },
+  {
+    "id": 8007,
+    "name": "青鸾碧血",
+    "icon": "res://assets/items/icons_simple/8007.png",
+    "atlas": "atlas_005",
+    "cell": 6
+  },
+  {
+    "id": 8008,
+    "name": "雷鹏紫血",
+    "icon": "res://assets/items/icons_simple/8008.png",
+    "atlas": "atlas_005",
+    "cell": 7
+  },
+  {
+    "id": 8009,
+    "name": "地龙髓血",
+    "icon": "res://assets/items/icons_simple/8009.png",
+    "atlas": "atlas_005",
+    "cell": 8
+  },
+  {
+    "id": 8010,
+    "name": "星狼银血",
+    "icon": "res://assets/items/icons_simple/8010.png",
+    "atlas": "atlas_005",
+    "cell": 9
+  },
+  {
+    "id": 8011,
+    "name": "紫蟾灵血",
+    "icon": "res://assets/items/icons_simple/8011.png",
+    "atlas": "atlas_005",
+    "cell": 10
+  },
+  {
+    "id": 8012,
+    "name": "九命猫血",
+    "icon": "res://assets/items/icons_simple/8012.png",
+    "atlas": "atlas_005",
+    "cell": 11
+  },
+  {
+    "id": 8013,
+    "name": "麒麟瑞血",
+    "icon": "res://assets/items/icons_simple/8013.png",
+    "atlas": "atlas_005",
+    "cell": 12
+  },
+  {
+    "id": 8014,
+    "name": "苍龙真血",
+    "icon": "res://assets/items/icons_simple/8014.png",
+    "atlas": "atlas_005",
+    "cell": 13
+  },
+  {
+    "id": 8015,
+    "name": "鸾凤心血",
+    "icon": "res://assets/items/icons_simple/8015.png",
+    "atlas": "atlas_005",
+    "cell": 14
+  },
+  {
+    "id": 8016,
+    "name": "太古源血",
+    "icon": "res://assets/items/icons_simple/8016.png",
+    "atlas": "atlas_005",
+    "cell": 15
+  },
+  {
+    "id": 9001,
+    "name": "石隙清泉",
+    "icon": "res://assets/items/icons_simple/9001.png",
+    "atlas": "atlas_003",
+    "cell": 0
+  },
+  {
+    "id": 9002,
+    "name": "青溪灵水",
+    "icon": "res://assets/items/icons_simple/9002.png",
+    "atlas": "atlas_003",
+    "cell": 1
+  },
+  {
+    "id": 9003,
+    "name": "古潭寒液",
+    "icon": "res://assets/items/icons_simple/9003.png",
+    "atlas": "atlas_003",
+    "cell": 2
+  },
+  {
+    "id": 9004,
+    "name": "玉壶露",
+    "icon": "res://assets/items/icons_simple/9004.png",
+    "atlas": "atlas_003",
+    "cell": 3
+  },
+  {
+    "id": 9005,
+    "name": "冰壑泉",
+    "icon": "res://assets/items/icons_simple/9005.png",
+    "atlas": "atlas_003",
+    "cell": 4
+  },
+  {
+    "id": 9006,
+    "name": "丹霞温泉",
+    "icon": "res://assets/items/icons_simple/9006.png",
+    "atlas": "atlas_003",
+    "cell": 5
+  },
+  {
+    "id": 9007,
+    "name": "苍梧木泉",
+    "icon": "res://assets/items/icons_simple/9007.png",
+    "atlas": "atlas_003",
+    "cell": 6
+  },
+  {
+    "id": 9008,
+    "name": "雷泽湛水",
+    "icon": "res://assets/items/icons_simple/9008.png",
+    "atlas": "atlas_003",
+    "cell": 7
+  },
+  {
+    "id": 9009,
+    "name": "地乳泉",
+    "icon": "res://assets/items/icons_simple/9009.png",
+    "atlas": "atlas_003",
+    "cell": 8
+  },
+  {
+    "id": 9010,
+    "name": "星落甘泉",
+    "icon": "res://assets/items/icons_simple/9010.png",
+    "atlas": "atlas_003",
+    "cell": 9
+  },
+  {
+    "id": 9011,
+    "name": "紫烟灵液",
+    "icon": "res://assets/items/icons_simple/9011.png",
+    "atlas": "atlas_003",
+    "cell": 10
+  },
+  {
+    "id": 9012,
+    "name": "九曲玄泉",
+    "icon": "res://assets/items/icons_simple/9012.png",
+    "atlas": "atlas_003",
+    "cell": 11
+  },
+  {
+    "id": 9013,
+    "name": "涅火生泉",
+    "icon": "res://assets/items/icons_simple/9013.png",
+    "atlas": "atlas_003",
+    "cell": 12
+  },
+  {
+    "id": 9014,
+    "name": "龙渊涎泉",
+    "icon": "res://assets/items/icons_simple/9014.png",
+    "atlas": "atlas_003",
+    "cell": 13
+  },
+  {
+    "id": 9015,
+    "name": "凤池天露",
+    "icon": "res://assets/items/icons_simple/9015.png",
+    "atlas": "atlas_003",
+    "cell": 14
+  },
+  {
+    "id": 9016,
+    "name": "太初元水",
+    "icon": "res://assets/items/icons_simple/9016.png",
+    "atlas": "atlas_003",
+    "cell": 15
+  },
+  {
+    "id": 10001,
+    "name": "雾晶砂",
+    "icon": "res://assets/items/icons_simple/10001.png",
+    "atlas": "atlas_024",
+    "cell": 0
+  },
+  {
+    "id": 10002,
+    "name": "青方晶",
+    "icon": "res://assets/items/icons_simple/10002.png",
+    "atlas": "atlas_024",
+    "cell": 1
+  },
+  {
+    "id": 10003,
+    "name": "三棱灵晶",
+    "icon": "res://assets/items/icons_simple/10003.png",
+    "atlas": "atlas_024",
+    "cell": 2
+  },
+  {
+    "id": 10004,
+    "name": "白玉晶珠",
+    "icon": "res://assets/items/icons_simple/10004.png",
+    "atlas": "atlas_024",
+    "cell": 3
+  },
+  {
+    "id": 10005,
+    "name": "霜棱簇",
+    "icon": "res://assets/items/icons_simple/10005.png",
+    "atlas": "atlas_024",
+    "cell": 4
+  },
+  {
+    "id": 10006,
+    "name": "赤焰晶",
+    "icon": "res://assets/items/icons_simple/10006.png",
+    "atlas": "atlas_024",
+    "cell": 5
+  },
+  {
+    "id": 10007,
+    "name": "苍木晶",
+    "icon": "res://assets/items/icons_simple/10007.png",
+    "atlas": "atlas_024",
+    "cell": 6
+  },
+  {
+    "id": 10008,
+    "name": "雷纹晶",
+    "icon": "res://assets/items/icons_simple/10008.png",
+    "atlas": "atlas_024",
+    "cell": 7
+  },
+  {
+    "id": 10009,
+    "name": "坤元厚晶",
+    "icon": "res://assets/items/icons_simple/10009.png",
+    "atlas": "atlas_024",
+    "cell": 8
+  },
+  {
+    "id": 10010,
+    "name": "星尘晶核",
+    "icon": "res://assets/items/icons_simple/10010.png",
+    "atlas": "atlas_024",
+    "cell": 9
+  },
+  {
+    "id": 10011,
+    "name": "紫烟晶",
+    "icon": "res://assets/items/icons_simple/10011.png",
+    "atlas": "atlas_024",
+    "cell": 10
+  },
+  {
+    "id": 10012,
+    "name": "九曲晶轮",
+    "icon": "res://assets/items/icons_simple/10012.png",
+    "atlas": "atlas_024",
+    "cell": 11
+  },
+  {
+    "id": 10013,
+    "name": "涅火心晶",
+    "icon": "res://assets/items/icons_simple/10013.png",
+    "atlas": "atlas_024",
+    "cell": 12
+  },
+  {
+    "id": 10014,
+    "name": "龙纹晶骨",
+    "icon": "res://assets/items/icons_simple/10014.png",
+    "atlas": "atlas_024",
+    "cell": 13
+  },
+  {
+    "id": 10015,
+    "name": "凤羽天晶",
+    "icon": "res://assets/items/icons_simple/10015.png",
+    "atlas": "atlas_024",
+    "cell": 14
+  },
+  {
+    "id": 10016,
+    "name": "太初晶胎",
+    "icon": "res://assets/items/icons_simple/10016.png",
+    "atlas": "atlas_024",
+    "cell": 15
+  },
+  {
+    "id": 11001,
+    "name": "青篱苗圃",
+    "icon": "res://assets/items/icons_simple/11001.png",
+    "atlas": "atlas_013",
+    "cell": 0
+  },
+  {
+    "id": 11002,
+    "name": "沃壤灵畦",
+    "icon": "res://assets/items/icons_simple/11002.png",
+    "atlas": "atlas_013",
+    "cell": 1
+  },
+  {
+    "id": 11003,
+    "name": "春芽圃",
+    "icon": "res://assets/items/icons_simple/11003.png",
+    "atlas": "atlas_013",
+    "cell": 2
+  },
+  {
+    "id": 11004,
+    "name": "白石药畦",
+    "icon": "res://assets/items/icons_simple/11004.png",
+    "atlas": "atlas_013",
+    "cell": 3
+  },
+  {
+    "id": 11005,
+    "name": "霜谷灵园",
+    "icon": "res://assets/items/icons_simple/11005.png",
+    "atlas": "atlas_013",
+    "cell": 4
+  },
+  {
+    "id": 11006,
+    "name": "丹霞暖圃",
+    "icon": "res://assets/items/icons_simple/11006.png",
+    "atlas": "atlas_013",
+    "cell": 5
+  },
+  {
+    "id": 11007,
+    "name": "苍梧灵田",
+    "icon": "res://assets/items/icons_simple/11007.png",
+    "atlas": "atlas_013",
+    "cell": 6
+  },
+  {
+    "id": 11008,
+    "name": "雷泽天畦",
+    "icon": "res://assets/items/icons_simple/11008.png",
+    "atlas": "atlas_013",
+    "cell": 7
+  },
+  {
+    "id": 11009,
+    "name": "坤脉厚土园",
+    "icon": "res://assets/items/icons_simple/11009.png",
+    "atlas": "atlas_013",
+    "cell": 8
+  },
+  {
+    "id": 11010,
+    "name": "星垄圃",
+    "icon": "res://assets/items/icons_simple/11010.png",
+    "atlas": "atlas_013",
+    "cell": 9
+  },
+  {
+    "id": 11011,
+    "name": "紫烟仙畦",
+    "icon": "res://assets/items/icons_simple/11011.png",
+    "atlas": "atlas_013",
+    "cell": 10
+  },
+  {
+    "id": 11012,
+    "name": "九曲灵圃",
+    "icon": "res://assets/items/icons_simple/11012.png",
+    "atlas": "atlas_013",
+    "cell": 11
+  },
+  {
+    "id": 11013,
+    "name": "涅火神田",
+    "icon": "res://assets/items/icons_simple/11013.png",
+    "atlas": "atlas_013",
+    "cell": 12
+  },
+  {
+    "id": 11014,
+    "name": "龙涎玉圃",
+    "icon": "res://assets/items/icons_simple/11014.png",
+    "atlas": "atlas_013",
+    "cell": 13
+  },
+  {
+    "id": 11015,
+    "name": "凤栖天田",
+    "icon": "res://assets/items/icons_simple/11015.png",
+    "atlas": "atlas_013",
+    "cell": 14
+  },
+  {
+    "id": 11016,
+    "name": "太初息壤",
+    "icon": "res://assets/items/icons_simple/11016.png",
+    "atlas": "atlas_013",
+    "cell": 15
+  },
+  {
+    "id": 12001,
+    "name": "石罅泉眼",
+    "icon": "res://assets/items/icons_simple/12001.png",
+    "atlas": "atlas_038",
+    "cell": 0
+  },
+  {
+    "id": 12002,
+    "name": "青溪涌泉",
+    "icon": "res://assets/items/icons_simple/12002.png",
+    "atlas": "atlas_038",
+    "cell": 1
+  },
+  {
+    "id": 12003,
+    "name": "古潭泉",
+    "icon": "res://assets/items/icons_simple/12003.png",
+    "atlas": "atlas_038",
+    "cell": 2
+  },
+  {
+    "id": 12004,
+    "name": "玉壶泉",
+    "icon": "res://assets/items/icons_simple/12004.png",
+    "atlas": "atlas_038",
+    "cell": 3
+  },
+  {
+    "id": 12005,
+    "name": "冰壑寒泉",
+    "icon": "res://assets/items/icons_simple/12005.png",
+    "atlas": "atlas_038",
+    "cell": 4
+  },
+  {
+    "id": 12006,
+    "name": "丹霞泉宫",
+    "icon": "res://assets/items/icons_simple/12006.png",
+    "atlas": "atlas_038",
+    "cell": 5
+  },
+  {
+    "id": 12007,
+    "name": "苍梧泉台",
+    "icon": "res://assets/items/icons_simple/12007.png",
+    "atlas": "atlas_038",
+    "cell": 6
+  },
+  {
+    "id": 12008,
+    "name": "雷泽灵泉",
+    "icon": "res://assets/items/icons_simple/12008.png",
+    "atlas": "atlas_038",
+    "cell": 7
+  },
+  {
+    "id": 12009,
+    "name": "地乳泉眼",
+    "icon": "res://assets/items/icons_simple/12009.png",
+    "atlas": "atlas_038",
+    "cell": 8
+  },
+  {
+    "id": 12010,
+    "name": "星落泉",
+    "icon": "res://assets/items/icons_simple/12010.png",
+    "atlas": "atlas_038",
+    "cell": 9
+  },
+  {
+    "id": 12011,
+    "name": "紫烟灵泉",
+    "icon": "res://assets/items/icons_simple/12011.png",
+    "atlas": "atlas_038",
+    "cell": 10
+  },
+  {
+    "id": 12012,
+    "name": "九曲泉府",
+    "icon": "res://assets/items/icons_simple/12012.png",
+    "atlas": "atlas_038",
+    "cell": 11
+  },
+  {
+    "id": 12013,
+    "name": "涅火泉坛",
+    "icon": "res://assets/items/icons_simple/12013.png",
+    "atlas": "atlas_038",
+    "cell": 12
+  },
+  {
+    "id": 12014,
+    "name": "龙渊泉宫",
+    "icon": "res://assets/items/icons_simple/12014.png",
+    "atlas": "atlas_038",
+    "cell": 13
+  },
+  {
+    "id": 12015,
+    "name": "凤池天泉",
+    "icon": "res://assets/items/icons_simple/12015.png",
+    "atlas": "atlas_038",
+    "cell": 14
+  },
+  {
+    "id": 12016,
+    "name": "太初元泉",
+    "icon": "res://assets/items/icons_simple/12016.png",
+    "atlas": "atlas_038",
+    "cell": 15
+  },
+  {
+    "id": 13001,
+    "name": "竹篱药圃",
+    "icon": "res://assets/items/icons_simple/13001.png",
+    "atlas": "atlas_015",
+    "cell": 0
+  },
+  {
+    "id": 13002,
+    "name": "青苔药畦",
+    "icon": "res://assets/items/icons_simple/13002.png",
+    "atlas": "atlas_015",
+    "cell": 1
+  },
+  {
+    "id": 13003,
+    "name": "百草小圃",
+    "icon": "res://assets/items/icons_simple/13003.png",
+    "atlas": "atlas_015",
+    "cell": 2
+  },
+  {
+    "id": 13004,
+    "name": "玉砂药园",
+    "icon": "res://assets/items/icons_simple/13004.png",
+    "atlas": "atlas_015",
+    "cell": 3
+  },
+  {
+    "id": 13005,
+    "name": "寒谷药圃",
+    "icon": "res://assets/items/icons_simple/13005.png",
+    "atlas": "atlas_015",
+    "cell": 4
+  },
+  {
+    "id": 13006,
+    "name": "赤岩药园",
+    "icon": "res://assets/items/icons_simple/13006.png",
+    "atlas": "atlas_015",
+    "cell": 5
+  },
+  {
+    "id": 13007,
+    "name": "苍梧药圃",
+    "icon": "res://assets/items/icons_simple/13007.png",
+    "atlas": "atlas_015",
+    "cell": 6
+  },
+  {
+    "id": 13008,
+    "name": "雷崖药苑",
+    "icon": "res://assets/items/icons_simple/13008.png",
+    "atlas": "atlas_015",
+    "cell": 7
+  },
+  {
+    "id": 13009,
+    "name": "地脉药园",
+    "icon": "res://assets/items/icons_simple/13009.png",
+    "atlas": "atlas_015",
+    "cell": 8
+  },
+  {
+    "id": 13010,
+    "name": "星露药圃",
+    "icon": "res://assets/items/icons_simple/13010.png",
+    "atlas": "atlas_015",
+    "cell": 9
+  },
+  {
+    "id": 13011,
+    "name": "紫烟药宫",
+    "icon": "res://assets/items/icons_simple/13011.png",
+    "atlas": "atlas_015",
+    "cell": 10
+  },
+  {
+    "id": 13012,
+    "name": "九曲药园",
+    "icon": "res://assets/items/icons_simple/13012.png",
+    "atlas": "atlas_015",
+    "cell": 11
+  },
+  {
+    "id": 13013,
+    "name": "涅火丹圃",
+    "icon": "res://assets/items/icons_simple/13013.png",
+    "atlas": "atlas_015",
+    "cell": 12
+  },
+  {
+    "id": 13014,
+    "name": "龙涎仙圃",
+    "icon": "res://assets/items/icons_simple/13014.png",
+    "atlas": "atlas_015",
+    "cell": 13
+  },
+  {
+    "id": 13015,
+    "name": "凤栖神圃",
+    "icon": "res://assets/items/icons_simple/13015.png",
+    "atlas": "atlas_015",
+    "cell": 14
+  },
+  {
+    "id": 13016,
+    "name": "太素药天",
+    "icon": "res://assets/items/icons_simple/13016.png",
+    "atlas": "atlas_015",
+    "cell": 15
+  },
+  {
+    "id": 13101,
+    "name": "清岚障图",
+    "icon": "res://assets/items/icons_simple/13101.png",
+    "atlas": "atlas_018",
+    "cell": 0
+  },
+  {
+    "id": 13102,
+    "name": "引星聚炁图",
+    "icon": "res://assets/items/icons_simple/13102.png",
+    "atlas": "atlas_018",
+    "cell": 1
+  },
+  {
+    "id": 13103,
+    "name": "玄壁镇守图",
+    "icon": "res://assets/items/icons_simple/13103.png",
+    "atlas": "atlas_018",
+    "cell": 2
+  },
+  {
+    "id": 13104,
+    "name": "三垣锁灵图",
+    "icon": "res://assets/items/icons_simple/13104.png",
+    "atlas": "atlas_018",
+    "cell": 3
+  },
+  {
+    "id": 13105,
+    "name": "四渎寒图",
+    "icon": "res://assets/items/icons_simple/13105.png",
+    "atlas": "atlas_018",
+    "cell": 4
+  },
+  {
+    "id": 13106,
+    "name": "离火焚天图",
+    "icon": "res://assets/items/icons_simple/13106.png",
+    "atlas": "atlas_018",
+    "cell": 5
+  },
+  {
+    "id": 13107,
+    "name": "玄龟载岳图",
+    "icon": "res://assets/items/icons_simple/13107.png",
+    "atlas": "atlas_018",
+    "cell": 6
+  },
+  {
+    "id": 13108,
+    "name": "九霄雷篆图",
+    "icon": "res://assets/items/icons_simple/13108.png",
+    "atlas": "atlas_018",
+    "cell": 7
+  },
+  {
+    "id": 13109,
+    "name": "地络龙吟图",
+    "icon": "res://assets/items/icons_simple/13109.png",
+    "atlas": "atlas_018",
+    "cell": 8
+  },
+  {
+    "id": 13110,
+    "name": "星罗天盘图",
+    "icon": "res://assets/items/icons_simple/13110.png",
+    "atlas": "atlas_018",
+    "cell": 9
+  },
+  {
+    "id": 13111,
+    "name": "太虚幻境图",
+    "icon": "res://assets/items/icons_simple/13111.png",
+    "atlas": "atlas_018",
+    "cell": 10
+  },
+  {
+    "id": 13112,
+    "name": "九幽续命图",
+    "icon": "res://assets/items/icons_simple/13112.png",
+    "atlas": "atlas_018",
+    "cell": 11
+  },
+  {
+    "id": 13113,
+    "name": "麒麟瑞相图",
+    "icon": "res://assets/items/icons_simple/13113.png",
+    "atlas": "atlas_018",
+    "cell": 12
+  },
+  {
+    "id": 13114,
+    "name": "苍龙御天图",
+    "icon": "res://assets/items/icons_simple/13114.png",
+    "atlas": "atlas_018",
+    "cell": 13
+  },
+  {
+    "id": 13115,
+    "name": "鸾舞涅槃图",
+    "icon": "res://assets/items/icons_simple/13115.png",
+    "atlas": "atlas_018",
+    "cell": 14
+  },
+  {
+    "id": 13116,
+    "name": "太一归元图",
+    "icon": "res://assets/items/icons_simple/13116.png",
+    "atlas": "atlas_018",
+    "cell": 15
+  },
+  {
+    "id": 14001,
+    "name": "木栅兽栏",
+    "icon": "res://assets/items/icons_simple/14001.png",
+    "atlas": "atlas_036",
+    "cell": 0
+  },
+  {
+    "id": 14002,
+    "name": "云鹿苑",
+    "icon": "res://assets/items/icons_simple/14002.png",
+    "atlas": "atlas_036",
+    "cell": 1
+  },
+  {
+    "id": 14003,
+    "name": "青鳞兽舍",
+    "icon": "res://assets/items/icons_simple/14003.png",
+    "atlas": "atlas_036",
+    "cell": 2
+  },
+  {
+    "id": 14004,
+    "name": "金蟾石苑",
+    "icon": "res://assets/items/icons_simple/14004.png",
+    "atlas": "atlas_036",
+    "cell": 3
+  },
+  {
+    "id": 14005,
+    "name": "冰蚕寒室",
+    "icon": "res://assets/items/icons_simple/14005.png",
+    "atlas": "atlas_036",
+    "cell": 4
+  },
+  {
+    "id": 14006,
+    "name": "火浣暖舍",
+    "icon": "res://assets/items/icons_simple/14006.png",
+    "atlas": "atlas_036",
+    "cell": 5
+  },
+  {
+    "id": 14007,
+    "name": "玄龟池苑",
+    "icon": "res://assets/items/icons_simple/14007.png",
+    "atlas": "atlas_036",
+    "cell": 6
+  },
+  {
+    "id": 14008,
+    "name": "雷蛟泽",
+    "icon": "res://assets/items/icons_simple/14008.png",
+    "atlas": "atlas_036",
+    "cell": 7
+  },
+  {
+    "id": 14009,
+    "name": "地龙石窟",
+    "icon": "res://assets/items/icons_simple/14009.png",
+    "atlas": "atlas_036",
+    "cell": 8
+  },
+  {
+    "id": 14010,
+    "name": "星貂云苑",
+    "icon": "res://assets/items/icons_simple/14010.png",
+    "atlas": "atlas_036",
+    "cell": 9
+  },
+  {
+    "id": 14011,
+    "name": "紫狸幻园",
+    "icon": "res://assets/items/icons_simple/14011.png",
+    "atlas": "atlas_036",
+    "cell": 10
+  },
+  {
+    "id": 14012,
+    "name": "九尾灵苑",
+    "icon": "res://assets/items/icons_simple/14012.png",
+    "atlas": "atlas_036",
+    "cell": 11
+  },
+  {
+    "id": 14013,
+    "name": "麒麟瑞园",
+    "icon": "res://assets/items/icons_simple/14013.png",
+    "atlas": "atlas_036",
+    "cell": 12
+  },
+  {
+    "id": 14014,
+    "name": "苍龙天苑",
+    "icon": "res://assets/items/icons_simple/14014.png",
+    "atlas": "atlas_036",
+    "cell": 13
+  },
+  {
+    "id": 14015,
+    "name": "凤栖神巢",
+    "icon": "res://assets/items/icons_simple/14015.png",
+    "atlas": "atlas_036",
+    "cell": 14
+  },
+  {
+    "id": 14016,
+    "name": "太古兽天",
+    "icon": "res://assets/items/icons_simple/14016.png",
+    "atlas": "atlas_036",
+    "cell": 15
+  },
+  {
+    "id": 14101,
+    "name": "清息吐纳篇",
+    "icon": "res://assets/items/icons_simple/14101.png",
+    "atlas": "atlas_004",
+    "cell": 0
+  },
+  {
+    "id": 14102,
+    "name": "抱元养炁诀",
+    "icon": "res://assets/items/icons_simple/14102.png",
+    "atlas": "atlas_004",
+    "cell": 1
+  },
+  {
+    "id": 14103,
+    "name": "铁骨淬身功",
+    "icon": "res://assets/items/icons_simple/14103.png",
+    "atlas": "atlas_004",
+    "cell": 2
+  },
+  {
+    "id": 14104,
+    "name": "玉液还真法",
+    "icon": "res://assets/items/icons_simple/14104.png",
+    "atlas": "atlas_004",
+    "cell": 3
+  },
+  {
+    "id": 14105,
+    "name": "寒魄玄经",
+    "icon": "res://assets/items/icons_simple/14105.png",
+    "atlas": "atlas_004",
+    "cell": 4
+  },
+  {
+    "id": 14106,
+    "name": "离火锻神篇",
+    "icon": "res://assets/items/icons_simple/14106.png",
+    "atlas": "atlas_004",
+    "cell": 5
+  },
+  {
+    "id": 14107,
+    "name": "青帝长生诀",
+    "icon": "res://assets/items/icons_simple/14107.png",
+    "atlas": "atlas_004",
+    "cell": 6
+  },
+  {
+    "id": 14108,
+    "name": "九霄御雷经",
+    "icon": "res://assets/items/icons_simple/14108.png",
+    "atlas": "atlas_004",
+    "cell": 7
+  },
+  {
+    "id": 14109,
+    "name": "坤元镇岳功",
+    "icon": "res://assets/items/icons_simple/14109.png",
+    "atlas": "atlas_004",
+    "cell": 8
+  },
+  {
+    "id": 14110,
+    "name": "星河观想法",
+    "icon": "res://assets/items/icons_simple/14110.png",
+    "atlas": "atlas_004",
+    "cell": 9
+  },
+  {
+    "id": 14111,
+    "name": "紫府炼神篇",
+    "icon": "res://assets/items/icons_simple/14111.png",
+    "atlas": "atlas_004",
+    "cell": 10
+  },
+  {
+    "id": 14112,
+    "name": "九窍通玄录",
+    "icon": "res://assets/items/icons_simple/14112.png",
+    "atlas": "atlas_004",
+    "cell": 11
+  },
+  {
+    "id": 14113,
+    "name": "涅火重生经",
+    "icon": "res://assets/items/icons_simple/14113.png",
+    "atlas": "atlas_004",
+    "cell": 12
+  },
+  {
+    "id": 14114,
+    "name": "苍龙化形诀",
+    "icon": "res://assets/items/icons_simple/14114.png",
+    "atlas": "atlas_004",
+    "cell": 13
+  },
+  {
+    "id": 14115,
+    "name": "鸾天羽化经",
+    "icon": "res://assets/items/icons_simple/14115.png",
+    "atlas": "atlas_004",
+    "cell": 14
+  },
+  {
+    "id": 14116,
+    "name": "太初道藏",
+    "icon": "res://assets/items/icons_simple/14116.png",
+    "atlas": "atlas_004",
+    "cell": 15
+  },
+  {
+    "id": 15001,
+    "name": "浅砂矿口",
+    "icon": "res://assets/items/icons_simple/15001.png",
+    "atlas": "atlas_039",
+    "cell": 0
+  },
+  {
+    "id": 15002,
+    "name": "乌铁矿井",
+    "icon": "res://assets/items/icons_simple/15002.png",
+    "atlas": "atlas_039",
+    "cell": 1
+  },
+  {
+    "id": 15003,
+    "name": "月银矿洞",
+    "icon": "res://assets/items/icons_simple/15003.png",
+    "atlas": "atlas_039",
+    "cell": 2
+  },
+  {
+    "id": 15004,
+    "name": "白金矿脉",
+    "icon": "res://assets/items/icons_simple/15004.png",
+    "atlas": "atlas_039",
+    "cell": 3
+  },
+  {
+    "id": 15005,
+    "name": "冰陨深井",
+    "icon": "res://assets/items/icons_simple/15005.png",
+    "atlas": "atlas_039",
+    "cell": 4
+  },
+  {
+    "id": 15006,
+    "name": "地火晶窟",
+    "icon": "res://assets/items/icons_simple/15006.png",
+    "atlas": "atlas_039",
+    "cell": 5
+  },
+  {
+    "id": 15007,
+    "name": "青罡玉坑",
+    "icon": "res://assets/items/icons_simple/15007.png",
+    "atlas": "atlas_039",
+    "cell": 6
+  },
+  {
+    "id": 15008,
+    "name": "雷极砂场",
+    "icon": "res://assets/items/icons_simple/15008.png",
+    "atlas": "atlas_039",
+    "cell": 7
+  },
+  {
+    "id": 15009,
+    "name": "坤髓矿府",
+    "icon": "res://assets/items/icons_simple/15009.png",
+    "atlas": "atlas_039",
+    "cell": 8
+  },
+  {
+    "id": 15010,
+    "name": "星陨矿坑",
+    "icon": "res://assets/items/icons_simple/15010.png",
+    "atlas": "atlas_039",
+    "cell": 9
+  },
+  {
+    "id": 15011,
+    "name": "太虚玉窟",
+    "icon": "res://assets/items/icons_simple/15011.png",
+    "atlas": "atlas_039",
+    "cell": 10
+  },
+  {
+    "id": 15012,
+    "name": "九幽铁渊",
+    "icon": "res://assets/items/icons_simple/15012.png",
+    "atlas": "atlas_039",
+    "cell": 11
+  },
+  {
+    "id": 15013,
+    "name": "日精金脉",
+    "icon": "res://assets/items/icons_simple/15013.png",
+    "atlas": "atlas_039",
+    "cell": 12
+  },
+  {
+    "id": 15014,
+    "name": "月魄玉山",
+    "icon": "res://assets/items/icons_simple/15014.png",
+    "atlas": "atlas_039",
+    "cell": 13
+  },
+  {
+    "id": 15015,
+    "name": "天河砂海",
+    "icon": "res://assets/items/icons_simple/15015.png",
+    "atlas": "atlas_039",
+    "cell": 14
+  },
+  {
+    "id": 15016,
+    "name": "鸿蒙晶域",
+    "icon": "res://assets/items/icons_simple/15016.png",
+    "atlas": "atlas_039",
+    "cell": 15
+  },
+  {
+    "id": 15101,
+    "name": "微澜剑炁",
+    "icon": "res://assets/items/icons_simple/15101.png",
+    "atlas": "atlas_006",
+    "cell": 0
+  },
+  {
+    "id": 15102,
+    "name": "青锋剑炁",
+    "icon": "res://assets/items/icons_simple/15102.png",
+    "atlas": "atlas_006",
+    "cell": 1
+  },
+  {
+    "id": 15103,
+    "name": "流霞剑炁",
+    "icon": "res://assets/items/icons_simple/15103.png",
+    "atlas": "atlas_006",
+    "cell": 2
+  },
+  {
+    "id": 15104,
+    "name": "裂石剑炁",
+    "icon": "res://assets/items/icons_simple/15104.png",
+    "atlas": "atlas_006",
+    "cell": 3
+  },
+  {
+    "id": 15105,
+    "name": "寒星剑炁",
+    "icon": "res://assets/items/icons_simple/15105.png",
+    "atlas": "atlas_006",
+    "cell": 4
+  },
+  {
+    "id": 15106,
+    "name": "丹霄剑炁",
+    "icon": "res://assets/items/icons_simple/15106.png",
+    "atlas": "atlas_006",
+    "cell": 5
+  },
+  {
+    "id": 15107,
+    "name": "惊雷剑炁",
+    "icon": "res://assets/items/icons_simple/15107.png",
+    "atlas": "atlas_006",
+    "cell": 6
+  },
+  {
+    "id": 15108,
+    "name": "沧海剑炁",
+    "icon": "res://assets/items/icons_simple/15108.png",
+    "atlas": "atlas_006",
+    "cell": 7
+  },
+  {
+    "id": 15109,
+    "name": "天河剑炁",
+    "icon": "res://assets/items/icons_simple/15109.png",
+    "atlas": "atlas_006",
+    "cell": 8
+  },
+  {
+    "id": 15110,
+    "name": "太虚剑炁",
+    "icon": "res://assets/items/icons_simple/15110.png",
+    "atlas": "atlas_006",
+    "cell": 9
+  },
+  {
+    "id": 15201,
+    "name": "草还散",
+    "icon": "res://assets/items/icons_simple/15201.png",
+    "atlas": "atlas_006",
+    "cell": 10
+  },
+  {
+    "id": 15202,
+    "name": "松龄丸",
+    "icon": "res://assets/items/icons_simple/15202.png",
+    "atlas": "atlas_006",
+    "cell": 11
+  },
+  {
+    "id": 15203,
+    "name": "玉芝丹",
+    "icon": "res://assets/items/icons_simple/15203.png",
+    "atlas": "atlas_006",
+    "cell": 12
+  },
+  {
+    "id": 15204,
+    "name": "紫蕴膏",
+    "icon": "res://assets/items/icons_simple/15204.png",
+    "atlas": "atlas_006",
+    "cell": 13
+  },
+  {
+    "id": 15205,
+    "name": "鹤寿金丹",
+    "icon": "res://assets/items/icons_simple/15205.png",
+    "atlas": "atlas_006",
+    "cell": 14
+  },
+  {
+    "id": 16001,
+    "name": "松木书架",
+    "icon": "res://assets/items/icons_simple/16001.png",
+    "atlas": "atlas_009",
+    "cell": 0
+  },
+  {
+    "id": 16002,
+    "name": "青竹经架",
+    "icon": "res://assets/items/icons_simple/16002.png",
+    "atlas": "atlas_009",
+    "cell": 1
+  },
+  {
+    "id": 16003,
+    "name": "石函书柜",
+    "icon": "res://assets/items/icons_simple/16003.png",
+    "atlas": "atlas_009",
+    "cell": 2
+  },
+  {
+    "id": 16004,
+    "name": "白玉简阁",
+    "icon": "res://assets/items/icons_simple/16004.png",
+    "atlas": "atlas_009",
+    "cell": 3
+  },
+  {
+    "id": 16005,
+    "name": "冰纹书台",
+    "icon": "res://assets/items/icons_simple/16005.png",
+    "atlas": "atlas_009",
+    "cell": 4
+  },
+  {
+    "id": 16006,
+    "name": "丹霞经楼",
+    "icon": "res://assets/items/icons_simple/16006.png",
+    "atlas": "atlas_009",
+    "cell": 5
+  },
+  {
+    "id": 16007,
+    "name": "苍梧藏室",
+    "icon": "res://assets/items/icons_simple/16007.png",
+    "atlas": "atlas_009",
+    "cell": 6
+  },
+  {
+    "id": 16008,
+    "name": "雷篆书阁",
+    "icon": "res://assets/items/icons_simple/16008.png",
+    "atlas": "atlas_009",
+    "cell": 7
+  },
+  {
+    "id": 16009,
+    "name": "地宫经库",
+    "icon": "res://assets/items/icons_simple/16009.png",
+    "atlas": "atlas_009",
+    "cell": 8
+  },
+  {
+    "id": 16010,
+    "name": "星图书楼",
+    "icon": "res://assets/items/icons_simple/16010.png",
+    "atlas": "atlas_009",
+    "cell": 9
+  },
+  {
+    "id": 16011,
+    "name": "紫烟藏阁",
+    "icon": "res://assets/items/icons_simple/16011.png",
+    "atlas": "atlas_009",
+    "cell": 10
+  },
+  {
+    "id": 16012,
+    "name": "九曲经宫",
+    "icon": "res://assets/items/icons_simple/16012.png",
+    "atlas": "atlas_009",
+    "cell": 11
+  },
+  {
+    "id": 16013,
+    "name": "涅火秘阁",
+    "icon": "res://assets/items/icons_simple/16013.png",
+    "atlas": "atlas_009",
+    "cell": 12
+  },
+  {
+    "id": 16014,
+    "name": "龙章天阁",
+    "icon": "res://assets/items/icons_simple/16014.png",
+    "atlas": "atlas_009",
+    "cell": 13
+  },
+  {
+    "id": 16015,
+    "name": "凤篆云楼",
+    "icon": "res://assets/items/icons_simple/16015.png",
+    "atlas": "atlas_009",
+    "cell": 14
+  },
+  {
+    "id": 16016,
+    "name": "太初藏经阁",
+    "icon": "res://assets/items/icons_simple/16016.png",
+    "atlas": "atlas_009",
+    "cell": 15
+  },
+  {
+    "id": 17001,
+    "name": "陶纹药炉",
+    "icon": "res://assets/items/icons_simple/17001.png",
+    "atlas": "atlas_030",
+    "cell": 0
+  },
+  {
+    "id": 17002,
+    "name": "青砖丹灶",
+    "icon": "res://assets/items/icons_simple/17002.png",
+    "atlas": "atlas_030",
+    "cell": 1
+  },
+  {
+    "id": 17003,
+    "name": "赤铜云炉",
+    "icon": "res://assets/items/icons_simple/17003.png",
+    "atlas": "atlas_030",
+    "cell": 2
+  },
+  {
+    "id": 17004,
+    "name": "玄铁丹鼎",
+    "icon": "res://assets/items/icons_simple/17004.png",
+    "atlas": "atlas_030",
+    "cell": 3
+  },
+  {
+    "id": 17005,
+    "name": "寒玉冰釜",
+    "icon": "res://assets/items/icons_simple/17005.png",
+    "atlas": "atlas_030",
+    "cell": 4
+  },
+  {
+    "id": 17006,
+    "name": "离火丹炉",
+    "icon": "res://assets/items/icons_simple/17006.png",
+    "atlas": "atlas_030",
+    "cell": 5
+  },
+  {
+    "id": 17007,
+    "name": "苍梧木鼎",
+    "icon": "res://assets/items/icons_simple/17007.png",
+    "atlas": "atlas_030",
+    "cell": 6
+  },
+  {
+    "id": 17008,
+    "name": "九霄雷炉",
+    "icon": "res://assets/items/icons_simple/17008.png",
+    "atlas": "atlas_030",
+    "cell": 7
+  },
+  {
+    "id": 17009,
+    "name": "坤元地鼎",
+    "icon": "res://assets/items/icons_simple/17009.png",
+    "atlas": "atlas_030",
+    "cell": 8
+  },
+  {
+    "id": 17010,
+    "name": "星陨丹台",
+    "icon": "res://assets/items/icons_simple/17010.png",
+    "atlas": "atlas_030",
+    "cell": 9
+  },
+  {
+    "id": 17011,
+    "name": "紫烟云炉",
+    "icon": "res://assets/items/icons_simple/17011.png",
+    "atlas": "atlas_030",
+    "cell": 10
+  },
+  {
+    "id": 17012,
+    "name": "九窍丹宫",
+    "icon": "res://assets/items/icons_simple/17012.png",
+    "atlas": "atlas_030",
+    "cell": 11
+  },
+  {
+    "id": 17013,
+    "name": "涅火神炉",
+    "icon": "res://assets/items/icons_simple/17013.png",
+    "atlas": "atlas_030",
+    "cell": 12
+  },
+  {
+    "id": 17014,
+    "name": "龙纹天鼎",
+    "icon": "res://assets/items/icons_simple/17014.png",
+    "atlas": "atlas_030",
+    "cell": 13
+  },
+  {
+    "id": 17015,
+    "name": "凤栖丹窑",
+    "icon": "res://assets/items/icons_simple/17015.png",
+    "atlas": "atlas_030",
+    "cell": 14
+  },
+  {
+    "id": 17016,
+    "name": "太初造化炉",
+    "icon": "res://assets/items/icons_simple/17016.png",
+    "atlas": "atlas_030",
+    "cell": 15
+  },
+  {
+    "id": 18001,
+    "name": "石砧铁锤",
+    "icon": "res://assets/items/icons_simple/18001.png",
+    "atlas": "atlas_020",
+    "cell": 0
+  },
+  {
+    "id": 18002,
+    "name": "松炭锻炉",
+    "icon": "res://assets/items/icons_simple/18002.png",
+    "atlas": "atlas_020",
+    "cell": 1
+  },
+  {
+    "id": 18003,
+    "name": "赤铜锻台",
+    "icon": "res://assets/items/icons_simple/18003.png",
+    "atlas": "atlas_020",
+    "cell": 2
+  },
+  {
+    "id": 18004,
+    "name": "玄铁金砧",
+    "icon": "res://assets/items/icons_simple/18004.png",
+    "atlas": "atlas_020",
+    "cell": 3
+  },
+  {
+    "id": 18005,
+    "name": "寒渊淬池",
+    "icon": "res://assets/items/icons_simple/18005.png",
+    "atlas": "atlas_020",
+    "cell": 4
+  },
+  {
+    "id": 18006,
+    "name": "地火熔炉",
+    "icon": "res://assets/items/icons_simple/18006.png",
+    "atlas": "atlas_020",
+    "cell": 5
+  },
+  {
+    "id": 18007,
+    "name": "青罡玉砧",
+    "icon": "res://assets/items/icons_simple/18007.png",
+    "atlas": "atlas_020",
+    "cell": 6
+  },
+  {
+    "id": 18008,
+    "name": "雷火锻台",
+    "icon": "res://assets/items/icons_simple/18008.png",
+    "atlas": "atlas_020",
+    "cell": 7
+  },
+  {
+    "id": 18009,
+    "name": "坤岳重炉",
+    "icon": "res://assets/items/icons_simple/18009.png",
+    "atlas": "atlas_020",
+    "cell": 8
+  },
+  {
+    "id": 18010,
+    "name": "星陨熔坊",
+    "icon": "res://assets/items/icons_simple/18010.png",
+    "atlas": "atlas_020",
+    "cell": 9
+  },
+  {
+    "id": 18011,
+    "name": "太虚锻宫",
+    "icon": "res://assets/items/icons_simple/18011.png",
+    "atlas": "atlas_020",
+    "cell": 10
+  },
+  {
+    "id": 18012,
+    "name": "九幽铸台",
+    "icon": "res://assets/items/icons_simple/18012.png",
+    "atlas": "atlas_020",
+    "cell": 11
+  },
+  {
+    "id": 18013,
+    "name": "日精金炉",
+    "icon": "res://assets/items/icons_simple/18013.png",
+    "atlas": "atlas_020",
+    "cell": 12
+  },
+  {
+    "id": 18014,
+    "name": "月魄寒坊",
+    "icon": "res://assets/items/icons_simple/18014.png",
+    "atlas": "atlas_020",
+    "cell": 13
+  },
+  {
+    "id": 18015,
+    "name": "天河铸宫",
+    "icon": "res://assets/items/icons_simple/18015.png",
+    "atlas": "atlas_020",
+    "cell": 14
+  },
+  {
+    "id": 18016,
+    "name": "鸿蒙炼天鼎",
+    "icon": "res://assets/items/icons_simple/18016.png",
+    "atlas": "atlas_020",
+    "cell": 15
+  },
+  {
+    "id": 19001,
+    "name": "竹席演阵台",
+    "icon": "res://assets/items/icons_simple/19001.png",
+    "atlas": "atlas_034",
+    "cell": 0
+  },
+  {
+    "id": 19002,
+    "name": "松盘布阵桌",
+    "icon": "res://assets/items/icons_simple/19002.png",
+    "atlas": "atlas_034",
+    "cell": 1
+  },
+  {
+    "id": 19003,
+    "name": "铜镜阵台",
+    "icon": "res://assets/items/icons_simple/19003.png",
+    "atlas": "atlas_034",
+    "cell": 2
+  },
+  {
+    "id": 19004,
+    "name": "玄铁棋阵",
+    "icon": "res://assets/items/icons_simple/19004.png",
+    "atlas": "atlas_034",
+    "cell": 3
+  },
+  {
+    "id": 19005,
+    "name": "冰晶阵座",
+    "icon": "res://assets/items/icons_simple/19005.png",
+    "atlas": "atlas_034",
+    "cell": 4
+  },
+  {
+    "id": 19006,
+    "name": "离火演阵台",
+    "icon": "res://assets/items/icons_simple/19006.png",
+    "atlas": "atlas_034",
+    "cell": 5
+  },
+  {
+    "id": 19007,
+    "name": "青玉阵盘",
+    "icon": "res://assets/items/icons_simple/19007.png",
+    "atlas": "atlas_034",
+    "cell": 6
+  },
+  {
+    "id": 19008,
+    "name": "雷纹阵枢",
+    "icon": "res://assets/items/icons_simple/19008.png",
+    "atlas": "atlas_034",
+    "cell": 7
+  },
+  {
+    "id": 19009,
+    "name": "地脉阵坛",
+    "icon": "res://assets/items/icons_simple/19009.png",
+    "atlas": "atlas_034",
+    "cell": 8
+  },
+  {
+    "id": 19010,
+    "name": "星罗演天台",
+    "icon": "res://assets/items/icons_simple/19010.png",
+    "atlas": "atlas_034",
+    "cell": 9
+  },
+  {
+    "id": 19011,
+    "name": "紫烟幻阵台",
+    "icon": "res://assets/items/icons_simple/19011.png",
+    "atlas": "atlas_034",
+    "cell": 10
+  },
+  {
+    "id": 19012,
+    "name": "九曲阵宫",
+    "icon": "res://assets/items/icons_simple/19012.png",
+    "atlas": "atlas_034",
+    "cell": 11
+  },
+  {
+    "id": 19013,
+    "name": "涅火阵坛",
+    "icon": "res://assets/items/icons_simple/19013.png",
+    "atlas": "atlas_034",
+    "cell": 12
+  },
+  {
+    "id": 19014,
+    "name": "龙纹天盘",
+    "icon": "res://assets/items/icons_simple/19014.png",
+    "atlas": "atlas_034",
+    "cell": 13
+  },
+  {
+    "id": 19015,
+    "name": "凤羽阵架",
+    "icon": "res://assets/items/icons_simple/19015.png",
+    "atlas": "atlas_034",
+    "cell": 14
+  },
+  {
+    "id": 19016,
+    "name": "太一阵道台",
+    "icon": "res://assets/items/icons_simple/19016.png",
+    "atlas": "atlas_034",
+    "cell": 15
+  },
+  {
+    "id": 20001,
+    "name": "松板画符桌",
+    "icon": "res://assets/items/icons_simple/20001.png",
+    "atlas": "atlas_002",
+    "cell": 0
+  },
+  {
+    "id": 20002,
+    "name": "青石符案",
+    "icon": "res://assets/items/icons_simple/20002.png",
+    "atlas": "atlas_002",
+    "cell": 1
+  },
+  {
+    "id": 20003,
+    "name": "赤铜镇符台",
+    "icon": "res://assets/items/icons_simple/20003.png",
+    "atlas": "atlas_002",
+    "cell": 2
+  },
+  {
+    "id": 20004,
+    "name": "玄铁符桌",
+    "icon": "res://assets/items/icons_simple/20004.png",
+    "atlas": "atlas_002",
+    "cell": 3
+  },
+  {
+    "id": 20005,
+    "name": "冰晶画案",
+    "icon": "res://assets/items/icons_simple/20005.png",
+    "atlas": "atlas_002",
+    "cell": 4
+  },
+  {
+    "id": 20006,
+    "name": "离火符台",
+    "icon": "res://assets/items/icons_simple/20006.png",
+    "atlas": "atlas_002",
+    "cell": 5
+  },
+  {
+    "id": 20007,
+    "name": "青玉符案",
+    "icon": "res://assets/items/icons_simple/20007.png",
+    "atlas": "atlas_002",
+    "cell": 6
+  },
+  {
+    "id": 20008,
+    "name": "雷砂画台",
+    "icon": "res://assets/items/icons_simple/20008.png",
+    "atlas": "atlas_002",
+    "cell": 7
+  },
+  {
+    "id": 20009,
+    "name": "地脉符桌",
+    "icon": "res://assets/items/icons_simple/20009.png",
+    "atlas": "atlas_002",
+    "cell": 8
+  },
+  {
+    "id": 20010,
+    "name": "星纹画阁",
+    "icon": "res://assets/items/icons_simple/20010.png",
+    "atlas": "atlas_002",
+    "cell": 9
+  },
+  {
+    "id": 20011,
+    "name": "紫烟符殿",
+    "icon": "res://assets/items/icons_simple/20011.png",
+    "atlas": "atlas_002",
+    "cell": 10
+  },
+  {
+    "id": 20012,
+    "name": "九窍符案",
+    "icon": "res://assets/items/icons_simple/20012.png",
+    "atlas": "atlas_002",
+    "cell": 11
+  },
+  {
+    "id": 20013,
+    "name": "涅火符台",
+    "icon": "res://assets/items/icons_simple/20013.png",
+    "atlas": "atlas_002",
+    "cell": 12
+  },
+  {
+    "id": 20014,
+    "name": "龙皮天案",
+    "icon": "res://assets/items/icons_simple/20014.png",
+    "atlas": "atlas_002",
+    "cell": 13
+  },
+  {
+    "id": 20015,
+    "name": "凤羽画台",
+    "icon": "res://assets/items/icons_simple/20015.png",
+    "atlas": "atlas_002",
+    "cell": 14
+  },
+  {
+    "id": 20016,
+    "name": "太初符道台",
+    "icon": "res://assets/items/icons_simple/20016.png",
+    "atlas": "atlas_002",
+    "cell": 15
+  },
+  {
+    "id": 21001,
+    "name": "陶瓮酒坊",
+    "icon": "res://assets/items/icons_simple/21001.png",
+    "atlas": "atlas_031",
+    "cell": 0
+  },
+  {
+    "id": 21002,
+    "name": "松桶酒窖",
+    "icon": "res://assets/items/icons_simple/21002.png",
+    "atlas": "atlas_031",
+    "cell": 1
+  },
+  {
+    "id": 21003,
+    "name": "铜甑酒灶",
+    "icon": "res://assets/items/icons_simple/21003.png",
+    "atlas": "atlas_031",
+    "cell": 2
+  },
+  {
+    "id": 21004,
+    "name": "玄铁酒库",
+    "icon": "res://assets/items/icons_simple/21004.png",
+    "atlas": "atlas_031",
+    "cell": 3
+  },
+  {
+    "id": 21005,
+    "name": "冰窟酒坊",
+    "icon": "res://assets/items/icons_simple/21005.png",
+    "atlas": "atlas_031",
+    "cell": 4
+  },
+  {
+    "id": 21006,
+    "name": "地火酒灶",
+    "icon": "res://assets/items/icons_simple/21006.png",
+    "atlas": "atlas_031",
+    "cell": 5
+  },
+  {
+    "id": 21007,
+    "name": "青藤酒架",
+    "icon": "res://assets/items/icons_simple/21007.png",
+    "atlas": "atlas_031",
+    "cell": 6
+  },
+  {
+    "id": 21008,
+    "name": "雷纹酒瓮",
+    "icon": "res://assets/items/icons_simple/21008.png",
+    "atlas": "atlas_031",
+    "cell": 7
+  },
+  {
+    "id": 21009,
+    "name": "地脉酒窖",
+    "icon": "res://assets/items/icons_simple/21009.png",
+    "atlas": "atlas_031",
+    "cell": 8
+  },
+  {
+    "id": 21010,
+    "name": "星露酿坊",
+    "icon": "res://assets/items/icons_simple/21010.png",
+    "atlas": "atlas_031",
+    "cell": 9
+  },
+  {
+    "id": 21011,
+    "name": "紫烟酒殿",
+    "icon": "res://assets/items/icons_simple/21011.png",
+    "atlas": "atlas_031",
+    "cell": 10
+  },
+  {
+    "id": 21012,
+    "name": "九曲酒池",
+    "icon": "res://assets/items/icons_simple/21012.png",
+    "atlas": "atlas_031",
+    "cell": 11
+  },
+  {
+    "id": 21013,
+    "name": "涅火酒炉",
+    "icon": "res://assets/items/icons_simple/21013.png",
+    "atlas": "atlas_031",
+    "cell": 12
+  },
+  {
+    "id": 21014,
+    "name": "龙涎酒宫",
+    "icon": "res://assets/items/icons_simple/21014.png",
+    "atlas": "atlas_031",
+    "cell": 13
+  },
+  {
+    "id": 21015,
+    "name": "凤栖酿坊",
+    "icon": "res://assets/items/icons_simple/21015.png",
+    "atlas": "atlas_031",
+    "cell": 14
+  },
+  {
+    "id": 21016,
+    "name": "太初酒鼎",
+    "icon": "res://assets/items/icons_simple/21016.png",
+    "atlas": "atlas_031",
+    "cell": 15
+  },
+  {
+    "id": 27001,
+    "name": "清息散",
+    "icon": "res://assets/items/icons_simple/27001.png",
+    "atlas": "atlas_022",
+    "cell": 0
+  },
+  {
+    "id": 27002,
+    "name": "抱元丸",
+    "icon": "res://assets/items/icons_simple/27002.png",
+    "atlas": "atlas_022",
+    "cell": 1
+  },
+  {
+    "id": 27003,
+    "name": "固真粉",
+    "icon": "res://assets/items/icons_simple/27003.png",
+    "atlas": "atlas_022",
+    "cell": 2
+  },
+  {
+    "id": 27004,
+    "name": "培炁丹",
+    "icon": "res://assets/items/icons_simple/27004.png",
+    "atlas": "atlas_022",
+    "cell": 3
+  },
+  {
+    "id": 27005,
+    "name": "玉髓丸",
+    "icon": "res://assets/items/icons_simple/27005.png",
+    "atlas": "atlas_022",
+    "cell": 4
+  },
+  {
+    "id": 27006,
+    "name": "黄庭丹",
+    "icon": "res://assets/items/icons_simple/27006.png",
+    "atlas": "atlas_022",
+    "cell": 5
+  },
+  {
+    "id": 27007,
+    "name": "周天丹",
+    "icon": "res://assets/items/icons_simple/27007.png",
+    "atlas": "atlas_022",
+    "cell": 6
+  },
+  {
+    "id": 27008,
+    "name": "丹霞丸",
+    "icon": "res://assets/items/icons_simple/27008.png",
+    "atlas": "atlas_022",
+    "cell": 7
+  },
+  {
+    "id": 27009,
+    "name": "青冥丹",
+    "icon": "res://assets/items/icons_simple/27009.png",
+    "atlas": "atlas_022",
+    "cell": 8
+  },
+  {
+    "id": 27010,
+    "name": "太白散",
+    "icon": "res://assets/items/icons_simple/27010.png",
+    "atlas": "atlas_022",
+    "cell": 9
+  },
+  {
+    "id": 27011,
+    "name": "寒魄丹",
+    "icon": "res://assets/items/icons_simple/27011.png",
+    "atlas": "atlas_022",
+    "cell": 10
+  },
+  {
+    "id": 27012,
+    "name": "离火丸",
+    "icon": "res://assets/items/icons_simple/27012.png",
+    "atlas": "atlas_022",
+    "cell": 11
+  },
+  {
+    "id": 27013,
+    "name": "苍木丹",
+    "icon": "res://assets/items/icons_simple/27013.png",
+    "atlas": "atlas_022",
+    "cell": 12
+  },
+  {
+    "id": 27014,
+    "name": "霆光丹",
+    "icon": "res://assets/items/icons_simple/27014.png",
+    "atlas": "atlas_022",
+    "cell": 13
+  },
+  {
+    "id": 27015,
+    "name": "坤元丹",
+    "icon": "res://assets/items/icons_simple/27015.png",
+    "atlas": "atlas_022",
+    "cell": 14
+  },
+  {
+    "id": 27016,
+    "name": "星精丸",
+    "icon": "res://assets/items/icons_simple/27016.png",
+    "atlas": "atlas_022",
+    "cell": 15
+  },
+  {
+    "id": 27017,
+    "name": "紫烟丹",
+    "icon": "res://assets/items/icons_simple/27017.png",
+    "atlas": "atlas_001",
+    "cell": 0
+  },
+  {
+    "id": 27018,
+    "name": "九灵丹",
+    "icon": "res://assets/items/icons_simple/27018.png",
+    "atlas": "atlas_001",
+    "cell": 1
+  },
+  {
+    "id": 27019,
+    "name": "厚土丹",
+    "icon": "res://assets/items/icons_simple/27019.png",
+    "atlas": "atlas_001",
+    "cell": 2
+  },
+  {
+    "id": 27020,
+    "name": "天芒丹",
+    "icon": "res://assets/items/icons_simple/27020.png",
+    "atlas": "atlas_001",
+    "cell": 3
+  },
+  {
+    "id": 27021,
+    "name": "紫府金丹",
+    "icon": "res://assets/items/icons_simple/27021.png",
+    "atlas": "atlas_001",
+    "cell": 4
+  },
+  {
+    "id": 27022,
+    "name": "九窍还真丹",
+    "icon": "res://assets/items/icons_simple/27022.png",
+    "atlas": "atlas_001",
+    "cell": 5
+  },
+  {
+    "id": 27023,
+    "name": "麟瑞丹",
+    "icon": "res://assets/items/icons_simple/27023.png",
+    "atlas": "atlas_001",
+    "cell": 6
+  },
+  {
+    "id": 27024,
+    "name": "龙元丹",
+    "icon": "res://assets/items/icons_simple/27024.png",
+    "atlas": "atlas_001",
+    "cell": 7
+  },
+  {
+    "id": 27025,
+    "name": "凤华丹",
+    "icon": "res://assets/items/icons_simple/27025.png",
+    "atlas": "atlas_001",
+    "cell": 8
+  },
+  {
+    "id": 27026,
+    "name": "太素丹",
+    "icon": "res://assets/items/icons_simple/27026.png",
+    "atlas": "atlas_001",
+    "cell": 9
+  },
+  {
+    "id": 27027,
+    "name": "涅火丹",
+    "icon": "res://assets/items/icons_simple/27027.png",
+    "atlas": "atlas_001",
+    "cell": 10
+  },
+  {
+    "id": 27028,
+    "name": "螭牙丹",
+    "icon": "res://assets/items/icons_simple/27028.png",
+    "atlas": "atlas_001",
+    "cell": 11
+  },
+  {
+    "id": 27029,
+    "name": "鸾血金丹",
+    "icon": "res://assets/items/icons_simple/27029.png",
+    "atlas": "atlas_001",
+    "cell": 12
+  },
+  {
+    "id": 27030,
+    "name": "混元玄丹",
+    "icon": "res://assets/items/icons_simple/27030.png",
+    "atlas": "atlas_001",
+    "cell": 13
+  },
+  {
+    "id": 27031,
+    "name": "筑基丹",
+    "icon": "res://assets/items/icons_simple/27031.png",
+    "atlas": "atlas_001",
+    "cell": 14
+  },
+  {
+    "id": 27032,
+    "name": "凝真大丹",
+    "icon": "res://assets/items/icons_simple/27032.png",
+    "atlas": "atlas_001",
+    "cell": 15
+  },
+  {
+    "id": 27033,
+    "name": "培神大丹",
+    "icon": "res://assets/items/icons_simple/27033.png",
+    "atlas": "atlas_027",
+    "cell": 0
+  },
+  {
+    "id": 27034,
+    "name": "玄霜大丹",
+    "icon": "res://assets/items/icons_simple/27034.png",
+    "atlas": "atlas_027",
+    "cell": 1
+  },
+  {
+    "id": 27035,
+    "name": "赤霞大丹",
+    "icon": "res://assets/items/icons_simple/27035.png",
+    "atlas": "atlas_027",
+    "cell": 2
+  },
+  {
+    "id": 27036,
+    "name": "青帝大丹",
+    "icon": "res://assets/items/icons_simple/27036.png",
+    "atlas": "atlas_027",
+    "cell": 3
+  },
+  {
+    "id": 27037,
+    "name": "雷音大丹",
+    "icon": "res://assets/items/icons_simple/27037.png",
+    "atlas": "atlas_027",
+    "cell": 4
+  },
+  {
+    "id": 27038,
+    "name": "坤脉大丹",
+    "icon": "res://assets/items/icons_simple/27038.png",
+    "atlas": "atlas_027",
+    "cell": 5
+  },
+  {
+    "id": 27039,
+    "name": "星河大丹",
+    "icon": "res://assets/items/icons_simple/27039.png",
+    "atlas": "atlas_027",
+    "cell": 6
+  },
+  {
+    "id": 27040,
+    "name": "紫极大丹",
+    "icon": "res://assets/items/icons_simple/27040.png",
+    "atlas": "atlas_027",
+    "cell": 7
+  },
+  {
+    "id": 27041,
+    "name": "九转真丹",
+    "icon": "res://assets/items/icons_simple/27041.png",
+    "atlas": "atlas_027",
+    "cell": 8
+  },
+  {
+    "id": 27042,
+    "name": "涅槃天丹",
+    "icon": "res://assets/items/icons_simple/27042.png",
+    "atlas": "atlas_027",
+    "cell": 9
+  },
+  {
+    "id": 27043,
+    "name": "龙灵宝丹",
+    "icon": "res://assets/items/icons_simple/27043.png",
+    "atlas": "atlas_027",
+    "cell": 10
+  },
+  {
+    "id": 27044,
+    "name": "凤髓宝丹",
+    "icon": "res://assets/items/icons_simple/27044.png",
+    "atlas": "atlas_027",
+    "cell": 11
+  },
+  {
+    "id": 27045,
+    "name": "无极道丹",
+    "icon": "res://assets/items/icons_simple/27045.png",
+    "atlas": "atlas_027",
+    "cell": 12
+  },
+  {
+    "id": 27046,
+    "name": "太清仙丹",
+    "icon": "res://assets/items/icons_simple/27046.png",
+    "atlas": "atlas_027",
+    "cell": 13
+  },
+  {
+    "id": 27047,
+    "name": "玄黄宝丹",
+    "icon": "res://assets/items/icons_simple/27047.png",
+    "atlas": "atlas_027",
+    "cell": 14
+  },
+  {
+    "id": 27048,
+    "name": "五炁朝元丹",
+    "icon": "res://assets/items/icons_simple/27048.png",
+    "atlas": "atlas_027",
+    "cell": 15
+  },
+  {
+    "id": 27049,
+    "name": "万法归宗丹",
+    "icon": "res://assets/items/icons_simple/27049.png",
+    "atlas": "atlas_026",
+    "cell": 0
+  },
+  {
+    "id": 27050,
+    "name": "太一祖丹",
+    "icon": "res://assets/items/icons_simple/27050.png",
+    "atlas": "atlas_026",
+    "cell": 1
+  },
+  {
+    "id": 27051,
+    "name": "回息散",
+    "icon": "res://assets/items/icons_simple/27051.png",
+    "atlas": "atlas_019",
+    "cell": 0
+  },
+  {
+    "id": 27052,
+    "name": "润脉丸",
+    "icon": "res://assets/items/icons_simple/27052.png",
+    "atlas": "atlas_019",
+    "cell": 1
+  },
+  {
+    "id": 27053,
+    "name": "清心露",
+    "icon": "res://assets/items/icons_simple/27053.png",
+    "atlas": "atlas_019",
+    "cell": 2
+  },
+  {
+    "id": 27054,
+    "name": "玉津丹",
+    "icon": "res://assets/items/icons_simple/27054.png",
+    "atlas": "atlas_019",
+    "cell": 3
+  },
+  {
+    "id": 27055,
+    "name": "冰心丸",
+    "icon": "res://assets/items/icons_simple/27055.png",
+    "atlas": "atlas_019",
+    "cell": 4
+  },
+  {
+    "id": 27056,
+    "name": "火髓散",
+    "icon": "res://assets/items/icons_simple/27056.png",
+    "atlas": "atlas_019",
+    "cell": 5
+  },
+  {
+    "id": 27057,
+    "name": "青泉露",
+    "icon": "res://assets/items/icons_simple/27057.png",
+    "atlas": "atlas_019",
+    "cell": 6
+  },
+  {
+    "id": 27058,
+    "name": "雷液丹",
+    "icon": "res://assets/items/icons_simple/27058.png",
+    "atlas": "atlas_019",
+    "cell": 7
+  },
+  {
+    "id": 27059,
+    "name": "地乳露",
+    "icon": "res://assets/items/icons_simple/27059.png",
+    "atlas": "atlas_019",
+    "cell": 8
+  },
+  {
+    "id": 27060,
+    "name": "星津液",
+    "icon": "res://assets/items/icons_simple/27060.png",
+    "atlas": "atlas_019",
+    "cell": 9
+  },
+  {
+    "id": 27061,
+    "name": "寒泉丹",
+    "icon": "res://assets/items/icons_simple/27061.png",
+    "atlas": "atlas_019",
+    "cell": 10
+  },
+  {
+    "id": 27062,
+    "name": "炎泉丹",
+    "icon": "res://assets/items/icons_simple/27062.png",
+    "atlas": "atlas_019",
+    "cell": 11
+  },
+  {
+    "id": 27063,
+    "name": "木泉丹",
+    "icon": "res://assets/items/icons_simple/27063.png",
+    "atlas": "atlas_019",
+    "cell": 12
+  },
+  {
+    "id": 27064,
+    "name": "霆泉丹",
+    "icon": "res://assets/items/icons_simple/27064.png",
+    "atlas": "atlas_019",
+    "cell": 13
+  },
+  {
+    "id": 27065,
+    "name": "地髓宝丹",
+    "icon": "res://assets/items/icons_simple/27065.png",
+    "atlas": "atlas_019",
+    "cell": 14
+  },
+  {
+    "id": 27066,
+    "name": "星尘宝丹",
+    "icon": "res://assets/items/icons_simple/27066.png",
+    "atlas": "atlas_019",
+    "cell": 15
+  },
+  {
+    "id": 27067,
+    "name": "紫炁宝丹",
+    "icon": "res://assets/items/icons_simple/27067.png",
+    "atlas": "atlas_028",
+    "cell": 0
+  },
+  {
+    "id": 27068,
+    "name": "九泉宝丹",
+    "icon": "res://assets/items/icons_simple/27068.png",
+    "atlas": "atlas_028",
+    "cell": 1
+  },
+  {
+    "id": 27069,
+    "name": "坤灵丹",
+    "icon": "res://assets/items/icons_simple/27069.png",
+    "atlas": "atlas_028",
+    "cell": 2
+  },
+  {
+    "id": 27070,
+    "name": "天华丹",
+    "icon": "res://assets/items/icons_simple/27070.png",
+    "atlas": "atlas_028",
+    "cell": 3
+  },
+  {
+    "id": 27071,
+    "name": "紫元灵丹",
+    "icon": "res://assets/items/icons_simple/27071.png",
+    "atlas": "atlas_028",
+    "cell": 4
+  },
+  {
+    "id": 27072,
+    "name": "九液灵丹",
+    "icon": "res://assets/items/icons_simple/27072.png",
+    "atlas": "atlas_028",
+    "cell": 5
+  },
+  {
+    "id": 27073,
+    "name": "麟息灵丹",
+    "icon": "res://assets/items/icons_simple/27073.png",
+    "atlas": "atlas_028",
+    "cell": 6
+  },
+  {
+    "id": 27074,
+    "name": "龙涎灵丹",
+    "icon": "res://assets/items/icons_simple/27074.png",
+    "atlas": "atlas_028",
+    "cell": 7
+  },
+  {
+    "id": 27075,
+    "name": "凤露灵丹",
+    "icon": "res://assets/items/icons_simple/27075.png",
+    "atlas": "atlas_028",
+    "cell": 8
+  },
+  {
+    "id": 27076,
+    "name": "太和灵丹",
+    "icon": "res://assets/items/icons_simple/27076.png",
+    "atlas": "atlas_028",
+    "cell": 9
+  },
+  {
+    "id": 27077,
+    "name": "涅生灵丹",
+    "icon": "res://assets/items/icons_simple/27077.png",
+    "atlas": "atlas_028",
+    "cell": 10
+  },
+  {
+    "id": 27078,
+    "name": "龙息灵丹",
+    "icon": "res://assets/items/icons_simple/27078.png",
+    "atlas": "atlas_028",
+    "cell": 11
+  },
+  {
+    "id": 27079,
+    "name": "凤血灵丹",
+    "icon": "res://assets/items/icons_simple/27079.png",
+    "atlas": "atlas_028",
+    "cell": 12
+  },
+  {
+    "id": 27080,
+    "name": "混沌灵丹",
+    "icon": "res://assets/items/icons_simple/27080.png",
+    "atlas": "atlas_028",
+    "cell": 13
+  },
+  {
+    "id": 27081,
+    "name": "聚灵玄丹",
+    "icon": "res://assets/items/icons_simple/27081.png",
+    "atlas": "atlas_028",
+    "cell": 14
+  },
+  {
+    "id": 27082,
+    "name": "玉液玄丹",
+    "icon": "res://assets/items/icons_simple/27082.png",
+    "atlas": "atlas_028",
+    "cell": 15
+  },
+  {
+    "id": 27083,
+    "name": "玄冰玄丹",
+    "icon": "res://assets/items/icons_simple/27083.png",
+    "atlas": "atlas_033",
+    "cell": 0
+  },
+  {
+    "id": 27084,
+    "name": "赤阳玄丹",
+    "icon": "res://assets/items/icons_simple/27084.png",
+    "atlas": "atlas_033",
+    "cell": 1
+  },
+  {
+    "id": 27085,
+    "name": "青木玄丹",
+    "icon": "res://assets/items/icons_simple/27085.png",
+    "atlas": "atlas_033",
+    "cell": 2
+  },
+  {
+    "id": 27086,
+    "name": "雷音玄丹",
+    "icon": "res://assets/items/icons_simple/27086.png",
+    "atlas": "atlas_033",
+    "cell": 3
+  },
+  {
+    "id": 27087,
+    "name": "地脉玄丹",
+    "icon": "res://assets/items/icons_simple/27087.png",
+    "atlas": "atlas_033",
+    "cell": 4
+  },
+  {
+    "id": 27088,
+    "name": "星辉玄丹",
+    "icon": "res://assets/items/icons_simple/27088.png",
+    "atlas": "atlas_033",
+    "cell": 5
+  },
+  {
+    "id": 27089,
+    "name": "紫府玄丹",
+    "icon": "res://assets/items/icons_simple/27089.png",
+    "atlas": "atlas_033",
+    "cell": 6
+  },
+  {
+    "id": 27090,
+    "name": "九窍玄丹",
+    "icon": "res://assets/items/icons_simple/27090.png",
+    "atlas": "atlas_033",
+    "cell": 7
+  },
+  {
+    "id": 27091,
+    "name": "涅槃玄丹",
+    "icon": "res://assets/items/icons_simple/27091.png",
+    "atlas": "atlas_033",
+    "cell": 8
+  },
+  {
+    "id": 27092,
+    "name": "龙灵玄丹",
+    "icon": "res://assets/items/icons_simple/27092.png",
+    "atlas": "atlas_033",
+    "cell": 9
+  },
+  {
+    "id": 27093,
+    "name": "凤血玄丹",
+    "icon": "res://assets/items/icons_simple/27093.png",
+    "atlas": "atlas_033",
+    "cell": 10
+  },
+  {
+    "id": 27094,
+    "name": "混元玄灵丹",
+    "icon": "res://assets/items/icons_simple/27094.png",
+    "atlas": "atlas_033",
+    "cell": 11
+  },
+  {
+    "id": 27095,
+    "name": "九转还灵丹",
+    "icon": "res://assets/items/icons_simple/27095.png",
+    "atlas": "atlas_033",
+    "cell": 12
+  },
+  {
+    "id": 27096,
+    "name": "太清还灵丹",
+    "icon": "res://assets/items/icons_simple/27096.png",
+    "atlas": "atlas_033",
+    "cell": 13
+  },
+  {
+    "id": 27097,
+    "name": "五灵归元丹",
+    "icon": "res://assets/items/icons_simple/27097.png",
+    "atlas": "atlas_033",
+    "cell": 14
+  },
+  {
+    "id": 27098,
+    "name": "万灵朝宗丹",
+    "icon": "res://assets/items/icons_simple/27098.png",
+    "atlas": "atlas_033",
+    "cell": 15
+  },
+  {
+    "id": 27099,
+    "name": "灵源天丹",
+    "icon": "res://assets/items/icons_simple/27099.png",
+    "atlas": "atlas_029",
+    "cell": 0
+  },
+  {
+    "id": 27100,
+    "name": "生生道丹",
+    "icon": "res://assets/items/icons_simple/27100.png",
+    "atlas": "atlas_029",
+    "cell": 1
+  },
+  {
+    "id": 27101,
+    "name": "黄粱春",
+    "icon": "res://assets/items/icons_simple/27101.png",
+    "atlas": "atlas_035",
+    "cell": 0
+  },
+  {
+    "id": 27102,
+    "name": "清溪酿",
+    "icon": "res://assets/items/icons_simple/27102.png",
+    "atlas": "atlas_035",
+    "cell": 1
+  },
+  {
+    "id": 27103,
+    "name": "百花醴",
+    "icon": "res://assets/items/icons_simple/27103.png",
+    "atlas": "atlas_035",
+    "cell": 2
+  },
+  {
+    "id": 27104,
+    "name": "玉露春",
+    "icon": "res://assets/items/icons_simple/27104.png",
+    "atlas": "atlas_035",
+    "cell": 3
+  },
+  {
+    "id": 27105,
+    "name": "青禾酒",
+    "icon": "res://assets/items/icons_simple/27105.png",
+    "atlas": "atlas_035",
+    "cell": 4
+  },
+  {
+    "id": 27106,
+    "name": "霜谷醪",
+    "icon": "res://assets/items/icons_simple/27106.png",
+    "atlas": "atlas_035",
+    "cell": 5
+  },
+  {
+    "id": 27107,
+    "name": "丹霞烧",
+    "icon": "res://assets/items/icons_simple/27107.png",
+    "atlas": "atlas_035",
+    "cell": 6
+  },
+  {
+    "id": 27108,
+    "name": "苍梧酿",
+    "icon": "res://assets/items/icons_simple/27108.png",
+    "atlas": "atlas_035",
+    "cell": 7
+  },
+  {
+    "id": 27109,
+    "name": "雷泽春",
+    "icon": "res://assets/items/icons_simple/27109.png",
+    "atlas": "atlas_035",
+    "cell": 8
+  },
+  {
+    "id": 27110,
+    "name": "地脉醇",
+    "icon": "res://assets/items/icons_simple/27110.png",
+    "atlas": "atlas_035",
+    "cell": 9
+  },
+  {
+    "id": 27111,
+    "name": "星落醴",
+    "icon": "res://assets/items/icons_simple/27111.png",
+    "atlas": "atlas_035",
+    "cell": 10
+  },
+  {
+    "id": 27112,
+    "name": "紫烟春",
+    "icon": "res://assets/items/icons_simple/27112.png",
+    "atlas": "atlas_035",
+    "cell": 11
+  },
+  {
+    "id": 27113,
+    "name": "九曲玉醪",
+    "icon": "res://assets/items/icons_simple/27113.png",
+    "atlas": "atlas_035",
+    "cell": 12
+  },
+  {
+    "id": 27114,
+    "name": "涅火烈酿",
+    "icon": "res://assets/items/icons_simple/27114.png",
+    "atlas": "atlas_035",
+    "cell": 13
+  },
+  {
+    "id": 27115,
+    "name": "龙渊醇",
+    "icon": "res://assets/items/icons_simple/27115.png",
+    "atlas": "atlas_035",
+    "cell": 14
+  },
+  {
+    "id": 27116,
+    "name": "凤池天酿",
+    "icon": "res://assets/items/icons_simple/27116.png",
+    "atlas": "atlas_035",
+    "cell": 15
+  },
+  {
+    "id": 27117,
+    "name": "太初元酒",
+    "icon": "res://assets/items/icons_simple/27117.png",
+    "atlas": "atlas_007",
+    "cell": 0
+  },
+  {
+    "id": 27118,
+    "name": "冰蚕寒醴",
+    "icon": "res://assets/items/icons_simple/27118.png",
+    "atlas": "atlas_007",
+    "cell": 1
+  },
+  {
+    "id": 27119,
+    "name": "火浣烧",
+    "icon": "res://assets/items/icons_simple/27119.png",
+    "atlas": "atlas_007",
+    "cell": 2
+  },
+  {
+    "id": 27120,
+    "name": "玄龟寿酒",
+    "icon": "res://assets/items/icons_simple/27120.png",
+    "atlas": "atlas_007",
+    "cell": 3
+  },
+  {
+    "id": 27121,
+    "name": "雷蛟电醪",
+    "icon": "res://assets/items/icons_simple/27121.png",
+    "atlas": "atlas_007",
+    "cell": 4
+  },
+  {
+    "id": 27122,
+    "name": "地龙沉酿",
+    "icon": "res://assets/items/icons_simple/27122.png",
+    "atlas": "atlas_007",
+    "cell": 5
+  },
+  {
+    "id": 27123,
+    "name": "星貂幻醴",
+    "icon": "res://assets/items/icons_simple/27123.png",
+    "atlas": "atlas_007",
+    "cell": 6
+  },
+  {
+    "id": 27124,
+    "name": "紫狸梦酒",
+    "icon": "res://assets/items/icons_simple/27124.png",
+    "atlas": "atlas_007",
+    "cell": 7
+  },
+  {
+    "id": 27125,
+    "name": "九尾灵醪",
+    "icon": "res://assets/items/icons_simple/27125.png",
+    "atlas": "atlas_007",
+    "cell": 8
+  },
+  {
+    "id": 27126,
+    "name": "麒麟瑞酿",
+    "icon": "res://assets/items/icons_simple/27126.png",
+    "atlas": "atlas_007",
+    "cell": 9
+  },
+  {
+    "id": 27127,
+    "name": "龙鳞战醴",
+    "icon": "res://assets/items/icons_simple/27127.png",
+    "atlas": "atlas_007",
+    "cell": 10
+  },
+  {
+    "id": 27128,
+    "name": "凤血涅槃酿",
+    "icon": "res://assets/items/icons_simple/27128.png",
+    "atlas": "atlas_007",
+    "cell": 11
+  },
+  {
+    "id": 27129,
+    "name": "太虚悟道酒",
+    "icon": "res://assets/items/icons_simple/27129.png",
+    "atlas": "atlas_007",
+    "cell": 12
+  },
+  {
+    "id": 27130,
+    "name": "灵果甘酿",
+    "icon": "res://assets/items/icons_simple/27130.png",
+    "atlas": "atlas_007",
+    "cell": 13
+  },
+  {
+    "id": 27131,
+    "name": "坤根醇",
+    "icon": "res://assets/items/icons_simple/27131.png",
+    "atlas": "atlas_007",
+    "cell": 14
+  },
+  {
+    "id": 27132,
+    "name": "星辉甘霖",
+    "icon": "res://assets/items/icons_simple/27132.png",
+    "atlas": "atlas_007",
+    "cell": 15
+  },
+  {
+    "id": 27133,
+    "name": "紫府仙醴",
+    "icon": "res://assets/items/icons_simple/27133.png",
+    "atlas": "atlas_025",
+    "cell": 0
+  },
+  {
+    "id": 27134,
+    "name": "九窍玉醪",
+    "icon": "res://assets/items/icons_simple/27134.png",
+    "atlas": "atlas_025",
+    "cell": 1
+  },
+  {
+    "id": 27135,
+    "name": "涅槃赤酿",
+    "icon": "res://assets/items/icons_simple/27135.png",
+    "atlas": "atlas_025",
+    "cell": 2
+  },
+  {
+    "id": 27136,
+    "name": "龙涎侯酒",
+    "icon": "res://assets/items/icons_simple/27136.png",
+    "atlas": "atlas_025",
+    "cell": 3
+  },
+  {
+    "id": 27137,
+    "name": "凤翼清酿",
+    "icon": "res://assets/items/icons_simple/27137.png",
+    "atlas": "atlas_025",
+    "cell": 4
+  },
+  {
+    "id": 27138,
+    "name": "混元朝圣酒",
+    "icon": "res://assets/items/icons_simple/27138.png",
+    "atlas": "atlas_025",
+    "cell": 5
+  },
+  {
+    "id": 27139,
+    "name": "寒泉冻醪",
+    "icon": "res://assets/items/icons_simple/27139.png",
+    "atlas": "atlas_025",
+    "cell": 6
+  },
+  {
+    "id": 27140,
+    "name": "炎泉沸醴",
+    "icon": "res://assets/items/icons_simple/27140.png",
+    "atlas": "atlas_025",
+    "cell": 7
+  },
+  {
+    "id": 27141,
+    "name": "青泉生酒",
+    "icon": "res://assets/items/icons_simple/27141.png",
+    "atlas": "atlas_025",
+    "cell": 8
+  },
+  {
+    "id": 27142,
+    "name": "雷泉鸣醪",
+    "icon": "res://assets/items/icons_simple/27142.png",
+    "atlas": "atlas_025",
+    "cell": 9
+  },
+  {
+    "id": 27143,
+    "name": "九转回春酿",
+    "icon": "res://assets/items/icons_simple/27143.png",
+    "atlas": "atlas_025",
+    "cell": 10
+  },
+  {
+    "id": 27144,
+    "name": "百草清醴",
+    "icon": "res://assets/items/icons_simple/27144.png",
+    "atlas": "atlas_025",
+    "cell": 11
+  },
+  {
+    "id": 27145,
+    "name": "五灵合酿",
+    "icon": "res://assets/items/icons_simple/27145.png",
+    "atlas": "atlas_025",
+    "cell": 12
+  },
+  {
+    "id": 27146,
+    "name": "三花玉醪",
+    "icon": "res://assets/items/icons_simple/27146.png",
+    "atlas": "atlas_025",
+    "cell": 13
+  },
+  {
+    "id": 27147,
+    "name": "五行和酒",
+    "icon": "res://assets/items/icons_simple/27147.png",
+    "atlas": "atlas_025",
+    "cell": 14
+  },
+  {
+    "id": 27148,
+    "name": "九龙天酿",
+    "icon": "res://assets/items/icons_simple/27148.png",
+    "atlas": "atlas_025",
+    "cell": 15
+  },
+  {
+    "id": 27149,
+    "name": "九凤朝元醴",
+    "icon": "res://assets/items/icons_simple/27149.png",
+    "atlas": "atlas_040",
+    "cell": 0
+  },
+  {
+    "id": 27150,
+    "name": "太一道酒",
+    "icon": "res://assets/items/icons_simple/27150.png",
+    "atlas": "atlas_040",
+    "cell": 1
+  },
+  {
+    "id": 28001,
+    "name": "青木短剑",
+    "icon": "res://assets/items/icons_simple/28001.png",
+    "atlas": "atlas_037",
+    "cell": 0
+  },
+  {
+    "id": 28002,
+    "name": "溪铁剑",
+    "icon": "res://assets/items/icons_simple/28002.png",
+    "atlas": "atlas_037",
+    "cell": 1
+  },
+  {
+    "id": 28003,
+    "name": "月银剑",
+    "icon": "res://assets/items/icons_simple/28003.png",
+    "atlas": "atlas_037",
+    "cell": 2
+  },
+  {
+    "id": 28004,
+    "name": "白金尺",
+    "icon": "res://assets/items/icons_simple/28004.png",
+    "atlas": "atlas_037",
+    "cell": 3
+  },
+  {
+    "id": 28005,
+    "name": "霜痕剑",
+    "icon": "res://assets/items/icons_simple/28005.png",
+    "atlas": "atlas_037",
+    "cell": 4
+  },
+  {
+    "id": 28006,
+    "name": "离火锋",
+    "icon": "res://assets/items/icons_simple/28006.png",
+    "atlas": "atlas_037",
+    "cell": 5
+  },
+  {
+    "id": 28007,
+    "name": "苍梧木剑",
+    "icon": "res://assets/items/icons_simple/28007.png",
+    "atlas": "atlas_037",
+    "cell": 6
+  },
+  {
+    "id": 28008,
+    "name": "九霄雷剑",
+    "icon": "res://assets/items/icons_simple/28008.png",
+    "atlas": "atlas_037",
+    "cell": 7
+  },
+  {
+    "id": 28009,
+    "name": "坤岳重剑",
+    "icon": "res://assets/items/icons_simple/28009.png",
+    "atlas": "atlas_037",
+    "cell": 8
+  },
+  {
+    "id": 28010,
+    "name": "星陨长锋",
+    "icon": "res://assets/items/icons_simple/28010.png",
+    "atlas": "atlas_037",
+    "cell": 9
+  },
+  {
+    "id": 28011,
+    "name": "太虚影剑",
+    "icon": "res://assets/items/icons_simple/28011.png",
+    "atlas": "atlas_037",
+    "cell": 10
+  },
+  {
+    "id": 28012,
+    "name": "九幽玄锋",
+    "icon": "res://assets/items/icons_simple/28012.png",
+    "atlas": "atlas_037",
+    "cell": 11
+  },
+  {
+    "id": 28013,
+    "name": "日曜神剑",
+    "icon": "res://assets/items/icons_simple/28013.png",
+    "atlas": "atlas_037",
+    "cell": 12
+  },
+  {
+    "id": 28014,
+    "name": "月魄寒锋",
+    "icon": "res://assets/items/icons_simple/28014.png",
+    "atlas": "atlas_037",
+    "cell": 13
+  },
+  {
+    "id": 28015,
+    "name": "天河剑",
+    "icon": "res://assets/items/icons_simple/28015.png",
+    "atlas": "atlas_037",
+    "cell": 14
+  },
+  {
+    "id": 28016,
+    "name": "太初开天剑",
+    "icon": "res://assets/items/icons_simple/28016.png",
+    "atlas": "atlas_037",
+    "cell": 15
+  },
+  {
+    "id": 28017,
+    "name": "清岚隐阵",
+    "icon": "res://assets/items/icons_simple/28017.png",
+    "atlas": "atlas_011",
+    "cell": 0
+  },
+  {
+    "id": 28018,
+    "name": "引星聚炁阵",
+    "icon": "res://assets/items/icons_simple/28018.png",
+    "atlas": "atlas_011",
+    "cell": 1
+  },
+  {
+    "id": 28019,
+    "name": "玄壁镇守阵",
+    "icon": "res://assets/items/icons_simple/28019.png",
+    "atlas": "atlas_011",
+    "cell": 2
+  },
+  {
+    "id": 28020,
+    "name": "三垣锁灵阵",
+    "icon": "res://assets/items/icons_simple/28020.png",
+    "atlas": "atlas_011",
+    "cell": 3
+  },
+  {
+    "id": 28021,
+    "name": "四渎寒阵",
+    "icon": "res://assets/items/icons_simple/28021.png",
+    "atlas": "atlas_011",
+    "cell": 4
+  },
+  {
+    "id": 28022,
+    "name": "离火焚阵",
+    "icon": "res://assets/items/icons_simple/28022.png",
+    "atlas": "atlas_011",
+    "cell": 5
+  },
+  {
+    "id": 28023,
+    "name": "玄龟载岳阵",
+    "icon": "res://assets/items/icons_simple/28023.png",
+    "atlas": "atlas_011",
+    "cell": 6
+  },
+  {
+    "id": 28024,
+    "name": "九霄雷阵",
+    "icon": "res://assets/items/icons_simple/28024.png",
+    "atlas": "atlas_011",
+    "cell": 7
+  },
+  {
+    "id": 28025,
+    "name": "地络龙吟阵",
+    "icon": "res://assets/items/icons_simple/28025.png",
+    "atlas": "atlas_011",
+    "cell": 8
+  },
+  {
+    "id": 28026,
+    "name": "星罗天阵",
+    "icon": "res://assets/items/icons_simple/28026.png",
+    "atlas": "atlas_011",
+    "cell": 9
+  },
+  {
+    "id": 28027,
+    "name": "太虚幻阵",
+    "icon": "res://assets/items/icons_simple/28027.png",
+    "atlas": "atlas_011",
+    "cell": 10
+  },
+  {
+    "id": 28028,
+    "name": "九幽续命阵",
+    "icon": "res://assets/items/icons_simple/28028.png",
+    "atlas": "atlas_011",
+    "cell": 11
+  },
+  {
+    "id": 28029,
+    "name": "麒麟瑞阵",
+    "icon": "res://assets/items/icons_simple/28029.png",
+    "atlas": "atlas_011",
+    "cell": 12
+  },
+  {
+    "id": 28030,
+    "name": "苍龙御天阵",
+    "icon": "res://assets/items/icons_simple/28030.png",
+    "atlas": "atlas_011",
+    "cell": 13
+  },
+  {
+    "id": 28031,
+    "name": "鸾舞涅槃阵",
+    "icon": "res://assets/items/icons_simple/28031.png",
+    "atlas": "atlas_011",
+    "cell": 14
+  },
+  {
+    "id": 28032,
+    "name": "太一归元阵",
+    "icon": "res://assets/items/icons_simple/28032.png",
+    "atlas": "atlas_011",
+    "cell": 15
+  },
+  {
+    "id": 28033,
+    "name": "却兽符",
+    "icon": "res://assets/items/icons_simple/28033.png",
+    "atlas": "atlas_010",
+    "cell": 0
+  },
+  {
+    "id": 28034,
+    "name": "净尘符",
+    "icon": "res://assets/items/icons_simple/28034.png",
+    "atlas": "atlas_010",
+    "cell": 1
+  },
+  {
+    "id": 28035,
+    "name": "流火符",
+    "icon": "res://assets/items/icons_simple/28035.png",
+    "atlas": "atlas_010",
+    "cell": 2
+  },
+  {
+    "id": 28036,
+    "name": "金甲符",
+    "icon": "res://assets/items/icons_simple/28036.png",
+    "atlas": "atlas_010",
+    "cell": 3
+  },
+  {
+    "id": 28037,
+    "name": "寒锥符",
+    "icon": "res://assets/items/icons_simple/28037.png",
+    "atlas": "atlas_010",
+    "cell": 4
+  },
+  {
+    "id": 28038,
+    "name": "爆炎符",
+    "icon": "res://assets/items/icons_simple/28038.png",
+    "atlas": "atlas_010",
+    "cell": 5
+  },
+  {
+    "id": 28039,
+    "name": "青藤缚符",
+    "icon": "res://assets/items/icons_simple/28039.png",
+    "atlas": "atlas_010",
+    "cell": 6
+  },
+  {
+    "id": 28040,
+    "name": "九雷符",
+    "icon": "res://assets/items/icons_simple/28040.png",
+    "atlas": "atlas_010",
+    "cell": 7
+  },
+  {
+    "id": 28041,
+    "name": "裂地符",
+    "icon": "res://assets/items/icons_simple/28041.png",
+    "atlas": "atlas_010",
+    "cell": 8
+  },
+  {
+    "id": 28042,
+    "name": "星遁符",
+    "icon": "res://assets/items/icons_simple/28042.png",
+    "atlas": "atlas_010",
+    "cell": 9
+  },
+  {
+    "id": 28043,
+    "name": "幻身符",
+    "icon": "res://assets/items/icons_simple/28043.png",
+    "atlas": "atlas_010",
+    "cell": 10
+  },
+  {
+    "id": 28044,
+    "name": "续命符",
+    "icon": "res://assets/items/icons_simple/28044.png",
+    "atlas": "atlas_010",
+    "cell": 11
+  },
+  {
+    "id": 28045,
+    "name": "麟瑞符",
+    "icon": "res://assets/items/icons_simple/28045.png",
+    "atlas": "atlas_010",
+    "cell": 12
+  },
+  {
+    "id": 28046,
+    "name": "龙威符",
+    "icon": "res://assets/items/icons_simple/28046.png",
+    "atlas": "atlas_010",
+    "cell": 13
+  },
+  {
+    "id": 28047,
+    "name": "涅槃符",
+    "icon": "res://assets/items/icons_simple/28047.png",
+    "atlas": "atlas_010",
+    "cell": 14
+  },
+  {
+    "id": 28048,
+    "name": "太一万象符",
+    "icon": "res://assets/items/icons_simple/28048.png",
+    "atlas": "atlas_010",
+    "cell": 15
+  },
+  {
+    "id": 28049,
+    "name": "引炁筑基散",
+    "icon": "res://assets/items/icons_simple/28049.png",
+    "atlas": "atlas_023",
+    "cell": 0
+  },
+  {
+    "id": 28050,
+    "name": "凝元破障丹",
+    "icon": "res://assets/items/icons_simple/28050.png",
+    "atlas": "atlas_023",
+    "cell": 1
+  },
+  {
+    "id": 28051,
+    "name": "筑基通玄丹",
+    "icon": "res://assets/items/icons_simple/28051.png",
+    "atlas": "atlas_023",
+    "cell": 2
+  },
+  {
+    "id": 28052,
+    "name": "固基培元丹",
+    "icon": "res://assets/items/icons_simple/28052.png",
+    "atlas": "atlas_023",
+    "cell": 3
+  },
+  {
+    "id": 28053,
+    "name": "化灵玄丹",
+    "icon": "res://assets/items/icons_simple/28053.png",
+    "atlas": "atlas_023",
+    "cell": 4
+  },
+  {
+    "id": 28054,
+    "name": "金丹破障丹",
+    "icon": "res://assets/items/icons_simple/28054.png",
+    "atlas": "atlas_023",
+    "cell": 5
+  },
+  {
+    "id": 28055,
+    "name": "凝丹化形丹",
+    "icon": "res://assets/items/icons_simple/28055.png",
+    "atlas": "atlas_023",
+    "cell": 6
+  },
+  {
+    "id": 28056,
+    "name": "九转金丹",
+    "icon": "res://assets/items/icons_simple/28056.png",
+    "atlas": "atlas_023",
+    "cell": 7
+  },
+  {
+    "id": 28057,
+    "name": "元婴破障丹",
+    "icon": "res://assets/items/icons_simple/28057.png",
+    "atlas": "atlas_023",
+    "cell": 8
+  },
+  {
+    "id": 28058,
+    "name": "元婴凝神丹",
+    "icon": "res://assets/items/icons_simple/28058.png",
+    "atlas": "atlas_023",
+    "cell": 9
+  },
+  {
+    "id": 28059,
+    "name": "元婴归元丹",
+    "icon": "res://assets/items/icons_simple/28059.png",
+    "atlas": "atlas_023",
+    "cell": 10
+  },
+  {
+    "id": 28060,
+    "name": "化神渡厄丹",
+    "icon": "res://assets/items/icons_simple/28060.png",
+    "atlas": "atlas_023",
+    "cell": 11
+  }
+]

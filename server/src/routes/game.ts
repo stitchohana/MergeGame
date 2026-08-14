@@ -46,6 +46,9 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
         state.crafted_item_ids = [];
         stateMigrated = true;
       }
+      if (engine.initializeProductionUnlocks(state)) {
+        stateMigrated = true;
+      }
       // Migrate: add pouch if missing (old saves)
       if (!state.pouch) {
         state.pouch = [];
@@ -180,6 +183,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       spawn_seed: state.spawn_seed,
       spawn_sequence: state.spawn_sequence,
       crafted_item_ids: state.crafted_item_ids,
+      unlocked_production_item_ids: state.unlocked_production_item_ids,
       activity_current_day: (() => {
         const active = engine.activityEngine.getActivities().find((a: any) => engine.activityEngine.isActive(a) && engine.activityEngine.hasWeeklyTasks(a.id));
         return active ? engine.activityEngine.getCurrentDay(active.id, engine.questResetHour) : 0;

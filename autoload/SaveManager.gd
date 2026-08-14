@@ -26,6 +26,9 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 	GameState.spawn_seed = state.get("spawn_seed", 0)
 	GameState.spawn_sequence = state.get("spawn_sequence", 0)
+	GameState.battle_tutorial_step = int(state.get("battle_tutorial_step", 0))
+	GameState.battle_player_hp = int(state.get("battle_player_hp", 100))
+	GameState.battle_player_max_hp = int(state.get("battle_player_max_hp", 100))
 	var crafted_item_ids: Array = state.get("crafted_item_ids", [])
 	GameState.set_crafted_item_ids(crafted_item_ids)
 

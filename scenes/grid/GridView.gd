@@ -1149,6 +1149,7 @@ func _on_launcher_charge_update(uid: int, text: String, color: Color) -> void:
 		if is_instance_valid(node) and node.item_data.get("_uid", 0) == uid:
 			node.charge_label.text = text
 			node.charge_label.add_theme_color_override("font_color", color)
+			node.refresh_status_icons()
 			break
 
 func _on_launcher_depleted_removed(uid: int, grid_pos: Vector2i) -> void:

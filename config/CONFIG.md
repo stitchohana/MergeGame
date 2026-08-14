@@ -196,6 +196,16 @@
 
 ## 9. meridians.json — 经脉表
 
+订单候选由顶层 `order_pool` 控制：`sources` 只允许 `items_regular` 与
+`items_recipe_product`；`unlock_by` 指定根据玩家永久解锁过的发射器和制作台，
+从其 `spawns` 与 `recipes` 动态计算可生成的订单物品。`group_id` 不参与订单筛选。
+`level_ranges` 按 `cultivation.current_level` 配置两类物品等级范围：练气为副产物
+4级、1–4级制作台产物；筑基为7–8级、5–8级；金丹为10–12级、9–12级；元婴为
+13–16级、13–16级。制作台产物的等级取实际产出它的制作台等级。固定引导订单仍
+优先使用 `fixed_orders`，不经过等级过滤。
+新手固定订单可在每条 `{item_ids, rewards}` 中提供显式奖励；配置了 `rewards` 时，
+服务端直接发放该奖励，不再按订单物品价值进行倍率换算。
+
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `thresholds` | array | 阈值列表 `[{level, item_pool, count_min, count_max, acupoint_rewards, circulation_rewards}]` |
@@ -224,6 +234,13 @@
 ---
 
 ## 12. home_meridians.json — 家园经脉
+
+`production_rewards` 用 `{stage, index, items}` 配置生产设施奖励，其中 `stage`
+与 `index` 均为从 0 开始的下标。服务端会把这些奖励合并到对应穴位的
+`acupoint_rewards`，因此预览与实际发放保持一致；境界限制仍由家园经脉阶段解锁规则控制。
+`production_reward_rules` 可用 `facility_prefixes`、`levels`、`count` 批量配置设施
+链奖励；当前规则为练气补到4级、筑基补到8级、金丹补到12级、元婴补到16级，
+设施类型在练气阶段逐步出现，筑基阶段补齐全部设施类型。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|

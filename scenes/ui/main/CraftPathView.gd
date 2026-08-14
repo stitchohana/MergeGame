@@ -167,7 +167,8 @@ func _build_source_section(selected: Dictionary) -> void:
 	else:
 		if relation_label:
 			relation_label.text = "来源"
-		entries = _get_present_launchers_for_item(int(selected.get("id", 0)))
+		var source_item: Dictionary = _get_group_level_one_item(selected)
+		entries = _get_present_launchers_for_item(int(source_item.get("id", selected.get("id", 0))))
 
 	if selected_type == Constants.ItemType.LAUNCHER:
 		_update_output_list(entries)
@@ -263,6 +264,15 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 		if present_launcher_ids.has(launcher_id):
 			result.append(launcher)
 	return result
+
+
+func _get_group_level_one_item(item_data: Dictionary) -> Dictionary:
+	var group_id: int = int(item_data.get("group_id", 0))
+	if group_id <= 0:
+		return item_data
+	var item_type: int = int(item_data.get("type", Constants.ItemType.REGULAR))
+	var level_one: Dictionary = ConfigDatabase.get_item_by_level(item_type, 1, group_id)
+	return level_one if not level_one.is_empty() else item_data
 
 
 func _on_item_clicked(index: int) -> void:

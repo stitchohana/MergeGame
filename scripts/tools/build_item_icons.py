@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import argparse
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -11,12 +12,59 @@ from remove_item_icon_backgrounds import make_transparent
 ROOT = Path(__file__).resolve().parents[2]
 ITEMS_PATH = ROOT / "config" / "json_output" / "items.json"
 ATLAS_DIR = ROOT / "assets" / "items" / "atlases"
+SIMPLE_ATLAS_DIR = ROOT / "assets" / "items" / "atlases_simple_generated"
 ICON_DIR = ROOT / "assets" / "items" / "icons"
+SIMPLE_ICON_DIR = ROOT / "assets" / "items" / "icons_simple"
 MANIFEST_PATH = ROOT / "assets" / "items" / "icon_manifest.json"
+SIMPLE_MANIFEST_PATH = ROOT / "assets" / "items" / "icon_manifest_simple.json"
 PREVIEW_PATH = ROOT / "assets" / "items" / "icons_preview.png"
+SIMPLE_PREVIEW_PATH = ROOT / "assets" / "items" / "icons_simple_preview.png"
 ICON_SIZE = 256
 VISIBLE_ALPHA_THRESHOLD = 16
 MAX_CENTER_OFFSET = 0.06
+
+SIMPLE_ATLAS_BY_GROUP = {
+	"breakthrough_01": "atlas_023",
+	"crafting_g31": "atlas_030",
+	"crafting_g32": "atlas_020",
+	"crafting_g33": "atlas_034",
+	"crafting_g34": "atlas_002",
+	"crafting_g35": "atlas_031",
+	"effect_01": "atlas_006",
+	"formation_01": "atlas_011",
+	"launcher_g17": "atlas_013",
+	"launcher_g18": "atlas_038",
+	"launcher_g19": "atlas_015",
+	"launcher_g20": "atlas_036",
+	"launcher_g21": "atlas_039",
+	"launcher_g22": "atlas_009",
+	"pill_cult_01": "atlas_022",
+	"pill_cult_02": "atlas_001",
+	"pill_cult_03": "atlas_027",
+	"pill_cult_04": "atlas_026",
+	"pill_qi_01": "atlas_019",
+	"pill_qi_02": "atlas_028",
+	"pill_qi_03": "atlas_033",
+	"pill_qi_04": "atlas_029",
+	"regular_g01": "atlas_016",
+	"regular_g02": "atlas_021",
+	"regular_g03": "atlas_014",
+	"regular_g06": "atlas_017",
+	"regular_g07": "atlas_032",
+	"regular_g08": "atlas_008",
+	"regular_g09": "atlas_012",
+	"regular_g10": "atlas_005",
+	"regular_g11": "atlas_003",
+	"regular_g12": "atlas_024",
+	"regular_g13": "atlas_018",
+	"regular_g14": "atlas_004",
+	"sword_01": "atlas_037",
+	"talisman_01": "atlas_010",
+	"wine_01": "atlas_035",
+	"wine_02": "atlas_007",
+	"wine_03": "atlas_025",
+	"wine_04": "atlas_040",
+}
 
 
 def load_items() -> tuple[dict, dict[int, dict]]:
@@ -94,13 +142,21 @@ def center_visible_content(image: Image.Image) -> Image.Image:
 	return centered
 
 
-def crop_icons(jobs: list[tuple[str, list[int]]], by_id: dict[int, dict]) -> list[dict]:
-	ICON_DIR.mkdir(parents=True, exist_ok=True)
+def crop_icons(
+	jobs: list[tuple[str, list[int]]],
+	by_id: dict[int, dict],
+	variant: str,
+) -> list[dict]:
+	is_simple = variant == "simple"
+	atlas_dir = SIMPLE_ATLAS_DIR if is_simple else ATLAS_DIR
+	icon_dir = SIMPLE_ICON_DIR if is_simple else ICON_DIR
+	icon_dir.mkdir(parents=True, exist_ok=True)
 	manifest: list[dict] = []
 	seen_ids: set[int] = set()
 
 	for atlas_name, item_ids in jobs:
-		atlas_path = ATLAS_DIR / f"{atlas_name}.png"
+		atlas_file = SIMPLE_ATLAS_BY_GROUP[atlas_name] if is_simple else atlas_name
+		atlas_path = atlas_dir / f"{atlas_file}.png"
 		if not atlas_path.exists():
 			raise FileNotFoundError(f"Missing atlas: {atlas_path}")
 		with Image.open(atlas_path) as source:
@@ -125,7 +181,7 @@ def crop_icons(jobs: list[tuple[str, list[int]]], by_id: dict[int, dict]) -> lis
 				icon = atlas.crop((left, top, right, bottom))
 				icon = icon.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
 				icon = center_visible_content(make_transparent(icon, threshold=38.0, feather=18.0))
-				output_path = ICON_DIR / f"{item_id}.png"
+				output_path = icon_dir / f"{item_id}.png"
 				icon.save(output_path, format="PNG", optimize=True)
 
 				item = by_id[item_id]
@@ -133,8 +189,8 @@ def crop_icons(jobs: list[tuple[str, list[int]]], by_id: dict[int, dict]) -> lis
 					{
 						"id": item_id,
 						"name": item.get("name", ""),
-						"icon": f"res://assets/items/icons/{item_id}.png",
-						"atlas": atlas_name,
+						"icon": f"res://assets/items/{'icons_simple' if is_simple else 'icons'}/{item_id}.png",
+						"atlas": atlas_file,
 						"cell": cell_index,
 					}
 				)
@@ -146,7 +202,9 @@ def crop_icons(jobs: list[tuple[str, list[int]]], by_id: dict[int, dict]) -> lis
 	return sorted(manifest, key=lambda entry: entry["id"])
 
 
-def build_preview(manifest: list[dict]) -> None:
+def build_preview(manifest: list[dict], variant: str) -> None:
+	icon_dir = SIMPLE_ICON_DIR if variant == "simple" else ICON_DIR
+	preview_path = SIMPLE_PREVIEW_PATH if variant == "simple" else PREVIEW_PATH
 	samples = manifest[:: max(1, len(manifest) // 80)][:80]
 	thumb_size = 96
 	label_height = 20
@@ -156,21 +214,28 @@ def build_preview(manifest: list[dict]) -> None:
 	draw = ImageDraw.Draw(preview)
 	for index, entry in enumerate(samples):
 		row, col = divmod(index, cols)
-		with Image.open(ICON_DIR / f"{entry['id']}.png") as icon:
-			thumb = icon.convert("RGB").resize((thumb_size, thumb_size), Image.Resampling.LANCZOS)
-		preview.paste(thumb, (col * thumb_size, row * (thumb_size + label_height)))
+		with Image.open(icon_dir / f"{entry['id']}.png") as icon:
+			thumb = icon.convert("RGBA").resize((thumb_size, thumb_size), Image.Resampling.LANCZOS)
+		preview.paste(thumb, (col * thumb_size, row * (thumb_size + label_height)), thumb)
 		draw.text((col * thumb_size + 4, row * (thumb_size + label_height) + thumb_size + 2), str(entry["id"]), fill="#4F584C")
-	preview.save(PREVIEW_PATH, format="PNG", optimize=True)
+	preview.save(preview_path, format="PNG", optimize=True)
 
 
 def main() -> None:
+	parser = argparse.ArgumentParser(description="Crop item icon atlases into individual PNGs.")
+	parser.add_argument("--variant", choices=("original", "simple"), default="original")
+	args = parser.parse_args()
+	variant: str = args.variant
 	data, by_id = load_items()
 	jobs = build_jobs(data)
 	if len(jobs) != 40:
 		raise ValueError(f"Expected 40 atlases, got {len(jobs)}")
-	manifest = crop_icons(jobs, by_id)
-	MANIFEST_PATH.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-	build_preview(manifest)
+	if variant == "simple" and set(SIMPLE_ATLAS_BY_GROUP) != {name for name, _item_ids in jobs}:
+		raise ValueError("Simple atlas mapping does not cover every generated atlas job")
+	manifest = crop_icons(jobs, by_id, variant)
+	manifest_path = SIMPLE_MANIFEST_PATH if variant == "simple" else MANIFEST_PATH
+	manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+	build_preview(manifest, variant)
 	print(f"Generated {len(manifest)} icons from {len(jobs)} atlases")
 
 
