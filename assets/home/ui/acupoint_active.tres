@@ -1,7 +1,0 @@
-[gd_resource type="AtlasTexture" format=3 uid="uid://b6tewescfveh5"]
-
-[ext_resource type="Texture2D" uid="uid://cyw7ghifgwdqu" path="res://assets/home/ui/acupoint_active_star.svg" id="1_icons"]
-
-[resource]
-atlas = ExtResource("1_icons")
-region = Rect2(0, 0, 64, 64)

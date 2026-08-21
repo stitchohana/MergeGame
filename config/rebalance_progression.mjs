@@ -81,62 +81,57 @@ for (const item of allItems) {
 const qiPerValue = 10;
 const orderRewardId = 219;
 rewards.rewards[String(orderRewardId)] = { tokens: [{ token: 2, amount: qiPerValue }] };
-// Order eligibility is category-driven. Facility unlock state is applied by
-// the server at runtime, so this balance script must not filter by group_id.
-const isOrderCandidate = id => {
-  const item = byId.get(id);
-  return item && (Number(item.type ?? 0) === 0 || Number(item.type ?? 0) === 4);
-};
-
-// A crafted product inherits the highest progression tier of its ingredients.
+// A crafted product inherits the highest regular-item level in its full recipe tree.
 const itemTier = new Map();
-for (const item of allItems) {
-  if (item.level != null) itemTier.set(item.id, Number(item.level));
+const recipesByResult = new Map();
+for (const recipe of recipes) {
+  if (!recipesByResult.has(recipe.result)) recipesByResult.set(recipe.result, []);
+  recipesByResult.get(recipe.result).push(recipe);
 }
-for (let pass = 0; pass < 100; pass++) {
-  let changed = false;
-  for (const recipe of recipes) {
-    const ingredientTiers = recipe.ingredients.map(id => itemTier.get(id));
-    if (ingredientTiers.some(tier => tier == null)) continue;
-    const tier = Math.max(...ingredientTiers);
-    if (tier > (itemTier.get(recipe.result) ?? 0)) {
-      itemTier.set(recipe.result, tier);
-      changed = true;
-    }
-  }
-  if (!changed) break;
+const getItemTier = (id, visiting = new Set()) => {
+  if (itemTier.has(id)) return itemTier.get(id);
+  const item = byId.get(id);
+  const itemType = Number(item?.type ?? 0);
+  if (!item || (itemType !== 0 && itemType !== 4)) return null;
+  if (itemType === 0) return Number.isFinite(Number(item.level)) ? Number(item.level) : null;
+  if (visiting.has(id)) return null;
+  visiting.add(id);
+  const ingredientTiers = (recipesByResult.get(id) ?? [])
+    .flatMap(recipe => recipe.ingredients.map(ingredientId => getItemTier(ingredientId, visiting)));
+  visiting.delete(id);
+  const tier = ingredientTiers.length > 0 && ingredientTiers.every(value => value != null)
+    ? Math.max(...ingredientTiers)
+    : null;
+  itemTier.set(id, tier);
+  return tier;
+};
+for (const item of items.regular) {
+  if (Number(item.type ?? 0) === 4) getItemTier(item.id);
 }
 
-const uniqueRecipeResults = [...new Set(recipes.map(recipe => recipe.result))];
-const makeOrderPool = (regularTiers, craftedMinTier, craftedMaxTier) => {
+const orderPoolForStage = stage => {
+  const range = (meridians.order_pool?.level_ranges ?? []).find(entry =>
+    stage >= Number(entry.cultivation_min) && stage <= Number(entry.cultivation_max));
+  if (!range) return [];
+  const [regularMin, regularMax] = range.items_regular;
+  const [recipeMin, recipeMax] = range.items_recipe_product;
   const regularProducts = items.regular
     .filter(item => Number(item.type ?? 0) === 0)
-    .filter(item => regularTiers.has(Number(item.level)))
-    .map(item => item.id)
-    .filter(isOrderCandidate);
-  const craftedProducts = uniqueRecipeResults
-    .filter(id => itemTier.has(id))
-    .filter(id => itemTier.get(id) >= craftedMinTier && itemTier.get(id) <= craftedMaxTier)
-    .filter(isOrderCandidate);
+    .filter(item => Number(item.level) >= regularMin && Number(item.level) <= regularMax)
+    .map(item => item.id);
+  const craftedProducts = items.regular
+    .filter(item => Number(item.type ?? 0) === 4)
+    .filter(item => {
+      const tier = getItemTier(item.id);
+      return tier != null && tier >= recipeMin && tier <= recipeMax;
+    })
+    .map(item => item.id);
   return [...new Set([...regularProducts, ...craftedProducts])].sort((a, b) => a - b);
-};
-
-const orderPoolsByPeriod = {
-  qi: makeOrderPool(new Set([4]), 1, 4),
-  foundation: makeOrderPool(new Set([7, 8]), 5, 8),
-  goldenCore: makeOrderPool(new Set([10, 11, 12]), 9, 12),
-  nascentSoul: makeOrderPool(new Set([13, 14, 15, 16]), 13, 16),
-};
-const orderPoolForStage = stage => {
-  if (stage <= 10) return orderPoolsByPeriod.qi;
-  if (stage <= 13) return orderPoolsByPeriod.foundation;
-  if (stage <= 16) return orderPoolsByPeriod.goldenCore;
-  return orderPoolsByPeriod.nascentSoul;
 };
 
 for (const threshold of meridians.thresholds) {
   const stage = Number(threshold.stage);
-  threshold.item_pool = orderPoolForStage(stage);
+  delete threshold.item_pool;
   threshold.order_count = Math.max(5, Number(threshold.order_count ?? 5));
   threshold.acupoint_rewards = orderRewardId;
   delete threshold.qi_per_value;
@@ -180,7 +175,7 @@ for (let groupIndex = 0; groupIndex < 19; groupIndex++) {
 for (let i = 0; i < cultivation.stages.length; i++) {
   const threshold = meridians.thresholds.find(entry => entry.stage === i + 1);
   if (!threshold) continue;
-  const maxOrderValue = threshold.item_pool
+  const maxOrderValue = orderPoolForStage(i + 1)
     .map(id => byId.get(id)?.value ?? 0)
     .sort((a, b) => b - a)
     .slice(0, threshold.count_max)

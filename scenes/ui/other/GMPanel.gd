@@ -59,6 +59,8 @@ func _on_exec() -> void:
 	result_label.text = "执行中..."
 	if cmd_option.selected == 8:
 		cmd_key = "activate_home_acupoints"
+	elif cmd_option.selected == 9:
+		cmd_key = "grant_order_items"
 	CloudService.submit_gm_exec(cmd_key, amount, item_id, col, row)
 
 func _on_gm_confirmed(_result: Dictionary) -> void:

@@ -141,7 +141,6 @@ export interface GameState {
   battle_map_id?: number;
   battle_stage?: number;
   battle_monsters?: BattleMonster[];
-  battle_tutorial_step?: number;
   battle_player_hp?: number;
   battle_player_max_hp?: number;
   meridian_circulations?: number;

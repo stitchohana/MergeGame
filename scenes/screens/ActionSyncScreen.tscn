@@ -1,41 +1,25 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://chvkdqgcwjri7"]
 
-[ext_resource type="Script" path="res://scenes/screens/ActionSyncSpinner.gd" id="1_spinner"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://b1xq7mv8p5i5a" path="res://scenes/screens/ActionSyncSpinner.gd" id="1_spinner"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
-bg_color = Color(0.055, 0.058, 0.07, 0.96)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.91, 0.74, 0.34, 0.5)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[node name="ActionSyncScreen" type="Control"]
+[node name="ActionSyncScreen" type="Control" unique_id=2043165580]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
-theme = ExtResource("2_theme")
 
-[node name="Blocker" type="ColorRect" parent="."]
+[node name="Blocker" type="ColorRect" parent="." unique_id=506414492]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
-color = Color(0.0, 0.0, 0.0, 0.55)
+color = Color(0, 0, 0, 0.55)
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="Panel" type="PanelContainer" parent="." unique_id=1818189774]
 custom_minimum_size = Vector2(260, 148)
 layout_mode = 1
 anchors_preset = 8
@@ -49,27 +33,25 @@ offset_right = 130.0
 offset_bottom = 74.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
+[node name="VBox" type="VBoxContainer" parent="Panel" unique_id=1933533524]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="SpinnerCenter" type="CenterContainer" parent="Panel/VBox"]
+[node name="SpinnerCenter" type="CenterContainer" parent="Panel/VBox" unique_id=940088453]
 custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Spinner" type="Control" parent="Panel/VBox/SpinnerCenter"]
+[node name="Spinner" type="Control" parent="Panel/VBox/SpinnerCenter" unique_id=816151682]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("1_spinner")
 
-[node name="Message" type="Label" parent="Panel/VBox"]
+[node name="Message" type="Label" parent="Panel/VBox" unique_id=806443942]
 layout_mode = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.22, 0.34, 0.25, 1)
 theme_override_font_sizes/font_size = 18
 text = "正在同步棋盘..."

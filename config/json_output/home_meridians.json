@@ -1,38 +1,515 @@
 {
   "production_rewards": [
-    { "stage": 1, "index": 0, "items": [{ "id": 13001, "count": 2 }, { "id": 18001, "count": 2 }] },
-    { "stage": 1, "index": 4, "items": [{ "id": 13002, "count": 2 }, { "id": 18002, "count": 2 }] },
-    { "stage": 1, "index": 8, "items": [{ "id": 13003, "count": 2 }, { "id": 18003, "count": 2 }] },
-    { "stage": 2, "index": 0, "items": [{ "id": 11001, "count": 2 }, { "id": 12001, "count": 2 }, { "id": 16001, "count": 2 }, { "id": 17001, "count": 2 }] },
-    { "stage": 2, "index": 4, "items": [{ "id": 11002, "count": 2 }, { "id": 12002, "count": 2 }, { "id": 16002, "count": 2 }, { "id": 17002, "count": 2 }] },
-    { "stage": 2, "index": 8, "items": [{ "id": 11003, "count": 2 }, { "id": 12003, "count": 2 }, { "id": 16003, "count": 2 }, { "id": 17003, "count": 2 }] },
-    { "stage": 3, "index": 0, "items": [{ "id": 14001, "count": 2 }, { "id": 19001, "count": 2 }] },
-    { "stage": 3, "index": 5, "items": [{ "id": 14002, "count": 2 }, { "id": 19002, "count": 2 }] },
-    { "stage": 3, "index": 10, "items": [{ "id": 14003, "count": 2 }, { "id": 19003, "count": 2 }] },
-    { "stage": 5, "index": 0, "items": [{ "id": 15001, "count": 2 }] },
-    { "stage": 5, "index": 7, "items": [{ "id": 15002, "count": 2 }] },
-    { "stage": 5, "index": 14, "items": [{ "id": 15003, "count": 2 }] }
+    {
+      "stage": 1,
+      "index": 0,
+      "items": [
+        {
+          "id": 13001,
+          "count": 2
+        },
+        {
+          "id": 18001,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "index": 4,
+      "items": [
+        {
+          "id": 13002,
+          "count": 2
+        },
+        {
+          "id": 18002,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "index": 8,
+      "items": [
+        {
+          "id": 13003,
+          "count": 2
+        },
+        {
+          "id": 18003,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 0,
+      "items": [
+        {
+          "id": 11001,
+          "count": 2
+        },
+        {
+          "id": 12001,
+          "count": 2
+        },
+        {
+          "id": 16001,
+          "count": 2
+        },
+        {
+          "id": 17001,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 4,
+      "items": [
+        {
+          "id": 11002,
+          "count": 2
+        },
+        {
+          "id": 12002,
+          "count": 2
+        },
+        {
+          "id": 16002,
+          "count": 2
+        },
+        {
+          "id": 17002,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 8,
+      "items": [
+        {
+          "id": 11003,
+          "count": 2
+        },
+        {
+          "id": 12003,
+          "count": 2
+        },
+        {
+          "id": 16003,
+          "count": 2
+        },
+        {
+          "id": 17003,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 0,
+      "items": [
+        {
+          "id": 14001,
+          "count": 2
+        },
+        {
+          "id": 19001,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 5,
+      "items": [
+        {
+          "id": 14002,
+          "count": 2
+        },
+        {
+          "id": 19002,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 10,
+      "items": [
+        {
+          "id": 14003,
+          "count": 2
+        },
+        {
+          "id": 19003,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 5,
+      "index": 0,
+      "items": [
+        {
+          "id": 15001,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 5,
+      "index": 7,
+      "items": [
+        {
+          "id": 15002,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "stage": 5,
+      "index": 14,
+      "items": [
+        {
+          "id": 15003,
+          "count": 2
+        }
+      ]
+    }
   ],
   "production_reward_rules": [
-    { "stage": 10, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190], "levels": [4], "count": 2 },
-    { "stage": 10, "index": 0, "facility_prefixes": [200, 210], "levels": [1], "count": 2 },
-    { "stage": 10, "index": 1, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190], "levels": [5], "count": 2 },
-    { "stage": 10, "index": 1, "facility_prefixes": [200, 210], "levels": [2], "count": 2 },
-    { "stage": 10, "index": 2, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190], "levels": [6], "count": 2 },
-    { "stage": 10, "index": 2, "facility_prefixes": [200, 210], "levels": [3], "count": 2 },
-    { "stage": 13, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190], "levels": [7], "count": 2 },
-    { "stage": 13, "index": 0, "facility_prefixes": [200, 210], "levels": [4], "count": 2 },
-    { "stage": 16, "index": 0, "facility_prefixes": [200, 210], "levels": [5], "count": 2 },
-    { "stage": 19, "index": 0, "facility_prefixes": [200, 210], "levels": [6], "count": 2 },
-    { "stage": 22, "index": 0, "facility_prefixes": [200, 210], "levels": [7], "count": 2 },
-    { "stage": 40, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [8], "count": 2 },
-    { "stage": 43, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [9], "count": 2 },
-    { "stage": 46, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [10], "count": 2 },
-    { "stage": 49, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [11], "count": 2 },
-    { "stage": 70, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [12], "count": 2 },
-    { "stage": 73, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [13], "count": 2 },
-    { "stage": 76, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [14], "count": 2 },
-    { "stage": 79, "index": 0, "facility_prefixes": [110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210], "levels": [15], "count": 2 }
+    {
+      "stage": 10,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190
+      ],
+      "levels": [
+        4
+      ],
+      "count": 2
+    },
+    {
+      "stage": 10,
+      "index": 0,
+      "facility_prefixes": [
+        200,
+        210
+      ],
+      "levels": [
+        1
+      ],
+      "count": 2
+    },
+    {
+      "stage": 10,
+      "index": 1,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190
+      ],
+      "levels": [
+        5
+      ],
+      "count": 2
+    },
+    {
+      "stage": 10,
+      "index": 1,
+      "facility_prefixes": [
+        200,
+        210
+      ],
+      "levels": [
+        2
+      ],
+      "count": 2
+    },
+    {
+      "stage": 10,
+      "index": 2,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190
+      ],
+      "levels": [
+        6
+      ],
+      "count": 2
+    },
+    {
+      "stage": 10,
+      "index": 2,
+      "facility_prefixes": [
+        200,
+        210
+      ],
+      "levels": [
+        3
+      ],
+      "count": 2
+    },
+    {
+      "stage": 13,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190
+      ],
+      "levels": [
+        7
+      ],
+      "count": 2
+    },
+    {
+      "stage": 13,
+      "index": 0,
+      "facility_prefixes": [
+        200,
+        210
+      ],
+      "levels": [
+        4
+      ],
+      "count": 2
+    },
+    {
+      "stage": 16,
+      "index": 0,
+      "facility_prefixes": [
+        200,
+        210
+      ],
+      "levels": [
+        5
+      ],
+      "count": 2
+    },
+    {
+      "stage": 19,
+      "index": 0,
+      "facility_prefixes": [
+        200,
+        210
+      ],
+      "levels": [
+        6
+      ],
+      "count": 2
+    },
+    {
+      "stage": 22,
+      "index": 0,
+      "facility_prefixes": [
+        200,
+        210
+      ],
+      "levels": [
+        7
+      ],
+      "count": 2
+    },
+    {
+      "stage": 40,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        210
+      ],
+      "levels": [
+        8
+      ],
+      "count": 2
+    },
+    {
+      "stage": 43,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        210
+      ],
+      "levels": [
+        9
+      ],
+      "count": 2
+    },
+    {
+      "stage": 46,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        210
+      ],
+      "levels": [
+        10
+      ],
+      "count": 2
+    },
+    {
+      "stage": 49,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        210
+      ],
+      "levels": [
+        11
+      ],
+      "count": 2
+    },
+    {
+      "stage": 70,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 2
+    },
+    {
+      "stage": 73,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        210
+      ],
+      "levels": [
+        13
+      ],
+      "count": 2
+    },
+    {
+      "stage": 76,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        210
+      ],
+      "levels": [
+        14
+      ],
+      "count": 2
+    },
+    {
+      "stage": 79,
+      "index": 0,
+      "facility_prefixes": [
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200,
+        210
+      ],
+      "levels": [
+        15
+      ],
+      "count": 2
+    }
   ],
   "stages": [
     {

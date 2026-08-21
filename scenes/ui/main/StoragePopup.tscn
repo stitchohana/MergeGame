@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://blb6ivmmge672"]
+[gd_scene format=3 uid="uid://blb6ivmmge672"]
 
-[ext_resource type="Script" uid="uid://qwgsnbltxaqh" path="res://scenes/ui/main/StoragePopup.gd" id="1_sp"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://bvut1w0cbo13k" path="res://scenes/ui/main/StoragePopup.gd" id="1_sp"]
 
 [node name="StoragePopup" type="Control" unique_id=1440782534]
 layout_mode = 3
@@ -11,7 +10,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_sp")
-theme = ExtResource("2_theme")
 
 [node name="Dim" type="ColorRect" parent="." unique_id=326572577]
 layout_mode = 1

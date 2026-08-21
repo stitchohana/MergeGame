@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://dahr254epq0xl" path="res://scenes/ui/home/AcupointNode.tscn" id="5_acupoint"]
 [ext_resource type="Texture2D" uid="uid://dbmvdfun5glg1" path="res://assets/ui/cultivation_screen_v3/background.png" id="5_eom76"]
 [ext_resource type="Texture2D" uid="uid://bens0v32u17aq" path="res://assets/ui/cultivation_screen_v3/layers/cultivation_array.png" id="7_5r5lb"]
-[ext_resource type="Theme" uid="uid://gc2kayu31yh8" path="res://assets/theme/btn_theme.tres" id="7_theme"]
 [ext_resource type="Texture2D" uid="uid://eq1njlx180e4" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_progress_empty_bar.png" id="9_exp_empty"]
 [ext_resource type="Texture2D" uid="uid://drjwitpae7x8b" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_progress_fill.png" id="10_exp_fill"]
 [ext_resource type="Texture2D" uid="uid://du4pbl0ehjaq2" path="res://assets/ui/cultivation_screen_v3/layers/cultivator_character_front.png" id="12_ydins"]
@@ -214,7 +213,6 @@ offset_left = 1.0
 offset_top = 1433.0
 offset_right = 379.0
 offset_bottom = 1652.0
-theme = ExtResource("7_theme")
 theme_override_font_sizes/font_size = 18
 theme_override_icons/icon = ExtResource("13_qqfj8")
 flat = true
@@ -228,7 +226,6 @@ offset_left = 391.0
 offset_top = 1444.0
 offset_right = 790.0
 offset_bottom = 1641.0
-theme = ExtResource("7_theme")
 theme_override_font_sizes/font_size = 18
 theme_override_icons/icon = ExtResource("14_cryq0")
 flat = true

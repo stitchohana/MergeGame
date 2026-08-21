@@ -174,15 +174,30 @@ save(wb, "items")
 print("Building meridians.xlsx...")
 data = json.load(open(JSON_DIR / "meridians.json", encoding="utf-8"))
 wb = new_book()
-h = ["stage","item_pool","count_min","count_max","acupoint_rewards","order_count","fixed_orders"]
+h = ["stage","count_min","count_max","acupoint_rewards","order_count","fixed_orders"]
 r = []
 for t in data["thresholds"]:
-    r.append([t.get("stage",""), join_list(t.get("item_pool",[])),
-              t.get("count_min",""), t.get("count_max",""),
+    r.append([t.get("stage",""), t.get("count_min",""), t.get("count_max",""),
               t.get("acupoint_rewards",""), t.get("order_count",""),
               json.dumps(t.get("fixed_orders", []), ensure_ascii=False, separators=(",", ":")) if t.get("fixed_orders") else ""])
 ws = wb.create_sheet("meridians")
 add_sheet(ws, h, r)
+level_range_headers = [
+    "cultivation_min", "cultivation_max",
+    "items_regular_min", "items_regular_max",
+    "items_recipe_product_min", "items_recipe_product_max",
+]
+level_range_rows = []
+for level_range in data.get("order_pool", {}).get("level_ranges", []):
+    regular_range = level_range.get("items_regular", ["", ""])
+    recipe_product_range = level_range.get("items_recipe_product", ["", ""])
+    level_range_rows.append([
+        level_range.get("cultivation_min", ""), level_range.get("cultivation_max", ""),
+        regular_range[0], regular_range[1],
+        recipe_product_range[0], recipe_product_range[1],
+    ])
+ws2 = wb.create_sheet("order_level_ranges")
+add_sheet(ws2, level_range_headers, level_range_rows)
 save(wb, "meridians")
 
 # ════════════════════════════════════════════════════════════

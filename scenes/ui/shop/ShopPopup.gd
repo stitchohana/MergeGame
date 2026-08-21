@@ -1,6 +1,5 @@
 class_name ShopPopup extends BasePopup
 
-const SHOP_BUTTON_THEME := preload("res://assets/theme/shop_button_theme.tres")
 
 @onready var title_label: Label = $Panel/TitleLabel
 @onready var item_container = $Panel/ItemContainer
@@ -63,7 +62,6 @@ func _build_item_button(item_data: Dictionary, price: int) -> VBoxContainer:
 
 	var buy_button := Button.new()
 	buy_button.text = "%d 灵石" % price
-	buy_button.theme = SHOP_BUTTON_THEME
 	buy_button.custom_minimum_size = Vector2(108, 36)
 	buy_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	vbox.add_child(buy_button)

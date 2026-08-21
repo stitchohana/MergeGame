@@ -1,9 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://weekly_activity_panel"]
+[gd_scene format=3 uid="uid://cvshlv7m8cjv2"]
 
-[ext_resource type="Script" path="res://scenes/ui/activity/WeeklyActivityPanel.gd" id="1_gd"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
-[ext_resource type="Texture2D" path="res://assets/ui/weekly/weekly_panel_bg.png" id="3_panel_texture"]
-[ext_resource type="Texture2D" path="res://assets/ui/weekly/weekly_close_button.png" id="4_close_texture"]
+[ext_resource type="Script" uid="uid://cr18u3ky2dhvt" path="res://scenes/ui/activity/WeeklyActivityPanel.gd" id="1_gd"]
+[ext_resource type="Texture2D" uid="uid://nc5y35014mk3" path="res://assets/ui/weekly/weekly_panel_bg.png" id="3_panel_texture"]
+[ext_resource type="Texture2D" uid="uid://mkr5w1medgog" path="res://assets/ui/weekly/weekly_close_button.png" id="4_close_texture"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBox_close_normal"]
 texture = ExtResource("4_close_texture")
@@ -11,14 +10,6 @@ texture_margin_left = 32.0
 texture_margin_top = 20.0
 texture_margin_right = 32.0
 texture_margin_bottom = 20.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBox_close_hover"]
-texture = ExtResource("4_close_texture")
-texture_margin_left = 32.0
-texture_margin_top = 20.0
-texture_margin_right = 32.0
-texture_margin_bottom = 20.0
-modulate_color = Color(1, 1, 0.9, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBox_close_pressed"]
 texture = ExtResource("4_close_texture")
@@ -28,21 +19,36 @@ texture_margin_right = 32.0
 texture_margin_bottom = 20.0
 modulate_color = Color(0.82, 0.82, 0.82, 1)
 
+[sub_resource type="StyleBoxTexture" id="StyleBox_close_hover"]
+texture = ExtResource("4_close_texture")
+texture_margin_left = 32.0
+texture_margin_top = 20.0
+texture_margin_right = 32.0
+texture_margin_bottom = 20.0
+modulate_color = Color(1, 1, 0.9, 1)
+
 [sub_resource type="StyleBoxEmpty" id="StyleBox_focus_empty"]
 
-[node name="WeeklyActivityPanel" type="Control"]
+[node name="WeeklyActivityPanel" type="Control" unique_id=1952960985]
 layout_mode = 3
 anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_gd")
-theme = ExtResource("2_theme")
 
-[node name="Dim" type="ColorRect" parent="."]
+[node name="Dim" type="ColorRect" parent="." unique_id=1686573053]
 layout_mode = 1
 anchors_preset = 15
-color = Color(0, 0, 0, 0.5)
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
 
-[node name="Panel" type="TextureRect" parent="."]
+[node name="Panel" type="TextureRect" parent="." unique_id=1189811564]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -53,11 +59,12 @@ offset_left = -300.0
 offset_top = -380.0
 offset_right = 300.0
 offset_bottom = 380.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("3_panel_texture")
 expand_mode = 1
-stretch_mode = 0
 
-[node name="VBox" type="VBoxContainer" parent="Panel"]
+[node name="VBox" type="VBoxContainer" parent="Panel" unique_id=260440590]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -66,38 +73,40 @@ offset_left = 24.0
 offset_top = 72.0
 offset_right = -24.0
 offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 14
 
-[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+[node name="TitleLabel" type="Label" parent="Panel/VBox" unique_id=1507237923]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(0.16, 0.29, 0.22, 1)
+theme_override_font_sizes/font_size = 24
 text = "周常任务"
 horizontal_alignment = 1
 
-[node name="DayButtons" type="HBoxContainer" parent="Panel/VBox"]
+[node name="DayButtons" type="HBoxContainer" parent="Panel/VBox" unique_id=1200963447]
 layout_mode = 2
-alignment = 1
 theme_override_constants/separation = 6
+alignment = 1
 
-[node name="ScrollContainer" type="ScrollContainer" parent="Panel/VBox"]
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/VBox" unique_id=1234444542]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TaskList" type="VBoxContainer" parent="Panel/VBox/ScrollContainer"]
+[node name="TaskList" type="VBoxContainer" parent="Panel/VBox/ScrollContainer" unique_id=707345557]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="CloseButton" type="Button" parent="Panel/VBox"]
+[node name="CloseButton" type="Button" parent="Panel/VBox" unique_id=383240704]
 custom_minimum_size = Vector2(160, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 0.94, 0.72, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 0.84, 1)
 theme_override_colors/font_pressed_color = Color(0.94, 0.86, 0.64, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.84, 1)
 theme_override_styles/normal = SubResource("StyleBox_close_normal")
-theme_override_styles/hover = SubResource("StyleBox_close_hover")
 theme_override_styles/pressed = SubResource("StyleBox_close_pressed")
+theme_override_styles/hover = SubResource("StyleBox_close_hover")
 theme_override_styles/focus = SubResource("StyleBox_focus_empty")
 text = "关闭"

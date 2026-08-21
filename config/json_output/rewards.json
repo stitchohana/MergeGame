@@ -1,36 +1,28 @@
 {
   "rewards": {
-	"1": {
-	  "tokens": [
-		{
-		  "token": 4,
-		  "amount": 50
-		}
-	  ]
-	},
-	"2": {
-	  "tokens": [
-		{
-		  "token": 4,
-		  "amount": 100
-		}
-	  ]
-	},
-	"219": {
-	  "tokens": [
-		{
-		  "token": 2,
-		  "amount": 10
-		}
-	  ]
-	},
-	"220": {
-	  "items": [
-		{
-		  "id": 11016,
-		  "count": 1
-		}
-	  ]
-	}
+    "1": {
+      "tokens": [
+        {
+          "token": 4,
+          "amount": 50
+        }
+      ]
+    },
+    "2": {
+      "tokens": [
+        {
+          "token": 4,
+          "amount": 100
+        }
+      ]
+    },
+    "219": {
+      "tokens": [
+        {
+          "token": 2,
+          "amount": 10
+        }
+      ]
+    }
   }
 }

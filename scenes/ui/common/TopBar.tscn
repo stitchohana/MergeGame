@@ -1,9 +1,7 @@
 [gd_scene format=3 uid="uid://c7qk1jsxa0n3r"]
 
 [ext_resource type="Script" uid="uid://b2s47v1wor4j1" path="res://scenes/ui/common/TopBar.gd" id="1_gd"]
-[ext_resource type="PackedScene" path="res://scenes/ui/common/TopResource.tscn" id="2_resource"]
-[ext_resource type="Texture2D" uid="uid://bfw2x0eoooupv" path="res://assets/ui/xianxia_v3_layers_v2/layers/qi_spirit_flame_icon.png" id="3_qi"]
-[ext_resource type="Texture2D" uid="uid://cr7bpkpx4stwc" path="res://assets/ui/xianxia_v3_layers_v2/layers/spirit_stone_icon.png" id="4_stones"]
+[ext_resource type="PackedScene" uid="uid://b8im68urgqlt8" path="res://scenes/ui/common/TopResource.tscn" id="2_resource"]
 
 [node name="TopBar" type="Control" unique_id=1995499029]
 custom_minimum_size = Vector2(780, 92)
@@ -13,37 +11,24 @@ offset_right = 780.0
 offset_bottom = 92.0
 script = ExtResource("1_gd")
 
-[node name="StaminaResource" parent="." instance=ExtResource("2_resource")]
+[node name="StaminaResource" parent="." unique_id=211057017 instance=ExtResource("2_resource")]
 layout_mode = 0
 offset_right = 246.0
 offset_bottom = 81.0
 
-[node name="QiResource" parent="." instance=ExtResource("2_resource")]
+[node name="QiResource" parent="." unique_id=753153288 instance=ExtResource("2_resource")]
 layout_mode = 0
 offset_left = 248.0
 offset_right = 496.0
 offset_bottom = 81.0
 
-[node name="Icon" parent="QiResource" index="1"]
-texture = ExtResource("3_qi")
-
-[node name="RegenTimerLabel" parent="QiResource" index="3"]
-visible = false
-
-[node name="StonesResource" parent="." instance=ExtResource("2_resource")]
+[node name="StonesResource" parent="." unique_id=1837579794 instance=ExtResource("2_resource")]
 layout_mode = 0
 offset_left = 483.0
 offset_right = 729.0
 offset_bottom = 81.0
 
-[node name="Icon" parent="StonesResource" index="1"]
-texture = ExtResource("4_stones")
-
-[node name="RegenTimerLabel" parent="StonesResource" index="3"]
-visible = false
-
 [node name="GMButton" type="Button" parent="." unique_id=1538700097]
-visible = false
 layout_mode = 0
 offset_left = 720.0
 offset_top = 8.0

@@ -6,6 +6,7 @@ class_name TopBar extends BaseHUD
 @onready var gm_btn: Button = $GMButton
 
 var _regen_remaining: float = 0.0
+var _qi_updates_suppressed: bool = false
 
 
 func _open_gm() -> void:
@@ -60,7 +61,15 @@ func _on_stones_changed(amount: int) -> void:
 
 
 func _on_qi_changed(_current: int, _max: int) -> void:
+	if _qi_updates_suppressed:
+		return
 	_update_qi()
+
+func set_qi_updates_suppressed(suppressed: bool) -> void:
+	var was_suppressed: bool = _qi_updates_suppressed
+	_qi_updates_suppressed = suppressed
+	if was_suppressed and not suppressed:
+		_update_qi()
 
 
 func _update_qi() -> void:

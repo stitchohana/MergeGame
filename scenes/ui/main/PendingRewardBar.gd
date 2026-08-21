@@ -1,7 +1,5 @@
 class_name PendingRewardBar extends Control
 
-const FALLBACK_ICON: Texture2D = preload("res://assets/home/ui/reward_fallback.svg")
-
 @onready var claim_button: Button = $Button
 @onready var item_icon: TextureRect = $Button/ItemIcon
 
@@ -38,7 +36,7 @@ func _refresh(_count: int) -> void:
 	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
 	var icon_path: String = str(item_data.get("icon", reward.get("icon", "")))
 	var texture: Texture2D = load(icon_path) as Texture2D if not icon_path.is_empty() else null
-	item_icon.texture = texture if texture != null else FALLBACK_ICON
+	item_icon.texture = texture
 	claim_button.tooltip_text = "%s (点击放入棋盘)" % str(reward.get("name", "暂存道具"))
 	claim_button.disabled = _claim_pending
 	show()

@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://blqf5wgh5bw51"]
 
 [ext_resource type="Script" uid="uid://dewrpmoa4cdmb" path="res://scenes/ui/main/RecipePopup.gd" id="1_gd"]
-[ext_resource type="Theme" uid="uid://dhv8eh1s6nl6v" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
 [ext_resource type="Texture2D" uid="uid://4fced22xi0n6" path="res://assets/ui/recipe/recipe_panel_bg.png" id="3_panel_texture"]
 [ext_resource type="Texture2D" uid="uid://cuue1mt3vdb0x" path="res://assets/ui/recipe/recipe_close_button.png" id="4_close_texture"]
 
@@ -37,7 +36,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("2_theme")
 script = ExtResource("1_gd")
 
 [node name="Dim" type="ColorRect" parent="." unique_id=1069868905]

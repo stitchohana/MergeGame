@@ -301,7 +301,6 @@ func _setup_breakthrough_btn() -> void:
 	var btn := Button.new()
 	btn.name = "BreakthroughBtn"
 	btn.text = ""
-	btn.theme = preload("res://assets/theme/btn_theme.tres")
 	btn.add_theme_font_size_override("font_size", 16)
 	btn.pressed.connect(_on_breakthrough_pressed)
 	btn.visible = false

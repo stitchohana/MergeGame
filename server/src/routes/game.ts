@@ -135,7 +135,13 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
         const newLevel = (realmOffsets[oldRealm] ?? 0) + oldLv;
         console.log(`[game] migrating cultivation: realm=${oldRealm} lv=${oldLv} -> flat level=${newLevel}`);
         state.cultivation.current_level = newLevel;
-        delete (state.cultivation as any).current_realm_id;      }
+        delete (state.cultivation as any).current_realm_id;
+        stateMigrated = true;
+      }
+
+      if (engine.repairInvalidMeridianOrders(state)) {
+        stateMigrated = true;
+      }
 
       // Re-initialize if grid is empty (stale save)
       if (!state.grid || state.grid.length === 0) {

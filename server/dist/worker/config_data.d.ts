@@ -228,7 +228,6 @@ export declare const gameConfigTables: {
     meridians: {
         thresholds: {
             stage: number;
-            item_pool: number[];
             count_min: number;
             count_max: number;
             acupoint_rewards: number;
@@ -274,12 +273,6 @@ export declare const gameConfigTables: {
                 tokens: {
                     token: number;
                     amount: number;
-                }[];
-            };
-            "220": {
-                items: {
-                    id: number;
-                    count: number;
                 }[];
             };
         };

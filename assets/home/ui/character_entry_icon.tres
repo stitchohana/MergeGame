@@ -1,7 +1,0 @@
-[gd_resource type="AtlasTexture" format=3 uid="uid://dainvywtvn2v2"]
-
-[ext_resource type="Texture2D" uid="uid://cw8q3nl3u2ata" path="res://assets/home/ui/character_meditation.png" id="1_icons"]
-
-[resource]
-atlas = ExtResource("1_icons")
-region = Rect2(0, 0, 64, 64)

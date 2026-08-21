@@ -19,6 +19,17 @@ func set_value(value: int) -> void:
 		return
 	if value == _displayed_value:
 		return
+	_animate_value_to(value)
+
+func animate_value_from(start_value: int, target_value: int) -> void:
+	_value_initialized = true
+	_displayed_value = start_value
+	value_label.text = "%d" % start_value
+	if start_value == target_value:
+		return
+	_animate_value_to(target_value)
+
+func _animate_value_to(value: int) -> void:
 	var start_value: int = _displayed_value
 	if _value_tween and _value_tween.is_valid():
 		_value_tween.kill()

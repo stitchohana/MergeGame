@@ -393,6 +393,10 @@ func _finish_drag(target_pos: Vector2i) -> void:
 
 	var target = GridManager.get_item(target_pos)
 	if target != null:
+		_merge_failed_is_push = false
+		if _try_optimistic_merge(_drag_source_pos, target_pos):
+			return
+
 		var _target_cfg := ConfigDatabase.get_item_data(target.get("id", 0))
 		if _target_cfg.get("storage_slots", 0) > 0:
 			_handle_storage_drop(target_pos, target)
@@ -405,14 +409,12 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		if _drag_item_data.get("type", 0) == Constants.ItemType.CRAFTING:
 			item_clicked.emit(_drag_item_data, target_pos)
 	else:
-		_merge_failed_is_push = false
-		if not _try_optimistic_merge(_drag_source_pos, target_pos):
-			if target.get("immovable") == true:
-				_snap_back()
-			elif CloudService.online:
-				_try_optimistic_push(_drag_source_pos, target_pos)
-			else:
-				_snap_back()
+		if target.get("immovable") == true:
+			_snap_back()
+		elif CloudService.online:
+			_try_optimistic_push(_drag_source_pos, target_pos)
+		else:
+			_snap_back()
 
 func _try_optimistic_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	var from_item: Variant = GridManager.get_item(from_pos)
@@ -1089,11 +1091,18 @@ func _apply_latest_action_batch_snapshot() -> void:
 	if _latest_action_batch_result.is_empty():
 		return
 	var server_grid: Array = _latest_action_batch_result.get("grid", [])
-	if not GridManager.reconcile_from_server(server_grid):
+	if GridManager.reconcile_from_server(server_grid):
+		_restore_crafting_timers()
+	else:
 		var batch_results: Array = _latest_action_batch_result.get("results", [])
 		GridManager.confirm_action_batch_results(batch_results)
 		push_warning("[GridView] Successful action batch snapshot did not match the optimistic board; kept local nodes")
 	_latest_action_batch_result.clear()
+
+func _restore_crafting_timers() -> void:
+	for entry: Dictionary in GridManager.get_all_items():
+		var item: Dictionary = entry.get("data", {})
+		CraftingService.restore_craft_timer_for_item(item)
 
 func _build_spawn_item(item_id: int, uid: int, atk_base: int, pending: bool) -> Dictionary:
 	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
@@ -1195,6 +1204,7 @@ func _sync_grid_from_server(result: Dictionary) -> void:
 		return
 	if GridManager.reconcile_from_server(server_grid):
 		print("[GridView] _sync_grid_from_server reconciled in place: entries=", server_grid.size())
+		_restore_crafting_timers()
 		return
 	print("[GridView] _sync_grid_from_server rebuilding: entries=", server_grid.size(),
 		" local_items=", GridManager.count_items(),

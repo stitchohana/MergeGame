@@ -208,7 +208,9 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `thresholds` | array | 阈值列表 `[{level, item_pool, count_min, count_max, acupoint_rewards, circulation_rewards}]` |
+配方产物等级由配方依赖树递归计算，并取所有基础原料等级的最大值；循环依赖、缺失配方或无效原料对应的产物不会进入候选池。
+
+| `thresholds` | array | 阈值列表 `[{stage, count_min, count_max, acupoint_rewards, order_count, fixed_orders}]`，不再配置 `item_pool` |
 
 ---
 

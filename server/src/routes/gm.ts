@@ -1,8 +1,33 @@
 import { Router, WorkerRequest as Request, WorkerResponse as Response } from "../worker/http";
-import { IStorage } from "../storage/interface";
+import { GameState, IStorage } from "../storage/interface";
 import { GameEngine } from "../engine/game_engine";
 import { createAuthRequired } from "../middleware/auth";
 import { enqueue } from "./queue";
+
+export function grantCurrentOrderItems(state: GameState, engine: GameEngine): { grantedCount: number; itemCounts: Record<string, number> } {
+  state.pending_rewards = state.pending_rewards || [];
+  const itemCounts: Record<string, number> = {};
+  let grantedCount = 0;
+
+  for (const order of state.meridian_acupoints || []) {
+    if ((order as any)?.completed === true || !Array.isArray((order as any)?.item_ids)) continue;
+    for (const rawItemId of (order as any).item_ids) {
+      const itemId = Number(rawItemId);
+      if (!Number.isInteger(itemId)) continue;
+      const itemDef = engine.getItemData(itemId);
+      if (!itemDef) continue;
+      state.pending_rewards.push({
+        uid: engine._nextUid(state),
+        id: itemId,
+        name: itemDef.name ?? `#${itemId}`,
+      });
+      itemCounts[String(itemId)] = (itemCounts[String(itemId)] || 0) + 1;
+      grantedCount += 1;
+    }
+  }
+
+  return { grantedCount, itemCounts };
+}
 
 export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret: string, gmKey: string): Router {
   const router = new Router();
@@ -39,6 +64,7 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
         engine.tickLauncherRecharge(state);
 
         let msg = "ok";
+        let gmResult: Record<string, unknown> = {};
 
         switch (cmd) {
           case "add_exp": {
@@ -141,14 +167,21 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
             msg = `Activated ${result.activated} home acupoints, completed ${result.completed_stages} stages`;
             break;
           }
+          case "grant_order_items": {
+            const result = grantCurrentOrderItems(state, engine);
+            if (result.grantedCount === 0) { res.status(400).json({ error: "no_order_items" }); return; }
+            gmResult = { granted_count: result.grantedCount, granted_items: result.itemCounts };
+            msg = `Granted ${result.grantedCount} current order items to pending rewards`;
+            break;
+          }
           default:
-            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid","activate_home_acupoints"] });
+            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid","activate_home_acupoints","grant_order_items"] });
             return;
         }
 
         await storage.saveState(userId, state);
         console.log(`[gm] ${userId}: ${cmd} — ${msg}`);
-        res.json({ ok: true, msg });
+        res.json({ ok: true, msg, ...gmResult });
       });
     } catch (e: any) {
       console.error("[gm] error:", e);

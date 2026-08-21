@@ -1,6 +1,7 @@
 class_name AcupointActivatePopup extends BasePopup
 
 const ITEM_WIDGET_SCENE: PackedScene = preload("res://scenes/ui/common/ItemWidget.tscn")
+const DEFAULT_ACTION_TEXT: String = "激活"
 
 @onready var title_label: Label = $PopupFrame/PopupPanel/Content/TaskOverview/TaskCopy/TitleLabel
 @onready var rewards_box: HBoxContainer = $PopupFrame/PopupPanel/Content/RewardsBox
@@ -13,7 +14,7 @@ const ITEM_WIDGET_SCENE: PackedScene = preload("res://scenes/ui/common/ItemWidge
 @onready var close_btn: Button = $PopupFrame/CloseButton
 
 var _on_action: Callable = Callable()
-var _action_text: String = "激活"
+var _action_text: String = DEFAULT_ACTION_TEXT
 var _action_cost_text: String = ""
 
 
@@ -57,7 +58,7 @@ func _on_rejected_handler(reason: String) -> void:
 
 func setup(title: String, cost: String, rewards: Dictionary, action_text: String, on_action: Callable) -> void:
 	title_label.text = title
-	_action_text = action_text if not action_text.is_empty() else "激活"
+	_action_text = action_text if not action_text.is_empty() else DEFAULT_ACTION_TEXT
 	_action_cost_text = _extract_cost_amount(cost)
 	_set_action_visual(_action_text, true)
 	action_btn.disabled = false
@@ -88,19 +89,27 @@ func _update_progress(cost: String) -> void:
 func _extract_progress_text(cost: String) -> String:
 	var lines: PackedStringArray = cost.split("\n")
 	for line in lines:
-		var marker: int = line.find("进度：")
-		if marker >= 0:
-			var progress: String = line.substr(marker + 3).strip_edges()
+		for marker_text in PackedStringArray(["进度：", "进度:"]):
+			var marker: int = line.find(marker_text)
+			if marker < 0:
+				continue
+			var progress: String = line.substr(marker + marker_text.length()).strip_edges()
 			if progress.contains("/"):
 				return progress
 	return ""
 
 
 func _extract_cost_amount(cost: String) -> String:
-	var marker_text: String = "消耗灵气："
-	var marker: int = cost.find(marker_text)
+	var marker_text: String = ""
+	var marker: int = -1
+	for candidate in PackedStringArray(["消耗灵气：", "消耗灵气:"]):
+		marker = cost.find(candidate)
+		if marker >= 0:
+			marker_text = candidate
+			break
 	if marker < 0:
-		return ""
+		var standalone_cost: String = cost.strip_edges()
+		return standalone_cost if standalone_cost.is_valid_int() else ""
 	var amount: String = cost.substr(marker + marker_text.length()).strip_edges()
 	var separator_index: int = amount.find("　")
 	if separator_index < 0:

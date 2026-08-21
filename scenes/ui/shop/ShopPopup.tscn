@@ -1,22 +1,28 @@
-[gd_scene load_steps=4 format=3 uid="uid://shop_popup_001"]
+[gd_scene format=3 uid="uid://yc443dwlm3at"]
 
-[ext_resource type="Script" path="res://scenes/ui/shop/ShopPopup.gd" id="1_sp"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://dnbtuoaqgs1ir" path="res://scenes/ui/shop/ShopPopup.gd" id="1_sp"]
 [ext_resource type="StyleBox" path="res://assets/ui/shop/shop_panel_style.tres" id="3_panel"]
 
-[node name="ShopPopup" type="Control"]
+[node name="ShopPopup" type="Control" unique_id=623403277]
 layout_mode = 3
 anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_sp")
-theme = ExtResource("2_theme")
 
-[node name="Dim" type="ColorRect" parent="."]
+[node name="Dim" type="ColorRect" parent="." unique_id=827517777]
 layout_mode = 1
 anchors_preset = 15
-color = Color(0, 0, 0, 0.5)
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Panel" type="Panel" parent="." unique_id=686066040]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -31,7 +37,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = ExtResource("3_panel")
 
-[node name="TitleLabel" type="Label" parent="Panel"]
+[node name="TitleLabel" type="Label" parent="Panel" unique_id=1511338860]
+layout_mode = 0
 offset_left = 28.0
 offset_top = 24.0
 offset_right = 548.0
@@ -41,18 +48,20 @@ theme_override_font_sizes/font_size = 28
 text = "商店"
 horizontal_alignment = 1
 
-[node name="CloseButton" type="Button" parent="Panel"]
+[node name="CloseButton" type="Button" parent="Panel" unique_id=2019249927]
+layout_mode = 0
 offset_left = 548.0
 offset_top = 18.0
 offset_right = 604.0
 offset_bottom = 70.0
-theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(0.18, 0.17, 0.31, 1)
 theme_override_colors/font_hover_color = Color(0.72, 0.5, 0.16, 1)
-flat = true
+theme_override_font_sizes/font_size = 20
 text = "X"
+flat = true
 
-[node name="ItemContainer" type="GridContainer" parent="Panel"]
+[node name="ItemContainer" type="GridContainer" parent="Panel" unique_id=1091570678]
+layout_mode = 0
 offset_left = 54.0
 offset_top = 112.0
 offset_right = 566.0

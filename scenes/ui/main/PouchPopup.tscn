@@ -1,26 +1,27 @@
-[gd_scene load_steps=3 format=3 uid="uid://d3mppjwx54eqq"]
+[gd_scene format=3 uid="uid://d3mppjwx54eqq"]
 
-[ext_resource type="Script" path="res://scenes/ui/main/PouchPopup.gd" id="1_gd"]
-[ext_resource type="Theme" path="res://assets/theme/formal_ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://mlk11j8esfnt" path="res://scenes/ui/main/PouchPopup.gd" id="1_gd"]
 
-[node name="PouchPopup" type="Control"]
+[node name="PouchPopup" type="Control" unique_id=26155102]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_gd")
-theme = ExtResource("2_theme")
 
-[node name="Dim" type="ColorRect" parent="."]
+[node name="Dim" type="ColorRect" parent="." unique_id=1127125108]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0, 0, 0, 0.5)
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Panel" type="Panel" parent="." unique_id=302992155]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -34,7 +35,8 @@ offset_bottom = 500.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TitleLabel" type="Label" parent="Panel"]
+[node name="TitleLabel" type="Label" parent="Panel" unique_id=1303402559]
+layout_mode = 0
 offset_left = 28.0
 offset_top = 24.0
 offset_right = 548.0
@@ -42,7 +44,8 @@ offset_bottom = 64.0
 theme_override_font_sizes/font_size = 24
 text = "储物袋"
 
-[node name="CloseButton" type="Button" parent="Panel"]
+[node name="CloseButton" type="Button" parent="Panel" unique_id=1753911355]
+layout_mode = 0
 offset_left = 548.0
 offset_top = 18.0
 offset_right = 604.0
@@ -50,7 +53,8 @@ offset_bottom = 70.0
 theme_override_font_sizes/font_size = 20
 text = "X"
 
-[node name="ItemContainer" type="GridContainer" parent="Panel"]
+[node name="ItemContainer" type="GridContainer" parent="Panel" unique_id=396190488]
+layout_mode = 0
 offset_left = 28.0
 offset_top = 84.0
 offset_right = 592.0

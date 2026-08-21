@@ -18,6 +18,7 @@ var _meridian_waiting_breakthrough: bool = false
 var _item_use_pending: bool = false
 var _load_token: int = -1
 var _pending_order_animation: Dictionary = {}
+var _order_animation_input_token: int = -1
 
 func _ready() -> void:
 	randomize()
@@ -92,6 +93,7 @@ func _render_main_grid_cache() -> void:
 	grid_view.set_skip_animations(false)
 
 func on_exit() -> void:
+	_end_order_animation_input_lock()
 	if GridManager.grid_updated.is_connected(_on_grid_changed):
 		GridManager.grid_updated.disconnect(_on_grid_changed)
 	grid_view._clear_all_item_nodes()
@@ -345,7 +347,7 @@ func _capture_order_animation(display_index: int) -> void:
 	var previous_positions: Dictionary = {}
 	for old_entry in entries:
 		previous_positions[old_entry.get_display_index()] = old_entry.position
-	_pending_order_animation = {"entry": entry, "sources": sources, "required_ids": required_ids, "completed_display_index": display_index, "previous_positions": previous_positions}
+	_pending_order_animation = {"entry": entry, "sources": sources, "required_ids": required_ids, "completed_display_index": display_index, "previous_positions": previous_positions, "start_qi": CultivationService.current_qi}
 	print("[GameScreen] order animation: captured index=", display_index, " required_ids=", required_ids, " sources=", sources.size())
 	if sources.is_empty():
 		print("[GameScreen] order animation: no matching board items for ids=", required_ids, " grid_nodes=", grid_view._item_nodes.size())
@@ -396,6 +398,8 @@ func _submit_meridian_complete(display_index: int) -> void:
 	if CloudService.online:
 		if _meridian_submit_pending:
 			return
+		if top_bar:
+			top_bar.set_qi_updates_suppressed(true)
 		_meridian_submit_pending = true
 		CloudService.meridian_complete_confirmed.connect(_on_meridian_confirmed, CONNECT_ONE_SHOT)
 		CloudService.meridian_complete_rejected.connect(_on_meridian_rejected, CONNECT_ONE_SHOT)
@@ -404,6 +408,7 @@ func _submit_meridian_complete(display_index: int) -> void:
 func _on_meridian_confirmed(result: Dictionary) -> void:
 	if CloudService.meridian_complete_rejected.is_connected(_on_meridian_rejected):
 		CloudService.meridian_complete_rejected.disconnect(_on_meridian_rejected)
+	_begin_order_animation_input_lock()
 	var animation: Dictionary = _pending_order_animation.duplicate(true)
 	_pending_order_animation.clear()
 	var animation_entry: RequirementEntry = animation.get("entry") as RequirementEntry
@@ -419,6 +424,8 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 	var cult: Dictionary = result.get("cultivation", {})
 	animation["target_qi"] = int(cult.get("current_qi", CultivationService.current_qi))
 	await _play_order_completion_animation(animation, int(result.get("qi_gained", 0)))
+	if top_bar:
+		top_bar.set_qi_updates_suppressed(false)
 	_meridian_submit_pending = false
 
 	var server_grid: Array = result.get("grid", [])
@@ -435,12 +442,29 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 	GameState.meridian_acupoints = result.get("meridian_acupoints", [])
 	_display_meridian()
 	requirement_list.animate_reflow_from(animation.get("previous_positions", {}), int(animation.get("completed_display_index", -1)))
+	await get_tree().create_timer(0.3).timeout
+	_end_order_animation_input_lock()
 
 	var qi_gained: int = result.get("qi_gained", 0)
 	if qi_gained > 0:
 		EventBus.show_toast.emit("灵力 +%d" % qi_gained)
 		if result.get("qi_full", false):
 			EventBus.show_toast.emit("灵力已满，尽快使用！")
+
+
+
+func _begin_order_animation_input_lock() -> void:
+	if _order_animation_input_token >= 0:
+		return
+	_order_animation_input_token = UIManager.begin_input_block("order_completion")
+
+
+func _end_order_animation_input_lock() -> void:
+	if _order_animation_input_token < 0:
+		return
+	UIManager.end_input_block(_order_animation_input_token)
+	_order_animation_input_token = -1
+
 
 func _play_order_completion_animation(animation: Dictionary, qi_gained: int) -> void:
 	if animation.is_empty():
@@ -461,7 +485,8 @@ func _play_order_completion_animation(animation: Dictionary, qi_gained: int) -> 
 	await get_tree().create_timer(0.24).timeout
 	if qi_gained > 0 and top_bar:
 		var target_qi: int = int(animation.get("target_qi", CultivationService.current_qi))
-		top_bar.qi_resource.set_value(target_qi)
+		var start_qi: int = int(animation.get("start_qi", target_qi - qi_gained))
+		top_bar.qi_resource.animate_value_from(start_qi, target_qi)
 		var qi_icon: TextureRect = top_bar.qi_resource.get_node_or_null("Icon") as TextureRect
 		if qi_icon and qi_icon.texture:
 			var from_pos: Vector2 = entry.get_global_rect().get_center() if entry and is_instance_valid(entry) else top_bar.global_position
@@ -572,6 +597,8 @@ func _on_stage_changed_for_meridian(_level: int, _name: String) -> void:
 
 func _on_meridian_rejected(reason: String) -> void:
 	_meridian_submit_pending = false
+	if top_bar:
+		top_bar.set_qi_updates_suppressed(false)
 	_pending_order_animation.clear()
 	if CloudService.meridian_complete_confirmed.is_connected(_on_meridian_confirmed):
 		CloudService.meridian_complete_confirmed.disconnect(_on_meridian_confirmed)

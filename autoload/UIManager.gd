@@ -20,6 +20,9 @@ var _layers: Dictionary = {}
 var _screen_stack: Array[BaseScreen] = []
 var _active_popups: Array[BasePopup] = []
 var _closing_popups: Array[BasePopup] = []
+var _input_block_tokens: Dictionary = {}
+var _next_input_block_token: int = 1
+var _input_blocker: Control = null
 
 signal pre_screen_changed(screen_name: String, action: String)
 signal post_screen_changed(screen_name: String, action: String)
@@ -49,6 +52,12 @@ func _ready() -> void:
 		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_ui_root.add_child(c)
 		_layers[layer] = c
+	_input_blocker = Control.new()
+	_input_blocker.name = "InputBlocker"
+	_input_blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_input_blocker.mouse_filter = Control.MOUSE_FILTER_STOP
+	_input_blocker.visible = false
+	_layers[Layer.OVERLAY].add_child(_input_blocker)
 
 	_update_input_gating()
 
@@ -175,12 +184,31 @@ func hide_top_popup() -> void:
 
 
 func is_input_blocked() -> bool:
-	return _active_popups.size() > 0
+	return _active_popups.size() > 0 or not _input_block_tokens.is_empty()
+
+
+func begin_input_block(reason: String = "") -> int:
+	var token: int = _next_input_block_token
+	_next_input_block_token += 1
+	_input_block_tokens[token] = reason
+	_update_input_gating()
+	input_blocked_changed.emit(true)
+	return token
+
+
+func end_input_block(token: int) -> void:
+	if not _input_block_tokens.has(token):
+		return
+	_input_block_tokens.erase(token)
+	_update_input_gating()
+	input_blocked_changed.emit(is_input_blocked())
 
 
 func _update_input_gating() -> void:
 	var blocked := is_input_blocked()
 	var game_layer = _layers.get(Layer.GAME)
+	if _input_blocker:
+		_input_blocker.visible = blocked
 	if game_layer:
 		game_layer.mouse_filter = Control.MOUSE_FILTER_STOP if blocked else Control.MOUSE_FILTER_IGNORE
 	var hud_layer = _layers.get(Layer.HUD)

@@ -1,2381 +1,2381 @@
 {
   "recipes": [
-	{
-	  "id": 1,
-	  "name": "养气散",
-	  "ingredients": [
-		5001,
-		9001
-	  ],
-	  "result": 27001,
-	  "craft_time": 15
-	},
-	{
-	  "id": 2,
-	  "name": "引气丸",
-	  "ingredients": [
-		5002,
-		9002
-	  ],
-	  "result": 27002,
-	  "craft_time": 15
-	},
-	{
-	  "id": 3,
-	  "name": "固元粉",
-	  "ingredients": [
-		5003,
-		1001
-	  ],
-	  "result": 27003,
-	  "craft_time": 15
-	},
-	{
-	  "id": 4,
-	  "name": "培元丹",
-	  "ingredients": [
-		5004,
-		1002,
-		9003
-	  ],
-	  "result": 27004,
-	  "craft_time": 20
-	},
-	{
-	  "id": 5,
-	  "name": "灵髓丸",
-	  "ingredients": [
-		5005,
-		1003,
-		9004
-	  ],
-	  "result": 27005,
-	  "craft_time": 20
-	},
-	{
-	  "id": 6,
-	  "name": "黄芽丹",
-	  "ingredients": [
-		1004,
-		6004
-	  ],
-	  "result": 27006,
-	  "craft_time": 15
-	},
-	{
-	  "id": 7,
-	  "name": "小还丹",
-	  "ingredients": [
-		1005,
-		6005,
-		9005,
-		3001
-	  ],
-	  "result": 27007,
-	  "craft_time": 25
-	},
-	{
-	  "id": 8,
-	  "name": "赤阳丸",
-	  "ingredients": [
-		1006,
-		6006,
-		12006,
-		3002
-	  ],
-	  "result": 27008,
-	  "craft_time": 25
-	},
-	{
-	  "id": 9,
-	  "name": "青冥丹",
-	  "ingredients": [
-		1007,
-		6007,
-		9007,
-		3003
-	  ],
-	  "result": 27009,
-	  "craft_time": 25
-	},
-	{
-	  "id": 10,
-	  "name": "玄金散",
-	  "ingredients": [
-		1008,
-		6008,
-		9008
-	  ],
-	  "result": 27010,
-	  "craft_time": 20
-	},
-	{
-	  "id": 11,
-	  "name": "冰魄丹",
-	  "ingredients": [
-		1009,
-		7005,
-		8005,
-		3005
-	  ],
-	  "result": 27011,
-	  "craft_time": 25
-	},
-	{
-	  "id": 12,
-	  "name": "火灵丸",
-	  "ingredients": [
-		1010,
-		7006,
-		8006,
-		3006
-	  ],
-	  "result": 27012,
-	  "craft_time": 25
-	},
-	{
-	  "id": 13,
-	  "name": "青玄丹",
-	  "ingredients": [
-		1011,
-		7007,
-		8007,
-		3007
-	  ],
-	  "result": 27013,
-	  "craft_time": 25
-	},
-	{
-	  "id": 14,
-	  "name": "五雷丹",
-	  "ingredients": [
-		1012,
-		7008,
-		8008,
-		3008
-	  ],
-	  "result": 27014,
-	  "craft_time": 25
-	},
-	{
-	  "id": 15,
-	  "name": "地龙丹",
-	  "ingredients": [
-		7009,
-		8009,
-		3009,
-		6009
-	  ],
-	  "result": 27015,
-	  "craft_time": 25
-	},
-	{
-	  "id": 16,
-	  "name": "星狼丹",
-	  "ingredients": [
-		7010,
-		8010,
-		3010,
-		6010
-	  ],
-	  "result": 27016,
-	  "craft_time": 25
-	},
-	{
-	  "id": 17,
-	  "name": "紫狐丹",
-	  "ingredients": [
-		7011,
-		8011,
-		3011,
-		6011
-	  ],
-	  "result": 27017,
-	  "craft_time": 25
-	},
-	{
-	  "id": 18,
-	  "name": "九命丹",
-	  "ingredients": [
-		7012,
-		8012,
-		9012,
-		6012
-	  ],
-	  "result": 27018,
-	  "craft_time": 25
-	},
-	{
-	  "id": 19,
-	  "name": "地皇丹",
-	  "ingredients": [
-		5009,
-		5012,
-		12009
-	  ],
-	  "result": 27019,
-	  "craft_time": 20
-	},
-	{
-	  "id": 20,
-	  "name": "星芒丹",
-	  "ingredients": [
-		5010,
-		5011,
-		9010
-	  ],
-	  "result": 27020,
-	  "craft_time": 20
-	},
-	{
-	  "id": 21,
-	  "name": "紫府金丹",
-	  "ingredients": [
-		5011,
-		9011,
-		1010
-	  ],
-	  "result": 27021,
-	  "craft_time": 20
-	},
-	{
-	  "id": 22,
-	  "name": "九窍还魂丹",
-	  "ingredients": [
-		5012,
-		9012,
-		1012
-	  ],
-	  "result": 27022,
-	  "craft_time": 20
-	},
-	{
-	  "id": 23,
-	  "name": "麒麟丹",
-	  "ingredients": [
-		7013,
-		8013,
-		12013
-	  ],
-	  "result": 27023,
-	  "craft_time": 20
-	},
-	{
-	  "id": 24,
-	  "name": "真龙丹",
-	  "ingredients": [
-		7014,
-		8014,
-		12014
-	  ],
-	  "result": 27024,
-	  "craft_time": 20
-	},
-	{
-	  "id": 25,
-	  "name": "凤凰丹",
-	  "ingredients": [
-		7015,
-		8015,
-		9015
-	  ],
-	  "result": 27025,
-	  "craft_time": 20
-	},
-	{
-	  "id": 26,
-	  "name": "混沌丹",
-	  "ingredients": [
-		7016,
-		8016,
-		9016
-	  ],
-	  "result": 27026,
-	  "craft_time": 20
-	},
-	{
-	  "id": 27,
-	  "name": "涅槃丹",
-	  "ingredients": [
-		5013,
-		6013,
-		3013
-	  ],
-	  "result": 27027,
-	  "craft_time": 20
-	},
-	{
-	  "id": 28,
-	  "name": "龙牙丹",
-	  "ingredients": [
-		5014,
-		6014,
-		3014
-	  ],
-	  "result": 27028,
-	  "craft_time": 20
-	},
-	{
-	  "id": 29,
-	  "name": "凤羽金丹",
-	  "ingredients": [
-		5015,
-		6015,
-		3015
-	  ],
-	  "result": 27029,
-	  "craft_time": 20
-	},
-	{
-	  "id": 30,
-	  "name": "混沌玄丹",
-	  "ingredients": [
-		5016,
-		6016,
-		3016
-	  ],
-	  "result": 27030,
-	  "craft_time": 20
-	},
-	{
-	  "id": 31,
-	  "name": "筑基丹",
-	  "ingredients": [
-		22004,
-		22004
-	  ],
-	  "result": 27031,
-	  "craft_time": 15
-	},
-	{
-	  "id": 32,
-	  "name": "聚灵大丹",
-	  "ingredients": [
-		22002,
-		9004
-	  ],
-	  "result": 27081,
-	  "craft_time": 15
-	},
-	{
-	  "id": 33,
-	  "name": "培元大丹",
-	  "ingredients": [
-		22003,
-		6004,
-		5004
-	  ],
-	  "result": 27033,
-	  "craft_time": 20
-	},
-	{
-	  "id": 34,
-	  "name": "玄冰大丹",
-	  "ingredients": [
-		22005,
-		6005,
-		3005
-	  ],
-	  "result": 27034,
-	  "craft_time": 20
-	},
-	{
-	  "id": 35,
-	  "name": "赤阳大丹",
-	  "ingredients": [
-		22006,
-		6006,
-		3006
-	  ],
-	  "result": 27035,
-	  "craft_time": 20
-	},
-	{
-	  "id": 36,
-	  "name": "青木大丹",
-	  "ingredients": [
-		22007,
-		6007,
-		3007
-	  ],
-	  "result": 27036,
-	  "craft_time": 20
-	},
-	{
-	  "id": 37,
-	  "name": "雷音大丹",
-	  "ingredients": [
-		22008,
-		6008,
-		3008
-	  ],
-	  "result": 27037,
-	  "craft_time": 20
-	},
-	{
-	  "id": 38,
-	  "name": "地脉大丹",
-	  "ingredients": [
-		22009,
-		6009,
-		3009
-	  ],
-	  "result": 27038,
-	  "craft_time": 20
-	},
-	{
-	  "id": 39,
-	  "name": "星辉大丹",
-	  "ingredients": [
-		22010,
-		6010,
-		3010
-	  ],
-	  "result": 27039,
-	  "craft_time": 20
-	},
-	{
-	  "id": 40,
-	  "name": "紫府大丹",
-	  "ingredients": [
-		22011,
-		6011,
-		3011
-	  ],
-	  "result": 27040,
-	  "craft_time": 20
-	},
-	{
-	  "id": 41,
-	  "name": "九窍大丹",
-	  "ingredients": [
-		22012,
-		6012,
-		9012
-	  ],
-	  "result": 27041,
-	  "craft_time": 20
-	},
-	{
-	  "id": 42,
-	  "name": "涅槃大丹",
-	  "ingredients": [
-		22013,
-		6013,
-		3013
-	  ],
-	  "result": 27042,
-	  "craft_time": 20
-	},
-	{
-	  "id": 43,
-	  "name": "龙灵大丹",
-	  "ingredients": [
-		22014,
-		6014,
-		3014
-	  ],
-	  "result": 27043,
-	  "craft_time": 20
-	},
-	{
-	  "id": 44,
-	  "name": "凤血大丹",
-	  "ingredients": [
-		22015,
-		6015,
-		3015
-	  ],
-	  "result": 27044,
-	  "craft_time": 20
-	},
-	{
-	  "id": 45,
-	  "name": "混沌大丹",
-	  "ingredients": [
-		22016,
-		6016,
-		3016
-	  ],
-	  "result": 27045,
-	  "craft_time": 20
-	},
-	{
-	  "id": 46,
-	  "name": "九转金丹",
-	  "ingredients": [
-		22011,
-		22012,
-		22013,
-		3016
-	  ],
-	  "result": 27046,
-	  "craft_time": 25
-	},
-	{
-	  "id": 47,
-	  "name": "太清仙丹",
-	  "ingredients": [
-		22014,
-		22015,
-		22016,
-		4016
-	  ],
-	  "result": 27047,
-	  "craft_time": 25
-	},
-	{
-	  "id": 48,
-	  "name": "天地玄黄丹",
-	  "ingredients": [
-		27006,
-		27034,
-		27019,
-		27030
-	  ],
-	  "result": 27048,
-	  "craft_time": 25
-	},
-	{
-	  "id": 49,
-	  "name": "五气朝元丹",
-	  "ingredients": [
-		27013,
-		27035,
-		27038,
-		27039
-	  ],
-	  "result": 27049,
-	  "craft_time": 25
-	},
-	{
-	  "id": 50,
-	  "name": "万法归宗丹",
-	  "ingredients": [
-		27045,
-		27047,
-		27046,
-		9016
-	  ],
-	  "result": 27050,
-	  "craft_time": 25
-	},
-	{
-	  "id": 51,
-	  "name": "回灵散",
-	  "ingredients": [
-		9001,
-		3001
-	  ],
-	  "result": 27051,
-	  "craft_time": 15
-	},
-	{
-	  "id": 52,
-	  "name": "复灵丸",
-	  "ingredients": [
-		9002,
-		3002
-	  ],
-	  "result": 27052,
-	  "craft_time": 15
-	},
-	{
-	  "id": 53,
-	  "name": "清心露",
-	  "ingredients": [
-		9003,
-		3003
-	  ],
-	  "result": 27053,
-	  "craft_time": 15
-	},
-	{
-	  "id": 54,
-	  "name": "玉灵丹",
-	  "ingredients": [
-		9004,
-		3004,
-		6002
-	  ],
-	  "result": 27054,
-	  "craft_time": 20
-	},
-	{
-	  "id": 55,
-	  "name": "冰心丸",
-	  "ingredients": [
-		9005,
-		3005,
-		6005
-	  ],
-	  "result": 27055,
-	  "craft_time": 20
-	},
-	{
-	  "id": 56,
-	  "name": "火灵散",
-	  "ingredients": [
-		12006,
-		3006,
-		6006
-	  ],
-	  "result": 27056,
-	  "craft_time": 20
-	},
-	{
-	  "id": 57,
-	  "name": "青木露",
-	  "ingredients": [
-		9007,
-		3007,
-		6007
-	  ],
-	  "result": 27057,
-	  "craft_time": 20
-	},
-	{
-	  "id": 58,
-	  "name": "雷光液",
-	  "ingredients": [
-		9008,
-		3008,
-		6008
-	  ],
-	  "result": 27058,
-	  "craft_time": 20
-	},
-	{
-	  "id": 59,
-	  "name": "地脉浆",
-	  "ingredients": [
-		12009,
-		3009,
-		6009
-	  ],
-	  "result": 27059,
-	  "craft_time": 20
-	},
-	{
-	  "id": 60,
-	  "name": "星辉液",
-	  "ingredients": [
-		9010,
-		3010,
-		6010
-	  ],
-	  "result": 27060,
-	  "craft_time": 20
-	},
-	{
-	  "id": 61,
-	  "name": "寒泉丹",
-	  "ingredients": [
-		1005,
-		7005,
-		8005,
-		6005
-	  ],
-	  "result": 27061,
-	  "craft_time": 25
-	},
-	{
-	  "id": 62,
-	  "name": "炎泉丹",
-	  "ingredients": [
-		1006,
-		7006,
-		8006,
-		6006
-	  ],
-	  "result": 27062,
-	  "craft_time": 25
-	},
-	{
-	  "id": 63,
-	  "name": "青泉丹",
-	  "ingredients": [
-		1007,
-		7007,
-		8007,
-		6007
-	  ],
-	  "result": 27063,
-	  "craft_time": 25
-	},
-	{
-	  "id": 64,
-	  "name": "雷泉丹",
-	  "ingredients": [
-		1008,
-		7008,
-		8008,
-		6008
-	  ],
-	  "result": 27064,
-	  "craft_time": 25
-	},
-	{
-	  "id": 65,
-	  "name": "地髓大丹",
-	  "ingredients": [
-		1009,
-		7009,
-		8009,
-		6009
-	  ],
-	  "result": 27065,
-	  "craft_time": 25
-	},
-	{
-	  "id": 66,
-	  "name": "星尘大丹",
-	  "ingredients": [
-		1010,
-		7010,
-		8010,
-		6010
-	  ],
-	  "result": 27066,
-	  "craft_time": 25
-	},
-	{
-	  "id": 67,
-	  "name": "紫气大丹",
-	  "ingredients": [
-		1011,
-		7011,
-		8011,
-		6011
-	  ],
-	  "result": 27067,
-	  "craft_time": 25
-	},
-	{
-	  "id": 68,
-	  "name": "九泉大丹",
-	  "ingredients": [
-		1012,
-		7012,
-		8012,
-		6012
-	  ],
-	  "result": 27068,
-	  "craft_time": 25
-	},
-	{
-	  "id": 69,
-	  "name": "地皇灵丹",
-	  "ingredients": [
-		5009,
-		12009
-	  ],
-	  "result": 27069,
-	  "craft_time": 15
-	},
-	{
-	  "id": 70,
-	  "name": "星芒灵丹",
-	  "ingredients": [
-		5010,
-		9010
-	  ],
-	  "result": 27070,
-	  "craft_time": 15
-	},
-	{
-	  "id": 71,
-	  "name": "紫府灵丹",
-	  "ingredients": [
-		5011,
-		9011
-	  ],
-	  "result": 27071,
-	  "craft_time": 15
-	},
-	{
-	  "id": 72,
-	  "name": "九窍灵丹",
-	  "ingredients": [
-		5012,
-		9012
-	  ],
-	  "result": 27072,
-	  "craft_time": 15
-	},
-	{
-	  "id": 73,
-	  "name": "麒麟灵丹",
-	  "ingredients": [
-		7013,
-		8013,
-		12013
-	  ],
-	  "result": 27073,
-	  "craft_time": 20
-	},
-	{
-	  "id": 74,
-	  "name": "龙鳞灵丹",
-	  "ingredients": [
-		7014,
-		8014,
-		12014
-	  ],
-	  "result": 27074,
-	  "craft_time": 20
-	},
-	{
-	  "id": 75,
-	  "name": "凤羽灵丹",
-	  "ingredients": [
-		7015,
-		8015,
-		9015
-	  ],
-	  "result": 27075,
-	  "craft_time": 20
-	},
-	{
-	  "id": 76,
-	  "name": "混沌灵丹",
-	  "ingredients": [
-		7016,
-		8016,
-		9016
-	  ],
-	  "result": 27080,
-	  "craft_time": 20
-	},
-	{
-	  "id": 77,
-	  "name": "涅槃灵丹",
-	  "ingredients": [
-		5013,
-		6013,
-		3013
-	  ],
-	  "result": 27077,
-	  "craft_time": 20
-	},
-	{
-	  "id": 78,
-	  "name": "龙息灵丹",
-	  "ingredients": [
-		5014,
-		6014,
-		3014
-	  ],
-	  "result": 27078,
-	  "craft_time": 20
-	},
-	{
-	  "id": 79,
-	  "name": "凤血灵丹",
-	  "ingredients": [
-		5015,
-		6015,
-		3015
-	  ],
-	  "result": 27079,
-	  "craft_time": 20
-	},
-	{
-	  "id": 80,
-	  "name": "混沌灵丹",
-	  "ingredients": [
-		5016,
-		6016,
-		3016
-	  ],
-	  "result": 27080,
-	  "craft_time": 20
-	},
-	{
-	  "id": 81,
-	  "name": "聚灵大丹",
-	  "ingredients": [
-		22002,
-		3002
-	  ],
-	  "result": 27081,
-	  "craft_time": 15
-	},
-	{
-	  "id": 82,
-	  "name": "玉液大丹",
-	  "ingredients": [
-		22004,
-		9004,
-		3004
-	  ],
-	  "result": 27082,
-	  "craft_time": 20
-	},
-	{
-	  "id": 83,
-	  "name": "玄冰大灵丹",
-	  "ingredients": [
-		22005,
-		3005,
-		6005
-	  ],
-	  "result": 27083,
-	  "craft_time": 20
-	},
-	{
-	  "id": 84,
-	  "name": "赤阳大灵丹",
-	  "ingredients": [
-		22006,
-		3006,
-		6006
-	  ],
-	  "result": 27084,
-	  "craft_time": 20
-	},
-	{
-	  "id": 85,
-	  "name": "青木大灵丹",
-	  "ingredients": [
-		22007,
-		3007,
-		6007
-	  ],
-	  "result": 27085,
-	  "craft_time": 20
-	},
-	{
-	  "id": 86,
-	  "name": "雷音大灵丹",
-	  "ingredients": [
-		22008,
-		3008,
-		6008
-	  ],
-	  "result": 27086,
-	  "craft_time": 20
-	},
-	{
-	  "id": 87,
-	  "name": "地脉大灵丹",
-	  "ingredients": [
-		22009,
-		3009,
-		6009
-	  ],
-	  "result": 27087,
-	  "craft_time": 20
-	},
-	{
-	  "id": 88,
-	  "name": "星辉大灵丹",
-	  "ingredients": [
-		22010,
-		3010,
-		6010
-	  ],
-	  "result": 27088,
-	  "craft_time": 20
-	},
-	{
-	  "id": 89,
-	  "name": "紫府大灵丹",
-	  "ingredients": [
-		22011,
-		3011,
-		6011
-	  ],
-	  "result": 27089,
-	  "craft_time": 20
-	},
-	{
-	  "id": 90,
-	  "name": "九窍大灵丹",
-	  "ingredients": [
-		22012,
-		9012,
-		6012
-	  ],
-	  "result": 27090,
-	  "craft_time": 20
-	},
-	{
-	  "id": 91,
-	  "name": "涅槃大灵丹",
-	  "ingredients": [
-		22013,
-		3013,
-		6013
-	  ],
-	  "result": 27091,
-	  "craft_time": 20
-	},
-	{
-	  "id": 92,
-	  "name": "龙灵大灵丹",
-	  "ingredients": [
-		22014,
-		3014,
-		6014
-	  ],
-	  "result": 27092,
-	  "craft_time": 20
-	},
-	{
-	  "id": 93,
-	  "name": "凤血大灵丹",
-	  "ingredients": [
-		22015,
-		3015,
-		6015
-	  ],
-	  "result": 27093,
-	  "craft_time": 20
-	},
-	{
-	  "id": 94,
-	  "name": "混沌大灵丹",
-	  "ingredients": [
-		22016,
-		3016,
-		6016
-	  ],
-	  "result": 27094,
-	  "craft_time": 20
-	},
-	{
-	  "id": 95,
-	  "name": "九转还灵丹",
-	  "ingredients": [
-		27082,
-		27087,
-		27090
-	  ],
-	  "result": 27095,
-	  "craft_time": 20
-	},
-	{
-	  "id": 96,
-	  "name": "太清还灵丹",
-	  "ingredients": [
-		27092,
-		27093,
-		27094
-	  ],
-	  "result": 27096,
-	  "craft_time": 20
-	},
-	{
-	  "id": 97,
-	  "name": "五灵归元丹",
-	  "ingredients": [
-		27085,
-		27084,
-		27087,
-		27088
-	  ],
-	  "result": 27097,
-	  "craft_time": 25
-	},
-	{
-	  "id": 98,
-	  "name": "万灵朝宗丹",
-	  "ingredients": [
-		27073,
-		27074,
-		27075,
-		27076
-	  ],
-	  "result": 27098,
-	  "craft_time": 25
-	},
-	{
-	  "id": 99,
-	  "name": "灵气源泉丹",
-	  "ingredients": [
-		10010,
-		10012,
-		10014,
-		10016
-	  ],
-	  "result": 27099,
-	  "craft_time": 25
-	},
-	{
-	  "id": 100,
-	  "name": "生生不息丹",
-	  "ingredients": [
-		27051,
-		27054,
-		27068,
-		27080
-	  ],
-	  "result": 27100,
-	  "craft_time": 25
-	},
-	{
-	  "id": 101,
-	  "name": "黄粱米酒",
-	  "ingredients": [
-		5001,
-		9001
-	  ],
-	  "result": 27101,
-	  "craft_time": 15
-	},
-	{
-	  "id": 102,
-	  "name": "清溪果酿",
-	  "ingredients": [
-		6002,
-		9002
-	  ],
-	  "result": 27102,
-	  "craft_time": 15
-	},
-	{
-	  "id": 103,
-	  "name": "百花醉",
-	  "ingredients": [
-		3002,
-		9003
-	  ],
-	  "result": 27103,
-	  "craft_time": 15
-	},
-	{
-	  "id": 104,
-	  "name": "玉露琼浆",
-	  "ingredients": [
-		9004,
-		6004
-	  ],
-	  "result": 27104,
-	  "craft_time": 15
-	},
-	{
-	  "id": 105,
-	  "name": "青芽酿",
-	  "ingredients": [
-		5003,
-		3003,
-		6003
-	  ],
-	  "result": 27105,
-	  "craft_time": 20
-	},
-	{
-	  "id": 106,
-	  "name": "霜华酿",
-	  "ingredients": [
-		5005,
-		3005,
-		6005
-	  ],
-	  "result": 27106,
-	  "craft_time": 20
-	},
-	{
-	  "id": 107,
-	  "name": "赤阳烧",
-	  "ingredients": [
-		5006,
-		3006,
-		6006
-	  ],
-	  "result": 27107,
-	  "craft_time": 20
-	},
-	{
-	  "id": 108,
-	  "name": "青玄酿",
-	  "ingredients": [
-		5007,
-		3007,
-		6007
-	  ],
-	  "result": 27108,
-	  "craft_time": 20
-	},
-	{
-	  "id": 109,
-	  "name": "雷火酒",
-	  "ingredients": [
-		5008,
-		3008,
-		6008
-	  ],
-	  "result": 27109,
-	  "craft_time": 20
-	},
-	{
-	  "id": 110,
-	  "name": "地脉醇",
-	  "ingredients": [
-		5009,
-		3009,
-		6009
-	  ],
-	  "result": 27110,
-	  "craft_time": 20
-	},
-	{
-	  "id": 111,
-	  "name": "星芒醉",
-	  "ingredients": [
-		5010,
-		3010,
-		6010
-	  ],
-	  "result": 27111,
-	  "craft_time": 20
-	},
-	{
-	  "id": 112,
-	  "name": "紫府仙酿",
-	  "ingredients": [
-		5011,
-		3011,
-		6011
-	  ],
-	  "result": 27112,
-	  "craft_time": 20
-	},
-	{
-	  "id": 113,
-	  "name": "九孔玉液酒",
-	  "ingredients": [
-		5012,
-		9012,
-		6012
-	  ],
-	  "result": 27113,
-	  "craft_time": 20
-	},
-	{
-	  "id": 114,
-	  "name": "涅槃重生酿",
-	  "ingredients": [
-		5013,
-		3013,
-		6013
-	  ],
-	  "result": 27114,
-	  "craft_time": 20
-	},
-	{
-	  "id": 115,
-	  "name": "龙息醇",
-	  "ingredients": [
-		5014,
-		3014,
-		6014
-	  ],
-	  "result": 27115,
-	  "craft_time": 20
-	},
-	{
-	  "id": 116,
-	  "name": "凤羽天酿",
-	  "ingredients": [
-		5015,
-		3015,
-		6015
-	  ],
-	  "result": 27116,
-	  "craft_time": 20
-	},
-	{
-	  "id": 117,
-	  "name": "混沌元酒",
-	  "ingredients": [
-		5016,
-		3016,
-		6016
-	  ],
-	  "result": 27117,
-	  "craft_time": 20
-	},
-	{
-	  "id": 118,
-	  "name": "冰蚕寒酿",
-	  "ingredients": [
-		7005,
-		3005,
-		1005
-	  ],
-	  "result": 27118,
-	  "craft_time": 20
-	},
-	{
-	  "id": 119,
-	  "name": "火浣烈酒",
-	  "ingredients": [
-		7006,
-		3006,
-		1006
-	  ],
-	  "result": 27119,
-	  "craft_time": 20
-	},
-	{
-	  "id": 120,
-	  "name": "龟甲养身酒",
-	  "ingredients": [
-		7007,
-		3007,
-		1007
-	  ],
-	  "result": 27120,
-	  "craft_time": 20
-	},
-	{
-	  "id": 121,
-	  "name": "雷蟒电光酒",
-	  "ingredients": [
-		7008,
-		3008,
-		1008
-	  ],
-	  "result": 27121,
-	  "craft_time": 20
-	},
-	{
-	  "id": 122,
-	  "name": "地龙沉酿",
-	  "ingredients": [
-		7009,
-		3009,
-		1009
-	  ],
-	  "result": 27122,
-	  "craft_time": 20
-	},
-	{
-	  "id": 123,
-	  "name": "星貂幻酒",
-	  "ingredients": [
-		7010,
-		3010,
-		1010
-	  ],
-	  "result": 27123,
-	  "craft_time": 20
-	},
-	{
-	  "id": 124,
-	  "name": "紫狐迷魂酒",
-	  "ingredients": [
-		7011,
-		3011,
-		1011
-	  ],
-	  "result": 27124,
-	  "craft_time": 20
-	},
-	{
-	  "id": 125,
-	  "name": "九尾灵酒",
-	  "ingredients": [
-		7012,
-		9012,
-		1012
-	  ],
-	  "result": 27125,
-	  "craft_time": 20
-	},
-	{
-	  "id": 126,
-	  "name": "麒麟祥瑞酒",
-	  "ingredients": [
-		7013,
-		12013,
-		8013
-	  ],
-	  "result": 27126,
-	  "craft_time": 20
-	},
-	{
-	  "id": 127,
-	  "name": "龙鳞战酒",
-	  "ingredients": [
-		7014,
-		12014,
-		8014
-	  ],
-	  "result": 27127,
-	  "craft_time": 20
-	},
-	{
-	  "id": 128,
-	  "name": "凤羽涅槃酒",
-	  "ingredients": [
-		7015,
-		9015,
-		8015
-	  ],
-	  "result": 27128,
-	  "craft_time": 20
-	},
-	{
-	  "id": 129,
-	  "name": "混沌悟道酒",
-	  "ingredients": [
-		7016,
-		9016,
-		8016
-	  ],
-	  "result": 27129,
-	  "craft_time": 20
-	},
-	{
-	  "id": 130,
-	  "name": "灵果甘酿",
-	  "ingredients": [
-		6004,
-		9004,
-		3004
-	  ],
-	  "result": 27130,
-	  "craft_time": 20
-	},
-	{
-	  "id": 131,
-	  "name": "地脉灵根酒",
-	  "ingredients": [
-		6009,
-		12009,
-		3009
-	  ],
-	  "result": 27131,
-	  "craft_time": 20
-	},
-	{
-	  "id": 132,
-	  "name": "星辉甘霖酒",
-	  "ingredients": [
-		6010,
-		9010,
-		3010
-	  ],
-	  "result": 27132,
-	  "craft_time": 20
-	},
-	{
-	  "id": 133,
-	  "name": "紫光仙酒",
-	  "ingredients": [
-		6011,
-		9011,
-		3011
-	  ],
-	  "result": 27133,
-	  "craft_time": 20
-	},
-	{
-	  "id": 134,
-	  "name": "九窍玉髓酒",
-	  "ingredients": [
-		6012,
-		9012,
-		5012
-	  ],
-	  "result": 27134,
-	  "craft_time": 20
-	},
-	{
-	  "id": 135,
-	  "name": "涅槃烈酒",
-	  "ingredients": [
-		6013,
-		12013,
-		3013
-	  ],
-	  "result": 27135,
-	  "craft_time": 20
-	},
-	{
-	  "id": 136,
-	  "name": "龙涎封侯酒",
-	  "ingredients": [
-		6014,
-		12014,
-		3014
-	  ],
-	  "result": 27136,
-	  "craft_time": 20
-	},
-	{
-	  "id": 137,
-	  "name": "凤羽飞天酒",
-	  "ingredients": [
-		6015,
-		9015,
-		3015
-	  ],
-	  "result": 27137,
-	  "craft_time": 20
-	},
-	{
-	  "id": 138,
-	  "name": "混沌朝圣酒",
-	  "ingredients": [
-		6016,
-		9016,
-		3016
-	  ],
-	  "result": 27138,
-	  "craft_time": 20
-	},
-	{
-	  "id": 139,
-	  "name": "寒泉冻骨酒",
-	  "ingredients": [
-		9005,
-		1005,
-		3005
-	  ],
-	  "result": 27139,
-	  "craft_time": 20
-	},
-	{
-	  "id": 140,
-	  "name": "炎泉沸血酒",
-	  "ingredients": [
-		12006,
-		1006,
-		3006
-	  ],
-	  "result": 27140,
-	  "craft_time": 20
-	},
-	{
-	  "id": 141,
-	  "name": "青泉生机酒",
-	  "ingredients": [
-		9007,
-		1007,
-		3007
-	  ],
-	  "result": 27141,
-	  "craft_time": 20
-	},
-	{
-	  "id": 142,
-	  "name": "雷泉电身酒",
-	  "ingredients": [
-		9008,
-		1008,
-		3008
-	  ],
-	  "result": 27142,
-	  "craft_time": 20
-	},
-	{
-	  "id": 143,
-	  "name": "九转回春酒",
-	  "ingredients": [
-		27051,
-		27054,
-		27068
-	  ],
-	  "result": 27143,
-	  "craft_time": 20
-	},
-	{
-	  "id": 144,
-	  "name": "百草灵酒",
-	  "ingredients": [
-		1001,
-		1002,
-		1003,
-		9004
-	  ],
-	  "result": 27144,
-	  "craft_time": 25
-	},
-	{
-	  "id": 145,
-	  "name": "五灵合酿酒",
-	  "ingredients": [
-		27108,
-		27107,
-		27110,
-		27111
-	  ],
-	  "result": 27145,
-	  "craft_time": 25
-	},
-	{
-	  "id": 146,
-	  "name": "三花聚顶酒",
-	  "ingredients": [
-		3002,
-		3007,
-		3011
-	  ],
-	  "result": 27146,
-	  "craft_time": 20
-	},
-	{
-	  "id": 147,
-	  "name": "五行调和酒",
-	  "ingredients": [
-		27118,
-		27119,
-		27120,
-		27121
-	  ],
-	  "result": 27147,
-	  "craft_time": 25
-	},
-	{
-	  "id": 148,
-	  "name": "九龙升天酒",
-	  "ingredients": [
-		27115,
-		27127,
-		27136,
-		5014
-	  ],
-	  "result": 27148,
-	  "craft_time": 25
-	},
-	{
-	  "id": 149,
-	  "name": "九凤朝凰酒",
-	  "ingredients": [
-		27116,
-		27128,
-		27137,
-		5015
-	  ],
-	  "result": 27149,
-	  "craft_time": 25
-	},
-	{
-	  "id": 150,
-	  "name": "混沌万道酒",
-	  "ingredients": [
-		27117,
-		27129,
-		27138,
-		5016
-	  ],
-	  "result": 27150,
-	  "craft_time": 25
-	},
-	{
-	  "id": 151,
-	  "name": "铁木剑",
-	  "ingredients": [
-		2002,
-		9001
-	  ],
-	  "result": 28001,
-	  "craft_time": 15
-	},
-	{
-	  "id": 152,
-	  "name": "铜锋剑",
-	  "ingredients": [
-		2003,
-		9002,
-		4001
-	  ],
-	  "result": 28002,
-	  "craft_time": 20
-	},
-	{
-	  "id": 153,
-	  "name": "银光剑",
-	  "ingredients": [
-		2003,
-		2004,
-		4003,
-		9003
-	  ],
-	  "result": 28003,
-	  "craft_time": 25
-	},
-	{
-	  "id": 154,
-	  "name": "玄金短剑",
-	  "ingredients": [
-		2004,
-		4004,
-		9004
-	  ],
-	  "result": 28004,
-	  "craft_time": 20
-	},
-	{
-	  "id": 155,
-	  "name": "寒渊冰剑",
-	  "ingredients": [
-		2005,
-		4005,
-		9005,
-		4002
-	  ],
-	  "result": 28005,
-	  "craft_time": 25
-	},
-	{
-	  "id": 156,
-	  "name": "赤炎火剑",
-	  "ingredients": [
-		2006,
-		4006,
-		9006
-	  ],
-	  "result": 28006,
-	  "craft_time": 20
-	},
-	{
-	  "id": 157,
-	  "name": "青灵木剑",
-	  "ingredients": [
-		2007,
-		4007,
-		9007,
-		3007
-	  ],
-	  "result": 28007,
-	  "craft_time": 25
-	},
-	{
-	  "id": 158,
-	  "name": "金雷斩邪剑",
-	  "ingredients": [
-		2008,
-		4008,
-		9008,
-		3008
-	  ],
-	  "result": 28008,
-	  "craft_time": 25
-	},
-	{
-	  "id": 159,
-	  "name": "地脉重剑",
-	  "ingredients": [
-		2009,
-		4009,
-		9009,
-		3009
-	  ],
-	  "result": 28009,
-	  "craft_time": 25
-	},
-	{
-	  "id": 160,
-	  "name": "星陨长剑",
-	  "ingredients": [
-		2010,
-		4010,
-		27060,
-		3010
-	  ],
-	  "result": 28010,
-	  "craft_time": 25
-	},
-	{
-	  "id": 161,
-	  "name": "虚空影剑",
-	  "ingredients": [
-		2011,
-		4011,
-		9011,
-		3011
-	  ],
-	  "result": 28011,
-	  "craft_time": 25
-	},
-	{
-	  "id": 162,
-	  "name": "九幽玄冥剑",
-	  "ingredients": [
-		2012,
-		4012,
-		9012,
-		6012
-	  ],
-	  "result": 28012,
-	  "craft_time": 25
-	},
-	{
-	  "id": 163,
-	  "name": "太阳真光剑",
-	  "ingredients": [
-		2013,
-		4013,
-		9013,
-		3013
-	  ],
-	  "result": 28013,
-	  "craft_time": 25
-	},
-	{
-	  "id": 164,
-	  "name": "太阴寒月剑",
-	  "ingredients": [
-		2014,
-		4014,
-		9014,
-		3014
-	  ],
-	  "result": 28014,
-	  "craft_time": 25
-	},
-	{
-	  "id": 165,
-	  "name": "星河无极剑",
-	  "ingredients": [
-		2015,
-		4015,
-		9015,
-		3015
-	  ],
-	  "result": 28015,
-	  "craft_time": 25
-	},
-	{
-	  "id": 166,
-	  "name": "鸿蒙开天剑",
-	  "ingredients": [
-		2016,
-		4016,
-		9016,
-		3016
-	  ],
-	  "result": 28016,
-	  "craft_time": 25
-	},
-	{
-	  "id": 167,
-	  "name": "清风阵",
-	  "ingredients": [
-		13101,
-		7001,
-		9001
-	  ],
-	  "result": 28017,
-	  "craft_time": 20
-	},
-	{
-	  "id": 168,
-	  "name": "聚灵阵",
-	  "ingredients": [
-		13102,
-		7002,
-		9002,
-		4001
-	  ],
-	  "result": 28018,
-	  "craft_time": 25
-	},
-	{
-	  "id": 169,
-	  "name": "铁壁阵",
-	  "ingredients": [
-		13103,
-		7003,
-		4002,
-		9003
-	  ],
-	  "result": 28019,
-	  "craft_time": 25
-	},
-	{
-	  "id": 170,
-	  "name": "三才锁灵阵",
-	  "ingredients": [
-		13104,
-		7004,
-		4004,
-		9004
-	  ],
-	  "result": 28020,
-	  "craft_time": 25
-	},
-	{
-	  "id": 171,
-	  "name": "四象寒冰阵",
-	  "ingredients": [
-		13105,
-		7005,
-		4005,
-		3005
-	  ],
-	  "result": 28021,
-	  "craft_time": 25
-	},
-	{
-	  "id": 172,
-	  "name": "烈焰困阵",
-	  "ingredients": [
-		13106,
-		7006,
-		4006,
-		3006
-	  ],
-	  "result": 28022,
-	  "craft_time": 25
-	},
-	{
-	  "id": 173,
-	  "name": "厚土御阵",
-	  "ingredients": [
-		13107,
-		7007,
-		4007,
-		3007
-	  ],
-	  "result": 28023,
-	  "craft_time": 25
-	},
-	{
-	  "id": 174,
-	  "name": "五雷诛邪阵",
-	  "ingredients": [
-		13108,
-		7008,
-		4008,
-		3008
-	  ],
-	  "result": 28024,
-	  "craft_time": 25
-	},
-	{
-	  "id": 175,
-	  "name": "地脉龙吟阵",
-	  "ingredients": [
-		13109,
-		7009,
-		4009,
-		3009
-	  ],
-	  "result": 28025,
-	  "craft_time": 25
-	},
-	{
-	  "id": 176,
-	  "name": "星罗迷阵",
-	  "ingredients": [
-		13110,
-		7010,
-		4010,
-		3010
-	  ],
-	  "result": 28026,
-	  "craft_time": 25
-	},
-	{
-	  "id": 177,
-	  "name": "九幻迷心阵",
-	  "ingredients": [
-		13111,
-		7011,
-		4011,
-		3011
-	  ],
-	  "result": 28027,
-	  "craft_time": 25
-	},
-	{
-	  "id": 178,
-	  "name": "九命续生阵",
-	  "ingredients": [
-		13112,
-		7012,
-		4012,
-		9012
-	  ],
-	  "result": 28028,
-	  "craft_time": 25
-	},
-	{
-	  "id": 179,
-	  "name": "瑞兽祥云阵",
-	  "ingredients": [
-		13113,
-		7013,
-		4013,
-		3013
-	  ],
-	  "result": 28029,
-	  "craft_time": 25
-	},
-	{
-	  "id": 180,
-	  "name": "真龙御天阵",
-	  "ingredients": [
-		13114,
-		7014,
-		4014,
-		3014
-	  ],
-	  "result": 28030,
-	  "craft_time": 25
-	},
-	{
-	  "id": 181,
-	  "name": "凤舞涅槃阵",
-	  "ingredients": [
-		13115,
-		7015,
-		4015,
-		3015
-	  ],
-	  "result": 28031,
-	  "craft_time": 25
-	},
-	{
-	  "id": 182,
-	  "name": "混沌归一阵",
-	  "ingredients": [
-		13116,
-		7016,
-		4016,
-		3016
-	  ],
-	  "result": 28032,
-	  "craft_time": 25
-	},
-	{
-	  "id": 183,
-	  "name": "驱兽符",
-	  "ingredients": [
-		7001,
-		8001,
-		9001
-	  ],
-	  "result": 28033,
-	  "craft_time": 20
-	},
-	{
-	  "id": 184,
-	  "name": "避尘符",
-	  "ingredients": [
-		7002,
-		8002,
-		9001
-	  ],
-	  "result": 28034,
-	  "craft_time": 20
-	},
-	{
-	  "id": 185,
-	  "name": "火弹符",
-	  "ingredients": [
-		7003,
-		8003,
-		9002,
-		3002
-	  ],
-	  "result": 28035,
-	  "craft_time": 25
-	},
-	{
-	  "id": 186,
-	  "name": "金甲符",
-	  "ingredients": [
-		7004,
-		8004,
-		9002,
-		3004
-	  ],
-	  "result": 28036,
-	  "craft_time": 25
-	},
-	{
-	  "id": 187,
-	  "name": "冰锥符",
-	  "ingredients": [
-		7005,
-		8005,
-		9003,
-		3005
-	  ],
-	  "result": 28037,
-	  "craft_time": 25
-	},
-	{
-	  "id": 188,
-	  "name": "炎爆符",
-	  "ingredients": [
-		7006,
-		8006,
-		9003,
-		3006
-	  ],
-	  "result": 28038,
-	  "craft_time": 25
-	},
-	{
-	  "id": 189,
-	  "name": "青藤符",
-	  "ingredients": [
-		7007,
-		8007,
-		9004,
-		3007
-	  ],
-	  "result": 28039,
-	  "craft_time": 25
-	},
-	{
-	  "id": 190,
-	  "name": "五雷符",
-	  "ingredients": [
-		7008,
-		8008,
-		9004,
-		3008
-	  ],
-	  "result": 28040,
-	  "craft_time": 25
-	},
-	{
-	  "id": 191,
-	  "name": "地裂符",
-	  "ingredients": [
-		7009,
-		8009,
-		9005,
-		3009
-	  ],
-	  "result": 28041,
-	  "craft_time": 25
-	},
-	{
-	  "id": 192,
-	  "name": "星遁符",
-	  "ingredients": [
-		7010,
-		8010,
-		9005,
-		3010
-	  ],
-	  "result": 28042,
-	  "craft_time": 25
-	},
-	{
-	  "id": 193,
-	  "name": "幻身符",
-	  "ingredients": [
-		7011,
-		8011,
-		9006,
-		3011
-	  ],
-	  "result": 28043,
-	  "craft_time": 25
-	},
-	{
-	  "id": 194,
-	  "name": "续命符",
-	  "ingredients": [
-		7012,
-		8012,
-		9006,
-		9012
-	  ],
-	  "result": 28044,
-	  "craft_time": 25
-	},
-	{
-	  "id": 195,
-	  "name": "祥瑞符",
-	  "ingredients": [
-		7013,
-		8013,
-		9007,
-		3013
-	  ],
-	  "result": 28045,
-	  "craft_time": 25
-	},
-	{
-	  "id": 196,
-	  "name": "龙威符",
-	  "ingredients": [
-		7014,
-		8014,
-		9007,
-		3014
-	  ],
-	  "result": 28046,
-	  "craft_time": 25
-	},
-	{
-	  "id": 197,
-	  "name": "涅槃符",
-	  "ingredients": [
-		7015,
-		8015,
-		9008,
-		3015
-	  ],
-	  "result": 28047,
-	  "craft_time": 25
-	},
-	{
-	  "id": 198,
-	  "name": "混沌符",
-	  "ingredients": [
-		7016,
-		8016,
-		9008,
-		3016
-	  ],
-	  "result": 28048,
-	  "craft_time": 25
-	},
-	{
-	  "id": 199,
-	  "name": "引气筑基散",
-	  "ingredients": [
-		1002,
-		5002,
-		9002
-	  ],
-	  "result": 28049,
-	  "craft_time": 20
-	},
-	{
-	  "id": 200,
-	  "name": "凝元破境丹",
-	  "ingredients": [
-		1003,
-		5004,
-		9004,
-		3004
-	  ],
-	  "result": 28050,
-	  "craft_time": 25
-	},
-	{
-	  "id": 201,
-	  "name": "筑基破障丹",
-	  "ingredients": [
-		1004,
-		1005,
-		27004,
-		4004
-	  ],
-	  "result": 28051,
-	  "craft_time": 25
-	},
-	{
-	  "id": 202,
-	  "name": "固基培元丹",
-	  "ingredients": [
-		1005,
-		1006,
-		9006,
-		4006
-	  ],
-	  "result": 28052,
-	  "craft_time": 25
-	},
-	{
-	  "id": 203,
-	  "name": "通玄化灵丹",
-	  "ingredients": [
-		1007,
-		1008,
-		9008,
-		4008
-	  ],
-	  "result": 28053,
-	  "craft_time": 25
-	},
-	{
-	  "id": 204,
-	  "name": "金丹破障丹",
-	  "ingredients": [
-		1009,
-		1010,
-		27007,
-		4009
-	  ],
-	  "result": 28054,
-	  "craft_time": 25
-	},
-	{
-	  "id": 205,
-	  "name": "凝丹化形丹",
-	  "ingredients": [
-		1009,
-		1011,
-		9011,
-		4011
-	  ],
-	  "result": 28055,
-	  "craft_time": 25
-	},
-	{
-	  "id": 206,
-	  "name": "九转金丹",
-	  "ingredients": [
-		1012,
-		1011,
-		9012,
-		4012
-	  ],
-	  "result": 28056,
-	  "craft_time": 25
-	},
-	{
-	  "id": 207,
-	  "name": "元婴破障丹",
-	  "ingredients": [
-		1012,
-		2009,
-		27009,
-		8012
-	  ],
-	  "result": 28057,
-	  "craft_time": 25
-	},
-	{
-	  "id": 208,
-	  "name": "元婴凝神丹",
-	  "ingredients": [
-		7013,
-		7014,
-		9013,
-		4013
-	  ],
-	  "result": 28058,
-	  "craft_time": 25
-	},
-	{
-	  "id": 209,
-	  "name": "元婴归元丹",
-	  "ingredients": [
-		7015,
-		7014,
-		9015,
-		4014
-	  ],
-	  "result": 28059,
-	  "craft_time": 25
-	},
-	{
-	  "id": 210,
-	  "name": "化神渡劫丹",
-	  "ingredients": [
-		7016,
-		8016,
-		3016,
-		4016
-	  ],
-	  "result": 28060,
-	  "craft_time": 25
-	}
+    {
+      "id": 1,
+      "name": "养气散",
+      "ingredients": [
+        5001,
+        9001
+      ],
+      "result": 27001,
+      "craft_time": 15
+    },
+    {
+      "id": 2,
+      "name": "引气丸",
+      "ingredients": [
+        5002,
+        9002
+      ],
+      "result": 27002,
+      "craft_time": 15
+    },
+    {
+      "id": 3,
+      "name": "固元粉",
+      "ingredients": [
+        5003,
+        1001
+      ],
+      "result": 27003,
+      "craft_time": 15
+    },
+    {
+      "id": 4,
+      "name": "培元丹",
+      "ingredients": [
+        5004,
+        1002,
+        9003
+      ],
+      "result": 27004,
+      "craft_time": 20
+    },
+    {
+      "id": 5,
+      "name": "灵髓丸",
+      "ingredients": [
+        5005,
+        1003,
+        9004
+      ],
+      "result": 27005,
+      "craft_time": 20
+    },
+    {
+      "id": 6,
+      "name": "黄芽丹",
+      "ingredients": [
+        1004,
+        6004
+      ],
+      "result": 27006,
+      "craft_time": 15
+    },
+    {
+      "id": 7,
+      "name": "小还丹",
+      "ingredients": [
+        1005,
+        6005,
+        9005,
+        3001
+      ],
+      "result": 27007,
+      "craft_time": 25
+    },
+    {
+      "id": 8,
+      "name": "赤阳丸",
+      "ingredients": [
+        1006,
+        6006,
+        12006,
+        3002
+      ],
+      "result": 27008,
+      "craft_time": 25
+    },
+    {
+      "id": 9,
+      "name": "青冥丹",
+      "ingredients": [
+        1007,
+        6007,
+        9007,
+        3003
+      ],
+      "result": 27009,
+      "craft_time": 25
+    },
+    {
+      "id": 10,
+      "name": "玄金散",
+      "ingredients": [
+        1008,
+        6008,
+        9008
+      ],
+      "result": 27010,
+      "craft_time": 20
+    },
+    {
+      "id": 11,
+      "name": "冰魄丹",
+      "ingredients": [
+        1009,
+        7005,
+        8005,
+        3005
+      ],
+      "result": 27011,
+      "craft_time": 25
+    },
+    {
+      "id": 12,
+      "name": "火灵丸",
+      "ingredients": [
+        1010,
+        7006,
+        8006,
+        3006
+      ],
+      "result": 27012,
+      "craft_time": 25
+    },
+    {
+      "id": 13,
+      "name": "青玄丹",
+      "ingredients": [
+        1011,
+        7007,
+        8007,
+        3007
+      ],
+      "result": 27013,
+      "craft_time": 25
+    },
+    {
+      "id": 14,
+      "name": "五雷丹",
+      "ingredients": [
+        1012,
+        7008,
+        8008,
+        3008
+      ],
+      "result": 27014,
+      "craft_time": 25
+    },
+    {
+      "id": 15,
+      "name": "地龙丹",
+      "ingredients": [
+        7009,
+        8009,
+        3009,
+        6009
+      ],
+      "result": 27015,
+      "craft_time": 25
+    },
+    {
+      "id": 16,
+      "name": "星狼丹",
+      "ingredients": [
+        7010,
+        8010,
+        3010,
+        6010
+      ],
+      "result": 27016,
+      "craft_time": 25
+    },
+    {
+      "id": 17,
+      "name": "紫狐丹",
+      "ingredients": [
+        7011,
+        8011,
+        3011,
+        6011
+      ],
+      "result": 27017,
+      "craft_time": 25
+    },
+    {
+      "id": 18,
+      "name": "九命丹",
+      "ingredients": [
+        7012,
+        8012,
+        9012,
+        6012
+      ],
+      "result": 27018,
+      "craft_time": 25
+    },
+    {
+      "id": 19,
+      "name": "地皇丹",
+      "ingredients": [
+        5009,
+        5012,
+        12009
+      ],
+      "result": 27019,
+      "craft_time": 20
+    },
+    {
+      "id": 20,
+      "name": "星芒丹",
+      "ingredients": [
+        5010,
+        5011,
+        9010
+      ],
+      "result": 27020,
+      "craft_time": 20
+    },
+    {
+      "id": 21,
+      "name": "紫府金丹",
+      "ingredients": [
+        5011,
+        9011,
+        1010
+      ],
+      "result": 27021,
+      "craft_time": 20
+    },
+    {
+      "id": 22,
+      "name": "九窍还魂丹",
+      "ingredients": [
+        5012,
+        9012,
+        1012
+      ],
+      "result": 27022,
+      "craft_time": 20
+    },
+    {
+      "id": 23,
+      "name": "麒麟丹",
+      "ingredients": [
+        7013,
+        8013,
+        12013
+      ],
+      "result": 27023,
+      "craft_time": 20
+    },
+    {
+      "id": 24,
+      "name": "真龙丹",
+      "ingredients": [
+        7014,
+        8014,
+        12014
+      ],
+      "result": 27024,
+      "craft_time": 20
+    },
+    {
+      "id": 25,
+      "name": "凤凰丹",
+      "ingredients": [
+        7015,
+        8015,
+        9015
+      ],
+      "result": 27025,
+      "craft_time": 20
+    },
+    {
+      "id": 26,
+      "name": "混沌丹",
+      "ingredients": [
+        7016,
+        8016,
+        9016
+      ],
+      "result": 27026,
+      "craft_time": 20
+    },
+    {
+      "id": 27,
+      "name": "涅槃丹",
+      "ingredients": [
+        5013,
+        6013,
+        3013
+      ],
+      "result": 27027,
+      "craft_time": 20
+    },
+    {
+      "id": 28,
+      "name": "龙牙丹",
+      "ingredients": [
+        5014,
+        6014,
+        3014
+      ],
+      "result": 27028,
+      "craft_time": 20
+    },
+    {
+      "id": 29,
+      "name": "凤羽金丹",
+      "ingredients": [
+        5015,
+        6015,
+        3015
+      ],
+      "result": 27029,
+      "craft_time": 20
+    },
+    {
+      "id": 30,
+      "name": "混沌玄丹",
+      "ingredients": [
+        5016,
+        6016,
+        3016
+      ],
+      "result": 27030,
+      "craft_time": 20
+    },
+    {
+      "id": 31,
+      "name": "筑基丹",
+      "ingredients": [
+        22004,
+        22004
+      ],
+      "result": 27031,
+      "craft_time": 15
+    },
+    {
+      "id": 32,
+      "name": "聚灵大丹",
+      "ingredients": [
+        22002,
+        9004
+      ],
+      "result": 27081,
+      "craft_time": 15
+    },
+    {
+      "id": 33,
+      "name": "培元大丹",
+      "ingredients": [
+        22003,
+        6004,
+        5004
+      ],
+      "result": 27033,
+      "craft_time": 20
+    },
+    {
+      "id": 34,
+      "name": "玄冰大丹",
+      "ingredients": [
+        22005,
+        6005,
+        3005
+      ],
+      "result": 27034,
+      "craft_time": 20
+    },
+    {
+      "id": 35,
+      "name": "赤阳大丹",
+      "ingredients": [
+        22006,
+        6006,
+        3006
+      ],
+      "result": 27035,
+      "craft_time": 20
+    },
+    {
+      "id": 36,
+      "name": "青木大丹",
+      "ingredients": [
+        22007,
+        6007,
+        3007
+      ],
+      "result": 27036,
+      "craft_time": 20
+    },
+    {
+      "id": 37,
+      "name": "雷音大丹",
+      "ingredients": [
+        22008,
+        6008,
+        3008
+      ],
+      "result": 27037,
+      "craft_time": 20
+    },
+    {
+      "id": 38,
+      "name": "地脉大丹",
+      "ingredients": [
+        22009,
+        6009,
+        3009
+      ],
+      "result": 27038,
+      "craft_time": 20
+    },
+    {
+      "id": 39,
+      "name": "星辉大丹",
+      "ingredients": [
+        22010,
+        6010,
+        3010
+      ],
+      "result": 27039,
+      "craft_time": 20
+    },
+    {
+      "id": 40,
+      "name": "紫府大丹",
+      "ingredients": [
+        22011,
+        6011,
+        3011
+      ],
+      "result": 27040,
+      "craft_time": 20
+    },
+    {
+      "id": 41,
+      "name": "九窍大丹",
+      "ingredients": [
+        22012,
+        6012,
+        9012
+      ],
+      "result": 27041,
+      "craft_time": 20
+    },
+    {
+      "id": 42,
+      "name": "涅槃大丹",
+      "ingredients": [
+        22013,
+        6013,
+        3013
+      ],
+      "result": 27042,
+      "craft_time": 20
+    },
+    {
+      "id": 43,
+      "name": "龙灵大丹",
+      "ingredients": [
+        22014,
+        6014,
+        3014
+      ],
+      "result": 27043,
+      "craft_time": 20
+    },
+    {
+      "id": 44,
+      "name": "凤血大丹",
+      "ingredients": [
+        22015,
+        6015,
+        3015
+      ],
+      "result": 27044,
+      "craft_time": 20
+    },
+    {
+      "id": 45,
+      "name": "混沌大丹",
+      "ingredients": [
+        22016,
+        6016,
+        3016
+      ],
+      "result": 27045,
+      "craft_time": 20
+    },
+    {
+      "id": 46,
+      "name": "九转金丹",
+      "ingredients": [
+        22011,
+        22012,
+        22013,
+        3016
+      ],
+      "result": 27046,
+      "craft_time": 25
+    },
+    {
+      "id": 47,
+      "name": "太清仙丹",
+      "ingredients": [
+        22014,
+        22015,
+        22016,
+        4016
+      ],
+      "result": 27047,
+      "craft_time": 25
+    },
+    {
+      "id": 48,
+      "name": "天地玄黄丹",
+      "ingredients": [
+        27006,
+        27034,
+        27019,
+        27030
+      ],
+      "result": 27048,
+      "craft_time": 25
+    },
+    {
+      "id": 49,
+      "name": "五气朝元丹",
+      "ingredients": [
+        27013,
+        27035,
+        27038,
+        27039
+      ],
+      "result": 27049,
+      "craft_time": 25
+    },
+    {
+      "id": 50,
+      "name": "万法归宗丹",
+      "ingredients": [
+        27045,
+        27047,
+        27046,
+        9016
+      ],
+      "result": 27050,
+      "craft_time": 25
+    },
+    {
+      "id": 51,
+      "name": "回灵散",
+      "ingredients": [
+        9001,
+        3001
+      ],
+      "result": 27051,
+      "craft_time": 15
+    },
+    {
+      "id": 52,
+      "name": "复灵丸",
+      "ingredients": [
+        9002,
+        3002
+      ],
+      "result": 27052,
+      "craft_time": 15
+    },
+    {
+      "id": 53,
+      "name": "清心露",
+      "ingredients": [
+        9003,
+        3003
+      ],
+      "result": 27053,
+      "craft_time": 15
+    },
+    {
+      "id": 54,
+      "name": "玉灵丹",
+      "ingredients": [
+        9004,
+        3004,
+        6002
+      ],
+      "result": 27054,
+      "craft_time": 20
+    },
+    {
+      "id": 55,
+      "name": "冰心丸",
+      "ingredients": [
+        9005,
+        3005,
+        6005
+      ],
+      "result": 27055,
+      "craft_time": 20
+    },
+    {
+      "id": 56,
+      "name": "火灵散",
+      "ingredients": [
+        12006,
+        3006,
+        6006
+      ],
+      "result": 27056,
+      "craft_time": 20
+    },
+    {
+      "id": 57,
+      "name": "青木露",
+      "ingredients": [
+        9007,
+        3007,
+        6007
+      ],
+      "result": 27057,
+      "craft_time": 20
+    },
+    {
+      "id": 58,
+      "name": "雷光液",
+      "ingredients": [
+        9008,
+        3008,
+        6008
+      ],
+      "result": 27058,
+      "craft_time": 20
+    },
+    {
+      "id": 59,
+      "name": "地脉浆",
+      "ingredients": [
+        12009,
+        3009,
+        6009
+      ],
+      "result": 27059,
+      "craft_time": 20
+    },
+    {
+      "id": 60,
+      "name": "星辉液",
+      "ingredients": [
+        9010,
+        3010,
+        6010
+      ],
+      "result": 27060,
+      "craft_time": 20
+    },
+    {
+      "id": 61,
+      "name": "寒泉丹",
+      "ingredients": [
+        1005,
+        7005,
+        8005,
+        6005
+      ],
+      "result": 27061,
+      "craft_time": 25
+    },
+    {
+      "id": 62,
+      "name": "炎泉丹",
+      "ingredients": [
+        1006,
+        7006,
+        8006,
+        6006
+      ],
+      "result": 27062,
+      "craft_time": 25
+    },
+    {
+      "id": 63,
+      "name": "青泉丹",
+      "ingredients": [
+        1007,
+        7007,
+        8007,
+        6007
+      ],
+      "result": 27063,
+      "craft_time": 25
+    },
+    {
+      "id": 64,
+      "name": "雷泉丹",
+      "ingredients": [
+        1008,
+        7008,
+        8008,
+        6008
+      ],
+      "result": 27064,
+      "craft_time": 25
+    },
+    {
+      "id": 65,
+      "name": "地髓大丹",
+      "ingredients": [
+        1009,
+        7009,
+        8009,
+        6009
+      ],
+      "result": 27065,
+      "craft_time": 25
+    },
+    {
+      "id": 66,
+      "name": "星尘大丹",
+      "ingredients": [
+        1010,
+        7010,
+        8010,
+        6010
+      ],
+      "result": 27066,
+      "craft_time": 25
+    },
+    {
+      "id": 67,
+      "name": "紫气大丹",
+      "ingredients": [
+        1011,
+        7011,
+        8011,
+        6011
+      ],
+      "result": 27067,
+      "craft_time": 25
+    },
+    {
+      "id": 68,
+      "name": "九泉大丹",
+      "ingredients": [
+        1012,
+        7012,
+        8012,
+        6012
+      ],
+      "result": 27068,
+      "craft_time": 25
+    },
+    {
+      "id": 69,
+      "name": "地皇灵丹",
+      "ingredients": [
+        5009,
+        12009
+      ],
+      "result": 27069,
+      "craft_time": 15
+    },
+    {
+      "id": 70,
+      "name": "星芒灵丹",
+      "ingredients": [
+        5010,
+        9010
+      ],
+      "result": 27070,
+      "craft_time": 15
+    },
+    {
+      "id": 71,
+      "name": "紫府灵丹",
+      "ingredients": [
+        5011,
+        9011
+      ],
+      "result": 27071,
+      "craft_time": 15
+    },
+    {
+      "id": 72,
+      "name": "九窍灵丹",
+      "ingredients": [
+        5012,
+        9012
+      ],
+      "result": 27072,
+      "craft_time": 15
+    },
+    {
+      "id": 73,
+      "name": "麒麟灵丹",
+      "ingredients": [
+        7013,
+        8013,
+        12013
+      ],
+      "result": 27073,
+      "craft_time": 20
+    },
+    {
+      "id": 74,
+      "name": "龙鳞灵丹",
+      "ingredients": [
+        7014,
+        8014,
+        12014
+      ],
+      "result": 27074,
+      "craft_time": 20
+    },
+    {
+      "id": 75,
+      "name": "凤羽灵丹",
+      "ingredients": [
+        7015,
+        8015,
+        9015
+      ],
+      "result": 27075,
+      "craft_time": 20
+    },
+    {
+      "id": 76,
+      "name": "混沌灵丹",
+      "ingredients": [
+        7016,
+        8016,
+        9016
+      ],
+      "result": 27080,
+      "craft_time": 20
+    },
+    {
+      "id": 77,
+      "name": "涅槃灵丹",
+      "ingredients": [
+        5013,
+        6013,
+        3013
+      ],
+      "result": 27077,
+      "craft_time": 20
+    },
+    {
+      "id": 78,
+      "name": "龙息灵丹",
+      "ingredients": [
+        5014,
+        6014,
+        3014
+      ],
+      "result": 27078,
+      "craft_time": 20
+    },
+    {
+      "id": 79,
+      "name": "凤血灵丹",
+      "ingredients": [
+        5015,
+        6015,
+        3015
+      ],
+      "result": 27079,
+      "craft_time": 20
+    },
+    {
+      "id": 80,
+      "name": "混沌灵丹",
+      "ingredients": [
+        5016,
+        6016,
+        3016
+      ],
+      "result": 27080,
+      "craft_time": 20
+    },
+    {
+      "id": 81,
+      "name": "聚灵大丹",
+      "ingredients": [
+        22002,
+        3002
+      ],
+      "result": 27081,
+      "craft_time": 15
+    },
+    {
+      "id": 82,
+      "name": "玉液大丹",
+      "ingredients": [
+        22004,
+        9004,
+        3004
+      ],
+      "result": 27082,
+      "craft_time": 20
+    },
+    {
+      "id": 83,
+      "name": "玄冰大灵丹",
+      "ingredients": [
+        22005,
+        3005,
+        6005
+      ],
+      "result": 27083,
+      "craft_time": 20
+    },
+    {
+      "id": 84,
+      "name": "赤阳大灵丹",
+      "ingredients": [
+        22006,
+        3006,
+        6006
+      ],
+      "result": 27084,
+      "craft_time": 20
+    },
+    {
+      "id": 85,
+      "name": "青木大灵丹",
+      "ingredients": [
+        22007,
+        3007,
+        6007
+      ],
+      "result": 27085,
+      "craft_time": 20
+    },
+    {
+      "id": 86,
+      "name": "雷音大灵丹",
+      "ingredients": [
+        22008,
+        3008,
+        6008
+      ],
+      "result": 27086,
+      "craft_time": 20
+    },
+    {
+      "id": 87,
+      "name": "地脉大灵丹",
+      "ingredients": [
+        22009,
+        3009,
+        6009
+      ],
+      "result": 27087,
+      "craft_time": 20
+    },
+    {
+      "id": 88,
+      "name": "星辉大灵丹",
+      "ingredients": [
+        22010,
+        3010,
+        6010
+      ],
+      "result": 27088,
+      "craft_time": 20
+    },
+    {
+      "id": 89,
+      "name": "紫府大灵丹",
+      "ingredients": [
+        22011,
+        3011,
+        6011
+      ],
+      "result": 27089,
+      "craft_time": 20
+    },
+    {
+      "id": 90,
+      "name": "九窍大灵丹",
+      "ingredients": [
+        22012,
+        9012,
+        6012
+      ],
+      "result": 27090,
+      "craft_time": 20
+    },
+    {
+      "id": 91,
+      "name": "涅槃大灵丹",
+      "ingredients": [
+        22013,
+        3013,
+        6013
+      ],
+      "result": 27091,
+      "craft_time": 20
+    },
+    {
+      "id": 92,
+      "name": "龙灵大灵丹",
+      "ingredients": [
+        22014,
+        3014,
+        6014
+      ],
+      "result": 27092,
+      "craft_time": 20
+    },
+    {
+      "id": 93,
+      "name": "凤血大灵丹",
+      "ingredients": [
+        22015,
+        3015,
+        6015
+      ],
+      "result": 27093,
+      "craft_time": 20
+    },
+    {
+      "id": 94,
+      "name": "混沌大灵丹",
+      "ingredients": [
+        22016,
+        3016,
+        6016
+      ],
+      "result": 27094,
+      "craft_time": 20
+    },
+    {
+      "id": 95,
+      "name": "九转还灵丹",
+      "ingredients": [
+        27082,
+        27087,
+        27090
+      ],
+      "result": 27095,
+      "craft_time": 20
+    },
+    {
+      "id": 96,
+      "name": "太清还灵丹",
+      "ingredients": [
+        27092,
+        27093,
+        27094
+      ],
+      "result": 27096,
+      "craft_time": 20
+    },
+    {
+      "id": 97,
+      "name": "五灵归元丹",
+      "ingredients": [
+        27085,
+        27084,
+        27087,
+        27088
+      ],
+      "result": 27097,
+      "craft_time": 25
+    },
+    {
+      "id": 98,
+      "name": "万灵朝宗丹",
+      "ingredients": [
+        27073,
+        27074,
+        27075,
+        27076
+      ],
+      "result": 27098,
+      "craft_time": 25
+    },
+    {
+      "id": 99,
+      "name": "灵气源泉丹",
+      "ingredients": [
+        10010,
+        10012,
+        10014,
+        10016
+      ],
+      "result": 27099,
+      "craft_time": 25
+    },
+    {
+      "id": 100,
+      "name": "生生不息丹",
+      "ingredients": [
+        27051,
+        27054,
+        27068,
+        27080
+      ],
+      "result": 27100,
+      "craft_time": 25
+    },
+    {
+      "id": 101,
+      "name": "黄粱米酒",
+      "ingredients": [
+        5001,
+        9001
+      ],
+      "result": 27101,
+      "craft_time": 15
+    },
+    {
+      "id": 102,
+      "name": "清溪果酿",
+      "ingredients": [
+        6002,
+        9002
+      ],
+      "result": 27102,
+      "craft_time": 15
+    },
+    {
+      "id": 103,
+      "name": "百花醉",
+      "ingredients": [
+        3002,
+        9003
+      ],
+      "result": 27103,
+      "craft_time": 15
+    },
+    {
+      "id": 104,
+      "name": "玉露琼浆",
+      "ingredients": [
+        9004,
+        6004
+      ],
+      "result": 27104,
+      "craft_time": 15
+    },
+    {
+      "id": 105,
+      "name": "青芽酿",
+      "ingredients": [
+        5003,
+        3003,
+        6003
+      ],
+      "result": 27105,
+      "craft_time": 20
+    },
+    {
+      "id": 106,
+      "name": "霜华酿",
+      "ingredients": [
+        5005,
+        3005,
+        6005
+      ],
+      "result": 27106,
+      "craft_time": 20
+    },
+    {
+      "id": 107,
+      "name": "赤阳烧",
+      "ingredients": [
+        5006,
+        3006,
+        6006
+      ],
+      "result": 27107,
+      "craft_time": 20
+    },
+    {
+      "id": 108,
+      "name": "青玄酿",
+      "ingredients": [
+        5007,
+        3007,
+        6007
+      ],
+      "result": 27108,
+      "craft_time": 20
+    },
+    {
+      "id": 109,
+      "name": "雷火酒",
+      "ingredients": [
+        5008,
+        3008,
+        6008
+      ],
+      "result": 27109,
+      "craft_time": 20
+    },
+    {
+      "id": 110,
+      "name": "地脉醇",
+      "ingredients": [
+        5009,
+        3009,
+        6009
+      ],
+      "result": 27110,
+      "craft_time": 20
+    },
+    {
+      "id": 111,
+      "name": "星芒醉",
+      "ingredients": [
+        5010,
+        3010,
+        6010
+      ],
+      "result": 27111,
+      "craft_time": 20
+    },
+    {
+      "id": 112,
+      "name": "紫府仙酿",
+      "ingredients": [
+        5011,
+        3011,
+        6011
+      ],
+      "result": 27112,
+      "craft_time": 20
+    },
+    {
+      "id": 113,
+      "name": "九孔玉液酒",
+      "ingredients": [
+        5012,
+        9012,
+        6012
+      ],
+      "result": 27113,
+      "craft_time": 20
+    },
+    {
+      "id": 114,
+      "name": "涅槃重生酿",
+      "ingredients": [
+        5013,
+        3013,
+        6013
+      ],
+      "result": 27114,
+      "craft_time": 20
+    },
+    {
+      "id": 115,
+      "name": "龙息醇",
+      "ingredients": [
+        5014,
+        3014,
+        6014
+      ],
+      "result": 27115,
+      "craft_time": 20
+    },
+    {
+      "id": 116,
+      "name": "凤羽天酿",
+      "ingredients": [
+        5015,
+        3015,
+        6015
+      ],
+      "result": 27116,
+      "craft_time": 20
+    },
+    {
+      "id": 117,
+      "name": "混沌元酒",
+      "ingredients": [
+        5016,
+        3016,
+        6016
+      ],
+      "result": 27117,
+      "craft_time": 20
+    },
+    {
+      "id": 118,
+      "name": "冰蚕寒酿",
+      "ingredients": [
+        7005,
+        3005,
+        1005
+      ],
+      "result": 27118,
+      "craft_time": 20
+    },
+    {
+      "id": 119,
+      "name": "火浣烈酒",
+      "ingredients": [
+        7006,
+        3006,
+        1006
+      ],
+      "result": 27119,
+      "craft_time": 20
+    },
+    {
+      "id": 120,
+      "name": "龟甲养身酒",
+      "ingredients": [
+        7007,
+        3007,
+        1007
+      ],
+      "result": 27120,
+      "craft_time": 20
+    },
+    {
+      "id": 121,
+      "name": "雷蟒电光酒",
+      "ingredients": [
+        7008,
+        3008,
+        1008
+      ],
+      "result": 27121,
+      "craft_time": 20
+    },
+    {
+      "id": 122,
+      "name": "地龙沉酿",
+      "ingredients": [
+        7009,
+        3009,
+        1009
+      ],
+      "result": 27122,
+      "craft_time": 20
+    },
+    {
+      "id": 123,
+      "name": "星貂幻酒",
+      "ingredients": [
+        7010,
+        3010,
+        1010
+      ],
+      "result": 27123,
+      "craft_time": 20
+    },
+    {
+      "id": 124,
+      "name": "紫狐迷魂酒",
+      "ingredients": [
+        7011,
+        3011,
+        1011
+      ],
+      "result": 27124,
+      "craft_time": 20
+    },
+    {
+      "id": 125,
+      "name": "九尾灵酒",
+      "ingredients": [
+        7012,
+        9012,
+        1012
+      ],
+      "result": 27125,
+      "craft_time": 20
+    },
+    {
+      "id": 126,
+      "name": "麒麟祥瑞酒",
+      "ingredients": [
+        7013,
+        12013,
+        8013
+      ],
+      "result": 27126,
+      "craft_time": 20
+    },
+    {
+      "id": 127,
+      "name": "龙鳞战酒",
+      "ingredients": [
+        7014,
+        12014,
+        8014
+      ],
+      "result": 27127,
+      "craft_time": 20
+    },
+    {
+      "id": 128,
+      "name": "凤羽涅槃酒",
+      "ingredients": [
+        7015,
+        9015,
+        8015
+      ],
+      "result": 27128,
+      "craft_time": 20
+    },
+    {
+      "id": 129,
+      "name": "混沌悟道酒",
+      "ingredients": [
+        7016,
+        9016,
+        8016
+      ],
+      "result": 27129,
+      "craft_time": 20
+    },
+    {
+      "id": 130,
+      "name": "灵果甘酿",
+      "ingredients": [
+        6004,
+        9004,
+        3004
+      ],
+      "result": 27130,
+      "craft_time": 20
+    },
+    {
+      "id": 131,
+      "name": "地脉灵根酒",
+      "ingredients": [
+        6009,
+        12009,
+        3009
+      ],
+      "result": 27131,
+      "craft_time": 20
+    },
+    {
+      "id": 132,
+      "name": "星辉甘霖酒",
+      "ingredients": [
+        6010,
+        9010,
+        3010
+      ],
+      "result": 27132,
+      "craft_time": 20
+    },
+    {
+      "id": 133,
+      "name": "紫光仙酒",
+      "ingredients": [
+        6011,
+        9011,
+        3011
+      ],
+      "result": 27133,
+      "craft_time": 20
+    },
+    {
+      "id": 134,
+      "name": "九窍玉髓酒",
+      "ingredients": [
+        6012,
+        9012,
+        5012
+      ],
+      "result": 27134,
+      "craft_time": 20
+    },
+    {
+      "id": 135,
+      "name": "涅槃烈酒",
+      "ingredients": [
+        6013,
+        12013,
+        3013
+      ],
+      "result": 27135,
+      "craft_time": 20
+    },
+    {
+      "id": 136,
+      "name": "龙涎封侯酒",
+      "ingredients": [
+        6014,
+        12014,
+        3014
+      ],
+      "result": 27136,
+      "craft_time": 20
+    },
+    {
+      "id": 137,
+      "name": "凤羽飞天酒",
+      "ingredients": [
+        6015,
+        9015,
+        3015
+      ],
+      "result": 27137,
+      "craft_time": 20
+    },
+    {
+      "id": 138,
+      "name": "混沌朝圣酒",
+      "ingredients": [
+        6016,
+        9016,
+        3016
+      ],
+      "result": 27138,
+      "craft_time": 20
+    },
+    {
+      "id": 139,
+      "name": "寒泉冻骨酒",
+      "ingredients": [
+        9005,
+        1005,
+        3005
+      ],
+      "result": 27139,
+      "craft_time": 20
+    },
+    {
+      "id": 140,
+      "name": "炎泉沸血酒",
+      "ingredients": [
+        12006,
+        1006,
+        3006
+      ],
+      "result": 27140,
+      "craft_time": 20
+    },
+    {
+      "id": 141,
+      "name": "青泉生机酒",
+      "ingredients": [
+        9007,
+        1007,
+        3007
+      ],
+      "result": 27141,
+      "craft_time": 20
+    },
+    {
+      "id": 142,
+      "name": "雷泉电身酒",
+      "ingredients": [
+        9008,
+        1008,
+        3008
+      ],
+      "result": 27142,
+      "craft_time": 20
+    },
+    {
+      "id": 143,
+      "name": "九转回春酒",
+      "ingredients": [
+        27051,
+        27054,
+        27068
+      ],
+      "result": 27143,
+      "craft_time": 20
+    },
+    {
+      "id": 144,
+      "name": "百草灵酒",
+      "ingredients": [
+        1001,
+        1002,
+        1003,
+        9004
+      ],
+      "result": 27144,
+      "craft_time": 25
+    },
+    {
+      "id": 145,
+      "name": "五灵合酿酒",
+      "ingredients": [
+        27108,
+        27107,
+        27110,
+        27111
+      ],
+      "result": 27145,
+      "craft_time": 25
+    },
+    {
+      "id": 146,
+      "name": "三花聚顶酒",
+      "ingredients": [
+        3002,
+        3007,
+        3011
+      ],
+      "result": 27146,
+      "craft_time": 20
+    },
+    {
+      "id": 147,
+      "name": "五行调和酒",
+      "ingredients": [
+        27118,
+        27119,
+        27120,
+        27121
+      ],
+      "result": 27147,
+      "craft_time": 25
+    },
+    {
+      "id": 148,
+      "name": "九龙升天酒",
+      "ingredients": [
+        27115,
+        27127,
+        27136,
+        5014
+      ],
+      "result": 27148,
+      "craft_time": 25
+    },
+    {
+      "id": 149,
+      "name": "九凤朝凰酒",
+      "ingredients": [
+        27116,
+        27128,
+        27137,
+        5015
+      ],
+      "result": 27149,
+      "craft_time": 25
+    },
+    {
+      "id": 150,
+      "name": "混沌万道酒",
+      "ingredients": [
+        27117,
+        27129,
+        27138,
+        5016
+      ],
+      "result": 27150,
+      "craft_time": 25
+    },
+    {
+      "id": 151,
+      "name": "铁木剑",
+      "ingredients": [
+        2002,
+        9001
+      ],
+      "result": 28001,
+      "craft_time": 15
+    },
+    {
+      "id": 152,
+      "name": "铜锋剑",
+      "ingredients": [
+        2003,
+        9002,
+        4001
+      ],
+      "result": 28002,
+      "craft_time": 20
+    },
+    {
+      "id": 153,
+      "name": "银光剑",
+      "ingredients": [
+        2003,
+        2004,
+        4003,
+        9003
+      ],
+      "result": 28003,
+      "craft_time": 25
+    },
+    {
+      "id": 154,
+      "name": "玄金短剑",
+      "ingredients": [
+        2004,
+        4004,
+        9004
+      ],
+      "result": 28004,
+      "craft_time": 20
+    },
+    {
+      "id": 155,
+      "name": "寒渊冰剑",
+      "ingredients": [
+        2005,
+        4005,
+        9005,
+        4002
+      ],
+      "result": 28005,
+      "craft_time": 25
+    },
+    {
+      "id": 156,
+      "name": "赤炎火剑",
+      "ingredients": [
+        2006,
+        4006,
+        9006
+      ],
+      "result": 28006,
+      "craft_time": 20
+    },
+    {
+      "id": 157,
+      "name": "青灵木剑",
+      "ingredients": [
+        2007,
+        4007,
+        9007,
+        3007
+      ],
+      "result": 28007,
+      "craft_time": 25
+    },
+    {
+      "id": 158,
+      "name": "金雷斩邪剑",
+      "ingredients": [
+        2008,
+        4008,
+        9008,
+        3008
+      ],
+      "result": 28008,
+      "craft_time": 25
+    },
+    {
+      "id": 159,
+      "name": "地脉重剑",
+      "ingredients": [
+        2009,
+        4009,
+        9009,
+        3009
+      ],
+      "result": 28009,
+      "craft_time": 25
+    },
+    {
+      "id": 160,
+      "name": "星陨长剑",
+      "ingredients": [
+        2010,
+        4010,
+        27060,
+        3010
+      ],
+      "result": 28010,
+      "craft_time": 25
+    },
+    {
+      "id": 161,
+      "name": "虚空影剑",
+      "ingredients": [
+        2011,
+        4011,
+        9011,
+        3011
+      ],
+      "result": 28011,
+      "craft_time": 25
+    },
+    {
+      "id": 162,
+      "name": "九幽玄冥剑",
+      "ingredients": [
+        2012,
+        4012,
+        9012,
+        6012
+      ],
+      "result": 28012,
+      "craft_time": 25
+    },
+    {
+      "id": 163,
+      "name": "太阳真光剑",
+      "ingredients": [
+        2013,
+        4013,
+        9013,
+        3013
+      ],
+      "result": 28013,
+      "craft_time": 25
+    },
+    {
+      "id": 164,
+      "name": "太阴寒月剑",
+      "ingredients": [
+        2014,
+        4014,
+        9014,
+        3014
+      ],
+      "result": 28014,
+      "craft_time": 25
+    },
+    {
+      "id": 165,
+      "name": "星河无极剑",
+      "ingredients": [
+        2015,
+        4015,
+        9015,
+        3015
+      ],
+      "result": 28015,
+      "craft_time": 25
+    },
+    {
+      "id": 166,
+      "name": "鸿蒙开天剑",
+      "ingredients": [
+        2016,
+        4016,
+        9016,
+        3016
+      ],
+      "result": 28016,
+      "craft_time": 25
+    },
+    {
+      "id": 167,
+      "name": "清风阵",
+      "ingredients": [
+        13101,
+        7001,
+        9001
+      ],
+      "result": 28017,
+      "craft_time": 20
+    },
+    {
+      "id": 168,
+      "name": "聚灵阵",
+      "ingredients": [
+        13102,
+        7002,
+        9002,
+        4001
+      ],
+      "result": 28018,
+      "craft_time": 25
+    },
+    {
+      "id": 169,
+      "name": "铁壁阵",
+      "ingredients": [
+        13103,
+        7003,
+        4002,
+        9003
+      ],
+      "result": 28019,
+      "craft_time": 25
+    },
+    {
+      "id": 170,
+      "name": "三才锁灵阵",
+      "ingredients": [
+        13104,
+        7004,
+        4004,
+        9004
+      ],
+      "result": 28020,
+      "craft_time": 25
+    },
+    {
+      "id": 171,
+      "name": "四象寒冰阵",
+      "ingredients": [
+        13105,
+        7005,
+        4005,
+        3005
+      ],
+      "result": 28021,
+      "craft_time": 25
+    },
+    {
+      "id": 172,
+      "name": "烈焰困阵",
+      "ingredients": [
+        13106,
+        7006,
+        4006,
+        3006
+      ],
+      "result": 28022,
+      "craft_time": 25
+    },
+    {
+      "id": 173,
+      "name": "厚土御阵",
+      "ingredients": [
+        13107,
+        7007,
+        4007,
+        3007
+      ],
+      "result": 28023,
+      "craft_time": 25
+    },
+    {
+      "id": 174,
+      "name": "五雷诛邪阵",
+      "ingredients": [
+        13108,
+        7008,
+        4008,
+        3008
+      ],
+      "result": 28024,
+      "craft_time": 25
+    },
+    {
+      "id": 175,
+      "name": "地脉龙吟阵",
+      "ingredients": [
+        13109,
+        7009,
+        4009,
+        3009
+      ],
+      "result": 28025,
+      "craft_time": 25
+    },
+    {
+      "id": 176,
+      "name": "星罗迷阵",
+      "ingredients": [
+        13110,
+        7010,
+        4010,
+        3010
+      ],
+      "result": 28026,
+      "craft_time": 25
+    },
+    {
+      "id": 177,
+      "name": "九幻迷心阵",
+      "ingredients": [
+        13111,
+        7011,
+        4011,
+        3011
+      ],
+      "result": 28027,
+      "craft_time": 25
+    },
+    {
+      "id": 178,
+      "name": "九命续生阵",
+      "ingredients": [
+        13112,
+        7012,
+        4012,
+        9012
+      ],
+      "result": 28028,
+      "craft_time": 25
+    },
+    {
+      "id": 179,
+      "name": "瑞兽祥云阵",
+      "ingredients": [
+        13113,
+        7013,
+        4013,
+        3013
+      ],
+      "result": 28029,
+      "craft_time": 25
+    },
+    {
+      "id": 180,
+      "name": "真龙御天阵",
+      "ingredients": [
+        13114,
+        7014,
+        4014,
+        3014
+      ],
+      "result": 28030,
+      "craft_time": 25
+    },
+    {
+      "id": 181,
+      "name": "凤舞涅槃阵",
+      "ingredients": [
+        13115,
+        7015,
+        4015,
+        3015
+      ],
+      "result": 28031,
+      "craft_time": 25
+    },
+    {
+      "id": 182,
+      "name": "混沌归一阵",
+      "ingredients": [
+        13116,
+        7016,
+        4016,
+        3016
+      ],
+      "result": 28032,
+      "craft_time": 25
+    },
+    {
+      "id": 183,
+      "name": "驱兽符",
+      "ingredients": [
+        7001,
+        8001,
+        9001
+      ],
+      "result": 28033,
+      "craft_time": 20
+    },
+    {
+      "id": 184,
+      "name": "避尘符",
+      "ingredients": [
+        7002,
+        8002,
+        9001
+      ],
+      "result": 28034,
+      "craft_time": 20
+    },
+    {
+      "id": 185,
+      "name": "火弹符",
+      "ingredients": [
+        7003,
+        8003,
+        9002,
+        3002
+      ],
+      "result": 28035,
+      "craft_time": 25
+    },
+    {
+      "id": 186,
+      "name": "金甲符",
+      "ingredients": [
+        7004,
+        8004,
+        9002,
+        3004
+      ],
+      "result": 28036,
+      "craft_time": 25
+    },
+    {
+      "id": 187,
+      "name": "冰锥符",
+      "ingredients": [
+        7005,
+        8005,
+        9003,
+        3005
+      ],
+      "result": 28037,
+      "craft_time": 25
+    },
+    {
+      "id": 188,
+      "name": "炎爆符",
+      "ingredients": [
+        7006,
+        8006,
+        9003,
+        3006
+      ],
+      "result": 28038,
+      "craft_time": 25
+    },
+    {
+      "id": 189,
+      "name": "青藤符",
+      "ingredients": [
+        7007,
+        8007,
+        9004,
+        3007
+      ],
+      "result": 28039,
+      "craft_time": 25
+    },
+    {
+      "id": 190,
+      "name": "五雷符",
+      "ingredients": [
+        7008,
+        8008,
+        9004,
+        3008
+      ],
+      "result": 28040,
+      "craft_time": 25
+    },
+    {
+      "id": 191,
+      "name": "地裂符",
+      "ingredients": [
+        7009,
+        8009,
+        9005,
+        3009
+      ],
+      "result": 28041,
+      "craft_time": 25
+    },
+    {
+      "id": 192,
+      "name": "星遁符",
+      "ingredients": [
+        7010,
+        8010,
+        9005,
+        3010
+      ],
+      "result": 28042,
+      "craft_time": 25
+    },
+    {
+      "id": 193,
+      "name": "幻身符",
+      "ingredients": [
+        7011,
+        8011,
+        9006,
+        3011
+      ],
+      "result": 28043,
+      "craft_time": 25
+    },
+    {
+      "id": 194,
+      "name": "续命符",
+      "ingredients": [
+        7012,
+        8012,
+        9006,
+        9012
+      ],
+      "result": 28044,
+      "craft_time": 25
+    },
+    {
+      "id": 195,
+      "name": "祥瑞符",
+      "ingredients": [
+        7013,
+        8013,
+        9007,
+        3013
+      ],
+      "result": 28045,
+      "craft_time": 25
+    },
+    {
+      "id": 196,
+      "name": "龙威符",
+      "ingredients": [
+        7014,
+        8014,
+        9007,
+        3014
+      ],
+      "result": 28046,
+      "craft_time": 25
+    },
+    {
+      "id": 197,
+      "name": "涅槃符",
+      "ingredients": [
+        7015,
+        8015,
+        9008,
+        3015
+      ],
+      "result": 28047,
+      "craft_time": 25
+    },
+    {
+      "id": 198,
+      "name": "混沌符",
+      "ingredients": [
+        7016,
+        8016,
+        9008,
+        3016
+      ],
+      "result": 28048,
+      "craft_time": 25
+    },
+    {
+      "id": 199,
+      "name": "引气筑基散",
+      "ingredients": [
+        1002,
+        5002,
+        9002
+      ],
+      "result": 28049,
+      "craft_time": 20
+    },
+    {
+      "id": 200,
+      "name": "凝元破境丹",
+      "ingredients": [
+        1003,
+        5004,
+        9004,
+        3004
+      ],
+      "result": 28050,
+      "craft_time": 25
+    },
+    {
+      "id": 201,
+      "name": "筑基破障丹",
+      "ingredients": [
+        1004,
+        1005,
+        27004,
+        4004
+      ],
+      "result": 28051,
+      "craft_time": 25
+    },
+    {
+      "id": 202,
+      "name": "固基培元丹",
+      "ingredients": [
+        1005,
+        1006,
+        9006,
+        4006
+      ],
+      "result": 28052,
+      "craft_time": 25
+    },
+    {
+      "id": 203,
+      "name": "通玄化灵丹",
+      "ingredients": [
+        1007,
+        1008,
+        9008,
+        4008
+      ],
+      "result": 28053,
+      "craft_time": 25
+    },
+    {
+      "id": 204,
+      "name": "金丹破障丹",
+      "ingredients": [
+        1009,
+        1010,
+        27007,
+        4009
+      ],
+      "result": 28054,
+      "craft_time": 25
+    },
+    {
+      "id": 205,
+      "name": "凝丹化形丹",
+      "ingredients": [
+        1009,
+        1011,
+        9011,
+        4011
+      ],
+      "result": 28055,
+      "craft_time": 25
+    },
+    {
+      "id": 206,
+      "name": "九转金丹",
+      "ingredients": [
+        1012,
+        1011,
+        9012,
+        4012
+      ],
+      "result": 28056,
+      "craft_time": 25
+    },
+    {
+      "id": 207,
+      "name": "元婴破障丹",
+      "ingredients": [
+        1012,
+        2009,
+        27009,
+        8012
+      ],
+      "result": 28057,
+      "craft_time": 25
+    },
+    {
+      "id": 208,
+      "name": "元婴凝神丹",
+      "ingredients": [
+        7013,
+        7014,
+        9013,
+        4013
+      ],
+      "result": 28058,
+      "craft_time": 25
+    },
+    {
+      "id": 209,
+      "name": "元婴归元丹",
+      "ingredients": [
+        7015,
+        7014,
+        9015,
+        4014
+      ],
+      "result": 28059,
+      "craft_time": 25
+    },
+    {
+      "id": 210,
+      "name": "化神渡劫丹",
+      "ingredients": [
+        7016,
+        8016,
+        3016,
+        4016
+      ],
+      "result": 28060,
+      "craft_time": 25
+    }
   ]
 }

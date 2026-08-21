@@ -1,326 +1,326 @@
 {
   "monsters": [
-	{
-	  "id": 1,
-	  "name": "石妖",
-	  "hp": 300,
-	  "atk": 5,
-	  "accept_effect_ids": [],
-	  "loot": [
-		21
-	  ],
-	  "describe": "岩石化成的低级妖兽"
-	},
-	{
-	  "id": 2,
-	  "name": "火精",
-	  "hp": 500,
-	  "atk": 8,
-	  "accept_effect_ids": [],
-	  "loot": [
-		21
-	  ],
-	  "describe": "体内燃烧着火焰的精灵"
-	},
-	{
-	  "id": 3,
-	  "name": "冰魄",
-	  "hp": 700,
-	  "atk": 12,
-	  "accept_effect_ids": [],
-	  "loot": [
-		21,
-		22
-	  ],
-	  "describe": "极寒之地孕育的妖物"
-	},
-	{
-	  "id": 4,
-	  "name": "暗影妖",
-	  "hp": 100,
-	  "atk": 18,
-	  "accept_effect_ids": [],
-	  "loot": [
-		22
-	  ],
-	  "describe": "来去无踪的暗影魔物"
-	},
-	{
-	  "id": 5,
-	  "name": "巨石魔",
-	  "hp": 180,
-	  "atk": 25,
-	  "accept_effect_ids": [],
-	  "loot": [
-		22,
-		61
-	  ],
-	  "describe": "由巨石凝聚而成的魔物"
-	},
-	{
-	  "id": 6,
-	  "name": "风翼兽",
-	  "hp": 120,
-	  "atk": 15,
-	  "accept_effect_ids": [],
-	  "loot": [
-		22
-	  ],
-	  "describe": "御风而行的猛兽"
-	},
-	{
-	  "id": 7,
-	  "name": "雷狼",
-	  "hp": 150,
-	  "atk": 22,
-	  "accept_effect_ids": [],
-	  "loot": [
-		22,
-		71
-	  ],
-	  "describe": "身披雷电的妖狼"
-	},
-	{
-	  "id": 8,
-	  "name": "毒蝎",
-	  "hp": 90,
-	  "atk": 20,
-	  "accept_effect_ids": [],
-	  "loot": [
-		21,
-		71
-	  ],
-	  "describe": "尾部含有剧毒的巨蝎"
-	},
-	{
-	  "id": 101,
-	  "name": "森之巨蟒",
-	  "hp": 300,
-	  "atk": 30,
-	  "accept_effect_ids": [],
-	  "loot": [
-		81,
-		71,
-		22
-	  ],
-	  "describe": "妖兽森林的霸主，百年巨蟒"
-	},
-	{
-	  "id": 102,
-	  "name": "熔岩领主",
-	  "hp": 500,
-	  "atk": 40,
-	  "accept_effect_ids": [],
-	  "loot": [
-		81,
-		81,
-		71
-	  ],
-	  "describe": "火山深处的熔岩之主"
-	},
-	{
-	  "id": 103,
-	  "name": "冰霜巨龙",
-	  "hp": 800,
-	  "atk": 55,
-	  "accept_effect_ids": [],
-	  "loot": [
-		81,
-		81,
-		81,
-		71
-	  ],
-	  "describe": "雪山之巅沉睡的远古龙"
-	}
+    {
+      "id": 1,
+      "name": "石妖",
+      "hp": 300,
+      "atk": 5,
+      "accept_effect_ids": [],
+      "loot": [
+        21
+      ],
+      "describe": "岩石化成的低级妖兽"
+    },
+    {
+      "id": 2,
+      "name": "火精",
+      "hp": 500,
+      "atk": 8,
+      "accept_effect_ids": [],
+      "loot": [
+        21
+      ],
+      "describe": "体内燃烧着火焰的精灵"
+    },
+    {
+      "id": 3,
+      "name": "冰魄",
+      "hp": 700,
+      "atk": 12,
+      "accept_effect_ids": [],
+      "loot": [
+        21,
+        22
+      ],
+      "describe": "极寒之地孕育的妖物"
+    },
+    {
+      "id": 4,
+      "name": "暗影妖",
+      "hp": 100,
+      "atk": 18,
+      "accept_effect_ids": [],
+      "loot": [
+        22
+      ],
+      "describe": "来去无踪的暗影魔物"
+    },
+    {
+      "id": 5,
+      "name": "巨石魔",
+      "hp": 180,
+      "atk": 25,
+      "accept_effect_ids": [],
+      "loot": [
+        22,
+        61
+      ],
+      "describe": "由巨石凝聚而成的魔物"
+    },
+    {
+      "id": 6,
+      "name": "风翼兽",
+      "hp": 120,
+      "atk": 15,
+      "accept_effect_ids": [],
+      "loot": [
+        22
+      ],
+      "describe": "御风而行的猛兽"
+    },
+    {
+      "id": 7,
+      "name": "雷狼",
+      "hp": 150,
+      "atk": 22,
+      "accept_effect_ids": [],
+      "loot": [
+        22,
+        71
+      ],
+      "describe": "身披雷电的妖狼"
+    },
+    {
+      "id": 8,
+      "name": "毒蝎",
+      "hp": 90,
+      "atk": 20,
+      "accept_effect_ids": [],
+      "loot": [
+        21,
+        71
+      ],
+      "describe": "尾部含有剧毒的巨蝎"
+    },
+    {
+      "id": 101,
+      "name": "森之巨蟒",
+      "hp": 300,
+      "atk": 30,
+      "accept_effect_ids": [],
+      "loot": [
+        81,
+        71,
+        22
+      ],
+      "describe": "妖兽森林的霸主，百年巨蟒"
+    },
+    {
+      "id": 102,
+      "name": "熔岩领主",
+      "hp": 500,
+      "atk": 40,
+      "accept_effect_ids": [],
+      "loot": [
+        81,
+        81,
+        71
+      ],
+      "describe": "火山深处的熔岩之主"
+    },
+    {
+      "id": 103,
+      "name": "冰霜巨龙",
+      "hp": 800,
+      "atk": 55,
+      "accept_effect_ids": [],
+      "loot": [
+        81,
+        81,
+        81,
+        71
+      ],
+      "describe": "雪山之巅沉睡的远古龙"
+    }
   ],
   "maps": [
-	{
-	  "id": 1,
-	  "name": "妖兽森林",
-	  "describe": "妖兽出没的密林，适合初入修真的弟子历练",
-	  "stages": [
-		{
-		  "stage": 1,
-		  "name": "林间小径",
-		  "monsters": [
-			{
-			  "monster_id": 1,
-			  "count": 2
-			}
-		  ]
-		},
-		{
-		  "stage": 2,
-		  "name": "妖兽聚集",
-		  "monsters": [
-			{
-			  "monster_id": 1,
-			  "count": 2
-			},
-			{
-			  "monster_id": 2,
-			  "count": 1
-			}
-		  ]
-		},
-		{
-		  "stage": 3,
-		  "name": "密林深处",
-		  "monsters": [
-			{
-			  "monster_id": 2,
-			  "count": 2
-			},
-			{
-			  "monster_id": 3,
-			  "count": 1
-			}
-		  ]
-		},
-		{
-		  "stage": 4,
-		  "name": "巨蟒巢穴",
-		  "monsters": [
-			{
-			  "monster_id": 3,
-			  "count": 2
-			}
-		  ],
-		  "boss": {
-			"monster_id": 101
-		  }
-		}
-	  ]
-	},
-	{
-	  "id": 2,
-	  "name": "熔岩洞穴",
-	  "describe": "炙热的火山洞穴，火属性妖兽横行",
-	  "stages": [
-		{
-		  "stage": 1,
-		  "name": "洞穴入口",
-		  "monsters": [
-			{
-			  "monster_id": 2,
-			  "count": 3
-			}
-		  ]
-		},
-		{
-		  "stage": 2,
-		  "name": "熔岩通道",
-		  "monsters": [
-			{
-			  "monster_id": 2,
-			  "count": 2
-			},
-			{
-			  "monster_id": 5,
-			  "count": 1
-			}
-		  ]
-		},
-		{
-		  "stage": 3,
-		  "name": "地心深处",
-		  "monsters": [
-			{
-			  "monster_id": 5,
-			  "count": 2
-			},
-			{
-			  "monster_id": 4,
-			  "count": 1
-			}
-		  ]
-		},
-		{
-		  "stage": 4,
-		  "name": "领主之殿",
-		  "monsters": [
-			{
-			  "monster_id": 4,
-			  "count": 2
-			}
-		  ],
-		  "boss": {
-			"monster_id": 102
-		  }
-		}
-	  ]
-	},
-	{
-	  "id": 3,
-	  "name": "雪山之巅",
-	  "describe": "冰雪覆盖的极寒之地，传说有远古龙栖息",
-	  "stages": [
-		{
-		  "stage": 1,
-		  "name": "雪原",
-		  "monsters": [
-			{
-			  "monster_id": 3,
-			  "count": 3
-			}
-		  ]
-		},
-		{
-		  "stage": 2,
-		  "name": "冰川裂隙",
-		  "monsters": [
-			{
-			  "monster_id": 3,
-			  "count": 2
-			},
-			{
-			  "monster_id": 6,
-			  "count": 1
-			}
-		  ]
-		},
-		{
-		  "stage": 3,
-		  "name": "暴风山口",
-		  "monsters": [
-			{
-			  "monster_id": 6,
-			  "count": 2
-			},
-			{
-			  "monster_id": 7,
-			  "count": 1
-			}
-		  ]
-		},
-		{
-		  "stage": 4,
-		  "name": "远古遗迹",
-		  "monsters": [
-			{
-			  "monster_id": 7,
-			  "count": 1
-			},
-			{
-			  "monster_id": 8,
-			  "count": 1
-			}
-		  ]
-		},
-		{
-		  "stage": 5,
-		  "name": "龙眠之地",
-		  "monsters": [
-			{
-			  "monster_id": 8,
-			  "count": 2
-			}
-		  ],
-		  "boss": {
-			"monster_id": 103
-		  }
-		}
-	  ]
-	}
+    {
+      "id": 1,
+      "name": "妖兽森林",
+      "describe": "妖兽出没的密林，适合初入修真的弟子历练",
+      "stages": [
+        {
+          "stage": 1,
+          "name": "林间小径",
+          "monsters": [
+            {
+              "monster_id": 1,
+              "count": 2
+            }
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "妖兽聚集",
+          "monsters": [
+            {
+              "monster_id": 1,
+              "count": 2
+            },
+            {
+              "monster_id": 2,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "密林深处",
+          "monsters": [
+            {
+              "monster_id": 2,
+              "count": 2
+            },
+            {
+              "monster_id": 3,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "stage": 4,
+          "name": "巨蟒巢穴",
+          "monsters": [
+            {
+              "monster_id": 3,
+              "count": 2
+            }
+          ],
+          "boss": {
+            "monster_id": 101
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "熔岩洞穴",
+      "describe": "炙热的火山洞穴，火属性妖兽横行",
+      "stages": [
+        {
+          "stage": 1,
+          "name": "洞穴入口",
+          "monsters": [
+            {
+              "monster_id": 2,
+              "count": 3
+            }
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "熔岩通道",
+          "monsters": [
+            {
+              "monster_id": 2,
+              "count": 2
+            },
+            {
+              "monster_id": 5,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "地心深处",
+          "monsters": [
+            {
+              "monster_id": 5,
+              "count": 2
+            },
+            {
+              "monster_id": 4,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "stage": 4,
+          "name": "领主之殿",
+          "monsters": [
+            {
+              "monster_id": 4,
+              "count": 2
+            }
+          ],
+          "boss": {
+            "monster_id": 102
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "雪山之巅",
+      "describe": "冰雪覆盖的极寒之地，传说有远古龙栖息",
+      "stages": [
+        {
+          "stage": 1,
+          "name": "雪原",
+          "monsters": [
+            {
+              "monster_id": 3,
+              "count": 3
+            }
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "冰川裂隙",
+          "monsters": [
+            {
+              "monster_id": 3,
+              "count": 2
+            },
+            {
+              "monster_id": 6,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "暴风山口",
+          "monsters": [
+            {
+              "monster_id": 6,
+              "count": 2
+            },
+            {
+              "monster_id": 7,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "stage": 4,
+          "name": "远古遗迹",
+          "monsters": [
+            {
+              "monster_id": 7,
+              "count": 1
+            },
+            {
+              "monster_id": 8,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "stage": 5,
+          "name": "龙眠之地",
+          "monsters": [
+            {
+              "monster_id": 8,
+              "count": 2
+            }
+          ],
+          "boss": {
+            "monster_id": 103
+          }
+        }
+      ]
+    }
   ]
 }

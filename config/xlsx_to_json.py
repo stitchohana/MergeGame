@@ -239,7 +239,6 @@ thresholds = []
 for row in read_rows(wb["meridians"]):
     threshold = {
         "stage": parse_int(row["stage"]),
-        "item_pool": parse_int_list(row["item_pool"]),
         "count_min": parse_int(row["count_min"]),
         "count_max": parse_int(row["count_max"]),
         "acupoint_rewards": parse_int(row.get("acupoint_rewards", "")),
@@ -258,16 +257,25 @@ for row in read_rows(wb["meridians"]):
     if fixed_orders:
         threshold["fixed_orders"] = fixed_orders
     thresholds.append(threshold)
+level_ranges = []
+for row in read_rows(wb["order_level_ranges"]):
+    level_ranges.append({
+        "cultivation_min": parse_int(row["cultivation_min"]),
+        "cultivation_max": parse_int(row["cultivation_max"]),
+        "items_regular": [
+            parse_int(row["items_regular_min"]),
+            parse_int(row["items_regular_max"]),
+        ],
+        "items_recipe_product": [
+            parse_int(row["items_recipe_product_min"]),
+            parse_int(row["items_recipe_product_max"]),
+        ],
+    })
 save_json("meridians.json", {
     "order_pool": {
         "sources": ["items_regular", "items_recipe_product"],
         "unlock_by": ["items_launcher", "items_crafting"],
-        "level_ranges": [
-            {"cultivation_min": 2, "cultivation_max": 10, "items_regular": [4, 4], "items_recipe_product": [1, 4]},
-            {"cultivation_min": 11, "cultivation_max": 13, "items_regular": [7, 8], "items_recipe_product": [5, 8]},
-            {"cultivation_min": 14, "cultivation_max": 16, "items_regular": [10, 12], "items_recipe_product": [9, 12]},
-            {"cultivation_min": 17, "cultivation_max": 19, "items_regular": [13, 16], "items_recipe_product": [13, 16]},
-        ],
+        "level_ranges": level_ranges,
     },
     "thresholds": thresholds,
 })

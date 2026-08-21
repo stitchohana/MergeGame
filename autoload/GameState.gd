@@ -7,7 +7,6 @@ var max_stamina: int = 100
 var spirit_stones: int = 0
 var regen_remaining_ms: float = 0.0
 var current_board_type: int = Constants.BoardType.MAIN
-var battle_tutorial_step: int = 0
 var battle_player_hp: int = 100
 var battle_player_max_hp: int = 100
 var previous_screen_name: String = ""

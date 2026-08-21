@@ -1,13 +1,10 @@
 class_name RewardSlot extends HBoxContainer
 
-const FALLBACK_ICON: Texture2D = preload("res://assets/home/ui/reward_fallback.svg")
-
 @onready var icon_rect: TextureRect = $IconRect
 @onready var count_label: Label = $CountLabel
 
 
 func setup(item_id: int, amount: int) -> void:
-	icon_rect.texture = FALLBACK_ICON
 	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
 	if item_data.is_empty():
 		item_data = ConfigDatabase.get_token_data(item_id)

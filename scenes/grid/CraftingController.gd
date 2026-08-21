@@ -113,6 +113,12 @@ func try_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 func show_button_for_table(recipe: Dictionary, table_pos: Vector2i, cell_size: int) -> void:
 	if not _craft_button:
 		return
+	var table_item_variant: Variant = GridManager.get_item(table_pos)
+	if table_item_variant == null or not table_item_variant is Dictionary:
+		hide_button()
+		return
+	_craft_table_item = table_item_variant as Dictionary
+	_craft_table_pos = table_pos
 	_craft_button.show_for_recipe(recipe)
 	_craft_button.set_table_pos(table_pos, cell_size)
 
@@ -217,6 +223,10 @@ func _clear_pending() -> void:
 	_pending_ingredient_id = -1
 
 func _get_table_grid_pos(table_item: Dictionary) -> Vector2i:
+	var table_uid: int = int(table_item.get("_uid", 0))
+	if table_uid > 0:
+		return GridManager.find_pos_by_uid(table_uid)
+
 	for entry in GridManager.get_all_items():
 		if entry.data == table_item:
 			return entry.pos
