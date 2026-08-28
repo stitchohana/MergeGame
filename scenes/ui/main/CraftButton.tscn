@@ -1,46 +1,44 @@
 [gd_scene format=3 uid="uid://j121pxqv4ag0"]
 
 [ext_resource type="Script" uid="uid://bpg51i3lk6h1t" path="res://scenes/ui/main/CraftButton.gd" id="1_gd"]
-[ext_resource type="Texture2D" uid="uid://cywrwm4abfk5b" path="res://assets/game/item_detail_bg_atlas_texture.tres" id="2_bg"]
+[ext_resource type="PackedScene" uid="uid://dbfaocwritemw" path="res://scenes/ui/common/ItemWidget.tscn" id="3_item_widget"]
 
 [node name="CraftButton" type="Control" unique_id=1116120039]
+z_index = 200
 layout_mode = 3
 anchors_preset = 0
-offset_right = 220.0
-offset_bottom = 92.0
+offset_right = 104.0
+offset_bottom = 132.0
 mouse_filter = 1
 script = ExtResource("1_gd")
 
 [node name="Bg" type="NinePatchRect" parent="." unique_id=2087092344]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-texture = ExtResource("2_bg")
+offset_right = -7.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
 patch_margin_left = 22
 patch_margin_top = 20
 patch_margin_right = 22
 patch_margin_bottom = 20
 
-[node name="RecipeLabel" type="Label" parent="." unique_id=89296233]
+[node name="OutputSlot" parent="." unique_id=2066678992 instance=ExtResource("3_item_widget")]
+custom_minimum_size = Vector2(60, 60)
 layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = 4.0
-offset_top = 10.0
-offset_right = -4.0
-offset_bottom = -2.0
-theme_override_font_sizes/font_size = 14
-text = "合成"
-horizontal_alignment = 1
-vertical_alignment = 1
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 78.0
+offset_bottom = 78.0
 
 [node name="CraftBtn" type="Button" parent="." unique_id=659989419]
 layout_mode = 0
-anchor_left = 0.2
-anchor_top = 0.5
-anchor_right = 0.8
-anchor_bottom = 1.0
-offset_top = 2.0
-offset_bottom = -4.0
+offset_left = 12.0
+offset_top = 64.0
+offset_right = 85.0
+offset_bottom = 92.0
 theme_override_font_sizes/font_size = 15
 text = "制作"

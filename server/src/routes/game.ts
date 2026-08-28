@@ -437,6 +437,28 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     res.json({ ok: true, recipe_id: result.recipe.id, craft_time: result.recipe.craft_time });
   }));
 
+  // POST /api/game/craft/speedup
+  router.post("/craft/speedup", op(async (req, res, userId) => {
+    const { table_col, table_row } = req.body;
+    if (typeof table_col !== "number" || typeof table_row !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.executeCraftSpeedup(state, table_col, table_row);
+    if (!result.ok) {
+      res.status(400).json({
+        error: result.reason,
+        required_stones: result.cost,
+        remaining_seconds: result.remainingSeconds,
+        spirit_stones: result.spiritStones,
+      });
+      return;
+    }
+    await storage.saveState(userId, state);
+    engine.enrichGridWithRechargeRemaining(state.grid);
+    res.json({ ok: true, table_col, table_row, cost: result.cost, remaining_seconds: result.remainingSeconds, spirit_stones: state.spirit_stones, grid: state.grid });
+  }));
+
   // POST /api/game/craft/retrieve
   router.post("/craft/retrieve", op(async (req, res, userId) => {
     const { table_col, table_row } = req.body;
@@ -463,6 +485,28 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     await storage.saveState(userId, state);
     engine.enrichGridWithRechargeRemaining(state.grid);
     res.json({ ok: true, removed_id: result.removed_id, removed_uid: result.removed_uid, table_col: result.table_col, table_row: result.table_row, target_col: result.target_col, target_row: result.target_row, grid: state.grid });
+  }));
+
+  // POST /api/game/launcher/speedup
+  router.post("/launcher/speedup", op(async (req, res, userId) => {
+    const { uid } = req.body;
+    if (typeof uid !== "number") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const result = engine.executeLauncherSpeedup(state, uid);
+    if (!result.ok) {
+      res.status(400).json({
+        error: result.reason,
+        required_stones: result.cost,
+        remaining_seconds: result.remainingSeconds,
+        spirit_stones: result.spiritStones,
+      });
+      return;
+    }
+    await storage.saveState(userId, state);
+    engine.enrichGridWithRechargeRemaining(state.grid);
+    res.json({ ok: true, uid, cost: result.cost, remaining_seconds: result.remainingSeconds, charges: result.charges, max_charges: result.maxCharges, spirit_stones: state.spirit_stones, grid: state.grid });
   }));
 
   // POST /api/game/push_place

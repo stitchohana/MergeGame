@@ -4,10 +4,18 @@ import { GameEngine } from "../engine/game_engine";
 import { createAuthRequired } from "../middleware/auth";
 import { enqueue } from "./queue";
 
-export function grantCurrentOrderItems(state: GameState, engine: GameEngine): { grantedCount: number; itemCounts: Record<string, number> } {
-  state.pending_rewards = state.pending_rewards || [];
+export type GrantCurrentOrderItemsResult = {
+  grantedCount: number;
+  itemCounts: Record<string, number>;
+  mainGrid: GameState["grid"];
+  error?: "no_order_items" | "grid_full";
+  requiredCount?: number;
+  availableSlots?: number;
+};
+
+export function grantCurrentOrderItems(state: GameState, engine: GameEngine): GrantCurrentOrderItemsResult {
   const itemCounts: Record<string, number> = {};
-  let grantedCount = 0;
+  const orderItems: Array<{ id: number; name: string }> = [];
 
   for (const order of state.meridian_acupoints || []) {
     if ((order as any)?.completed === true || !Array.isArray((order as any)?.item_ids)) continue;
@@ -16,17 +24,74 @@ export function grantCurrentOrderItems(state: GameState, engine: GameEngine): { 
       if (!Number.isInteger(itemId)) continue;
       const itemDef = engine.getItemData(itemId);
       if (!itemDef) continue;
-      state.pending_rewards.push({
-        uid: engine._nextUid(state),
-        id: itemId,
-        name: itemDef.name ?? `#${itemId}`,
-      });
+      orderItems.push({ id: itemId, name: itemDef.name ?? `#${itemId}` });
       itemCounts[String(itemId)] = (itemCounts[String(itemId)] || 0) + 1;
-      grantedCount += 1;
     }
   }
 
-  return { grantedCount, itemCounts };
+  const mainGrid = state.board_type === 1 && Array.isArray(state.saved_grid)
+    ? state.saved_grid
+    : state.grid;
+  if (orderItems.length === 0) {
+    return { grantedCount: 0, itemCounts, mainGrid, error: "no_order_items" };
+  }
+
+  // Place the whole batch atomically. A failed GM request must not leave only
+  // part of the order requirements on the board.
+  const availableSlots = Math.max(0, engine.MAX_CELLS - mainGrid.length);
+  if (availableSlots < orderItems.length) {
+    return {
+      grantedCount: 0,
+      itemCounts: {},
+      mainGrid,
+      error: "grid_full",
+      requiredCount: orderItems.length,
+      availableSlots,
+    };
+  }
+
+  const placementGrid = mainGrid.map(item => ({
+    uid: item.uid,
+    id: item.id,
+    col: item.col,
+    row: item.row,
+  }));
+  const positions: Array<{ col: number; row: number }> = [];
+  for (const _item of orderItems) {
+    const empty = engine.findEmptyPos(placementGrid);
+    if (!empty) {
+      return {
+        grantedCount: 0,
+        itemCounts: {},
+        mainGrid,
+        error: "grid_full",
+        requiredCount: orderItems.length,
+        availableSlots: positions.length,
+      };
+    }
+    positions.push(empty);
+    placementGrid.push({ id: 0, col: empty.col, row: empty.row });
+  }
+
+  for (let index = 0; index < orderItems.length; index += 1) {
+    const orderItem = orderItems[index];
+    const position = positions[index];
+    const itemDef = engine.getItemData(orderItem.id)!;
+    const gridItem: any = {
+      uid: engine._nextUid(state),
+      id: orderItem.id,
+      col: position.col,
+      row: position.row,
+    };
+    if (engine.isLauncher(itemDef)) {
+      gridItem.charges = engine.getMaxCharges(orderItem.id);
+      gridItem.last_charge_time = Date.now();
+    }
+    mainGrid.push(gridItem);
+  }
+  engine.initializeProductionUnlocks(state);
+  state.version += 1;
+  return { grantedCount: orderItems.length, itemCounts, mainGrid };
 }
 
 export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret: string, gmKey: string): Router {
@@ -169,9 +234,20 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
           }
           case "grant_order_items": {
             const result = grantCurrentOrderItems(state, engine);
-            if (result.grantedCount === 0) { res.status(400).json({ error: "no_order_items" }); return; }
-            gmResult = { granted_count: result.grantedCount, granted_items: result.itemCounts };
-            msg = `Granted ${result.grantedCount} current order items to pending rewards`;
+            if (result.error) {
+              res.status(400).json({
+                error: result.error,
+                required_count: result.requiredCount,
+                available_slots: result.availableSlots,
+              });
+              return;
+            }
+            gmResult = {
+              granted_count: result.grantedCount,
+              granted_items: result.itemCounts,
+              main_grid: result.mainGrid,
+            };
+            msg = `Granted ${result.grantedCount} current order items to main grid`;
             break;
           }
           default:

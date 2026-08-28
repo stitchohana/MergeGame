@@ -25,6 +25,26 @@ signal items_swapped(item_a: Dictionary, item_b: Dictionary, pos_a: Vector2i, po
 signal grid_updated()
 
 var _skip_anims: bool = false
+var _grid_update_batch_depth: int = 0
+var _grid_update_pending: bool = false
+
+
+func _notify_grid_updated() -> void:
+	if _grid_update_batch_depth > 0:
+		_grid_update_pending = true
+		return
+	grid_updated.emit()
+
+
+func _begin_grid_update_batch() -> void:
+	_grid_update_batch_depth += 1
+
+
+func _end_grid_update_batch() -> void:
+	_grid_update_batch_depth = maxi(_grid_update_batch_depth - 1, 0)
+	if _grid_update_batch_depth == 0 and _grid_update_pending:
+		_grid_update_pending = false
+		grid_updated.emit()
 
 func _ready() -> void:
 	init_grid(current_board_type)
@@ -96,7 +116,7 @@ func add_item(item_data: Dictionary, pos: Vector2i) -> bool:
 		_uid_to_pos[uid] = pos
 
 	item_added.emit(item_data, pos)
-	grid_updated.emit()
+	_notify_grid_updated()
 	return true
 
 func confirm_optimistic_item(pos: Vector2i, temp_uid: int, server_uid: int,
@@ -113,7 +133,7 @@ func confirm_optimistic_item(pos: Vector2i, temp_uid: int, server_uid: int,
 	if atk_base > 0:
 		item["atk_base"] = atk_base
 	_uid_to_pos[server_uid] = pos
-	grid_updated.emit()
+	_notify_grid_updated()
 	return true
 
 func remove_item(pos: Vector2i) -> Dictionary:
@@ -138,7 +158,7 @@ func remove_item(pos: Vector2i) -> Dictionary:
 		_uid_to_pos.erase(uid)
 
 	item_removed.emit(item_data, pos)
-	grid_updated.emit()
+	_notify_grid_updated()
 	return item_data
 
 func move_item(from_pos: Vector2i, to_pos: Vector2i) -> bool:
@@ -166,7 +186,7 @@ func move_item(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		_uid_to_pos[uid] = to_pos
 
 	item_moved.emit(item_data, from_pos, to_pos)
-	grid_updated.emit()
+	_notify_grid_updated()
 	return true
 
 func swap_items(pos_a: Vector2i, pos_b: Vector2i) -> void:
@@ -197,7 +217,7 @@ func swap_items(pos_a: Vector2i, pos_b: Vector2i) -> void:
 	if uid_b > 0:
 		_uid_to_pos[uid_b] = pos_a
 	items_swapped.emit(item_a, item_b, pos_a, pos_b)
-	grid_updated.emit()
+	_notify_grid_updated()
 
 # --- Queries ---
 
@@ -385,6 +405,9 @@ static func _sanitize_json_ints(data: Variant) -> Variant:
 # Populate grid from server entries — shared by all screen restore paths
 func populate_from_server(server_grid: Array) -> void:
 	print("[GridManager] populate_from_server: entries=", server_grid.size())
+	_begin_grid_update_batch()
+	# One authoritative snapshot should produce one UI refresh, even when empty.
+	_grid_update_pending = true
 	for raw_entry in server_grid:
 		var entry: Dictionary = _sanitize_json_ints(raw_entry) as Dictionary
 		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
@@ -394,6 +417,8 @@ func populate_from_server(server_grid: Array) -> void:
 		item["_uid"] = entry.uid
 		if entry.has("charges"):
 			item["charges"] = entry.charges
+		if entry.has("last_charge_time"):
+			item["last_charge_time"] = entry.last_charge_time
 		if entry.has("immovable"):
 			item["immovable"] = entry.immovable
 		var craft_data: Variant = entry.get("craft", null)
@@ -409,6 +434,7 @@ func populate_from_server(server_grid: Array) -> void:
 		if entry.has("atk_base"):
 			item["atk_base"] = entry.atk_base
 		add_item(item, Vector2i(entry.col, entry.row))
+	_end_grid_update_batch()
 
 
 # Apply an authoritative snapshot without clearing the board when the optimistic
@@ -443,6 +469,8 @@ func reconcile_from_server(server_grid: Array) -> bool:
 		authoritative["_uid"] = int(entry.get("uid", 0))
 		if entry.has("charges"):
 			authoritative["charges"] = entry.charges
+		if entry.has("last_charge_time"):
+			authoritative["last_charge_time"] = entry.last_charge_time
 		if entry.has("immovable"):
 			authoritative["immovable"] = entry.immovable
 		var craft_data: Variant = entry.get("craft", null)
@@ -462,7 +490,7 @@ func reconcile_from_server(server_grid: Array) -> bool:
 		local_item.merge(authoritative, true)
 		_uid_to_pos[int(authoritative["_uid"])] = pos
 
-	grid_updated.emit()
+	_notify_grid_updated()
 	return true
 
 
@@ -501,4 +529,4 @@ func confirm_action_batch_results(server_results: Array) -> void:
 		changed = true
 
 	if changed:
-		grid_updated.emit()
+		_notify_grid_updated()

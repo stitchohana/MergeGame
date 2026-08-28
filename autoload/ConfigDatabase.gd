@@ -41,6 +41,27 @@ func _load_json(path: String) -> Dictionary:
 		return {}
 	return sanitize_json_ints(json.data)
 
+# Config tables can contain blank cells as JSON nulls. Keep those values from
+# reaching the built-in int() conversion, which raises "Nonexistent 'int'
+# constructor" for null in Godot 4.
+static func _coerce_int(value: Variant, fallback: int = 0) -> int:
+	if value == null:
+		return fallback
+	match typeof(value):
+		TYPE_INT:
+			return int(value)
+		TYPE_FLOAT:
+			return int(value)
+		TYPE_BOOL:
+			return int(value)
+		TYPE_STRING:
+			var text: String = (value as String).strip_edges()
+			if text.is_valid_int():
+				return text.to_int()
+			if text.is_valid_float():
+				return floori(text.to_float())
+	return fallback
+
 # Recursively convert JSON floats to ints for integer keys
 static func sanitize_json_ints(data: Variant) -> Variant:
 	if data is Dictionary:
@@ -99,7 +120,7 @@ func _load_recipes(path: String) -> void:
 	_items_data["_recipes"] = recipes
 	_recipes_by_table.clear()
 	for recipe in recipes:
-		var rid: int = recipe.get("id", 0)
+		var rid: int = _coerce_int(recipe.get("id", 0))
 		for item_id in _items_data:
 			if not item_id is int:
 				continue
@@ -112,7 +133,7 @@ func _load_recipes(path: String) -> void:
 	print("[ConfigDatabase] Loaded ", recipes.size(), " recipes")
 
 func get_item_data(item_id: int) -> Dictionary:
-	return _items_data.get(item_id, {})
+	return _items_data.get(item_id, {}) 
 
 # Get item data by type, level, and optional group_id
 func get_item_by_level(type: int, level: int, group_id: int = 0) -> Dictionary:
@@ -129,9 +150,10 @@ func get_item_by_level(type: int, level: int, group_id: int = 0) -> Dictionary:
 
 # Get the next level item filtered by group_id
 func _add_item_by_type_level(item_data: Dictionary) -> void:
-	var item_type: int = item_data.get("type", 0)
-	var level: int = int(item_data.get("level", 0))
-	_items_data[int(item_data.id)] = item_data
+	var item_type: int = _coerce_int(item_data.get("type", 0))
+	var level: int = _coerce_int(item_data.get("level", 0))
+	var item_id: int = _coerce_int(item_data.get("id", 0))
+	_items_data[item_id] = item_data
 	if not _items_by_type_level.has(item_type):
 		_items_by_type_level[item_type] = {}
 	if not _items_by_type_level[item_type].has(level):
@@ -214,7 +236,7 @@ func get_recipes() -> Array:
 func get_recipes_for_result(item_id: int) -> Array:
 	var result: Array = []
 	for recipe in get_recipes():
-		if int(recipe.get("result", 0)) == item_id:
+		if _coerce_int(recipe.get("result", 0)) == item_id:
 			result.append(recipe)
 	return result
 
@@ -230,11 +252,11 @@ func _load_expedition(path: String) -> void:
 	var maps: Array = data.get("maps", [])
 	print("[ConfigDatabase] Loaded ", maps.size(), " expedition maps")
 	for m in maps:
-		_expedition_maps[int(m.id)] = m
+		_expedition_maps[_coerce_int(m.get("id", 0))] = m
 	var monsters: Array = data.get("monsters", [])
 	print("[ConfigDatabase] Loaded ", monsters.size(), " monsters")
 	for mo in monsters:
-		_monsters_data[int(mo.id)] = mo
+		_monsters_data[_coerce_int(mo.get("id", 0))] = mo
 
 func get_expedition_map(map_id: int) -> Dictionary:
 	return _expedition_maps.get(map_id, {})
@@ -252,7 +274,7 @@ func _load_meridians(path: String) -> void:
 func _load_tokens(path: String) -> void:
 	var data := _load_json(path)
 	for t in data.get("tokens", []):
-		_tokens_data[int(t.id)] = t
+		_tokens_data[_coerce_int(t.get("id", 0))] = t
 
 func get_token_data(token_id: int) -> Dictionary:
 	return _tokens_data.get(token_id, {})
@@ -305,7 +327,7 @@ func get_stage_exp(level: int) -> int:
 	var s: Dictionary = _get_stage(level)
 	if s.is_empty():
 		return 999999
-	return int(s.get("exp", 0))
+	return _coerce_int(s.get("exp", 0))
 
 func get_stage_name(level: int) -> String:
 	var s: Dictionary = _get_stage(level)
@@ -317,31 +339,31 @@ func get_stage_max_qi(level: int) -> int:
 	var s: Dictionary = _get_stage(level)
 	if s.is_empty():
 		return 100
-	return int(s.get("max_qi", 100))
+	return _coerce_int(s.get("max_qi", 100), 100)
 
 func get_stage_atk(level: int) -> int:
 	var s: Dictionary = _get_stage(level)
 	if s.is_empty():
 		return 0
-	return int(s.get("atk", 0))
+	return _coerce_int(s.get("atk", 0))
 
 func get_stage_breakthrough_pill(level: int) -> int:
 	var s: Dictionary = _get_stage(level)
 	if s.is_empty():
 		return 0
-	return int(s.get("breakthrough_pill", 0))
+	return _coerce_int(s.get("breakthrough_pill", 0))
 
 func get_stage_breakthrough_reward(level: int) -> int:
 	var s: Dictionary = _get_stage(level)
 	if s.is_empty():
 		return 0
-	return int(s.get("breakthrough_reward_id", 0))
+	return _coerce_int(s.get("breakthrough_reward_id", 0))
 
 
 func _load_weekly_tasks(path: String) -> void:
 	var data := _load_json(path)
 	for wt in data.get("weekly_tasks", []):
-		_weekly_tasks[int(wt.activity_id)] = wt.daily_quests
+		_weekly_tasks[_coerce_int(wt.get("activity_id", 0))] = wt.get("daily_quests", [])
 
 func get_weekly_tasks(activity_id: int) -> Array:
 	return _weekly_tasks.get(activity_id, [])

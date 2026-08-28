@@ -135,7 +135,7 @@ func _make_item_widget(item_data: Dictionary, size_px: int) -> ItemWidget:
 	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	button.tooltip_text = "查看合成链"
 	widget.set_clickable(true)
-	widget.pressed.connect(_open_craft_path.bind(item_data))
+	widget.pressed.connect(_open_item_source.bind(item_data))
 	return widget
 
 
@@ -164,8 +164,15 @@ func _make_recipe_card_style() -> StyleBoxFlat:
 	style.corner_radius_bottom_left = 10
 	return style
 
-func _open_craft_path(item_data: Dictionary) -> void:
+func _open_item_source(item_data: Dictionary) -> void:
 	if item_data.is_empty():
+		return
+	var item_id: int = int(item_data.get("id", 0))
+	var recipes: Array = ConfigDatabase.get_recipes_for_result(item_id)
+	if not recipes.is_empty():
+		var source_popup := preload("res://scenes/ui/main/RecipeSourcePopup.tscn").instantiate() as RecipeSourcePopup
+		UIManager.show_popup(source_popup)
+		source_popup.setup_for_item(item_id)
 		return
 	var popup := preload("res://scenes/ui/main/CraftPathView.tscn").instantiate() as CraftPathView
 	UIManager.show_popup(popup)

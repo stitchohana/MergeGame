@@ -19,6 +19,9 @@ var _item_use_pending: bool = false
 var _load_token: int = -1
 var _pending_order_animation: Dictionary = {}
 var _order_animation_input_token: int = -1
+var _is_initial_game_load: bool = true
+var _initial_order_reset_token: int = 0
+var _require_refresh_queued: bool = false
 
 func _ready() -> void:
 	randomize()
@@ -31,7 +34,10 @@ func _ready() -> void:
 	EventBus.restart_requested.connect(_on_restart)
 
 	detail_panel.material_clicked.connect(_on_material_clicked)
+	detail_panel.material_source_requested.connect(_on_material_source_requested)
 	grid_view.item_clicked.connect(_on_item_clicked)
+	if not CraftingService.table_state_changed.is_connected(_on_craft_table_state_changed):
+		CraftingService.table_state_changed.connect(_on_craft_table_state_changed)
 
 	grid_view.item_use_requested.connect(_on_item_use_requested)
 	CloudService.board_switch_confirmed.connect(_on_main_board_switch_confirmed)
@@ -68,6 +74,9 @@ func _setup_extras() -> void:
 
 func on_enter() -> void:
 	print("[GameScreen] on_enter START")
+	_initial_order_reset_token += 1
+	_is_initial_game_load = true
+	requirement_list.reset_scroll_to_start()
 	GameState.current_board_type = Constants.BoardType.MAIN
 	if not GridManager.grid_updated.is_connected(_on_grid_changed):
 		GridManager.grid_updated.connect(_on_grid_changed)
@@ -84,6 +93,9 @@ func on_enter() -> void:
 	print("[GameScreen] _load_token=", _load_token, " online=", CloudService.online)
 	if CloudService.online:
 		CloudService.submit_board_switch(Constants.BoardType.MAIN)
+	else:
+		_schedule_initial_order_list_reset()
+	requirement_list.reset_scroll_to_start()
 	print("[GameScreen] on_enter DONE")
 
 func _render_main_grid_cache() -> void:
@@ -93,6 +105,7 @@ func _render_main_grid_cache() -> void:
 	grid_view.set_skip_animations(false)
 
 func on_exit() -> void:
+	_initial_order_reset_token += 1
 	_end_order_animation_input_lock()
 	if GridManager.grid_updated.is_connected(_on_grid_changed):
 		GridManager.grid_updated.disconnect(_on_grid_changed)
@@ -110,6 +123,8 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 	GridManager.populate_from_server(GameState.main_grid_cache)
 	grid_view.set_skip_animations(false)
 	grid_view.visible = true
+	requirement_list.reset_scroll_to_start()
+	_schedule_initial_order_list_reset()
 	print("[GameScreen] grid_view.visible=true, ending token=", _load_token)
 	if _load_token > 0:
 		LoadingManager.end(_load_token)
@@ -119,10 +134,31 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 func _on_main_board_switch_rejected(_reason: String) -> void:
 	if not GameState.main_grid_cache.is_empty():
 		_render_main_grid_cache()
+	requirement_list.reset_scroll_to_start()
+	_schedule_initial_order_list_reset()
 	grid_view.visible = true
 	if _load_token > 0:
 		LoadingManager.end(_load_token)
 		_load_token = -1
+
+func _schedule_initial_order_list_reset() -> void:
+	_initial_order_reset_token += 1
+	var reset_token: int = _initial_order_reset_token
+	call_deferred("_finish_initial_order_list_reset", reset_token)
+
+func _finish_initial_order_list_reset(reset_token: int) -> void:
+	await get_tree().process_frame
+	if reset_token != _initial_order_reset_token or not is_inside_tree():
+		return
+	requirement_list.reset_scroll_to_start()
+	await get_tree().process_frame
+	if reset_token != _initial_order_reset_token or not is_inside_tree():
+		return
+	_is_initial_game_load = false
+	print("[GameScreen] initial order list locked to character area")
+
+func _allow_available_order_focus() -> bool:
+	return not _is_initial_game_load
 
 func _on_material_clicked(uid: int, item_id: int) -> void:
 	var table_pos := detail_panel.get_current_craft_pos()
@@ -137,6 +173,11 @@ func _on_material_clicked(uid: int, item_id: int) -> void:
 			return
 		_submit_material_remove(synced_table_pos, uid, item_id)
 	)
+
+func _on_material_source_requested(item_id: int) -> void:
+	if item_id <= 0:
+		return
+	requirement_list.show_item_source(item_id)
 
 func _submit_material_remove(table_pos: Vector2i, _uid: int, item_id: int) -> void:
 	var spawn_pos := GridManager.find_nearest_empty(table_pos)
@@ -220,7 +261,97 @@ func _on_restart() -> void:
 		CloudService.fetch_state()
 
 func _on_grid_changed() -> void:
+	_queue_requirement_refresh()
+
+func _on_craft_table_state_changed(_table_item: Dictionary, state: int) -> void:
+	_refresh_requirement_crafting_badges()
+	# IDLE is followed by a grid update when a material/result is moved.
+	# Wait for that update so retrieval does not briefly re-mark ingredients.
+	if state == CraftingService.TableState.IDLE:
+		return
+	_queue_requirement_refresh()
+
+func _queue_requirement_refresh() -> void:
+	if _require_refresh_queued:
+		return
+	_require_refresh_queued = true
+	call_deferred("_flush_requirement_refresh")
+
+func _flush_requirement_refresh() -> void:
+	_require_refresh_queued = false
+	if not is_inside_tree():
+		return
 	_refresh_requirement_buttons()
+
+func _get_reserved_crafting_item_ids() -> Dictionary:
+	var reserved_ids: Dictionary = {}
+	for entry: Dictionary in GridManager.get_all_items():
+		var table_item: Dictionary = entry.get("data", {}) as Dictionary
+		if int(table_item.get("type", 0)) != Constants.ItemType.CRAFTING:
+			continue
+		for stored_variant: Variant in table_item.get("_craft_stored", []):
+			if not stored_variant is Dictionary:
+				continue
+			var stored_item: Dictionary = stored_variant as Dictionary
+			var stored_id: int = int(stored_item.get("id", 0))
+			if stored_id > 0:
+				reserved_ids[stored_id] = true
+		var craft_state: int = int(table_item.get("_craft_state", CraftingService.TableState.IDLE))
+		if craft_state != CraftingService.TableState.CRAFTING and craft_state != CraftingService.TableState.READY:
+			continue
+		var active_recipe: Dictionary = table_item.get("_craft_recipe", {}) as Dictionary
+		for ingredient_variant: Variant in active_recipe.get("ingredients", []):
+			var ingredient_id: int = int(ingredient_variant)
+			if ingredient_id > 0:
+				reserved_ids[ingredient_id] = true
+	return reserved_ids
+
+func _get_finished_order_item_counts() -> Dictionary:
+	var finished_counts: Dictionary = {}
+	var board_item_ids: Array[int] = []
+	var ready_result_ids: Array[int] = []
+	var known_positions: Dictionary = {}
+	for entry: Dictionary in GridManager.get_all_items():
+		var item_data: Dictionary = entry.get("data", {}) as Dictionary
+		var entry_pos: Vector2i = entry.get("pos", Vector2i(-1, -1)) as Vector2i
+		known_positions["%d,%d" % [entry_pos.x, entry_pos.y]] = true
+		var item_id: int = int(item_data.get("id", 0))
+		var item_type: int = int(item_data.get("type", 0))
+		# An order product can inherit an immovable flag from its board snapshot.
+		# It is still an existing product; only crafting facilities are excluded.
+		if item_id > 0 and item_type != Constants.ItemType.CRAFTING:
+			board_item_ids.append(item_id)
+			finished_counts[item_id] = int(finished_counts.get(item_id, 0)) + 1
+		if int(item_data.get("type", 0)) != Constants.ItemType.CRAFTING:
+			continue
+		if int(item_data.get("_craft_state", CraftingService.TableState.IDLE)) != CraftingService.TableState.READY:
+			continue
+		var result_id: int = int(item_data.get("_craft_result_id", 0))
+		if result_id <= 0:
+			var recipe: Dictionary = item_data.get("_craft_recipe", {}) as Dictionary
+			result_id = int(recipe.get("result", 0))
+		if result_id > 0:
+			ready_result_ids.append(result_id)
+			finished_counts[result_id] = int(finished_counts.get(result_id, 0)) + 1
+	var ui_fallback_item_ids: Array[int] = []
+	if grid_view != null and is_instance_valid(grid_view):
+		for node_key: Variant in grid_view._item_nodes.keys():
+			if known_positions.has(str(node_key)):
+				continue
+			var node: GridItem = grid_view._item_nodes[node_key] as GridItem
+			if node == null or not is_instance_valid(node):
+				continue
+			var node_item_id: int = int(node.item_data.get("id", 0))
+			var node_item_type: int = int(node.item_data.get("type", 0))
+			if node_item_id <= 0 or node_item_type == Constants.ItemType.CRAFTING:
+				continue
+			ui_fallback_item_ids.append(node_item_id)
+			finished_counts[node_item_id] = int(finished_counts.get(node_item_id, 0)) + 1
+	print("[Require] finished_scan board_item_ids=", board_item_ids,
+		" ready_result_ids=", ready_result_ids,
+		" ui_fallback_item_ids=", ui_fallback_item_ids,
+		" finished_counts=", finished_counts)
+	return finished_counts
 
 func _count_grid_item(item_id: int) -> int:
 	var count := 0
@@ -231,24 +362,48 @@ func _count_grid_item(item_id: int) -> int:
 	return count
 
 func _check_can_complete(req: Dictionary) -> bool:
+	return _get_requirement_priority(req) == 2
+
+func _get_requirement_priority(req: Dictionary) -> int:
 	var items: Array = req.get("items", [])
 	if items.is_empty():
-		return false
-	for it in items:
-		if _count_grid_item(int(it.get("item_id", 0))) < 1:
-			return false
-	return true
+		return 0
+	var required_counts: Dictionary = {}
+	for item_variant: Variant in items:
+		if not item_variant is Dictionary:
+			continue
+		var item: Dictionary = item_variant as Dictionary
+		var item_id: int = int(item.get("item_id", 0))
+		if item_id <= 0:
+			continue
+		required_counts[item_id] = int(required_counts.get(item_id, 0)) + 1
+	if required_counts.is_empty():
+		return 0
+	var matched_count: int = 0
+	var required_count: int = 0
+	for item_id_variant: Variant in required_counts.keys():
+		var item_id: int = int(item_id_variant)
+		var item_required_count: int = int(required_counts[item_id])
+		required_count += item_required_count
+		matched_count += mini(_count_grid_item(item_id), item_required_count)
+	if matched_count >= required_count:
+		return 2
+	if matched_count > 0:
+		return 1
+	return 0
 
 func _refresh_requirement_buttons() -> void:
 	_refresh_required_indicators()
 	_refresh_requirement_item_selection()
+	_refresh_requirement_crafting_badges()
 	for i in range(_display_index_map.size()):
 		var data_index: int = _display_index_map[i]
 		if data_index < 0 or data_index >= GameState.meridian_acupoints.size():
 			continue
 		var req: Dictionary = GameState.meridian_acupoints[data_index]
 		if not req.get("completed", false):
-			requirement_list.set_entry_available(i, _check_can_complete(req))
+			var allow_available_focus: bool = _allow_available_order_focus()
+			requirement_list.set_entry_priority(i, _get_requirement_priority(req), allow_available_focus)
 
 func _refresh_requirement_item_selection() -> void:
 	var present_item_ids: Dictionary = {}
@@ -262,22 +417,115 @@ func _refresh_requirement_item_selection() -> void:
 	requirement_list.refresh_item_selection(present_item_ids)
 
 
+func _refresh_requirement_crafting_badges() -> void:
+	requirement_list.refresh_item_crafting(_get_crafting_result_item_ids())
+
+
+func _get_crafting_result_item_ids() -> Dictionary:
+	var crafting_item_ids: Dictionary = {}
+	for entry in GridManager.get_all_items():
+		var table_item: Dictionary = entry.get("data", {})
+		if int(table_item.get("type", 0)) != Constants.ItemType.CRAFTING:
+			continue
+		if int(table_item.get("_craft_state", CraftingService.TableState.IDLE)) != CraftingService.TableState.CRAFTING:
+			continue
+		var result_id: int = int(table_item.get("_craft_result_id", 0))
+		if result_id <= 0:
+			var recipe_variant: Variant = table_item.get("_craft_recipe", {})
+			if recipe_variant is Dictionary:
+				result_id = int((recipe_variant as Dictionary).get("result", 0))
+		if result_id > 0:
+			crafting_item_ids[result_id] = true
+	return crafting_item_ids
+
+
 func _refresh_required_indicators() -> void:
 	if GameState.current_board_type != Constants.BoardType.MAIN:
 		return
-	var required_ids: Array = []
-	# Collect all item IDs needed by incomplete acupoints
-	for req in GameState.meridian_acupoints:
-		for it in req.get("items", []):
+	var required_ids: Dictionary = {}
+	var finished_order_item_ids: Dictionary = {}
+	var reserved_crafting_ids: Dictionary = _get_reserved_crafting_item_ids()
+	var finished_order_item_counts: Dictionary = _get_finished_order_item_counts()
+	var order_targets: Array[int] = []
+	print("[Require] refresh_begin board_type=", GameState.current_board_type,
+		" grid_count=", GridManager.count_items(), " ui_node_count=", grid_view._item_nodes.size(),
+		" finished_counts=", finished_order_item_counts)
+	# An order product already on the board shows require itself. Its recipe
+	# materials are already satisfied, so do not mark the material tree for that
+	# order. Missing order products still collect every required material below.
+	for req_variant: Variant in GameState.meridian_acupoints:
+		var req: Dictionary = req_variant as Dictionary
+		if bool(req.get("completed", false)):
+			continue
+		for it_variant: Variant in req.get("items", []):
+			var it: Dictionary = it_variant as Dictionary
 			var item_id: int = int(it.get("item_id", 0))
-			if item_id > 0 and not required_ids.has(item_id):
-				required_ids.append(item_id)
+			order_targets.append(item_id)
+			var finished_count: int = int(finished_order_item_counts.get(item_id, 0))
+			if finished_count > 0:
+				finished_order_item_counts[item_id] = finished_count - 1
+				finished_order_item_ids[item_id] = true
+				required_ids[item_id] = true
+				print("[Require] target_skip_finished item_id=", item_id,
+					" remaining_finished=", finished_count - 1,
+					" mark_order_product=true")
+				continue
+			var required_before: Dictionary = required_ids.duplicate()
+			_collect_recipe_material_ids(item_id, required_ids, reserved_crafting_ids)
+			var target_added_ids: Array[int] = []
+			for required_variant: Variant in required_ids.keys():
+				if not required_before.has(required_variant):
+					target_added_ids.append(int(required_variant))
+			print("[Require] target_collect target_id=", item_id,
+				" added_ids=", target_added_ids)
+	print("[Require] refresh order_targets=", order_targets,
+		" reserved_ids=", reserved_crafting_ids.keys(),
+		" required_ids=", required_ids.keys())
+
+	# Clear every live UI node first. A node can temporarily survive a grid
+	# mutation while its position map is being reconciled; leaving it out of the
+	# GridManager loop would otherwise preserve a stale require icon.
+	if grid_view != null and is_instance_valid(grid_view):
+		for node_key: Variant in grid_view._item_nodes.keys():
+			var live_node: GridItem = grid_view._item_nodes[node_key] as GridItem
+			if live_node != null and is_instance_valid(live_node):
+				live_node.set_required(false)
+
 	# Update all grid items
 	for entry in GridManager.get_all_items():
 		var node: GridItem = grid_view._item_nodes.get("%d,%d" % [entry.pos.x, entry.pos.y])
 		if node and is_instance_valid(node):
 			var item_data: Dictionary = entry.data
-			node.set_required(not bool(item_data.get("immovable", false)) and required_ids.has(int(item_data.get("id", 0))))
+			var item_id: int = int(item_data.get("id", 0))
+			var should_require: bool = (
+				(finished_order_item_ids.has(item_id)
+					or (not bool(item_data.get("immovable", false))
+						and required_ids.has(item_id)))
+			)
+			node.set_required(should_require)
+			if should_require:
+				print("[Require] apply pos=", entry.pos, " item_id=", item_id, " required=true")
+
+func _collect_recipe_material_ids(result_id: int, required_ids: Dictionary, reserved_ids: Dictionary) -> void:
+	if result_id <= 0:
+		return
+	for recipe_variant: Variant in ConfigDatabase.get_recipes_for_result(result_id):
+		if not recipe_variant is Dictionary:
+			continue
+		var recipe: Dictionary = recipe_variant as Dictionary
+		for ingredient_variant: Variant in recipe.get("ingredients", []):
+			_collect_recipe_dependency_ids(int(ingredient_variant), required_ids, reserved_ids)
+
+func _collect_recipe_dependency_ids(item_id: int, required_ids: Dictionary, reserved_ids: Dictionary) -> void:
+	if item_id <= 0 or required_ids.has(item_id) or reserved_ids.has(item_id):
+		return
+	required_ids[item_id] = true
+	for recipe_variant: Variant in ConfigDatabase.get_recipes_for_result(item_id):
+		if not recipe_variant is Dictionary:
+			continue
+		var recipe: Dictionary = recipe_variant as Dictionary
+		for ingredient_variant: Variant in recipe.get("ingredients", []):
+			_collect_recipe_dependency_ids(int(ingredient_variant), required_ids, reserved_ids)
 
 func _refresh_meridian() -> void:
 	if not GameState.meridian_acupoints.is_empty():
@@ -300,15 +548,15 @@ func _display_meridian() -> void:
 			completed += 1
 	requirement_list.set_title("修炼需求 %d/%d" % [completed, GameState.meridian_acupoints.size()])
 	var display_reqs: Array = []
-	var available_indices: Dictionary = {}
+	var priority_indices: Dictionary = {}
 	for i in range(GameState.meridian_acupoints.size()):
 		var req: Dictionary = GameState.meridian_acupoints[i]
 		if not req.get("completed", false):
 			var display_index: int = display_reqs.size()
 			display_reqs.append(req.duplicate())
 			_display_index_map.append(i)
-			available_indices[display_index] = _check_can_complete(req)
-	requirement_list.set_requirements(display_reqs, available_indices)
+			priority_indices[display_index] = _get_requirement_priority(req)
+	requirement_list.set_requirements(display_reqs, priority_indices)
 	_refresh_requirement_buttons()
 
 func _on_meridian_complete(display_index: int) -> void:
@@ -423,7 +671,11 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 	print("[GameScreen] order animation: confirmed sources=", animation.get("sources", []).size(), " qi=", result.get("qi_gained", 0))
 	var cult: Dictionary = result.get("cultivation", {})
 	animation["target_qi"] = int(cult.get("current_qi", CultivationService.current_qi))
-	await _play_order_completion_animation(animation, int(result.get("qi_gained", 0)))
+	var qi_from: Vector2 = top_bar.global_position
+	if animation_entry and is_instance_valid(animation_entry):
+		qi_from = animation_entry.get_global_rect().get_center()
+	animation["qi_from"] = qi_from
+	await _play_order_completion_animation(animation)
 	if top_bar:
 		top_bar.set_qi_updates_suppressed(false)
 	_meridian_submit_pending = false
@@ -441,7 +693,15 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 	# Server returns updated list (completed order removed, new order added)
 	GameState.meridian_acupoints = result.get("meridian_acupoints", [])
 	_display_meridian()
-	requirement_list.animate_reflow_from(animation.get("previous_positions", {}), int(animation.get("completed_display_index", -1)))
+	if not _is_initial_game_load:
+		requirement_list.focus_first_available_order()
+	await requirement_list.animate_reflow_from(
+		animation.get("previous_positions", {}),
+		int(animation.get("completed_display_index", -1))
+	)
+	var qi_animation_duration: float = _play_order_qi_animation(animation, int(result.get("qi_gained", 0)))
+	if qi_animation_duration > 0.0:
+		await get_tree().create_timer(qi_animation_duration + 0.05).timeout
 	await get_tree().create_timer(0.3).timeout
 	_end_order_animation_input_lock()
 
@@ -466,7 +726,7 @@ func _end_order_animation_input_lock() -> void:
 	_order_animation_input_token = -1
 
 
-func _play_order_completion_animation(animation: Dictionary, qi_gained: int) -> void:
+func _play_order_completion_animation(animation: Dictionary) -> void:
 	if animation.is_empty():
 		return
 	var sources: Array = animation.get("sources", [])
@@ -480,20 +740,25 @@ func _play_order_completion_animation(animation: Dictionary, qi_gained: int) -> 
 		await get_tree().create_timer(fly_duration).timeout
 	var entry: RequirementEntry = animation.get("entry") as RequirementEntry
 	if entry and is_instance_valid(entry):
-		print("[GameScreen] order animation: card disappear index=", entry.get_display_index())
-		entry.play_complete_animation()
-	await get_tree().create_timer(0.24).timeout
-	if qi_gained > 0 and top_bar:
-		var target_qi: int = int(animation.get("target_qi", CultivationService.current_qi))
-		var start_qi: int = int(animation.get("start_qi", target_qi - qi_gained))
-		top_bar.qi_resource.animate_value_from(start_qi, target_qi)
-		var qi_icon: TextureRect = top_bar.qi_resource.get_node_or_null("Icon") as TextureRect
-		if qi_icon and qi_icon.texture:
-			var from_pos: Vector2 = entry.get_global_rect().get_center() if entry and is_instance_valid(entry) else top_bar.global_position
-			var to_pos: Vector2 = qi_icon.get_global_rect().get_center()
-			_play_qi_reward_pile(qi_icon.texture, from_pos, to_pos)
-			var qi_batch_duration: float = Constants.QI_REWARD_FLY_DURATION + float(maxi(Constants.QI_REWARD_FLY_COUNT - 1, 0)) * Constants.QI_REWARD_FLY_STAGGER
-			await get_tree().create_timer(qi_batch_duration + 0.05).timeout
+		print("[GameScreen] order animation: empty state index=", entry.get_display_index())
+		entry.show_completed_empty_state()
+
+func _play_order_qi_animation(animation: Dictionary, qi_gained: int) -> float:
+	if qi_gained <= 0 or top_bar == null:
+		return 0.0
+	var target_qi: int = int(animation.get("target_qi", CultivationService.current_qi))
+	var start_qi: int = int(animation.get("start_qi", target_qi - qi_gained))
+	top_bar.qi_resource.animate_value_from(start_qi, target_qi)
+	var qi_icon: TextureRect = top_bar.qi_resource.get_node_or_null("Icon") as TextureRect
+	if qi_icon == null or qi_icon.texture == null:
+		return 0.0
+	var from_pos: Vector2 = top_bar.global_position
+	var stored_from: Variant = animation.get("qi_from", null)
+	if stored_from is Vector2:
+		from_pos = stored_from
+	var to_pos: Vector2 = qi_icon.get_global_rect().get_center()
+	_play_qi_reward_pile(qi_icon.texture, from_pos, to_pos)
+	return Constants.QI_REWARD_FLY_DURATION + float(maxi(Constants.QI_REWARD_FLY_COUNT - 1, 0)) * Constants.QI_REWARD_FLY_STAGGER
 
 func _hide_order_source_items(animation: Dictionary, duration: float) -> void:
 	for source in animation.get("sources", []):

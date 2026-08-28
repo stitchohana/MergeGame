@@ -9,15 +9,18 @@ var item_data: Dictionary = {}
 var grid_position: Vector2i
 var is_launcher: bool = false
 var _is_selected: bool = false
+var _is_crafting: bool = false
 
 @onready var icon_rect: TextureRect = $IconRect
 @onready var select_icon: TextureRect = $SelectIcon
 @onready var click_button: Button = $ClickButton
+@onready var crafting_badge: Control = $CraftingBadge
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	click_button.pressed.connect(_on_click_button_pressed)
+	_update_crafting_badge()
 
 
 func setup(data: Dictionary, pos: Vector2i = Vector2i(-1, -1), cell_size: int = 80) -> void:
@@ -54,6 +57,17 @@ func set_selected(active: bool) -> void:
 	var selection: TextureRect = _selection()
 	if selection:
 		selection.visible = active
+
+
+func set_crafting_badge(active: bool) -> void:
+	_is_crafting = active
+	_update_crafting_badge()
+
+
+func _update_crafting_badge() -> void:
+	var badge: Control = crafting_badge if crafting_badge else get_node_or_null("CraftingBadge") as Control
+	if badge:
+		badge.visible = _is_crafting
 
 
 func set_clickable(active: bool) -> void:

@@ -29,8 +29,31 @@ func can_merge(item_a_data: Dictionary, item_b_data: Dictionary) -> bool:
 	var type: int = item_a_data.get("type", 0)
 	var level: int = item_a_data.get("level", 0)
 	var gid: int = item_a_data.get("group_id", 0)
-	var next = ConfigDatabase.get_next_level(type, level, gid)
-	return not next.is_empty()
+	var next: Dictionary = ConfigDatabase.get_next_level(type, level, gid)
+	if next.is_empty():
+		return false
+	return not is_merge_blocked_by_craft_materials(item_a_data, item_b_data)
+
+func is_merge_blocked_by_craft_materials(item_a_data: Dictionary, item_b_data: Dictionary) -> bool:
+	if item_a_data.is_empty() or item_b_data.is_empty():
+		return false
+	if item_a_data.get("group_id", 0) != item_b_data.get("group_id", 0):
+		return false
+	if item_a_data.get("id", 0) != item_b_data.get("id", 0):
+		return false
+	var type: int = int(item_a_data.get("type", 0))
+	var level: int = int(item_a_data.get("level", 0))
+	var gid: int = int(item_a_data.get("group_id", 0))
+	var next: Dictionary = ConfigDatabase.get_next_level(type, level, gid)
+	if next.is_empty():
+		return false
+	return _has_craft_materials(item_a_data) or _has_craft_materials(item_b_data)
+
+func _has_craft_materials(item_data: Dictionary) -> bool:
+	if int(item_data.get("type", -1)) != Constants.ItemType.CRAFTING:
+		return false
+	var stored_items: Array = item_data.get("_craft_stored", [])
+	return not stored_items.is_empty()
 
 func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	var item_a = GridManager.get_item(from_pos)
@@ -40,7 +63,8 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		return false
 	if not can_merge(item_a, item_b):
 		print("[MergeService] can_merge failed: #" + str(item_a.get("id",0)) + " vs #" + str(item_b.get("id",0)))
-		merge_failed.emit("Cannot merge")
+		var reason: String = "craft_table_has_materials" if is_merge_blocked_by_craft_materials(item_a, item_b) else "Cannot merge"
+		merge_failed.emit(reason)
 		return false
 	if not _pending_merge.is_empty():
 		merge_failed.emit("merge_pending")
@@ -122,6 +146,7 @@ func _rollback_pending_merge() -> void:
 
 func _merge_error_text(reason: String) -> String:
 	match reason:
+		"craft_table_has_materials": return "无法合成"
 		"source_item_not_found": return "合并失败：物品不存在"
 		"target_item_not_found": return "合并失败：目标物品不存在"
 		"group_id_mismatch": return "合并失败：物品类型不同"

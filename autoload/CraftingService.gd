@@ -152,6 +152,18 @@ func get_remaining_craft_seconds(table_item: Dictionary) -> float:
 		return 0.0
 	return timer.time_left
 
+func complete_craft_now(table_item: Dictionary) -> void:
+	if table_item.is_empty():
+		return
+	var timer: Timer = table_item.get("_craft_timer")
+	if timer and is_instance_valid(timer):
+		timer.stop()
+		timer.queue_free()
+	table_item.erase("_craft_timer")
+	_set_state(table_item, TableState.READY)
+	table_item["_craft_progress"] = 1.0
+	table_state_changed.emit(table_item, TableState.READY)
+
 func _on_craft_timeout(table_item: Dictionary) -> void:
 	_set_state(table_item, TableState.READY)
 	table_item["_craft_progress"] = 1.0

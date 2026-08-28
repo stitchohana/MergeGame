@@ -3,12 +3,15 @@ class_name RequirementList extends Control
 signal complete_clicked(index: int)
 
 const DRAG_THRESHOLD: float = 8.0
+const ORDER_ANIMATION_FOREGROUND_Z: int = 100
 
 var _entry_scene: PackedScene = preload("res://scenes/ui/meridian/RequirementEntry.tscn")
 var _dragging: bool = false
 var _drag_moved: bool = false
 var _drag_start_x: float = 0.0
 var _drag_start_scroll: int = 0
+var _available_scroll_request_pending: bool = false
+var _available_scroll_request_id: int = 0
 
 @onready var scroll: ScrollContainer = $Panel/ScrollContainer
 @onready var container: HBoxContainer = $Panel/ScrollContainer/HBoxContainer
@@ -134,7 +137,7 @@ func _on_cultivation_pressed() -> void:
 	GameState.pending_auto_acupoint = true
 	EventBus.screen_change_requested.emit("home")
 
-func set_requirements(reqs: Array, available_indices: Dictionary = {}) -> void:
+func set_requirements(reqs: Array, priority_indices: Dictionary = {}) -> void:
 	for child in container.get_children():
 		if child is RequirementEntry:
 			container.remove_child(child)
@@ -142,10 +145,13 @@ func set_requirements(reqs: Array, available_indices: Dictionary = {}) -> void:
 
 	var ordered_indices: Array[int] = []
 	for i in range(reqs.size()):
-		if bool(available_indices.get(i, false)):
+		if _normalize_priority(priority_indices.get(i, 0)) == 2:
 			ordered_indices.append(i)
 	for i in range(reqs.size()):
-		if not bool(available_indices.get(i, false)):
+		if _normalize_priority(priority_indices.get(i, 0)) == 1:
+			ordered_indices.append(i)
+	for i in range(reqs.size()):
+		if _normalize_priority(priority_indices.get(i, 0)) == 0:
 			ordered_indices.append(i)
 
 	for i in ordered_indices:
@@ -153,14 +159,33 @@ func set_requirements(reqs: Array, available_indices: Dictionary = {}) -> void:
 		var entry: RequirementEntry = _entry_scene.instantiate()
 		container.add_child(entry)
 		entry.setup(req.get("items", []), i, req.get("completed", false), req.get("rewards", {}))
-		entry.set_available(bool(available_indices.get(i, false)))
+		entry.set_order_priority(_normalize_priority(priority_indices.get(i, 0)))
 		var idx := i
 		entry.complete_pressed.connect(_emit_complete.bind(idx))
 		entry.item_pressed.connect(_on_entry_item_pressed)
+	_sort_entries_by_availability()
+
+
+func reset_scroll_to_start() -> void:
+	_available_scroll_request_id += 1
+	_available_scroll_request_pending = false
+	if not is_inside_tree():
+		return
+	scroll.scroll_horizontal = 0
+	call_deferred("_reset_scroll_to_start_deferred")
+
+
+func _reset_scroll_to_start_deferred() -> void:
+	if not is_inside_tree():
+		return
+	scroll.scroll_horizontal = 0
 
 func _on_entry_item_pressed(item_id: int) -> void:
 	if _drag_moved:
 		return
+	_show_item_source(item_id)
+
+func show_item_source(item_id: int) -> void:
 	_show_item_source(item_id)
 
 func _reset_drag_gesture() -> void:
@@ -186,12 +211,11 @@ func animate_reflow_from(previous_positions: Dictionary, removed_index: int = -1
 		if not old_position_variant is Vector2:
 			continue
 		var old_position: Vector2 = old_position_variant
-		var target_modulate: Color = entry.modulate
-		var hidden_modulate: Color = target_modulate
-		hidden_modulate.a = 0.0
-		entry.modulate = hidden_modulate
-		entry.position = old_position
-		pending.append({"entry": entry, "from": old_position, "modulate": target_modulate})
+		pending.append({
+			"entry": entry,
+			"from": old_position,
+			"z_index": entry.z_index,
+		})
 	await get_tree().process_frame
 	for pending_variant in pending:
 		var data: Dictionary = pending_variant
@@ -200,29 +224,45 @@ func animate_reflow_from(previous_positions: Dictionary, removed_index: int = -1
 			continue
 		var from_position: Vector2 = data.get("from", Vector2.ZERO)
 		var to_position: Vector2 = entry.position
-		var target_modulate: Color = data.get("modulate", Color.WHITE)
 		entry.position = from_position
+		var original_z_index: int = int(data.get("z_index", entry.z_index))
+		var moves_forward: bool = to_position.x < from_position.x
+		if moves_forward:
+			entry.z_index = ORDER_ANIMATION_FOREGROUND_Z
 		var tween: Tween = create_tween().set_parallel(true)
 		tween.set_trans(Tween.TRANS_CUBIC)
 		tween.set_ease(Tween.EASE_OUT)
 		tween.tween_property(entry, "position", to_position, 0.28)
-		tween.tween_property(entry, "modulate:a", target_modulate.a, 0.18)
+		if moves_forward:
+			tween.chain().tween_callback(_restore_entry_z_index.bind(entry, original_z_index))
 
 func set_entry_available(index: int, available: bool) -> void:
+	set_entry_priority(index, 2 if available else 0)
+
+
+func set_entry_priority(index: int, priority: int, focus_available: bool = true) -> bool:
 	var entry := _get_entry_by_display_index(index)
 	if entry == null:
-		return
-	var changed: bool = entry.set_available(available)
+		return false
+	var previous_priority: int = entry.get_order_priority()
+	var normalized_priority: int = clampi(priority, 0, 2)
+	var changed: bool = entry.set_order_priority(normalized_priority)
 	if not changed:
-		return
-	if available:
-		_promote_entry(entry)
-	else:
-		_move_entry_after_available(entry)
+		return false
+	var start_position: Vector2 = entry.position
+	_sort_entries_by_availability()
+	if normalized_priority > previous_priority:
+		_animate_promoted_entry(entry, start_position, focus_available)
+	return true
 
 func refresh_item_selection(present_item_ids: Dictionary) -> void:
 	for entry in _get_entries():
 		entry.refresh_item_selection(present_item_ids)
+
+
+func refresh_item_crafting(crafting_item_ids: Dictionary) -> void:
+	for entry in _get_entries():
+		entry.refresh_item_crafting(crafting_item_ids)
 
 
 func _get_entry_by_display_index(index: int) -> RequirementEntry:
@@ -232,22 +272,25 @@ func _get_entry_by_display_index(index: int) -> RequirementEntry:
 	return null
 
 
-func _promote_entry(entry: RequirementEntry) -> void:
-	var start_position: Vector2 = entry.position
-	var target_modulate: Color = entry.modulate
-	var hidden_modulate: Color = target_modulate
-	hidden_modulate.a = 0.0
-	entry.modulate = hidden_modulate
-	container.move_child(entry, _get_order_start_index())
-	_animate_promoted_entry(entry, start_position, target_modulate)
+func _sort_entries_by_availability() -> void:
+	var ordered_entries: Array[RequirementEntry] = _get_entries()
+	ordered_entries.sort_custom(_compare_entry_priority)
+	var start_index: int = _get_order_start_index()
+	for offset in range(ordered_entries.size()):
+		container.move_child(ordered_entries[offset], start_index + offset)
 
 
-func _move_entry_after_available(entry: RequirementEntry) -> void:
-	var available_count: int = 0
-	for child in _get_entries():
-		if child != entry and child.is_available():
-			available_count += 1
-	container.move_child(entry, _get_order_start_index() + available_count)
+
+func _compare_entry_priority(left: RequirementEntry, right: RequirementEntry) -> bool:
+	if left.get_order_priority() != right.get_order_priority():
+		return left.get_order_priority() > right.get_order_priority()
+	return left.get_display_index() < right.get_display_index()
+
+
+func _normalize_priority(value: Variant) -> int:
+	if value is bool:
+		return 2 if bool(value) else 0
+	return clampi(int(value), 0, 2)
 
 func _get_order_start_index() -> int:
 	var fixed_child_count: int = 0
@@ -257,17 +300,63 @@ func _get_order_start_index() -> int:
 	return fixed_child_count
 
 
-func _animate_promoted_entry(entry: RequirementEntry, start_position: Vector2, target_modulate: Color) -> void:
+func _animate_promoted_entry(entry: RequirementEntry, start_position: Vector2, focus_available: bool) -> void:
 	await get_tree().process_frame
 	if not is_instance_valid(entry):
 		return
 	var target_position: Vector2 = entry.position
+	if focus_available:
+		_scroll_entry_to_center(entry)
 	entry.position = start_position
+	var original_z_index: int = entry.z_index
+	entry.z_index = ORDER_ANIMATION_FOREGROUND_Z
 	var tween: Tween = create_tween().set_parallel(true)
 	tween.set_trans(Tween.TRANS_CUBIC)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.tween_property(entry, "position", target_position, 0.28)
-	tween.tween_property(entry, "modulate:a", target_modulate.a, 0.18)
+	tween.chain().tween_callback(_restore_entry_z_index.bind(entry, original_z_index))
+
+
+func _schedule_available_order_scroll() -> void:
+	if _available_scroll_request_pending:
+		return
+	_available_scroll_request_pending = true
+	_available_scroll_request_id += 1
+	var request_id: int = _available_scroll_request_id
+	call_deferred("_scroll_to_first_available_order", request_id)
+
+
+func focus_first_available_order() -> void:
+	_schedule_available_order_scroll()
+
+
+func _scroll_to_first_available_order(request_id: int) -> void:
+	await get_tree().process_frame
+	if request_id != _available_scroll_request_id:
+		return
+	_available_scroll_request_pending = false
+	if not is_inside_tree():
+		return
+	for entry in _get_entries():
+		if entry.is_available():
+			_scroll_entry_to_center(entry)
+			return
+
+
+func _scroll_entry_to_center(entry: RequirementEntry) -> void:
+	if not is_inside_tree() or not is_instance_valid(entry):
+		return
+	var viewport_rect: Rect2 = scroll.get_global_rect()
+	var entry_rect: Rect2 = entry.get_global_rect()
+	var current_scroll: float = float(scroll.scroll_horizontal)
+	var max_scroll: int = int(scroll.get_h_scroll_bar().max_value)
+	var target_scroll: float = current_scroll + entry_rect.get_center().x - viewport_rect.get_center().x
+	scroll.scroll_horizontal = clampi(int(roundf(target_scroll)), 0, max_scroll)
+
+
+func _restore_entry_z_index(entry: RequirementEntry, original_z_index: int) -> void:
+	if entry and is_instance_valid(entry):
+		entry.z_index = original_z_index
 
 func _emit_complete(idx: int) -> void:
 	complete_clicked.emit(idx)

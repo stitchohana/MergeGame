@@ -12,12 +12,22 @@ const INGREDIENT_SIZE: int = 112
 @onready var craft_time_label: Label = $Panel/SourceContainer/RecipeRegionsTemplate/ProductTimerArea/CraftTime
 @onready var close_btn: TextureButton = $Panel/CloseButton
 
+var _pending_item_id: int = 0
+
 
 func _ready() -> void:
-	close_btn.pressed.connect(_on_close)
+	if close_btn:
+		close_btn.pressed.connect(_on_close)
+	if _pending_item_id > 0:
+		var pending_item_id: int = _pending_item_id
+		_pending_item_id = 0
+		setup_for_item(pending_item_id)
 
 
 func setup_for_item(item_id: int) -> void:
+	if not is_node_ready():
+		_pending_item_id = item_id
+		return
 	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
 	if item_data.is_empty():
 		return
@@ -131,6 +141,13 @@ func _on_ingredient_pressed(widget: ItemWidget) -> void:
 
 func _open_craft_path(item_data: Dictionary) -> void:
 	if item_data.is_empty():
+		return
+	var item_id: int = int(item_data.get("id", 0))
+	var recipes: Array = ConfigDatabase.get_recipes_for_result(item_id)
+	if not recipes.is_empty():
+		var source_popup := preload("res://scenes/ui/main/RecipeSourcePopup.tscn").instantiate() as RecipeSourcePopup
+		UIManager.show_popup(source_popup)
+		source_popup.setup_for_item(item_id)
 		return
 	var popup := preload("res://scenes/ui/main/CraftPathView.tscn").instantiate() as CraftPathView
 	UIManager.show_popup(popup)

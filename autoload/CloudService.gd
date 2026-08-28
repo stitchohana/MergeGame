@@ -49,6 +49,10 @@ signal craft_remove_confirmed(result: Dictionary)
 signal craft_remove_rejected(reason: String)
 signal craft_retrieve_confirmed(result: Dictionary)
 signal craft_retrieve_rejected(reason: String)
+signal craft_speedup_confirmed(result: Dictionary)
+signal craft_speedup_rejected(reason: String)
+signal launcher_speedup_confirmed(result: Dictionary)
+signal launcher_speedup_rejected(reason: String)
 signal state_loaded(state: Dictionary)
 signal state_load_failed(reason: String)
 signal battle_attack_confirmed(result: Dictionary)
@@ -126,6 +130,8 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("craft_start", _on_craft_start_response, craft_start_rejected, craft_start_rejected, craft_start_rejected)
 	_register_endpoint("craft_remove", _on_craft_remove_response, craft_remove_rejected, craft_remove_rejected, craft_remove_rejected)
 	_register_endpoint("craft_retrieve", _on_craft_retrieve_response, craft_retrieve_rejected, craft_retrieve_rejected, craft_retrieve_rejected)
+	_register_endpoint("craft_speedup", _on_craft_speedup_response, craft_speedup_rejected, craft_speedup_rejected, craft_speedup_rejected)
+	_register_endpoint("launcher_speedup", _on_launcher_speedup_response, launcher_speedup_rejected, launcher_speedup_rejected, launcher_speedup_rejected)
 	_register_endpoint("battle_attack", _on_battle_attack_response, battle_attack_rejected, battle_attack_rejected, battle_attack_rejected)
 	_register_endpoint("battle_heal", _on_battle_heal_response, battle_heal_rejected, battle_heal_rejected, battle_heal_rejected)
 	_register_endpoint("storage_withdraw", _on_storage_withdraw_response, storage_withdraw_rejected, storage_withdraw_rejected, storage_withdraw_rejected)
@@ -467,6 +473,38 @@ func _on_craft_retrieve_response(data: Dictionary) -> void:
 		craft_retrieve_confirmed.emit(data)
 	else:
 		craft_retrieve_rejected.emit(data.get("error", "unknown_error"))
+
+func submit_craft_speedup(table_col: int, table_row: int) -> void:
+	var body: String = JSON.stringify({
+		"table_col": table_col,
+		"table_row": table_row
+	})
+	_send_authed_request("craft_speedup", "/api/game/craft/speedup", HTTPClient.Method.METHOD_POST, body)
+
+func _on_craft_speedup_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		_apply_speedup_resources(data)
+		craft_speedup_confirmed.emit(data)
+	else:
+		_apply_speedup_resources(data)
+		craft_speedup_rejected.emit(data.get("error", "unknown_error"))
+
+func submit_launcher_speedup(uid: int) -> void:
+	var body: String = JSON.stringify({"uid": uid})
+	_send_authed_request("launcher_speedup", "/api/game/launcher/speedup", HTTPClient.Method.METHOD_POST, body)
+
+func _on_launcher_speedup_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		_apply_speedup_resources(data)
+		launcher_speedup_confirmed.emit(data)
+	else:
+		_apply_speedup_resources(data)
+		launcher_speedup_rejected.emit(data.get("error", "unknown_error"))
+
+func _apply_speedup_resources(data: Dictionary) -> void:
+	if data.has("spirit_stones"):
+		GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 
 # --- Leaderboard ---
 

@@ -41,6 +41,116 @@ func setup_button(parent: Node) -> void:
 
 # --- Called by GridView ---
 
+func get_ingredient_hint_debug(table_item: Dictionary, ingredient_id: int) -> Dictionary:
+	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
+	var table_id: int = table_item.get("id", 0) as int
+	var allowed_recipes: Array = ConfigDatabase.get_recipes_for_item(table_id)
+	if allowed_recipes.is_empty():
+		return {"accepted": false, "reason": "no_table_recipes", "state": craft_state, "recipe_count": 0, "stored_count": 0}
+	var required_recipe_ids: Dictionary = _get_required_recipe_ids()
+	if required_recipe_ids.is_empty():
+		return {"accepted": false, "reason": "no_active_order_recipes", "state": craft_state, "recipe_count": allowed_recipes.size(), "stored_count": CraftingService.get_stored_items(table_item).size()}
+	var stored: Array = CraftingService.get_stored_items(table_item)
+	var ingredient_in_required_recipe: bool = false
+	for recipe_variant: Variant in allowed_recipes:
+		var recipe: Dictionary = recipe_variant as Dictionary
+		var recipe_id: int = int(recipe.get("id", 0))
+		if not required_recipe_ids.has(recipe_id):
+			continue
+		var ingredients: Array = recipe.get("ingredients", [])
+		if not ingredients.has(ingredient_id):
+			continue
+		ingredient_in_required_recipe = true
+		if not _recipe_accepts_stored_and_new(ingredients, stored, ingredient_id):
+			continue
+		var reason: String = "required_recipe_supported"
+		if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
+			reason = "required_recipe_supported_table_busy"
+		return {"accepted": true, "reason": reason, "state": craft_state, "recipe_count": allowed_recipes.size(), "stored_count": stored.size(), "recipe_id": recipe_id, "required_recipe_count": required_recipe_ids.size()}
+	var reject_reason: String = "incompatible_with_stored" if ingredient_in_required_recipe else "ingredient_not_in_required_recipes"
+	return {"accepted": false, "reason": reject_reason, "state": craft_state, "recipe_count": allowed_recipes.size(), "stored_count": stored.size(), "required_recipe_count": required_recipe_ids.size()}
+
+func _get_required_recipe_ids() -> Dictionary:
+	var required_recipe_ids: Dictionary = {}
+	var visited_item_ids: Dictionary = {}
+	for order_variant: Variant in GameState.meridian_acupoints:
+		var order: Dictionary = order_variant as Dictionary
+		if bool(order.get("completed", false)):
+			continue
+		for item_variant: Variant in order.get("items", []):
+			var item: Dictionary = item_variant as Dictionary
+			_collect_required_recipe_ids(int(item.get("item_id", 0)), required_recipe_ids, visited_item_ids)
+	return required_recipe_ids
+
+func _collect_required_recipe_ids(item_id: int, required_recipe_ids: Dictionary, visited_item_ids: Dictionary) -> void:
+	if item_id <= 0 or visited_item_ids.has(item_id):
+		return
+	visited_item_ids[item_id] = true
+	for recipe_variant: Variant in ConfigDatabase.get_recipes_for_result(item_id):
+		if not recipe_variant is Dictionary:
+			continue
+		var recipe: Dictionary = recipe_variant as Dictionary
+		var recipe_id: int = int(recipe.get("id", 0))
+		if recipe_id > 0:
+			required_recipe_ids[recipe_id] = true
+		for ingredient_variant: Variant in recipe.get("ingredients", []):
+			_collect_required_recipe_ids(int(ingredient_variant), required_recipe_ids, visited_item_ids)
+
+func _recipe_accepts_stored_and_new(ingredients: Array, stored: Array, ingredient_id: int) -> bool:
+	var available_counts: Dictionary = {}
+	for ingredient_variant: Variant in ingredients:
+		var recipe_ingredient_id: int = int(ingredient_variant)
+		available_counts[recipe_ingredient_id] = int(available_counts.get(recipe_ingredient_id, 0)) + 1
+	var used_counts: Dictionary = {ingredient_id: 1}
+	for stored_variant: Variant in stored:
+		var stored_item: Dictionary = stored_variant as Dictionary
+		var stored_id: int = int(stored_item.get("id", 0))
+		used_counts[stored_id] = int(used_counts.get(stored_id, 0)) + 1
+	for used_id_variant: Variant in used_counts.keys():
+		var used_id: int = int(used_id_variant)
+		if int(used_counts[used_id]) > int(available_counts.get(used_id, 0)):
+			return false
+	return true
+
+func can_accept_ingredient(table_item: Dictionary, ingredient_id: int) -> bool:
+	var debug_result: Dictionary = get_ingredient_acceptance_debug(table_item, ingredient_id)
+	return bool(debug_result.get("accepted", false))
+
+func get_ingredient_acceptance_debug(table_item: Dictionary, ingredient_id: int) -> Dictionary:
+	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
+	if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
+		return {"accepted": false, "reason": "table_busy", "state": craft_state, "recipe_count": 0, "stored_count": 0}
+
+	var table_id: int = table_item.get("id", 0) as int
+	var allowed_recipes: Array = ConfigDatabase.get_recipes_for_item(table_id)
+	if allowed_recipes.is_empty():
+		return {"accepted": false, "reason": "no_table_recipes", "state": craft_state, "recipe_count": 0, "stored_count": 0}
+
+	var stored: Array = CraftingService.get_stored_items(table_item)
+	for stored_variant: Variant in stored:
+		var stored_item: Dictionary = stored_variant as Dictionary
+		if int(stored_item.get("id", 0)) == ingredient_id:
+			return {"accepted": false, "reason": "ingredient_already_stored", "state": craft_state, "recipe_count": allowed_recipes.size(), "stored_count": stored.size()}
+
+	var ingredient_in_any_recipe: bool = false
+	for recipe_variant: Variant in allowed_recipes:
+		var recipe: Dictionary = recipe_variant as Dictionary
+		var ingredients: Array = recipe.get("ingredients", [])
+		if not ingredients.has(ingredient_id):
+			continue
+		ingredient_in_any_recipe = true
+		var stored_items_fit: bool = true
+		for candidate_variant: Variant in stored:
+			var stored_item: Dictionary = candidate_variant as Dictionary
+			if not ingredients.has(int(stored_item.get("id", 0))):
+				stored_items_fit = false
+				break
+		if stored_items_fit:
+			return {"accepted": true, "reason": "ok", "state": craft_state, "recipe_count": allowed_recipes.size(), "stored_count": stored.size(), "recipe_id": int(recipe.get("id", 0))}
+
+	var reason: String = "incompatible_with_stored" if ingredient_in_any_recipe else "ingredient_not_in_table_recipes"
+	return {"accepted": false, "reason": reason, "state": craft_state, "recipe_count": allowed_recipes.size(), "stored_count": stored.size()}
+
 func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Vector2i, ingredient_id: int, drag_item_data: Dictionary) -> bool:
 	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
 	if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:

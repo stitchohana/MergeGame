@@ -28,9 +28,19 @@ func _ready() -> void:
 	_cd_timer.start()
 
 func try_spawn(grid_pos: Vector2i, launcher_uid: int, launcher_config: Dictionary,
-		charges: int, is_immovable: bool) -> bool:
+		charges: int, is_immovable: bool, recharge_remaining_ms: float = 0.0) -> bool:
 	if is_immovable:
 		spawn_failed.emit("item_immovable", {})
+		return false
+
+	# The cooldown is authoritative even when a stale/missing `charges` field
+	# would otherwise make this launcher look usable.
+	var is_recharging: bool = charges <= 0 and recharge_remaining_ms > 0.0
+	if charges <= 0 and _launcher_cd.has(launcher_uid):
+		var cooldown: Dictionary = _launcher_cd.get(launcher_uid, {}) as Dictionary
+		is_recharging = is_recharging or float(cooldown.get("remaining", 0.0)) > 0.0
+	if is_recharging:
+		spawn_failed.emit("no_charges", {})
 		return false
 
 	var pending_for_launcher: int = _pending_count_for_launcher(launcher_uid)
@@ -142,11 +152,14 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 		var cd_time: float = result.get("recharge_time", 0.0)
 		if charges_val <= 0 and cd_time > 0:
 			_launcher_cd[launcher_uid] = {"remaining": cd_time, "recharge_time": cd_time, "max_charges": max_c}
+			launcher_item["_recharge_remaining"] = cd_time * 1000.0
 			var cd_secs: int = int(ceil(cd_time))
 			charge_visual_update.emit(launcher_uid, "%02d:%02d" % [int(cd_secs / 60), cd_secs % 60], Color(1, 0.6, 0.2, 1))
 		elif charges_val <= 0:
 			charge_visual_update.emit(launcher_uid, "0/%d" % max_c, Color(1, 0.3, 0.3, 1))
 		else:
+			_launcher_cd.erase(launcher_uid)
+			launcher_item.erase("_recharge_remaining")
 			charge_visual_update.emit(launcher_uid, "%d/%d" % [charges_val, max_c], Color(1, 1, 1, 0.7))
 
 		spawn_finished.emit(result, prediction)
@@ -202,6 +215,9 @@ func _on_cd_tick() -> void:
 		if cd.remaining <= 0:
 			to_erase.append(uid)
 		else:
+			var charging_item: Dictionary = GridManager.find_by_uid(uid)
+			if not charging_item.is_empty():
+				charging_item["_recharge_remaining"] = float(cd.remaining) * 1000.0
 			var secs: int = int(ceil(cd.remaining))
 			var m: int = int(secs / 60)
 			var s: int = secs % 60
@@ -214,6 +230,7 @@ func _on_cd_tick() -> void:
 			var cfg: Dictionary = ConfigDatabase.get_item_data(item.get("id", 0) as int)
 			var max_c: int = cfg.get("max_charges", 3) as int
 			item["charges"] = max_c
+			item.erase("_recharge_remaining")
 			charge_visual_update.emit(uid, "%d/%d" % [max_c, max_c], Color(1, 1, 1, 0.7))
 
 func start_cd_from_restore(item_data: Dictionary) -> void:
@@ -234,12 +251,16 @@ func start_cd_from_restore(item_data: Dictionary) -> void:
 	if typeof(server_rem) == TYPE_FLOAT or typeof(server_rem) == TYPE_INT:
 		remaining = maxf(0, float(server_rem) / 1000.0)
 	_launcher_cd[uid] = {"remaining": remaining, "recharge_time": cd_time, "max_charges": max_c}
+	item_data["_recharge_remaining"] = remaining * 1000.0
 	var secs: int = int(ceil(remaining))
 	charge_visual_update.emit(uid, "%02d:%02d" % [int(secs / 60), secs % 60], Color(1, 0.6, 0.2, 1))
 
 func clear_cd(uid: int) -> void:
 	if uid > 0 and _launcher_cd.has(uid):
 		_launcher_cd.erase(uid)
+	var item: Dictionary = GridManager.find_by_uid(uid)
+	if not item.is_empty():
+		item.erase("_recharge_remaining")
 
 func is_spawn_in_flight() -> bool:
 	return not _pending_spawns.is_empty()

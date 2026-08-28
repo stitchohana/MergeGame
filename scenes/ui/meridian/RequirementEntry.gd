@@ -10,6 +10,7 @@ var _completed_setup: bool = false
 var _rewards_setup: Dictionary = {}
 var _ready_done: bool = false
 var _available: bool = false
+var _order_priority: int = 0
 var _item_widget_scene: PackedScene = preload("res://scenes/ui/common/ItemWidget.tscn")
 var _reward_slot_scene: PackedScene = preload("res://scenes/ui/meridian/RewardSlot.tscn")
 
@@ -35,6 +36,11 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 	var items_container: HBoxContainer = $ItemsContainer
 	var reward_box: HBoxContainer = $RewardRow/RewardBox
 	var complete_btn: Button = $CompleteButton
+	items_container.show()
+	$RewardRow.show()
+	complete_btn.show()
+	modulate = Color.WHITE
+	scale = Vector2.ONE
 
 	for child in items_container.get_children():
 		items_container.remove_child(child)
@@ -109,6 +115,18 @@ func is_available() -> bool:
 	return _available
 
 
+func set_order_priority(priority: int) -> bool:
+	var normalized_priority: int = clampi(priority, 0, 2)
+	var changed: bool = _order_priority != normalized_priority
+	_order_priority = normalized_priority
+	set_available(_order_priority == 2)
+	return changed
+
+
+func get_order_priority() -> int:
+	return _order_priority
+
+
 func get_display_index() -> int:
 	return int(_data.get("index", -1))
 
@@ -121,16 +139,29 @@ func refresh_item_selection(present_item_ids: Dictionary) -> void:
 			var item_id: int = int(widget.item_data.get("id", 0))
 			widget.set_selected(item_id > 0 and present_item_ids.has(item_id))
 
+
+func refresh_item_crafting(crafting_item_ids: Dictionary) -> void:
+	var items_container: HBoxContainer = $ItemsContainer
+	for child in items_container.get_children():
+		if child is ItemWidget:
+			var widget: ItemWidget = child as ItemWidget
+			var item_id: int = int(widget.item_data.get("id", 0))
+			widget.set_crafting_badge(item_id > 0 and crafting_item_ids.has(item_id))
+
 func get_item_widget_center(item_id: int) -> Vector2:
 	for child in $ItemsContainer.get_children():
 		if child is ItemWidget and int((child as ItemWidget).item_data.get("id", 0)) == item_id:
 			return (child as Control).get_global_rect().get_center()
 	return get_global_rect().get_center()
 
-func play_complete_animation() -> void:
-	var tween: Tween = create_tween().set_parallel(true)
-	tween.tween_property(self, "modulate:a", 0.0, 0.22)
-	tween.tween_property(self, "scale", Vector2(1.08, 1.08), 0.22)
+func show_completed_empty_state() -> void:
+	# Clear the completed order immediately; the list reflow starts right after this call.
+	for child in $ItemsContainer.get_children():
+		child.hide()
+	$RewardRow.hide()
+	$CompleteButton.hide()
+	modulate = Color.WHITE
+	scale = Vector2.ONE
 
 
 func _on_btn_pressed() -> void:

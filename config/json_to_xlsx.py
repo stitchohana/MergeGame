@@ -127,12 +127,11 @@ for it in regular:
 ws = wb.create_sheet("items_regular")
 add_sheet(ws, hr, rr)
 
-hcons = ["id","name","icon","type","describe","value","effect_type","effect_value","max_charges","recharge_time","no_cost","spawns(id:weight)","fixed_spawns"]
+hcons = ["id","level","name","icon","type","describe","value","max_charges","recharge_time","no_cost","spawns(id:weight)","fixed_spawns"]
 rcons = []
 for it in consumables:
-    rcons.append([it.get("id",""), it.get("name",""), it.get("icon",""),
+    rcons.append([it.get("id",""), it.get("level",""), it.get("name",""), it.get("icon",""),
                   it.get("type",""), it.get("describe",""), it.get("value",""),
-                  it.get("effect_type",""), it.get("effect_value",""),
                   it.get("max_charges",""), it.get("recharge_time",""),
                   "TRUE" if it.get("no_cost") else "",
                   join_dict_list(it.get("spawns", [])), join_list(it.get("fixed_spawns", []))])
@@ -141,7 +140,10 @@ add_sheet(ws4, hcons, rcons)
 
 he = ["id","level","name","icon","group_id","type","describe","effect_type","effect_value"]
 re = []
-for it in data.get("effect", []):
+effect_config_items = data.get("effect", []) + [
+    it for it in consumables if it.get("effect_type") is not None
+]
+for it in effect_config_items:
     re.append([it.get("id",""), it.get("level",""), it.get("name",""), it.get("icon",""),
                it.get("group_id",""), it.get("type",""), it.get("describe",""), it.get("effect_type",""), it.get("effect_value","")])
 ws5 = wb.create_sheet("items_effect")
@@ -174,26 +176,30 @@ save(wb, "items")
 print("Building meridians.xlsx...")
 data = json.load(open(JSON_DIR / "meridians.json", encoding="utf-8"))
 wb = new_book()
-h = ["stage","count_min","count_max","acupoint_rewards","order_count","fixed_orders"]
+h = ["stage","count_min","count_max","acupoint_rewards","order_count","fixed_orders","fixed_order_batches"]
 r = []
 for t in data["thresholds"]:
     r.append([t.get("stage",""), t.get("count_min",""), t.get("count_max",""),
               t.get("acupoint_rewards",""), t.get("order_count",""),
-              json.dumps(t.get("fixed_orders", []), ensure_ascii=False, separators=(",", ":")) if t.get("fixed_orders") else ""])
+              json.dumps(t.get("fixed_orders", []), ensure_ascii=False, separators=(",", ":")) if t.get("fixed_orders") else "",
+              json.dumps(t.get("fixed_order_batches", []), ensure_ascii=False, separators=(",", ":")) if t.get("fixed_order_batches") else ""])
 ws = wb.create_sheet("meridians")
 add_sheet(ws, h, r)
 level_range_headers = [
     "cultivation_min", "cultivation_max",
     "items_regular_min", "items_regular_max",
+    "items_byproduct_min", "items_byproduct_max",
     "items_recipe_product_min", "items_recipe_product_max",
 ]
 level_range_rows = []
 for level_range in data.get("order_pool", {}).get("level_ranges", []):
     regular_range = level_range.get("items_regular", ["", ""])
+    byproduct_range = level_range.get("items_byproduct", level_range.get("items_recipe_product", ["", ""]))
     recipe_product_range = level_range.get("items_recipe_product", ["", ""])
     level_range_rows.append([
         level_range.get("cultivation_min", ""), level_range.get("cultivation_max", ""),
         regular_range[0], regular_range[1],
+        byproduct_range[0], byproduct_range[1],
         recipe_product_range[0], recipe_product_range[1],
     ])
 ws2 = wb.create_sheet("order_level_ranges")

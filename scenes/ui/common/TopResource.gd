@@ -1,5 +1,8 @@
 class_name TopResource extends Control
 
+@export var icon_texture: Texture2D
+@export var show_regen_timer: bool = true
+
 @onready var value_label: Label = $Label
 @onready var regen_timer_label: Label = $RegenTimerLabel
 
@@ -9,6 +12,9 @@ var _value_tween: Tween = null
 var _value_pulse_tween: Tween = null
 
 func _ready() -> void:
+	if icon_texture:
+		$Icon.texture = icon_texture
+	regen_timer_label.visible = show_regen_timer
 	value_label.pivot_offset = value_label.size * 0.5
 
 func set_value(value: int) -> void:
@@ -53,6 +59,8 @@ func _set_displayed_value(value: float) -> void:
 
 
 func set_regen_timer(time_left: float) -> void:
+	if not show_regen_timer:
+		return
 	if time_left <= 0.0:
 		regen_timer_label.text = ""
 		return

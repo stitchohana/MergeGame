@@ -8,6 +8,12 @@ const ACTION_SYNC_SCREEN_SCENE := preload("res://scenes/screens/ActionSyncScreen
 const CELL_SIZE := Constants.CELL_SIZE
 const CELL_STEP := Constants.CELL_STEP
 const DRAG_THRESHOLD := 10.0  # pixels before drag starts
+const CLICK_CRAFT_HINT_DURATION := 3.0
+const IDLE_MERGE_HINT_DELAY := 8.0
+const IDLE_MERGE_HINT_DISTANCE := 12.0
+const IDLE_MERGE_HINT_SCALE := 1.08
+const IDLE_MERGE_HINT_MOVE_DURATION := 0.22
+const IDLE_MERGE_HINT_PAUSE_DURATION := 0.14
 
 @export var grid_item_scene: PackedScene
 @export var grid_cell_texture: Texture2D
@@ -26,6 +32,13 @@ var _press_start_pos: Vector2i = Vector2i(-1, -1)
 var _press_screen_pos: Vector2 = Vector2.ZERO
 var _pressed_item: Dictionary = {}
 var _pressed_has_moved: bool = false
+var _craft_hint_nodes: Array[GridItem] = []
+var _craft_hint_token: int = 0
+var _idle_elapsed: float = 0.0
+var _idle_merge_hint_nodes: Array[GridItem] = []
+var _idle_merge_hint_active: bool = false
+var _recipe_product_ids: Dictionary = {}
+var _recipe_product_ids_initialized: bool = false
 
 # Crafting — delegated to CraftingController
 var _craft_ctrl: Node = null
@@ -110,8 +123,26 @@ func _hide_action_sync_screen() -> void:
 	set_process_input(true)
 
 func _exit_tree() -> void:
+	_clear_crafting_hints()
+	_stop_idle_merge_hint()
 	_action_sync_waiters.clear()
 	_hide_action_sync_screen()
+
+func _process(delta: float) -> void:
+	if not visible or UIManager.is_input_blocked() or _is_dragging or _has_unsynced_actions():
+		_idle_elapsed = 0.0
+		_stop_idle_merge_hint()
+		return
+	if _idle_merge_hint_active:
+		if not _idle_merge_hint_nodes_are_valid():
+			_stop_idle_merge_hint()
+			_idle_elapsed = 0.0
+		return
+	_idle_elapsed += delta
+	if _idle_elapsed < IDLE_MERGE_HINT_DELAY:
+		return
+	_idle_elapsed = 0.0
+	_start_idle_merge_hint()
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -176,6 +207,8 @@ func _connect_signals() -> void:
 	CloudService.push_place_rejected.connect(_on_push_place_rejected)
 	CloudService.storage_deposit_confirmed.connect(_on_storage_deposit_confirmed)
 	CloudService.storage_deposit_rejected.connect(_on_storage_deposit_rejected)
+	CloudService.craft_speedup_confirmed.connect(_on_craft_speedup_confirmed)
+	CloudService.launcher_speedup_confirmed.connect(_on_launcher_speedup_confirmed)
 	StoragePouch.deposit_failed.connect(_on_pouch_deposit_rejected)
 
 # --- Input: press on any item, then drag or click dispatch ---
@@ -183,6 +216,8 @@ func _connect_signals() -> void:
 func _input(event: InputEvent) -> void:
 	if UIManager.is_input_blocked():
 		return
+	if event is InputEventMouseButton or event is InputEventScreenTouch:
+		_reset_board_idle()
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index != MOUSE_BUTTON_LEFT:
@@ -208,6 +243,8 @@ func _input(event: InputEvent) -> void:
 			_finish_drag(cell_pos)
 		elif _pressed_has_moved == false and not _pressed_item.is_empty():
 			_select_item(_press_start_pos)
+			print("[CraftHint] input=click item_id=", int(_pressed_item.get("id", 0)), " source_pos=", _press_start_pos)
+			_show_crafting_hints(_pressed_item, _press_start_pos, false)
 			item_clicked.emit(_pressed_item, _press_start_pos)
 
 			if _pressed_item.get("type", 0) == Constants.ItemType.CRAFTING:
@@ -241,6 +278,108 @@ func _input(event: InputEvent) -> void:
 			if local_pos.distance_to(_press_screen_pos) > DRAG_THRESHOLD:
 				_pressed_has_moved = true
 				_start_drag(_press_start_pos)
+
+func _reset_board_idle() -> void:
+	_idle_elapsed = 0.0
+	_stop_idle_merge_hint()
+
+func _start_idle_merge_hint() -> void:
+	var pair: Array[Vector2i] = _find_idle_merge_pair()
+	if pair.size() != 2:
+		return
+	var node_a: GridItem = _item_nodes.get(_grid_key(pair[0])) as GridItem
+	var node_b: GridItem = _item_nodes.get(_grid_key(pair[1])) as GridItem
+	if node_a == null or node_b == null or not is_instance_valid(node_a) or not is_instance_valid(node_b):
+		return
+
+	var center_a: Vector2 = node_a.position + node_a.size * 0.5
+	var center_b: Vector2 = node_b.position + node_b.size * 0.5
+	var delta: Vector2 = center_b - center_a
+	if delta.length_squared() <= 0.01:
+		delta = Vector2.RIGHT
+	var direction: Vector2 = delta.normalized()
+	var travel: float = min(IDLE_MERGE_HINT_DISTANCE, max(4.0, delta.length() * 0.16))
+	node_a.play_merge_hint(direction * travel, IDLE_MERGE_HINT_SCALE,
+		IDLE_MERGE_HINT_MOVE_DURATION, IDLE_MERGE_HINT_PAUSE_DURATION)
+	node_b.play_merge_hint(-direction * travel, IDLE_MERGE_HINT_SCALE,
+		IDLE_MERGE_HINT_MOVE_DURATION, IDLE_MERGE_HINT_PAUSE_DURATION)
+	_idle_merge_hint_nodes = [node_a, node_b]
+	_idle_merge_hint_active = true
+
+func _find_idle_merge_pair() -> Array[Vector2i]:
+	var entries: Array[Dictionary] = GridManager.get_all_items()
+	for first_index: int in range(entries.size()):
+		var first_entry: Dictionary = entries[first_index]
+		var first_item: Dictionary = first_entry.get("data", {}) as Dictionary
+		var first_pos: Vector2i = first_entry.get("pos", Vector2i(-1, -1)) as Vector2i
+		if not _is_idle_merge_candidate(first_item, first_pos):
+			continue
+		for second_index: int in range(first_index + 1, entries.size()):
+			var second_entry: Dictionary = entries[second_index]
+			var second_item: Dictionary = second_entry.get("data", {}) as Dictionary
+			var second_pos: Vector2i = second_entry.get("pos", Vector2i(-1, -1)) as Vector2i
+			if not _is_idle_merge_candidate(second_item, second_pos):
+				continue
+			if MergeService.can_merge(first_item, second_item):
+				return [first_pos, second_pos]
+	return []
+
+func _is_idle_merge_candidate(item: Dictionary, pos: Vector2i) -> bool:
+	if item.is_empty() or not GridManager.is_valid_pos(pos):
+		return false
+	if _is_recipe_product(item):
+		return false
+	if item.get("immovable", false) == true:
+		return false
+	if item.get("_pending_spawn", false) == true or item.get("_optimistic_action", false) == true:
+		return false
+	if MergeService.is_position_pending(pos):
+		return false
+	var node: GridItem = _item_nodes.get(_grid_key(pos)) as GridItem
+	return node != null and is_instance_valid(node)
+
+func _is_recipe_product(item: Dictionary) -> bool:
+	if int(item.get("type", Constants.ItemType.REGULAR)) == Constants.ItemType.RECIPE_PRODUCT:
+		return true
+	var item_id: int = int(item.get("id", 0))
+	if item_id <= 0:
+		return false
+	if not _recipe_product_ids_initialized:
+		_recipe_product_ids_initialized = true
+		for recipe_variant: Variant in ConfigDatabase.get_recipes():
+			if not recipe_variant is Dictionary:
+				continue
+			var recipe: Dictionary = recipe_variant as Dictionary
+			var result_id: int = int(recipe.get("result", 0))
+			if result_id > 0:
+				_recipe_product_ids[result_id] = true
+	return _recipe_product_ids.has(item_id)
+
+func _idle_merge_hint_nodes_are_valid() -> bool:
+	if _idle_merge_hint_nodes.size() != 2:
+		return false
+	for node: GridItem in _idle_merge_hint_nodes:
+		if node == null or not is_instance_valid(node):
+			return false
+		if _is_recipe_product(node.item_data):
+			return false
+		var key: String = _grid_key(node.grid_position)
+		if _item_nodes.get(key) != node:
+			return false
+		var current_item: Variant = GridManager.get_item(node.grid_position)
+		if current_item == null or not MergeService.can_merge(node.item_data, current_item as Dictionary):
+			return false
+	return true
+
+func _stop_idle_merge_hint() -> void:
+	for node: GridItem in _idle_merge_hint_nodes:
+		if node != null and is_instance_valid(node):
+			node.stop_merge_hint()
+	_idle_merge_hint_nodes.clear()
+	_idle_merge_hint_active = false
+
+func _grid_key(pos: Vector2i) -> String:
+	return "%d,%d" % [pos.x, pos.y]
 
 func _to_local(global_pos: Vector2) -> Vector2:
 	return get_global_transform_with_canvas().affine_inverse() * global_pos
@@ -330,7 +469,8 @@ func _handle_launcher_click(pos: Vector2i) -> void:
 		item.get("_uid", -1) as int,
 		item_config,
 		item.get("charges", -1) as int,
-		item.get("immovable") == true)
+		item.get("immovable") == true,
+		float(item.get("_recharge_remaining", 0.0)))
 	if not ok:
 		pass
 
@@ -351,6 +491,7 @@ func _spawn_error_text(reason: String) -> String:
 func _start_drag(pos: Vector2i) -> void:
 	if _is_dragging:
 		return
+	_reset_board_idle()
 	_deselect_all()
 	var item = GridManager.get_item(pos)
 	if item == null:
@@ -362,6 +503,8 @@ func _start_drag(pos: Vector2i) -> void:
 	_drag_source_pos = pos
 	_drag_item_data = item
 	_is_dragging = true
+	print("[CraftHint] input=drag_start item_id=", int(item.get("id", 0)), " source_pos=", pos)
+	_show_crafting_hints(item, pos, true)
 	var drag_key := "%d,%d" % [pos.x, pos.y]
 	var drag_node = _item_nodes.get(drag_key)
 	if drag_node and is_instance_valid(drag_node):
@@ -370,6 +513,7 @@ func _start_drag(pos: Vector2i) -> void:
 	_craft_ctrl.hide_button()
 
 func _finish_drag(target_pos: Vector2i) -> void:
+	_clear_crafting_hints("drag_finished")
 	_is_dragging = false
 	var drag_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 	var drag_node = _item_nodes.get(drag_key)
@@ -422,6 +566,10 @@ func _try_optimistic_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	if from_item == null or to_item == null:
 		return false
 	if not MergeService.can_merge(from_item as Dictionary, to_item as Dictionary):
+		if MergeService.is_merge_blocked_by_craft_materials(from_item as Dictionary, to_item as Dictionary):
+			_snap_back()
+			EventBus.show_toast.emit("无法合成")
+			return true
 		return false
 	var next_item: Dictionary = ConfigDatabase.get_next_level(
 		from_item.get("type", 0) as int,
@@ -577,6 +725,7 @@ func _snap_back_to(pos: Vector2i) -> void:
 # --- Item Visual Management ---
 
 func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
+	_reset_board_idle()
 	_remove_item_node(pos)
 	var item := grid_item_scene.instantiate()
 	var layer := _get_items_layer()
@@ -597,6 +746,7 @@ func _try_start_launcher_cd(item_data: Dictionary) -> void:
 	_launcher_ctrl.start_cd_from_restore(item_data)
 
 func _on_item_removed(item_data: Dictionary, pos: Vector2i) -> void:
+	_reset_board_idle()
 	var key := "%d,%d" % [pos.x, pos.y]
 	if key == _selected_key:
 		_selected_key = ""
@@ -611,6 +761,7 @@ func _on_item_removed(item_data: Dictionary, pos: Vector2i) -> void:
 	# CD managed by LauncherController start_cd_from_restore
 
 func _on_item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i) -> void:
+	_reset_board_idle()
 	var key := "%d,%d" % [from_pos.x, from_pos.y]
 	var node = _item_nodes.get(key)
 	if node and is_instance_valid(node):
@@ -628,6 +779,7 @@ func _on_item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i)
 
 
 func _on_items_swapped(_item_a: Dictionary, _item_b: Dictionary, pos_a: Vector2i, pos_b: Vector2i) -> void:
+	_reset_board_idle()
 	var key_a: String = "%d,%d" % [pos_a.x, pos_a.y]
 	var key_b: String = "%d,%d" % [pos_b.x, pos_b.y]
 	var node_a: GridItem = _item_nodes.get(key_a) as GridItem
@@ -653,9 +805,10 @@ func _on_items_swapped(_item_a: Dictionary, _item_b: Dictionary, pos_a: Vector2i
 		tween.tween_property(node_b, "position", target_b, 0.15)
 
 func _on_grid_updated() -> void:
-	pass
+	_reset_board_idle()
 
 func _sync_all_items() -> void:
+	_reset_board_idle()
 	_clear_all_item_nodes()
 	var layer := _get_items_layer()
 	if not layer:
@@ -675,6 +828,7 @@ func _remove_item_node(pos: Vector2i) -> void:
 	_item_nodes.erase(key)
 
 func _clear_all_item_nodes() -> void:
+	_clear_crafting_hints("grid_rebuild")
 	for key in _item_nodes:
 		var node = _item_nodes[key]
 		if is_instance_valid(node):
@@ -686,6 +840,66 @@ func _get_items_layer() -> Control:
 		if child.name == "ItemsLayer":
 			return child as Control
 	return null
+
+func _show_crafting_hints(item_data: Dictionary, source_pos: Vector2i, persistent: bool) -> void:
+	_clear_crafting_hints("new_request")
+	var source_key: String = "%d,%d" % [source_pos.x, source_pos.y]
+	var source_node: GridItem = _item_nodes.get(source_key) as GridItem
+	var source_valid: bool = source_node != null and is_instance_valid(source_node)
+	var source_required: bool = source_valid and source_node.is_required()
+	print("[CraftHint] request item_id=", int(item_data.get("id", 0)), " source_pos=", source_pos,
+		" persistent=", persistent, " source_node_found=", source_valid, " required=", source_required)
+	if not source_valid:
+		print("[CraftHint] abort reason=source_node_missing source_key=", source_key, " known_nodes=", _item_nodes.size())
+		return
+	if not source_required:
+		print("[CraftHint] abort reason=source_not_required require_visible=", source_node.require_icon.visible)
+		return
+	var ingredient_id: int = int(item_data.get("id", 0))
+	var ingredient_icon: Texture2D = source_node.icon_rect.texture
+	if ingredient_id <= 0 or ingredient_icon == null:
+		print("[CraftHint] abort reason=invalid_item_or_icon ingredient_id=", ingredient_id, " icon_null=", ingredient_icon == null)
+		return
+
+	var crafting_table_count: int = 0
+	for entry: Dictionary in GridManager.get_all_items():
+		var table_item: Dictionary = entry.get("data", {}) as Dictionary
+		if int(table_item.get("type", -1)) != Constants.ItemType.CRAFTING:
+			continue
+		crafting_table_count += 1
+		var table_pos: Vector2i = entry.get("pos", Vector2i(-1, -1)) as Vector2i
+		var acceptance: Dictionary = _craft_ctrl.get_ingredient_hint_debug(table_item, ingredient_id)
+		print("[CraftHint] table_check table_id=", int(table_item.get("id", 0)), " table_pos=", table_pos,
+			" accepted=", bool(acceptance.get("accepted", false)), " reason=", acceptance.get("reason", "unknown"),
+			" state=", acceptance.get("state", -1), " recipes=", acceptance.get("recipe_count", 0),
+			" stored=", acceptance.get("stored_count", 0), " recipe_id=", acceptance.get("recipe_id", 0))
+		if not bool(acceptance.get("accepted", false)):
+			continue
+		var table_key: String = "%d,%d" % [table_pos.x, table_pos.y]
+		var table_node: GridItem = _item_nodes.get(table_key) as GridItem
+		if table_node == null or not is_instance_valid(table_node):
+			print("[CraftHint] table_skip reason=table_node_missing table_id=", int(table_item.get("id", 0)), " table_key=", table_key)
+			continue
+		table_node.show_crafting_hint(ingredient_icon)
+		_craft_hint_nodes.append(table_node)
+	print("[CraftHint] summary ingredient_id=", ingredient_id, " crafting_tables=", crafting_table_count,
+		" bubbles_shown=", _craft_hint_nodes.size())
+
+	if not persistent and not _craft_hint_nodes.is_empty():
+		var hint_token: int = _craft_hint_token
+		get_tree().create_timer(CLICK_CRAFT_HINT_DURATION).timeout.connect(func() -> void:
+			if hint_token == _craft_hint_token:
+				_clear_crafting_hints("click_timeout")
+		)
+
+func _clear_crafting_hints(reason: String = "reset") -> void:
+	_craft_hint_token += 1
+	if not _craft_hint_nodes.is_empty():
+		print("[CraftHint] clear reason=", reason, " bubble_count=", _craft_hint_nodes.size())
+	for table_node: GridItem in _craft_hint_nodes:
+		if table_node != null and is_instance_valid(table_node):
+			table_node.hide_crafting_hint()
+	_craft_hint_nodes.clear()
 
 # --- Crafting ---
 
@@ -881,6 +1095,27 @@ func _on_launcher_spawn_started(prediction: Dictionary) -> void:
 	_is_launcher_spawning = false
 	if added:
 		_play_spawn_fly(target_pos, launcher_pos)
+
+func _on_craft_speedup_confirmed(result: Dictionary) -> void:
+	var table_pos: Vector2i = Vector2i(int(result.get("table_col", -1)), int(result.get("table_row", -1)))
+	var table_item_variant: Variant = GridManager.get_item(table_pos)
+	if table_item_variant is Dictionary:
+		CraftingService.complete_craft_now(table_item_variant as Dictionary)
+	_sync_grid_from_server(result)
+
+func _on_launcher_speedup_confirmed(result: Dictionary) -> void:
+	var uid: int = int(result.get("uid", 0))
+	if uid <= 0:
+		return
+	_sync_grid_from_server(result)
+	_launcher_ctrl.clear_cd(uid)
+	var item: Dictionary = GridManager.find_by_uid(uid)
+	if item.is_empty():
+		return
+	var max_charges: int = int(result.get("max_charges", item.get("charges", 0)))
+	item["charges"] = int(result.get("charges", max_charges))
+	item.erase("_recharge_remaining")
+	_on_launcher_charge_update(uid, "%d/%d" % [item["charges"], max_charges], Color(1, 1, 1, 0.7))
 
 func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> void:
 	_apply_spawn_resources(result)
@@ -1216,8 +1451,18 @@ func _sync_grid_from_server(result: Dictionary) -> void:
 		if not item_data.is_empty():
 			var item := item_data.duplicate(true)
 			if entry.has("charges"): item["charges"] = entry.charges
+			if entry.has("last_charge_time"): item["last_charge_time"] = entry.last_charge_time
 			if entry.has("uid"): item["_uid"] = entry.uid
 			if entry.has("immovable"): item["immovable"] = entry.immovable
+			var recharge_remaining: Variant = entry.get("_recharge_remaining", null)
+			if recharge_remaining != null: item["_recharge_remaining"] = recharge_remaining
+			var craft_data: Variant = entry.get("craft", null)
+			if craft_data is Dictionary and not (craft_data as Dictionary).is_empty():
+				for key in craft_data as Dictionary:
+					item[key] = craft_data[key]
+			var storage_data: Variant = entry.get("storage", null)
+			if storage_data != null: item["storage"] = storage_data
+			if entry.has("atk_base"): item["atk_base"] = entry.atk_base
 			GridManager.add_item(item, Vector2i(entry.col, entry.row))
 	_skip_anims = false
 

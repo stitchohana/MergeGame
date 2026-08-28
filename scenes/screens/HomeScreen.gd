@@ -280,6 +280,9 @@ func _on_light_confirmed(result: Dictionary) -> void:
 		GameState.home_meridian_progress = _home_progress.duplicate(true)
 	if result.has("cultivation"):
 		CultivationService.deserialize(result.cultivation)
+	if result.has("meridian_acupoints"):
+		GameState.meridian_acupoints = result.meridian_acupoints.duplicate(true)
+		GameState.meridian_updated.emit()
 	_refresh_display()
 
 

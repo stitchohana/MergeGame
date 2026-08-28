@@ -5,12 +5,54 @@
       "index": 0,
       "items": [
         {
-          "id": 13001,
-          "count": 2
+          "id": 11001,
+          "count": 1
         },
         {
-          "id": 18001,
-          "count": 2
+          "id": 12001,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "index": 1,
+      "items": [
+        {
+          "id": 13001,
+          "count": 1
+        },
+        {
+          "id": 14001,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "index": 2,
+      "items": [
+        {
+          "id": 15001,
+          "count": 1
+        },
+        {
+          "id": 16001,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "index": 3,
+      "items": [
+        {
+          "id": 11001,
+          "count": 1
+        },
+        {
+          "id": 12001,
+          "count": 1
         }
       ]
     },
@@ -19,26 +61,54 @@
       "index": 4,
       "items": [
         {
-          "id": 13002,
-          "count": 2
+          "id": 13001,
+          "count": 1
         },
         {
-          "id": 18002,
-          "count": 2
+          "id": 14001,
+          "count": 1
         }
       ]
     },
     {
       "stage": 1,
-      "index": 8,
+      "index": 5,
       "items": [
         {
-          "id": 13003,
-          "count": 2
+          "id": 15001,
+          "count": 1
         },
         {
-          "id": 18003,
-          "count": 2
+          "id": 16001,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "index": 6,
+      "items": [
+        {
+          "id": 17001,
+          "count": 1
+        },
+        {
+          "id": 19001,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "index": 7,
+      "items": [
+        {
+          "id": 17001,
+          "count": 1
+        },
+        {
+          "id": 19001,
+          "count": 1
         }
       ]
     },
@@ -47,20 +117,38 @@
       "index": 0,
       "items": [
         {
-          "id": 11001,
-          "count": 2
-        },
+          "id": 15002,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 1,
+      "items": [
         {
-          "id": 12001,
-          "count": 2
-        },
+          "id": 18001,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 2,
+      "items": [
         {
-          "id": 16001,
-          "count": 2
-        },
+          "id": 15002,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 3,
+      "items": [
         {
-          "id": 17001,
-          "count": 2
+          "id": 18001,
+          "count": 1
         }
       ]
     },
@@ -70,19 +158,49 @@
       "items": [
         {
           "id": 11002,
-          "count": 2
+          "count": 1
         },
         {
           "id": 12002,
-          "count": 2
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 5,
+      "items": [
+        {
+          "id": 13002,
+          "count": 1
         },
         {
+          "id": 14002,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 6,
+      "items": [
+        {
           "id": 16002,
-          "count": 2
+          "count": 1
         },
         {
           "id": 17002,
-          "count": 2
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 7,
+      "items": [
+        {
+          "id": 19002,
+          "count": 1
         }
       ]
     },
@@ -91,20 +209,60 @@
       "index": 8,
       "items": [
         {
-          "id": 11003,
-          "count": 2
+          "id": 11002,
+          "count": 1
         },
         {
-          "id": 12003,
-          "count": 2
+          "id": 12002,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 9,
+      "items": [
+        {
+          "id": 13002,
+          "count": 1
         },
         {
-          "id": 16003,
-          "count": 2
+          "id": 14002,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 10,
+      "items": [
+        {
+          "id": 16002,
+          "count": 1
         },
         {
-          "id": 17003,
-          "count": 2
+          "id": 17002,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 11,
+      "items": [
+        {
+          "id": 19002,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "index": 12,
+      "items": [
+        {
+          "id": 18002,
+          "count": 1
         }
       ]
     },
@@ -113,12 +271,64 @@
       "index": 0,
       "items": [
         {
-          "id": 14001,
-          "count": 2
+          "id": 18002,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 1,
+      "items": [
+        {
+          "id": 11003,
+          "count": 1
         },
         {
-          "id": 19001,
-          "count": 2
+          "id": 12003,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 2,
+      "items": [
+        {
+          "id": 13003,
+          "count": 1
+        },
+        {
+          "id": 14003,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 3,
+      "items": [
+        {
+          "id": 15003,
+          "count": 1
+        },
+        {
+          "id": 16003,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 4,
+      "items": [
+        {
+          "id": 17003,
+          "count": 1
+        },
+        {
+          "id": 18003,
+          "count": 1
         }
       ]
     },
@@ -127,12 +337,64 @@
       "index": 5,
       "items": [
         {
-          "id": 14002,
-          "count": 2
+          "id": 19003,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 6,
+      "items": [
+        {
+          "id": 11003,
+          "count": 1
         },
         {
-          "id": 19002,
-          "count": 2
+          "id": 12003,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 7,
+      "items": [
+        {
+          "id": 13003,
+          "count": 1
+        },
+        {
+          "id": 14003,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 8,
+      "items": [
+        {
+          "id": 15003,
+          "count": 1
+        },
+        {
+          "id": 16003,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "stage": 3,
+      "index": 9,
+      "items": [
+        {
+          "id": 17003,
+          "count": 1
+        },
+        {
+          "id": 18003,
+          "count": 1
         }
       ]
     },
@@ -141,42 +403,8 @@
       "index": 10,
       "items": [
         {
-          "id": 14003,
-          "count": 2
-        },
-        {
           "id": 19003,
-          "count": 2
-        }
-      ]
-    },
-    {
-      "stage": 5,
-      "index": 0,
-      "items": [
-        {
-          "id": 15001,
-          "count": 2
-        }
-      ]
-    },
-    {
-      "stage": 5,
-      "index": 7,
-      "items": [
-        {
-          "id": 15002,
-          "count": 2
-        }
-      ]
-    },
-    {
-      "stage": 5,
-      "index": 14,
-      "items": [
-        {
-          "id": 15003,
-          "count": 2
+          "count": 1
         }
       ]
     }
@@ -185,337 +413,2805 @@
     {
       "stage": 10,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190
+        110
       ],
       "levels": [
-        4
+        1
       ],
-      "count": 2
+      "count": 1
     },
     {
       "stage": 10,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        200,
+        120
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 10,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 10,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 10,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 11,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 11,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 11,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 11,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 11,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 12,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         1
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 10,
-      "index": 1,
+      "stage": 12,
+      "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
+        110
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 12,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 12,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 12,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 13,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 13,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 13,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 13,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 13,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         190
       ],
       "levels": [
-        5
+        1
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 10,
-      "index": 1,
+      "stage": 14,
+      "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        200,
+        210
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 15,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        1
+      ],
+      "count": 1
+    },
+    {
+      "stage": 15,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        2
+      ],
+      "count": 1
+    },
+    {
+      "stage": 15,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         2
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 10,
-      "index": 2,
+      "stage": 16,
+      "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190
+        200
       ],
       "levels": [
-        6
+        2
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 10,
-      "index": 2,
+      "stage": 16,
+      "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        200,
-        210
+        110
       ],
       "levels": [
         3
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 13,
+      "stage": 16,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
+        120
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 16,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 16,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 17,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 17,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 17,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 17,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 17,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         190
       ],
       "levels": [
-        7
+        3
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 13,
+      "stage": 18,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        200,
+        110
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 18,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 18,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 18,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 18,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 19,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 19,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 19,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 19,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        3
+      ],
+      "count": 1
+    },
+    {
+      "stage": 19,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        110
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 20,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 20,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 20,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 20,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 20,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 21,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 21,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 21,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 21,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 21,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         4
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 16,
+      "stage": 22,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        200,
+        110
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 22,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 22,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 22,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 22,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 23,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 23,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 23,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 23,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        4
+      ],
+      "count": 1
+    },
+    {
+      "stage": 23,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        110
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 24,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 24,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 24,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 24,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 24,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 25,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 25,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 25,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 25,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        5
+      ],
+      "count": 1
+    },
+    {
+      "stage": 25,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         5
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 19,
+      "stage": 26,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        200,
+        200
+      ],
+      "levels": [
+        6
+      ],
+      "count": 1
+    },
+    {
+      "stage": 26,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         6
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 22,
+      "stage": 26,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        200,
+        110
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 26,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 26,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 27,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 27,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 27,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 27,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 27,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 28,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 28,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        7
+      ],
+      "count": 1
+    },
+    {
+      "stage": 28,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         7
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 40,
+      "stage": 28,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190,
-        200,
+        110
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 28,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 29,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 29,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 29,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 29,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 29,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 30,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 30,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 30,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        8
+      ],
+      "count": 1
+    },
+    {
+      "stage": 30,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         8
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 43,
+      "stage": 30,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190,
-        200,
+        110
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 31,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 31,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 31,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 31,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 31,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 32,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 32,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 32,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 32,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        9
+      ],
+      "count": 1
+    },
+    {
+      "stage": 32,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         9
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 46,
+      "stage": 33,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190,
-        200,
+        110
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 33,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 33,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 33,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 33,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 34,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 34,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 34,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 34,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 34,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        10
+      ],
+      "count": 1
+    },
+    {
+      "stage": 35,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         10
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 49,
+      "stage": 35,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190,
-        200,
+        110
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 35,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 35,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 35,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 36,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 36,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 36,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 36,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 36,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 37,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        11
+      ],
+      "count": 1
+    },
+    {
+      "stage": 37,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         11
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 70,
+      "stage": 37,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190,
-        200,
+        110
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 37,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 37,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 38,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 38,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 38,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 38,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 38,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 39,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 39,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 39,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
       ],
       "levels": [
         12
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 73,
+      "stage": 40,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190,
-        200,
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 40,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
         210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 41,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 41,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 42,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 42,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 43,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 43,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 44,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 44,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 45,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 45,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 46,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 46,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 47,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 47,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 48,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 48,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 49,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 49,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 50,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 50,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 51,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 51,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 52,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 52,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 53,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        200
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 53,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        210
+      ],
+      "levels": [
+        12
+      ],
+      "count": 1
+    },
+    {
+      "stage": 53,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        110
       ],
       "levels": [
         13
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 76,
+      "stage": 53,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190,
-        200,
-        210
+        120
       ],
       "levels": [
-        14
+        13
       ],
-      "count": 2
+      "count": 1
     },
     {
-      "stage": 79,
+      "stage": 53,
       "index": 0,
+      "timing": "circulation",
       "facility_prefixes": [
-        110,
-        120,
-        130,
-        140,
-        150,
-        160,
-        170,
-        180,
-        190,
-        200,
-        210
+        130
       ],
       "levels": [
-        15
+        13
       ],
-      "count": 2
+      "count": 1
+    },
+    {
+      "stage": 54,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 54,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 54,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 54,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 54,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 55,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 55,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        110
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 55,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 55,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 55,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 56,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 56,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 56,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 56,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 56,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 57,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        110
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 57,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 57,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 57,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 57,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 58,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 58,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 58,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 58,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 58,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        110
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 59,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 59,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 59,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 59,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 59,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 60,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 60,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 60,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 60,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        110
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 60,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 61,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 61,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 61,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 61,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 61,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 62,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 62,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 62,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        110
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 62,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 62,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 63,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 63,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 63,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 63,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 63,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 64,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 64,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        110
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 64,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        120
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 64,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        130
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 64,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        140
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 65,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        150
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 65,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        160
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 65,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        170
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 65,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        180
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
+    },
+    {
+      "stage": 65,
+      "index": 0,
+      "timing": "circulation",
+      "facility_prefixes": [
+        190
+      ],
+      "levels": [
+        13
+      ],
+      "count": 1
     }
   ],
   "stages": [
     {
       "name": "凡人·引气",
       "acupoints": 3,
-      "qi_cost": 80,
+      "qi_cost": 240,
       "acupoint_rewards": [
         {
           "items": [
@@ -580,12 +3276,12 @@
     {
       "name": "练气一层·周天",
       "acupoints": 10,
-      "qi_cost": 168,
+      "qi_cost": 504,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 2
+            "amount": 4
           },
           {
             "token": 3,
@@ -597,7 +3293,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 10
+            "amount": 16
           },
           {
             "token": 3,
@@ -609,244 +3305,12 @@
     {
       "name": "练气二层·周天",
       "acupoints": 13,
-      "qi_cost": 228,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 3
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 17
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "练气三层·周天",
-      "acupoints": 16,
-      "qi_cost": 288,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 4
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 26
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "练气四层·周天",
-      "acupoints": 19,
-      "qi_cost": 348,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 4
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 32
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "练气五层·周天",
-      "acupoints": 22,
-      "qi_cost": 408,
+      "qi_cost": 684,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
             "amount": 5
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 47
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "练气六层·周天",
-      "acupoints": 25,
-      "qi_cost": 456,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 6
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 64
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "练气七层·周天",
-      "acupoints": 28,
-      "qi_cost": 516,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 8
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 96
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "练气八层·周天",
-      "acupoints": 31,
-      "qi_cost": 576,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 9
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 121
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "练气九层·周天",
-      "acupoints": 34,
-      "qi_cost": 636,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 10
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 160
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基前期·周天1",
-      "acupoints": 35,
-      "qi_cost": 1500,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 1
           },
           {
             "token": 3,
@@ -868,14 +3332,14 @@
       }
     },
     {
-      "name": "筑基前期·周天2",
-      "acupoints": 36,
-      "qi_cost": 1560,
+      "name": "练气三层·周天",
+      "acupoints": 16,
+      "qi_cost": 864,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 1
+            "amount": 5
           },
           {
             "token": 3,
@@ -887,7 +3351,239 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 24
+            "amount": 28
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "练气四层·周天",
+      "acupoints": 19,
+      "qi_cost": 1044,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 6
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 43
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "练气五层·周天",
+      "acupoints": 22,
+      "qi_cost": 1224,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 7
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 60
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "练气六层·周天",
+      "acupoints": 25,
+      "qi_cost": 1368,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 9
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 95
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "练气七层·周天",
+      "acupoints": 28,
+      "qi_cost": 1548,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 10
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 120
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "练气八层·周天",
+      "acupoints": 31,
+      "qi_cost": 1728,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 11
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 159
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "练气九层·周天",
+      "acupoints": 34,
+      "qi_cost": 1908,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 12
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 192
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "筑基前期·周天1",
+      "acupoints": 35,
+      "qi_cost": 4500,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 2
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 20
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "筑基前期·周天2",
+      "acupoints": 36,
+      "qi_cost": 4680,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 2
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 18
           },
           {
             "token": 3,
@@ -899,12 +3595,12 @@
     {
       "name": "筑基前期·周天3",
       "acupoints": 37,
-      "qi_cost": 1608,
+      "qi_cost": 4824,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 1
+            "amount": 2
           },
           {
             "token": 3,
@@ -916,7 +3612,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 23
+            "amount": 16
           },
           {
             "token": 3,
@@ -928,297 +3624,7 @@
     {
       "name": "筑基前期·周天4",
       "acupoints": 38,
-      "qi_cost": 1668,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 1
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 22
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基前期·周天5",
-      "acupoints": 39,
-      "qi_cost": 1728,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 1
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 21
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基前期·周天6",
-      "acupoints": 40,
-      "qi_cost": 1788,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 1
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 20
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基前期·周天7",
-      "acupoints": 41,
-      "qi_cost": 1848,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 1
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 19
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基前期·周天8",
-      "acupoints": 42,
-      "qi_cost": 1896,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 1
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 18
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基前期·周天9",
-      "acupoints": 43,
-      "qi_cost": 1956,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 1
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 17
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基前期·周天10",
-      "acupoints": 44,
-      "qi_cost": 2016,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 1
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 16
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基中期·周天1",
-      "acupoints": 35,
-      "qi_cost": 1956,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 2
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 20
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基中期·周天2",
-      "acupoints": 36,
-      "qi_cost": 2016,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 2
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 18
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基中期·周天3",
-      "acupoints": 37,
-      "qi_cost": 2076,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 2
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 16
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "筑基中期·周天4",
-      "acupoints": 38,
-      "qi_cost": 2136,
+      "qi_cost": 5004,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1245,9 +3651,9 @@
       }
     },
     {
-      "name": "筑基中期·周天5",
+      "name": "筑基前期·周天5",
       "acupoints": 39,
-      "qi_cost": 2196,
+      "qi_cost": 5184,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1274,9 +3680,9 @@
       }
     },
     {
-      "name": "筑基中期·周天6",
+      "name": "筑基前期·周天6",
       "acupoints": 40,
-      "qi_cost": 2244,
+      "qi_cost": 5364,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1303,9 +3709,9 @@
       }
     },
     {
-      "name": "筑基中期·周天7",
+      "name": "筑基前期·周天7",
       "acupoints": 41,
-      "qi_cost": 2304,
+      "qi_cost": 5544,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1332,9 +3738,9 @@
       }
     },
     {
-      "name": "筑基中期·周天8",
+      "name": "筑基前期·周天8",
       "acupoints": 42,
-      "qi_cost": 2364,
+      "qi_cost": 5688,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1361,9 +3767,9 @@
       }
     },
     {
-      "name": "筑基中期·周天9",
+      "name": "筑基前期·周天9",
       "acupoints": 43,
-      "qi_cost": 2424,
+      "qi_cost": 5868,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1390,9 +3796,9 @@
       }
     },
     {
-      "name": "筑基中期·周天10",
+      "name": "筑基前期·周天10",
       "acupoints": 44,
-      "qi_cost": 2484,
+      "qi_cost": 6048,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1419,9 +3825,9 @@
       }
     },
     {
-      "name": "筑基后期·周天1",
+      "name": "筑基中期·周天1",
       "acupoints": 35,
-      "qi_cost": 2532,
+      "qi_cost": 5868,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1448,9 +3854,9 @@
       }
     },
     {
-      "name": "筑基后期·周天2",
+      "name": "筑基中期·周天2",
       "acupoints": 36,
-      "qi_cost": 2592,
+      "qi_cost": 6048,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1477,9 +3883,9 @@
       }
     },
     {
-      "name": "筑基后期·周天3",
+      "name": "筑基中期·周天3",
       "acupoints": 37,
-      "qi_cost": 2652,
+      "qi_cost": 6228,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1506,9 +3912,9 @@
       }
     },
     {
-      "name": "筑基后期·周天4",
+      "name": "筑基中期·周天4",
       "acupoints": 38,
-      "qi_cost": 2712,
+      "qi_cost": 6408,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1535,9 +3941,9 @@
       }
     },
     {
-      "name": "筑基后期·周天5",
+      "name": "筑基中期·周天5",
       "acupoints": 39,
-      "qi_cost": 2772,
+      "qi_cost": 6588,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1564,9 +3970,9 @@
       }
     },
     {
-      "name": "筑基后期·周天6",
+      "name": "筑基中期·周天6",
       "acupoints": 40,
-      "qi_cost": 2820,
+      "qi_cost": 6732,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1593,9 +3999,9 @@
       }
     },
     {
-      "name": "筑基后期·周天7",
+      "name": "筑基中期·周天7",
       "acupoints": 41,
-      "qi_cost": 2880,
+      "qi_cost": 6912,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1622,9 +4028,9 @@
       }
     },
     {
-      "name": "筑基后期·周天8",
+      "name": "筑基中期·周天8",
       "acupoints": 42,
-      "qi_cost": 2940,
+      "qi_cost": 7092,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1651,9 +4057,9 @@
       }
     },
     {
-      "name": "筑基后期·周天9",
+      "name": "筑基中期·周天9",
       "acupoints": 43,
-      "qi_cost": 3000,
+      "qi_cost": 7272,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1680,9 +4086,9 @@
       }
     },
     {
-      "name": "筑基后期·周天10",
+      "name": "筑基中期·周天10",
       "acupoints": 44,
-      "qi_cost": 3060,
+      "qi_cost": 7452,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -1709,14 +4115,14 @@
       }
     },
     {
-      "name": "金丹前期·周天1",
-      "acupoints": 45,
-      "qi_cost": 3228,
+      "name": "筑基后期·周天1",
+      "acupoints": 35,
+      "qi_cost": 7596,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 6
+            "amount": 8
           },
           {
             "token": 3,
@@ -1728,7 +4134,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 120
+            "amount": 110
           },
           {
             "token": 3,
@@ -1738,72 +4144,14 @@
       }
     },
     {
-      "name": "金丹前期·周天2",
-      "acupoints": 46,
-      "qi_cost": 3288,
+      "name": "筑基后期·周天2",
+      "acupoints": 36,
+      "qi_cost": 7776,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 6
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 114
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "金丹前期·周天3",
-      "acupoints": 47,
-      "qi_cost": 3348,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 6
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 108
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "金丹前期·周天4",
-      "acupoints": 48,
-      "qi_cost": 3396,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 6
+            "amount": 8
           },
           {
             "token": 3,
@@ -1825,14 +4173,159 @@
       }
     },
     {
-      "name": "金丹前期·周天5",
-      "acupoints": 49,
-      "qi_cost": 3456,
+      "name": "筑基后期·周天3",
+      "acupoints": 37,
+      "qi_cost": 7956,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 6
+            "amount": 7
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 131
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "筑基后期·周天4",
+      "acupoints": 38,
+      "qi_cost": 8136,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 7
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 124
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "筑基后期·周天5",
+      "acupoints": 39,
+      "qi_cost": 8316,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 7
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 117
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "筑基后期·周天6",
+      "acupoints": 40,
+      "qi_cost": 8460,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 7
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 110
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "筑基后期·周天7",
+      "acupoints": 41,
+      "qi_cost": 8640,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 7
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 103
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "筑基后期·周天8",
+      "acupoints": 42,
+      "qi_cost": 8820,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 7
           },
           {
             "token": 3,
@@ -1854,14 +4347,14 @@
       }
     },
     {
-      "name": "金丹前期·周天6",
-      "acupoints": 50,
-      "qi_cost": 3516,
+      "name": "筑基后期·周天9",
+      "acupoints": 43,
+      "qi_cost": 9000,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 5
+            "amount": 6
           },
           {
             "token": 3,
@@ -1873,7 +4366,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 140
+            "amount": 132
           },
           {
             "token": 3,
@@ -1883,14 +4376,14 @@
       }
     },
     {
-      "name": "金丹前期·周天7",
-      "acupoints": 51,
-      "qi_cost": 3576,
+      "name": "筑基后期·周天10",
+      "acupoints": 44,
+      "qi_cost": 9180,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 5
+            "amount": 6
           },
           {
             "token": 3,
@@ -1902,7 +4395,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 135
+            "amount": 126
           },
           {
             "token": 3,
@@ -1912,96 +4405,9 @@
       }
     },
     {
-      "name": "金丹前期·周天8",
-      "acupoints": 52,
-      "qi_cost": 3636,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 5
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 130
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "金丹前期·周天9",
-      "acupoints": 53,
-      "qi_cost": 3684,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 5
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 125
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "金丹前期·周天10",
-      "acupoints": 54,
-      "qi_cost": 3744,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 5
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 120
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "金丹中期·周天1",
+      "name": "金丹前期·周天1",
       "acupoints": 45,
-      "qi_cost": 4152,
+      "qi_cost": 9684,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2028,9 +4434,9 @@
       }
     },
     {
-      "name": "金丹中期·周天2",
+      "name": "金丹前期·周天2",
       "acupoints": 46,
-      "qi_cost": 4212,
+      "qi_cost": 9864,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2057,9 +4463,9 @@
       }
     },
     {
-      "name": "金丹中期·周天3",
+      "name": "金丹前期·周天3",
       "acupoints": 47,
-      "qi_cost": 4260,
+      "qi_cost": 10044,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2086,9 +4492,9 @@
       }
     },
     {
-      "name": "金丹中期·周天4",
+      "name": "金丹前期·周天4",
       "acupoints": 48,
-      "qi_cost": 4320,
+      "qi_cost": 10188,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2115,9 +4521,9 @@
       }
     },
     {
-      "name": "金丹中期·周天5",
+      "name": "金丹前期·周天5",
       "acupoints": 49,
-      "qi_cost": 4380,
+      "qi_cost": 10368,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2144,9 +4550,9 @@
       }
     },
     {
-      "name": "金丹中期·周天6",
+      "name": "金丹前期·周天6",
       "acupoints": 50,
-      "qi_cost": 4440,
+      "qi_cost": 10548,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2173,9 +4579,9 @@
       }
     },
     {
-      "name": "金丹中期·周天7",
+      "name": "金丹前期·周天7",
       "acupoints": 51,
-      "qi_cost": 4500,
+      "qi_cost": 10728,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2202,9 +4608,9 @@
       }
     },
     {
-      "name": "金丹中期·周天8",
+      "name": "金丹前期·周天8",
       "acupoints": 52,
-      "qi_cost": 4548,
+      "qi_cost": 10908,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2231,9 +4637,9 @@
       }
     },
     {
-      "name": "金丹中期·周天9",
+      "name": "金丹前期·周天9",
       "acupoints": 53,
-      "qi_cost": 4608,
+      "qi_cost": 11052,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2260,9 +4666,9 @@
       }
     },
     {
-      "name": "金丹中期·周天10",
+      "name": "金丹前期·周天10",
       "acupoints": 54,
-      "qi_cost": 4668,
+      "qi_cost": 11232,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2289,9 +4695,9 @@
       }
     },
     {
-      "name": "金丹后期·周天1",
+      "name": "金丹中期·周天1",
       "acupoints": 45,
-      "qi_cost": 5304,
+      "qi_cost": 12456,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2318,9 +4724,9 @@
       }
     },
     {
-      "name": "金丹后期·周天2",
+      "name": "金丹中期·周天2",
       "acupoints": 46,
-      "qi_cost": 5364,
+      "qi_cost": 12636,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2347,9 +4753,9 @@
       }
     },
     {
-      "name": "金丹后期·周天3",
+      "name": "金丹中期·周天3",
       "acupoints": 47,
-      "qi_cost": 5412,
+      "qi_cost": 12780,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2376,9 +4782,9 @@
       }
     },
     {
-      "name": "金丹后期·周天4",
+      "name": "金丹中期·周天4",
       "acupoints": 48,
-      "qi_cost": 5472,
+      "qi_cost": 12960,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2405,9 +4811,9 @@
       }
     },
     {
-      "name": "金丹后期·周天5",
+      "name": "金丹中期·周天5",
       "acupoints": 49,
-      "qi_cost": 5532,
+      "qi_cost": 13140,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2434,9 +4840,9 @@
       }
     },
     {
-      "name": "金丹后期·周天6",
+      "name": "金丹中期·周天6",
       "acupoints": 50,
-      "qi_cost": 5592,
+      "qi_cost": 13320,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2463,9 +4869,9 @@
       }
     },
     {
-      "name": "金丹后期·周天7",
+      "name": "金丹中期·周天7",
       "acupoints": 51,
-      "qi_cost": 5652,
+      "qi_cost": 13500,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2492,9 +4898,9 @@
       }
     },
     {
-      "name": "金丹后期·周天8",
+      "name": "金丹中期·周天8",
       "acupoints": 52,
-      "qi_cost": 5700,
+      "qi_cost": 13644,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2521,9 +4927,9 @@
       }
     },
     {
-      "name": "金丹后期·周天9",
+      "name": "金丹中期·周天9",
       "acupoints": 53,
-      "qi_cost": 5760,
+      "qi_cost": 13824,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2550,9 +4956,9 @@
       }
     },
     {
-      "name": "金丹后期·周天10",
+      "name": "金丹中期·周天10",
       "acupoints": 54,
-      "qi_cost": 5820,
+      "qi_cost": 14004,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2579,246 +4985,14 @@
       }
     },
     {
-      "name": "元婴前期·周天1",
-      "acupoints": 55,
-      "qi_cost": 6912,
+      "name": "金丹后期·周天1",
+      "acupoints": 45,
+      "qi_cost": 15912,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 17
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 425
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "元婴前期·周天2",
-      "acupoints": 56,
-      "qi_cost": 6972,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 17
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 408
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "元婴前期·周天3",
-      "acupoints": 57,
-      "qi_cost": 7032,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 17
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 391
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "元婴前期·周天4",
-      "acupoints": 58,
-      "qi_cost": 7092,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 16
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 432
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "元婴前期·周天5",
-      "acupoints": 59,
-      "qi_cost": 7152,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 16
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 416
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "元婴前期·周天6",
-      "acupoints": 60,
-      "qi_cost": 7200,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 16
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 400
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "元婴前期·周天7",
-      "acupoints": 61,
-      "qi_cost": 7260,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 16
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 384
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "元婴前期·周天8",
-      "acupoints": 62,
-      "qi_cost": 7320,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 15
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 430
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "元婴前期·周天9",
-      "acupoints": 63,
-      "qi_cost": 7380,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 15
+            "amount": 21
           },
           {
             "token": 3,
@@ -2840,14 +5014,72 @@
       }
     },
     {
-      "name": "元婴前期·周天10",
-      "acupoints": 64,
-      "qi_cost": 7440,
+      "name": "金丹后期·周天2",
+      "acupoints": 46,
+      "qi_cost": 16092,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
+            "amount": 21
+          },
+          {
+            "token": 3,
             "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 394
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "金丹后期·周天3",
+      "acupoints": 47,
+      "qi_cost": 16236,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 20
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 420
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "金丹后期·周天4",
+      "acupoints": 48,
+      "qi_cost": 16416,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 20
           },
           {
             "token": 3,
@@ -2869,9 +5101,183 @@
       }
     },
     {
-      "name": "元婴中期·周天1",
+      "name": "金丹后期·周天5",
+      "acupoints": 49,
+      "qi_cost": 16596,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 19
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 429
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "金丹后期·周天6",
+      "acupoints": 50,
+      "qi_cost": 16776,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 19
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 410
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "金丹后期·周天7",
+      "acupoints": 51,
+      "qi_cost": 16956,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 19
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 391
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "金丹后期·周天8",
+      "acupoints": 52,
+      "qi_cost": 17100,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 18
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 424
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "金丹后期·周天9",
+      "acupoints": 53,
+      "qi_cost": 17280,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 18
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 406
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "金丹后期·周天10",
+      "acupoints": 54,
+      "qi_cost": 17460,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 18
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 388
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "元婴前期·周天1",
       "acupoints": 55,
-      "qi_cost": 8988,
+      "qi_cost": 20736,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2898,9 +5304,9 @@
       }
     },
     {
-      "name": "元婴中期·周天2",
+      "name": "元婴前期·周天2",
       "acupoints": 56,
-      "qi_cost": 9048,
+      "qi_cost": 20916,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2927,9 +5333,9 @@
       }
     },
     {
-      "name": "元婴中期·周天3",
+      "name": "元婴前期·周天3",
       "acupoints": 57,
-      "qi_cost": 9108,
+      "qi_cost": 21096,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2956,9 +5362,9 @@
       }
     },
     {
-      "name": "元婴中期·周天4",
+      "name": "元婴前期·周天4",
       "acupoints": 58,
-      "qi_cost": 9168,
+      "qi_cost": 21276,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -2985,9 +5391,9 @@
       }
     },
     {
-      "name": "元婴中期·周天5",
+      "name": "元婴前期·周天5",
       "acupoints": 59,
-      "qi_cost": 9216,
+      "qi_cost": 21456,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3014,9 +5420,9 @@
       }
     },
     {
-      "name": "元婴中期·周天6",
+      "name": "元婴前期·周天6",
       "acupoints": 60,
-      "qi_cost": 9276,
+      "qi_cost": 21600,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3043,9 +5449,9 @@
       }
     },
     {
-      "name": "元婴中期·周天7",
+      "name": "元婴前期·周天7",
       "acupoints": 61,
-      "qi_cost": 9336,
+      "qi_cost": 21780,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3072,9 +5478,9 @@
       }
     },
     {
-      "name": "元婴中期·周天8",
+      "name": "元婴前期·周天8",
       "acupoints": 62,
-      "qi_cost": 9396,
+      "qi_cost": 21960,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3101,9 +5507,9 @@
       }
     },
     {
-      "name": "元婴中期·周天9",
+      "name": "元婴前期·周天9",
       "acupoints": 63,
-      "qi_cost": 9456,
+      "qi_cost": 22140,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3130,9 +5536,9 @@
       }
     },
     {
-      "name": "元婴中期·周天10",
+      "name": "元婴前期·周天10",
       "acupoints": 64,
-      "qi_cost": 9504,
+      "qi_cost": 22320,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3159,9 +5565,9 @@
       }
     },
     {
-      "name": "元婴后期·周天1",
+      "name": "元婴中期·周天1",
       "acupoints": 55,
-      "qi_cost": 11532,
+      "qi_cost": 26964,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3188,9 +5594,9 @@
       }
     },
     {
-      "name": "元婴后期·周天2",
+      "name": "元婴中期·周天2",
       "acupoints": 56,
-      "qi_cost": 11580,
+      "qi_cost": 27144,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3217,9 +5623,9 @@
       }
     },
     {
-      "name": "元婴后期·周天3",
+      "name": "元婴中期·周天3",
       "acupoints": 57,
-      "qi_cost": 11640,
+      "qi_cost": 27324,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3246,9 +5652,9 @@
       }
     },
     {
-      "name": "元婴后期·周天4",
+      "name": "元婴中期·周天4",
       "acupoints": 58,
-      "qi_cost": 11700,
+      "qi_cost": 27504,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3275,9 +5681,9 @@
       }
     },
     {
-      "name": "元婴后期·周天5",
+      "name": "元婴中期·周天5",
       "acupoints": 59,
-      "qi_cost": 11760,
+      "qi_cost": 27648,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3304,9 +5710,9 @@
       }
     },
     {
-      "name": "元婴后期·周天6",
+      "name": "元婴中期·周天6",
       "acupoints": 60,
-      "qi_cost": 11820,
+      "qi_cost": 27828,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3333,9 +5739,9 @@
       }
     },
     {
-      "name": "元婴后期·周天7",
+      "name": "元婴中期·周天7",
       "acupoints": 61,
-      "qi_cost": 11868,
+      "qi_cost": 28008,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3362,9 +5768,9 @@
       }
     },
     {
-      "name": "元婴后期·周天8",
+      "name": "元婴中期·周天8",
       "acupoints": 62,
-      "qi_cost": 11928,
+      "qi_cost": 28188,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3391,9 +5797,9 @@
       }
     },
     {
-      "name": "元婴后期·周天9",
+      "name": "元婴中期·周天9",
       "acupoints": 63,
-      "qi_cost": 11988,
+      "qi_cost": 28368,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3420,9 +5826,9 @@
       }
     },
     {
-      "name": "元婴后期·周天10",
+      "name": "元婴中期·周天10",
       "acupoints": 64,
-      "qi_cost": 12048,
+      "qi_cost": 28512,
       "acupoint_rewards": {
         "tokens": [
           {
@@ -3449,14 +5855,14 @@
       }
     },
     {
-      "name": "化神前期·周天1",
-      "acupoints": 65,
-      "qi_cost": 14988,
+      "name": "元婴后期·周天1",
+      "acupoints": 55,
+      "qi_cost": 34596,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 33
+            "amount": 39
           },
           {
             "token": 3,
@@ -3478,14 +5884,14 @@
       }
     },
     {
-      "name": "化神前期·周天2",
-      "acupoints": 66,
-      "qi_cost": 15048,
+      "name": "元婴后期·周天2",
+      "acupoints": 56,
+      "qi_cost": 34740,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 33
+            "amount": 39
           },
           {
             "token": 3,
@@ -3497,7 +5903,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 922
+            "amount": 916
           },
           {
             "token": 3,
@@ -3507,14 +5913,14 @@
       }
     },
     {
-      "name": "化神前期·周天3",
-      "acupoints": 67,
-      "qi_cost": 15096,
+      "name": "元婴后期·周天3",
+      "acupoints": 57,
+      "qi_cost": 34920,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 32
+            "amount": 38
           },
           {
             "token": 3,
@@ -3526,7 +5932,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 956
+            "amount": 934
           },
           {
             "token": 3,
@@ -3536,14 +5942,14 @@
       }
     },
     {
-      "name": "化神前期·周天4",
-      "acupoints": 68,
-      "qi_cost": 15156,
+      "name": "元婴后期·周天4",
+      "acupoints": 58,
+      "qi_cost": 35100,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 32
+            "amount": 37
           },
           {
             "token": 3,
@@ -3555,7 +5961,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 924
+            "amount": 954
           },
           {
             "token": 3,
@@ -3565,14 +5971,14 @@
       }
     },
     {
-      "name": "化神前期·周天5",
-      "acupoints": 69,
-      "qi_cost": 15216,
+      "name": "元婴后期·周天5",
+      "acupoints": 59,
+      "qi_cost": 35280,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 31
+            "amount": 37
           },
           {
             "token": 3,
@@ -3584,7 +5990,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 961
+            "amount": 917
           },
           {
             "token": 3,
@@ -3594,72 +6000,14 @@
       }
     },
     {
-      "name": "化神前期·周天6",
-      "acupoints": 70,
-      "qi_cost": 15276,
+      "name": "元婴后期·周天6",
+      "acupoints": 60,
+      "qi_cost": 35460,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 31
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 930
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "化神前期·周天7",
-      "acupoints": 71,
-      "qi_cost": 15336,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 31
-          },
-          {
-            "token": 3,
-            "amount": 15
-          }
-        ]
-      },
-      "circulation_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 899
-          },
-          {
-            "token": 3,
-            "amount": 100
-          }
-        ]
-      }
-    },
-    {
-      "name": "化神前期·周天8",
-      "acupoints": 72,
-      "qi_cost": 15384,
-      "acupoint_rewards": {
-        "tokens": [
-          {
-            "token": 4,
-            "amount": 30
+            "amount": 36
           },
           {
             "token": 3,
@@ -3681,14 +6029,14 @@
       }
     },
     {
-      "name": "化神前期·周天9",
-      "acupoints": 73,
-      "qi_cost": 15444,
+      "name": "元婴后期·周天7",
+      "acupoints": 61,
+      "qi_cost": 35604,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 30
+            "amount": 36
           },
           {
             "token": 3,
@@ -3700,7 +6048,355 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 910
+            "amount": 904
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "元婴后期·周天8",
+      "acupoints": 62,
+      "qi_cost": 35784,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 35
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 930
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "元婴后期·周天9",
+      "acupoints": 63,
+      "qi_cost": 35964,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 34
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 958
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "元婴后期·周天10",
+      "acupoints": 64,
+      "qi_cost": 36144,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 34
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 924
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "化神前期·周天1",
+      "acupoints": 65,
+      "qi_cost": 44964,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 107692
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 3000020
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "化神前期·周天2",
+      "acupoints": 66,
+      "qi_cost": 45144,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 106061
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 2999974
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "化神前期·周天3",
+      "acupoints": 67,
+      "qi_cost": 45288,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 104478
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 2999974
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "化神前期·周天4",
+      "acupoints": 68,
+      "qi_cost": 45468,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 102941
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 3000012
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "化神前期·周天5",
+      "acupoints": 69,
+      "qi_cost": 45648,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 101449
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 3000019
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "化神前期·周天6",
+      "acupoints": 70,
+      "qi_cost": 45828,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 100000
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 3000000
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "化神前期·周天7",
+      "acupoints": 71,
+      "qi_cost": 46008,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 98592
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 2999968
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "化神前期·周天8",
+      "acupoints": 72,
+      "qi_cost": 46152,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 97222
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 3000016
+          },
+          {
+            "token": 3,
+            "amount": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "化神前期·周天9",
+      "acupoints": 73,
+      "qi_cost": 46332,
+      "acupoint_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 95890
+          },
+          {
+            "token": 3,
+            "amount": 15
+          }
+        ]
+      },
+      "circulation_rewards": {
+        "tokens": [
+          {
+            "token": 4,
+            "amount": 3000030
           },
           {
             "token": 3,
@@ -3712,12 +6408,12 @@
     {
       "name": "化神前期·周天10",
       "acupoints": 74,
-      "qi_cost": 15504,
+      "qi_cost": 46512,
       "acupoint_rewards": {
         "tokens": [
           {
             "token": 4,
-            "amount": 29
+            "amount": 94595
           },
           {
             "token": 3,
@@ -3729,7 +6425,7 @@
         "tokens": [
           {
             "token": 4,
-            "amount": 954
+            "amount": 2999969
           },
           {
             "token": 3,

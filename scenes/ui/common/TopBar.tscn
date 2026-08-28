@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" uid="uid://b2s47v1wor4j1" path="res://scenes/ui/common/TopBar.gd" id="1_gd"]
 [ext_resource type="PackedScene" uid="uid://b8im68urgqlt8" path="res://scenes/ui/common/TopResource.tscn" id="2_resource"]
+[ext_resource type="Texture2D" path="res://assets/ui/xianxia_v3_layers_v2/layers/energy_lightning_icon.png" id="3_stamina_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/xianxia_v3_layers_v2/layers/qi_spirit_flame_icon.png" id="4_qi_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/xianxia_v3_layers_v2/layers/spirit_stone_icon.png" id="5_stones_icon"]
 
 [node name="TopBar" type="Control" unique_id=1995499029]
 custom_minimum_size = Vector2(780, 92)
@@ -15,18 +18,23 @@ script = ExtResource("1_gd")
 layout_mode = 0
 offset_right = 246.0
 offset_bottom = 81.0
+icon_texture = ExtResource("3_stamina_icon")
 
 [node name="QiResource" parent="." unique_id=753153288 instance=ExtResource("2_resource")]
 layout_mode = 0
 offset_left = 248.0
 offset_right = 496.0
 offset_bottom = 81.0
+icon_texture = ExtResource("4_qi_icon")
+show_regen_timer = false
 
 [node name="StonesResource" parent="." unique_id=1837579794 instance=ExtResource("2_resource")]
 layout_mode = 0
 offset_left = 483.0
 offset_right = 729.0
 offset_bottom = 81.0
+icon_texture = ExtResource("5_stones_icon")
+show_regen_timer = false
 
 [node name="GMButton" type="Button" parent="." unique_id=1538700097]
 layout_mode = 0
