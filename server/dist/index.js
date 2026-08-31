@@ -14,6 +14,65 @@ const game_1 = require("./routes/game");
 const cultivation_1 = require("./routes/cultivation");
 const gm_1 = require("./routes/gm");
 const config_data_1 = require("./worker/config_data");
+const http_1 = require("./worker/http");
+class ExpressWorkerResponse extends http_1.WorkerResponse {
+    expressResponse;
+    constructor(expressResponse) {
+        super();
+        this.expressResponse = expressResponse;
+    }
+    status(code) {
+        this.statusCode = code;
+        this.expressResponse.status(code);
+        return this;
+    }
+    header(name, value) {
+        this.expressResponse.setHeader(name, value);
+        return this;
+    }
+    json(value) {
+        this.headersSent = true;
+        this.expressResponse.status(this.statusCode).json(value);
+        return this;
+    }
+    sendStatus(code) {
+        this.status(code);
+        this.headersSent = true;
+        this.expressResponse.sendStatus(code);
+        return this;
+    }
+}
+function toWorkerRequest(req) {
+    const headers = {};
+    for (const [name, value] of Object.entries(req.headers)) {
+        headers[name.toLowerCase()] = Array.isArray(value) ? value.join(", ") : value;
+    }
+    const query = {};
+    for (const [name, value] of Object.entries(req.query)) {
+        query[name] = typeof value === "string"
+            ? value
+            : Array.isArray(value) && typeof value[0] === "string" ? value[0] : undefined;
+    }
+    return {
+        method: req.method,
+        path: req.path,
+        headers,
+        body: req.body ?? {},
+        query,
+    };
+}
+function mountRouter(app, prefix, router) {
+    app.use(prefix, async (req, res, next) => {
+        try {
+            const handled = await router.handle(toWorkerRequest(req), new ExpressWorkerResponse(res));
+            if (!handled && !res.headersSent)
+                next();
+        }
+        catch (error) {
+            next(error);
+        }
+    });
+}
 function createStorage() {
     switch (config_1.config.dbType) {
         case "memory":
@@ -78,10 +137,10 @@ function main() {
     console.log(`[server] Grid: ${engine.GRID_COLS}x${engine.GRID_ROWS}`);
     console.log(`[server] Initial setup: ${engine.getInitialSetup().length} items`);
     // Routes
-    app.use("/api/auth", (0, auth_1.createAuthRouter)(storage, config_1.config.jwtSecret));
-    app.use("/api/game", (0, game_1.createGameRouter)(storage, engine, config_1.config.jwtSecret));
-    app.use("/api/cultivation", (0, cultivation_1.createCultivationRouter)(storage, engine, config_1.config.jwtSecret));
-    app.use("/api/gm", (0, gm_1.createGMRouter)(storage, engine, config_1.config.jwtSecret, process.env.GM_KEY || ""));
+    mountRouter(app, "/api/auth", (0, auth_1.createAuthRouter)(storage, config_1.config.jwtSecret));
+    mountRouter(app, "/api/game", (0, game_1.createGameRouter)(storage, engine, config_1.config.jwtSecret));
+    mountRouter(app, "/api/cultivation", (0, cultivation_1.createCultivationRouter)(storage, engine, config_1.config.jwtSecret));
+    mountRouter(app, "/api/gm", (0, gm_1.createGMRouter)(storage, engine, config_1.config.jwtSecret, process.env.GM_KEY || ""));
     // Health check
     app.get("/api/health", (_req, res) => {
         res.json({ status: "ok" });

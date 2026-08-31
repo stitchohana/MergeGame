@@ -2113,6 +2113,806 @@
       "sell_price": 1200000
     },
     {
+      "id": 1101,
+      "level": 1,
+      "name": "青灵枝",
+      "icon": "res://assets/items/icons_simple/1101.png",
+      "group_id": 36,
+      "describe": "青灵枝是灵木一脉的1级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3
+    },
+    {
+      "id": 1102,
+      "level": 2,
+      "name": "云纹木",
+      "icon": "res://assets/items/icons_simple/1102.png",
+      "group_id": 36,
+      "describe": "云纹木是灵木一脉的2级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 10
+    },
+    {
+      "id": 1103,
+      "level": 3,
+      "name": "赤霞杉",
+      "icon": "res://assets/items/icons_simple/1103.png",
+      "group_id": 36,
+      "describe": "赤霞杉是灵木一脉的3级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 25
+    },
+    {
+      "id": 1104,
+      "level": 4,
+      "name": "月桂灵木",
+      "icon": "res://assets/items/icons_simple/1104.png",
+      "group_id": 36,
+      "describe": "月桂灵木是灵木一脉的4级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 60
+    },
+    {
+      "id": 1105,
+      "level": 5,
+      "name": "雷击桃木",
+      "icon": "res://assets/items/icons_simple/1105.png",
+      "group_id": 36,
+      "describe": "雷击桃木是灵木一脉的5级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 140
+    },
+    {
+      "id": 1106,
+      "level": 6,
+      "name": "玄冰梧桐",
+      "icon": "res://assets/items/icons_simple/1106.png",
+      "group_id": 36,
+      "describe": "玄冰梧桐是灵木一脉的6级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 300
+    },
+    {
+      "id": 1107,
+      "level": 7,
+      "name": "地脉沉香",
+      "icon": "res://assets/items/icons_simple/1107.png",
+      "group_id": 36,
+      "describe": "地脉沉香是灵木一脉的7级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 700
+    },
+    {
+      "id": 1108,
+      "level": 8,
+      "name": "星辉紫檀",
+      "icon": "res://assets/items/icons_simple/1108.png",
+      "group_id": 36,
+      "describe": "星辉紫檀是灵木一脉的8级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1500
+    },
+    {
+      "id": 1109,
+      "level": 9,
+      "name": "龙血古木",
+      "icon": "res://assets/items/icons_simple/1109.png",
+      "group_id": 36,
+      "describe": "龙血古木是灵木一脉的9级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3500
+    },
+    {
+      "id": 1110,
+      "level": 10,
+      "name": "凤栖神木",
+      "icon": "res://assets/items/icons_simple/1110.png",
+      "group_id": 36,
+      "describe": "凤栖神木是灵木一脉的10级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 8000
+    },
+    {
+      "id": 1111,
+      "level": 11,
+      "name": "九幽冥木",
+      "icon": "res://assets/items/icons_simple/1111.png",
+      "group_id": 36,
+      "describe": "九幽冥木是灵木一脉的11级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 18000
+    },
+    {
+      "id": 1112,
+      "level": 12,
+      "name": "扶桑阳木",
+      "icon": "res://assets/items/icons_simple/1112.png",
+      "group_id": 36,
+      "describe": "扶桑阳木是灵木一脉的12级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 40000
+    },
+    {
+      "id": 1113,
+      "level": 13,
+      "name": "建木灵芯",
+      "icon": "res://assets/items/icons_simple/1113.png",
+      "group_id": 36,
+      "describe": "建木灵芯是灵木一脉的13级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 90000
+    },
+    {
+      "id": 1114,
+      "level": 14,
+      "name": "菩提道木",
+      "icon": "res://assets/items/icons_simple/1114.png",
+      "group_id": 36,
+      "describe": "菩提道木是灵木一脉的14级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 200000
+    },
+    {
+      "id": 1115,
+      "level": 15,
+      "name": "鸿蒙祖木",
+      "icon": "res://assets/items/icons_simple/1115.png",
+      "group_id": 36,
+      "describe": "鸿蒙祖木是灵木一脉的15级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 450000
+    },
+    {
+      "id": 1116,
+      "level": 16,
+      "name": "世界树心",
+      "icon": "res://assets/items/icons_simple/1116.png",
+      "group_id": 36,
+      "describe": "世界树心是灵木一脉的16级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1000000
+    },
+    {
+      "id": 1201,
+      "level": 1,
+      "name": "松露灵脂",
+      "icon": "res://assets/items/icons_simple/1201.png",
+      "group_id": 37,
+      "describe": "松露灵脂是灵脂一脉的1级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3
+    },
+    {
+      "id": 1202,
+      "level": 2,
+      "name": "青檀脂",
+      "icon": "res://assets/items/icons_simple/1202.png",
+      "group_id": 37,
+      "describe": "青檀脂是灵脂一脉的2级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 10
+    },
+    {
+      "id": 1203,
+      "level": 3,
+      "name": "赤枫脂",
+      "icon": "res://assets/items/icons_simple/1203.png",
+      "group_id": 37,
+      "describe": "赤枫脂是灵脂一脉的3级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 25
+    },
+    {
+      "id": 1204,
+      "level": 4,
+      "name": "月桂凝脂",
+      "icon": "res://assets/items/icons_simple/1204.png",
+      "group_id": 37,
+      "describe": "月桂凝脂是灵脂一脉的4级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 60
+    },
+    {
+      "id": 1205,
+      "level": 5,
+      "name": "桃木雷脂",
+      "icon": "res://assets/items/icons_simple/1205.png",
+      "group_id": 37,
+      "describe": "桃木雷脂是灵脂一脉的5级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 140
+    },
+    {
+      "id": 1206,
+      "level": 6,
+      "name": "冰梧寒脂",
+      "icon": "res://assets/items/icons_simple/1206.png",
+      "group_id": 37,
+      "describe": "冰梧寒脂是灵脂一脉的6级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 300
+    },
+    {
+      "id": 1207,
+      "level": 7,
+      "name": "沉香地髓",
+      "icon": "res://assets/items/icons_simple/1207.png",
+      "group_id": 37,
+      "describe": "沉香地髓是灵脂一脉的7级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 700
+    },
+    {
+      "id": 1208,
+      "level": 8,
+      "name": "紫檀星脂",
+      "icon": "res://assets/items/icons_simple/1208.png",
+      "group_id": 37,
+      "describe": "紫檀星脂是灵脂一脉的8级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1500
+    },
+    {
+      "id": 1209,
+      "level": 9,
+      "name": "龙血木脂",
+      "icon": "res://assets/items/icons_simple/1209.png",
+      "group_id": 37,
+      "describe": "龙血木脂是灵脂一脉的9级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3500
+    },
+    {
+      "id": 1210,
+      "level": 10,
+      "name": "凤栖香脂",
+      "icon": "res://assets/items/icons_simple/1210.png",
+      "group_id": 37,
+      "describe": "凤栖香脂是灵脂一脉的10级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 8000
+    },
+    {
+      "id": 1211,
+      "level": 11,
+      "name": "九幽玄脂",
+      "icon": "res://assets/items/icons_simple/1211.png",
+      "group_id": 37,
+      "describe": "九幽玄脂是灵脂一脉的11级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 18000
+    },
+    {
+      "id": 1212,
+      "level": 12,
+      "name": "扶桑日脂",
+      "icon": "res://assets/items/icons_simple/1212.png",
+      "group_id": 37,
+      "describe": "扶桑日脂是灵脂一脉的12级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 40000
+    },
+    {
+      "id": 1213,
+      "level": 13,
+      "name": "建木玉脂",
+      "icon": "res://assets/items/icons_simple/1213.png",
+      "group_id": 37,
+      "describe": "建木玉脂是灵脂一脉的13级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 90000
+    },
+    {
+      "id": 1214,
+      "level": 14,
+      "name": "菩提心脂",
+      "icon": "res://assets/items/icons_simple/1214.png",
+      "group_id": 37,
+      "describe": "菩提心脂是灵脂一脉的14级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 200000
+    },
+    {
+      "id": 1215,
+      "level": 15,
+      "name": "鸿蒙源脂",
+      "icon": "res://assets/items/icons_simple/1215.png",
+      "group_id": 37,
+      "describe": "鸿蒙源脂是灵脂一脉的15级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 450000
+    },
+    {
+      "id": 1216,
+      "level": 16,
+      "name": "太初神脂",
+      "icon": "res://assets/items/icons_simple/1216.png",
+      "group_id": 37,
+      "describe": "太初神脂是灵脂一脉的16级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1000000
+    },
+    {
+      "id": 1301,
+      "level": 1,
+      "name": "青鳞灵鱼",
+      "icon": "res://assets/items/icons_simple/1301.png",
+      "group_id": 38,
+      "describe": "青鳞灵鱼是灵鱼一脉的1级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3
+    },
+    {
+      "id": 1302,
+      "level": 2,
+      "name": "银须鲫",
+      "icon": "res://assets/items/icons_simple/1302.png",
+      "group_id": 38,
+      "describe": "银须鲫是灵鱼一脉的2级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 10
+    },
+    {
+      "id": 1303,
+      "level": 3,
+      "name": "赤尾鲤",
+      "icon": "res://assets/items/icons_simple/1303.png",
+      "group_id": 38,
+      "describe": "赤尾鲤是灵鱼一脉的3级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 25
+    },
+    {
+      "id": 1304,
+      "level": 4,
+      "name": "月纹鳜",
+      "icon": "res://assets/items/icons_simple/1304.png",
+      "group_id": 38,
+      "describe": "月纹鳜是灵鱼一脉的4级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 60
+    },
+    {
+      "id": 1305,
+      "level": 5,
+      "name": "雷鳍鲶",
+      "icon": "res://assets/items/icons_simple/1305.png",
+      "group_id": 38,
+      "describe": "雷鳍鲶是灵鱼一脉的5级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 140
+    },
+    {
+      "id": 1306,
+      "level": 6,
+      "name": "冰魄鲑",
+      "icon": "res://assets/items/icons_simple/1306.png",
+      "group_id": 38,
+      "describe": "冰魄鲑是灵鱼一脉的6级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 300
+    },
+    {
+      "id": 1307,
+      "level": 7,
+      "name": "地脉鳅",
+      "icon": "res://assets/items/icons_simple/1307.png",
+      "group_id": 38,
+      "describe": "地脉鳅是灵鱼一脉的7级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 700
+    },
+    {
+      "id": 1308,
+      "level": 8,
+      "name": "星斑鲷",
+      "icon": "res://assets/items/icons_simple/1308.png",
+      "group_id": 38,
+      "describe": "星斑鲷是灵鱼一脉的8级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1500
+    },
+    {
+      "id": 1309,
+      "level": 9,
+      "name": "龙须鲤",
+      "icon": "res://assets/items/icons_simple/1309.png",
+      "group_id": 38,
+      "describe": "龙须鲤是灵鱼一脉的9级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3500
+    },
+    {
+      "id": 1310,
+      "level": 10,
+      "name": "凤尾锦鲤",
+      "icon": "res://assets/items/icons_simple/1310.png",
+      "group_id": 38,
+      "describe": "凤尾锦鲤是灵鱼一脉的10级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 8000
+    },
+    {
+      "id": 1311,
+      "level": 11,
+      "name": "九幽玄鱼",
+      "icon": "res://assets/items/icons_simple/1311.png",
+      "group_id": 38,
+      "describe": "九幽玄鱼是灵鱼一脉的11级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 18000
+    },
+    {
+      "id": 1312,
+      "level": 12,
+      "name": "扶桑金鲤",
+      "icon": "res://assets/items/icons_simple/1312.png",
+      "group_id": 38,
+      "describe": "扶桑金鲤是灵鱼一脉的12级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 40000
+    },
+    {
+      "id": 1313,
+      "level": 13,
+      "name": "建木游龙",
+      "icon": "res://assets/items/icons_simple/1313.png",
+      "group_id": 38,
+      "describe": "建木游龙是灵鱼一脉的13级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 90000
+    },
+    {
+      "id": 1314,
+      "level": 14,
+      "name": "菩提慧鱼",
+      "icon": "res://assets/items/icons_simple/1314.png",
+      "group_id": 38,
+      "describe": "菩提慧鱼是灵鱼一脉的14级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 200000
+    },
+    {
+      "id": 1315,
+      "level": 15,
+      "name": "鸿蒙鲲苗",
+      "icon": "res://assets/items/icons_simple/1315.png",
+      "group_id": 38,
+      "describe": "鸿蒙鲲苗是灵鱼一脉的15级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 450000
+    },
+    {
+      "id": 1316,
+      "level": 16,
+      "name": "太初神鲲",
+      "icon": "res://assets/items/icons_simple/1316.png",
+      "group_id": 38,
+      "describe": "太初神鲲是灵鱼一脉的16级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1000000
+    },
+    {
+      "id": 1401,
+      "level": 1,
+      "name": "清水灵珠",
+      "icon": "res://assets/items/icons_simple/1401.png",
+      "group_id": 39,
+      "describe": "清水灵珠是灵珠一脉的1级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3
+    },
+    {
+      "id": 1402,
+      "level": 2,
+      "name": "青波珠",
+      "icon": "res://assets/items/icons_simple/1402.png",
+      "group_id": 39,
+      "describe": "青波珠是灵珠一脉的2级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 10
+    },
+    {
+      "id": 1403,
+      "level": 3,
+      "name": "赤潮珠",
+      "icon": "res://assets/items/icons_simple/1403.png",
+      "group_id": 39,
+      "describe": "赤潮珠是灵珠一脉的3级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 25
+    },
+    {
+      "id": 1404,
+      "level": 4,
+      "name": "月华珠",
+      "icon": "res://assets/items/icons_simple/1404.png",
+      "group_id": 39,
+      "describe": "月华珠是灵珠一脉的4级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 60
+    },
+    {
+      "id": 1405,
+      "level": 5,
+      "name": "雷鸣珠",
+      "icon": "res://assets/items/icons_simple/1405.png",
+      "group_id": 39,
+      "describe": "雷鸣珠是灵珠一脉的5级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 140
+    },
+    {
+      "id": 1406,
+      "level": 6,
+      "name": "玄冰珠",
+      "icon": "res://assets/items/icons_simple/1406.png",
+      "group_id": 39,
+      "describe": "玄冰珠是灵珠一脉的6级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 300
+    },
+    {
+      "id": 1407,
+      "level": 7,
+      "name": "地泉珠",
+      "icon": "res://assets/items/icons_simple/1407.png",
+      "group_id": 39,
+      "describe": "地泉珠是灵珠一脉的7级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 700
+    },
+    {
+      "id": 1408,
+      "level": 8,
+      "name": "星澜珠",
+      "icon": "res://assets/items/icons_simple/1408.png",
+      "group_id": 39,
+      "describe": "星澜珠是灵珠一脉的8级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1500
+    },
+    {
+      "id": 1409,
+      "level": 9,
+      "name": "龙涎珠",
+      "icon": "res://assets/items/icons_simple/1409.png",
+      "group_id": 39,
+      "describe": "龙涎珠是灵珠一脉的9级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3500
+    },
+    {
+      "id": 1410,
+      "level": 10,
+      "name": "凤泪珠",
+      "icon": "res://assets/items/icons_simple/1410.png",
+      "group_id": 39,
+      "describe": "凤泪珠是灵珠一脉的10级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 8000
+    },
+    {
+      "id": 1411,
+      "level": 11,
+      "name": "九幽玄珠",
+      "icon": "res://assets/items/icons_simple/1411.png",
+      "group_id": 39,
+      "describe": "九幽玄珠是灵珠一脉的11级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 18000
+    },
+    {
+      "id": 1412,
+      "level": 12,
+      "name": "扶桑日珠",
+      "icon": "res://assets/items/icons_simple/1412.png",
+      "group_id": 39,
+      "describe": "扶桑日珠是灵珠一脉的12级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 40000
+    },
+    {
+      "id": 1413,
+      "level": 13,
+      "name": "建木碧珠",
+      "icon": "res://assets/items/icons_simple/1413.png",
+      "group_id": 39,
+      "describe": "建木碧珠是灵珠一脉的13级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 90000
+    },
+    {
+      "id": 1414,
+      "level": 14,
+      "name": "菩提心珠",
+      "icon": "res://assets/items/icons_simple/1414.png",
+      "group_id": 39,
+      "describe": "菩提心珠是灵珠一脉的14级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 200000
+    },
+    {
+      "id": 1415,
+      "level": 15,
+      "name": "鸿蒙源珠",
+      "icon": "res://assets/items/icons_simple/1415.png",
+      "group_id": 39,
+      "describe": "鸿蒙源珠是灵珠一脉的15级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 450000
+    },
+    {
+      "id": 1416,
+      "level": 16,
+      "name": "太初神珠",
+      "icon": "res://assets/items/icons_simple/1416.png",
+      "group_id": 39,
+      "describe": "太初神珠是灵珠一脉的16级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1000000
+    },
+    {
+      "id": 1501,
+      "level": 1,
+      "name": "青白玉",
+      "icon": "res://assets/items/icons_simple/1501.png",
+      "group_id": 40,
+      "describe": "青白玉是玉石一脉的1级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3
+    },
+    {
+      "id": 1502,
+      "level": 2,
+      "name": "云纹玉",
+      "icon": "res://assets/items/icons_simple/1502.png",
+      "group_id": 40,
+      "describe": "云纹玉是玉石一脉的2级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 10
+    },
+    {
+      "id": 1503,
+      "level": 3,
+      "name": "赤霞玉",
+      "icon": "res://assets/items/icons_simple/1503.png",
+      "group_id": 40,
+      "describe": "赤霞玉是玉石一脉的3级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 25
+    },
+    {
+      "id": 1504,
+      "level": 4,
+      "name": "月华玉",
+      "icon": "res://assets/items/icons_simple/1504.png",
+      "group_id": 40,
+      "describe": "月华玉是玉石一脉的4级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 60
+    },
+    {
+      "id": 1505,
+      "level": 5,
+      "name": "雷纹玉",
+      "icon": "res://assets/items/icons_simple/1505.png",
+      "group_id": 40,
+      "describe": "雷纹玉是玉石一脉的5级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 140
+    },
+    {
+      "id": 1506,
+      "level": 6,
+      "name": "玄冰玉",
+      "icon": "res://assets/items/icons_simple/1506.png",
+      "group_id": 40,
+      "describe": "玄冰玉是玉石一脉的6级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 300
+    },
+    {
+      "id": 1507,
+      "level": 7,
+      "name": "地髓玉",
+      "icon": "res://assets/items/icons_simple/1507.png",
+      "group_id": 40,
+      "describe": "地髓玉是玉石一脉的7级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 700
+    },
+    {
+      "id": 1508,
+      "level": 8,
+      "name": "星辉玉",
+      "icon": "res://assets/items/icons_simple/1508.png",
+      "group_id": 40,
+      "describe": "星辉玉是玉石一脉的8级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1500
+    },
+    {
+      "id": 1509,
+      "level": 9,
+      "name": "龙血玉",
+      "icon": "res://assets/items/icons_simple/1509.png",
+      "group_id": 40,
+      "describe": "龙血玉是玉石一脉的9级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 3500
+    },
+    {
+      "id": 1510,
+      "level": 10,
+      "name": "凤栖玉",
+      "icon": "res://assets/items/icons_simple/1510.png",
+      "group_id": 40,
+      "describe": "凤栖玉是玉石一脉的10级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 8000
+    },
+    {
+      "id": 1511,
+      "level": 11,
+      "name": "九幽玄玉",
+      "icon": "res://assets/items/icons_simple/1511.png",
+      "group_id": 40,
+      "describe": "九幽玄玉是玉石一脉的11级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 18000
+    },
+    {
+      "id": 1512,
+      "level": 12,
+      "name": "扶桑阳玉",
+      "icon": "res://assets/items/icons_simple/1512.png",
+      "group_id": 40,
+      "describe": "扶桑阳玉是玉石一脉的12级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 40000
+    },
+    {
+      "id": 1513,
+      "level": 13,
+      "name": "建木碧玉",
+      "icon": "res://assets/items/icons_simple/1513.png",
+      "group_id": 40,
+      "describe": "建木碧玉是玉石一脉的13级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 90000
+    },
+    {
+      "id": 1514,
+      "level": 14,
+      "name": "菩提心玉",
+      "icon": "res://assets/items/icons_simple/1514.png",
+      "group_id": 40,
+      "describe": "菩提心玉是玉石一脉的14级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 200000
+    },
+    {
+      "id": 1515,
+      "level": 15,
+      "name": "鸿蒙源玉",
+      "icon": "res://assets/items/icons_simple/1515.png",
+      "group_id": 40,
+      "describe": "鸿蒙源玉是玉石一脉的15级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 450000
+    },
+    {
+      "id": 1516,
+      "level": 16,
+      "name": "太初神玉",
+      "icon": "res://assets/items/icons_simple/1516.png",
+      "group_id": 40,
+      "describe": "太初神玉是玉石一脉的16级材料，可用于对应层次的修真制作。",
+      "type": 0,
+      "sell_price": 1000000
+    },
+    {
       "id": 27001,
       "level": 1,
       "name": "清息散",
@@ -4102,6 +4902,456 @@
       "describe": "太初道种与凤羽天晶在苍露膏中温养七昼夜，凝作化神渡厄丹，轻摇可闻玉珠清响。",
       "type": 4,
       "value": 17779839
+    },
+    {
+      "id": 28101,
+      "level": 1,
+      "name": "松露养元散",
+      "icon": "res://assets/items/icons_simple/28101.png",
+      "describe": "松露养元散以松露灵脂、青鳞灵鱼、雾芽草合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 8
+    },
+    {
+      "id": 28102,
+      "level": 2,
+      "name": "银鳞抱元丸",
+      "icon": "res://assets/items/icons_simple/28102.png",
+      "describe": "银鳞抱元丸以银须鲫、青络花合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 16
+    },
+    {
+      "id": 28103,
+      "level": 4,
+      "name": "月桂玉露丹",
+      "icon": "res://assets/items/icons_simple/28103.png",
+      "describe": "月桂玉露丹以月桂凝脂、月纹鳜、玉壶露合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 168
+    },
+    {
+      "id": 28104,
+      "level": 5,
+      "name": "雷脂雪魄丸",
+      "icon": "res://assets/items/icons_simple/28104.png",
+      "describe": "雷脂雪魄丸以桃木雷脂、雷鳍鲶、雪魄莲合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 394
+    },
+    {
+      "id": 28105,
+      "level": 7,
+      "name": "沉香青冥丹",
+      "icon": "res://assets/items/icons_simple/28105.png",
+      "describe": "沉香青冥丹以沉香地髓、地脉鳅、苍梧藤合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 2015
+    },
+    {
+      "id": 28106,
+      "level": 8,
+      "name": "星脂霆元丹",
+      "icon": "res://assets/items/icons_simple/28106.png",
+      "describe": "星脂霆元丹以紫檀星脂、星斑鲷、霆光竹合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 4404
+    },
+    {
+      "id": 28107,
+      "level": 10,
+      "name": "凤鲤星华丹",
+      "icon": "res://assets/items/icons_simple/28107.png",
+      "describe": "凤鲤星华丹以凤栖香脂、凤尾锦鲤、星坠蕊合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 23832
+    },
+    {
+      "id": 28108,
+      "level": 12,
+      "name": "扶桑九转丹",
+      "icon": "res://assets/items/icons_simple/28108.png",
+      "describe": "扶桑九转丹以扶桑日脂、扶桑金鲤、九曲槲合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 122681
+    },
+    {
+      "id": 28109,
+      "level": 14,
+      "name": "菩提龙元丹",
+      "icon": "res://assets/items/icons_simple/28109.png",
+      "describe": "菩提龙元丹以菩提心脂、菩提慧鱼、螭涎兰合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 633683
+    },
+    {
+      "id": 28110,
+      "level": 16,
+      "name": "太初造化丹",
+      "icon": "res://assets/items/icons_simple/28110.png",
+      "describe": "太初造化丹以太初神脂、太初神鲲、太初道种合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 3285215
+    },
+    {
+      "id": 28111,
+      "level": 1,
+      "name": "松露青果酿",
+      "icon": "res://assets/items/icons_simple/28111.png",
+      "describe": "松露青果酿以松露灵脂、山青果合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 14
+    },
+    {
+      "id": 28112,
+      "level": 2,
+      "name": "银须青禾酒",
+      "icon": "res://assets/items/icons_simple/28112.png",
+      "describe": "银须青禾酒以银须鲫、青禾米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 16
+    },
+    {
+      "id": 28113,
+      "level": 4,
+      "name": "赤枫金铃酿",
+      "icon": "res://assets/items/icons_simple/28113.png",
+      "describe": "赤枫金铃酿以赤枫脂、赤尾鲤、金铃果合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 214
+    },
+    {
+      "id": 28114,
+      "level": 5,
+      "name": "雷脂雪纹酒",
+      "icon": "res://assets/items/icons_simple/28114.png",
+      "describe": "雷脂雪纹酒以桃木雷脂、雷鳍鲶、雪纹米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 394
+    },
+    {
+      "id": 28115,
+      "level": 7,
+      "name": "冰魄苍梧酿",
+      "icon": "res://assets/items/icons_simple/28115.png",
+      "describe": "冰魄苍梧酿以冰梧寒脂、冰魄鲑、苍梧子合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 2851
+    },
+    {
+      "id": 28116,
+      "level": 8,
+      "name": "星脂雷芒酒",
+      "icon": "res://assets/items/icons_simple/28116.png",
+      "describe": "星脂雷芒酒以紫檀星脂、星斑鲷、雷芒米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 4404
+    },
+    {
+      "id": 28117,
+      "level": 10,
+      "name": "龙血星子酿",
+      "icon": "res://assets/items/icons_simple/28117.png",
+      "describe": "龙血星子酿以龙血木脂、龙须鲤、星子米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 13032
+    },
+    {
+      "id": 28118,
+      "level": 12,
+      "name": "九幽九曲醪",
+      "icon": "res://assets/items/icons_simple/28118.png",
+      "describe": "九幽九曲醪以九幽玄脂、九幽玄鱼、九曲米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 69881
+    },
+    {
+      "id": 28119,
+      "level": 14,
+      "name": "建木龙牙酿",
+      "icon": "res://assets/items/icons_simple/28119.png",
+      "describe": "建木龙牙酿以建木玉脂、建木游龙、龙牙米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 369683
+    },
+    {
+      "id": 28120,
+      "level": 16,
+      "name": "鸿蒙玄粟酒",
+      "icon": "res://assets/items/icons_simple/28120.png",
+      "describe": "鸿蒙玄粟酒以鸿蒙源脂、鸿蒙鲲苗、太初玄粟合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 1965215
+    },
+    {
+      "id": 28121,
+      "level": 1,
+      "name": "青枝铜骨剑",
+      "icon": "res://assets/items/icons_simple/28121.png",
+      "describe": "青枝铜骨剑以青灵枝、赤髓铜合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 5
+    },
+    {
+      "id": 28122,
+      "level": 2,
+      "name": "云木乌铁刀",
+      "icon": "res://assets/items/icons_simple/28122.png",
+      "describe": "云木乌铁刀以云纹木、乌纹铁合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 16
+    },
+    {
+      "id": 28123,
+      "level": 4,
+      "name": "月桂白金杖",
+      "icon": "res://assets/items/icons_simple/28123.png",
+      "describe": "月桂白金杖以月桂灵木、月华玉、太白金母合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 168
+    },
+    {
+      "id": 28124,
+      "level": 5,
+      "name": "雷木玄冰枪",
+      "icon": "res://assets/items/icons_simple/28124.png",
+      "describe": "雷木玄冰枪以雷击桃木、雷纹玉、玄冰陨铁合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 394
+    },
+    {
+      "id": 28125,
+      "level": 7,
+      "name": "沉香青罡印",
+      "icon": "res://assets/items/icons_simple/28125.png",
+      "describe": "沉香青罡印以地脉沉香、地髓玉、青罡玉合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 2015
+    },
+    {
+      "id": 28126,
+      "level": 8,
+      "name": "紫檀雷极轮",
+      "icon": "res://assets/items/icons_simple/28126.png",
+      "describe": "紫檀雷极轮以星辉紫檀、星辉玉、雷极砂合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 4404
+    },
+    {
+      "id": 28127,
+      "level": 10,
+      "name": "凤木星陨弓",
+      "icon": "res://assets/items/icons_simple/28127.png",
+      "describe": "凤木星陨弓以凤栖神木、凤栖玉、星陨铁核合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 23832
+    },
+    {
+      "id": 28128,
+      "level": 12,
+      "name": "扶桑九幽戟",
+      "icon": "res://assets/items/icons_simple/28128.png",
+      "describe": "扶桑九幽戟以扶桑阳木、扶桑阳玉、九幽沉铁合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 122681
+    },
+    {
+      "id": 28129,
+      "level": 14,
+      "name": "菩提月魄钟",
+      "icon": "res://assets/items/icons_simple/28129.png",
+      "describe": "菩提月魄钟以菩提道木、菩提心玉、月魄寒玉合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 633683
+    },
+    {
+      "id": 28130,
+      "level": 16,
+      "name": "世界树开天斧",
+      "icon": "res://assets/items/icons_simple/28130.png",
+      "describe": "世界树开天斧以世界树心、太初神玉、鸿蒙母晶合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 3285215
+    },
+    {
+      "id": 28131,
+      "level": 1,
+      "name": "清珠岚障阵",
+      "icon": "res://assets/items/icons_simple/28131.png",
+      "describe": "清珠岚障阵以清水灵珠、青白玉、清岚障图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 8
+    },
+    {
+      "id": 28132,
+      "level": 2,
+      "name": "云玉聚炁阵",
+      "icon": "res://assets/items/icons_simple/28132.png",
+      "describe": "云玉聚炁阵以青波珠、云纹玉、引星聚炁图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 28
+    },
+    {
+      "id": 28133,
+      "level": 4,
+      "name": "月珠锁灵阵",
+      "icon": "res://assets/items/icons_simple/28133.png",
+      "describe": "月珠锁灵阵以赤潮珠、月华珠、赤霞玉、三垣锁灵图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 156
+    },
+    {
+      "id": 28134,
+      "level": 5,
+      "name": "雷珠寒光阵",
+      "icon": "res://assets/items/icons_simple/28134.png",
+      "describe": "雷珠寒光阵以雷鸣珠、雷纹玉、四渎寒图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 394
+    },
+    {
+      "id": 28135,
+      "level": 7,
+      "name": "地珠载岳阵",
+      "icon": "res://assets/items/icons_simple/28135.png",
+      "describe": "地珠载岳阵以玄冰珠、地泉珠、玄冰玉、玄龟载岳图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 1895
+    },
+    {
+      "id": 28136,
+      "level": 8,
+      "name": "星珠九霄阵",
+      "icon": "res://assets/items/icons_simple/28136.png",
+      "describe": "星珠九霄阵以星澜珠、星辉玉、九霄雷篆图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 4404
+    },
+    {
+      "id": 28137,
+      "level": 10,
+      "name": "凤珠星罗阵",
+      "icon": "res://assets/items/icons_simple/28137.png",
+      "describe": "凤珠星罗阵以龙涎珠、凤泪珠、龙血玉、星罗天盘图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 22632
+    },
+    {
+      "id": 28138,
+      "level": 12,
+      "name": "日珠续命阵",
+      "icon": "res://assets/items/icons_simple/28138.png",
+      "describe": "日珠续命阵以九幽玄珠、扶桑日珠、九幽玄玉、九幽续命图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 117881
+    },
+    {
+      "id": 28139,
+      "level": 14,
+      "name": "心珠御龙阵",
+      "icon": "res://assets/items/icons_simple/28139.png",
+      "describe": "心珠御龙阵以建木碧珠、菩提心珠、建木碧玉、苍龙御天图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 609683
+    },
+    {
+      "id": 28140,
+      "level": 16,
+      "name": "太初万象阵",
+      "icon": "res://assets/items/icons_simple/28140.png",
+      "describe": "太初万象阵以鸿蒙源珠、太初神珠、鸿蒙源玉、太一归元图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 3165215
+    },
+    {
+      "id": 28141,
+      "level": 1,
+      "name": "青枝镇煞符",
+      "icon": "res://assets/items/icons_simple/28141.png",
+      "describe": "青枝镇煞符以青灵枝、山豕血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 14
+    },
+    {
+      "id": 28142,
+      "level": 2,
+      "name": "青檀净心符",
+      "icon": "res://assets/items/icons_simple/28142.png",
+      "describe": "青檀净心符以青檀脂、云鹿灵血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 38
+    },
+    {
+      "id": 28143,
+      "level": 4,
+      "name": "赤霞金身符",
+      "icon": "res://assets/items/icons_simple/28143.png",
+      "describe": "赤霞金身符以赤霞杉、月桂凝脂、金蟾髓合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 256
+    },
+    {
+      "id": 28144,
+      "level": 5,
+      "name": "雷木寒霜符",
+      "icon": "res://assets/items/icons_simple/28144.png",
+      "describe": "雷木寒霜符以雷击桃木、桃木雷脂、冰蛇寒血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 706
+    },
+    {
+      "id": 28145,
+      "level": 7,
+      "name": "冰梧青鸾符",
+      "icon": "res://assets/items/icons_simple/28145.png",
+      "describe": "冰梧青鸾符以玄冰梧桐、沉香地髓、青鸾碧血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 3331
+    },
+    {
+      "id": 28146,
+      "level": 8,
+      "name": "紫檀雷鹏符",
+      "icon": "res://assets/items/icons_simple/28146.png",
+      "describe": "紫檀雷鹏符以星辉紫檀、紫檀星脂、雷鹏紫血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 8716
+    },
+    {
+      "id": 28147,
+      "level": 10,
+      "name": "龙血星狼符",
+      "icon": "res://assets/items/icons_simple/28147.png",
+      "describe": "龙血星狼符以龙血古木、凤栖香脂、星狼银血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 43268
+    },
+    {
+      "id": 28148,
+      "level": 12,
+      "name": "九幽九命符",
+      "icon": "res://assets/items/icons_simple/28148.png",
+      "describe": "九幽九命符以九幽冥木、扶桑日脂、九命猫血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 239339
+    },
+    {
+      "id": 28149,
+      "level": 14,
+      "name": "建木龙血符",
+      "icon": "res://assets/items/icons_simple/28149.png",
+      "describe": "建木龙血符以建木灵芯、菩提心脂、苍龙真血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 1325698
+    },
+    {
+      "id": 28150,
+      "level": 16,
+      "name": "鸿蒙太古符",
+      "icon": "res://assets/items/icons_simple/28150.png",
+      "describe": "鸿蒙太古符以鸿蒙祖木、太初神脂、太古源血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "type": 4,
+      "value": 7371541
     }
   ],
   "launcher": [
@@ -7512,6 +8762,1594 @@
           "weight": 15
         }
       ]
+    },
+    {
+      "id": 23001,
+      "level": 1,
+      "name": "青篱灵木园",
+      "icon": "res://assets/items/icons_simple/23001.png",
+      "group_id": 42,
+      "max_charges": 15,
+      "recharge_time": 1800,
+      "describe": "青篱灵木园可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 7
+        },
+        {
+          "id": 1201,
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": 24001,
+      "level": 1,
+      "name": "清波灵潭",
+      "icon": "res://assets/items/icons_simple/24001.png",
+      "group_id": 43,
+      "max_charges": 15,
+      "recharge_time": 1800,
+      "describe": "清波灵潭可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 7
+        },
+        {
+          "id": 1401,
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": 25001,
+      "level": 1,
+      "name": "浅层灵石矿脉",
+      "icon": "res://assets/items/icons_simple/25001.png",
+      "group_id": 44,
+      "max_charges": 15,
+      "recharge_time": 1800,
+      "describe": "浅层灵石矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 9500
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23002,
+      "level": 2,
+      "name": "云露木圃",
+      "icon": "res://assets/items/icons_simple/23002.png",
+      "group_id": 42,
+      "max_charges": 20,
+      "recharge_time": 2400,
+      "describe": "云露木圃可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 686
+        },
+        {
+          "id": 1201,
+          "weight": 294
+        },
+        {
+          "id": 1102,
+          "weight": 14
+        },
+        {
+          "id": 1202,
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": 24002,
+      "level": 2,
+      "name": "青涟鱼池",
+      "icon": "res://assets/items/icons_simple/24002.png",
+      "group_id": 43,
+      "max_charges": 20,
+      "recharge_time": 2400,
+      "describe": "青涟鱼池可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 686
+        },
+        {
+          "id": 1401,
+          "weight": 294
+        },
+        {
+          "id": 1302,
+          "weight": 14
+        },
+        {
+          "id": 1402,
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": 25002,
+      "level": 2,
+      "name": "青岩矿脉",
+      "icon": "res://assets/items/icons_simple/25002.png",
+      "group_id": 44,
+      "max_charges": 20,
+      "recharge_time": 2400,
+      "describe": "青岩矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 9310
+        },
+        {
+          "id": 1502,
+          "weight": 190
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23003,
+      "level": 3,
+      "name": "赤霞杉苑",
+      "icon": "res://assets/items/icons_simple/23003.png",
+      "group_id": 42,
+      "max_charges": 25,
+      "recharge_time": 3000,
+      "describe": "赤霞杉苑可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 672
+        },
+        {
+          "id": 1201,
+          "weight": 288
+        },
+        {
+          "id": 1102,
+          "weight": 28
+        },
+        {
+          "id": 1202,
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": 24003,
+      "level": 3,
+      "name": "赤潮灵潭",
+      "icon": "res://assets/items/icons_simple/24003.png",
+      "group_id": 43,
+      "max_charges": 25,
+      "recharge_time": 3000,
+      "describe": "赤潮灵潭可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 672
+        },
+        {
+          "id": 1401,
+          "weight": 288
+        },
+        {
+          "id": 1302,
+          "weight": 28
+        },
+        {
+          "id": 1402,
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": 25003,
+      "level": 3,
+      "name": "赤霞矿脉",
+      "icon": "res://assets/items/icons_simple/25003.png",
+      "group_id": 44,
+      "max_charges": 25,
+      "recharge_time": 3000,
+      "describe": "赤霞矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 9120
+        },
+        {
+          "id": 1502,
+          "weight": 380
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23004,
+      "level": 4,
+      "name": "月桂灵园",
+      "icon": "res://assets/items/icons_simple/23004.png",
+      "group_id": 42,
+      "max_charges": 30,
+      "recharge_time": 3600,
+      "describe": "月桂灵园可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 658
+        },
+        {
+          "id": 1201,
+          "weight": 282
+        },
+        {
+          "id": 1102,
+          "weight": 42
+        },
+        {
+          "id": 1202,
+          "weight": 18
+        }
+      ]
+    },
+    {
+      "id": 24004,
+      "level": 4,
+      "name": "月华鱼湾",
+      "icon": "res://assets/items/icons_simple/24004.png",
+      "group_id": 43,
+      "max_charges": 30,
+      "recharge_time": 3600,
+      "describe": "月华鱼湾可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 658
+        },
+        {
+          "id": 1401,
+          "weight": 282
+        },
+        {
+          "id": 1302,
+          "weight": 42
+        },
+        {
+          "id": 1402,
+          "weight": 18
+        }
+      ]
+    },
+    {
+      "id": 25004,
+      "level": 4,
+      "name": "月华玉矿",
+      "icon": "res://assets/items/icons_simple/25004.png",
+      "group_id": 44,
+      "max_charges": 30,
+      "recharge_time": 3600,
+      "describe": "月华玉矿可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 8930
+        },
+        {
+          "id": 1502,
+          "weight": 570
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23005,
+      "level": 5,
+      "name": "雷桃仙圃",
+      "icon": "res://assets/items/icons_simple/23005.png",
+      "group_id": 42,
+      "max_charges": 35,
+      "recharge_time": 4200,
+      "describe": "雷桃仙圃可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 644
+        },
+        {
+          "id": 1201,
+          "weight": 276
+        },
+        {
+          "id": 1102,
+          "weight": 56
+        },
+        {
+          "id": 1202,
+          "weight": 24
+        }
+      ]
+    },
+    {
+      "id": 24005,
+      "level": 5,
+      "name": "雷鸣灵泽",
+      "icon": "res://assets/items/icons_simple/24005.png",
+      "group_id": 43,
+      "max_charges": 35,
+      "recharge_time": 4200,
+      "describe": "雷鸣灵泽可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 644
+        },
+        {
+          "id": 1401,
+          "weight": 276
+        },
+        {
+          "id": 1302,
+          "weight": 56
+        },
+        {
+          "id": 1402,
+          "weight": 24
+        }
+      ]
+    },
+    {
+      "id": 25005,
+      "level": 5,
+      "name": "雷纹矿脉",
+      "icon": "res://assets/items/icons_simple/25005.png",
+      "group_id": 44,
+      "max_charges": 35,
+      "recharge_time": 4200,
+      "describe": "雷纹矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 8740
+        },
+        {
+          "id": 1502,
+          "weight": 760
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23006,
+      "level": 6,
+      "name": "冰梧寒苑",
+      "icon": "res://assets/items/icons_simple/23006.png",
+      "group_id": 42,
+      "max_charges": 40,
+      "recharge_time": 4800,
+      "describe": "冰梧寒苑可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 637
+        },
+        {
+          "id": 1201,
+          "weight": 273
+        },
+        {
+          "id": 1102,
+          "weight": 63
+        },
+        {
+          "id": 1202,
+          "weight": 27
+        }
+      ]
+    },
+    {
+      "id": 24006,
+      "level": 6,
+      "name": "玄冰鱼渊",
+      "icon": "res://assets/items/icons_simple/24006.png",
+      "group_id": 43,
+      "max_charges": 40,
+      "recharge_time": 4800,
+      "describe": "玄冰鱼渊可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 637
+        },
+        {
+          "id": 1401,
+          "weight": 273
+        },
+        {
+          "id": 1302,
+          "weight": 63
+        },
+        {
+          "id": 1402,
+          "weight": 27
+        }
+      ]
+    },
+    {
+      "id": 25006,
+      "level": 6,
+      "name": "玄冰玉脉",
+      "icon": "res://assets/items/icons_simple/25006.png",
+      "group_id": 44,
+      "max_charges": 40,
+      "recharge_time": 4800,
+      "describe": "玄冰玉脉可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 8645
+        },
+        {
+          "id": 1502,
+          "weight": 855
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23007,
+      "level": 7,
+      "name": "地脉沉香园",
+      "icon": "res://assets/items/icons_simple/23007.png",
+      "group_id": 42,
+      "max_charges": 45,
+      "recharge_time": 5400,
+      "describe": "地脉沉香园可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 630
+        },
+        {
+          "id": 1201,
+          "weight": 270
+        },
+        {
+          "id": 1102,
+          "weight": 70
+        },
+        {
+          "id": 1202,
+          "weight": 30
+        }
+      ]
+    },
+    {
+      "id": 24007,
+      "level": 7,
+      "name": "地泉灵潭",
+      "icon": "res://assets/items/icons_simple/24007.png",
+      "group_id": 43,
+      "max_charges": 45,
+      "recharge_time": 5400,
+      "describe": "地泉灵潭可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 630
+        },
+        {
+          "id": 1401,
+          "weight": 270
+        },
+        {
+          "id": 1302,
+          "weight": 70
+        },
+        {
+          "id": 1402,
+          "weight": 30
+        }
+      ]
+    },
+    {
+      "id": 25007,
+      "level": 7,
+      "name": "地髓矿脉",
+      "icon": "res://assets/items/icons_simple/25007.png",
+      "group_id": 44,
+      "max_charges": 45,
+      "recharge_time": 5400,
+      "describe": "地髓矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 8550
+        },
+        {
+          "id": 1502,
+          "weight": 950
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23008,
+      "level": 8,
+      "name": "星辉紫檀林",
+      "icon": "res://assets/items/icons_simple/23008.png",
+      "group_id": 42,
+      "max_charges": 50,
+      "recharge_time": 6000,
+      "describe": "星辉紫檀林可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 602
+        },
+        {
+          "id": 1201,
+          "weight": 258
+        },
+        {
+          "id": 1102,
+          "weight": 84
+        },
+        {
+          "id": 1202,
+          "weight": 36
+        },
+        {
+          "id": 1103,
+          "weight": 14
+        },
+        {
+          "id": 1203,
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": 24008,
+      "level": 8,
+      "name": "星澜鱼海",
+      "icon": "res://assets/items/icons_simple/24008.png",
+      "group_id": 43,
+      "max_charges": 50,
+      "recharge_time": 6000,
+      "describe": "星澜鱼海可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 602
+        },
+        {
+          "id": 1401,
+          "weight": 258
+        },
+        {
+          "id": 1302,
+          "weight": 84
+        },
+        {
+          "id": 1402,
+          "weight": 36
+        },
+        {
+          "id": 1303,
+          "weight": 14
+        },
+        {
+          "id": 1403,
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": 25008,
+      "level": 8,
+      "name": "星辉玉矿",
+      "icon": "res://assets/items/icons_simple/25008.png",
+      "group_id": 44,
+      "max_charges": 50,
+      "recharge_time": 6000,
+      "describe": "星辉玉矿可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 8170
+        },
+        {
+          "id": 1502,
+          "weight": 1140
+        },
+        {
+          "id": 1503,
+          "weight": 190
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23009,
+      "level": 9,
+      "name": "龙血古木境",
+      "icon": "res://assets/items/icons_simple/23009.png",
+      "group_id": 42,
+      "max_charges": 55,
+      "recharge_time": 6600,
+      "describe": "龙血古木境可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 574
+        },
+        {
+          "id": 1201,
+          "weight": 246
+        },
+        {
+          "id": 1102,
+          "weight": 105
+        },
+        {
+          "id": 1202,
+          "weight": 45
+        },
+        {
+          "id": 1103,
+          "weight": 21
+        },
+        {
+          "id": 1203,
+          "weight": 9
+        }
+      ]
+    },
+    {
+      "id": 24009,
+      "level": 9,
+      "name": "龙涎灵池",
+      "icon": "res://assets/items/icons_simple/24009.png",
+      "group_id": 43,
+      "max_charges": 55,
+      "recharge_time": 6600,
+      "describe": "龙涎灵池可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 574
+        },
+        {
+          "id": 1401,
+          "weight": 246
+        },
+        {
+          "id": 1302,
+          "weight": 105
+        },
+        {
+          "id": 1402,
+          "weight": 45
+        },
+        {
+          "id": 1303,
+          "weight": 21
+        },
+        {
+          "id": 1403,
+          "weight": 9
+        }
+      ]
+    },
+    {
+      "id": 25009,
+      "level": 9,
+      "name": "龙脉矿藏",
+      "icon": "res://assets/items/icons_simple/25009.png",
+      "group_id": 44,
+      "max_charges": 55,
+      "recharge_time": 6600,
+      "describe": "龙脉矿藏可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 7790
+        },
+        {
+          "id": 1502,
+          "weight": 1425
+        },
+        {
+          "id": 1503,
+          "weight": 285
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23010,
+      "level": 10,
+      "name": "凤栖神木园",
+      "icon": "res://assets/items/icons_simple/23010.png",
+      "group_id": 42,
+      "max_charges": 60,
+      "recharge_time": 7200,
+      "describe": "凤栖神木园可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 532
+        },
+        {
+          "id": 1201,
+          "weight": 228
+        },
+        {
+          "id": 1102,
+          "weight": 140
+        },
+        {
+          "id": 1202,
+          "weight": 60
+        },
+        {
+          "id": 1103,
+          "weight": 28
+        },
+        {
+          "id": 1203,
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": 24010,
+      "level": 10,
+      "name": "凤影锦潭",
+      "icon": "res://assets/items/icons_simple/24010.png",
+      "group_id": 43,
+      "max_charges": 60,
+      "recharge_time": 7200,
+      "describe": "凤影锦潭可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 532
+        },
+        {
+          "id": 1401,
+          "weight": 228
+        },
+        {
+          "id": 1302,
+          "weight": 140
+        },
+        {
+          "id": 1402,
+          "weight": 60
+        },
+        {
+          "id": 1303,
+          "weight": 28
+        },
+        {
+          "id": 1403,
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": 25010,
+      "level": 10,
+      "name": "凤华玉脉",
+      "icon": "res://assets/items/icons_simple/25010.png",
+      "group_id": 44,
+      "max_charges": 60,
+      "recharge_time": 7200,
+      "describe": "凤华玉脉可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 7220
+        },
+        {
+          "id": 1502,
+          "weight": 1900
+        },
+        {
+          "id": 1503,
+          "weight": 380
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23011,
+      "level": 11,
+      "name": "九幽玄木界",
+      "icon": "res://assets/items/icons_simple/23011.png",
+      "group_id": 42,
+      "max_charges": 65,
+      "recharge_time": 7800,
+      "describe": "九幽玄木界可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 490
+        },
+        {
+          "id": 1201,
+          "weight": 210
+        },
+        {
+          "id": 1102,
+          "weight": 175
+        },
+        {
+          "id": 1202,
+          "weight": 75
+        },
+        {
+          "id": 1103,
+          "weight": 35
+        },
+        {
+          "id": 1203,
+          "weight": 15
+        }
+      ]
+    },
+    {
+      "id": 24011,
+      "level": 11,
+      "name": "九幽玄渊",
+      "icon": "res://assets/items/icons_simple/24011.png",
+      "group_id": 43,
+      "max_charges": 65,
+      "recharge_time": 7800,
+      "describe": "九幽玄渊可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 490
+        },
+        {
+          "id": 1401,
+          "weight": 210
+        },
+        {
+          "id": 1302,
+          "weight": 175
+        },
+        {
+          "id": 1402,
+          "weight": 75
+        },
+        {
+          "id": 1303,
+          "weight": 35
+        },
+        {
+          "id": 1403,
+          "weight": 15
+        }
+      ]
+    },
+    {
+      "id": 25011,
+      "level": 11,
+      "name": "九幽玄矿",
+      "icon": "res://assets/items/icons_simple/25011.png",
+      "group_id": 44,
+      "max_charges": 65,
+      "recharge_time": 7800,
+      "describe": "九幽玄矿可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 6650
+        },
+        {
+          "id": 1502,
+          "weight": 2375
+        },
+        {
+          "id": 1503,
+          "weight": 475
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23012,
+      "level": 12,
+      "name": "扶桑日轮苑",
+      "icon": "res://assets/items/icons_simple/23012.png",
+      "group_id": 42,
+      "max_charges": 70,
+      "recharge_time": 8400,
+      "describe": "扶桑日轮苑可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 462
+        },
+        {
+          "id": 1201,
+          "weight": 198
+        },
+        {
+          "id": 1102,
+          "weight": 182
+        },
+        {
+          "id": 1202,
+          "weight": 78
+        },
+        {
+          "id": 1103,
+          "weight": 49
+        },
+        {
+          "id": 1203,
+          "weight": 21
+        },
+        {
+          "id": 1104,
+          "weight": 7
+        },
+        {
+          "id": 1204,
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": 24012,
+      "level": 12,
+      "name": "扶桑日潭",
+      "icon": "res://assets/items/icons_simple/24012.png",
+      "group_id": 43,
+      "max_charges": 70,
+      "recharge_time": 8400,
+      "describe": "扶桑日潭可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 462
+        },
+        {
+          "id": 1401,
+          "weight": 198
+        },
+        {
+          "id": 1302,
+          "weight": 182
+        },
+        {
+          "id": 1402,
+          "weight": 78
+        },
+        {
+          "id": 1303,
+          "weight": 49
+        },
+        {
+          "id": 1403,
+          "weight": 21
+        },
+        {
+          "id": 1304,
+          "weight": 7
+        },
+        {
+          "id": 1404,
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "id": 25012,
+      "level": 12,
+      "name": "扶桑阳矿",
+      "icon": "res://assets/items/icons_simple/25012.png",
+      "group_id": 44,
+      "max_charges": 70,
+      "recharge_time": 8400,
+      "describe": "扶桑阳矿可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 6270
+        },
+        {
+          "id": 1502,
+          "weight": 2470
+        },
+        {
+          "id": 1503,
+          "weight": 665
+        },
+        {
+          "id": 1504,
+          "weight": 95
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23013,
+      "level": 13,
+      "name": "建木灵境",
+      "icon": "res://assets/items/icons_simple/23013.png",
+      "group_id": 42,
+      "max_charges": 75,
+      "recharge_time": 9000,
+      "describe": "建木灵境可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 434
+        },
+        {
+          "id": 1201,
+          "weight": 186
+        },
+        {
+          "id": 1102,
+          "weight": 189
+        },
+        {
+          "id": 1202,
+          "weight": 81
+        },
+        {
+          "id": 1103,
+          "weight": 63
+        },
+        {
+          "id": 1203,
+          "weight": 27
+        },
+        {
+          "id": 1104,
+          "weight": 14
+        },
+        {
+          "id": 1204,
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": 24013,
+      "level": 13,
+      "name": "建木碧泽",
+      "icon": "res://assets/items/icons_simple/24013.png",
+      "group_id": 43,
+      "max_charges": 75,
+      "recharge_time": 9000,
+      "describe": "建木碧泽可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 434
+        },
+        {
+          "id": 1401,
+          "weight": 186
+        },
+        {
+          "id": 1302,
+          "weight": 189
+        },
+        {
+          "id": 1402,
+          "weight": 81
+        },
+        {
+          "id": 1303,
+          "weight": 63
+        },
+        {
+          "id": 1403,
+          "weight": 27
+        },
+        {
+          "id": 1304,
+          "weight": 14
+        },
+        {
+          "id": 1404,
+          "weight": 6
+        }
+      ]
+    },
+    {
+      "id": 25013,
+      "level": 13,
+      "name": "建木碧矿",
+      "icon": "res://assets/items/icons_simple/25013.png",
+      "group_id": 44,
+      "max_charges": 75,
+      "recharge_time": 9000,
+      "describe": "建木碧矿可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 5890
+        },
+        {
+          "id": 1502,
+          "weight": 2565
+        },
+        {
+          "id": 1503,
+          "weight": 855
+        },
+        {
+          "id": 1504,
+          "weight": 190
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23014,
+      "level": 14,
+      "name": "菩提道园",
+      "icon": "res://assets/items/icons_simple/23014.png",
+      "group_id": 42,
+      "max_charges": 80,
+      "recharge_time": 9600,
+      "describe": "菩提道园可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 406
+        },
+        {
+          "id": 1201,
+          "weight": 174
+        },
+        {
+          "id": 1102,
+          "weight": 196
+        },
+        {
+          "id": 1202,
+          "weight": 84
+        },
+        {
+          "id": 1103,
+          "weight": 77
+        },
+        {
+          "id": 1203,
+          "weight": 33
+        },
+        {
+          "id": 1104,
+          "weight": 21
+        },
+        {
+          "id": 1204,
+          "weight": 9
+        }
+      ]
+    },
+    {
+      "id": 24014,
+      "level": 14,
+      "name": "菩提慧海",
+      "icon": "res://assets/items/icons_simple/24014.png",
+      "group_id": 43,
+      "max_charges": 80,
+      "recharge_time": 9600,
+      "describe": "菩提慧海可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 406
+        },
+        {
+          "id": 1401,
+          "weight": 174
+        },
+        {
+          "id": 1302,
+          "weight": 196
+        },
+        {
+          "id": 1402,
+          "weight": 84
+        },
+        {
+          "id": 1303,
+          "weight": 77
+        },
+        {
+          "id": 1403,
+          "weight": 33
+        },
+        {
+          "id": 1304,
+          "weight": 21
+        },
+        {
+          "id": 1404,
+          "weight": 9
+        }
+      ]
+    },
+    {
+      "id": 25014,
+      "level": 14,
+      "name": "菩提心矿",
+      "icon": "res://assets/items/icons_simple/25014.png",
+      "group_id": 44,
+      "max_charges": 80,
+      "recharge_time": 9600,
+      "describe": "菩提心矿可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 5510
+        },
+        {
+          "id": 1502,
+          "weight": 2660
+        },
+        {
+          "id": 1503,
+          "weight": 1045
+        },
+        {
+          "id": 1504,
+          "weight": 285
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23015,
+      "level": 15,
+      "name": "鸿蒙祖木界",
+      "icon": "res://assets/items/icons_simple/23015.png",
+      "group_id": 42,
+      "max_charges": 85,
+      "recharge_time": 10200,
+      "describe": "鸿蒙祖木界可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 378
+        },
+        {
+          "id": 1201,
+          "weight": 162
+        },
+        {
+          "id": 1102,
+          "weight": 203
+        },
+        {
+          "id": 1202,
+          "weight": 87
+        },
+        {
+          "id": 1103,
+          "weight": 91
+        },
+        {
+          "id": 1203,
+          "weight": 39
+        },
+        {
+          "id": 1104,
+          "weight": 28
+        },
+        {
+          "id": 1204,
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": 24015,
+      "level": 15,
+      "name": "鸿蒙灵洋",
+      "icon": "res://assets/items/icons_simple/24015.png",
+      "group_id": 43,
+      "max_charges": 85,
+      "recharge_time": 10200,
+      "describe": "鸿蒙灵洋可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 378
+        },
+        {
+          "id": 1401,
+          "weight": 162
+        },
+        {
+          "id": 1302,
+          "weight": 203
+        },
+        {
+          "id": 1402,
+          "weight": 87
+        },
+        {
+          "id": 1303,
+          "weight": 91
+        },
+        {
+          "id": 1403,
+          "weight": 39
+        },
+        {
+          "id": 1304,
+          "weight": 28
+        },
+        {
+          "id": 1404,
+          "weight": 12
+        }
+      ]
+    },
+    {
+      "id": 25015,
+      "level": 15,
+      "name": "鸿蒙源矿",
+      "icon": "res://assets/items/icons_simple/25015.png",
+      "group_id": 44,
+      "max_charges": 85,
+      "recharge_time": 10200,
+      "describe": "鸿蒙源矿可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 5130
+        },
+        {
+          "id": 1502,
+          "weight": 2755
+        },
+        {
+          "id": 1503,
+          "weight": 1235
+        },
+        {
+          "id": 1504,
+          "weight": 380
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
+    },
+    {
+      "id": 23016,
+      "level": 16,
+      "name": "太初世界林",
+      "icon": "res://assets/items/icons_simple/23016.png",
+      "group_id": 42,
+      "max_charges": 90,
+      "recharge_time": 10800,
+      "describe": "太初世界林可培育灵木并伴生灵脂。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1101,
+          "weight": 350
+        },
+        {
+          "id": 1201,
+          "weight": 150
+        },
+        {
+          "id": 1102,
+          "weight": 210
+        },
+        {
+          "id": 1202,
+          "weight": 90
+        },
+        {
+          "id": 1103,
+          "weight": 105
+        },
+        {
+          "id": 1203,
+          "weight": 45
+        },
+        {
+          "id": 1104,
+          "weight": 35
+        },
+        {
+          "id": 1204,
+          "weight": 15
+        }
+      ]
+    },
+    {
+      "id": 24016,
+      "level": 16,
+      "name": "太初神潭",
+      "icon": "res://assets/items/icons_simple/24016.png",
+      "group_id": 43,
+      "max_charges": 90,
+      "recharge_time": 10800,
+      "describe": "太初神潭可孕养灵鱼并凝结灵珠。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1301,
+          "weight": 350
+        },
+        {
+          "id": 1401,
+          "weight": 150
+        },
+        {
+          "id": 1302,
+          "weight": 210
+        },
+        {
+          "id": 1402,
+          "weight": 90
+        },
+        {
+          "id": 1303,
+          "weight": 105
+        },
+        {
+          "id": 1403,
+          "weight": 45
+        },
+        {
+          "id": 1304,
+          "weight": 35
+        },
+        {
+          "id": 1404,
+          "weight": 15
+        }
+      ]
+    },
+    {
+      "id": 25016,
+      "level": 16,
+      "name": "太初神矿",
+      "icon": "res://assets/items/icons_simple/25016.png",
+      "group_id": 44,
+      "max_charges": 90,
+      "recharge_time": 10800,
+      "describe": "太初神矿可开采玉石并偶尔产出可使用的灵石。",
+      "type": "1",
+      "spawns": [
+        {
+          "id": 1501,
+          "weight": 4750
+        },
+        {
+          "id": 1502,
+          "weight": 2850
+        },
+        {
+          "id": 1503,
+          "weight": 1425
+        },
+        {
+          "id": 1504,
+          "weight": 475
+        },
+        {
+          "id": 1601,
+          "weight": 500
+        }
+      ]
     }
   ],
   "crafting": [
@@ -7633,7 +10471,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -7755,7 +10603,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -7877,7 +10735,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -7999,7 +10867,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -8121,7 +10999,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -8243,7 +11131,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -8365,7 +11263,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -8487,7 +11395,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -8609,7 +11527,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -8731,7 +11659,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -8853,7 +11791,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -8975,7 +11923,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -9097,7 +12055,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -9219,7 +12187,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -9341,7 +12319,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -9463,7 +12451,17 @@
         207,
         208,
         209,
-        210
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
       ],
       "type": 2
     },
@@ -9490,7 +12488,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9517,7 +12525,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9544,7 +12562,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9571,7 +12599,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9598,7 +12636,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9625,7 +12673,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9652,7 +12710,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9679,7 +12747,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9706,7 +12784,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9733,7 +12821,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9760,7 +12858,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9787,7 +12895,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9814,7 +12932,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9841,7 +12969,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9868,7 +13006,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9895,7 +13043,17 @@
         163,
         164,
         165,
-        166
+        166,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
       ],
       "type": 2
     },
@@ -9922,7 +13080,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -9949,7 +13117,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -9976,7 +13154,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10003,7 +13191,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10030,7 +13228,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10057,7 +13265,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10084,7 +13302,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10111,7 +13339,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10138,7 +13376,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10165,7 +13413,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10192,7 +13450,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10219,7 +13487,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10246,7 +13524,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10273,7 +13561,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10300,7 +13598,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10327,7 +13635,17 @@
         179,
         180,
         181,
-        182
+        182,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
       ],
       "type": 2
     },
@@ -10354,7 +13672,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10381,7 +13709,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10408,7 +13746,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10435,7 +13783,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10462,7 +13820,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10489,7 +13857,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10516,7 +13894,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10543,7 +13931,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10570,7 +13968,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10597,7 +14005,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10624,7 +14042,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10651,7 +14079,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10678,7 +14116,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10705,7 +14153,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10732,7 +14190,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10759,7 +14227,17 @@
         195,
         196,
         197,
-        198
+        198,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260
       ],
       "type": 2
     },
@@ -10820,7 +14298,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -10881,7 +14369,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -10942,7 +14440,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11003,7 +14511,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11064,7 +14582,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11125,7 +14653,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11186,7 +14724,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11247,7 +14795,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11308,7 +14866,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11369,7 +14937,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11430,7 +15008,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11491,7 +15079,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11552,7 +15150,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11613,7 +15221,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11674,7 +15292,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     },
@@ -11735,7 +15363,17 @@
         147,
         148,
         149,
-        150
+        150,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230
       ],
       "type": 2
     }
@@ -12212,6 +15850,50 @@
       "describe": "太初道种与凤羽天晶在苍露膏中温养七昼夜，凝作化神渡厄丹，轻摇可闻玉珠清响。",
       "effect_type": 5,
       "effect_value": 600,
+      "type": 5
+    },
+    {
+      "id": 1601,
+      "level": 1,
+      "name": "普通灵石",
+      "icon": "res://assets/items/icons_simple/1601.png",
+      "group_id": 41,
+      "describe": "普通灵石，点击使用可获得1灵石。",
+      "effect_type": 8,
+      "effect_value": 1,
+      "type": 5
+    },
+    {
+      "id": 1602,
+      "level": 2,
+      "name": "中品灵石",
+      "icon": "res://assets/items/icons_simple/1602.png",
+      "group_id": 41,
+      "describe": "中品灵石，点击使用可获得5灵石。",
+      "effect_type": 8,
+      "effect_value": 5,
+      "type": 5
+    },
+    {
+      "id": 1603,
+      "level": 3,
+      "name": "上品灵石",
+      "icon": "res://assets/items/icons_simple/1603.png",
+      "group_id": 41,
+      "describe": "上品灵石，点击使用可获得15灵石。",
+      "effect_type": 8,
+      "effect_value": 15,
+      "type": 5
+    },
+    {
+      "id": 1604,
+      "level": 4,
+      "name": "极品灵石",
+      "icon": "res://assets/items/icons_simple/1604.png",
+      "group_id": 41,
+      "describe": "极品灵石，点击使用可获得40灵石。",
+      "effect_type": 8,
+      "effect_value": 40,
       "type": 5
     }
   ]

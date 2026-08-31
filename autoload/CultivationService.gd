@@ -7,7 +7,7 @@ extends Node
 signal exp_changed(current_exp: int, exp_to_next: int)
 signal stage_changed(level: int, stage_name: String)
 signal qi_changed(current_qi: int, max_qi: int)
-signal breakthrough_pill_needed(pill_id: int)
+signal breakthrough_items_needed(items: Array)
 
 var current_level: int = 1
 var current_exp: int = 0
@@ -15,7 +15,6 @@ var total_exp: int = 0
 var current_qi: int = 0
 var max_qi: int = 100
 var _pending_exp_pill_uid: int = -1
-var _pending_breakthrough_uid: int = -1
 
 func _ready() -> void:
 	CloudService.breakthrough_confirmed.connect(_on_breakthrough_confirmed)
@@ -26,25 +25,25 @@ func _ready() -> void:
 
 func _on_breakthrough_confirmed(result: Dictionary) -> void:
 	print("[Cultivation] breakthrough confirmed")
-	if _pending_breakthrough_uid > 0:
-		print("[Cultivation] removing pill by uid=" + str(_pending_breakthrough_uid))
-		var pos := GridManager.find_pos_by_uid(_pending_breakthrough_uid)
-		print("[Cultivation] find_pos_by_uid result=" + str(pos))
-		if pos != Vector2i(-1, -1):
-			GridManager.remove_item(pos)
-			print("[Cultivation] pill removed from grid")
-		else:
-			print("[Cultivation] pill NOT FOUND by uid=" + str(_pending_breakthrough_uid))
-		_pending_breakthrough_uid = -1
-	else:
-		print("[Cultivation] _pending_breakthrough_uid <= 0, skipping local removal")
+	if result.has("grid"):
+		var server_grid: Array = result.get("grid", []) as Array
+		GridManager.populate_from_server(server_grid)
+	if result.has("pouch"):
+		var server_pouch: Array = result.get("pouch", []) as Array
+		StoragePouch.restore_from_server(server_pouch)
+	if result.has("meridian_acupoints"):
+		GameState.meridian_acupoints = (result.get("meridian_acupoints", []) as Array).duplicate(true)
+		GameState.meridian_updated.emit()
 	var c: Dictionary = result.get("cultivation", {})
 	_apply_cultivation_state(c)
 
 func _on_breakthrough_rejected(_reason: String) -> void:
-	_pending_breakthrough_uid = -1
+	pass
 
 func _on_exp_pill_consume_confirmed(result: Dictionary) -> void:
+	if result.has("meridian_acupoints"):
+		GameState.meridian_acupoints = (result.get("meridian_acupoints", []) as Array).duplicate(true)
+		GameState.meridian_updated.emit()
 	var c: Dictionary = result.get("cultivation", {})
 	_apply_cultivation_state(c)
 	if _pending_exp_pill_uid > 0:
@@ -55,14 +54,12 @@ func _on_exp_pill_consume_confirmed(result: Dictionary) -> void:
 
 # --- Public operations (submit to server) ---
 
-func try_breakthrough(pill_id: int, uid: int) -> bool:
-	print("[Cultivation] try_breakthrough pill=" + str(pill_id) + " uid=" + str(uid))
+func try_breakthrough(uid: int = 0) -> bool:
+	print("[Cultivation] try_breakthrough uid=" + str(uid))
 	if uid <= 0:
-		print("[Cultivation] try_breakthrough uid=0, will search pouch/grid")
-	_pending_breakthrough_uid = uid
-	print("[Cultivation] pending_breakthrough_uid=" + str(_pending_breakthrough_uid))
+		print("[Cultivation] try_breakthrough uid=0, server will consume configured items")
 	if CloudService.online:
-		CloudService.submit_breakthrough(pill_id, uid)
+		CloudService.submit_breakthrough(uid)
 		return true
 	return false
 
@@ -98,10 +95,8 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 	if current_qi != old_qi or max_qi != old_max_qi:
 		qi_changed.emit(current_qi, max_qi)
 
-	if _needs_breakthrough_pill():
-		var pill_id := get_required_breakthrough_pill()
-		if pill_id > 0:
-			breakthrough_pill_needed.emit(pill_id)
+	if _needs_breakthrough_items():
+		breakthrough_items_needed.emit(get_required_breakthrough_items())
 	else:
 		exp_changed.emit(current_exp, get_exp_to_next_level())
 
@@ -124,17 +119,18 @@ func is_max_cultivation() -> bool:
 func get_current_atk() -> int:
 	return ConfigDatabase.get_stage_atk(current_level)
 
-func get_required_breakthrough_pill() -> int:
+func get_required_breakthrough_items() -> Array:
 	if not is_breakthrough_ready():
-		return 0
-	return ConfigDatabase.get_stage_breakthrough_pill(current_level)
+		return []
+	return ConfigDatabase.get_stage_breakthrough_items(current_level)
 
-func _needs_breakthrough_pill() -> bool:
+
+func _needs_breakthrough_items() -> bool:
 	if is_max_cultivation():
 		return false
 	if not is_breakthrough_ready():
 		return false
-	return ConfigDatabase.get_stage_breakthrough_pill(current_level) > 0
+	return not ConfigDatabase.get_stage_breakthrough_items(current_level).is_empty()
 
 func get_formatted_stage() -> String:
 	return ConfigDatabase.get_stage_name(current_level)

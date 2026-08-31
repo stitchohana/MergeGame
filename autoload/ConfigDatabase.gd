@@ -347,11 +347,21 @@ func get_stage_atk(level: int) -> int:
 		return 0
 	return _coerce_int(s.get("atk", 0))
 
-func get_stage_breakthrough_pill(level: int) -> int:
-	var s: Dictionary = _get_stage(level)
-	if s.is_empty():
-		return 0
-	return _coerce_int(s.get("breakthrough_pill", 0))
+func get_stage_breakthrough_items(level: int) -> Array:
+	var stage: Dictionary = _get_stage(level)
+	var configured_items: Variant = stage.get("breakthrough_items", [])
+	if not configured_items is Array:
+		return []
+	var result: Array = []
+	for item_variant: Variant in configured_items:
+		if not item_variant is Dictionary:
+			continue
+		var item: Dictionary = item_variant as Dictionary
+		var item_id: int = _coerce_int(item.get("item_id", 0))
+		var count: int = _coerce_int(item.get("count", 0))
+		if item_id > 0 and count > 0:
+			result.append({"item_id": item_id, "count": count})
+	return result
 
 func get_stage_breakthrough_reward(level: int) -> int:
 	var s: Dictionary = _get_stage(level)

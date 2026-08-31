@@ -16,6 +16,7 @@ var _char_max_hp: int = 100
 var _monsters: Array = []
 
 var _pending_stamina_uid: int = -1
+var _pending_spirit_stone_uid: int = -1
 var _pending_attack_uid: int = -1
 var _pending_attack_pos: Vector2i = Vector2i(-1, -1)
 var _pending_heal_amount: int = 0
@@ -38,6 +39,8 @@ func _ready() -> void:
 	CloudService.battle_attack_rejected.connect(_on_battle_attack_rejected)
 	CloudService.stamina_restore_confirmed.connect(_on_stamina_restore_confirmed)
 	CloudService.stamina_restore_rejected.connect(_on_stamina_restore_rejected)
+	CloudService.spirit_stone_consume_confirmed.connect(_on_spirit_stone_consume_confirmed)
+	CloudService.spirit_stone_consume_rejected.connect(_on_spirit_stone_consume_rejected)
 	CloudService.battle_heal_confirmed.connect(_on_battle_heal_confirmed)
 	CloudService.battle_heal_rejected.connect(_on_battle_heal_rejected)
 	CultivationService.qi_changed.connect(_on_qi_changed)
@@ -162,12 +165,15 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 		Constants.EffectType.STAMINA:
 			_pending_stamina_uid = uid
 			CloudService.submit_restore_stamina(item_data.get("id", 0), uid)
+		Constants.EffectType.SPIRIT_STONES:
+			_pending_spirit_stone_uid = uid
+			CloudService.submit_consume_spirit_stone(item_data.get("id", 0), uid)
 		Constants.EffectType.BREAKTHROUGH:
 			var pill_id: int = item_data.get("id", 0)
 			if uid <= 0:
 				EventBus.show_toast.emit("物品数据异常，请重新登录")
 				return
-			CultivationService.try_breakthrough(pill_id, uid)
+			CultivationService.try_breakthrough(uid)
 		_:
 			EventBus.show_toast.emit("此物品无法使用")
 
@@ -341,3 +347,17 @@ func _on_stamina_restore_rejected(reason: String) -> void:
 	_item_use_pending = false
 	EventBus.show_toast.emit("回复体力失败：" + reason)
 	_pending_stamina_uid = -1
+
+func _on_spirit_stone_consume_confirmed(result: Dictionary) -> void:
+	_item_use_pending = false
+	if _pending_spirit_stone_uid > 0:
+		var pos: Vector2i = GridManager.find_pos_by_uid(_pending_spirit_stone_uid)
+		if pos != Vector2i(-1, -1):
+			GridManager.remove_item(pos)
+	_pending_spirit_stone_uid = -1
+	EventBus.show_toast.emit("获得%d灵石" % int(result.get("amount", 0)))
+
+func _on_spirit_stone_consume_rejected(reason: String) -> void:
+	_item_use_pending = false
+	_pending_spirit_stone_uid = -1
+	EventBus.show_toast.emit("使用灵石失败：" + reason)

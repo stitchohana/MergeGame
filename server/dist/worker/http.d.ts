@@ -21,7 +21,7 @@ export declare class WorkerResponse {
     toResponse(): Response;
 }
 export type NextFunction = () => Promise<void>;
-export type Handler = (req: WorkerRequest, res: WorkerResponse, next?: NextFunction) => void | Promise<void>;
+export type Handler = (req: WorkerRequest, res: WorkerResponse, next: NextFunction) => void | Promise<void>;
 export declare class Router {
     private middleware;
     private routes;

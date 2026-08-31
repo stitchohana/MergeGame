@@ -26,6 +26,8 @@ signal exp_pill_consume_confirmed(result: Dictionary)
 signal exp_pill_consume_rejected(reason: String)
 signal stamina_restore_confirmed(result: Dictionary)
 signal stamina_restore_rejected(reason: String)
+signal spirit_stone_consume_confirmed(result: Dictionary)
+signal spirit_stone_consume_rejected(reason: String)
 signal board_switch_confirmed(result: Dictionary)
 signal board_switch_rejected(reason: String)
 signal pouch_deposit_confirmed(result: Dictionary)
@@ -118,6 +120,7 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("breakthrough", _on_breakthrough_response, breakthrough_rejected, breakthrough_rejected, breakthrough_rejected)
 	_register_endpoint("consume_exp_pill", _on_consume_exp_pill_response, exp_pill_consume_rejected, exp_pill_consume_rejected, exp_pill_consume_rejected)
 	_register_endpoint("restore_stamina", _on_restore_stamina_response, stamina_restore_rejected, stamina_restore_rejected, stamina_restore_rejected)
+	_register_endpoint("consume_spirit_stone", _on_consume_spirit_stone_response, spirit_stone_consume_rejected, spirit_stone_consume_rejected, spirit_stone_consume_rejected)
 	_register_endpoint("board_switch", _on_board_switch_response, board_switch_rejected, board_switch_rejected, board_switch_rejected)
 	_register_endpoint("pouch_deposit", _on_pouch_deposit_response, pouch_deposit_rejected, pouch_deposit_rejected, pouch_deposit_rejected)
 	_register_endpoint("pouch_withdraw", _on_pouch_withdraw_response, pouch_withdraw_rejected, pouch_withdraw_rejected, pouch_withdraw_rejected)
@@ -280,8 +283,8 @@ func submit_action_batch(operations: Array[Dictionary]) -> void:
 
 # --- Cultivation ---
 
-func submit_breakthrough(pill_id: int, uid: int) -> void:
-	var body := JSON.stringify({"pill_id": pill_id, "uid": uid})
+func submit_breakthrough(uid: int = 0) -> void:
+	var body := JSON.stringify({"uid": uid})
 	_send_authed_request("breakthrough", "/api/cultivation/breakthrough", HTTPClient.Method.METHOD_POST, body)
 
 func submit_consume_exp_pill(pill_id: int, uid: int) -> void:
@@ -291,6 +294,10 @@ func submit_consume_exp_pill(pill_id: int, uid: int) -> void:
 func submit_restore_stamina(pill_id: int, uid: int) -> void:
 	var body := JSON.stringify({"pill_id": pill_id, "uid": uid})
 	_send_authed_request("restore_stamina", "/api/cultivation/consume-stamina", HTTPClient.Method.METHOD_POST, body)
+
+func submit_consume_spirit_stone(item_id: int, uid: int) -> void:
+	var body := JSON.stringify({"item_id": item_id, "uid": uid})
+	_send_authed_request("consume_spirit_stone", "/api/cultivation/consume-spirit-stone", HTTPClient.Method.METHOD_POST, body)
 
 func submit_board_switch(board_type: int, map_id: int = 0, stage: int = 0) -> void:
 	var body_data: Dictionary = {"board_type": board_type}
@@ -413,6 +420,14 @@ func _on_restore_stamina_response(data: Dictionary) -> void:
 		stamina_restore_confirmed.emit(data)
 	else:
 		stamina_restore_rejected.emit(data.get("error", "unknown_error"))
+
+func _on_consume_spirit_stone_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+		spirit_stone_consume_confirmed.emit(data)
+	else:
+		spirit_stone_consume_rejected.emit(data.get("error", "unknown_error"))
 
 # --- Craft ---
 

@@ -12,6 +12,7 @@ var _drag_start_x: float = 0.0
 var _drag_start_scroll: int = 0
 var _available_scroll_request_pending: bool = false
 var _available_scroll_request_id: int = 0
+var _scroll_restore_request_id: int = 0
 
 @onready var scroll: ScrollContainer = $Panel/ScrollContainer
 @onready var container: HBoxContainer = $Panel/ScrollContainer/HBoxContainer
@@ -138,6 +139,9 @@ func _on_cultivation_pressed() -> void:
 	EventBus.screen_change_requested.emit("home")
 
 func set_requirements(reqs: Array, priority_indices: Dictionary = {}) -> void:
+	var preserved_scroll: int = int(scroll.scroll_horizontal) if is_inside_tree() else 0
+	_scroll_restore_request_id += 1
+	var restore_request_id: int = _scroll_restore_request_id
 	for child in container.get_children():
 		if child is RequirementEntry:
 			container.remove_child(child)
@@ -164,6 +168,15 @@ func set_requirements(reqs: Array, priority_indices: Dictionary = {}) -> void:
 		entry.complete_pressed.connect(_emit_complete.bind(idx))
 		entry.item_pressed.connect(_on_entry_item_pressed)
 	_sort_entries_by_availability()
+	call_deferred("_restore_scroll_position", preserved_scroll, restore_request_id)
+
+
+func _restore_scroll_position(scroll_position: int, request_id: int) -> void:
+	await get_tree().process_frame
+	if request_id != _scroll_restore_request_id or not is_inside_tree():
+		return
+	var max_scroll: int = int(scroll.get_h_scroll_bar().max_value)
+	scroll.scroll_horizontal = clampi(scroll_position, 0, max_scroll)
 
 
 func reset_scroll_to_start() -> void:
@@ -365,7 +378,12 @@ func _show_item_source(item_id: int) -> void:
 	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
 	if item_data.is_empty():
 		return
-	if int(item_data.get("type", Constants.ItemType.REGULAR)) == Constants.ItemType.RECIPE_PRODUCT:
+	var item_type: int = ConfigDatabase._coerce_int(
+		item_data.get("type", Constants.ItemType.REGULAR),
+		Constants.ItemType.REGULAR
+	)
+	var has_output_recipe: bool = not ConfigDatabase.get_recipes_for_result(item_id).is_empty()
+	if item_type == Constants.ItemType.RECIPE_PRODUCT or has_output_recipe:
 		var source_popup := preload("res://scenes/ui/main/RecipeSourcePopup.tscn").instantiate() as RecipeSourcePopup
 		UIManager.show_popup(source_popup)
 		source_popup.setup_for_item(item_id)

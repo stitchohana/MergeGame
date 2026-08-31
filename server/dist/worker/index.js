@@ -67,7 +67,11 @@ exports.default = {
         if (corsOrigin)
             res.header("Access-Control-Allow-Origin", corsOrigin);
         if (url.pathname === "/api/health" && request.method === "GET") {
-            return res.json({ status: "ok" }).toResponse();
+            return res.json({ status: "ok", maintenance: env.MAINTENANCE_MODE === "true" }).toResponse();
+        }
+        if (env.MAINTENANCE_MODE === "true") {
+            res.header("Retry-After", "30");
+            return res.status(503).json({ error: "maintenance" }).toResponse();
         }
         if (!env.JWT_SECRET) {
             return res.status(500).json({ error: "server_misconfigured" }).toResponse();

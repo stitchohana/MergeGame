@@ -59,7 +59,7 @@ func _ready() -> void:
 func set_selected(active: bool) -> void:
 	_is_selected = active
 	if select_icon:
-		select_icon.visible = active
+		select_icon.visible = active and not bool(item_data.get("immovable", false))
 
 func setup(data: Dictionary, pos: Vector2i, cell_step: int) -> void:
 	item_data = data
@@ -74,6 +74,15 @@ func setup(data: Dictionary, pos: Vector2i, cell_step: int) -> void:
 	_update_visuals()
 
 func _update_visuals() -> void:
+	var is_immovable: bool = bool(item_data.get("immovable", false))
+	if select_icon:
+		select_icon.visible = _is_selected and not is_immovable
+	if is_immovable:
+		# Immovable items only show their item art and the immovable marker.
+		if require_icon:
+			require_icon.hide()
+		hide_crafting_hint()
+
 	# Apply crafting state visual if present (restored from server).
 	if _item_type() == Constants.ItemType.CRAFTING:
 		var cs: int = int(item_data.get("_craft_state", 0))
@@ -102,6 +111,25 @@ func _update_visuals() -> void:
 
 func _update_status_icons() -> void:
 	var is_immovable: bool = bool(item_data.get("immovable", false))
+	if is_immovable:
+		if select_icon:
+			select_icon.hide()
+		if require_icon:
+			require_icon.hide()
+		hide_crafting_hint()
+		_set_available_overlay_visible(false)
+		if status_charging_icon:
+			status_charging_icon.hide()
+		if status_idle_icon:
+			status_idle_icon.hide()
+		if status_loaded_icon:
+			status_loaded_icon.hide()
+		if status_working_icon:
+			status_working_icon.hide()
+		if status_ready_icon:
+			status_ready_icon.hide()
+		return
+
 	# These six textures are facility-agnostic; only the state routing is facility-specific.
 	if status_available_overlay:
 		# Initial/immovable launchers may not have a runtime `charges` field yet.
@@ -171,12 +199,14 @@ func set_visual_position(pos: Vector2) -> void:
 
 func set_required(required: bool) -> void:
 	if require_icon:
-		require_icon.visible = required
+		require_icon.visible = required and not bool(item_data.get("immovable", false))
 
 func is_required() -> bool:
 	return require_icon != null and require_icon.visible
 
 func show_crafting_hint(icon: Texture2D) -> void:
+	if bool(item_data.get("immovable", false)):
+		return
 	if craft_hint_bubble == null or craft_hint_icon == null or icon == null:
 		return
 	if _craft_hint_tween != null and _craft_hint_tween.is_valid():

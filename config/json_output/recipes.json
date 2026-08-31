@@ -2364,6 +2364,555 @@
       ],
       "result": 28060,
       "craft_time": 25
+    },
+    {
+      "id": 211,
+      "name": "松露养元散",
+      "ingredients": [
+        1201,
+        1301,
+        1001
+      ],
+      "result": 28101,
+      "craft_time": 20
+    },
+    {
+      "id": 212,
+      "name": "银鳞抱元丸",
+      "ingredients": [
+        1302,
+        1002
+      ],
+      "result": 28102,
+      "craft_time": 15
+    },
+    {
+      "id": 213,
+      "name": "月桂玉露丹",
+      "ingredients": [
+        1204,
+        1304,
+        9004
+      ],
+      "result": 28103,
+      "craft_time": 20
+    },
+    {
+      "id": 214,
+      "name": "雷脂雪魄丸",
+      "ingredients": [
+        1205,
+        1305,
+        1005
+      ],
+      "result": 28104,
+      "craft_time": 20
+    },
+    {
+      "id": 215,
+      "name": "沉香青冥丹",
+      "ingredients": [
+        1207,
+        1307,
+        1007
+      ],
+      "result": 28105,
+      "craft_time": 20
+    },
+    {
+      "id": 216,
+      "name": "星脂霆元丹",
+      "ingredients": [
+        1208,
+        1308,
+        1008
+      ],
+      "result": 28106,
+      "craft_time": 20
+    },
+    {
+      "id": 217,
+      "name": "凤鲤星华丹",
+      "ingredients": [
+        1210,
+        1310,
+        1010
+      ],
+      "result": 28107,
+      "craft_time": 20
+    },
+    {
+      "id": 218,
+      "name": "扶桑九转丹",
+      "ingredients": [
+        1212,
+        1312,
+        1012
+      ],
+      "result": 28108,
+      "craft_time": 20
+    },
+    {
+      "id": 219,
+      "name": "菩提龙元丹",
+      "ingredients": [
+        1214,
+        1314,
+        1014
+      ],
+      "result": 28109,
+      "craft_time": 20
+    },
+    {
+      "id": 220,
+      "name": "太初造化丹",
+      "ingredients": [
+        1216,
+        1316,
+        1016
+      ],
+      "result": 28110,
+      "craft_time": 20
+    },
+    {
+      "id": 221,
+      "name": "松露青果酿",
+      "ingredients": [
+        1201,
+        6001
+      ],
+      "result": 28111,
+      "craft_time": 15
+    },
+    {
+      "id": 222,
+      "name": "银须青禾酒",
+      "ingredients": [
+        1302,
+        5002
+      ],
+      "result": 28112,
+      "craft_time": 15
+    },
+    {
+      "id": 223,
+      "name": "赤枫金铃酿",
+      "ingredients": [
+        1203,
+        1303,
+        6004
+      ],
+      "result": 28113,
+      "craft_time": 20
+    },
+    {
+      "id": 224,
+      "name": "雷脂雪纹酒",
+      "ingredients": [
+        1205,
+        1305,
+        5005
+      ],
+      "result": 28114,
+      "craft_time": 20
+    },
+    {
+      "id": 225,
+      "name": "冰魄苍梧酿",
+      "ingredients": [
+        1206,
+        1306,
+        6007
+      ],
+      "result": 28115,
+      "craft_time": 20
+    },
+    {
+      "id": 226,
+      "name": "星脂雷芒酒",
+      "ingredients": [
+        1208,
+        1308,
+        5008
+      ],
+      "result": 28116,
+      "craft_time": 20
+    },
+    {
+      "id": 227,
+      "name": "龙血星子酿",
+      "ingredients": [
+        1209,
+        1309,
+        5010
+      ],
+      "result": 28117,
+      "craft_time": 20
+    },
+    {
+      "id": 228,
+      "name": "九幽九曲醪",
+      "ingredients": [
+        1211,
+        1311,
+        5012
+      ],
+      "result": 28118,
+      "craft_time": 20
+    },
+    {
+      "id": 229,
+      "name": "建木龙牙酿",
+      "ingredients": [
+        1213,
+        1313,
+        5014
+      ],
+      "result": 28119,
+      "craft_time": 20
+    },
+    {
+      "id": 230,
+      "name": "鸿蒙玄粟酒",
+      "ingredients": [
+        1215,
+        1315,
+        5016
+      ],
+      "result": 28120,
+      "craft_time": 20
+    },
+    {
+      "id": 231,
+      "name": "青枝铜骨剑",
+      "ingredients": [
+        1101,
+        2001
+      ],
+      "result": 28121,
+      "craft_time": 15
+    },
+    {
+      "id": 232,
+      "name": "云木乌铁刀",
+      "ingredients": [
+        1102,
+        2002
+      ],
+      "result": 28122,
+      "craft_time": 15
+    },
+    {
+      "id": 233,
+      "name": "月桂白金杖",
+      "ingredients": [
+        1104,
+        1504,
+        2004
+      ],
+      "result": 28123,
+      "craft_time": 20
+    },
+    {
+      "id": 234,
+      "name": "雷木玄冰枪",
+      "ingredients": [
+        1105,
+        1505,
+        2005
+      ],
+      "result": 28124,
+      "craft_time": 20
+    },
+    {
+      "id": 235,
+      "name": "沉香青罡印",
+      "ingredients": [
+        1107,
+        1507,
+        2007
+      ],
+      "result": 28125,
+      "craft_time": 20
+    },
+    {
+      "id": 236,
+      "name": "紫檀雷极轮",
+      "ingredients": [
+        1108,
+        1508,
+        2008
+      ],
+      "result": 28126,
+      "craft_time": 20
+    },
+    {
+      "id": 237,
+      "name": "凤木星陨弓",
+      "ingredients": [
+        1110,
+        1510,
+        2010
+      ],
+      "result": 28127,
+      "craft_time": 20
+    },
+    {
+      "id": 238,
+      "name": "扶桑九幽戟",
+      "ingredients": [
+        1112,
+        1512,
+        2012
+      ],
+      "result": 28128,
+      "craft_time": 20
+    },
+    {
+      "id": 239,
+      "name": "菩提月魄钟",
+      "ingredients": [
+        1114,
+        1514,
+        2014
+      ],
+      "result": 28129,
+      "craft_time": 20
+    },
+    {
+      "id": 240,
+      "name": "世界树开天斧",
+      "ingredients": [
+        1116,
+        1516,
+        2016
+      ],
+      "result": 28130,
+      "craft_time": 20
+    },
+    {
+      "id": 241,
+      "name": "清珠岚障阵",
+      "ingredients": [
+        1401,
+        1501,
+        13101
+      ],
+      "result": 28131,
+      "craft_time": 20
+    },
+    {
+      "id": 242,
+      "name": "云玉聚炁阵",
+      "ingredients": [
+        1402,
+        1502,
+        13102
+      ],
+      "result": 28132,
+      "craft_time": 20
+    },
+    {
+      "id": 243,
+      "name": "月珠锁灵阵",
+      "ingredients": [
+        1403,
+        1404,
+        1503,
+        13104
+      ],
+      "result": 28133,
+      "craft_time": 25
+    },
+    {
+      "id": 244,
+      "name": "雷珠寒光阵",
+      "ingredients": [
+        1405,
+        1505,
+        13105
+      ],
+      "result": 28134,
+      "craft_time": 20
+    },
+    {
+      "id": 245,
+      "name": "地珠载岳阵",
+      "ingredients": [
+        1406,
+        1407,
+        1506,
+        13107
+      ],
+      "result": 28135,
+      "craft_time": 25
+    },
+    {
+      "id": 246,
+      "name": "星珠九霄阵",
+      "ingredients": [
+        1408,
+        1508,
+        13108
+      ],
+      "result": 28136,
+      "craft_time": 20
+    },
+    {
+      "id": 247,
+      "name": "凤珠星罗阵",
+      "ingredients": [
+        1409,
+        1410,
+        1509,
+        13110
+      ],
+      "result": 28137,
+      "craft_time": 25
+    },
+    {
+      "id": 248,
+      "name": "日珠续命阵",
+      "ingredients": [
+        1411,
+        1412,
+        1511,
+        13112
+      ],
+      "result": 28138,
+      "craft_time": 25
+    },
+    {
+      "id": 249,
+      "name": "心珠御龙阵",
+      "ingredients": [
+        1413,
+        1414,
+        1513,
+        13114
+      ],
+      "result": 28139,
+      "craft_time": 25
+    },
+    {
+      "id": 250,
+      "name": "太初万象阵",
+      "ingredients": [
+        1415,
+        1416,
+        1515,
+        13116
+      ],
+      "result": 28140,
+      "craft_time": 25
+    },
+    {
+      "id": 251,
+      "name": "青枝镇煞符",
+      "ingredients": [
+        1101,
+        8001
+      ],
+      "result": 28141,
+      "craft_time": 15
+    },
+    {
+      "id": 252,
+      "name": "青檀净心符",
+      "ingredients": [
+        1202,
+        8002
+      ],
+      "result": 28142,
+      "craft_time": 15
+    },
+    {
+      "id": 253,
+      "name": "赤霞金身符",
+      "ingredients": [
+        1103,
+        1204,
+        8004
+      ],
+      "result": 28143,
+      "craft_time": 20
+    },
+    {
+      "id": 254,
+      "name": "雷木寒霜符",
+      "ingredients": [
+        1105,
+        1205,
+        8005
+      ],
+      "result": 28144,
+      "craft_time": 20
+    },
+    {
+      "id": 255,
+      "name": "冰梧青鸾符",
+      "ingredients": [
+        1106,
+        1207,
+        8007
+      ],
+      "result": 28145,
+      "craft_time": 20
+    },
+    {
+      "id": 256,
+      "name": "紫檀雷鹏符",
+      "ingredients": [
+        1108,
+        1208,
+        8008
+      ],
+      "result": 28146,
+      "craft_time": 20
+    },
+    {
+      "id": 257,
+      "name": "龙血星狼符",
+      "ingredients": [
+        1109,
+        1210,
+        8010
+      ],
+      "result": 28147,
+      "craft_time": 20
+    },
+    {
+      "id": 258,
+      "name": "九幽九命符",
+      "ingredients": [
+        1111,
+        1212,
+        8012
+      ],
+      "result": 28148,
+      "craft_time": 20
+    },
+    {
+      "id": 259,
+      "name": "建木龙血符",
+      "ingredients": [
+        1113,
+        1214,
+        8014
+      ],
+      "result": 28149,
+      "craft_time": 20
+    },
+    {
+      "id": 260,
+      "name": "鸿蒙太古符",
+      "ingredients": [
+        1115,
+        1216,
+        8016
+      ],
+      "result": 28150,
+      "craft_time": 20
     }
   ]
 }

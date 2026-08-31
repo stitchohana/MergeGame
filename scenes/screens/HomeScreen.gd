@@ -7,6 +7,9 @@ class_name HomeScreen extends BaseScreen
 @onready var exp_label: Label = $ExpLabel
 @onready var acupoint_layer: Control = $AcupointLayer
 
+const ITEM_WIDGET_SCENE: PackedScene = preload("res://scenes/ui/common/ItemWidget.tscn")
+const BREAKTHROUGH_ITEM_SIZE: int = 72
+
 var acupoint_nodes: Array[AcupointNode] = []
 
 var _home_defs: Array = []
@@ -14,6 +17,8 @@ var _home_progress: Array = []
 var _current_stage_idx: int = -1
 var _load_token: int = -1
 var _activation_pending: bool = false
+var _breakthrough_items_scroll: ScrollContainer = null
+var _breakthrough_items_row: HBoxContainer = null
 
 
 func _ready() -> void:
@@ -73,6 +78,7 @@ func on_enter() -> void:
 		_load_token = LoadingManager.begin("加载数据...")
 	if CloudService.online:
 		CloudService.fetch_state()
+	_try_show_pending_breakthrough_prompt()
 
 
 func _setup_acupoint_ui() -> void:
@@ -97,6 +103,7 @@ func _on_state_loaded(state: Dictionary) -> void:
 	_refresh_cultivation_info()
 	_refresh_display()
 	_refresh_breakthrough_btn()
+	_try_show_pending_breakthrough_prompt()
 	_try_auto_acupoint()
 	var fade := create_tween()
 	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
@@ -301,9 +308,30 @@ func _on_battle_pressed() -> void:
 
 
 func _setup_breakthrough_btn() -> void:
+	_breakthrough_items_scroll = ScrollContainer.new()
+	_breakthrough_items_scroll.name = "BreakthroughItemsScroll"
+	_breakthrough_items_scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+	_breakthrough_items_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	_breakthrough_items_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_breakthrough_items_scroll.offset_left = 200
+	_breakthrough_items_scroll.offset_top = 1304
+	_breakthrough_items_scroll.offset_right = 580
+	_breakthrough_items_scroll.offset_bottom = 1382
+	_breakthrough_items_scroll.z_index = 4
+	add_child(_breakthrough_items_scroll)
+
+	_breakthrough_items_row = HBoxContainer.new()
+	_breakthrough_items_row.name = "BreakthroughItemsRow"
+	_breakthrough_items_row.custom_minimum_size = Vector2(0, BREAKTHROUGH_ITEM_SIZE)
+	_breakthrough_items_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_breakthrough_items_row.add_theme_constant_override("separation", 8)
+	_breakthrough_items_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	_breakthrough_items_row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_breakthrough_items_scroll.add_child(_breakthrough_items_row)
+
 	var btn := Button.new()
 	btn.name = "BreakthroughBtn"
-	btn.text = ""
+	btn.text = "突破"
 	btn.add_theme_font_size_override("font_size", 16)
 	btn.pressed.connect(_on_breakthrough_pressed)
 	btn.visible = false
@@ -319,35 +347,108 @@ func _setup_breakthrough_btn() -> void:
 
 func _refresh_breakthrough_btn() -> void:
 	var btn := get_node_or_null("BreakthroughBtn") as Button
-	if not btn: return
-	if CultivationService.is_breakthrough_ready():
-		var pill_id: int = CultivationService.get_required_breakthrough_pill()
-		if pill_id > 0:
-			var pill_data := ConfigDatabase.get_item_data(pill_id)
-			btn.text = "突破·" + pill_data.get("name", "丹药")
-		else:
-			btn.text = "突破"
-		btn.visible = true
-	else:
-		btn.visible = false
+	if btn == null or _breakthrough_items_scroll == null or _breakthrough_items_row == null:
+		return
+	var ready: bool = CultivationService.is_breakthrough_ready()
+	btn.visible = ready
+	_breakthrough_items_scroll.visible = ready
+	if not ready:
+		_clear_breakthrough_items()
+		return
+	_refresh_breakthrough_items()
+
+func _clear_breakthrough_items() -> void:
+	if _breakthrough_items_row == null:
+		return
+	for child: Node in _breakthrough_items_row.get_children():
+		child.free()
+
+func _refresh_breakthrough_items() -> void:
+	_clear_breakthrough_items()
+	var requirements: Array = CultivationService.get_required_breakthrough_items()
+	for requirement_variant: Variant in requirements:
+		if not requirement_variant is Dictionary:
+			continue
+		var requirement: Dictionary = requirement_variant as Dictionary
+		var item_id: int = int(requirement.get("item_id", 0))
+		var count: int = int(requirement.get("count", 0))
+		var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
+		if item_id <= 0 or count <= 0 or item_data.is_empty():
+			continue
+
+		var item_slot := Control.new()
+		item_slot.name = "BreakthroughItem%d" % item_id
+		item_slot.custom_minimum_size = Vector2(BREAKTHROUGH_ITEM_SIZE, BREAKTHROUGH_ITEM_SIZE)
+		item_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		var item_widget: ItemWidget = ITEM_WIDGET_SCENE.instantiate() as ItemWidget
+		item_widget.name = "ItemWidget"
+		item_widget.custom_minimum_size = Vector2(BREAKTHROUGH_ITEM_SIZE, BREAKTHROUGH_ITEM_SIZE)
+		item_widget.size = Vector2(BREAKTHROUGH_ITEM_SIZE, BREAKTHROUGH_ITEM_SIZE)
+		item_widget.setup(item_data)
+		item_widget.set_clickable(true)
+		item_widget.pressed.connect(_on_breakthrough_item_pressed.bind(item_id))
+		item_slot.add_child(item_widget)
+
+		var count_label := Label.new()
+		count_label.name = "CountLabel"
+		count_label.text = "×%d" % count
+		count_label.position = Vector2(42, 48)
+		count_label.size = Vector2(30, 22)
+		count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		count_label.add_theme_font_size_override("font_size", 14)
+		count_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.78, 1.0))
+		count_label.add_theme_color_override("font_outline_color", Color(0.18, 0.12, 0.05, 1.0))
+		count_label.add_theme_constant_override("outline_size", 3)
+		item_slot.add_child(count_label)
+
+		_breakthrough_items_row.add_child(item_slot)
+	_breakthrough_items_scroll.scroll_horizontal = 0
+
+func _on_breakthrough_item_pressed(item_id: int) -> void:
+	if item_id <= 0:
+		return
+	var source_popup := preload("res://scenes/ui/main/RecipeSourcePopup.tscn").instantiate() as RecipeSourcePopup
+	UIManager.show_popup(source_popup)
+	source_popup.setup_for_item(item_id)
 
 func _on_breakthrough_pressed() -> void:
-	var pill_id: int = CultivationService.get_required_breakthrough_pill()
-	if pill_id > 0:
+	var requirements: Array = CultivationService.get_required_breakthrough_items()
+	if not requirements.is_empty():
 		var popup := preload("res://scenes/ui/common/ConfirmPopup.tscn").instantiate() as ConfirmPopup
 		UIManager.show_popup(popup)
-		var pill_data := ConfigDatabase.get_item_data(pill_id)
-		popup.setup("突破确认", "确定使用" + pill_data.get("name", "丹药") + "进行突破吗？", func(): _do_breakthrough(pill_id))
+		popup.setup("突破确认", _format_breakthrough_confirmation(requirements), _do_breakthrough)
 	else:
-		_do_breakthrough(0)
+		_do_breakthrough()
 
-func _do_breakthrough(pill_id: int) -> void:
-	CultivationService.try_breakthrough(pill_id, 0)
+func _try_show_pending_breakthrough_prompt() -> void:
+	if not GameState.pending_breakthrough_prompt:
+		return
+	if not CultivationService.is_breakthrough_ready():
+		return
+	GameState.pending_breakthrough_prompt = false
+	call_deferred("_on_breakthrough_pressed")
+
+func _format_breakthrough_confirmation(requirements: Array) -> String:
+	var labels: Array[String] = []
+	for requirement_variant: Variant in requirements:
+		if not requirement_variant is Dictionary:
+			continue
+		var requirement: Dictionary = requirement_variant as Dictionary
+		var item_data: Dictionary = ConfigDatabase.get_item_data(int(requirement.get("item_id", 0)))
+		var item_name: String = String(item_data.get("name", "物品"))
+		var count: int = int(requirement.get("count", 0))
+		labels.append("%s ×%d" % [item_name, count])
+	return "确认消耗：%s\n进行突破吗？" % ", ".join(labels)
+
+func _do_breakthrough() -> void:
+	CultivationService.try_breakthrough()
 
 func _on_breakthrough_done(_result: Dictionary) -> void:
 	_refresh_breakthrough_btn()
 	_refresh_display()
 
 func _on_breakthrough_rejected(reason: String) -> void:
-	if reason == "pill_not_found":
-		EventBus.show_toast.emit("当前没有该丹药")
+	if reason == "breakthrough_items_insufficient":
+		EventBus.show_toast.emit("突破材料不足")

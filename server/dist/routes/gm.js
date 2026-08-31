@@ -1,9 +1,88 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.grantCurrentOrderItems = grantCurrentOrderItems;
 exports.createGMRouter = createGMRouter;
 const http_1 = require("../worker/http");
 const auth_1 = require("../middleware/auth");
 const queue_1 = require("./queue");
+function grantCurrentOrderItems(state, engine) {
+    const itemCounts = {};
+    const orderItems = [];
+    for (const order of state.meridian_acupoints || []) {
+        if (order?.completed === true || !Array.isArray(order?.item_ids))
+            continue;
+        for (const rawItemId of order.item_ids) {
+            const itemId = Number(rawItemId);
+            if (!Number.isInteger(itemId))
+                continue;
+            const itemDef = engine.getItemData(itemId);
+            if (!itemDef)
+                continue;
+            orderItems.push({ id: itemId, name: itemDef.name ?? `#${itemId}` });
+            itemCounts[String(itemId)] = (itemCounts[String(itemId)] || 0) + 1;
+        }
+    }
+    const mainGrid = state.board_type === 1 && Array.isArray(state.saved_grid)
+        ? state.saved_grid
+        : state.grid;
+    if (orderItems.length === 0) {
+        return { grantedCount: 0, itemCounts, mainGrid, error: "no_order_items" };
+    }
+    // Place the whole batch atomically. A failed GM request must not leave only
+    // part of the order requirements on the board.
+    const availableSlots = Math.max(0, engine.MAX_CELLS - mainGrid.length);
+    if (availableSlots < orderItems.length) {
+        return {
+            grantedCount: 0,
+            itemCounts: {},
+            mainGrid,
+            error: "grid_full",
+            requiredCount: orderItems.length,
+            availableSlots,
+        };
+    }
+    const placementGrid = mainGrid.map(item => ({
+        uid: item.uid,
+        id: item.id,
+        col: item.col,
+        row: item.row,
+    }));
+    const positions = [];
+    for (const _item of orderItems) {
+        const empty = engine.findEmptyPos(placementGrid);
+        if (!empty) {
+            return {
+                grantedCount: 0,
+                itemCounts: {},
+                mainGrid,
+                error: "grid_full",
+                requiredCount: orderItems.length,
+                availableSlots: positions.length,
+            };
+        }
+        positions.push(empty);
+        placementGrid.push({ id: 0, col: empty.col, row: empty.row });
+    }
+    for (let index = 0; index < orderItems.length; index += 1) {
+        const orderItem = orderItems[index];
+        const position = positions[index];
+        const itemDef = engine.getItemData(orderItem.id);
+        const gridItem = {
+            uid: engine._nextUid(state),
+            id: orderItem.id,
+            col: position.col,
+            row: position.row,
+        };
+        if (engine.isLauncher(itemDef)) {
+            gridItem.charges = engine.getMaxCharges(orderItem.id);
+            gridItem.last_charge_time = Date.now();
+        }
+        mainGrid.push(gridItem);
+    }
+    engine.initializeProductionUnlocks(state);
+    state.version += 1;
+    return { grantedCount: orderItems.length, itemCounts, mainGrid };
+}
 function createGMRouter(storage, engine, jwtSecret, gmKey) {
     const router = new http_1.Router();
     // If GM_KEY is not configured, disable the GM endpoint entirely
@@ -35,6 +114,7 @@ function createGMRouter(storage, engine, jwtSecret, gmKey) {
                 engine.tickStamina(state);
                 engine.tickLauncherRecharge(state);
                 let msg = "ok";
+                let gmResult = {};
                 switch (cmd) {
                     case "add_exp": {
                         const amt = parseInt(amount, 10);
@@ -167,13 +247,31 @@ function createGMRouter(storage, engine, jwtSecret, gmKey) {
                         msg = `Activated ${result.activated} home acupoints, completed ${result.completed_stages} stages`;
                         break;
                     }
+                    case "grant_order_items": {
+                        const result = grantCurrentOrderItems(state, engine);
+                        if (result.error) {
+                            res.status(400).json({
+                                error: result.error,
+                                required_count: result.requiredCount,
+                                available_slots: result.availableSlots,
+                            });
+                            return;
+                        }
+                        gmResult = {
+                            granted_count: result.grantedCount,
+                            granted_items: result.itemCounts,
+                            main_grid: result.mainGrid,
+                        };
+                        msg = `Granted ${result.grantedCount} current order items to main grid`;
+                        break;
+                    }
                     default:
-                        res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp", "add_stones", "set_stamina", "set_qi", "levelup", "breakthrough", "add_item", "reset_launcher_cd", "clear_grid", "activate_home_acupoints"] });
+                        res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp", "add_stones", "set_stamina", "set_qi", "levelup", "breakthrough", "add_item", "reset_launcher_cd", "clear_grid", "activate_home_acupoints", "grant_order_items"] });
                         return;
                 }
                 await storage.saveState(userId, state);
                 console.log(`[gm] ${userId}: ${cmd} — ${msg}`);
-                res.json({ ok: true, msg });
+                res.json({ ok: true, msg, ...gmResult });
             });
         }
         catch (e) {

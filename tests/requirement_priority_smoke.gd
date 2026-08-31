@@ -141,6 +141,12 @@ func _test_available_order_is_first() -> void:
 	assert(viewport_rect.encloses(promoted_rect))
 	assert(requirement_list.scroll.scroll_horizontal < max_scroll)
 	assert(promoted_entry.z_index == 0)
+	requirement_list.scroll.scroll_horizontal = max_scroll
+	requirement_list.set_requirements(requirements)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var rebuilt_max_scroll: int = int(requirement_list.scroll.get_h_scroll_bar().max_value)
+	assert(requirement_list.scroll.scroll_horizontal == rebuilt_max_scroll)
 	requirement_list.set_entry_priority(0, 0)
 	entries = requirement_list.get_order_entries()
 	assert(_get_order_indices(entries) == [2, 1, 0])

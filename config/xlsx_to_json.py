@@ -434,8 +434,13 @@ stages = []
 for row in read_rows(wb["cultivation"]):
     stage = {"name": row["name"], "exp": parse_int(row["exp"]),
              "max_qi": parse_int(row["max_qi"])}
-    if row.get("breakthrough_pill"):
-        stage["breakthrough_pill"] = parse_int(row["breakthrough_pill"])
+    breakthrough_items = parse_dict_list(row.get("breakthrough_items", ""), "item_id", "count")
+    if breakthrough_items:
+        stage["breakthrough_items"] = [
+            {"item_id": int(entry["item_id"]), "count": int(entry["count"])}
+            for entry in breakthrough_items
+            if isinstance(entry, dict) and int(entry.get("item_id", 0)) > 0 and int(entry.get("count", 0)) > 0
+        ]
     if row.get("breakthrough_reward_id"):
         stage["breakthrough_reward_id"] = parse_int(row["breakthrough_reward_id"])
     stages.append(stage)
@@ -556,6 +561,11 @@ for row in read_rows(wb["home_meridians"]):
     acupoint_exp = parse_int(row.get("acupoint_exp", "")) or 0
     circulation_exp = parse_int(row.get("circulation_exp", "")) or 0
     acupoint_rewards = parse_reward_config(row.get("acupoint_rewards", ""))
+    if isinstance(acupoint_rewards, int) and str(acupoint_rewards) not in rewards:
+        raise ValueError(
+            f"home meridian {row['name']} references missing reward ID "
+            f"{acupoint_rewards}"
+        )
     if acupoint_rewards is None:
         acupoint_rewards = {"tokens": [
             {"token": 4, "amount": acupoint_exp},
@@ -570,45 +580,89 @@ for row in read_rows(wb["home_meridians"]):
             {"token": 3, "amount": 100},
         ]},
     })
-production_reward_schedule = [
-    # First grant the six material launchers. The alchemy and formation tables
-    # are only granted after their starter recipe materials are producible.
-    (1, 0, [11001, 12001]),
-    (1, 1, [13001, 14001]),
-    (1, 2, [15001, 16001]),
-    (1, 3, [11001, 12001]),
-    (1, 4, [13001, 14001]),
-    (1, 5, [15001, 16001]),
-    (1, 6, [17001, 19001]),
-    (1, 7, [17001, 19001]),
 
-    # The refining table's first recipe needs ore 2002. Grant a level-2 mine
-    # before the table instead of leaving the table unusable until stage 5.
-    (2, 0, [15002]),
-    (2, 1, [18001]),
-    (2, 2, [15002]),
-    (2, 3, [18001]),
-    (2, 4, [11002, 12002]),
-    (2, 5, [13002, 14002]),
-    (2, 6, [16002, 17002]),
-    (2, 7, [19002]),
+
+def reward_exp_amount(reward_config):
+    """Return cultivation EXP (token 4) granted by one reward config."""
+    if isinstance(reward_config, int):
+        reward_config = rewards.get(str(reward_config), {})
+    if not isinstance(reward_config, dict):
+        return 0
+    return sum(
+        int(token.get("amount", 0))
+        for token in reward_config.get("tokens", [])
+        if isinstance(token, dict) and int(token.get("token", 0)) == 4
+    )
+
+
+def home_stage_exp_total(home_stage):
+    acupoint_reward = home_stage["acupoint_rewards"]
+    if isinstance(acupoint_reward, list):
+        acupoint_total = sum(reward_exp_amount(reward) for reward in acupoint_reward)
+    else:
+        acupoint_total = home_stage["acupoints"] * reward_exp_amount(acupoint_reward)
+    return acupoint_total + reward_exp_amount(home_stage["circulation_rewards"])
+
+
+def max_unlocked_home_stage_index(cultivation_level):
+    if cultivation_level <= 1:
+        return 0
+    if cultivation_level <= 10:
+        return cultivation_level - 1
+    return 9 + (cultivation_level - 10) * 10
+
+
+for cultivation_level in range(2, len(stages) + 1):
+    first_stage_index = max_unlocked_home_stage_index(cultivation_level - 1) + 1
+    last_stage_index = max_unlocked_home_stage_index(cultivation_level)
+    unlocked_stages = home_stages[first_stage_index:last_stage_index + 1]
+    total_exp = sum(home_stage_exp_total(home_stage) for home_stage in unlocked_stages)
+    expected_exp = stages[cultivation_level - 1]["exp"]
+    if total_exp != expected_exp:
+        raise ValueError(
+            f"home meridians unlocked at cultivation level {cultivation_level} grant "
+            f"{total_exp} EXP, but the cultivation stage requires {expected_exp}"
+        )
+production_reward_schedule = [
+    # The source workbook's first row is the unchanged beginner tutorial.  The
+    # The tutorial itself is unchanged. Its bookshelf launcher has no usable
+    # table yet, so the first post-tutorial reward completes that production
+    # loop with the animal launcher and formation table. Later rewards only
+    # add launchers together with a table that can already consume them.
+    (1, 0, [14001, 19001]),
+    (1, 1, [11001, 12001]),
+    (1, 2, [11001, 17001]),
+
+    # Phase 2: introduce the herb/animal and ore/book lines in pairs.  Each
+    # crafting table is placed only after the level-2 material needed by its
+    # starter recipe has appeared.
+    (2, 0, [13001, 14001]),
+    (2, 1, [13001]),
+    (2, 2, [15001, 16001, 18001]),
+    (2, 3, [15001]),
+    (2, 4, [15002, 16002]),
+    (2, 5, [18001]),
+    (2, 6, [19001]),
+    (2, 7, [11002, 12002]),
     (2, 8, [11002, 12002]),
     (2, 9, [13002, 14002]),
-    (2, 10, [16002, 17002]),
-    (2, 11, [19002]),
-    (2, 12, [18002]),
+    (2, 10, [13002, 14002]),
 
-    (3, 0, [18002]),
-    (3, 1, [11003, 12003]),
-    (3, 2, [13003, 14003]),
-    (3, 3, [15003, 16003]),
-    (3, 4, [17003, 18003]),
-    (3, 5, [19003]),
+    # Phase 3: finish the core lines and their tables.  Spirit wood/pond
+    # launchers are deliberately not in the tutorial; they enter through the
+    # later circulation schedule after the corresponding table families are
+    # available.
+    (3, 0, [15002, 16002]),
+    (3, 1, [17002, 18002]),
+    (3, 2, [17002, 18002]),
+    (3, 3, [19002]),
+    (3, 4, [19002]),
+    (3, 5, [11003, 12003]),
     (3, 6, [11003, 12003]),
     (3, 7, [13003, 14003]),
-    (3, 8, [15003, 16003]),
-    (3, 9, [17003, 18003]),
-    (3, 10, [19003]),
+    (3, 8, [13003, 14003]),
+    (3, 9, [15003, 16003, 17003, 18003, 19003]),
+    (3, 10, [15003, 16003, 17003, 18003, 19003]),
 ]
 production_rewards = [
     {
@@ -618,7 +672,16 @@ production_rewards = [
     }
     for stage, index, item_ids in production_reward_schedule
 ]
-facility_prefixes = [110, 120, 130, 140, 150, 160, 170, 180, 190]
+# The vein is an independent resource line (it has no crafting table).  Keep
+# its single starter copy in the first long-term circulation reward instead of
+# putting another unrelated launcher in the early tutorial.
+production_rewards.append({
+    "stage": 10,
+    "index": 0,
+    "timing": "circulation",
+    "items": [{"id": 25001, "count": 1}],
+})
+facility_prefixes = [110, 120, 130, 140, 150, 160, 170, 180, 190, 230, 240]
 table_prefixes = [200, 210]
 
 # These are the complete target totals per facility line after tutorial,
@@ -645,9 +708,12 @@ breakthrough_facility_counts = {
     **{prefix: {4: 1} for prefix in facility_prefixes},
 }
 
+# The two spirit-material lines are long-term systems and are intentionally
+# excluded from the tutorial.  They are introduced by circulation rewards so
+# players learn the core production loop before having to remember them.
 tutorial_facility_counts = {
     prefix: {1: 2, 2: 2, 3: 2}
-    for prefix in facility_prefixes
+    for prefix in [110, 120, 130, 140, 150, 160, 170, 180, 190]
 }
 
 all_facility_prefixes = facility_prefixes + table_prefixes
@@ -669,8 +735,8 @@ for prefix in all_facility_prefixes:
 
         facility_reward_counts[(prefix, level)] = circulation_count
 
-if total_facility_rewards != 300:
-    raise ValueError(f"facility reward total must be 300, got {total_facility_rewards}")
+if total_facility_rewards != 354:
+    raise ValueError(f"facility reward total must be 354, got {total_facility_rewards}")
 
 def schedule_unit_facility_rewards(reward_counts, max_per_stage=5):
     """Spread copies across stages; one facility ID can appear only once per stage."""
@@ -699,9 +765,16 @@ def schedule_unit_facility_rewards(reward_counts, max_per_stage=5):
     return slots
 
 
-facility_reward_slots = schedule_unit_facility_rewards(facility_reward_counts)
-if len(facility_reward_slots) > 66:
-    raise ValueError("facility circulation reward schedule exceeds configured stages")
+facility_reward_slots = schedule_unit_facility_rewards(facility_reward_counts, max_per_stage=3)
+# Circulation starts at stage 10 (the eleventh home-meridian row).  Derive the
+# capacity from the workbook instead of a stale hard-coded limit so deferring
+# the spirit lines does not silently overflow the available stages.
+circulation_stage_capacity = max(0, len(home_stages) - 10)
+if len(facility_reward_slots) > circulation_stage_capacity:
+    raise ValueError(
+        "facility circulation reward schedule exceeds configured stages: "
+        f"{len(facility_reward_slots)} > {circulation_stage_capacity}"
+    )
 
 production_reward_rules = []
 for slot_index, entries in enumerate(facility_reward_slots):
@@ -720,11 +793,29 @@ for slot_index, entries in enumerate(facility_reward_slots):
 def validate_facility_rewards():
     crafting_by_id = {item["id"]: item for item in crafting}
     recipes_by_id = {recipe["id"]: recipe for recipe in recipe_definitions}
+    regular_by_id = {
+        item["id"]: item
+        for item in regular
+        if item.get("group_id") is not None and item.get("level") is not None
+    }
+    regular_by_group = {}
+    for item in regular_by_id.values():
+        regular_by_group.setdefault(item["group_id"], []).append(item)
     launcher_outputs = {}
     for item in launcher:
-        outputs = set(item.get("fixed_spawns", []))
-        outputs.update(spawn["id"] for spawn in item.get("spawns", []))
-        launcher_outputs[item["id"]] = outputs
+        direct_outputs = set(item.get("fixed_spawns", []))
+        direct_outputs.update(spawn["id"] for spawn in item.get("spawns", []))
+        reachable_outputs = set(direct_outputs)
+        for output_id in direct_outputs:
+            output = regular_by_id.get(output_id)
+            if output is None:
+                continue
+            reachable_outputs.update(
+                candidate["id"]
+                for candidate in regular_by_group.get(output["group_id"], [])
+                if candidate["level"] >= output["level"]
+            )
+        launcher_outputs[item["id"]] = reachable_outputs
 
     def table_is_usable(item_id, available_materials):
         table = crafting_by_id.get(item_id)
@@ -736,8 +827,68 @@ def validate_facility_rewards():
             if recipe_id in recipes_by_id
         )
 
+    def launcher_has_usable_table(item_id, available_materials, available_tables):
+        launcher_materials = launcher_outputs.get(item_id, set())
+        if not launcher_materials:
+            return True
+        for table_id in available_tables:
+            table = crafting_by_id.get(table_id)
+            if table is None:
+                continue
+            for recipe_id in table.get("recipes", []):
+                recipe = recipes_by_id.get(recipe_id)
+                if recipe is None:
+                    continue
+                ingredients = set(recipe["ingredients"])
+                if ingredients.issubset(available_materials) and ingredients.intersection(launcher_materials):
+                    return True
+        return False
+
+    def iter_reward_items(reward_config):
+        """Yield item entries from an inline reward config or reward-table ID."""
+        configs = []
+        if isinstance(reward_config, dict):
+            configs = [reward_config]
+        elif isinstance(reward_config, list):
+            configs = [entry for entry in reward_config if isinstance(entry, dict)]
+        elif isinstance(reward_config, int):
+            table_reward = rewards.get(str(reward_config), rewards.get(reward_config, {}))
+            if isinstance(table_reward, dict):
+                configs = [table_reward]
+        for config in configs:
+            for item in config.get("items", []):
+                if isinstance(item, dict) and "id" in item:
+                    yield item
+
     available_materials = set()
+    available_launcher_ids = set()
+    available_table_ids = set()
     actual_tutorial_counts = {}
+
+    def add_available_facility(item_id):
+        if item_id in launcher_outputs:
+            available_launcher_ids.add(item_id)
+            available_materials.update(launcher_outputs[item_id])
+        if item_id in crafting_by_id:
+            available_table_ids.add(item_id)
+
+    for item in setup.get("main", {}).get("items", []):
+        add_available_facility(int(item["id"]))
+
+    # Inline rewards in the source workbook are part of the tutorial too.  In
+    # particular, the starter row grants the first 17001 table; include it in
+    # the fixed-count audit so circulation does not over-issue that table.
+    for home_stage in home_stages:
+        for item in iter_reward_items(home_stage.get("acupoint_rewards")):
+            item_id = int(item["id"])
+            add_available_facility(item_id)
+            prefix, level = divmod(item_id, 100)
+            if prefix in tutorial_facility_counts:
+                count = int(item.get("count", 1))
+                actual_tutorial_counts[(prefix, level)] = (
+                    actual_tutorial_counts.get((prefix, level), 0) + count
+                )
+
     for reward in production_rewards:
         item_ids = [item["id"] for item in reward["items"]]
         if len(item_ids) != len(set(item_ids)):
@@ -745,12 +896,24 @@ def validate_facility_rewards():
         if any(item["count"] != 1 for item in reward["items"]):
             raise ValueError("production facility reward count must be 1")
         for item_id in item_ids:
-            available_materials.update(launcher_outputs.get(item_id, set()))
+            add_available_facility(item_id)
+        if reward.get("timing", "acupoint") == "circulation":
+            continue
         for item_id in item_ids:
             prefix, level = divmod(item_id, 100)
             actual_tutorial_counts[(prefix, level)] = actual_tutorial_counts.get((prefix, level), 0) + 1
             if not table_is_usable(item_id, available_materials):
                 raise ValueError(f"crafting table {item_id} is rewarded before its materials")
+        unusable_launcher_ids = sorted(
+            item_id
+            for item_id in available_launcher_ids
+            if not launcher_has_usable_table(item_id, available_materials, available_table_ids)
+        )
+        if unusable_launcher_ids:
+            raise ValueError(
+                f"production reward stage {reward['stage']}/{reward['index']} leaves "
+                f"launchers without a usable crafting table: {unusable_launcher_ids}"
+            )
 
     for prefix, counts in tutorial_facility_counts.items():
         for level, expected_count in counts.items():
@@ -760,6 +923,17 @@ def validate_facility_rewards():
                     f"tutorial facility reward count mismatch: {prefix}/{level} "
                     f"expected {expected_count}, got {actual_count}"
                 )
+
+    mine_circulation_ids = [
+        item["id"]
+        for reward in production_rewards
+        for item in reward["items"]
+        if reward.get("timing", "acupoint") == "circulation" and item["id"] // 100 == 250
+    ]
+    if mine_circulation_ids != [25001]:
+        raise ValueError(
+            f"spirit stone vein circulation rewards must contain only one level-1 item, got {mine_circulation_ids}"
+        )
 
     for rule in production_reward_rules:
         if rule["count"] != 1:

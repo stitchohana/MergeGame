@@ -136,6 +136,7 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
             const amt = parseInt(amount, 10);
             if (isNaN(amt) || amt <= 0) { res.status(400).json({ error: "invalid_amount" }); return; }
             engine._addExp(state.cultivation, amt);
+            engine.syncBreakthroughOrder(state);
             msg = `Added ${amt} exp, now level=${state.cultivation.current_level} exp=${state.cultivation.current_exp}`;
             break;
           }

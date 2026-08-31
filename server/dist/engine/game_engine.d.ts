@@ -22,6 +22,8 @@ interface ItemDef {
     recipes?: number[];
     max_charges?: number;
     recharge_time?: number;
+    fixed_spawns?: number[];
+    no_cost?: boolean;
     storage_slots?: number;
 }
 interface RecipeDef {
@@ -37,7 +39,10 @@ interface StageDef {
     name: string;
     exp: number;
     max_qi: number;
-    breakthrough_pill?: number;
+    breakthrough_items?: {
+        item_id: number;
+        count: number;
+    }[];
     breakthrough_reward_id?: number;
 }
 interface CultivationConfig {
@@ -49,6 +54,13 @@ export declare enum TableState {
     CRAFTING = 2,
     READY = 3
 }
+type SpeedupFailure = {
+    ok: false;
+    reason: string;
+    cost?: number;
+    remainingSeconds?: number;
+    spiritStones?: number;
+};
 export declare class GameEngine {
     readonly GRID_COLS = 7;
     readonly GRID_ROWS = 9;
@@ -66,9 +78,15 @@ export declare class GameEngine {
         regenInterval: number;
         regenAmount: number;
     };
+    speedupConfig: {
+        craftStoneCostPerMinute: number;
+        launcherStoneCostPerMinute: number;
+    };
     questResetHour: number;
     private shopConfig;
     private meridianThresholds;
+    private meridianOrderSources;
+    private meridianOrderLevelRanges;
     private maps;
     private monsters;
     private rewardsTable;
@@ -90,7 +108,11 @@ export declare class GameEngine {
     private loadRewards;
     getRewardConfig(rewardId: number): RewardConfig | undefined;
     private loadHomeMeridians;
+    private _copyRewardConfig;
     getHomeMeridianDefs(): any[];
+    private _resolveRewardConfig;
+    private _getAcupointReward;
+    private _maxUnlockedHomeStageIndex;
     lightHomeAcupoint(state: GameState, stageIndex: number, acupointIndex: number): {
         ok: true;
         circulation_completed: boolean;
@@ -99,6 +121,7 @@ export declare class GameEngine {
         stamina: number;
         pending_rewards: any[];
         home_meridian_progress: any[];
+        meridian_acupoints: any[];
     } | {
         ok: false;
         reason: string;
@@ -111,9 +134,18 @@ export declare class GameEngine {
     generateMeridianRequirements(state: GameState): {
         acupoints: any[];
     };
+    private _getFixedOrderBatches;
+    private _tryRevealFixedOrderBatch;
     private _scaleRewardConfig;
     private _findMeridianThreshold;
     private _genOneAcupoint;
+    private _genFixedAcupoint;
+    private isOrderCandidate;
+    private registerProductionUnlock;
+    /** Backfill the unlock history for old saves and initialize new saves. */
+    initializeProductionUnlocks(state: GameState): boolean;
+    private getUnlockedOrderPool;
+    repairInvalidMeridianOrders(state: GameState): boolean;
     private loadInitialSetup;
     getItemData(id: number): ItemDef | null;
     getItemByLevel(type: number, level: number, groupId?: number): ItemDef | null;
@@ -125,6 +157,7 @@ export declare class GameEngine {
         id: number;
         col: number;
         row: number;
+        atk_base?: number;
     }[];
     getMaxCharges(itemId: number): number;
     _nextUid(state: GameState): number;
@@ -151,6 +184,7 @@ export declare class GameEngine {
     } | null;
     applyRewards(state: GameState, rewards: RewardConfig | number): RewardConfig;
     createInitialState(boardType?: number): GameState;
+    createSpawnSeed(): number;
     switchBoard(state: GameState, boardType: string, battleMapId?: number, battleStage?: number): {
         ok: true;
         newVersion: number;
@@ -185,7 +219,7 @@ export declare class GameEngine {
         ok: false;
         reason: string;
     };
-    executeSpawn(state: GameState, launcherCol: number, launcherRow: number): {
+    executeSpawn(state: GameState, launcherCol: number, launcherRow: number, expectedSequence?: number): {
         ok: true;
         spawnedUid: number;
         spawnedId: number;
@@ -196,6 +230,9 @@ export declare class GameEngine {
         charges: number;
         maxCharges: number;
         rechargeTime: number;
+        atkBase: number;
+        sequenceUsed: number;
+        spawnSequence: number;
     } | {
         ok: false;
         reason: string;
@@ -235,6 +272,20 @@ export declare class GameEngine {
         ok: false;
         reason: string;
     };
+    executeCraftSpeedup(state: GameState, tableCol: number, tableRow: number): {
+        ok: true;
+        cost: number;
+        remainingSeconds: number;
+        newVersion: number;
+    } | SpeedupFailure;
+    executeLauncherSpeedup(state: GameState, launcherUid: number): {
+        ok: true;
+        cost: number;
+        remainingSeconds: number;
+        charges: number;
+        maxCharges: number;
+        newVersion: number;
+    } | SpeedupFailure;
     executeCraftRetrieve(state: GameState, tableCol: number, tableRow: number): {
         ok: true;
         resultUid: number;
@@ -253,20 +304,32 @@ export declare class GameEngine {
         reason: string;
     };
     private matchRecipe;
-    getStageBreakthroughPill(level: number): number;
+    private getStoredItemId;
+    getStageBreakthroughItems(level: number): {
+        item_id: number;
+        count: number;
+    }[];
     getStageBreakthroughReward(level: number): number;
     getExpToNextLevel(level: number): number;
     isMaxCultivation(level: number): boolean;
-    needsBreakthroughPill(level: number): boolean;
+    needsBreakthroughItems(level: number): boolean;
     isBreakthroughReady(level: number, exp: number): boolean;
-    getRequiredBreakthroughPill(level: number, exp: number): number;
-    executeTryBreakthrough(state: GameState, pillId: number, uid: number, level: number, exp: number): {
+    getRequiredBreakthroughItems(level: number, exp: number): {
+        item_id: number;
+        count: number;
+    }[];
+    executeTryBreakthrough(state: GameState, uid: number, level: number, exp: number): {
         ok: true;
         newCultivation: CultivationData;
         rewards: RewardConfig;
     } | {
         ok: false;
         reason: string;
+        missing?: {
+            item_id: number;
+            required: number;
+            available: number;
+        }[];
     };
     tickCraftingState(state: GameState): boolean;
     consumeExpPill(state: GameState, pillId: number, uid: number): {
@@ -316,6 +379,14 @@ export declare class GameEngine {
         ok: true;
         stamina: number;
         max_stamina: number;
+    } | {
+        ok: false;
+        reason: string;
+    };
+    consumeSpiritStoneItem(state: GameState, itemId: number, uid: number): {
+        ok: true;
+        spiritStones: number;
+        amount: number;
     } | {
         ok: false;
         reason: string;

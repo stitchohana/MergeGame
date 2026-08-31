@@ -14,7 +14,7 @@ var _pending_item_ids: Array = []
 var _meridian_submit_pending: bool = false
 var _display_index_map: Array = []
 var _pending_stamina_uid: int = -1
-var _meridian_waiting_breakthrough: bool = false
+var _pending_spirit_stone_uid: int = -1
 var _item_use_pending: bool = false
 var _load_token: int = -1
 var _pending_order_animation: Dictionary = {}
@@ -46,6 +46,8 @@ func _ready() -> void:
 	CloudService.craft_remove_rejected.connect(_on_craft_remove_rejected)
 	CloudService.stamina_restore_confirmed.connect(_on_stamina_restore_confirmed)
 	CloudService.stamina_restore_rejected.connect(_on_stamina_restore_rejected)
+	CloudService.spirit_stone_consume_confirmed.connect(_on_spirit_stone_consume_confirmed)
+	CloudService.spirit_stone_consume_rejected.connect(_on_spirit_stone_consume_rejected)
 	CultivationService.stage_changed.connect(_on_stage_changed_for_meridian)
 	CloudService.breakthrough_confirmed.connect(func(_r): _item_use_pending = false)
 	CloudService.breakthrough_rejected.connect(func(_r): _item_use_pending = false)
@@ -220,17 +222,20 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	_item_use_pending = true
 	match effect_type:
 		Constants.EffectType.BREAKTHROUGH:
-				print("[GameScreen] breakthrough click: pill_id=" + str(item_data.get("id",0)) + " uid=" + str(uid) + " pos=" + str(grid_pos))
+				print("[GameScreen] breakthrough click: uid=" + str(uid) + " pos=" + str(grid_pos))
 				if uid <= 0:
 					EventBus.show_toast.emit("物品数据异常，请重新登录")
 					print("[GameScreen] breakthrough BLOCKED: uid=" + str(uid))
 					return
-				CultivationService.try_breakthrough(item_data.get("id", 0), uid)
+				CultivationService.try_breakthrough(uid)
 		Constants.EffectType.EXP:
 			CultivationService.consume_exp_pill(item_data.get("id", 0), uid)
 		Constants.EffectType.STAMINA:
 			_pending_stamina_uid = uid
 			CloudService.submit_restore_stamina(item_data.get("id", 0), uid)
+		Constants.EffectType.SPIRIT_STONES:
+			_pending_spirit_stone_uid = uid
+			CloudService.submit_consume_spirit_stone(item_data.get("id", 0), uid)
 		Constants.EffectType.QI:
 			EventBus.show_toast.emit("灵力恢复")
 		Constants.EffectType.QI:
@@ -505,7 +510,6 @@ func _refresh_required_indicators() -> void:
 			node.set_required(should_require)
 			if should_require:
 				print("[Require] apply pos=", entry.pos, " item_id=", item_id, " required=true")
-
 func _collect_recipe_material_ids(result_id: int, required_ids: Dictionary, reserved_ids: Dictionary) -> void:
 	if result_id <= 0:
 		return
@@ -561,6 +565,16 @@ func _display_meridian() -> void:
 
 func _on_meridian_complete(display_index: int) -> void:
 	if _meridian_submit_pending:
+		return
+	if display_index < 0 or display_index >= _display_index_map.size():
+		return
+	var data_index: int = _display_index_map[display_index]
+	if data_index < 0 or data_index >= GameState.meridian_acupoints.size():
+		return
+	var requirement: Dictionary = GameState.meridian_acupoints[data_index]
+	if bool(requirement.get("breakthrough_order", false)):
+		GameState.pending_breakthrough_prompt = true
+		EventBus.screen_change_requested.emit("home")
 		return
 	_pending_order_animation.clear()
 	_capture_order_animation(display_index)
@@ -693,8 +707,6 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 	# Server returns updated list (completed order removed, new order added)
 	GameState.meridian_acupoints = result.get("meridian_acupoints", [])
 	_display_meridian()
-	if not _is_initial_game_load:
-		requirement_list.focus_first_available_order()
 	await requirement_list.animate_reflow_from(
 		animation.get("previous_positions", {}),
 		int(animation.get("completed_display_index", -1))
@@ -856,9 +868,7 @@ func _play_flying_texture(texture: Texture2D, from_pos: Vector2, to_pos: Vector2
 	tween.tween_callback(fly.queue_free)
 
 func _on_stage_changed_for_meridian(_level: int, _name: String) -> void:
-	if _meridian_waiting_breakthrough and not CultivationService._needs_breakthrough_pill():
-		_meridian_waiting_breakthrough = false
-		_refresh_meridian()
+	_refresh_meridian()
 
 func _on_meridian_rejected(reason: String) -> void:
 	_meridian_submit_pending = false
@@ -890,6 +900,20 @@ func _on_stamina_restore_rejected(reason: String) -> void:
 	_item_use_pending = false
 	EventBus.show_toast.emit("回复体力失败：" + reason)
 	_pending_stamina_uid = -1
+
+func _on_spirit_stone_consume_confirmed(result: Dictionary) -> void:
+	_item_use_pending = false
+	if _pending_spirit_stone_uid > 0:
+		var pos: Vector2i = GridManager.find_pos_by_uid(_pending_spirit_stone_uid)
+		if pos != Vector2i(-1, -1):
+			GridManager.remove_item(pos)
+	_pending_spirit_stone_uid = -1
+	EventBus.show_toast.emit("获得%d灵石" % int(result.get("amount", 0)))
+
+func _on_spirit_stone_consume_rejected(reason: String) -> void:
+	_item_use_pending = false
+	_pending_spirit_stone_uid = -1
+	EventBus.show_toast.emit("使用灵石失败：" + reason)
 
 func _create_activity_entry(act: Dictionary) -> Control:
 	var widget: String = act.get("widget", "")

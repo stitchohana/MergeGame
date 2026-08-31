@@ -94,7 +94,7 @@
 | `exp` | int | 升级所需经验 |
 | `max_qi` | int | 灵力上限 |
 | `atk` | int | 攻击力 |
-| `breakthrough_pill` | int | 突破所需丹药 item id（可选） |
+| `breakthrough_items` | array | 突破所需物品，XLSX 中用 `item_id:count;item_id:count` 配置（可选） |
 | `breakthrough_reward_id` | int | 突破成功后发放的 reward id（可选） |
 
 ---
@@ -246,15 +246,25 @@
 与 `index` 均为从 0 开始的下标。默认奖励时机是穴位完成；设置
 `timing: "circulation"` 时，奖励会合并到该阶段的 `circulation_rewards`，在整个周天完成时发放。
 `production_reward_rules` 可用 `facility_prefixes`、`levels`、`count` 批量配置设施
-链奖励，并用 `timing` 区分穴位或周天完成。当前教程段保持穴位奖励不变，教程后设施奖励
-按每次完成周天最多两类设施拆分；突破奖励则通过 `cultivation.json` 的
-`breakthrough_reward_id` 指向 `rewards.json`。
+链奖励，并用 `timing` 区分穴位或周天完成。穴位奖励按“基础材料与炼丹台 → 核心材料线
+与对应制作台 → 已有生产线的高等级设施”分阶段投放；灵木园/灵潭发射器不进入前期教程，
+改由后续周天循环奖励逐步引入，灵脉发射器则在首个循环奖励中只发放一个 1 级起点。
+新手引导首阶段的源表奖励保持不变。
+教程后的发射器首次出现时，同批或此前奖励必须已有能消耗其产物的制作台；练气一层
+首先补齐教程书架所需的兽栏与演阵台，再逐条开放后续生产链。
+教程后的周天奖励每次最多合并三类设施，继续降低单次记忆负担。
+突破奖励则通过 `cultivation.json` 的
+`breakthrough_reward_id` 指向 `rewards.json`；突破消耗物品由 `breakthrough_items` 配置。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `stages` | array | 阶段列表 `[{name, acupoints, qi_cost, acupoint_rewards, circulation_rewards}]` |
 | `acupoint_rewards` | number/object/array | 单个奖励配置会应用到所有穴位；数组时按穴位下标逐点发放奖励 |
 | `circulation_rewards` | number/object | 整个周天完成时发放的奖励；设施链奖励会合并到这里 |
+
+`acupoint_rewards` 使用数字时必须是 `rewards.json` 中存在的奖励 ID；留空则由
+`acupoint_exp` 生成内联经验奖励。配置生成时会校验每个境界解锁的全部周天经验总和
+恰好等于该境界的突破经验要求（新手引导首阶段除外）。
 
 ---
 

@@ -22,20 +22,26 @@ export declare const gameConfigTables: {
             name: string;
             exp: number;
             max_qi: number;
-            breakthrough_reward_id: number;
-            breakthrough_pill?: undefined;
-        } | {
-            name: string;
-            exp: number;
-            max_qi: number;
-            breakthrough_pill: number;
-            breakthrough_reward_id: number;
-        } | {
-            name: string;
-            exp: number;
-            max_qi: number;
+            breakthrough_items: {
+                item_id: number;
+                count: number;
+            }[];
             breakthrough_reward_id?: undefined;
-            breakthrough_pill?: undefined;
+        } | {
+            name: string;
+            exp: number;
+            max_qi: number;
+            breakthrough_items?: undefined;
+            breakthrough_reward_id?: undefined;
+        } | {
+            name: string;
+            exp: number;
+            max_qi: number;
+            breakthrough_items: {
+                item_id: number;
+                count: number;
+            }[];
+            breakthrough_reward_id: number;
         })[];
     };
     expedition: {
@@ -81,9 +87,47 @@ export declare const gameConfigTables: {
             regen_amount: number;
         };
         reset_hour: number;
+        craft_speedup_stone_cost_per_minute: number;
+        launcher_speedup_stone_cost_per_minute: number;
     };
     homeMeridians: {
-        stages: {
+        production_rewards: {
+            stage: number;
+            index: number;
+            items: {
+                id: number;
+                count: number;
+            }[];
+        }[];
+        production_reward_rules: {
+            stage: number;
+            index: number;
+            timing: string;
+            facility_prefixes: number[];
+            levels: number[];
+            count: number;
+        }[];
+        stages: ({
+            name: string;
+            acupoints: number;
+            qi_cost: number;
+            acupoint_rewards: {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+                tokens: {
+                    token: number;
+                    amount: number;
+                }[];
+            }[];
+            circulation_rewards: {
+                tokens: {
+                    token: number;
+                    amount: number;
+                }[];
+            };
+        } | {
             name: string;
             acupoints: number;
             qi_cost: number;
@@ -99,7 +143,7 @@ export declare const gameConfigTables: {
                     amount: number;
                 }[];
             };
-        }[];
+        })[];
     };
     initialSetup: {
         main: {
@@ -122,21 +166,30 @@ export declare const gameConfigTables: {
             type: number;
             value: number;
             sell_price: number;
-            effect_type?: undefined;
-            effect_value?: undefined;
             max_charges?: undefined;
             recharge_time?: undefined;
             spawns?: undefined;
         } | {
             id: number;
+            level: number;
+            name: string;
+            icon: string;
+            group_id: number;
+            describe: string;
+            type: number;
+            sell_price: number;
+            value?: undefined;
+            max_charges?: undefined;
+            recharge_time?: undefined;
+            spawns?: undefined;
+        } | {
+            id: number;
+            level: number;
             name: string;
             icon: string;
             describe: string;
             type: number;
             value: number;
-            effect_type: number;
-            effect_value: number;
-            level?: undefined;
             group_id?: undefined;
             sell_price?: undefined;
             max_charges?: undefined;
@@ -144,35 +197,18 @@ export declare const gameConfigTables: {
             spawns?: undefined;
         } | {
             id: number;
+            level: number;
             name: string;
             icon: string;
             describe: string;
             type: number;
             value: number;
-            level?: undefined;
-            group_id?: undefined;
-            sell_price?: undefined;
-            effect_type?: undefined;
-            effect_value?: undefined;
-            max_charges?: undefined;
-            recharge_time?: undefined;
-            spawns?: undefined;
-        } | {
-            id: number;
-            name: string;
-            icon: string;
-            describe: string;
-            type: number;
-            value: number;
-            effect_type: number;
-            effect_value: number;
             max_charges: number;
             recharge_time: number;
             spawns: {
                 id: number;
                 weight: number;
             }[];
-            level?: undefined;
             group_id?: undefined;
             sell_price?: undefined;
         })[];
@@ -211,28 +247,47 @@ export declare const gameConfigTables: {
             effect_type: number;
             effect_value: number;
             type: number;
-            value: number;
         } | {
             id: number;
             level: number;
             name: string;
             icon: string;
-            group_id: number;
+            group_id: null;
             describe: string;
             effect_type: number;
             effect_value: number;
             type: number;
-            value?: undefined;
         })[];
     };
     meridians: {
-        thresholds: {
+        order_pool: {
+            sources: string[];
+            unlock_by: string[];
+            level_ranges: {
+                cultivation_min: number;
+                cultivation_max: number;
+                items_regular: number[];
+                items_byproduct: number[];
+                items_recipe_product: number[];
+            }[];
+        };
+        thresholds: ({
             stage: number;
             count_min: number;
             count_max: number;
             acupoint_rewards: number;
             order_count: number;
-        }[];
+            fixed_order_batches: {
+                item_ids: number[];
+            }[][];
+        } | {
+            stage: number;
+            count_min: number;
+            count_max: number;
+            acupoint_rewards: number;
+            order_count: number;
+            fixed_order_batches?: undefined;
+        })[];
     };
     quests: {
         quests: {
@@ -273,6 +328,78 @@ export declare const gameConfigTables: {
                 tokens: {
                     token: number;
                     amount: number;
+                }[];
+            };
+            "301": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "302": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "303": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "304": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "305": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "306": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "307": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "308": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "309": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "310": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "311": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "312": {
+                items: {
+                    id: number;
+                    count: number;
                 }[];
             };
         };

@@ -5,6 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://d2wl0oyu4h3t" path="res://assets/ui/cultivation_screen_v3/layers/cultivation_star_gold.png" id="4_ue3xj"]
 [ext_resource type="Shader" uid="uid://dhdcx38cmwbt7" path="res://shaders/acupoint_glow.gdshader" id="5_acupoint_glow"]
 
+[sub_resource type="CanvasTexture" id="CanvasTexture_ue3xj"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_acupoint_glow"]
 resource_local_to_scene = true
 shader = ExtResource("5_acupoint_glow")
@@ -24,14 +26,13 @@ script = ExtResource("1_script")
 [node name="ActivateButton" type="Button" parent="." unique_id=1954480713]
 z_index = 10
 layout_mode = 0
-offset_left = -38.0
+offset_left = 1.0
 offset_top = -55.0
-offset_right = 112.0
+offset_right = 75.0
 offset_bottom = -1.0
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 13
-text = "激活
-0/1 · 灵气 0"
+icon = SubResource("CanvasTexture_ue3xj")
 flat = true
 icon_alignment = 1
 expand_icon = true

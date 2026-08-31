@@ -86,6 +86,21 @@ func _find_crafting_table_for_recipe(recipe_id: int) -> Dictionary:
 			continue
 		if best.is_empty() or int(candidate.get("level", 0)) > int(best.get("level", 0)):
 			best = candidate
+	if not best.is_empty():
+		return best
+
+	# The popup can be opened from the home screen, where the main board is
+	# not loaded. Keep showing the facility required by the recipe by falling
+	# back to the lowest configured crafting table that supports it.
+	for candidate_variant: Variant in ConfigDatabase.get_all_items_of_type(Constants.ItemType.CRAFTING):
+		if not candidate_variant is Dictionary:
+			continue
+		var candidate: Dictionary = candidate_variant as Dictionary
+		var recipe_ids: Array = candidate.get("recipes", [])
+		if not recipe_ids.has(recipe_id):
+			continue
+		if best.is_empty() or int(candidate.get("level", 0)) < int(best.get("level", 0)):
+			best = candidate
 	return best
 
 

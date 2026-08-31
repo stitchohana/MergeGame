@@ -42,7 +42,7 @@ interface StageDef {
   name: string;
   exp: number;
   max_qi: number;
-  breakthrough_pill?: number;
+  breakthrough_items?: { item_id: number; count: number }[];
   breakthrough_reward_id?: number;
 }
 
@@ -566,6 +566,9 @@ export class GameEngine {
   }
 
   generateMeridianRequirements(state: GameState): { acupoints: any[] } {
+    if (this.syncBreakthroughOrder(state)) {
+      return { acupoints: state.meridian_acupoints || [] };
+    }
     const thresholds = this.meridianThresholds;
     if (!thresholds.length) return { acupoints: [] };
 
@@ -903,6 +906,12 @@ export class GameEngine {
   }
 
   repairInvalidMeridianOrders(state: GameState): boolean {
+    if (this.getRequiredBreakthroughItems(
+      state.cultivation.current_level,
+      state.cultivation.current_exp,
+    ).length > 0) {
+      return this.syncBreakthroughOrder(state);
+    }
     if (!Array.isArray(state.meridian_acupoints) || state.meridian_acupoints.length === 0) return false;
 
     const threshold = this._findMeridianThreshold(state.cultivation.current_level);
@@ -1141,6 +1150,7 @@ export class GameEngine {
 
   applyRewards(state: GameState, rewards: RewardConfig | number): RewardConfig {
     const result: RewardConfig = { tokens: [], items: [] };
+    let expChanged = false;
 
     // Resolve reward ID to config
     if (typeof rewards === "number") {
@@ -1161,7 +1171,7 @@ export class GameEngine {
             console.log(`[reward] +${t.amount} spirit_stones (total: ${state.spirit_stones})`);
             break;
           case TokenType.QI:
-            state.cultivation.current_qi = Math.min(state.cultivation.max_qi, state.cultivation.current_qi + t.amount);
+            state.cultivation.current_qi += t.amount;
             console.log(`[reward] +${t.amount} qi (total: ${state.cultivation.current_qi}/${state.cultivation.max_qi})`);
             break;
           case TokenType.STAMINA:
@@ -1170,6 +1180,7 @@ export class GameEngine {
             break;
           case TokenType.EXP:
             this._addExp(state.cultivation, t.amount);
+            expChanged = true;
             console.log(`[reward] +${t.amount} exp (total: ${state.cultivation.current_exp})`);
             break;
           default:
@@ -1196,6 +1207,10 @@ export class GameEngine {
         result.items!.push({ id: ri.id, count: ri.count });
         console.log(`[reward] +${ri.count}x ${name} -> pending_rewards`);
       }
+    }
+
+    if (expChanged) {
+      this.syncBreakthroughOrder(state);
     }
 
     return result;
@@ -2008,11 +2023,24 @@ export class GameEngine {
 
   // --- Cultivation ---
 
-  getStageBreakthroughPill(level: number): number {
-    if (!this.cultivation) return 0;
+  private getStoredItemId(entry: unknown): number {
+    if (typeof entry === "number") return entry;
+    if (!entry || typeof entry !== "object") return 0;
+    return Number((entry as { id?: unknown }).id ?? 0);
+  }
+
+  getStageBreakthroughItems(level: number): { item_id: number; count: number }[] {
+    if (!this.cultivation) return [];
     const stages = this.cultivation.stages;
-    if (!stages || level < 1 || level > stages.length) return 0;
-    return stages[level - 1]?.breakthrough_pill ?? 0;
+    if (!stages || level < 1 || level > stages.length) return [];
+    const configured = stages[level - 1]?.breakthrough_items;
+    if (!Array.isArray(configured)) return [];
+    return configured.flatMap((entry) => {
+      const itemId = Number(entry?.item_id ?? 0);
+      const count = Number(entry?.count ?? 0);
+      if (!Number.isInteger(itemId) || itemId <= 0 || !Number.isInteger(count) || count <= 0) return [];
+      return [{ item_id: itemId, count }];
+    });
   }
 
   getStageBreakthroughReward(level: number): number {
@@ -2034,81 +2062,60 @@ export class GameEngine {
     return level >= this.cultivation.stages.length;
   }
 
-  needsBreakthroughPill(level: number): boolean {
+  needsBreakthroughItems(level: number): boolean {
     if (!this.cultivation) return false;
     if (this.isMaxCultivation(level)) return false;
-    return this.getStageBreakthroughPill(level) > 0;
+    return this.getStageBreakthroughItems(level).length > 0;
   }
 
   isBreakthroughReady(level: number, exp: number): boolean {
     if (!this.cultivation) return false;
     if (this.isMaxCultivation(level)) return false;
     if (level > this.cultivation.stages.length) return false;
-    if (exp < this.getExpToNextLevel(level)) return false;
-    const pill = this.getStageBreakthroughPill(level);
-    return pill > 0 || level < this.cultivation.stages.length;
+    return exp >= this.getExpToNextLevel(level);
   }
 
-  getRequiredBreakthroughPill(level: number, exp: number): number {
-    if (!this.isBreakthroughReady(level, exp)) return 0;
-    return this.getStageBreakthroughPill(level);
+  getRequiredBreakthroughItems(level: number, exp: number): { item_id: number; count: number }[] {
+    if (!this.isBreakthroughReady(level, exp)) return [];
+    return this.getStageBreakthroughItems(level);
   }
 
-  executeTryBreakthrough(
+  syncBreakthroughOrder(state: GameState): boolean {
+    const level = state.cultivation.current_level;
+    const requirements = this.getRequiredBreakthroughItems(level, state.cultivation.current_exp);
+    if (requirements.length === 0) return false;
+
+    const itemIds = requirements.flatMap(requirement =>
+      new Array(requirement.count).fill(requirement.item_id));
+    const currentOrders = Array.isArray(state.meridian_acupoints) ? state.meridian_acupoints : [];
+    const currentOrder = currentOrders.length === 1 ? currentOrders[0] : null;
+    const alreadyCurrent = currentOrder?.breakthrough_order === true
+      && Number(currentOrder.breakthrough_level) === level
+      && JSON.stringify(currentOrder.item_ids) === JSON.stringify(itemIds);
+    if (alreadyCurrent) return false;
+
+    state.meridian_acupoints = [{
+      ...this._genFixedAcupoint(itemIds),
+      breakthrough_order: true,
+      breakthrough_level: level,
+    }];
+    console.log(`[engine] breakthrough ready at level ${level}; replaced all meridian orders with requirements ${JSON.stringify(itemIds)}`);
+    return true;
+  }
+
+  private finishBreakthrough(
     state: GameState,
-    pillId: number,
-    uid: number,
     level: number,
-    exp: number
+    requiredCounts: Map<number, number>,
   ): { ok: true; newCultivation: CultivationData; rewards: RewardConfig } | { ok: false; reason: string } {
-    console.log(`[engine] tryBreakthrough: pill=${pillId} uid=${uid} level=${level} exp=${exp}`);
-    if (!this.isBreakthroughReady(level, exp)) {
-      console.log(`[engine] tryBreakthrough: not ready (need exp=${this.getExpToNextLevel(level)} have=${exp})`);
-      return { ok: false, reason: "not_ready" };
-    }
-    const required = this.getRequiredBreakthroughPill(level, exp);
-    if (required > 0 && pillId !== required) {
-      console.log(`[engine] tryBreakthrough: wrong pill (need=${required} got=${pillId})`);
-      return { ok: false, reason: "wrong_pill" };
-    }
     if (!this.cultivation) return { ok: false, reason: "no_config" };
+    const nextLevel = level + 1;
+    if (nextLevel > this.cultivation.stages.length) return { ok: false, reason: "max_level" };
 
-    // Find and remove the pill (only if required)
-    if (required > 0) {
-      if (uid > 0) {
-      const pillIdx = state.grid.findIndex(g => g.uid === uid && g.id === required);
-      if (pillIdx >= 0) {
-        state.grid.splice(pillIdx, 1);
-        console.log(`[engine]   breakthrough pill #${pillId} removed from grid, uid=${uid}`);
-      } else {
-        console.log(`[engine]   breakthrough: uid=${uid} NOT FOUND in grid`);
-        return { ok: false, reason: "pill_not_found" };
-      }
-    } else {
-      // uid=0: search pouch first, then grid
-      const pouchIdx = state.pouch.findIndex((p: any) => p.id === pillId);
-      if (pouchIdx >= 0) {
-        state.pouch.splice(pouchIdx, 1);
-        console.log(`[engine]   breakthrough pill #${pillId} removed from pouch`);
-      } else {
-        const gridIdx = state.grid.findIndex(g => g.id === pillId);
-        if (gridIdx >= 0) {
-          state.grid.splice(gridIdx, 1);
-          console.log(`[engine]   breakthrough pill #${pillId} removed from grid`);
-        } else {
-          console.log(`[engine]   breakthrough: pill #${pillId} not found in pouch or grid`);
-          return { ok: false, reason: "pill_not_found" };
-        }
-      }
-    }
-    }
-
-    const newLevel = level + 1;
-    if (newLevel > (this.cultivation.stages.length)) return { ok: false, reason: "max_level" };
-    const nextStage = this.cultivation.stages[newLevel - 1];
+    const nextStage = this.cultivation.stages[nextLevel - 1];
     const newMaxQi: number = nextStage?.max_qi ?? (state.cultivation.max_qi + 50);
     const newCultivation: CultivationData = {
-      current_level: newLevel,
+      current_level: nextLevel,
       current_exp: 0,
       total_exp: state.cultivation.total_exp,
       current_qi: Math.min(state.cultivation.current_qi, newMaxQi),
@@ -2117,16 +2124,87 @@ export class GameEngine {
     };
 
     state.cultivation = newCultivation;
+    state.meridian_acupoints = [];
     const rewardId = this.getStageBreakthroughReward(level);
     const rewards = rewardId > 0 ? this.applyRewards(state, rewardId) : { tokens: [], items: [] };
+    this.generateMeridianRequirements(state);
     state.version += 1;
 
-    const stageName = nextStage?.name ?? `stage_${newLevel}`;
-    console.log(`[engine] breakthrough: -> ${stageName} | qi=${newCultivation.max_qi} | v${state.version}`);
-
+    const stageName = nextStage?.name ?? `stage_${nextLevel}`;
+    console.log(`[engine] breakthrough: -> ${stageName} | consumed=${JSON.stringify([...requiredCounts])} | qi=${newCultivation.max_qi} | v${state.version}`);
     this.questEngine.incrementQuestProgress(state, QuestType.BREAKTHROUGH, 1, this);
-
     return { ok: true, newCultivation, rewards };
+  }
+
+  executeTryBreakthrough(
+    state: GameState,
+    uid: number,
+    level: number,
+    exp: number
+  ): {
+    ok: true;
+    newCultivation: CultivationData;
+    rewards: RewardConfig;
+  } | {
+    ok: false;
+    reason: string;
+    missing?: { item_id: number; required: number; available: number }[];
+  } {
+    console.log(`[engine] tryBreakthrough: uid=${uid} level=${level} exp=${exp}`);
+    if (!this.isBreakthroughReady(level, exp)) {
+      console.log(`[engine] tryBreakthrough: not ready (need exp=${this.getExpToNextLevel(level)} have=${exp})`);
+      return { ok: false, reason: "not_ready" };
+    }
+    if (!this.cultivation) return { ok: false, reason: "no_config" };
+
+    const requiredCounts = new Map<number, number>();
+    for (const requirement of this.getRequiredBreakthroughItems(level, exp)) {
+      requiredCounts.set(
+        requirement.item_id,
+        (requiredCounts.get(requirement.item_id) ?? 0) + requirement.count,
+      );
+    }
+
+    const availableCounts = new Map<number, number>();
+    for (const item of state.grid) {
+      availableCounts.set(item.id, (availableCounts.get(item.id) ?? 0) + 1);
+    }
+    for (const entry of state.pouch as unknown[]) {
+      const itemId = this.getStoredItemId(entry);
+      if (itemId > 0) {
+        availableCounts.set(itemId, (availableCounts.get(itemId) ?? 0) + 1);
+      }
+    }
+
+    const missing: { item_id: number; required: number; available: number }[] = [];
+    for (const [itemId, requiredCount] of requiredCounts) {
+      const available = availableCounts.get(itemId) ?? 0;
+      if (available < requiredCount) {
+        missing.push({ item_id: itemId, required: requiredCount, available });
+      }
+    }
+    if (missing.length > 0) {
+      console.log(`[engine] breakthrough blocked: missing=${JSON.stringify(missing)}`);
+      return { ok: false, reason: "breakthrough_items_insufficient", missing };
+    }
+
+    const remainingCounts = new Map(requiredCounts);
+    for (let index = state.pouch.length - 1; index >= 0; index -= 1) {
+      const itemId = this.getStoredItemId(state.pouch[index]);
+      const remaining = remainingCounts.get(itemId) ?? 0;
+      if (remaining <= 0) continue;
+      state.pouch.splice(index, 1);
+      remainingCounts.set(itemId, remaining - 1);
+    }
+    for (let index = state.grid.length - 1; index >= 0; index -= 1) {
+      const itemId = state.grid[index].id;
+      const remaining = remainingCounts.get(itemId) ?? 0;
+      if (remaining <= 0) continue;
+      state.grid.splice(index, 1);
+      remainingCounts.set(itemId, remaining - 1);
+    }
+
+    return this.finishBreakthrough(state, level, requiredCounts);
   }
 
 
@@ -2171,6 +2249,7 @@ export class GameEngine {
     }
 
     this._addExp(state.cultivation, expGain);
+    this.syncBreakthroughOrder(state);
     state.version += 1;
 
     const pillName = pillData.name;
@@ -2394,6 +2473,32 @@ export class GameEngine {
     return { ok: true, stamina: state.stamina, max_stamina: this.staminaConfig.max };
   }
 
+  consumeSpiritStoneItem(
+    state: GameState,
+    itemId: number,
+    uid: number
+  ): { ok: true; spiritStones: number; amount: number } | { ok: false; reason: string } {
+    const itemData = this.getItemData(itemId);
+    if (!itemData) return { ok: false, reason: "invalid_item" };
+    if (itemData.effect_type !== 8) return { ok: false, reason: "invalid_effect" };
+
+    const amount = Number(itemData.effect_value ?? 0);
+    if (!Number.isInteger(amount) || amount <= 0) {
+      return { ok: false, reason: "no_spirit_stone_gain" };
+    }
+
+    const itemIndex = state.grid.findIndex(item => item.uid === uid && item.id === itemId);
+    if (itemIndex < 0) return { ok: false, reason: "item_not_found" };
+
+    state.grid.splice(itemIndex, 1);
+    state.spirit_stones += amount;
+    state.version += 1;
+    this.questEngine.incrementQuestProgress(state, QuestType.ANY_ITEM_CONSUME, 1, this);
+
+    console.log(`[engine] consume spirit stone item: #${itemId} uid=${uid} +${amount} stones (total=${state.spirit_stones}) | v${state.version}`);
+    return { ok: true, spiritStones: state.spirit_stones, amount };
+  }
+
   _addExp(c: CultivationData, amount: number): void {
     if (amount <= 0) return;
     if (!this.cultivation) return;
@@ -2448,6 +2553,9 @@ export class GameEngine {
     }
     const req = state.meridian_acupoints[index];
     if (req.completed) return { ok: false, reason: "already_completed" };
+    if (req.breakthrough_order === true) {
+      return { ok: false, reason: "breakthrough_confirmation_required" };
+    }
     // Consume one of each required item from grid
     const toRemove: number[] = [];
     for (const reqItemId of itemIds) {
@@ -2462,7 +2570,6 @@ export class GameEngine {
       if (!found) return { ok: false, reason: "insufficient_items" };
     }
 
-    // Check if qi is capped before removing items
     if (state.cultivation.current_qi >= state.cultivation.max_qi) {
       return { ok: false, reason: "qi_full" };
     }

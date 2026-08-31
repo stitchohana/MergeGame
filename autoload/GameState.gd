@@ -32,6 +32,7 @@ var activity_current_day: int = 0
 
 # Auto-acupoint activation from RequirementList
 var pending_auto_acupoint: bool = false
+var pending_breakthrough_prompt: bool = false
 var skip_next_home_loading: bool = false
 
 signal meridian_updated()

@@ -121,6 +121,8 @@ export interface GameState {
     battle_map_id?: number;
     battle_stage?: number;
     battle_monsters?: BattleMonster[];
+    battle_player_hp?: number;
+    battle_player_max_hp?: number;
     meridian_circulations?: number;
     meridian_acupoints?: {
         item_id: number;
@@ -129,12 +131,23 @@ export interface GameState {
         completed: boolean;
     }[];
     meridian_threshold_idx?: number;
+    meridian_fixed_order_cursor?: number;
     quest_progress?: Record<number, QuestProgress>;
     quests_initialized?: boolean;
     quest_last_reset?: number;
     pending_rewards: PendingReward[];
     home_meridian_progress?: HomeMeridianStageProgress[];
+    /** Production facilities acquired at least once; kept after merge/consumption. */
+    unlocked_production_item_ids?: number[];
     activity_progress?: Record<number, ActivityProgress>;
+    spawn_seed?: number;
+    spawn_sequence?: number;
+    spawn_history?: SpawnHistoryEntry[];
+    crafted_item_ids: number[];
+}
+export interface SpawnHistoryEntry {
+    request_id: string;
+    result: Record<string, unknown>;
 }
 export interface BattleMonster {
     monster_id: number;

@@ -38,7 +38,7 @@ func _ready() -> void:
 
 
 func show_for_item(item_data: Dictionary) -> void:
-	var group_id: int = int(item_data.get("group_id", 0))
+	var group_id: int = ConfigDatabase._coerce_int(item_data.get("group_id", 0))
 	var source_items: Array = ConfigDatabase.get_items_by_group(group_id) if group_id > 0 else [item_data]
 	_items.clear()
 	for raw_item: Variant in source_items:
@@ -52,11 +52,11 @@ func show_for_item(item_data: Dictionary) -> void:
 
 
 func _sort_items(left: Dictionary, right: Dictionary) -> bool:
-	var left_level: int = int(left.get("level", 0))
-	var right_level: int = int(right.get("level", 0))
+	var left_level: int = ConfigDatabase._coerce_int(left.get("level", 0))
+	var right_level: int = ConfigDatabase._coerce_int(right.get("level", 0))
 	if left_level != right_level:
 		return left_level < right_level
-	return int(left.get("id", 0)) < int(right.get("id", 0))
+	return ConfigDatabase._coerce_int(left.get("id", 0)) < ConfigDatabase._coerce_int(right.get("id", 0))
 
 
 func _update_selected_item(selected: Dictionary) -> void:
@@ -72,7 +72,7 @@ func _build_path(selected: Dictionary) -> void:
 		child.queue_free()
 	_item_controls.clear()
 
-	var selected_id: int = int(selected.get("id", 0))
+	var selected_id: int = ConfigDatabase._coerce_int(selected.get("id", 0))
 	var slot_count: int = maxi(MIN_VISIBLE_SLOTS, _items.size())
 	var row_count: int = ceili(float(slot_count) / float(COLUMNS))
 	var layout_row_count: int = maxi(row_count, COMPACT_LAYOUT_ROWS)
@@ -97,7 +97,7 @@ func _build_path(selected: Dictionary) -> void:
 			var item_data: Dictionary = _items[item_index] if item_index < _items.size() else {}
 			var is_selected: bool = (
 				not item_data.is_empty()
-				and int(item_data.get("id", 0)) == selected_id
+				and ConfigDatabase._coerce_int(item_data.get("id", 0)) == selected_id
 			)
 			var item_control: ItemWidget = _create_path_node(item_data, item_index, is_selected, node_size)
 			row.add_child(item_control)
@@ -110,7 +110,7 @@ func _build_path(selected: Dictionary) -> void:
 
 func _create_path_node(item_data: Dictionary, item_index: int, is_selected: bool, node_size: Vector2) -> ItemWidget:
 	var widget: ItemWidget = ITEM_WIDGET_SCENE.instantiate() as ItemWidget
-	widget.name = "UnknownNode" if item_data.is_empty() else "ItemNode%d" % int(item_data.get("level", item_index + 1))
+	widget.name = "UnknownNode" if item_data.is_empty() else "ItemNode%d" % ConfigDatabase._coerce_int(item_data.get("level", item_index + 1), item_index + 1)
 	widget.custom_minimum_size = node_size
 	widget.size = node_size
 	widget.setup(item_data)
@@ -154,13 +154,13 @@ func _create_arrow(arrow_size: Vector2) -> Control:
 
 func _build_source_section(selected: Dictionary) -> void:
 	var entries: Array[Dictionary] = []
-	var selected_type: int = int(selected.get("type", 0))
+	var selected_type: int = ConfigDatabase._coerce_int(selected.get("type", 0))
 	if selected_type == Constants.ItemType.LAUNCHER:
 		if relation_label:
 			relation_label.text = "可产出"
 		var spawns: Array = selected.get("spawns", [])
 		for spawn: Dictionary in spawns:
-			var output_id: int = int(spawn.get("id", 0))
+			var output_id: int = ConfigDatabase._coerce_int(spawn.get("id", 0))
 			var output_data: Dictionary = ConfigDatabase.get_item_data(output_id)
 			if not output_data.is_empty():
 				entries.append(output_data)
@@ -168,7 +168,7 @@ func _build_source_section(selected: Dictionary) -> void:
 		if relation_label:
 			relation_label.text = "来源"
 		var source_item: Dictionary = _get_group_level_one_item(selected)
-		entries = _get_present_launchers_for_item(int(source_item.get("id", selected.get("id", 0))))
+		entries = _get_present_launchers_for_item(ConfigDatabase._coerce_int(source_item.get("id", selected.get("id", 0))))
 
 	if selected_type == Constants.ItemType.LAUNCHER:
 		_update_output_list(entries)
@@ -232,8 +232,8 @@ func _update_source_card(entries: Array[Dictionary]) -> void:
 func _configure_discovery_visual(widget: ItemWidget, item_data: Dictionary) -> void:
 	var icon_rect: TextureRect = widget.get_node_or_null("IconRect") as TextureRect
 	var lock_icon: TextureRect = widget.get_node_or_null("IconLock") as TextureRect
-	var item_id: int = int(item_data.get("id", 0))
-	var item_level: int = int(item_data.get("level", 0))
+	var item_id: int = ConfigDatabase._coerce_int(item_data.get("id", 0))
+	var item_level: int = ConfigDatabase._coerce_int(item_data.get("level", 0))
 	var is_discovered: bool = not item_data.is_empty() and (
 		item_level <= 1 or GameState.has_crafted_item(item_id)
 	)
@@ -248,9 +248,9 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 	var present_launcher_ids: Dictionary = {}
 	for entry: Dictionary in GridManager.get_all_items():
 		var board_item: Dictionary = entry.get("data", {})
-		if int(board_item.get("type", 0)) != Constants.ItemType.LAUNCHER:
+		if ConfigDatabase._coerce_int(board_item.get("type", 0)) != Constants.ItemType.LAUNCHER:
 			continue
-		var launcher_id: int = int(board_item.get("id", 0))
+		var launcher_id: int = ConfigDatabase._coerce_int(board_item.get("id", 0))
 		if launcher_id > 0:
 			present_launcher_ids[launcher_id] = true
 
@@ -260,17 +260,26 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 		if not raw_launcher is Dictionary:
 			continue
 		var launcher: Dictionary = raw_launcher as Dictionary
-		var launcher_id: int = int(launcher.get("id", 0))
+		var launcher_id: int = ConfigDatabase._coerce_int(launcher.get("id", 0))
 		if present_launcher_ids.has(launcher_id):
 			result.append(launcher)
+	if not result.is_empty():
+		return result
+
+	# This popup is also reachable from the home screen, where the main board
+	# may not be loaded. Show the configured source launcher instead of an
+	# empty source card when no matching launcher is currently on the board.
+	for raw_launcher: Variant in launchers:
+		if raw_launcher is Dictionary:
+			result.append(raw_launcher as Dictionary)
 	return result
 
 
 func _get_group_level_one_item(item_data: Dictionary) -> Dictionary:
-	var group_id: int = int(item_data.get("group_id", 0))
+	var group_id: int = ConfigDatabase._coerce_int(item_data.get("group_id", 0))
 	if group_id <= 0:
 		return item_data
-	var item_type: int = int(item_data.get("type", Constants.ItemType.REGULAR))
+	var item_type: int = ConfigDatabase._coerce_int(item_data.get("type", Constants.ItemType.REGULAR), Constants.ItemType.REGULAR)
 	var level_one: Dictionary = ConfigDatabase.get_item_by_level(item_type, 1, group_id)
 	return level_one if not level_one.is_empty() else item_data
 

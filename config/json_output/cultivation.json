@@ -4,7 +4,12 @@
       "name": "凡人",
       "exp": 30,
       "max_qi": 1000,
-      "breakthrough_pill": 14101
+      "breakthrough_items": [
+        {
+          "item_id": 14101,
+          "count": 1
+        }
+      ]
     },
     {
       "name": "练气一层",
@@ -15,7 +20,12 @@
       "name": "练气二层",
       "exp": 90,
       "max_qi": 6000,
-      "breakthrough_pill": 28049,
+      "breakthrough_items": [
+        {
+          "item_id": 28049,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 311
     },
     {
@@ -27,7 +37,12 @@
       "name": "练气四层",
       "exp": 157,
       "max_qi": 8000,
-      "breakthrough_pill": 28050
+      "breakthrough_items": [
+        {
+          "item_id": 28050,
+          "count": 1
+        }
+      ]
     },
     {
       "name": "练气五层",
@@ -38,7 +53,12 @@
       "name": "练气六层",
       "exp": 320,
       "max_qi": 12000,
-      "breakthrough_pill": 28050,
+      "breakthrough_items": [
+        {
+          "item_id": 28050,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 312
     },
     {
@@ -55,70 +75,120 @@
       "name": "练气九层",
       "exp": 600,
       "max_qi": 20000,
-      "breakthrough_pill": 28051,
+      "breakthrough_items": [
+        {
+          "item_id": 28051,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 301
     },
     {
       "name": "筑基前期",
       "exp": 900,
       "max_qi": 100000,
-      "breakthrough_pill": 28052,
+      "breakthrough_items": [
+        {
+          "item_id": 28052,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 302
     },
     {
       "name": "筑基中期",
       "exp": 2150,
       "max_qi": 200000,
-      "breakthrough_pill": 28053,
+      "breakthrough_items": [
+        {
+          "item_id": 28053,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 303
     },
     {
       "name": "筑基后期",
       "exp": 3900,
       "max_qi": 400000,
-      "breakthrough_pill": 28054,
+      "breakthrough_items": [
+        {
+          "item_id": 28054,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 304
     },
     {
       "name": "金丹前期",
       "exp": 2200,
       "max_qi": 1000000,
-      "breakthrough_pill": 28055,
+      "breakthrough_items": [
+        {
+          "item_id": 28055,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 305
     },
     {
       "name": "金丹中期",
       "exp": 6300,
       "max_qi": 4000000,
-      "breakthrough_pill": 28056,
+      "breakthrough_items": [
+        {
+          "item_id": 28056,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 306
     },
     {
       "name": "金丹后期",
       "exp": 13600,
       "max_qi": 8000000,
-      "breakthrough_pill": 28057,
+      "breakthrough_items": [
+        {
+          "item_id": 28057,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 307
     },
     {
       "name": "元婴前期",
       "exp": 4700,
       "max_qi": 100000000,
-      "breakthrough_pill": 28058,
+      "breakthrough_items": [
+        {
+          "item_id": 28058,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 308
     },
     {
       "name": "元婴中期",
       "exp": 13700,
       "max_qi": 500000000,
-      "breakthrough_pill": 28059,
+      "breakthrough_items": [
+        {
+          "item_id": 28059,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 309
     },
     {
       "name": "元婴后期",
       "exp": 31000,
       "max_qi": 1000000000,
-      "breakthrough_pill": 28060,
+      "breakthrough_items": [
+        {
+          "item_id": 28060,
+          "count": 1
+        }
+      ],
       "breakthrough_reward_id": 310
     },
     {
