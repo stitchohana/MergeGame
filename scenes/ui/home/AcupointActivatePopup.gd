@@ -12,6 +12,7 @@ const DEFAULT_ACTION_TEXT: String = "激活"
 @onready var action_cost_icon: TextureRect = $PopupFrame/PopupPanel/Content/OperationArea/ActionButton/ActionContent/ActionCostIcon
 @onready var action_cost_label: Label = $PopupFrame/PopupPanel/Content/OperationArea/ActionButton/ActionContent/ActionCostLabel
 @onready var close_btn: Button = $PopupFrame/CloseButton
+@onready var gift_button: TextureButton = $PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox/ProgressRow/GiftFrame/GiftIcon
 
 var _on_action: Callable = Callable()
 var _action_text: String = DEFAULT_ACTION_TEXT
@@ -21,6 +22,8 @@ var _action_cost_text: String = ""
 func _ready() -> void:
 	CloudService.home_meridian_light_confirmed.connect(_on_success)
 	CloudService.home_meridian_light_rejected.connect(_on_rejected_handler)
+	if gift_button and not gift_button.pressed.is_connected(_on_gift_button_pressed):
+		gift_button.pressed.connect(_on_gift_button_pressed)
 	if not action_btn.pressed.is_connected(_on_action_btn):
 		action_btn.pressed.connect(_on_action_btn)
 	if not close_btn.pressed.is_connected(_on_close):
@@ -209,3 +212,9 @@ func _on_action_btn() -> void:
 func _on_close() -> void:
 	_disconnect_signals()
 	UIManager.hide_popup(self)
+
+
+func _on_gift_button_pressed() -> void:
+	var popup := preload("res://scenes/ui/home/BreakthroughRewardPreviewPopup.tscn").instantiate() as BreakthroughRewardPreviewPopup
+	UIManager.show_popup(popup)
+	popup.setup_for_current_level()

@@ -214,14 +214,19 @@ func _get_entries() -> Array[RequirementEntry]:
 func get_order_entries() -> Array[RequirementEntry]:
 	return _get_entries()
 
-func animate_reflow_from(previous_positions: Dictionary, removed_index: int = -1) -> void:
+func animate_reflow_from(previous_positions: Dictionary, removed_visual_index: int = -1) -> void:
+	# Positions are keyed by the old visual slot, not the data/display index.
+	# Entries can be sorted by availability, so only visual slots guarantee that
+	# cards after the removed one move forward by one slot.
 	var pending: Array[Dictionary] = []
+	var visual_index: int = 0
 	for entry in _get_entries():
-		var old_index: int = entry.get_display_index()
-		if removed_index >= 0 and old_index >= removed_index:
-			old_index += 1
-		var old_position_variant: Variant = previous_positions.get(old_index, null)
+		var old_visual_index: int = visual_index
+		if removed_visual_index >= 0 and visual_index >= removed_visual_index:
+			old_visual_index += 1
+		var old_position_variant: Variant = previous_positions.get(old_visual_index, null)
 		if not old_position_variant is Vector2:
+			visual_index += 1
 			continue
 		var old_position: Vector2 = old_position_variant
 		pending.append({
@@ -229,6 +234,7 @@ func animate_reflow_from(previous_positions: Dictionary, removed_index: int = -1
 			"from": old_position,
 			"z_index": entry.z_index,
 		})
+		visual_index += 1
 	await get_tree().process_frame
 	for pending_variant in pending:
 		var data: Dictionary = pending_variant
@@ -372,6 +378,8 @@ func _restore_entry_z_index(entry: RequirementEntry, original_z_index: int) -> v
 		entry.z_index = original_z_index
 
 func _emit_complete(idx: int) -> void:
+	if _drag_moved:
+		return
 	complete_clicked.emit(idx)
 
 func _show_item_source(item_id: int) -> void:

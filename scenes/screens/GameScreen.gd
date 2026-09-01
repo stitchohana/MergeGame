@@ -607,9 +607,13 @@ func _capture_order_animation(display_index: int) -> void:
 			source["to"] = entry.get_item_widget_center(item_id)
 			sources.append(source)
 	var previous_positions: Dictionary = {}
-	for old_entry in entries:
-		previous_positions[old_entry.get_display_index()] = old_entry.position
-	_pending_order_animation = {"entry": entry, "sources": sources, "required_ids": required_ids, "completed_display_index": display_index, "previous_positions": previous_positions, "start_qi": CultivationService.current_qi}
+	# Capture the actual visual order because RequirementList may sort entries by
+	# availability independently of their display/data indices.
+	for visual_index in range(entries.size()):
+		var old_entry: RequirementEntry = entries[visual_index]
+		previous_positions[visual_index] = old_entry.position
+	var completed_visual_index: int = entries.find(entry)
+	_pending_order_animation = {"entry": entry, "sources": sources, "required_ids": required_ids, "completed_display_index": display_index, "completed_visual_index": completed_visual_index, "previous_positions": previous_positions, "start_qi": CultivationService.current_qi}
 	print("[GameScreen] order animation: captured index=", display_index, " required_ids=", required_ids, " sources=", sources.size())
 	if sources.is_empty():
 		print("[GameScreen] order animation: no matching board items for ids=", required_ids, " grid_nodes=", grid_view._item_nodes.size())
@@ -709,7 +713,7 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 	_display_meridian()
 	await requirement_list.animate_reflow_from(
 		animation.get("previous_positions", {}),
-		int(animation.get("completed_display_index", -1))
+		int(animation.get("completed_visual_index", -1))
 	)
 	var qi_animation_duration: float = _play_order_qi_animation(animation, int(result.get("qi_gained", 0)))
 	if qi_animation_duration > 0.0:

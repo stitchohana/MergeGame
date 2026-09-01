@@ -114,13 +114,17 @@ text = "4/7"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RewardBadge" type="TextureRect" parent="." unique_id=1203585249]
+[node name="RewardBadge" type="TextureButton" parent="." unique_id=1203585249]
 layout_mode = 0
 offset_left = 151.0
 offset_top = 181.0
 offset_right = 195.0
 offset_bottom = 225.0
-mouse_filter = 2
-texture = ExtResource("5_reward_icon")
-expand_mode = 1
+mouse_filter = 0
+tooltip_text = "查看突破奖励"
+focus_mode = 0
+texture_normal = ExtResource("5_reward_icon")
+texture_pressed = ExtResource("5_reward_icon")
+texture_hover = ExtResource("5_reward_icon")
+ignore_texture_size = true
 stretch_mode = 5

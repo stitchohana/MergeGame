@@ -16,6 +16,25 @@ OUT.mkdir(exist_ok=True)
 
 ITEM_ICON_DIRECTORY = "icons_simple"
 
+CRAFT_TIME_SECONDS_BY_PRODUCT_LEVEL = {
+    1: 60,
+    2: 180,
+    3: 300,
+    4: 600,
+    5: 1200,
+    6: 1800,
+    7: 2700,
+    8: 3600,
+    9: 5400,
+    10: 7200,
+    11: 10800,
+    12: 14400,
+    13: 21600,
+    14: 28800,
+    15: 36000,
+    16: 43200,
+}
+
 
 def item_icon_path(item_id):
     return f"res://assets/items/{ITEM_ICON_DIRECTORY}/{item_id}.png"
@@ -411,6 +430,23 @@ save_json("game_config.json", game_config)
 
 # ─── recipes ───────────────────────────────────────────────
 print("Building recipes.json...")
+recipe_result_levels = {
+    item["id"]: item.get("level")
+    for item in regular
+}
+for recipe in recipe_definitions:
+    product_level = recipe_result_levels.get(recipe["result"])
+    expected_craft_time = CRAFT_TIME_SECONDS_BY_PRODUCT_LEVEL.get(product_level)
+    if expected_craft_time is None:
+        raise ValueError(
+            f"recipe {recipe['id']} result {recipe['result']} has unsupported "
+            f"product level {product_level}"
+        )
+    if recipe["craft_time"] != expected_craft_time:
+        raise ValueError(
+            f"recipe {recipe['id']} level {product_level} craft time must be "
+            f"{expected_craft_time}s, got {recipe['craft_time']}s"
+        )
 save_json("recipes.json", {"recipes": recipe_definitions})
 
 # ─── initial_setup ─────────────────────────────────────────

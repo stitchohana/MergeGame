@@ -7,6 +7,7 @@ var _items_data: Dictionary = {}        # item_id -> item_data Dictionary
 var _items_by_type_level: Dictionary = {}  # type -> { level -> Array[item_data] }
 var _initial_setup: Dictionary = {}
 var _cultivation_config: Dictionary = {}
+var _rewards_data: Dictionary = {}
 var _expedition_maps: Dictionary = {}
 var _monsters_data: Dictionary = {}
 var _meridian_thresholds: Array = []
@@ -23,6 +24,7 @@ func load_all() -> void:
 	_load_items("res://config/json_output/items.json")
 	_load_recipes("res://config/json_output/recipes.json")
 	_cultivation_config = _load_json("res://config/json_output/cultivation.json")
+	_load_rewards("res://config/json_output/rewards.json")
 	_load_expedition("res://config/json_output/expedition.json")
 	_load_meridians("res://config/json_output/meridians.json")
 	_load_tokens("res://config/json_output/tokens.json")
@@ -368,6 +370,27 @@ func get_stage_breakthrough_reward(level: int) -> int:
 	if s.is_empty():
 		return 0
 	return _coerce_int(s.get("breakthrough_reward_id", 0))
+
+# Get a reward bundle by its configured ID. JSON object keys are strings, so
+# accept both the integer form used by gameplay config and its string form.
+func get_reward_data(reward_id: int) -> Dictionary:
+	if reward_id <= 0:
+		return {}
+	var reward_variant: Variant = _rewards_data.get(reward_id, null)
+	if reward_variant == null:
+		reward_variant = _rewards_data.get(str(reward_id), null)
+	if reward_variant is Dictionary:
+		return (reward_variant as Dictionary).duplicate(true)
+	return {}
+
+
+func _load_rewards(path: String) -> void:
+	var data: Dictionary = _load_json(path)
+	var rewards_variant: Variant = data.get("rewards", {})
+	if rewards_variant is Dictionary:
+		_rewards_data = rewards_variant as Dictionary
+	else:
+		_rewards_data = {}
 
 
 func _load_weekly_tasks(path: String) -> void:

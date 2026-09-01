@@ -3,17 +3,22 @@ class_name CharacterEntry extends Control
 @onready var icon: TextureRect = $Icon
 @onready var progress_bar: TextureProgressBar = $ProgressOuter
 @onready var progress_label: Label = $ProgressOuter/ProgressLabel
+@onready var reward_button: TextureButton = $RewardBadge
 
 var _home_defs: Array = []
 var _home_progress: Array = []
 
 
 func _ready() -> void:
+	if reward_button and not reward_button.pressed.is_connected(_on_reward_button_pressed):
+		reward_button.pressed.connect(_on_reward_button_pressed)
 	CloudService.state_loaded.connect(_on_state_loaded)
 	CloudService.home_meridian_light_confirmed.connect(_on_home_meridian_light_confirmed)
+	CultivationService.stage_changed.connect(_on_cultivation_stage_changed)
 	_home_defs = GameState.home_meridian_defs.duplicate(true)
 	_home_progress = GameState.home_meridian_progress.duplicate(true)
 	_refresh_progress()
+	_refresh_reward_button()
 
 
 func _on_state_loaded(state: Dictionary) -> void:
@@ -24,6 +29,7 @@ func _on_state_loaded(state: Dictionary) -> void:
 		_home_progress = state.home_meridian_progress
 		GameState.home_meridian_progress = _home_progress.duplicate(true)
 	_refresh_progress()
+	_refresh_reward_button()
 
 
 func _on_home_meridian_light_confirmed(result: Dictionary) -> void:
@@ -33,6 +39,31 @@ func _on_home_meridian_light_confirmed(result: Dictionary) -> void:
 	_home_progress = progress
 	GameState.home_meridian_progress = progress.duplicate(true)
 	_refresh_progress()
+	_refresh_reward_button()
+
+
+func _on_cultivation_stage_changed(_level: int, _stage_name: String) -> void:
+	_refresh_progress()
+	_refresh_reward_button()
+
+
+func _on_reward_button_pressed() -> void:
+	var popup := preload("res://scenes/ui/home/BreakthroughRewardPreviewPopup.tscn").instantiate() as BreakthroughRewardPreviewPopup
+	UIManager.show_popup(popup)
+	popup.setup_for_current_level()
+
+
+func _refresh_reward_button() -> void:
+	if reward_button == null:
+		return
+	var level: int = CultivationService.current_level
+	var reward_id: int = ConfigDatabase.get_stage_breakthrough_reward(level)
+	if CultivationService.is_max_cultivation():
+		reward_button.tooltip_text = "已达最高境界"
+	elif reward_id > 0 and not ConfigDatabase.get_reward_data(reward_id).is_empty():
+		reward_button.tooltip_text = "查看突破奖励"
+	else:
+		reward_button.tooltip_text = "查看突破奖励（暂无额外奖励）"
 
 
 func _refresh_progress() -> void:

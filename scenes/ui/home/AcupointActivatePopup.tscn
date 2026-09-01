@@ -500,12 +500,17 @@ size_flags_horizontal = 0
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBox_gift_frame")
 
-[node name="GiftIcon" type="TextureRect" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox/ProgressRow/GiftFrame" unique_id=2100000027]
+[node name="GiftIcon" type="TextureButton" parent="PopupFrame/PopupPanel/Content/ProgressArea/ProgressMargin/ProgressVBox/ProgressRow/GiftFrame" unique_id=2100000027]
 custom_minimum_size = Vector2(58, 58)
 layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("4_reward")
-expand_mode = 1
+mouse_filter = 0
+tooltip_text = "查看突破奖励"
+focus_mode = 0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("4_reward")
+texture_pressed = ExtResource("4_reward")
+texture_hover = ExtResource("4_reward")
+ignore_texture_size = true
 stretch_mode = 5
 
 [node name="OperationArea" type="VBoxContainer" parent="PopupFrame/PopupPanel/Content" unique_id=2100000028]

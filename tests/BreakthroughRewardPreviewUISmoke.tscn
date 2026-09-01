@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/breakthrough_reward_preview_ui_smoke.gd" id="1_script"]
+
+[node name="BreakthroughRewardPreviewUISmoke" type="Node"]
+script = ExtResource("1_script")
