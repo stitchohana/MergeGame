@@ -50,7 +50,12 @@ function createCultivationRouter(storage, engine, jwtSecret) {
             return;
         }
         await storage.saveState(userId, state);
-        res.json({ ok: true, cultivation: state.cultivation, quest_progress: state.quest_progress });
+        res.json({
+            ok: true,
+            cultivation: state.cultivation,
+            quest_progress: state.quest_progress,
+            meridian_acupoints: state.meridian_acupoints || [],
+        });
     }));
     // POST /api/cultivation/consume-stamina
     router.post("/consume-stamina", op(async (req, res, userId) => {
@@ -113,6 +118,7 @@ function createCultivationRouter(storage, engine, jwtSecret) {
             stamina: state.stamina,
             pending_rewards: state.pending_rewards,
             quest_progress: state.quest_progress,
+            meridian_acupoints: state.meridian_acupoints || [],
         });
     }));
     return router;

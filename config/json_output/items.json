@@ -7635,16 +7635,20 @@
       "group_id": 21,
       "max_charges": 15,
       "recharge_time": 1800,
-      "describe": "浅砂矿口以河砂与碎岩筑成，矿壁留有新凿出的浅痕。",
+      "describe": "浅砂矿口以河砂与碎岩筑成，矿壁留有新凿出的浅痕，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 7
+          "weight": 665
         },
         {
           "id": 4001,
-          "weight": 3
+          "weight": 285
+        },
+        {
+          "id": 1501,
+          "weight": 50
         }
       ]
     },
@@ -7656,24 +7660,32 @@
       "group_id": 21,
       "max_charges": 20,
       "recharge_time": 2400,
-      "describe": "乌铁矿井立于溪谷缓坡，井下回声沉闷如钟。",
+      "describe": "乌铁矿井立于溪谷缓坡，井下回声沉闷如钟，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 686
+          "weight": 652
         },
         {
           "id": 4001,
-          "weight": 294
+          "weight": 279
         },
         {
           "id": 2002,
-          "weight": 14
+          "weight": 13
         },
         {
           "id": 4002,
           "weight": 6
+        },
+        {
+          "id": 1501,
+          "weight": 49
+        },
+        {
+          "id": 1502,
+          "weight": 1
         }
       ]
     },
@@ -7685,24 +7697,32 @@
       "group_id": 21,
       "max_charges": 25,
       "recharge_time": 3000,
-      "describe": "匠人取月银石柱建成月银矿洞，洞顶在月夜泛出银辉。",
+      "describe": "匠人取月银石柱建成月银矿洞，洞顶在月夜泛出银辉，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 672
+          "weight": 638
         },
         {
           "id": 4001,
-          "weight": 288
+          "weight": 274
         },
         {
           "id": 2002,
-          "weight": 28
+          "weight": 27
         },
         {
           "id": 4002,
-          "weight": 12
+          "weight": 11
+        },
+        {
+          "id": 1501,
+          "weight": 48
+        },
+        {
+          "id": 1502,
+          "weight": 2
         }
       ]
     },
@@ -7714,24 +7734,32 @@
       "group_id": 21,
       "max_charges": 30,
       "recharge_time": 3600,
-      "describe": "传闻白金矿脉旧址在云崖石台，金脉沿岩层纵横生长。",
+      "describe": "传闻白金矿脉旧址在云崖石台，金脉沿岩层纵横生长，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 658
+          "weight": 625
         },
         {
           "id": 4001,
-          "weight": 282
+          "weight": 268
         },
         {
           "id": 2002,
-          "weight": 42
+          "weight": 40
         },
         {
           "id": 4002,
-          "weight": 18
+          "weight": 17
+        },
+        {
+          "id": 1501,
+          "weight": 47
+        },
+        {
+          "id": 1502,
+          "weight": 3
         }
       ]
     },
@@ -7743,24 +7771,32 @@
       "group_id": 21,
       "max_charges": 35,
       "recharge_time": 4200,
-      "describe": "寒谷背阴处所见的冰陨深井由冰陨石与寒木构成，井口吐出的风带着冰屑。",
+      "describe": "寒谷背阴处所见的冰陨深井由冰陨石与寒木构成，井口吐出的风带着冰屑，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 644
+          "weight": 612
         },
         {
           "id": 4001,
-          "weight": 276
+          "weight": 262
         },
         {
           "id": 2002,
-          "weight": 56
+          "weight": 53
         },
         {
           "id": 4002,
-          "weight": 24
+          "weight": 23
+        },
+        {
+          "id": 1501,
+          "weight": 46
+        },
+        {
+          "id": 1502,
+          "weight": 4
         }
       ]
     },
@@ -7772,24 +7808,32 @@
       "group_id": 21,
       "max_charges": 40,
       "recharge_time": 4800,
-      "describe": "地火晶窟以地火岩与赤铜筑成，晶窟深处常有红光跃动。",
+      "describe": "地火晶窟以地火岩与赤铜筑成，晶窟深处常有红光跃动，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 637
+          "weight": 605
         },
         {
           "id": 4001,
-          "weight": 273
+          "weight": 259
         },
         {
           "id": 2002,
-          "weight": 63
+          "weight": 60
         },
         {
           "id": 4002,
-          "weight": 27
+          "weight": 26
+        },
+        {
+          "id": 1501,
+          "weight": 46
+        },
+        {
+          "id": 1502,
+          "weight": 4
         }
       ]
     },
@@ -7801,24 +7845,32 @@
       "group_id": 21,
       "max_charges": 45,
       "recharge_time": 5400,
-      "describe": "青罡玉坑立于苍梧秘境，玉壁内云纹缓缓迁移。",
+      "describe": "青罡玉坑立于苍梧秘境，玉壁内云纹缓缓迁移，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 630
+          "weight": 599
         },
         {
           "id": 4001,
-          "weight": 270
+          "weight": 257
         },
         {
           "id": 2002,
-          "weight": 70
+          "weight": 66
         },
         {
           "id": 4002,
-          "weight": 30
+          "weight": 28
+        },
+        {
+          "id": 1501,
+          "weight": 45
+        },
+        {
+          "id": 1502,
+          "weight": 5
         }
       ]
     },
@@ -7830,32 +7882,44 @@
       "group_id": 21,
       "max_charges": 50,
       "recharge_time": 6000,
-      "describe": "匠人取雷极砂砖建成雷极砂场，砂层摩擦时传来细雷。",
+      "describe": "匠人取雷极砂砖建成雷极砂场，砂层摩擦时传来细雷，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 602
+          "weight": 572
         },
         {
           "id": 4001,
-          "weight": 258
+          "weight": 245
         },
         {
           "id": 2002,
-          "weight": 84
+          "weight": 80
         },
         {
           "id": 4002,
-          "weight": 36
+          "weight": 34
         },
         {
           "id": 2003,
-          "weight": 14
+          "weight": 13
         },
         {
           "id": 4003,
           "weight": 6
+        },
+        {
+          "id": 1501,
+          "weight": 43
+        },
+        {
+          "id": 1502,
+          "weight": 6
+        },
+        {
+          "id": 1503,
+          "weight": 1
         }
       ]
     },
@@ -7867,32 +7931,44 @@
       "group_id": 21,
       "max_charges": 55,
       "recharge_time": 6600,
-      "describe": "传闻坤髓矿府旧址在坤元地脉，地脉气息沿矿壁缓缓升起。",
+      "describe": "传闻坤髓矿府旧址在坤元地脉，地脉气息沿矿壁缓缓升起，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 574
+          "weight": 545
         },
         {
           "id": 4001,
-          "weight": 246
+          "weight": 234
         },
         {
           "id": 2002,
-          "weight": 105
+          "weight": 100
         },
         {
           "id": 4002,
-          "weight": 45
+          "weight": 43
         },
         {
           "id": 2003,
-          "weight": 21
+          "weight": 20
         },
         {
           "id": 4003,
-          "weight": 9
+          "weight": 8
+        },
+        {
+          "id": 1501,
+          "weight": 41
+        },
+        {
+          "id": 1502,
+          "weight": 8
+        },
+        {
+          "id": 1503,
+          "weight": 1
         }
       ]
     },
@@ -7904,32 +7980,44 @@
       "group_id": 21,
       "max_charges": 60,
       "recharge_time": 7200,
-      "describe": "星落天原所见的星陨矿坑由星陨铁与天河砂构成，夜间矿壁会映出群星轨迹。",
+      "describe": "星落天原所见的星陨矿坑由星陨铁与天河砂构成，夜间矿壁会映出群星轨迹，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 532
+          "weight": 505
         },
         {
           "id": 4001,
-          "weight": 228
+          "weight": 217
         },
         {
           "id": 2002,
-          "weight": 140
+          "weight": 133
         },
         {
           "id": 4002,
-          "weight": 60
+          "weight": 57
         },
         {
           "id": 2003,
-          "weight": 28
+          "weight": 27
         },
         {
           "id": 4003,
-          "weight": 12
+          "weight": 11
+        },
+        {
+          "id": 1501,
+          "weight": 38
+        },
+        {
+          "id": 1502,
+          "weight": 10
+        },
+        {
+          "id": 1503,
+          "weight": 2
         }
       ]
     },
@@ -7941,32 +8029,44 @@
       "group_id": 21,
       "max_charges": 65,
       "recharge_time": 7800,
-      "describe": "太虚玉窟以紫府玉与烟霞木筑成，紫色云烟常在矿壁周围盘旋。",
+      "describe": "太虚玉窟以紫府玉与烟霞木筑成，紫色云烟常在矿壁周围盘旋，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 490
+          "weight": 466
         },
         {
           "id": 4001,
-          "weight": 210
+          "weight": 200
         },
         {
           "id": 2002,
-          "weight": 175
+          "weight": 166
         },
         {
           "id": 4002,
-          "weight": 75
+          "weight": 71
         },
         {
           "id": 2003,
-          "weight": 35
+          "weight": 33
         },
         {
           "id": 4003,
-          "weight": 15
+          "weight": 14
+        },
+        {
+          "id": 1501,
+          "weight": 35
+        },
+        {
+          "id": 1502,
+          "weight": 13
+        },
+        {
+          "id": 1503,
+          "weight": 2
         }
       ]
     },
@@ -7978,32 +8078,32 @@
       "group_id": 21,
       "max_charges": 70,
       "recharge_time": 8400,
-      "describe": "九幽铁渊立于九曲地宫，矿壁依九曲方位层层展开。",
+      "describe": "九幽铁渊立于九曲地宫，矿壁依九曲方位层层展开，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 462
+          "weight": 439
         },
         {
           "id": 4001,
-          "weight": 198
+          "weight": 188
         },
         {
           "id": 2002,
-          "weight": 182
+          "weight": 173
         },
         {
           "id": 4002,
-          "weight": 78
+          "weight": 74
         },
         {
           "id": 2003,
-          "weight": 49
+          "weight": 46
         },
         {
           "id": 4003,
-          "weight": 21
+          "weight": 20
         },
         {
           "id": 2004,
@@ -8012,6 +8112,18 @@
         {
           "id": 4004,
           "weight": 3
+        },
+        {
+          "id": 1501,
+          "weight": 33
+        },
+        {
+          "id": 1502,
+          "weight": 13
+        },
+        {
+          "id": 1503,
+          "weight": 4
         }
       ]
     },
@@ -8023,40 +8135,56 @@
       "group_id": 21,
       "max_charges": 75,
       "recharge_time": 9000,
-      "describe": "匠人取涅火晶与赤金建成日精金脉，赤金纹路随天火明灭不定。",
+      "describe": "匠人取涅火晶与赤金建成日精金脉，赤金纹路随天火明灭不定，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 434
+          "weight": 412
         },
         {
           "id": 4001,
-          "weight": 186
+          "weight": 177
         },
         {
           "id": 2002,
-          "weight": 189
+          "weight": 179
         },
         {
           "id": 4002,
-          "weight": 81
+          "weight": 77
         },
         {
           "id": 2003,
-          "weight": 63
+          "weight": 60
         },
         {
           "id": 4003,
-          "weight": 27
+          "weight": 26
         },
         {
           "id": 2004,
-          "weight": 14
+          "weight": 13
         },
         {
           "id": 4004,
           "weight": 6
+        },
+        {
+          "id": 1501,
+          "weight": 31
+        },
+        {
+          "id": 1502,
+          "weight": 14
+        },
+        {
+          "id": 1503,
+          "weight": 4
+        },
+        {
+          "id": 1504,
+          "weight": 1
         }
       ]
     },
@@ -8068,40 +8196,56 @@
       "group_id": 21,
       "max_charges": 80,
       "recharge_time": 9600,
-      "describe": "传闻月魄玉山旧址在龙眠古渊，矿壁上隐约盘着龙形云气。",
+      "describe": "传闻月魄玉山旧址在龙眠古渊，矿壁上隐约盘着龙形云气，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 406
+          "weight": 386
         },
         {
           "id": 4001,
-          "weight": 174
+          "weight": 165
         },
         {
           "id": 2002,
-          "weight": 196
+          "weight": 186
         },
         {
           "id": 4002,
-          "weight": 84
+          "weight": 80
         },
         {
           "id": 2003,
-          "weight": 77
+          "weight": 73
         },
         {
           "id": 4003,
-          "weight": 33
+          "weight": 31
         },
         {
           "id": 2004,
-          "weight": 21
+          "weight": 20
         },
         {
           "id": 4004,
           "weight": 9
+        },
+        {
+          "id": 1501,
+          "weight": 29
+        },
+        {
+          "id": 1502,
+          "weight": 14
+        },
+        {
+          "id": 1503,
+          "weight": 6
+        },
+        {
+          "id": 1504,
+          "weight": 1
         }
       ]
     },
@@ -8113,40 +8257,56 @@
       "group_id": 21,
       "max_charges": 85,
       "recharge_time": 10200,
-      "describe": "凤栖神木所见的天河砂海由凤羽晶与梧桐神木构成，高处常有凤鸟虚影掠过。",
+      "describe": "凤栖神木所见的天河砂海由凤羽晶与梧桐神木构成，高处常有凤鸟虚影掠过，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 378
+          "weight": 359
         },
         {
           "id": 4001,
-          "weight": 162
+          "weight": 154
         },
         {
           "id": 2002,
-          "weight": 203
+          "weight": 193
         },
         {
           "id": 4002,
-          "weight": 87
+          "weight": 83
         },
         {
           "id": 2003,
-          "weight": 91
+          "weight": 86
         },
         {
           "id": 4003,
-          "weight": 39
+          "weight": 37
         },
         {
           "id": 2004,
-          "weight": 28
+          "weight": 27
         },
         {
           "id": 4004,
-          "weight": 12
+          "weight": 11
+        },
+        {
+          "id": 1501,
+          "weight": 27
+        },
+        {
+          "id": 1502,
+          "weight": 15
+        },
+        {
+          "id": 1503,
+          "weight": 6
+        },
+        {
+          "id": 1504,
+          "weight": 2
         }
       ]
     },
@@ -8158,40 +8318,56 @@
       "group_id": 21,
       "max_charges": 90,
       "recharge_time": 10800,
-      "describe": "鸿蒙晶域以太初晶与鸿蒙母金筑成，近看矿壁仿佛隔着太初雾海。",
+      "describe": "鸿蒙晶域以太初晶与鸿蒙母金筑成，近看矿壁仿佛隔着太初雾海，并有小概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 350
+          "weight": 333
         },
         {
           "id": 4001,
-          "weight": 150
+          "weight": 143
         },
         {
           "id": 2002,
-          "weight": 210
+          "weight": 199
         },
         {
           "id": 4002,
-          "weight": 90
+          "weight": 85
         },
         {
           "id": 2003,
-          "weight": 105
+          "weight": 100
         },
         {
           "id": 4003,
-          "weight": 45
+          "weight": 43
         },
         {
           "id": 2004,
-          "weight": 35
+          "weight": 33
         },
         {
           "id": 4004,
+          "weight": 14
+        },
+        {
+          "id": 1501,
+          "weight": 25
+        },
+        {
+          "id": 1502,
           "weight": 15
+        },
+        {
+          "id": 1503,
+          "weight": 8
+        },
+        {
+          "id": 1504,
+          "weight": 2
         }
       ]
     },
@@ -8811,18 +8987,14 @@
       "name": "浅层灵石矿脉",
       "icon": "res://assets/items/icons_simple/25001.png",
       "group_id": 44,
-      "max_charges": 15,
-      "recharge_time": 1800,
-      "describe": "浅层灵石矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "浅层灵石矿脉只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 9500
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -8890,22 +9062,14 @@
       "name": "青岩矿脉",
       "icon": "res://assets/items/icons_simple/25002.png",
       "group_id": 44,
-      "max_charges": 20,
-      "recharge_time": 2400,
-      "describe": "青岩矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "青岩矿脉只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 9310
-        },
-        {
-          "id": 1502,
-          "weight": 190
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -8973,22 +9137,14 @@
       "name": "赤霞矿脉",
       "icon": "res://assets/items/icons_simple/25003.png",
       "group_id": 44,
-      "max_charges": 25,
-      "recharge_time": 3000,
-      "describe": "赤霞矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "赤霞矿脉只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 9120
-        },
-        {
-          "id": 1502,
-          "weight": 380
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9056,22 +9212,14 @@
       "name": "月华玉矿",
       "icon": "res://assets/items/icons_simple/25004.png",
       "group_id": 44,
-      "max_charges": 30,
-      "recharge_time": 3600,
-      "describe": "月华玉矿可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "月华玉矿只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 8930
-        },
-        {
-          "id": 1502,
-          "weight": 570
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9139,22 +9287,14 @@
       "name": "雷纹矿脉",
       "icon": "res://assets/items/icons_simple/25005.png",
       "group_id": 44,
-      "max_charges": 35,
-      "recharge_time": 4200,
-      "describe": "雷纹矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "雷纹矿脉只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 8740
-        },
-        {
-          "id": 1502,
-          "weight": 760
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9222,22 +9362,14 @@
       "name": "玄冰玉脉",
       "icon": "res://assets/items/icons_simple/25006.png",
       "group_id": 44,
-      "max_charges": 40,
-      "recharge_time": 4800,
-      "describe": "玄冰玉脉可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "玄冰玉脉只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 8645
-        },
-        {
-          "id": 1502,
-          "weight": 855
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9305,22 +9437,14 @@
       "name": "地髓矿脉",
       "icon": "res://assets/items/icons_simple/25007.png",
       "group_id": 44,
-      "max_charges": 45,
-      "recharge_time": 5400,
-      "describe": "地髓矿脉可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "地髓矿脉只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 8550
-        },
-        {
-          "id": 1502,
-          "weight": 950
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9404,26 +9528,14 @@
       "name": "星辉玉矿",
       "icon": "res://assets/items/icons_simple/25008.png",
       "group_id": 44,
-      "max_charges": 50,
-      "recharge_time": 6000,
-      "describe": "星辉玉矿可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "星辉玉矿只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 8170
-        },
-        {
-          "id": 1502,
-          "weight": 1140
-        },
-        {
-          "id": 1503,
-          "weight": 190
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9507,26 +9619,14 @@
       "name": "龙脉矿藏",
       "icon": "res://assets/items/icons_simple/25009.png",
       "group_id": 44,
-      "max_charges": 55,
-      "recharge_time": 6600,
-      "describe": "龙脉矿藏可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "龙脉矿藏只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 7790
-        },
-        {
-          "id": 1502,
-          "weight": 1425
-        },
-        {
-          "id": 1503,
-          "weight": 285
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9610,26 +9710,14 @@
       "name": "凤华玉脉",
       "icon": "res://assets/items/icons_simple/25010.png",
       "group_id": 44,
-      "max_charges": 60,
-      "recharge_time": 7200,
-      "describe": "凤华玉脉可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "凤华玉脉只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 7220
-        },
-        {
-          "id": 1502,
-          "weight": 1900
-        },
-        {
-          "id": 1503,
-          "weight": 380
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9713,26 +9801,14 @@
       "name": "九幽玄矿",
       "icon": "res://assets/items/icons_simple/25011.png",
       "group_id": 44,
-      "max_charges": 65,
-      "recharge_time": 7800,
-      "describe": "九幽玄矿可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "九幽玄矿只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 6650
-        },
-        {
-          "id": 1502,
-          "weight": 2375
-        },
-        {
-          "id": 1503,
-          "weight": 475
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9832,30 +9908,14 @@
       "name": "扶桑阳矿",
       "icon": "res://assets/items/icons_simple/25012.png",
       "group_id": 44,
-      "max_charges": 70,
-      "recharge_time": 8400,
-      "describe": "扶桑阳矿可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "扶桑阳矿只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 6270
-        },
-        {
-          "id": 1502,
-          "weight": 2470
-        },
-        {
-          "id": 1503,
-          "weight": 665
-        },
-        {
-          "id": 1504,
-          "weight": 95
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -9955,30 +10015,14 @@
       "name": "建木碧矿",
       "icon": "res://assets/items/icons_simple/25013.png",
       "group_id": 44,
-      "max_charges": 75,
-      "recharge_time": 9000,
-      "describe": "建木碧矿可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "建木碧矿只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 5890
-        },
-        {
-          "id": 1502,
-          "weight": 2565
-        },
-        {
-          "id": 1503,
-          "weight": 855
-        },
-        {
-          "id": 1504,
-          "weight": 190
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -10078,30 +10122,14 @@
       "name": "菩提心矿",
       "icon": "res://assets/items/icons_simple/25014.png",
       "group_id": 44,
-      "max_charges": 80,
-      "recharge_time": 9600,
-      "describe": "菩提心矿可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "菩提心矿只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 5510
-        },
-        {
-          "id": 1502,
-          "weight": 2660
-        },
-        {
-          "id": 1503,
-          "weight": 1045
-        },
-        {
-          "id": 1504,
-          "weight": 285
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -10201,30 +10229,14 @@
       "name": "鸿蒙源矿",
       "icon": "res://assets/items/icons_simple/25015.png",
       "group_id": 44,
-      "max_charges": 85,
-      "recharge_time": 10200,
-      "describe": "鸿蒙源矿可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "鸿蒙源矿只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 5130
-        },
-        {
-          "id": 1502,
-          "weight": 2755
-        },
-        {
-          "id": 1503,
-          "weight": 1235
-        },
-        {
-          "id": 1504,
-          "weight": 380
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     },
@@ -10324,30 +10336,14 @@
       "name": "太初神矿",
       "icon": "res://assets/items/icons_simple/25016.png",
       "group_id": 44,
-      "max_charges": 90,
-      "recharge_time": 10800,
-      "describe": "太初神矿可开采玉石并偶尔产出可使用的灵石。",
+      "max_charges": 6,
+      "recharge_time": 43200,
+      "describe": "太初神矿只产出可使用的灵石。",
       "type": "1",
       "spawns": [
         {
-          "id": 1501,
-          "weight": 4750
-        },
-        {
-          "id": 1502,
-          "weight": 2850
-        },
-        {
-          "id": 1503,
-          "weight": 1425
-        },
-        {
-          "id": 1504,
-          "weight": 475
-        },
-        {
           "id": 1601,
-          "weight": 500
+          "weight": 1000
         }
       ]
     }

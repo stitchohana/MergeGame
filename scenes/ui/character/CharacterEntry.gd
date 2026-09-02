@@ -50,20 +50,13 @@ func _on_cultivation_stage_changed(_level: int, _stage_name: String) -> void:
 func _on_reward_button_pressed() -> void:
 	var popup := preload("res://scenes/ui/home/BreakthroughRewardPreviewPopup.tscn").instantiate() as BreakthroughRewardPreviewPopup
 	UIManager.show_popup(popup)
-	popup.setup_for_current_level()
+	popup.setup_for_current_stage()
 
 
 func _refresh_reward_button() -> void:
 	if reward_button == null:
 		return
-	var level: int = CultivationService.current_level
-	var reward_id: int = ConfigDatabase.get_stage_breakthrough_reward(level)
-	if CultivationService.is_max_cultivation():
-		reward_button.tooltip_text = "已达最高境界"
-	elif reward_id > 0 and not ConfigDatabase.get_reward_data(reward_id).is_empty():
-		reward_button.tooltip_text = "查看突破奖励"
-	else:
-		reward_button.tooltip_text = "查看突破奖励（暂无额外奖励）"
+	reward_button.tooltip_text = "查看周天奖励"
 
 
 func _refresh_progress() -> void:
@@ -109,12 +102,7 @@ func _clamp_unlocked_stage_index(stage_idx: int) -> int:
 
 
 func _max_unlocked_home_stage_index() -> int:
-	var cultivation_level: int = CultivationService.current_level
-	if cultivation_level <= 1:
-		return 0
-	if cultivation_level <= 10:
-		return cultivation_level - 1
-	return 9 + (cultivation_level - 10) * 10
+	return ConfigDatabase.get_max_unlocked_home_meridian_stage_index(CultivationService.current_level)
 
 
 func _get_stage_lit(stage_idx: int) -> Array:

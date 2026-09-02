@@ -131,6 +131,7 @@ export interface GameState {
         completed: boolean;
     }[];
     meridian_threshold_idx?: number;
+    /** Number of fixed orders already revealed in the active threshold's waves. */
     meridian_fixed_order_cursor?: number;
     quest_progress?: Record<number, QuestProgress>;
     quests_initialized?: boolean;

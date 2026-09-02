@@ -9,5 +9,12 @@ export type GrantCurrentOrderItemsResult = {
     requiredCount?: number;
     availableSlots?: number;
 };
+export type RefreshAllOrdersResult = {
+    acupoints: any[];
+    refreshedCount: number;
+    preservedBreakthrough: boolean;
+    fixedOrdersPreserved: boolean;
+};
 export declare function grantCurrentOrderItems(state: GameState, engine: GameEngine): GrantCurrentOrderItemsResult;
+export declare function refreshAllOrders(state: GameState, engine: GameEngine): RefreshAllOrdersResult;
 export declare function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret: string, gmKey: string): Router;

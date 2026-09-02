@@ -40,6 +40,10 @@
 | `fixed_spawns` | int[] | 固定顺序生成（替代 spawns，可选） |
 | `no_cost` | bool | true 时不消耗体力/灵力（可选） |
 
+灵石矿脉（`25001–25016`）只产出可使用的 1 级灵石 `1601`，统一为 6 次发射、
+12 小时（43200 秒）重置；玉石 `1501–1516` 改由普通灵矿（`15001–15016`）
+以 5% 总权重小概率产出，矿材产出占其余 95% 权重。
+
 ### 效果字段（type=5 或 type=4 可配置）
 
 效果字段统一维护在 `items.xlsx` 的 `items_effect` 工作表中。`items_recipe_product`
@@ -174,6 +178,9 @@
 | `craft_time` | int | 制作时间（秒） |
 | `crafting_level` | int | 所需制作等级 |
 
+配方 `ingredients` 只能引用可消耗的普通物品或配方产物，不能引用
+`items_launcher` 中的发射器本体。
+
 制作时间由配方产物等级统一决定：
 
 | 产物等级 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
@@ -212,22 +219,26 @@
 
 ## 9. meridians.json — 经脉表
 
-订单候选由顶层 `order_pool` 控制：`sources` 支持主产物 `items_regular`、副产物
-`items_byproduct` 与配方产物 `items_recipe_product`。系统根据当前棋盘上的发射器
-和制作台，从其 `spawns` 与 `recipes` 递归计算真正可制作的订单物品。发射器内按
-产物链汇总权重，低于最高权重的产物链视为副产物。
-`level_ranges` 按 `cultivation.current_level` 分别配置三类物品等级范围：练气为主产物
-4级、副产物1–4级、配方产物1–4级；筑基为7–8级、5–8级、5–8级；金丹为
-10–12级、9–12级、9–12级；元婴均为13–16级。副产物等级范围与配方产物保持一致。
-固定引导订单仍优先使用 `fixed_orders` 或 `fixed_order_batches`，不经过等级过滤。
-新手固定订单可在每条 `{item_ids, rewards}` 中提供显式奖励；配置了 `rewards` 时，
+订单候选由当前棋盘上的发射器和制作台计算，固定包含主产物、副产物与配方产物三类。
+系统从 `spawns` 与 `recipes` 递归计算真正可制作的订单物品；发射器内产出权重较低
+的产物链视为副产物。
+`order_level_ranges` 对应 `meridians.xlsx` 的 `order_level_ranges` 工作表，按
+`cultivation.current_level` 配置主产物与配方产物的等级范围；副产物沿用配方产物范围。
+固定引导订单直接使用 `fixed_orders`，不经过等级过滤，`order_count` 以 XLSX 为准。
+`fixed_orders` 的紧凑形式是“一个对象一波”：`{item_ids:[...]}` 中的每个 ID
+对应该波的一个订单，当前波次全部完成后才会显示下一波。XLSX 中可写成每行一波的
+`item_ids:{5003,5004,6001}`。需要表达单个订单包含多个物品时，仍可使用旧的嵌套
+订单数组与 `item_ids` 配置。
+例如：`[{"item_ids":[5003,5004,6001]},{"item_ids":[9003,9004,10001]}]`。
+固定订单对象也可提供显式 `rewards`；配置了 `rewards` 时，
 服务端直接发放该奖励，不再按订单物品价值进行倍率换算。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-配方产物的 `level` 在导出时按配方依赖树计算，取所需材料的最大等级；循环依赖、缺失配方或无效原料会生成空等级，订单筛选时不会进入有等级限制的候选池。
+| `order_level_ranges` | array | 订单等级区间，来源为 `order_level_ranges` 工作表 |
+| `thresholds` | array | 阈值列表 `[{stage, count_min, count_max, acupoint_rewards, order_count, fixed_orders}]`；`fixed_orders` 可为 `{item_ids:[...]}` 波次对象数组或旧嵌套订单数组 |
 
-| `thresholds` | array | 阈值列表 `[{stage, count_min, count_max, acupoint_rewards, order_count, fixed_orders, fixed_order_batches}]`，不再配置 `item_pool` |
+配方产物的 `level` 在导出时按配方依赖树计算，取所需材料的最大等级；循环依赖、缺失配方或无效原料会生成空等级，订单筛选时不会进入有等级限制的候选池。
 
 ---
 
@@ -254,29 +265,34 @@
 
 ## 12. home_meridians.json — 家园经脉
 
-`production_rewards` 用 `{stage, index, items}` 配置生产设施奖励，其中 `stage`
-与 `index` 均为从 0 开始的下标。默认奖励时机是穴位完成；设置
-`timing: "circulation"` 时，奖励会合并到该阶段的 `circulation_rewards`，在整个周天完成时发放。
-`production_reward_rules` 可用 `facility_prefixes`、`levels`、`count` 批量配置设施
-链奖励，并用 `timing` 区分穴位或周天完成。穴位奖励按“基础材料与炼丹台 → 核心材料线
-与对应制作台 → 已有生产线的高等级设施”分阶段投放；灵木园/灵潭发射器不进入前期教程，
-改由后续周天循环奖励逐步引入，灵脉发射器则在首个循环奖励中只发放一个 1 级起点。
-新手引导首阶段的源表奖励保持不变。
-教程后的发射器首次出现时，同批或此前奖励必须已有能消耗其产物的制作台；练气一层
-首先补齐教程书架所需的兽栏与演阵台，再逐条开放后续生产链。
-教程后的周天奖励每次最多合并三类设施，继续降低单次记忆负担。
+设施奖励直接配置在对应阶段的 `circulation_reward.items` 中，完成整个周天时一次发放；
+不再维护全局生产奖励表。凡人阶段的教程设施由 `initial_setup.json` 直接摆放在初始棋盘上。
+穴位奖励不再单独配置，由阶段的 `acupoint_exp` 统一发放经验和 15 点体力。当前配置共有
+666 个周天，每个周天固定发放 2 个非灵石矿设施，共 1332 个周天设施奖励。
+
+为平滑前期节奏，凡人和练气期每个周天固定 4 个穴位；凡人单穴位消耗 60 点灵气、获得 1 点经验，
+练气期按层级递增至 80～160 点消耗和 2～3 点经验，凡人境界总经验为 12，低于练气一层的 48。
+
+设施奖励按境界逐步提高等级：凡人发放 1 级，练气期不超过 4 级，筑基期不超过 8 级，
+金丹期不超过 12 级，元婴及以后不超过 16 级；13 个设施族群均会在练气期内首次出现，
+并可在元婴期获得 16 级奖励。周天顺序先发放发射器，再发放依赖这些发射器的制作台。
+所有突破（前 19 个境界）统一通过 `rewards.json` 发放 1 个 1 级灵石矿 `25001`。
 突破奖励则通过 `cultivation.json` 的
 `breakthrough_reward_id` 指向 `rewards.json`；突破消耗物品由 `breakthrough_items` 配置。
 
+制作台的配方依赖会递归解析到发射器族群。配置顺序必须满足：制作台首次发放前，
+其全部依赖族群至少已有一个发射器在初始棋盘或更早的周天奖励中发放；同一周天内
+同时配置的发射器不视为“已先发放”。转换脚本会自动校验这条规则，初始棋盘中的
+`17001`、`16001` 作为教程设施基线保留。
+
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `stages` | array | 阶段列表 `[{name, acupoints, qi_cost, acupoint_rewards, circulation_rewards}]` |
-| `acupoint_rewards` | number/object/array | 单个奖励配置会应用到所有穴位；数组时按穴位下标逐点发放奖励 |
-| `circulation_rewards` | number/object | 整个周天完成时发放的奖励；设施链奖励会合并到这里 |
+| `stages` | array | 阶段列表 `[{cultivation_level, name, acupoints, qi_cost, acupoint_exp, circulation_reward}]` |
+| `acupoint_exp` | int | 激活每个穴位获得的经验；同时固定获得 15 点体力 |
+| `circulation_reward` | object/number | 整个周天完成时发放的奖励，包含经验、体力和恰好两个设施 `items` |
 
-`acupoint_rewards` 使用数字时必须是 `rewards.json` 中存在的奖励 ID；留空则由
-`acupoint_exp` 生成内联经验奖励。配置生成时会校验每个境界解锁的全部周天经验总和
-恰好等于该境界的突破经验要求（新手引导首阶段除外）。
+配置生成时会校验每个境界解锁的全部周天经验总和恰好等于该境界的突破经验要求
+（新手引导首阶段除外）。
 
 ---
 
@@ -303,5 +319,8 @@
 
 1. 修改 `config/xlsx/` 中的 Excel 文件
 2. 运行 `python config/xlsx_to_json.py` 重新生成 `json_output/` 下的 JSON
+   （转换时会校验发射器→制作台的依赖顺序；需要重建 666 周天奖励时运行
+   `python config/expand_home_meridians.py`，历史命令
+   `python config/optimize_facility_rewards.py` 会转发到该生成器）
 3. 重启服务器 `cd server && npm run dev`
 4. 启动 Godot 客户端测试

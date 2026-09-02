@@ -91,59 +91,22 @@ export declare const gameConfigTables: {
         launcher_speedup_stone_cost_per_minute: number;
     };
     homeMeridians: {
-        production_rewards: {
-            stage: number;
-            index: number;
-            items: {
-                id: number;
-                count: number;
-            }[];
-        }[];
-        production_reward_rules: {
-            stage: number;
-            index: number;
-            timing: string;
-            facility_prefixes: number[];
-            levels: number[];
-            count: number;
-        }[];
-        stages: ({
+        stages: {
             name: string;
             acupoints: number;
             qi_cost: number;
-            acupoint_rewards: {
+            acupoint_exp: number;
+            circulation_reward: {
+                tokens: {
+                    token: number;
+                    amount: number;
+                }[];
                 items: {
                     id: number;
                     count: number;
                 }[];
-                tokens: {
-                    token: number;
-                    amount: number;
-                }[];
-            }[];
-            circulation_rewards: {
-                tokens: {
-                    token: number;
-                    amount: number;
-                }[];
             };
-        } | {
-            name: string;
-            acupoints: number;
-            qi_cost: number;
-            acupoint_rewards: {
-                tokens: {
-                    token: number;
-                    amount: number;
-                }[];
-            };
-            circulation_rewards: {
-                tokens: {
-                    token: number;
-                    amount: number;
-                }[];
-            };
-        })[];
+        }[];
     };
     initialSetup: {
         main: {
@@ -260,33 +223,28 @@ export declare const gameConfigTables: {
         })[];
     };
     meridians: {
-        order_pool: {
-            sources: string[];
-            unlock_by: string[];
-            level_ranges: {
-                cultivation_min: number;
-                cultivation_max: number;
-                items_regular: number[];
-                items_byproduct: number[];
-                items_recipe_product: number[];
-            }[];
-        };
+        order_level_ranges: {
+            cultivation_min: number;
+            cultivation_max: number;
+            items_regular: number[];
+            items_recipe_product: number[];
+        }[];
         thresholds: ({
             stage: number;
             count_min: number;
             count_max: number;
             acupoint_rewards: number;
             order_count: number;
-            fixed_order_batches: {
+            fixed_orders: {
                 item_ids: number[];
-            }[][];
+            }[];
         } | {
             stage: number;
             count_min: number;
             count_max: number;
             acupoint_rewards: number;
             order_count: number;
-            fixed_order_batches?: undefined;
+            fixed_orders?: undefined;
         })[];
     };
     quests: {

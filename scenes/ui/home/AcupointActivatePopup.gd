@@ -217,4 +217,4 @@ func _on_close() -> void:
 func _on_gift_button_pressed() -> void:
 	var popup := preload("res://scenes/ui/home/BreakthroughRewardPreviewPopup.tscn").instantiate() as BreakthroughRewardPreviewPopup
 	UIManager.show_popup(popup)
-	popup.setup_for_current_level()
+	popup.setup_for_current_stage()

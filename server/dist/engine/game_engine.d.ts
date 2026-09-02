@@ -85,7 +85,6 @@ export declare class GameEngine {
     questResetHour: number;
     private shopConfig;
     private meridianThresholds;
-    private meridianOrderSources;
     private meridianOrderLevelRanges;
     private maps;
     private monsters;
@@ -110,7 +109,6 @@ export declare class GameEngine {
     private loadHomeMeridians;
     private _copyRewardConfig;
     getHomeMeridianDefs(): any[];
-    private _resolveRewardConfig;
     private _getAcupointReward;
     private _maxUnlockedHomeStageIndex;
     lightHomeAcupoint(state: GameState, stageIndex: number, acupointIndex: number): {
@@ -134,8 +132,23 @@ export declare class GameEngine {
     generateMeridianRequirements(state: GameState): {
         acupoints: any[];
     };
-    private _getFixedOrderBatches;
-    private _tryRevealFixedOrderBatch;
+    /**
+     * Force a GM refresh of the active order list.
+     *
+     * Normal generation intentionally keeps an existing list.  A GM refresh
+     * clears random orders before generating them again, while fixed onboarding
+     * waves are rebuilt from the currently visible orders so the wave cursor is
+     * never advanced or skipped.  Breakthrough requirements always win over a
+     * refresh and are kept authoritative.
+     */
+    refreshMeridianRequirements(state: GameState): {
+        acupoints: any[];
+        refreshedCount: number;
+        preservedBreakthrough: boolean;
+        fixedOrdersPreserved: boolean;
+    };
+    private _getFixedOrderWaves;
+    private _tryRevealFixedOrders;
     private _scaleRewardConfig;
     private _findMeridianThreshold;
     private _genOneAcupoint;
@@ -318,6 +331,8 @@ export declare class GameEngine {
         item_id: number;
         count: number;
     }[];
+    syncBreakthroughOrder(state: GameState): boolean;
+    private finishBreakthrough;
     executeTryBreakthrough(state: GameState, uid: number, level: number, exp: number): {
         ok: true;
         newCultivation: CultivationData;

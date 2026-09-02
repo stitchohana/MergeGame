@@ -13,6 +13,13 @@ export type GrantCurrentOrderItemsResult = {
   availableSlots?: number;
 };
 
+export type RefreshAllOrdersResult = {
+  acupoints: any[];
+  refreshedCount: number;
+  preservedBreakthrough: boolean;
+  fixedOrdersPreserved: boolean;
+};
+
 export function grantCurrentOrderItems(state: GameState, engine: GameEngine): GrantCurrentOrderItemsResult {
   const itemCounts: Record<string, number> = {};
   const orderItems: Array<{ id: number; name: string }> = [];
@@ -92,6 +99,10 @@ export function grantCurrentOrderItems(state: GameState, engine: GameEngine): Gr
   engine.initializeProductionUnlocks(state);
   state.version += 1;
   return { grantedCount: orderItems.length, itemCounts, mainGrid };
+}
+
+export function refreshAllOrders(state: GameState, engine: GameEngine): RefreshAllOrdersResult {
+  return engine.refreshMeridianRequirements(state);
 }
 
 export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret: string, gmKey: string): Router {
@@ -251,8 +262,27 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
             msg = `Granted ${result.grantedCount} current order items to main grid`;
             break;
           }
+          case "refresh_orders":
+          case "refresh_all_orders": {
+            const result = refreshAllOrders(state, engine);
+            gmResult = {
+              meridian_acupoints: result.acupoints,
+              threshold_idx: state.meridian_threshold_idx,
+              refreshed_count: result.refreshedCount,
+              preserved_breakthrough: result.preservedBreakthrough,
+              fixed_orders_preserved: result.fixedOrdersPreserved,
+            };
+            if (result.preservedBreakthrough) {
+              msg = "Breakthrough order is active; orders were not refreshed";
+            } else if (result.fixedOrdersPreserved) {
+              msg = `Refreshed ${result.refreshedCount} fixed orders without advancing the wave`;
+            } else {
+              msg = `Refreshed ${result.refreshedCount} orders`;
+            }
+            break;
+          }
           default:
-            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid","activate_home_acupoints","grant_order_items"] });
+            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid","activate_home_acupoints","grant_order_items","refresh_orders","refresh_all_orders"] });
             return;
         }
 

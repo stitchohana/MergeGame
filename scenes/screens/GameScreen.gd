@@ -48,6 +48,7 @@ func _ready() -> void:
 	CloudService.stamina_restore_rejected.connect(_on_stamina_restore_rejected)
 	CloudService.spirit_stone_consume_confirmed.connect(_on_spirit_stone_consume_confirmed)
 	CloudService.spirit_stone_consume_rejected.connect(_on_spirit_stone_consume_rejected)
+	CloudService.state_loaded.connect(_on_state_loaded_for_orders)
 	CultivationService.stage_changed.connect(_on_stage_changed_for_meridian)
 	CloudService.breakthrough_confirmed.connect(func(_r): _item_use_pending = false)
 	CloudService.breakthrough_rejected.connect(func(_r): _item_use_pending = false)
@@ -63,6 +64,15 @@ func _ready() -> void:
 	_setup_extras()
 
 	print("[GameScreen] Game initialized!")
+
+func _on_state_loaded_for_orders(state: Dictionary) -> void:
+	if not state.has("meridian_acupoints"):
+		return
+	var acupoints: Array = state.get("meridian_acupoints", []) as Array
+	GameState.meridian_acupoints = acupoints.duplicate(true)
+	GameState.meridian_threshold_idx = int(state.get("meridian_threshold_idx", GameState.meridian_threshold_idx))
+	if is_inside_tree():
+		_display_meridian()
 
 func _setup_extras() -> void:
 	# Design order: cultivation character -> order cards.

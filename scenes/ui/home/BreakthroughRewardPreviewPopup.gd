@@ -5,45 +5,103 @@ const REWARD_ITEM_SIZE: int = 112
 
 @onready var title_label: Label = $Panel/Content/VBox/TitleLabel
 @onready var stage_label: Label = $Panel/Content/VBox/StageLabel
-@onready var rewards_container: HBoxContainer = $Panel/Content/VBox/RewardsPanel/RewardsContainer
+@onready var rewards_container: HBoxContainer = $Panel/Content/VBox/RewardsPanel/RewardsScroll/RewardsContainer
 @onready var empty_label: Label = $Panel/Content/VBox/RewardsPanel/EmptyLabel
 @onready var close_btn: TextureButton = $Panel/CloseButton
 
-var _pending_level: int = -1
+var _pending_stage_index: int = -1
 
 
 func _ready() -> void:
 	if close_btn and not close_btn.pressed.is_connected(_on_close):
 		close_btn.pressed.connect(_on_close)
-	if _pending_level > 0:
-		var pending_level: int = _pending_level
-		_pending_level = -1
-		setup_for_level(pending_level)
+	if _pending_stage_index >= 0:
+		var pending_stage_index: int = _pending_stage_index
+		_pending_stage_index = -1
+		setup_for_stage_index(pending_stage_index)
 
 
 func setup_for_current_level() -> void:
-	setup_for_level(CultivationService.current_level)
+	setup_for_current_stage()
 
 
 func setup_for_level(level: int) -> void:
+	# Backward-compatible entry point for callers that only know cultivation
+	# level. The gift now previews the corresponding home-meridian cycle reward.
+	var stages: Array = _get_home_meridian_defs()
+	setup_for_stage_index(_get_home_stage_index_for_level(level, stages.size()))
+
+
+func setup_for_current_stage() -> void:
+	var stages: Array = _get_home_meridian_defs()
+	setup_for_stage_index(_get_current_home_stage_index(stages))
+
+
+func setup_for_stage_index(stage_index: int) -> void:
 	if not is_node_ready():
-		_pending_level = level
+		_pending_stage_index = stage_index
 		return
 
-	var stage_count: int = ConfigDatabase.get_stage_count()
-	var display_level: int = clampi(level, 1, maxi(stage_count, 1))
-	var current_stage_name: String = ConfigDatabase.get_stage_name(display_level)
-	var next_stage_name: String = ConfigDatabase.get_stage_name(display_level + 1)
-	if display_level >= stage_count or next_stage_name == "未知":
-		next_stage_name = "最高境界"
-	title_label.text = "突破奖励预览"
-	stage_label.text = "%s  →  %s" % [current_stage_name, next_stage_name]
-	_populate_rewards(ConfigDatabase.get_stage_breakthrough_reward(display_level))
+	var stages: Array = _get_home_meridian_defs()
+	var display_index: int = clampi(stage_index, -1, stages.size() - 1)
+	var stage_data: Dictionary = {}
+	if display_index >= 0 and display_index < stages.size() and stages[display_index] is Dictionary:
+		stage_data = stages[display_index] as Dictionary
+	title_label.text = "周天奖励预览"
+	var stage_name: String = String(stage_data.get("name", "当前周天"))
+	stage_label.text = "当前周天：%s" % stage_name
+	_populate_rewards(_get_circulation_reward(stage_data))
 
 
-func _populate_rewards(reward_id: int) -> void:
+func _get_home_meridian_defs() -> Array:
+	if not GameState.home_meridian_defs.is_empty():
+		return GameState.home_meridian_defs.duplicate(true)
+	return ConfigDatabase.get_home_meridian_stages()
+
+
+func _get_current_home_stage_index(stages: Array) -> int:
+	if stages.is_empty():
+		return -1
+	var max_unlocked_index: int = _max_unlocked_home_stage_index()
+	for stage_index: int in range(stages.size()):
+		var progress: Dictionary = _get_home_stage_progress(stage_index)
+		if progress.is_empty() or not bool(progress.get("circulation_completed", false)):
+			return clampi(stage_index, 0, mini(max_unlocked_index, stages.size() - 1))
+	return clampi(stages.size() - 1, 0, mini(max_unlocked_index, stages.size() - 1))
+
+
+func _get_home_stage_progress(stage_index: int) -> Dictionary:
+	for progress_variant: Variant in GameState.home_meridian_progress:
+		if not progress_variant is Dictionary:
+			continue
+		var progress: Dictionary = progress_variant as Dictionary
+		if int(progress.get("stage", -1)) == stage_index:
+			return progress
+	return {}
+
+
+func _get_home_stage_index_for_level(level: int, stage_count: int) -> int:
+	if stage_count <= 0:
+		return -1
+	var max_index: int = ConfigDatabase.get_max_unlocked_home_meridian_stage_index(level)
+	return clampi(max_index, 0, stage_count - 1)
+
+
+func _max_unlocked_home_stage_index() -> int:
+	return ConfigDatabase.get_max_unlocked_home_meridian_stage_index(CultivationService.current_level)
+
+
+func _get_circulation_reward(stage_data: Dictionary) -> Dictionary:
+	var reward_variant: Variant = stage_data.get("circulation_reward", {})
+	if reward_variant is Dictionary:
+		return (reward_variant as Dictionary).duplicate(true)
+	if reward_variant is int:
+		return ConfigDatabase.get_reward_data(int(reward_variant))
+	return {}
+
+
+func _populate_rewards(rewards: Dictionary) -> void:
 	_clear_rewards()
-	var rewards: Dictionary = ConfigDatabase.get_reward_data(reward_id)
 	var reward_count: int = 0
 
 	var tokens_variant: Variant = rewards.get("tokens", [])
@@ -78,7 +136,7 @@ func _populate_rewards(reward_id: int) -> void:
 
 	empty_label.visible = reward_count == 0
 	if reward_count == 0:
-		empty_label.text = "本次突破暂无额外礼包奖励"
+		empty_label.text = "本周天暂无额外奖励"
 
 
 func _clear_rewards() -> void:

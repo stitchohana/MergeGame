@@ -20,14 +20,15 @@ func _ready() -> void:
 
 
 func _on_cmd_selected(index: int) -> void:
-	if index == 8:
+	var cmd: String = cmd_option.get_item_text(index)
+	if cmd in ["激活穴位节点", "下发订单道具", "刷新所有订单"]:
 		amount_spin.value = 1.0
 
 func _populate_cmds() -> void:
 	if cmd_option.item_count > 0:
 		cmd_option.select(0)
 		return
-	var cmds := ["增加经验", "增加灵石", "设置体力", "设置灵力", "升级", "突破", "添加道具", "重置发射器CD"]
+	var cmds := ["增加经验", "增加灵石", "设置体力", "设置灵力", "升级", "突破", "添加道具", "重置发射器CD", "激活穴位节点", "下发订单道具", "刷新所有订单"]
 	for c in cmds:
 		cmd_option.add_item(c)
 	cmd_option.select(0)
@@ -55,12 +56,11 @@ func _on_exec() -> void:
 			cmd_key = "add_item"
 			item_id = int(amount_spin.value)
 		"重置发射器CD": cmd_key = "reset_launcher_cd"
-	var amount: int = 1 if cmd == "添加道具" else int(amount_spin.value)
+		"激活穴位节点": cmd_key = "activate_home_acupoints"
+		"下发订单道具": cmd_key = "grant_order_items"
+		"刷新所有订单": cmd_key = "refresh_orders"
+	var amount: int = 1 if cmd in ["添加道具", "下发订单道具", "刷新所有订单"] else int(amount_spin.value)
 	result_label.text = "执行中..."
-	if cmd_option.selected == 8:
-		cmd_key = "activate_home_acupoints"
-	elif cmd_option.selected == 9:
-		cmd_key = "grant_order_items"
 	CloudService.submit_gm_exec(cmd_key, amount, item_id, col, row)
 
 func _on_gm_confirmed(_result: Dictionary) -> void:

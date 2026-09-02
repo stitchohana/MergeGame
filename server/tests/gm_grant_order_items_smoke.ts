@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { GameEngine } from "../src/engine/game_engine";
 import { gameConfigTables } from "../src/worker/config_data";
-import { grantCurrentOrderItems } from "../src/routes/gm";
+import { grantCurrentOrderItems, refreshAllOrders } from "../src/routes/gm";
 
 const engine = new GameEngine(gameConfigTables);
 
@@ -41,5 +41,34 @@ const fullResult = grantCurrentOrderItems(fullState, engine);
 assert.equal(fullResult.error, "grid_full");
 assert.equal(fullResult.grantedCount, 0);
 assert.equal(fullState.grid.length, engine.MAX_CELLS);
+
+const randomState: any = engine.createInitialState();
+randomState.cultivation.current_level = 2;
+randomState.meridian_threshold_idx = 1;
+randomState.meridian_acupoints = [{ completed: false, item_ids: [5001] }];
+const previousRandomOrders = randomState.meridian_acupoints;
+const randomRefresh = refreshAllOrders(randomState, engine);
+assert.equal(randomRefresh.preservedBreakthrough, false);
+assert.equal(randomRefresh.fixedOrdersPreserved, false);
+assert.equal(randomRefresh.refreshedCount, randomState.meridian_acupoints.length);
+assert.notEqual(randomState.meridian_acupoints, previousRandomOrders);
+assert.equal(randomState.meridian_acupoints.length, 7);
+
+const fixedState: any = engine.createInitialState();
+const fixedInitial = engine.generateMeridianRequirements(fixedState).acupoints;
+const fixedIds = fixedInitial.map((order: any) => [...order.item_ids]);
+const fixedCursor = fixedState.meridian_fixed_order_cursor;
+const fixedRefresh = refreshAllOrders(fixedState, engine);
+assert.equal(fixedRefresh.fixedOrdersPreserved, true);
+assert.deepEqual(fixedState.meridian_acupoints.map((order: any) => order.item_ids), fixedIds);
+assert.equal(fixedState.meridian_fixed_order_cursor, fixedCursor);
+fixedState.meridian_acupoints.splice(1, 1);
+const partialFixedRefresh = refreshAllOrders(fixedState, engine);
+assert.equal(partialFixedRefresh.fixedOrdersPreserved, true);
+assert.deepEqual(
+  fixedState.meridian_acupoints.map((order: any) => order.item_ids),
+  [fixedIds[0], fixedIds[2]],
+);
+assert.equal(fixedState.meridian_fixed_order_cursor, fixedCursor);
 
 console.log("GM_GRANT_ORDER_ITEMS_SMOKE_OK");

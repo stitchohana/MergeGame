@@ -146,6 +146,7 @@ export interface GameState {
   meridian_circulations?: number;
   meridian_acupoints?: { item_id: number; name: string; count: number; completed: boolean }[];
   meridian_threshold_idx?: number;
+  /** Number of fixed orders already revealed in the active threshold's waves. */
   meridian_fixed_order_cursor?: number;
   quest_progress?: Record<number, QuestProgress>;
   quests_initialized?: boolean;

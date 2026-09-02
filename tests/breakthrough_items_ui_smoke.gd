@@ -23,6 +23,7 @@ func _ready() -> void:
 				{"item_id": 28052, "count": 1},
 				{"item_id": 28053, "count": 1},
 			],
+			"breakthrough_reward_id": 301,
 		}, {
 			"name": "下一层",
 			"exp": 999,
@@ -46,6 +47,12 @@ func _ready() -> void:
 			break
 	assert(confirm_popup != null)
 	assert(confirm_popup.title_label.text == "突破确认")
+	assert(confirm_popup is BreakthroughConfirmPopup)
+	var breakthrough_popup: BreakthroughConfirmPopup = confirm_popup as BreakthroughConfirmPopup
+	assert(breakthrough_popup.rewards_container.get_child_count() == 1)
+	var first_reward_card: VBoxContainer = breakthrough_popup.rewards_container.get_child(0) as VBoxContainer
+	var first_reward_widget: ItemWidget = first_reward_card.get_node("ItemWidget") as ItemWidget
+	assert(int(first_reward_widget.item_data.get("id", 0)) == 25001)
 	await UIManager.hide_popup(confirm_popup)
 
 	var scroll: ScrollContainer = home.get_node("BreakthroughItemsScroll") as ScrollContainer

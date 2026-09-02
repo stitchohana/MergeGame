@@ -4,7 +4,9 @@
 
 **Goal:** 按当前修为境界限制动态订单中的副产物与制作台产物等级。
 
-**Architecture:** 在 `meridians.json.order_pool` 配置修为等级区间和两类订单来源的物品等级范围。服务端根据 `cultivation.current_level` 选择适用规则，只对动态随机订单候选进行过滤；固定引导订单继续读取 `fixed_orders`。
+**Architecture:** `meridians.xlsx` 的 `order_level_ranges` 工作表是订单等级区间的唯一来源，导出到
+`meridians.json.order_level_ranges`。服务端根据 `cultivation.current_level` 选择适用规则，固定使用
+主产物、副产物与配方产物三类订单来源；固定引导订单直接读取 `fixed_orders`。
 
 **Tech Stack:** TypeScript/Godot worker、JSON 配置、Python XLSX 转换脚本、tsx 检查脚本。
 
@@ -24,7 +26,7 @@
 **Files:**
 - Modify: `server/src/engine/game_engine.ts`
 
-加载 `order_pool.level_ranges`，在计算已解锁设施产出时同时检查来源类型、物品等级和当前修为等级；没有匹配境界规则时保持已有候选逻辑。
+加载 `order_level_ranges`，在计算已解锁设施产出时同时检查来源类型、物品等级和当前修为等级；没有匹配境界规则时保持已有候选逻辑。
 
 ### Task 3: 验证
 

@@ -3,6 +3,8 @@
 import json, re
 from pathlib import Path
 
+from recipe_validation import validate_no_launcher_ingredients
+
 BASE = Path(__file__).parent
 recipes = json.load(open(BASE / "json_output" / "recipes.json", encoding="utf-8"))
 items = json.load(open(BASE / "json_output" / "items.json", encoding="utf-8"))
@@ -112,6 +114,8 @@ all_new.extend(build("talisman", talisman_recipes))
 recipes["recipes"].extend(all_new)
 for i, r in enumerate(recipes["recipes"]):
     r["id"] = i + 1
+
+validate_no_launcher_ingredients(recipes["recipes"], items.get("launcher", []))
 
 with open(BASE / "json_output" / "recipes.json", "w", encoding="utf-8") as f:
     json.dump(recipes, f, ensure_ascii=False, indent=2)

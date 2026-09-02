@@ -117,12 +117,7 @@ func _clamp_unlocked_stage_index(stage_idx: int, stage_count: int) -> int:
 	return clampi(stage_idx, 0, mini(stage_count - 1, _max_unlocked_home_stage_index()))
 
 func _max_unlocked_home_stage_index() -> int:
-	var cultivation_level: int = CultivationService.current_level
-	if cultivation_level <= 1:
-		return 0
-	if cultivation_level <= 10:
-		return cultivation_level - 1
-	return 9 + (cultivation_level - 10) * 10
+	return ConfigDatabase.get_max_unlocked_home_meridian_stage_index(CultivationService.current_level)
 
 func _get_stage_lit(home_progress: Array, stage_idx: int) -> Array:
 	for progress_variant in home_progress:

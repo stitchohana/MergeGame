@@ -12,6 +12,10 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
+from facility_reward_validation import validate_facility_reward_order
+from home_meridian_progression import validate_home_progression
+from recipe_validation import validate_no_launcher_ingredients
+
 BASE = Path(__file__).parent
 JSON_DIR = BASE / "json_output"
 OUT = BASE / "xlsx"
@@ -47,6 +51,39 @@ def join_dict_list(lst, sep=";"):
     return sep.join(parts)
 
 
+def item_type(item):
+    """Read an item type consistently when JSON stores it as int or text."""
+    value = item.get("type", 0)
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return value
+
+
+def fixed_orders_for_xlsx(fixed_orders):
+    """Serialize flat or wave-grouped fixed orders while keeping waves readable."""
+    if not fixed_orders:
+        return ""
+    if (
+        isinstance(fixed_orders, list)
+        and all(
+            isinstance(wave, dict)
+            and set(wave.keys()) == {"item_ids"}
+            and isinstance(wave.get("item_ids"), list)
+            and wave["item_ids"]
+            for wave in fixed_orders
+        )
+    ):
+        return "\n".join(
+            f"item_ids:{{{','.join(str(item_id) for item_id in wave['item_ids'])}}}"
+            for wave in fixed_orders
+        )
+    if isinstance(fixed_orders, list) and fixed_orders and all(isinstance(wave, list) for wave in fixed_orders):
+        wave_text = [json.dumps(wave, ensure_ascii=False, separators=(",", ":")) for wave in fixed_orders]
+        return "[\n  " + ",\n  ".join(wave_text) + "\n]"
+    return json.dumps(fixed_orders, ensure_ascii=False, separators=(",", ":"))
+
+
 def format_rewards(obj):
     """Convert a rewards dict like {tokens: [{token:4,amount:2}]} to string '4:2;3:15'"""
     if not obj:
@@ -62,17 +99,9 @@ def format_rewards(obj):
 
 
 def reward_json_for_xlsx(obj):
-    if isinstance(obj, list):
+    if isinstance(obj, (dict, list)):
         return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
     return ""
-
-
-def reward_exp_amount(obj):
-    if isinstance(obj, dict):
-        return next((t.get("amount", 0) for t in obj.get("tokens", []) if t.get("token") == 4), 0)
-    if isinstance(obj, list):
-        return next((reward_exp_amount(entry) for entry in obj if reward_exp_amount(entry) > 0), 0)
-    return 0
 
 
 def add_sheet(ws, headers, rows):
@@ -115,8 +144,8 @@ print("Building items.xlsx...")
 data = json.load(open(JSON_DIR / "items.json", encoding="utf-8"))
 wb = new_book()
 
-regular = [it for it in data["regular"] if it.get("type", 0) == 0]
-consumables = [it for it in data["regular"] if it.get("type") == 4]
+regular = [it for it in data["regular"] if item_type(it) == 0]
+consumables = [it for it in data["regular"] if item_type(it) == 4]
 
 hr = ["id","level","name","icon","group_id","type","describe","value","sell_price"]
 rr = []
@@ -176,30 +205,33 @@ save(wb, "items")
 print("Building meridians.xlsx...")
 data = json.load(open(JSON_DIR / "meridians.json", encoding="utf-8"))
 wb = new_book()
-h = ["stage","count_min","count_max","acupoint_rewards","order_count","fixed_orders","fixed_order_batches"]
+h = ["stage","count_min","count_max","acupoint_rewards","order_count","fixed_orders"]
 r = []
 for t in data["thresholds"]:
     r.append([t.get("stage",""), t.get("count_min",""), t.get("count_max",""),
               t.get("acupoint_rewards",""), t.get("order_count",""),
-              json.dumps(t.get("fixed_orders", []), ensure_ascii=False, separators=(",", ":")) if t.get("fixed_orders") else "",
-              json.dumps(t.get("fixed_order_batches", []), ensure_ascii=False, separators=(",", ":")) if t.get("fixed_order_batches") else ""])
+              fixed_orders_for_xlsx(t.get("fixed_orders", []))])
 ws = wb.create_sheet("meridians")
 add_sheet(ws, h, r)
+for row_index, threshold in enumerate(data["thresholds"], 2):
+    if threshold.get("fixed_orders"):
+        ws.column_dimensions["F"].width = 80
+        ws.cell(row=row_index, column=6).alignment = Alignment(
+            horizontal="left", vertical="top", wrap_text=True
+        )
+        ws.row_dimensions[row_index].height = 100
 level_range_headers = [
     "cultivation_min", "cultivation_max",
     "items_regular_min", "items_regular_max",
-    "items_byproduct_min", "items_byproduct_max",
     "items_recipe_product_min", "items_recipe_product_max",
 ]
 level_range_rows = []
-for level_range in data.get("order_pool", {}).get("level_ranges", []):
+for level_range in data.get("order_level_ranges", []):
     regular_range = level_range.get("items_regular", ["", ""])
-    byproduct_range = level_range.get("items_byproduct", level_range.get("items_recipe_product", ["", ""]))
     recipe_product_range = level_range.get("items_recipe_product", ["", ""])
     level_range_rows.append([
         level_range.get("cultivation_min", ""), level_range.get("cultivation_max", ""),
         regular_range[0], regular_range[1],
-        byproduct_range[0], byproduct_range[1],
         recipe_product_range[0], recipe_product_range[1],
     ])
 ws2 = wb.create_sheet("order_level_ranges")
@@ -244,6 +276,8 @@ save(wb, "game_config")
 # ════════════════════════════════════════════════════════════
 print("Building recipes.xlsx...")
 data = json.load(open(JSON_DIR / "recipes.json", encoding="utf-8"))
+items_data = json.load(open(JSON_DIR / "items.json", encoding="utf-8"))
+validate_no_launcher_ingredients(data["recipes"], items_data.get("launcher", []))
 wb = new_book()
 h = ["id","name","ingredients","result","craft_time"]
 r = []
@@ -400,13 +434,31 @@ save(wb, "weekly_tasks")
 # ════════════════════════════════════════════════════════════
 print("Building home_meridians.xlsx...")
 data = json.load(open(JSON_DIR / "home_meridians.json", encoding="utf-8"))
+items_for_facility_validation = json.load(open(JSON_DIR / "items.json", encoding="utf-8"))
+recipes_for_facility_validation = json.load(open(JSON_DIR / "recipes.json", encoding="utf-8"))["recipes"]
+setup_for_facility_validation = json.load(open(JSON_DIR / "initial_setup.json", encoding="utf-8"))
+rewards_for_facility_validation = json.load(open(JSON_DIR / "rewards.json", encoding="utf-8")).get("rewards", {})
+cultivation_for_home_validation = json.load(open(JSON_DIR / "cultivation.json", encoding="utf-8"))["stages"]
+validate_home_progression(
+    data["stages"],
+    cultivation_for_home_validation,
+    rewards_for_facility_validation,
+    items_for_facility_validation,
+)
+validate_facility_reward_order(
+    data["stages"],
+    items_for_facility_validation,
+    recipes_for_facility_validation,
+    setup_for_facility_validation,
+    rewards_for_facility_validation,
+    cultivation_for_home_validation,
+)
 wb = new_book()
 ws = wb.create_sheet("home_meridians")
-add_sheet(ws, ["name","acupoints","qi_cost","acupoint_exp","circulation_exp","acupoint_rewards"],
-    [[s.get("name",""), s.get("acupoints",""), s.get("qi_cost",""),
-      reward_exp_amount(s.get("acupoint_rewards", {})),
-      next((t.get("amount", 0) for t in s.get("circulation_rewards", {}).get("tokens", []) if t.get("token") == 4), 0),
-      reward_json_for_xlsx(s.get("acupoint_rewards", {}))]
+add_sheet(ws, ["cultivation_level","name","acupoints","qi_cost","acupoint_exp","circulation_reward"],
+    [[s.get("cultivation_level",""), s.get("name",""), s.get("acupoints",""), s.get("qi_cost",""),
+      s.get("acupoint_exp", 0),
+      reward_json_for_xlsx(s.get("circulation_reward", {}))]
      for s in data["stages"]])
 save(wb, "home_meridians")
 

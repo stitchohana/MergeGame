@@ -1,130 +1,81 @@
 {
-  "order_pool": {
-    "sources": [
-      "items_regular",
-      "items_byproduct",
-      "items_recipe_product"
-    ],
-    "unlock_by": [
-      "items_launcher",
-      "items_crafting"
-    ],
-    "level_ranges": [
-      {
-        "cultivation_min": 1,
-        "cultivation_max": 10,
-        "items_regular": [
-          4,
-          4
-        ],
-        "items_byproduct": [
-          1,
-          4
-        ],
-        "items_recipe_product": [
-          1,
-          4
-        ]
-      },
-      {
-        "cultivation_min": 11,
-        "cultivation_max": 13,
-        "items_regular": [
-          7,
-          8
-        ],
-        "items_byproduct": [
-          5,
-          8
-        ],
-        "items_recipe_product": [
-          5,
-          8
-        ]
-      },
-      {
-        "cultivation_min": 14,
-        "cultivation_max": 16,
-        "items_regular": [
-          10,
-          12
-        ],
-        "items_byproduct": [
-          9,
-          12
-        ],
-        "items_recipe_product": [
-          9,
-          12
-        ]
-      },
-      {
-        "cultivation_min": 17,
-        "cultivation_max": 19,
-        "items_regular": [
-          13,
-          16
-        ],
-        "items_byproduct": [
-          13,
-          16
-        ],
-        "items_recipe_product": [
-          13,
-          16
-        ]
-      }
-    ]
-  },
+  "order_level_ranges": [
+    {
+      "cultivation_min": 1,
+      "cultivation_max": 10,
+      "items_regular": [
+        4,
+        4
+      ],
+      "items_recipe_product": [
+        1,
+        4
+      ]
+    },
+    {
+      "cultivation_min": 11,
+      "cultivation_max": 13,
+      "items_regular": [
+        7,
+        8
+      ],
+      "items_recipe_product": [
+        5,
+        8
+      ]
+    },
+    {
+      "cultivation_min": 14,
+      "cultivation_max": 16,
+      "items_regular": [
+        10,
+        12
+      ],
+      "items_recipe_product": [
+        9,
+        12
+      ]
+    },
+    {
+      "cultivation_min": 17,
+      "cultivation_max": 19,
+      "items_regular": [
+        13,
+        16
+      ],
+      "items_recipe_product": [
+        13,
+        16
+      ]
+    }
+  ],
   "thresholds": [
     {
       "stage": 1,
       "count_min": 1,
       "count_max": 1,
       "acupoint_rewards": 219,
-      "order_count": 3,
-      "fixed_order_batches": [
-        [
-          {
-            "item_ids": [
-              5003
-            ]
-          },
-          {
-            "item_ids": [
-              5004
-            ]
-          },
-          {
-            "item_ids": [
-              6001
-            ]
-          }
-        ],
-        [
-          {
-            "item_ids": [
-              9003
-            ]
-          },
-          {
-            "item_ids": [
-              9004
-            ]
-          },
-          {
-            "item_ids": [
-              10001
-            ]
-          }
-        ],
-        [
-          {
-            "item_ids": [
-              27001
-            ]
-          }
-        ]
+      "order_count": 7,
+      "fixed_orders": [
+        {
+          "item_ids": [
+            5003,
+            5004,
+            6001
+          ]
+        },
+        {
+          "item_ids": [
+            9003,
+            9004,
+            10001
+          ]
+        },
+        {
+          "item_ids": [
+            27001
+          ]
+        }
       ]
     },
     {

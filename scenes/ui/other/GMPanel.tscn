@@ -59,7 +59,7 @@ offset_left = 120.0
 offset_top = 66.0
 offset_right = 468.0
 offset_bottom = 112.0
-item_count = 10
+item_count = 11
 popup/item_0/text = "增加经验"
 popup/item_0/id = 0
 popup/item_1/text = "增加灵石"
@@ -80,6 +80,8 @@ popup/item_8/text = "激活穴位节点"
 popup/item_8/id = 8
 popup/item_9/text = "下发订单道具"
 popup/item_9/id = 9
+popup/item_10/text = "刷新所有订单"
+popup/item_10/id = 10
 
 [node name="AmountLabel" type="Label" parent="Panel" unique_id=1188029945]
 layout_mode = 0

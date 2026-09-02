@@ -3,6 +3,8 @@
 import json, re
 from pathlib import Path
 
+from recipe_validation import validate_no_launcher_ingredients
+
 BASE = Path(__file__).parent
 ITEMS = json.load(open(BASE / "json_output" / "items.json", encoding="utf-8"))
 
@@ -309,6 +311,8 @@ all_recipes = []
 all_recipes.extend(build_recipes(xp_recipes, "cultivation"))
 all_recipes.extend(build_recipes(mp_recipes, "spirit"))
 all_recipes.extend(build_recipes(wine_recipes, "wine"))
+
+validate_no_launcher_ingredients(all_recipes, ITEMS.get("launcher", []))
 
 # Re-index
 for i, r in enumerate(all_recipes):

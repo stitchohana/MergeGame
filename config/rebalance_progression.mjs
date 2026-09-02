@@ -82,7 +82,7 @@ const qiPerValue = 10;
 const orderRewardId = 219;
 rewards.rewards[String(orderRewardId)] = { tokens: [{ token: 2, amount: qiPerValue }] };
 const orderPoolForStage = stage => {
-  const range = (meridians.order_pool?.level_ranges ?? []).find(entry =>
+  const range = (meridians.order_level_ranges ?? []).find(entry =>
     stage >= Number(entry.cultivation_min) && stage <= Number(entry.cultivation_max));
   if (!range) return [];
   const [regularMin, regularMax] = range.items_regular;
@@ -102,9 +102,7 @@ const orderPoolForStage = stage => {
 };
 
 for (const threshold of meridians.thresholds) {
-  const stage = Number(threshold.stage);
   delete threshold.item_pool;
-  threshold.order_count = Math.max(5, Number(threshold.order_count ?? 5));
   threshold.acupoint_rewards = orderRewardId;
   delete threshold.qi_per_value;
 }
@@ -116,11 +114,10 @@ for (let i = 0; i < earlyExpTargets.length; i++) cultivation.stages[i].exp = ear
 const regenInterval = gameConfig.stamina.regen_interval;
 const targetDays = 300;
 const naturalStamina = Math.floor(targetDays * 86400 / regenInterval) * gameConfig.stamina.regen_amount;
-// The tutorial stage uses per-acupoint reward entries, while normal
-// progression stages share one reward config. Detect it structurally so a
-// localized display name cannot shift every EXP budget by one.
-const hasTutorialHomeStage = Array.isArray(home.stages[0]?.acupoint_rewards);
-const progressionHomeStages = hasTutorialHomeStage ? home.stages.slice(1) : home.stages;
+// The first stage is the fixed tutorial; all later stages are rebalanced by
+// cultivation segment. Facilities remain attached to each stage's circulation
+// reward while only the token amounts are recalculated here.
+const progressionHomeStages = home.stages.slice(1);
 const homeStamina = progressionHomeStages.reduce((sum, stage) => sum + stage.acupoints * 15 + 100, 0);
 const targetQi = (naturalStamina + homeStamina) * qiPerValue;
 const oldQi = progressionHomeStages.reduce((sum, stage) => sum + stage.acupoints * stage.qi_cost, 0);
@@ -139,12 +136,15 @@ for (let groupIndex = 0; groupIndex < 19; groupIndex++) {
     const acupointExp = Math.max(1, Math.round(cycleBudget * 0.7 / stage.acupoints));
     const holeTotal = acupointExp * stage.acupoints;
     const circulationExp = Math.max(1, cycleBudget - holeTotal);
-    stage.acupoint_rewards = { tokens: [{ token: 4, amount: acupointExp }, { token: 3, amount: 15 }] };
-    stage.circulation_rewards = { tokens: [{ token: 4, amount: circulationExp }, { token: 3, amount: 100 }] };
+    stage.acupoint_exp = acupointExp;
+    stage.circulation_reward = {
+      tokens: [{ token: 4, amount: circulationExp }, { token: 3, amount: 100 }],
+      items: stage.circulation_reward?.items ?? [],
+    };
   }
   const configuredExp = stages.reduce((sum, stage) => {
-    const acupointExp = Number(stage.acupoint_rewards.tokens.find(token => token.token === 4)?.amount ?? 0);
-    const circulationExp = Number(stage.circulation_rewards.tokens.find(token => token.token === 4)?.amount ?? 0);
+    const acupointExp = Number(stage.acupoint_exp ?? 0);
+    const circulationExp = Number(stage.circulation_reward?.tokens?.find(token => token.token === 4)?.amount ?? 0);
     return sum + acupointExp * stage.acupoints + circulationExp;
   }, 0);
   if (configuredExp !== targetExp) {

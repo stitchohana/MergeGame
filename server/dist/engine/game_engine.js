@@ -30,11 +30,6 @@ class GameEngine {
     questResetHour = 0;
     shopConfig = { shopItems: [], sellPrices: {}, buyPrices: {} };
     meridianThresholds = [];
-    meridianOrderSources = new Set([
-        "items_regular",
-        "items_byproduct",
-        "items_recipe_product",
-    ]);
     meridianOrderLevelRanges = [];
     maps = new Map();
     monsters = new Map();
@@ -132,6 +127,27 @@ class GameEngine {
     }
     loadRecipes(data) {
         this.recipes = data.recipes || [];
+        const launcherIds = new Set();
+        for (const item of this.itemsById.values()) {
+            if (item.type === 1)
+                launcherIds.add(Number(item.id));
+        }
+        const invalidLauncherIngredients = [];
+        for (const recipe of this.recipes) {
+            const ingredients = Array.isArray(recipe.ingredients)
+                ? recipe.ingredients
+                : [];
+            for (const ingredient of ingredients) {
+                const ingredientId = Number(ingredient);
+                if (!launcherIds.has(ingredientId))
+                    continue;
+                invalidLauncherIngredients.push(`recipe ${recipe.id} ${recipe.name ?? ""} ingredient ${ingredientId}`.trim());
+            }
+        }
+        if (invalidLauncherIngredients.length > 0) {
+            throw new Error("Recipe ingredients cannot contain launcher items: "
+                + invalidLauncherIngredients.join("; "));
+        }
         this.recipesByTable.clear();
         for (const recipe of this.recipes) {
             for (const [, item] of this.itemsById) {
@@ -151,22 +167,8 @@ class GameEngine {
     loadMeridians(data) {
         try {
             this.meridianThresholds = data.thresholds || [];
-            const validSources = new Set([
-                "items_regular",
-                "items_byproduct",
-                "items_recipe_product",
-            ]);
-            const configuredSources = Array.isArray(data.order_pool?.sources)
-                ? data.order_pool.sources
-                : [];
-            const configuredOrderSources = configuredSources
-                .map((source) => String(source))
-                .filter((source) => validSources.has(source));
-            if (configuredOrderSources.length > 0) {
-                this.meridianOrderSources = new Set(configuredOrderSources);
-            }
-            const configuredRanges = Array.isArray(data.order_pool?.level_ranges)
-                ? data.order_pool.level_ranges
+            const configuredRanges = Array.isArray(data.order_level_ranges)
+                ? data.order_level_ranges
                 : [];
             this.meridianOrderLevelRanges = configuredRanges
                 .map((entry) => ({
@@ -217,80 +219,7 @@ class GameEngine {
     }
     loadHomeMeridians(data) {
         try {
-            this.homeMeridianDefs = data.stages || [];
-            const productionRewards = Array.isArray(data.production_rewards)
-                ? [...data.production_rewards]
-                : [];
-            for (const rule of data.production_reward_rules || []) {
-                const prefixes = Array.isArray(rule.facility_prefixes)
-                    ? rule.facility_prefixes.map((prefix) => Number(prefix)).filter((prefix) => Number.isInteger(prefix))
-                    : [];
-                const levels = Array.isArray(rule.levels)
-                    ? rule.levels.map((level) => Number(level)).filter((level) => Number.isInteger(level))
-                    : [];
-                const count = Number(rule.count ?? 2);
-                const items = [];
-                for (const prefix of prefixes) {
-                    for (const level of levels) {
-                        const itemId = prefix * 100 + level;
-                        if (count > 0)
-                            items.push({ id: itemId, count });
-                    }
-                }
-                if (items.length > 0) {
-                    productionRewards.push({
-                        stage: rule.stage,
-                        index: rule.index,
-                        timing: rule.timing ?? "acupoint",
-                        items,
-                    });
-                }
-            }
-            for (const productionReward of productionRewards) {
-                const stageIndex = Number(productionReward.stage);
-                const stage = this.homeMeridianDefs[stageIndex];
-                if (!stage)
-                    continue;
-                if (productionReward.timing === "circulation") {
-                    const target = this._copyRewardConfig(stage.circulation_rewards ?? {});
-                    for (const item of productionReward.items || []) {
-                        const itemId = Number(item.id);
-                        const count = Number(item.count ?? 1);
-                        if (!Number.isInteger(itemId) || count <= 0)
-                            continue;
-                        const existing = (target.items || []).find(entry => entry.id === itemId);
-                        if (existing)
-                            existing.count += count;
-                        else {
-                            target.items = target.items || [];
-                            target.items.push({ id: itemId, count });
-                        }
-                    }
-                    stage.circulation_rewards = target;
-                    continue;
-                }
-                const acupointIndex = Number(productionReward.index);
-                if (acupointIndex < 0 || acupointIndex >= stage.acupoints)
-                    continue;
-                const baseRewards = Array.isArray(stage.acupoint_rewards)
-                    ? stage.acupoint_rewards
-                    : Array.from({ length: stage.acupoints }, () => stage.acupoint_rewards || {});
-                stage.acupoint_rewards = Array.from({ length: stage.acupoints }, (_value, index) => this._copyRewardConfig(baseRewards[index] || {}));
-                const target = stage.acupoint_rewards[acupointIndex];
-                for (const item of productionReward.items || []) {
-                    const itemId = Number(item.id);
-                    const count = Number(item.count ?? 1);
-                    if (!Number.isInteger(itemId) || count <= 0)
-                        continue;
-                    const existing = (target.items || []).find(entry => entry.id === itemId);
-                    if (existing)
-                        existing.count += count;
-                    else {
-                        target.items = target.items || [];
-                        target.items.push({ id: itemId, count });
-                    }
-                }
-            }
+            this.homeMeridianDefs = Array.isArray(data.stages) ? data.stages : [];
             console.log(`[engine] Loaded ${this.homeMeridianDefs.length} home meridian stages`);
         }
         catch { /* optional */ }
@@ -307,25 +236,20 @@ class GameEngine {
     getHomeMeridianDefs() {
         return this.homeMeridianDefs.map(s => ({
             ...s,
-            acupoint_rewards: this._resolveRewardConfig(s.acupoint_rewards),
-            circulation_rewards: typeof s.circulation_rewards === "number" ? (this.rewardsTable.get(s.circulation_rewards) ?? s.circulation_rewards) : s.circulation_rewards,
+            circulation_reward: typeof s.circulation_reward === "number"
+                ? (this.rewardsTable.get(s.circulation_reward) ?? s.circulation_reward)
+                : s.circulation_reward,
         }));
     }
-    _resolveRewardConfig(rewards) {
-        if (Array.isArray(rewards)) {
-            return rewards.map(reward => this._resolveRewardConfig(reward));
-        }
-        if (typeof rewards === "number") {
-            return this.rewardsTable.get(rewards) ?? rewards;
-        }
-        return rewards;
-    }
-    _getAcupointReward(def, acupointIndex) {
-        const rewards = def.acupoint_rewards;
-        if (Array.isArray(rewards)) {
-            return rewards[acupointIndex];
-        }
-        return rewards;
+    _getAcupointReward(def, _acupointIndex) {
+        const exp = Math.max(0, Number(def.acupoint_exp ?? 0));
+        return {
+            tokens: [
+                { token: interface_1.TokenType.EXP, amount: exp },
+                { token: interface_1.TokenType.STAMINA, amount: 15 },
+            ],
+            items: [],
+        };
     }
     _maxUnlockedHomeStageIndex(cultivationLevel) {
         if (cultivationLevel <= 1)
@@ -387,14 +311,14 @@ class GameEngine {
         const allLit = stageProgress.lit.every(l => l);
         if (allLit) {
             stageProgress.circulation_completed = true;
-            if (def.circulation_rewards) {
-                const r = this.applyRewards(state, def.circulation_rewards);
+            if (def.circulation_reward) {
+                const r = this.applyRewards(state, def.circulation_reward);
                 rewardsApplied.tokens.push(...(r.tokens || []));
                 rewardsApplied.items.push(...(r.items || []));
             }
         }
         const meridianThreshold = this._findMeridianThreshold(state.cultivation.current_level);
-        this._tryRevealFixedOrderBatch(state, meridianThreshold);
+        this._tryRevealFixedOrders(state, meridianThreshold);
         state.version += 1;
         return {
             ok: true,
@@ -440,14 +364,14 @@ class GameEngine {
             if (normalizedProgress.lit.every(isLit => isLit)) {
                 normalizedProgress.circulation_completed = true;
                 completedStages += 1;
-                if (def.circulation_rewards) {
-                    this.applyRewards(state, def.circulation_rewards);
+                if (def.circulation_reward) {
+                    this.applyRewards(state, def.circulation_reward);
                 }
             }
         }
         if (activated > 0) {
             const meridianThreshold = this._findMeridianThreshold(state.cultivation.current_level);
-            this._tryRevealFixedOrderBatch(state, meridianThreshold);
+            this._tryRevealFixedOrders(state, meridianThreshold);
             state.version += 1;
         }
         return { activated, completed_stages: completedStages };
@@ -456,6 +380,9 @@ class GameEngine {
         return this.monsters.get(id) ?? null;
     }
     generateMeridianRequirements(state) {
+        if (this.syncBreakthroughOrder(state)) {
+            return { acupoints: state.meridian_acupoints || [] };
+        }
         const thresholds = this.meridianThresholds;
         if (!thresholds.length)
             return { acupoints: [] };
@@ -463,20 +390,25 @@ class GameEngine {
         const t = this._findMeridianThreshold(stageLevel) ?? thresholds[0];
         const foundIdx = thresholds.indexOf(t);
         const orderCount = t.order_count ?? t.acupoints ?? 3;
-        const fixedOrderBatches = this._getFixedOrderBatches(t);
+        const fixedOrderWaves = this._getFixedOrderWaves(t);
+        const previousThresholdIdx = Number(state.meridian_threshold_idx ?? -1);
+        if (previousThresholdIdx !== foundIdx) {
+            // A cursor belongs to one threshold.  Do not let a completed wave from
+            // an earlier cultivation stage skip fixed orders in a later one.
+            state.meridian_fixed_order_cursor = 0;
+            state.meridian_acupoints = [];
+        }
+        state.meridian_threshold_idx = foundIdx;
         if (Array.isArray(state.meridian_acupoints) && state.meridian_acupoints.length > 0) {
-            state.meridian_threshold_idx = foundIdx;
             return { acupoints: state.meridian_acupoints };
         }
-        if (fixedOrderBatches.length > 0) {
-            state.meridian_threshold_idx = foundIdx;
-            this._tryRevealFixedOrderBatch(state, t);
+        if (fixedOrderWaves.length > 0) {
+            this._tryRevealFixedOrders(state, t);
             return { acupoints: state.meridian_acupoints || [] };
         }
         const pool = this.getUnlockedOrderPool(state);
         const typeMin = t.count_min ?? 1;
         const typeMax = t.count_max ?? 3;
-        state.meridian_threshold_idx = foundIdx;
         if (pool.length === 0) {
             state.meridian_acupoints = [];
             return { acupoints: [] };
@@ -493,49 +425,169 @@ class GameEngine {
         state.meridian_acupoints = acupoints;
         return { acupoints };
     }
-    _getFixedOrderBatches(threshold) {
-        if (Array.isArray(threshold?.fixed_order_batches)) {
-            return threshold.fixed_order_batches.filter((batch) => Array.isArray(batch) && batch.length > 0);
+    /**
+     * Force a GM refresh of the active order list.
+     *
+     * Normal generation intentionally keeps an existing list.  A GM refresh
+     * clears random orders before generating them again, while fixed onboarding
+     * waves are rebuilt from the currently visible orders so the wave cursor is
+     * never advanced or skipped.  Breakthrough requirements always win over a
+     * refresh and are kept authoritative.
+     */
+    refreshMeridianRequirements(state) {
+        const currentOrders = Array.isArray(state.meridian_acupoints)
+            ? state.meridian_acupoints
+            : [];
+        const breakthroughRequired = this.getRequiredBreakthroughItems(state.cultivation.current_level, state.cultivation.current_exp).length > 0;
+        if (breakthroughRequired) {
+            this.syncBreakthroughOrder(state);
+            const acupoints = state.meridian_acupoints || [];
+            state.version += 1;
+            return {
+                acupoints,
+                refreshedCount: 0,
+                preservedBreakthrough: true,
+                fixedOrdersPreserved: false,
+            };
         }
-        const legacyOrders = Array.isArray(threshold?.fixed_orders) ? threshold.fixed_orders : [];
-        return legacyOrders.length > 0 ? [legacyOrders] : [];
+        const threshold = this._findMeridianThreshold(state.cultivation.current_level);
+        const thresholdIdx = this.meridianThresholds.indexOf(threshold);
+        const thresholdChanged = thresholdIdx >= 0
+            && Number(state.meridian_threshold_idx ?? -1) !== thresholdIdx;
+        const fixedOrderWaves = this._getFixedOrderWaves(threshold);
+        if (fixedOrderWaves.length > 0 && !thresholdChanged) {
+            const activeFixedOrders = currentOrders.filter((order) => order?.completed !== true && order?.breakthrough_order !== true);
+            if (activeFixedOrders.length > 0) {
+                // The fixed-order cursor points past the whole visible wave.  Reusing
+                // generateMeridianRequirements after clearing it would therefore skip
+                // to the next wave, so rebuild the same visible orders explicitly.
+                const rawCursor = Number(state.meridian_fixed_order_cursor ?? 0);
+                const cursor = Number.isFinite(rawCursor) ? Math.max(0, Math.floor(rawCursor)) : 0;
+                let waveStart = 0;
+                let activeWave = null;
+                for (const wave of fixedOrderWaves) {
+                    const waveEnd = waveStart + wave.length;
+                    if (cursor > waveStart && cursor <= waveEnd) {
+                        activeWave = wave;
+                        break;
+                    }
+                    waveStart = waveEnd;
+                }
+                const itemIdsOf = (order) => {
+                    const configuredIds = Array.isArray(order)
+                        ? order
+                        : (order?.item_id !== undefined ? [order.item_id] : order?.item_ids);
+                    return Array.isArray(configuredIds)
+                        ? configuredIds.map((id) => Number(id)).filter((id) => Number.isInteger(id))
+                        : [];
+                };
+                const canReuseLatestConfig = activeWave !== null && activeFixedOrders.every((order) => activeWave.some((fixedOrder) => JSON.stringify(itemIdsOf(fixedOrder)) === JSON.stringify(itemIdsOf(order))));
+                const usedConfigIndexes = new Set();
+                state.meridian_acupoints = activeFixedOrders.map((order) => {
+                    // Match by item IDs so completing fixed orders out of sequence does
+                    // not make refresh re-introduce an already completed order.  If an
+                    // old save no longer matches the latest config, keep its current
+                    // order rather than guessing a wave position.
+                    let sourceOrder = order;
+                    if (canReuseLatestConfig) {
+                        const matchingIndex = activeWave.findIndex((fixedOrder, index) => !usedConfigIndexes.has(index)
+                            && JSON.stringify(itemIdsOf(fixedOrder)) === JSON.stringify(itemIdsOf(order)));
+                        if (matchingIndex >= 0) {
+                            usedConfigIndexes.add(matchingIndex);
+                            sourceOrder = activeWave[matchingIndex];
+                        }
+                    }
+                    const refreshed = this._genFixedAcupoint(sourceOrder);
+                    if (!refreshed.fixed_order_rewards && threshold?.acupoint_rewards && refreshed.total_value > 0) {
+                        refreshed.rewards = this._scaleRewardConfig(threshold.acupoint_rewards, refreshed.total_value);
+                    }
+                    return refreshed;
+                });
+                state.version += 1;
+                return {
+                    acupoints: state.meridian_acupoints,
+                    refreshedCount: state.meridian_acupoints.length,
+                    preservedBreakthrough: false,
+                    fixedOrdersPreserved: true,
+                };
+            }
+        }
+        // Random orders (or a newly entered threshold) can safely be regenerated
+        // through the regular path.  It also reveals the next fixed wave when the
+        // previous one has been fully completed.
+        state.meridian_acupoints = [];
+        const result = this.generateMeridianRequirements(state);
+        state.version += 1;
+        return {
+            acupoints: result.acupoints,
+            refreshedCount: result.acupoints.length,
+            preservedBreakthrough: false,
+            fixedOrdersPreserved: false,
+        };
     }
-    _tryRevealFixedOrderBatch(state, threshold) {
-        const batches = this._getFixedOrderBatches(threshold);
-        if (batches.length === 0)
+    _getFixedOrderWaves(threshold) {
+        const configured = threshold?.fixed_orders;
+        if (!Array.isArray(configured) || configured.length === 0)
+            return [];
+        // The nested form is an array of waves, each containing fixed-order
+        // objects.  Keep it intact so multi-item orders and per-order rewards work.
+        const isNestedWaveConfig = configured.some((entry) => Array.isArray(entry)
+            && entry.some((order) => Array.isArray(order)
+                || (order !== null && typeof order === "object")));
+        if (isNestedWaveConfig) {
+            return configured
+                .filter((entry) => Array.isArray(entry))
+                .filter((wave) => wave.length > 0)
+                .map((wave) => wave.filter((order) => order !== null && order !== undefined));
+        }
+        // The compact form is an array of wave objects such as
+        // {"item_ids": [5003, 5004, 6001]}.  Each ID is one order in that wave.
+        // Treat every such object as a wave, including single-ID waves, so the
+        // compact format remains unambiguous.
+        const groupedWaveConfig = configured.every((entry) => entry !== null
+            && typeof entry === "object"
+            && !Array.isArray(entry)
+            && Array.isArray(entry.item_ids));
+        if (groupedWaveConfig) {
+            return configured
+                .map((waveConfig) => {
+                const itemIds = Array.isArray(waveConfig.item_ids) ? waveConfig.item_ids : [];
+                return itemIds.map((itemId) => ({
+                    item_id: itemId,
+                    ...(waveConfig.rewards !== undefined ? { rewards: waveConfig.rewards } : {}),
+                }));
+            })
+                .filter((wave) => wave.length > 0);
+        }
+        // A historical flat array is still interpreted as one wave.
+        return [configured.filter((order) => order !== null && order !== undefined)];
+    }
+    _tryRevealFixedOrders(state, threshold) {
+        const fixedOrderWaves = this._getFixedOrderWaves(threshold);
+        if (fixedOrderWaves.length === 0)
             return false;
         state.meridian_acupoints = Array.isArray(state.meridian_acupoints) ? state.meridian_acupoints : [];
         if (state.meridian_acupoints.length > 0)
             return false;
-        const cursor = Math.max(0, Number(state.meridian_fixed_order_cursor ?? 0));
-        const totalOrderCount = batches.reduce((total, batch) => total + batch.length, 0);
-        if (cursor >= totalOrderCount)
-            return false;
-        const firstStageProgress = (state.home_meridian_progress || []).find(progress => progress.stage === 0);
-        const litAcupointCount = Array.isArray(firstStageProgress?.lit)
-            ? firstStageProgress.lit.filter(Boolean).length
-            : 0;
-        const unlockedBatchCount = Math.min(batches.length, litAcupointCount + 1);
-        const templateRewards = threshold?.acupoint_rewards;
-        let batchStart = 0;
-        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-            const batch = batches[batchIndex];
-            const batchEnd = batchStart + batch.length;
-            if (cursor < batchEnd) {
-                if (batchIndex >= unlockedBatchCount)
-                    return false;
-                const offset = Math.max(0, cursor - batchStart);
-                state.meridian_acupoints = batch.slice(offset).map((fixedOrder) => {
+        const rawCursor = Number(state.meridian_fixed_order_cursor ?? 0);
+        const cursor = Number.isFinite(rawCursor) ? Math.max(0, Math.floor(rawCursor)) : 0;
+        let waveStart = 0;
+        for (const wave of fixedOrderWaves) {
+            const waveEnd = waveStart + wave.length;
+            if (cursor < waveEnd) {
+                const offset = Math.max(0, cursor - waveStart);
+                const templateRewards = threshold?.acupoint_rewards;
+                state.meridian_acupoints = wave.slice(offset).map((fixedOrder) => {
                     const order = this._genFixedAcupoint(fixedOrder);
                     if (!order.fixed_order_rewards && templateRewards && order.total_value > 0) {
                         order.rewards = this._scaleRewardConfig(templateRewards, order.total_value);
                     }
                     return order;
                 });
-                state.meridian_fixed_order_cursor = batchEnd;
+                state.meridian_fixed_order_cursor = waveEnd;
                 return state.meridian_acupoints.length > 0;
             }
-            batchStart = batchEnd;
+            waveStart = waveEnd;
         }
         return false;
     }
@@ -577,7 +629,18 @@ class GameEngine {
         return { item_ids: pickedIds, name: names.join(", "), items, completed: false, total_value: totalValue };
     }
     _genFixedAcupoint(fixedOrder) {
-        const configuredIds = Array.isArray(fixedOrder) ? fixedOrder : fixedOrder?.item_ids;
+        // A fixed order normally contains one item, so config can use the clearer
+        // singular item_id.  Keep item_ids/array forms for multi-item and legacy data.
+        let configuredIds;
+        if (Array.isArray(fixedOrder)) {
+            configuredIds = fixedOrder;
+        }
+        else if (fixedOrder?.item_id !== undefined && fixedOrder?.item_id !== null) {
+            configuredIds = [fixedOrder.item_id];
+        }
+        else {
+            configuredIds = fixedOrder?.item_ids;
+        }
         const itemIds = Array.isArray(configuredIds)
             ? configuredIds.map((id) => Number(id)).filter((id) => Number.isInteger(id))
             : [];
@@ -606,8 +669,6 @@ class GameEngine {
     }
     isOrderCandidate(itemDef, cultivationLevel, source) {
         if (!itemDef)
-            return false;
-        if (!this.meridianOrderSources.has(source))
             return false;
         if (source === "items_recipe_product" && itemDef.type !== 4)
             return false;
@@ -782,10 +843,13 @@ class GameEngine {
         return [...orderIds].sort((a, b) => a - b);
     }
     repairInvalidMeridianOrders(state) {
+        if (this.getRequiredBreakthroughItems(state.cultivation.current_level, state.cultivation.current_exp).length > 0) {
+            return this.syncBreakthroughOrder(state);
+        }
         if (!Array.isArray(state.meridian_acupoints) || state.meridian_acupoints.length === 0)
             return false;
         const threshold = this._findMeridianThreshold(state.cultivation.current_level);
-        if (this._getFixedOrderBatches(threshold).length > 0)
+        if (this._getFixedOrderWaves(threshold).length > 0)
             return false;
         const pool = this.getUnlockedOrderPool(state);
         if (pool.length === 0) {
@@ -1002,6 +1066,7 @@ class GameEngine {
     // --- Generic reward distribution ---
     applyRewards(state, rewards) {
         const result = { tokens: [], items: [] };
+        let expChanged = false;
         // Resolve reward ID to config
         if (typeof rewards === "number") {
             const resolved = this.rewardsTable.get(rewards);
@@ -1029,6 +1094,7 @@ class GameEngine {
                         break;
                     case interface_1.TokenType.EXP:
                         this._addExp(state.cultivation, t.amount);
+                        expChanged = true;
                         console.log(`[reward] +${t.amount} exp (total: ${state.cultivation.current_exp})`);
                         break;
                     default:
@@ -1054,6 +1120,9 @@ class GameEngine {
                 result.items.push({ id: ri.id, count: ri.count });
                 console.log(`[reward] +${ri.count}x ${name} -> pending_rewards`);
             }
+        }
+        if (expChanged) {
+            this.syncBreakthroughOrder(state);
         }
         return result;
     }
@@ -1776,6 +1845,54 @@ class GameEngine {
             return [];
         return this.getStageBreakthroughItems(level);
     }
+    syncBreakthroughOrder(state) {
+        const level = state.cultivation.current_level;
+        const requirements = this.getRequiredBreakthroughItems(level, state.cultivation.current_exp);
+        if (requirements.length === 0)
+            return false;
+        const itemIds = requirements.flatMap(requirement => new Array(requirement.count).fill(requirement.item_id));
+        const currentOrders = Array.isArray(state.meridian_acupoints) ? state.meridian_acupoints : [];
+        const currentOrder = currentOrders.length === 1 ? currentOrders[0] : null;
+        const alreadyCurrent = currentOrder?.breakthrough_order === true
+            && Number(currentOrder.breakthrough_level) === level
+            && JSON.stringify(currentOrder.item_ids) === JSON.stringify(itemIds);
+        if (alreadyCurrent)
+            return false;
+        state.meridian_acupoints = [{
+                ...this._genFixedAcupoint(itemIds),
+                breakthrough_order: true,
+                breakthrough_level: level,
+            }];
+        console.log(`[engine] breakthrough ready at level ${level}; replaced all meridian orders with requirements ${JSON.stringify(itemIds)}`);
+        return true;
+    }
+    finishBreakthrough(state, level, requiredCounts) {
+        if (!this.cultivation)
+            return { ok: false, reason: "no_config" };
+        const nextLevel = level + 1;
+        if (nextLevel > this.cultivation.stages.length)
+            return { ok: false, reason: "max_level" };
+        const nextStage = this.cultivation.stages[nextLevel - 1];
+        const newMaxQi = nextStage?.max_qi ?? (state.cultivation.max_qi + 50);
+        const newCultivation = {
+            current_level: nextLevel,
+            current_exp: 0,
+            total_exp: state.cultivation.total_exp,
+            current_qi: Math.min(state.cultivation.current_qi, newMaxQi),
+            max_qi: newMaxQi,
+            last_tick_time: state.cultivation.last_tick_time,
+        };
+        state.cultivation = newCultivation;
+        state.meridian_acupoints = [];
+        const rewardId = this.getStageBreakthroughReward(level);
+        const rewards = rewardId > 0 ? this.applyRewards(state, rewardId) : { tokens: [], items: [] };
+        this.generateMeridianRequirements(state);
+        state.version += 1;
+        const stageName = nextStage?.name ?? `stage_${nextLevel}`;
+        console.log(`[engine] breakthrough: -> ${stageName} | consumed=${JSON.stringify([...requiredCounts])} | qi=${newCultivation.max_qi} | v${state.version}`);
+        this.questEngine.incrementQuestProgress(state, interface_1.QuestType.BREAKTHROUGH, 1, this);
+        return { ok: true, newCultivation, rewards };
+    }
     executeTryBreakthrough(state, uid, level, exp) {
         console.log(`[engine] tryBreakthrough: uid=${uid} level=${level} exp=${exp}`);
         if (!this.isBreakthroughReady(level, exp)) {
@@ -1784,9 +1901,6 @@ class GameEngine {
         }
         if (!this.cultivation)
             return { ok: false, reason: "no_config" };
-        const nextLevel = level + 1;
-        if (nextLevel > this.cultivation.stages.length)
-            return { ok: false, reason: "max_level" };
         const requiredCounts = new Map();
         for (const requirement of this.getRequiredBreakthroughItems(level, exp)) {
             requiredCounts.set(requirement.item_id, (requiredCounts.get(requirement.item_id) ?? 0) + requirement.count);
@@ -1829,24 +1943,7 @@ class GameEngine {
             state.grid.splice(index, 1);
             remainingCounts.set(itemId, remaining - 1);
         }
-        const nextStage = this.cultivation.stages[nextLevel - 1];
-        const newMaxQi = nextStage?.max_qi ?? (state.cultivation.max_qi + 50);
-        const newCultivation = {
-            current_level: nextLevel,
-            current_exp: 0,
-            total_exp: state.cultivation.total_exp,
-            current_qi: Math.min(state.cultivation.current_qi, newMaxQi),
-            max_qi: newMaxQi,
-            last_tick_time: state.cultivation.last_tick_time,
-        };
-        state.cultivation = newCultivation;
-        const rewardId = this.getStageBreakthroughReward(level);
-        const rewards = rewardId > 0 ? this.applyRewards(state, rewardId) : { tokens: [], items: [] };
-        state.version += 1;
-        const stageName = nextStage?.name ?? `stage_${nextLevel}`;
-        console.log(`[engine] breakthrough: -> ${stageName} | consumed=${JSON.stringify([...requiredCounts])} | qi=${newCultivation.max_qi} | v${state.version}`);
-        this.questEngine.incrementQuestProgress(state, interface_1.QuestType.BREAKTHROUGH, 1, this);
-        return { ok: true, newCultivation, rewards };
+        return this.finishBreakthrough(state, level, requiredCounts);
     }
     tickCraftingState(state) {
         const now = Date.now();
@@ -1884,6 +1981,7 @@ class GameEngine {
             console.log(`[engine]   exp pill #${pillId} removed, uid=${uid}`);
         }
         this._addExp(state.cultivation, expGain);
+        this.syncBreakthroughOrder(state);
         state.version += 1;
         const pillName = pillData.name;
         console.log(`[engine] consume exp pill: ${pillName} | exp +${expGain} | v${state.version}`);
@@ -2165,6 +2263,9 @@ class GameEngine {
         const req = state.meridian_acupoints[index];
         if (req.completed)
             return { ok: false, reason: "already_completed" };
+        if (req.breakthrough_order === true) {
+            return { ok: false, reason: "breakthrough_confirmation_required" };
+        }
         // Consume one of each required item from grid
         const toRemove = [];
         for (const reqItemId of itemIds) {
@@ -2179,7 +2280,6 @@ class GameEngine {
             if (!found)
                 return { ok: false, reason: "insufficient_items" };
         }
-        // Check if qi is capped before removing items
         if (state.cultivation.current_qi >= state.cultivation.max_qi) {
             return { ok: false, reason: "qi_full" };
         }
@@ -2208,11 +2308,11 @@ class GameEngine {
             qiGained = state.cultivation.current_qi - qiBefore;
             qiFull = state.cultivation.current_qi >= state.cultivation.max_qi && qiBefore < state.cultivation.max_qi;
         }
-        // Fixed onboarding orders refill by batch after the matching home acupoint is lit.
+        // Fixed onboarding orders are revealed one configured wave at a time.
         state.meridian_acupoints.splice(index, 1);
         const newThreshold = this._findMeridianThreshold(state.cultivation.current_level);
-        const fixedOrderBatches = this._getFixedOrderBatches(newThreshold);
-        if (fixedOrderBatches.length === 0) {
+        const fixedOrderWaves = this._getFixedOrderWaves(newThreshold);
+        if (fixedOrderWaves.length === 0) {
             const newPool = this.getUnlockedOrderPool(state);
             if (newPool.length > 0) {
                 const newTypeMin = newThreshold?.count_min ?? 1;
@@ -2229,8 +2329,8 @@ class GameEngine {
             }
         }
         else {
-            const revealed = this._tryRevealFixedOrderBatch(state, newThreshold);
-            console.log(`[engine] meridian onboarding order #${index} completed, next batch revealed: ${revealed}`);
+            const revealed = this._tryRevealFixedOrders(state, newThreshold);
+            console.log(`[engine] meridian fixed order #${index} completed, next wave revealed: ${revealed}`);
         }
         return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina };
     }

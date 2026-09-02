@@ -8,6 +8,7 @@ var _items_by_type_level: Dictionary = {}  # type -> { level -> Array[item_data]
 var _initial_setup: Dictionary = {}
 var _cultivation_config: Dictionary = {}
 var _rewards_data: Dictionary = {}
+var _home_meridian_stages: Array = []
 var _expedition_maps: Dictionary = {}
 var _monsters_data: Dictionary = {}
 var _meridian_thresholds: Array = []
@@ -25,6 +26,7 @@ func load_all() -> void:
 	_load_recipes("res://config/json_output/recipes.json")
 	_cultivation_config = _load_json("res://config/json_output/cultivation.json")
 	_load_rewards("res://config/json_output/rewards.json")
+	_load_home_meridians("res://config/json_output/home_meridians.json")
 	_load_expedition("res://config/json_output/expedition.json")
 	_load_meridians("res://config/json_output/meridians.json")
 	_load_tokens("res://config/json_output/tokens.json")
@@ -391,6 +393,49 @@ func _load_rewards(path: String) -> void:
 		_rewards_data = rewards_variant as Dictionary
 	else:
 		_rewards_data = {}
+
+
+func get_home_meridian_stages() -> Array:
+	return _home_meridian_stages.duplicate(true)
+
+
+func get_home_meridian_stage(index: int) -> Dictionary:
+	if index < 0 or index >= _home_meridian_stages.size():
+		return {}
+	var stage_variant: Variant = _home_meridian_stages[index]
+	if stage_variant is Dictionary:
+		return (stage_variant as Dictionary).duplicate(true)
+	return {}
+
+
+func get_max_unlocked_home_meridian_stage_index(cultivation_level: int) -> int:
+	"""Return the last home circulation belonging to a cultivation level."""
+	var max_index: int = -1
+	for index in range(_home_meridian_stages.size()):
+		var stage_variant: Variant = _home_meridian_stages[index]
+		if not stage_variant is Dictionary:
+			continue
+		var configured_level: int = _coerce_int((stage_variant as Dictionary).get("cultivation_level", 0))
+		if configured_level > 0:
+			if configured_level <= cultivation_level:
+				max_index = index
+			continue
+		# Keep compatibility with legacy home configs without explicit levels.
+		if cultivation_level <= 1:
+			return 0
+		if cultivation_level <= 10:
+			return mini(_home_meridian_stages.size() - 1, cultivation_level - 1)
+		return mini(_home_meridian_stages.size() - 1, 9 + (cultivation_level - 10) * 10)
+	return max_index
+
+
+func _load_home_meridians(path: String) -> void:
+	var data: Dictionary = _load_json(path)
+	var stages_variant: Variant = data.get("stages", [])
+	if stages_variant is Array:
+		_home_meridian_stages = (stages_variant as Array).duplicate(true)
+	else:
+		_home_meridian_stages = []
 
 
 func _load_weekly_tasks(path: String) -> void:

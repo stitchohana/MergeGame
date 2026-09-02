@@ -7,6 +7,8 @@ const CHARACTER_ENTRY_SCENE: PackedScene = preload("res://scenes/ui/character/Ch
 func _ready() -> void:
 	var original_cultivation: Dictionary = ConfigDatabase._cultivation_config.duplicate(true)
 	var original_rewards: Dictionary = ConfigDatabase._rewards_data.duplicate(true)
+	var original_home_defs: Array = ConfigDatabase._home_meridian_stages.duplicate(true)
+	var original_home_progress: Array = GameState.home_meridian_progress.duplicate(true)
 	ConfigDatabase._cultivation_config = {
 		"stages": [{
 			"name": "测试境界",
@@ -19,14 +21,18 @@ func _ready() -> void:
 			"max_qi": 2000,
 		}],
 	}
-	ConfigDatabase._rewards_data = {
-		"301": {
+	ConfigDatabase._rewards_data = {}
+	ConfigDatabase._home_meridian_stages = [{
+		"name": "测试周天",
+		"circulation_reward": {
 			"items": [
 				{"id": 20002, "count": 1},
 				{"id": 21002, "count": 2},
 			],
 		},
-	}
+	}]
+	GameState.home_meridian_defs = ConfigDatabase._home_meridian_stages.duplicate(true)
+	GameState.home_meridian_progress = []
 	CultivationService.current_level = 1
 	CultivationService.current_exp = 30
 
@@ -39,8 +45,8 @@ func _ready() -> void:
 	await get_tree().process_frame
 	var reward_popup: BreakthroughRewardPreviewPopup = _find_reward_popup()
 	assert(reward_popup != null)
-	assert(reward_popup.title_label.text == "突破奖励预览")
-	assert(reward_popup.stage_label.text == "测试境界  →  下一层")
+	assert(reward_popup.title_label.text == "周天奖励预览")
+	assert(reward_popup.stage_label.text == "当前周天：测试周天")
 	assert(reward_popup.rewards_container.get_child_count() == 2)
 	var first_card: VBoxContainer = reward_popup.rewards_container.get_child(0) as VBoxContainer
 	var first_widget: ItemWidget = first_card.get_node("ItemWidget") as ItemWidget
@@ -62,6 +68,9 @@ func _ready() -> void:
 
 	ConfigDatabase._cultivation_config = original_cultivation
 	ConfigDatabase._rewards_data = original_rewards
+	ConfigDatabase._home_meridian_stages = original_home_defs
+	GameState.home_meridian_defs = original_home_defs.duplicate(true)
+	GameState.home_meridian_progress = original_home_progress
 	print("BREAKTHROUGH_REWARD_PREVIEW_UI_SMOKE_OK")
 	get_tree().quit()
 

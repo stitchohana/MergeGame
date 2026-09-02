@@ -150,12 +150,7 @@ func _refresh_display() -> void:
 
 
 func _max_unlocked_home_stage_index() -> int:
-	var cultivation_level: int = CultivationService.current_level
-	if cultivation_level <= 1:
-		return 0
-	if cultivation_level <= 10:
-		return cultivation_level - 1
-	return 9 + (cultivation_level - 10) * 10
+	return ConfigDatabase.get_max_unlocked_home_meridian_stage_index(CultivationService.current_level)
 
 
 func _set_acupoint_nodes(lit: Array, count: int, qi_cost: int) -> void:
@@ -261,15 +256,15 @@ func _on_acupoint_pressed(slot_index: int) -> void:
 
 
 func _get_acupoint_rewards(def: Dictionary, target_index: int) -> Dictionary:
-	var rewards_variant: Variant = def.get("acupoint_rewards", {})
-	if rewards_variant is Array:
-		var rewards_array: Array = rewards_variant
-		if target_index >= 0 and target_index < rewards_array.size() and rewards_array[target_index] is Dictionary:
-			return rewards_array[target_index]
+	if target_index < 0 or target_index >= int(def.get("acupoints", 0)):
 		return {}
-	if rewards_variant is Dictionary:
-		return rewards_variant
-	return {}
+	return {
+		"tokens": [
+			{"token": 4, "amount": int(def.get("acupoint_exp", 0))},
+			{"token": 3, "amount": 15},
+		],
+		"items": [],
+	}
 
 
 func _submit_acupoint(stage_index: int, target_index: int) -> void:
@@ -416,9 +411,14 @@ func _on_breakthrough_item_pressed(item_id: int) -> void:
 func _on_breakthrough_pressed() -> void:
 	var requirements: Array = CultivationService.get_required_breakthrough_items()
 	if not requirements.is_empty():
-		var popup := preload("res://scenes/ui/common/ConfirmPopup.tscn").instantiate() as ConfirmPopup
+		var popup := preload("res://scenes/ui/home/BreakthroughConfirmPopup.tscn").instantiate() as BreakthroughConfirmPopup
 		UIManager.show_popup(popup)
-		popup.setup("突破确认", _format_breakthrough_confirmation(requirements), _do_breakthrough)
+		popup.setup_with_rewards(
+			"突破确认",
+			_format_breakthrough_confirmation(requirements),
+			ConfigDatabase.get_stage_breakthrough_reward(CultivationService.current_level),
+			_do_breakthrough
+		)
 	else:
 		_do_breakthrough()
 
