@@ -65,6 +65,4 @@ func set_regen_timer(time_left: float) -> void:
 		regen_timer_label.text = ""
 		return
 
-	var seconds: int = int(ceil(time_left))
-	var minutes: int = seconds / 60
-	regen_timer_label.text = "%02d:%02d" % [minutes, seconds % 60]
+	regen_timer_label.text = TimeUtils.format_countdown(time_left)

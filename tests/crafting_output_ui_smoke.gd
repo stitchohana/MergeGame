@@ -125,7 +125,9 @@ func _ready() -> void:
 	assert(ItemDetailPanel.format_countdown_hms(59.01) == "1分")
 	assert(ItemDetailPanel.format_countdown_hms(120.0) == "2分")
 	assert(ItemDetailPanel.format_countdown_hms(3600.0) == "1时")
-	assert(ItemDetailPanel.format_countdown_hms(3723.0) == "1时2分3秒")
+	assert(ItemDetailPanel.format_countdown_hms(3723.0) == "1时2分")
+	assert(TimeUtils.format_countdown(90061.0) == "1日1时")
+	assert(TimeUtils.format_countdown(3661.0) == "1时1分")
 	assert(ItemDetailPanel.calculate_speedup_cost(0.0, 1.0) == 0)
 	assert(ItemDetailPanel.calculate_speedup_cost(0.1, 1.0) == 1)
 	assert(ItemDetailPanel.calculate_speedup_cost(60.0, 1.0) == 1)
@@ -136,7 +138,7 @@ func _ready() -> void:
 	launcher_data["charges"] = 0
 	launcher_data["_recharge_remaining"] = 3723000.0
 	detail_panel.show_item(launcher_data)
-	assert(detail_panel.status_label.text == "充能中… 1时2分3秒")
+	assert(detail_panel.status_label.text == "充能中… 1时2分")
 	assert(detail_panel.speedup_btn.text == "立即完成（63灵石）")
 	detail_panel.clear()
 	assert(detail_panel.get_output_item_id() == 0)

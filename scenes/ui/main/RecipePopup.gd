@@ -69,7 +69,7 @@ func _build_entry(recipe: Dictionary, show_board_table: bool) -> Control:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(spacer)
 	var craft_time: float = float(recipe.get("craft_time", 0.0))
-	header.add_child(_make_label("制作 %s" % _format_time(craft_time), 13, Color(0.48, 0.32, 0.2, 1)))
+	header.add_child(_make_label("制作 %s" % TimeUtils.format_countdown(craft_time), 13, Color(0.48, 0.32, 0.2, 1)))
 	content.add_child(header)
 
 	var flow := HBoxContainer.new()
@@ -185,11 +185,6 @@ func _make_label(text: String, font_size: int, color: Color) -> Label:
 	label.add_theme_color_override("font_color", color)
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	return label
-
-func _format_time(seconds: float) -> String:
-	if seconds < 60.0:
-		return "%d秒" % int(ceil(seconds))
-	return "%d分%d秒" % [int(seconds / 60.0), int(seconds) % 60]
 
 func _clear_children(container: Node) -> void:
 	for child in container.get_children():

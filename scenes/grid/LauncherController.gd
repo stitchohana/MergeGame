@@ -153,8 +153,7 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 		if charges_val <= 0 and cd_time > 0:
 			_launcher_cd[launcher_uid] = {"remaining": cd_time, "recharge_time": cd_time, "max_charges": max_c}
 			launcher_item["_recharge_remaining"] = cd_time * 1000.0
-			var cd_secs: int = int(ceil(cd_time))
-			charge_visual_update.emit(launcher_uid, "%02d:%02d" % [int(cd_secs / 60), cd_secs % 60], Color(1, 0.6, 0.2, 1))
+			charge_visual_update.emit(launcher_uid, TimeUtils.format_countdown(cd_time), Color(1, 0.6, 0.2, 1))
 		elif charges_val <= 0:
 			charge_visual_update.emit(launcher_uid, "0/%d" % max_c, Color(1, 0.3, 0.3, 1))
 		else:
@@ -218,10 +217,7 @@ func _on_cd_tick() -> void:
 			var charging_item: Dictionary = GridManager.find_by_uid(uid)
 			if not charging_item.is_empty():
 				charging_item["_recharge_remaining"] = float(cd.remaining) * 1000.0
-			var secs: int = int(ceil(cd.remaining))
-			var m: int = int(secs / 60)
-			var s: int = secs % 60
-			charge_visual_update.emit(uid, "%02d:%02d" % [m, s], Color(1, 0.6, 0.2, 1))
+			charge_visual_update.emit(uid, TimeUtils.format_countdown(cd.remaining), Color(1, 0.6, 0.2, 1))
 
 	for uid in to_erase:
 		_launcher_cd.erase(uid)
@@ -252,8 +248,7 @@ func start_cd_from_restore(item_data: Dictionary) -> void:
 		remaining = maxf(0, float(server_rem) / 1000.0)
 	_launcher_cd[uid] = {"remaining": remaining, "recharge_time": cd_time, "max_charges": max_c}
 	item_data["_recharge_remaining"] = remaining * 1000.0
-	var secs: int = int(ceil(remaining))
-	charge_visual_update.emit(uid, "%02d:%02d" % [int(secs / 60), secs % 60], Color(1, 0.6, 0.2, 1))
+	charge_visual_update.emit(uid, TimeUtils.format_countdown(remaining), Color(1, 0.6, 0.2, 1))
 
 func clear_cd(uid: int) -> void:
 	if uid > 0 and _launcher_cd.has(uid):

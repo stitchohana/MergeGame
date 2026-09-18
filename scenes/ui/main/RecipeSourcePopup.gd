@@ -72,7 +72,7 @@ func _populate_sources(recipes: Array, result_data: Dictionary) -> void:
 	product_icon.visible = not table_data.is_empty()
 	if not table_data.is_empty():
 		_configure_item_widget(product_icon, table_data, false)
-	craft_time_label.text = _format_time(float(recipe.get("craft_time", 0.0)))
+	craft_time_label.text = TimeUtils.format_countdown(float(recipe.get("craft_time", 0.0)))
 
 func _find_crafting_table_for_recipe(recipe_id: int) -> Dictionary:
 	var best: Dictionary = {}
@@ -167,12 +167,6 @@ func _open_craft_path(item_data: Dictionary) -> void:
 	var popup := preload("res://scenes/ui/main/CraftPathView.tscn").instantiate() as CraftPathView
 	UIManager.show_popup(popup)
 	popup.show_for_item(item_data)
-
-
-func _format_time(seconds: float) -> String:
-	if seconds < 60.0:
-		return "%d秒" % int(ceil(seconds))
-	return "%d分%d秒" % [int(seconds / 60.0), int(seconds) % 60]
 
 
 func _clear_children(container: Node) -> void:

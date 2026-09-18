@@ -116,7 +116,7 @@ func _refresh_materials() -> void:
 		print("[CraftDetail] materials_hidden reason=table_crafting")
 		var remaining: float = CraftingService.get_remaining_craft_seconds(_current_item_data)
 		if remaining > 0:
-			status_label.text = "制作中... %d秒" % int(ceil(remaining))
+			status_label.text = "制作中... %s" % TimeUtils.format_countdown(remaining)
 		else:
 			status_label.text = "制作中..."
 		status_label.show()
@@ -534,7 +534,7 @@ func _on_countdown_tick() -> void:
 			return
 		var remaining: float = CraftingService.get_remaining_craft_seconds(_current_item_data)
 		if remaining > 0:
-			status_label.text = "制作中… %d秒" % int(ceil(remaining))
+			status_label.text = "制作中… %s" % TimeUtils.format_countdown(remaining)
 			_refresh_speedup_button("craft", remaining)
 		else:
 			_hide_speedup_button()
@@ -569,25 +569,14 @@ func _refresh_launcher_speedup() -> void:
 		desc_label.show()
 		return
 	desc_label.hide()
-	status_label.text = "充能中… %s" % format_countdown_hms(remaining)
+	status_label.text = "充能中… %s" % TimeUtils.format_countdown(remaining)
 	status_label.show()
 	_refresh_speedup_button("launcher", remaining)
 	if _countdown_timer == null or not is_instance_valid(_countdown_timer):
 		_start_countdown_timer()
 
 static func format_countdown_hms(seconds: float) -> String:
-	var total_seconds: int = maxi(0, int(ceil(seconds)))
-	var hours: int = int(total_seconds / 3600)
-	var minutes: int = int((total_seconds % 3600) / 60)
-	var remaining_seconds: int = total_seconds % 60
-	var parts: Array[String] = []
-	if hours > 0:
-		parts.append("%d时" % hours)
-	if minutes > 0:
-		parts.append("%d分" % minutes)
-	if remaining_seconds > 0 or parts.is_empty():
-		parts.append("%d秒" % remaining_seconds)
-	return "".join(parts)
+	return TimeUtils.format_countdown(seconds)
 
 func _refresh_speedup_button(kind: String, remaining: float) -> void:
 	var config_key: String = "craft_speedup_stone_cost_per_minute" if kind == "craft" else "launcher_speedup_stone_cost_per_minute"
