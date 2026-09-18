@@ -18,8 +18,10 @@ func _ready() -> void:
 		CloudService.quest_claim_confirmed.connect(_on_reward_response)
 	if not CloudService.home_meridian_light_confirmed.is_connected(_on_reward_response):
 		CloudService.home_meridian_light_confirmed.connect(_on_reward_response)
-	if not CloudService.breakthrough_confirmed.is_connected(_on_reward_response):
-		CloudService.breakthrough_confirmed.connect(_on_reward_response)
+	if not CloudService.home_meridian_run_confirmed.is_connected(_on_reward_response):
+		CloudService.home_meridian_run_confirmed.connect(_on_reward_response)
+	if not CloudService.breakthrough_confirmed.is_connected(_on_breakthrough_reward_response):
+		CloudService.breakthrough_confirmed.connect(_on_breakthrough_reward_response)
 	if not CloudService.battle_attack_confirmed.is_connected(_on_reward_response):
 		CloudService.battle_attack_confirmed.connect(_on_reward_response)
 	if not CloudService.pending_reward_claimed.is_connected(_on_reward_response):
@@ -44,6 +46,19 @@ func _on_reward_response(result: Dictionary) -> void:
 	if result.has("pending_rewards"):
 		pending_rewards = result.pending_rewards
 		pending_rewards_changed.emit(pending_rewards.size())
+
+
+func _on_breakthrough_reward_response(result: Dictionary) -> void:
+	_on_reward_response(result)
+	var rewards_variant: Variant = result.get("rewards", {})
+	var rewards: Dictionary = {}
+	if rewards_variant is Dictionary:
+		rewards = rewards_variant as Dictionary
+	var popup := preload("res://scenes/ui/home/RewardReceivedPopup.tscn").instantiate() as RewardReceivedPopup
+	if popup == null:
+		return
+	UIManager.show_popup(popup)
+	popup.setup("收到奖励", "突破成功，境界提升并获得突破奖励", rewards)
 
 
 func claim_pending_reward(uid: int) -> void:

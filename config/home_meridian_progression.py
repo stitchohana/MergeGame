@@ -10,12 +10,17 @@ SPIRIT_STONE_MINE_ID = 25001
 MINE_ONLY_REWARD_ID = 313
 MINE_FAMILY = SPIRIT_STONE_MINE_ID // 100
 
-# The initial ten cultivation levels intentionally use more readable
-# per-circulation node counts while keeping total qi and EXP budgets modest.
+# The initial ten cultivation levels keep four nodes per circulation. The
+# tutorial (凡人) uses 5 qi per node so its three circulations cost 60 qi,
+# closely matching the 65 qi produced by the seven fixed onboarding orders.
+# Later levels are derived from current order values so a maximum order fills
+# about half of one circulation after order rewards switch to 1:1 value-to-qi.
 # Index 0 is 凡人; indexes 1-9 are the 练气 levels.
 EARLY_STAGE_NODES_PER_CIRCULATION = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
-EARLY_STAGE_QI_COST = [60, 80, 90, 100, 110, 120, 130, 140, 150, 160]
-EARLY_STAGE_ACUPOINT_EXP = [1, 2, 2, 2, 2, 3, 3, 3, 3, 3]
+EARLY_STAGE_QI_COST = [5, 126, 210, 262, 315, 377, 440, 440, 587, 587]
+# EXP formerly granted one node at a time is now included in the completed
+# circulation reward. Keep the per-circulation budget here for balance checks.
+EARLY_STAGE_EXP_PER_CIRCULATION = [4, 8, 8, 8, 8, 12, 12, 12, 12, 12]
 
 
 def _as_int(value: Any, default: int = 0) -> int:
@@ -61,8 +66,7 @@ def early_stage_exp(cultivation_level: int, circulation_count: int) -> int:
         raise ValueError(f"not an early cultivation level: {cultivation_level}")
     return (
         circulation_count
-        * EARLY_STAGE_NODES_PER_CIRCULATION[index]
-        * EARLY_STAGE_ACUPOINT_EXP[index]
+        * EARLY_STAGE_EXP_PER_CIRCULATION[index]
     )
 
 
@@ -156,8 +160,11 @@ def validate_home_progression(
         acupoints = _as_int(stage.get("acupoints"))
         if acupoints <= 0:
             raise ValueError(f"home circulation {stage_index} must have at least one acupoint")
+        if "acupoint_exp" in stage:
+            raise ValueError(
+                f"home circulation {stage_index} must not configure acupoint_exp"
+            )
         counts[level] += 1
-        exp_by_level[level] += acupoints * _as_int(stage.get("acupoint_exp"))
         exp_by_level[level] += reward_token_amount(
             stage.get("circulation_reward"),
             4,
@@ -167,9 +174,16 @@ def validate_home_progression(
         if isinstance(reward_config, int) and rewards is not None:
             reward_config = rewards.get(str(reward_config), {})
         reward_items = reward_config.get("items", []) if isinstance(reward_config, Mapping) else []
-        if not isinstance(reward_items, list) or len(reward_items) != 2:
+        mortal_facility_counts = (1, 0, 2)
+        expected_facility_count = (
+            mortal_facility_counts[counts[level] - 1]
+            if level == 1
+            else 2
+        )
+        if not isinstance(reward_items, list) or len(reward_items) != expected_facility_count:
             raise ValueError(
-                f"home circulation {stage_index} must grant exactly two facilities, got {reward_items}"
+                f"home circulation {stage_index} must grant exactly "
+                f"{expected_facility_count} facilities, got {reward_items}"
             )
         for facility in reward_items:
             facility_id = _as_int(facility.get("id")) if isinstance(facility, Mapping) else 0
@@ -213,7 +227,7 @@ def validate_home_progression(
         ]
         expected_nodes = EARLY_STAGE_NODES_PER_CIRCULATION[level - 1]
         expected_cost = EARLY_STAGE_QI_COST[level - 1]
-        expected_node_exp = EARLY_STAGE_ACUPOINT_EXP[level - 1]
+        expected_cycle_exp = EARLY_STAGE_EXP_PER_CIRCULATION[level - 1]
         for stage in level_rows:
             if _as_int(stage.get("acupoints")) != expected_nodes:
                 raise ValueError(
@@ -223,7 +237,7 @@ def validate_home_progression(
                 raise ValueError(
                     f"early cultivation level {level} must use qi_cost {expected_cost}"
                 )
-            if _as_int(stage.get("acupoint_exp")) != expected_node_exp:
+            if reward_token_amount(stage.get("circulation_reward"), 4) != expected_cycle_exp:
                 raise ValueError(
-                    f"early cultivation level {level} must use acupoint_exp {expected_node_exp}"
+                    f"early cultivation level {level} must grant {expected_cycle_exp} EXP per circulation"
                 )

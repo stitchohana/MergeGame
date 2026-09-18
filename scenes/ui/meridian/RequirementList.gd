@@ -25,6 +25,7 @@ func _ready() -> void:
 	CultivationService.stage_changed.connect(_on_cultivation_changed)
 	CloudService.state_loaded.connect(func(_state: Dictionary): call_deferred("_refresh_cultivation_button"))
 	CloudService.home_meridian_light_confirmed.connect(func(_result: Dictionary): call_deferred("_refresh_cultivation_button"))
+	CloudService.home_meridian_run_confirmed.connect(func(_result: Dictionary): call_deferred("_refresh_cultivation_button"))
 	_refresh_cultivation_button()
 
 func setup_pending_reward_bar(grid: Control) -> void:
@@ -133,7 +134,7 @@ func _on_cultivation_pressed() -> void:
 	GameState.pending_auto_acupoint = true
 	EventBus.screen_change_requested.emit("home")
 
-func set_requirements(reqs: Array, priority_indices: Dictionary = {}) -> void:
+func set_requirements(reqs: Array, priority_indices: Dictionary = {}, match_counts: Dictionary = {}) -> void:
 	var preserved_scroll: int = int(scroll.scroll_horizontal) if is_inside_tree() else 0
 	_scroll_restore_request_id += 1
 	var restore_request_id: int = _scroll_restore_request_id
@@ -158,7 +159,10 @@ func set_requirements(reqs: Array, priority_indices: Dictionary = {}) -> void:
 		var entry: RequirementEntry = _entry_scene.instantiate()
 		container.add_child(entry)
 		entry.setup(req.get("items", []), i, req.get("completed", false), req.get("rewards", {}))
-		entry.set_order_priority(_normalize_priority(priority_indices.get(i, 0)))
+		entry.set_order_rank(
+			_normalize_priority(priority_indices.get(i, 0)),
+			maxi(int(match_counts.get(i, 0)), 0)
+		)
 		var idx := i
 		entry.complete_pressed.connect(_emit_complete.bind(idx))
 		entry.item_pressed.connect(_on_entry_item_pressed)
@@ -254,18 +258,23 @@ func set_entry_available(index: int, available: bool) -> void:
 	set_entry_priority(index, 2 if available else 0)
 
 
-func set_entry_priority(index: int, priority: int, focus_available: bool = true) -> bool:
+func set_entry_priority(index: int, priority: int, focus_available: bool = true, match_count: int = -1) -> bool:
 	var entry := _get_entry_by_display_index(index)
 	if entry == null:
 		return false
 	var previous_priority: int = entry.get_order_priority()
+	var previous_match_count: int = entry.get_order_match_count()
 	var normalized_priority: int = clampi(priority, 0, 2)
-	var changed: bool = entry.set_order_priority(normalized_priority)
+	var normalized_match_count: int = previous_match_count if match_count < 0 else maxi(match_count, 0)
+	var changed: bool = entry.set_order_rank(normalized_priority, normalized_match_count)
 	if not changed:
 		return false
 	var start_position: Vector2 = entry.position
 	_sort_entries_by_availability()
-	if normalized_priority > previous_priority:
+	if (
+		normalized_priority > previous_priority
+		or (normalized_priority == previous_priority and normalized_match_count > previous_match_count)
+	):
 		_animate_promoted_entry(entry, start_position, focus_available)
 	return true
 
@@ -284,6 +293,16 @@ func _get_entry_by_display_index(index: int) -> RequirementEntry:
 		if entry.get_display_index() == index:
 			return entry
 	return null
+
+
+func get_entry_rank(index: int) -> Dictionary:
+	var entry: RequirementEntry = _get_entry_by_display_index(index)
+	if entry == null:
+		return {"priority": 0, "matched_count": 0}
+	return {
+		"priority": entry.get_order_priority(),
+		"matched_count": entry.get_order_match_count(),
+	}
 
 
 func _sort_entries_by_availability() -> void:

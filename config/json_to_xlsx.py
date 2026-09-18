@@ -455,9 +455,8 @@ validate_facility_reward_order(
 )
 wb = new_book()
 ws = wb.create_sheet("home_meridians")
-add_sheet(ws, ["cultivation_level","name","acupoints","qi_cost","acupoint_exp","circulation_reward"],
+add_sheet(ws, ["cultivation_level","name","acupoints","qi_cost","circulation_reward"],
     [[s.get("cultivation_level",""), s.get("name",""), s.get("acupoints",""), s.get("qi_cost",""),
-      s.get("acupoint_exp", 0),
       reward_json_for_xlsx(s.get("circulation_reward", {}))]
      for s in data["stages"]])
 save(wb, "home_meridians")

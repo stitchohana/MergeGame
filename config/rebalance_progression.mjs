@@ -78,7 +78,9 @@ for (const item of allItems) {
   item.value = newValue;
 }
 
-const qiPerValue = 10;
+// Order value now converts to qi at a 1:1 rate. Home-meridian qi costs are
+// tuned separately so a maximum order is about half of one circulation.
+const qiPerValue = 1;
 const orderRewardId = 219;
 rewards.rewards[String(orderRewardId)] = { tokens: [{ token: 2, amount: qiPerValue }] };
 const orderPoolForStage = stage => {
@@ -133,19 +135,14 @@ for (let groupIndex = 0; groupIndex < 19; groupIndex++) {
   for (let i = 0; i < stages.length; i++) {
     const stage = stages[i];
     const cycleBudget = Math.floor(targetExp / cycleCount) + (i < targetExp % cycleCount ? 1 : 0);
-    const acupointExp = Math.max(1, Math.round(cycleBudget * 0.7 / stage.acupoints));
-    const holeTotal = acupointExp * stage.acupoints;
-    const circulationExp = Math.max(1, cycleBudget - holeTotal);
-    stage.acupoint_exp = acupointExp;
     stage.circulation_reward = {
-      tokens: [{ token: 4, amount: circulationExp }, { token: 3, amount: 100 }],
+      tokens: [{ token: 4, amount: cycleBudget }, { token: 3, amount: 100 }],
       items: stage.circulation_reward?.items ?? [],
     };
   }
   const configuredExp = stages.reduce((sum, stage) => {
-    const acupointExp = Number(stage.acupoint_exp ?? 0);
     const circulationExp = Number(stage.circulation_reward?.tokens?.find(token => token.token === 4)?.amount ?? 0);
-    return sum + acupointExp * stage.acupoints + circulationExp;
+    return sum + circulationExp;
   }, 0);
   if (configuredExp !== targetExp) {
     throw new Error(`Home EXP mismatch for cultivation stage ${groupIndex + 2}: configured=${configuredExp}, required=${targetExp}`);

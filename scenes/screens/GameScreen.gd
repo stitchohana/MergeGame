@@ -22,6 +22,7 @@ var _order_animation_input_token: int = -1
 var _is_initial_game_load: bool = true
 var _initial_order_reset_token: int = 0
 var _require_refresh_queued: bool = false
+var _suppress_requirement_refresh: bool = false
 
 func _ready() -> void:
 	randomize()
@@ -49,6 +50,7 @@ func _ready() -> void:
 	CloudService.spirit_stone_consume_confirmed.connect(_on_spirit_stone_consume_confirmed)
 	CloudService.spirit_stone_consume_rejected.connect(_on_spirit_stone_consume_rejected)
 	CloudService.state_loaded.connect(_on_state_loaded_for_orders)
+	GameState.meridian_updated.connect(_on_meridian_updated)
 	CultivationService.stage_changed.connect(_on_stage_changed_for_meridian)
 	CloudService.breakthrough_confirmed.connect(func(_r): _item_use_pending = false)
 	CloudService.breakthrough_rejected.connect(func(_r): _item_use_pending = false)
@@ -72,6 +74,10 @@ func _on_state_loaded_for_orders(state: Dictionary) -> void:
 	GameState.meridian_acupoints = acupoints.duplicate(true)
 	GameState.meridian_threshold_idx = int(state.get("meridian_threshold_idx", GameState.meridian_threshold_idx))
 	if is_inside_tree():
+		_display_meridian()
+
+func _on_meridian_updated() -> void:
+	if is_node_ready() and is_inside_tree():
 		_display_meridian()
 
 func _setup_extras() -> void:
@@ -276,9 +282,15 @@ func _on_restart() -> void:
 		CloudService.fetch_state()
 
 func _on_grid_changed() -> void:
+	print("[StatusTrace] grid_changed frame=", Engine.get_process_frames(),
+		" grid_count=", GridManager.count_items(), " ui_nodes=", grid_view._item_nodes.size(),
+		" suppress=", _suppress_requirement_refresh)
 	_queue_requirement_refresh()
 
 func _on_craft_table_state_changed(_table_item: Dictionary, state: int) -> void:
+	print("[CraftStatusTrace] screen_state_changed frame=", Engine.get_process_frames(),
+		" uid=", int(_table_item.get("_uid", 0)), " state=", state,
+		" grid=", GridManager.count_items(), " nodes=", grid_view._item_nodes.size())
 	_refresh_requirement_crafting_badges()
 	# IDLE is followed by a grid update when a material/result is moved.
 	# Wait for that update so retrieval does not briefly re-mark ingredients.
@@ -287,6 +299,8 @@ func _on_craft_table_state_changed(_table_item: Dictionary, state: int) -> void:
 	_queue_requirement_refresh()
 
 func _queue_requirement_refresh() -> void:
+	if _suppress_requirement_refresh:
+		return
 	if _require_refresh_queued:
 		return
 	_require_refresh_queued = true
@@ -294,7 +308,7 @@ func _queue_requirement_refresh() -> void:
 
 func _flush_requirement_refresh() -> void:
 	_require_refresh_queued = false
-	if not is_inside_tree():
+	if _suppress_requirement_refresh or not is_inside_tree():
 		return
 	_refresh_requirement_buttons()
 
@@ -380,9 +394,13 @@ func _check_can_complete(req: Dictionary) -> bool:
 	return _get_requirement_priority(req) == 2
 
 func _get_requirement_priority(req: Dictionary) -> int:
+	var stats: Dictionary = _get_requirement_match_stats(req)
+	return int(stats.get("priority", 0))
+
+func _get_requirement_match_stats(req: Dictionary) -> Dictionary:
 	var items: Array = req.get("items", [])
 	if items.is_empty():
-		return 0
+		return {"priority": 0, "matched_count": 0}
 	var required_counts: Dictionary = {}
 	for item_variant: Variant in items:
 		if not item_variant is Dictionary:
@@ -393,7 +411,7 @@ func _get_requirement_priority(req: Dictionary) -> int:
 			continue
 		required_counts[item_id] = int(required_counts.get(item_id, 0)) + 1
 	if required_counts.is_empty():
-		return 0
+		return {"priority": 0, "matched_count": 0}
 	var matched_count: int = 0
 	var required_count: int = 0
 	for item_id_variant: Variant in required_counts.keys():
@@ -402,23 +420,57 @@ func _get_requirement_priority(req: Dictionary) -> int:
 		required_count += item_required_count
 		matched_count += mini(_count_grid_item(item_id), item_required_count)
 	if matched_count >= required_count:
-		return 2
+		return {"priority": 2, "matched_count": matched_count}
 	if matched_count > 0:
-		return 1
-	return 0
+		return {"priority": 1, "matched_count": matched_count}
+	return {"priority": 0, "matched_count": 0}
 
 func _refresh_requirement_buttons() -> void:
 	_refresh_required_indicators()
 	_refresh_requirement_item_selection()
 	_refresh_requirement_crafting_badges()
+	var refreshed_stats: Dictionary = {}
+	var focus_display_index: int = -1
+	var focus_priority: int = -1
+	var focus_match_count: int = -1
 	for i in range(_display_index_map.size()):
 		var data_index: int = _display_index_map[i]
 		if data_index < 0 or data_index >= GameState.meridian_acupoints.size():
 			continue
 		var req: Dictionary = GameState.meridian_acupoints[data_index]
 		if not req.get("completed", false):
-			var allow_available_focus: bool = _allow_available_order_focus()
-			requirement_list.set_entry_priority(i, _get_requirement_priority(req), allow_available_focus)
+			var stats: Dictionary = _get_requirement_match_stats(req)
+			refreshed_stats[i] = stats
+			var previous: Dictionary = requirement_list.get_entry_rank(i)
+			var priority: int = int(stats.get("priority", 0))
+			var match_count: int = int(stats.get("matched_count", 0))
+			var previous_priority: int = int(previous.get("priority", 0))
+			var previous_match_count: int = int(previous.get("matched_count", 0))
+			var promoted: bool = (
+				priority > previous_priority
+				or (priority == previous_priority and match_count > previous_match_count)
+			)
+			if promoted and (
+				priority > focus_priority
+				or (priority == focus_priority and match_count > focus_match_count)
+			):
+				focus_display_index = i
+				focus_priority = priority
+				focus_match_count = match_count
+	for i in range(_display_index_map.size()):
+		if not refreshed_stats.has(i):
+			continue
+		var stats: Dictionary = refreshed_stats[i]
+		var allow_available_focus: bool = (
+			_allow_available_order_focus()
+			and i == focus_display_index
+		)
+		requirement_list.set_entry_priority(
+			i,
+			int(stats.get("priority", 0)),
+			allow_available_focus,
+			int(stats.get("matched_count", 0))
+		)
 
 func _refresh_requirement_item_selection() -> void:
 	var present_item_ids: Dictionary = {}
@@ -455,6 +507,9 @@ func _get_crafting_result_item_ids() -> Dictionary:
 
 
 func _refresh_required_indicators() -> void:
+	print("[StatusTrace] refresh_begin frame=", Engine.get_process_frames(),
+		" grid_count=", GridManager.count_items(), " ui_nodes=", grid_view._item_nodes.size(),
+		" orders=", GameState.meridian_acupoints.size())
 	if GameState.current_board_type != Constants.BoardType.MAIN:
 		return
 	var required_ids: Dictionary = {}
@@ -497,18 +552,12 @@ func _refresh_required_indicators() -> void:
 		" reserved_ids=", reserved_crafting_ids.keys(),
 		" required_ids=", required_ids.keys())
 
-	# Clear every live UI node first. A node can temporarily survive a grid
-	# mutation while its position map is being reconciled; leaving it out of the
-	# GridManager loop would otherwise preserve a stale require icon.
-	if grid_view != null and is_instance_valid(grid_view):
-		for node_key: Variant in grid_view._item_nodes.keys():
-			var live_node: GridItem = grid_view._item_nodes[node_key] as GridItem
-			if live_node != null and is_instance_valid(live_node):
-				live_node.set_required(false)
-
 	# Update all grid items
+	var seen_node_keys: Dictionary = {}
 	for entry in GridManager.get_all_items():
-		var node: GridItem = grid_view._item_nodes.get("%d,%d" % [entry.pos.x, entry.pos.y])
+		var node_key: String = "%d,%d" % [entry.pos.x, entry.pos.y]
+		seen_node_keys[node_key] = true
+		var node: GridItem = grid_view._item_nodes.get(node_key)
 		if node and is_instance_valid(node):
 			var item_data: Dictionary = entry.data
 			var item_id: int = int(item_data.get("id", 0))
@@ -520,6 +569,18 @@ func _refresh_required_indicators() -> void:
 			node.set_required(should_require)
 			if should_require:
 				print("[Require] apply pos=", entry.pos, " item_id=", item_id, " required=true")
+	# A node can temporarily survive a grid mutation while its position map is
+	# being reconciled. Clear only such stale nodes; do not toggle live nodes off
+	# before applying their final state, which causes a visible one-frame blink.
+	if grid_view != null and is_instance_valid(grid_view):
+		for node_key: Variant in grid_view._item_nodes.keys():
+			if seen_node_keys.has(str(node_key)):
+				continue
+			var stale_node: GridItem = grid_view._item_nodes[node_key] as GridItem
+			if stale_node != null and is_instance_valid(stale_node):
+				stale_node.set_required(false)
+	print("[StatusTrace] refresh_end frame=", Engine.get_process_frames(),
+		" seen_nodes=", seen_node_keys.size())
 func _collect_recipe_material_ids(result_id: int, required_ids: Dictionary, reserved_ids: Dictionary) -> void:
 	if result_id <= 0:
 		return
@@ -563,14 +624,17 @@ func _display_meridian() -> void:
 	requirement_list.set_title("修炼需求 %d/%d" % [completed, GameState.meridian_acupoints.size()])
 	var display_reqs: Array = []
 	var priority_indices: Dictionary = {}
+	var match_counts: Dictionary = {}
 	for i in range(GameState.meridian_acupoints.size()):
 		var req: Dictionary = GameState.meridian_acupoints[i]
 		if not req.get("completed", false):
 			var display_index: int = display_reqs.size()
 			display_reqs.append(req.duplicate())
 			_display_index_map.append(i)
-			priority_indices[display_index] = _get_requirement_priority(req)
-	requirement_list.set_requirements(display_reqs, priority_indices)
+			var stats: Dictionary = _get_requirement_match_stats(req)
+			priority_indices[display_index] = int(stats.get("priority", 0))
+			match_counts[display_index] = int(stats.get("matched_count", 0))
+	requirement_list.set_requirements(display_reqs, priority_indices, match_counts)
 	_refresh_requirement_buttons()
 
 func _on_meridian_complete(display_index: int) -> void:
@@ -710,10 +774,35 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 
 	var server_grid: Array = result.get("grid", [])
 	print("[GameScreen] meridian confirmed, server grid size=", server_grid.size())
+	print("[StatusTrace] order_confirmed frame=", Engine.get_process_frames(),
+		" pending_animation=", not animation.is_empty(), " local_nodes=", grid_view._item_nodes.size())
+	_suppress_requirement_refresh = true
 	grid_view.set_skip_animations(true)
-	GridManager.init_grid()
-	GridManager.populate_from_server(server_grid)
+	# The optimistic completion has already removed submitted items locally.
+	# Reconcile the authoritative snapshot in place so surviving GridItem nodes
+	# (and their status overlays) are not destroyed and recreated in one frame.
+	var server_uids: Dictionary = {}
+	for server_entry_variant: Variant in server_grid:
+		if server_entry_variant is Dictionary:
+			var server_entry: Dictionary = server_entry_variant
+			server_uids[int(server_entry.get("uid", 0))] = true
+	var stale_positions: Array[Vector2i] = []
+	for local_entry: Dictionary in GridManager.get_all_items():
+		var local_uid: int = int(local_entry.data.get("_uid", 0))
+		if local_uid > 0 and not server_uids.has(local_uid):
+			stale_positions.append(local_entry.pos)
+	for stale_pos: Vector2i in stale_positions:
+		GridManager.remove_item(stale_pos)
+	print("[StatusTrace] order_grid_prune frame=", Engine.get_process_frames(),
+		" removed=", stale_positions.size())
+	var reconciled_in_place: bool = GridManager.reconcile_from_server(server_grid)
+	print("[StatusTrace] order_grid_reconcile frame=", Engine.get_process_frames(),
+		" in_place=", reconciled_in_place, " nodes=", grid_view._item_nodes.size())
+	if not reconciled_in_place:
+		GridManager.init_grid()
+		GridManager.populate_from_server(server_grid)
 	grid_view.set_skip_animations(false)
+	_suppress_requirement_refresh = false
 
 	if not cult.is_empty():
 		CultivationService.deserialize(cult)

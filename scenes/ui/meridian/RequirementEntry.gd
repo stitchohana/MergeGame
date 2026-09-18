@@ -11,6 +11,7 @@ var _rewards_setup: Dictionary = {}
 var _ready_done: bool = false
 var _available: bool = false
 var _order_priority: int = 0
+var _order_match_count: int = 0
 var _item_widget_scene: PackedScene = preload("res://scenes/ui/common/ItemWidget.tscn")
 var _reward_slot_scene: PackedScene = preload("res://scenes/ui/meridian/RewardSlot.tscn")
 
@@ -116,15 +117,28 @@ func is_available() -> bool:
 
 
 func set_order_priority(priority: int) -> bool:
+	return set_order_rank(priority, _order_match_count)
+
+
+func set_order_rank(priority: int, match_count: int) -> bool:
 	var normalized_priority: int = clampi(priority, 0, 2)
-	var changed: bool = _order_priority != normalized_priority
+	var normalized_match_count: int = maxi(match_count, 0)
+	var changed: bool = (
+		_order_priority != normalized_priority
+		or _order_match_count != normalized_match_count
+	)
 	_order_priority = normalized_priority
+	_order_match_count = normalized_match_count
 	set_available(_order_priority == 2)
 	return changed
 
 
 func get_order_priority() -> int:
 	return _order_priority
+
+
+func get_order_match_count() -> int:
+	return _order_match_count
 
 
 func get_display_index() -> int:

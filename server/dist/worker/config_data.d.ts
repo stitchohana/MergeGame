@@ -26,22 +26,19 @@ export declare const gameConfigTables: {
                 item_id: number;
                 count: number;
             }[];
-            breakthrough_reward_id?: undefined;
+            breakthrough_reward_id: number;
+        } | {
+            name: string;
+            exp: number;
+            max_qi: number;
+            breakthrough_reward_id: number;
+            breakthrough_items?: undefined;
         } | {
             name: string;
             exp: number;
             max_qi: number;
             breakthrough_items?: undefined;
             breakthrough_reward_id?: undefined;
-        } | {
-            name: string;
-            exp: number;
-            max_qi: number;
-            breakthrough_items: {
-                item_id: number;
-                count: number;
-            }[];
-            breakthrough_reward_id: number;
         })[];
     };
     expedition: {
@@ -92,10 +89,10 @@ export declare const gameConfigTables: {
     };
     homeMeridians: {
         stages: {
+            cultivation_level: number;
             name: string;
             acupoints: number;
             qi_cost: number;
-            acupoint_exp: number;
             circulation_reward: {
                 tokens: {
                     token: number;
@@ -355,6 +352,12 @@ export declare const gameConfigTables: {
                 }[];
             };
             "312": {
+                items: {
+                    id: number;
+                    count: number;
+                }[];
+            };
+            "313": {
                 items: {
                     id: number;
                     count: number;

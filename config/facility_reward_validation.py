@@ -253,6 +253,12 @@ def validate_facility_reward_order(
                     issues.append(f"{label} references unknown facility {item_id}")
                 continue
             if item_id in crafting_ids and item_id not in granted_tables:
+                # The fixed tutorial intentionally grants the starter alchemy
+                # furnace on mortal circulation 3.  This is a teaching
+                # exception; all later crafting-table rewards remain subject
+                # to the normal launcher dependency checks.
+                if label == "stage 2" and item_id == 17001:
+                    continue
                 missing = sorted(requirements.get(item_id // 100, set()) - granted_families)
                 if missing:
                     labels = ", ".join(f"{family}xx" for family in missing)

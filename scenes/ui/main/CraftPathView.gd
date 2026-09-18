@@ -7,7 +7,7 @@ class_name CraftPathView extends BasePopup
 signal item_selected(item_data: Dictionary)
 
 const COLUMNS: int = 4
-const MIN_VISIBLE_SLOTS: int = 12
+const MIN_VISIBLE_SLOTS: int = 0
 const COMPACT_LAYOUT_ROWS: int = 4
 const PATH_WIDTH: float = 655.2
 const PATH_HEIGHT: float = 511.68
@@ -217,6 +217,9 @@ func _update_source_card(entries: Array[Dictionary]) -> void:
 		return
 
 	var first_entry: Dictionary = entries[0]
+	print("[CraftPathTrace] source_card entries=", _describe_source_entries(entries),
+		" selected_id=", ConfigDatabase._coerce_int(first_entry.get("id", 0)),
+		" selected_level=", ConfigDatabase._coerce_int(first_entry.get("level", 0)))
 	source_item.show()
 	source_item.setup(first_entry)
 	source_item.set_selected(false)
@@ -246,6 +249,7 @@ func _configure_discovery_visual(widget: ItemWidget, item_data: Dictionary) -> v
 
 func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 	var present_launcher_ids: Dictionary = {}
+	var board_launchers: Array[Dictionary] = []
 	for entry: Dictionary in GridManager.get_all_items():
 		var board_item: Dictionary = entry.get("data", {})
 		if ConfigDatabase._coerce_int(board_item.get("type", 0)) != Constants.ItemType.LAUNCHER:
@@ -253,9 +257,14 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 		var launcher_id: int = ConfigDatabase._coerce_int(board_item.get("id", 0))
 		if launcher_id > 0:
 			present_launcher_ids[launcher_id] = true
+			board_launchers.append(board_item)
 
 	var result: Array[Dictionary] = []
 	var launchers: Array = ConfigDatabase.get_launchers_for_item(item_id)
+	print("[CraftPathTrace] source_candidates item_id=", item_id,
+		" board_launchers=", _describe_source_entries(board_launchers),
+		" configured_candidates=", _describe_source_entries(launchers),
+		" current_level=", maxi(1, int(CultivationService.current_level)))
 	for raw_launcher: Variant in launchers:
 		if not raw_launcher is Dictionary:
 			continue
@@ -263,6 +272,17 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 		var launcher_id: int = ConfigDatabase._coerce_int(launcher.get("id", 0))
 		if present_launcher_ids.has(launcher_id):
 			result.append(launcher)
+	# The source card uses the first entry as its icon. Prefer the highest-level
+	# launcher currently present on the board so the displayed source reflects
+	# the player's strongest available producer.
+	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var level_a: int = ConfigDatabase._coerce_int(a.get("level", 0))
+		var level_b: int = ConfigDatabase._coerce_int(b.get("level", 0))
+		if level_a != level_b:
+			return level_a > level_b
+		return ConfigDatabase._coerce_int(a.get("id", 0)) > ConfigDatabase._coerce_int(b.get("id", 0)))
+	print("[CraftPathTrace] source_sorted item_id=", item_id,
+		" present_result=", _describe_source_entries(result))
 	if not result.is_empty():
 		return result
 
@@ -273,6 +293,31 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 		if raw_launcher is Dictionary:
 			result.append(raw_launcher as Dictionary)
 	return result
+
+func _describe_source_entries(entries: Array) -> Array[String]:
+	var result: Array[String] = []
+	for raw: Variant in entries:
+		if raw is Dictionary:
+			var data: Dictionary = raw as Dictionary
+			result.append("%d(lv%d)" % [
+				ConfigDatabase._coerce_int(data.get("id", 0)),
+				ConfigDatabase._coerce_int(data.get("level", 0))])
+	return result
+
+
+func _filter_launchers_by_cultivation_level(launchers: Array) -> Array:
+	# Source icons should reflect the mine levels currently available to the
+	# player, rather than every configured future level.
+	var current_level: int = maxi(1, int(CultivationService.current_level))
+	var filtered: Array = []
+	for raw_launcher: Variant in launchers:
+		if not raw_launcher is Dictionary:
+			continue
+		var launcher: Dictionary = raw_launcher as Dictionary
+		var launcher_level: int = ConfigDatabase._coerce_int(launcher.get("level", 1), 1)
+		if launcher_level <= current_level:
+			filtered.append(launcher)
+	return filtered
 
 
 func _get_group_level_one_item(item_data: Dictionary) -> Dictionary:

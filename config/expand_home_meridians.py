@@ -24,7 +24,6 @@ from facility_reward_validation import (
 )
 from home_meridian_progression import (
     CIRCULATIONS_BY_LEVEL,
-    EARLY_STAGE_ACUPOINT_EXP,
     EARLY_STAGE_NODES_PER_CIRCULATION,
     EARLY_STAGE_QI_COST,
     MINE_ONLY_REWARD_ID,
@@ -145,14 +144,12 @@ def build_expanded_stages(
         if level <= len(EARLY_STAGE_NODES_PER_CIRCULATION):
             node_count = EARLY_STAGE_NODES_PER_CIRCULATION[level - 1]
             qi_cost = EARLY_STAGE_QI_COST[level - 1]
-            acupoint_exp = EARLY_STAGE_ACUPOINT_EXP[level - 1]
             for _cycle in range(target_count):
                 level_stages.append({
                     "cultivation_level": level,
                     "name": f"{cultivation_stages[level - 1]['name']}·周天{cycle_number}",
                     "acupoints": node_count,
                     "qi_cost": qi_cost,
-                    "acupoint_exp": acupoint_exp,
                     "circulation_reward": {"tokens": [], "items": []},
                 })
                 cycle_number += 1
@@ -166,26 +163,16 @@ def build_expanded_stages(
                         "name": f"{cultivation_stages[level - 1]['name']}·周天{cycle_number}",
                         "acupoints": acupoints,
                         "qi_cost": as_int(old_stage.get("qi_cost")),
-                        "acupoint_exp": as_int(old_stage.get("acupoint_exp")),
                         "circulation_reward": {"tokens": [], "items": []},
                     })
                     cycle_number += 1
 
-        acupoint_exp_total = sum(
-            stage["acupoints"] * stage["acupoint_exp"]
-            for stage in level_stages
-        )
         if level <= len(EARLY_STAGE_NODES_PER_CIRCULATION):
             target_exp = early_stage_exp(level, target_count)
             cultivation_stages[level - 1]["exp"] = target_exp
         else:
             target_exp = as_int(cultivation_stages[level - 1].get("exp"))
-        circulation_exp = target_exp - acupoint_exp_total
-        if circulation_exp < 0:
-            raise ValueError(
-                f"cultivation level {level} acupoints already grant {acupoint_exp_total} EXP, "
-                f"above target {target_exp}"
-            )
+        circulation_exp = target_exp
 
         token_totals: Dict[int, int] = defaultdict(int)
         for old_stage in old_stages:
@@ -531,7 +518,37 @@ def main() -> None:
     grouped = group_existing_stages(home["stages"], len(cultivation_stages))
     ensure_breakthrough_mines(cultivation_stages, rewards, items)
     expanded_stages = build_expanded_stages(grouped, cultivation_stages)
+    for stage in expanded_stages[:3]:
+        tokens = stage["circulation_reward"]["tokens"]
+        stage["circulation_reward"]["tokens"] = [
+            token for token in tokens if as_int(token.get("token")) != 1
+        ]
+    expanded_stages[1]["circulation_reward"]["tokens"].append(
+        {"token": 1, "amount": 10}
+    )
     facility_schedule = facility_reward_schedule(expanded_stages, items)
+    # Preserve the original three-circulation tutorial rewards.  The third
+    # tutorial circulation grants the alchemy furnace (17001) together with
+    # the wood-spirit launcher (16001).
+    facility_schedule[0] = [{"id": 12001, "count": 1}]
+    facility_schedule[1] = []
+    facility_schedule[2] = [
+        {"id": 16001, "count": 1},
+        {"id": 17001, "count": 1},
+    ]
+
+    # At 练气一层, grant the remaining 230/240 launcher families first; each
+    # later crafting table then has every launcher family needed by its recipes.
+    first_qi_facilities = [
+        [{"id": 23001, "count": 1}, {"id": 24001, "count": 1}],
+        [{"id": 15001, "count": 1}, {"id": 11001, "count": 1}],
+        [{"id": 13001, "count": 1}, {"id": 14001, "count": 1}],
+        [{"id": 18001, "count": 1}, {"id": 19001, "count": 1}],
+        [{"id": 20001, "count": 1}, {"id": 21001, "count": 1}],
+        [{"id": 11001, "count": 1}, {"id": 12001, "count": 1}],
+    ]
+    for offset, facilities in enumerate(first_qi_facilities):
+        facility_schedule[3 + offset] = facilities
     for stage, facilities in zip(expanded_stages, facility_schedule):
         stage["circulation_reward"]["items"] = facilities
 

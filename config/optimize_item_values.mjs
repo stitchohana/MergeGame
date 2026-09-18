@@ -48,12 +48,66 @@ function updateValuesById(sheet, valuesById) {
   return updated;
 }
 
+function calculateSpawnBaseCosts(items, byId) {
+  const directBaseCosts = new Map();
+  const byproductBaseCosts = new Map();
+  const setMinimum = (map, key, value) => {
+    if (!Number.isFinite(value) || value <= 0) return;
+    const previous = map.get(key);
+    if (previous === undefined || value < previous) map.set(key, value);
+  };
+
+  for (const launcher of items.launcher) {
+    const spawns = Array.isArray(launcher.spawns) ? launcher.spawns : [];
+    const totalWeight = spawns.reduce((sum, spawn) => sum + Math.max(0, Number(spawn.weight ?? 0)), 0);
+    if (totalWeight <= 0) continue;
+
+    const chains = new Map();
+    for (const spawn of spawns) {
+      const item = byId.get(Number(spawn.id));
+      const groupId = Number(item?.group_id);
+      const level = Number(item?.level);
+      const weight = Math.max(0, Number(spawn.weight ?? 0));
+      if (Number(item?.type) !== 0 || !Number.isInteger(groupId) || weight <= 0) continue;
+      const chain = chains.get(groupId) ?? { totalWeight: 0, levelOneWeight: 0 };
+      chain.totalWeight += weight;
+      if (level === 1) chain.levelOneWeight += weight;
+      chains.set(groupId, chain);
+    }
+
+    const highestChainWeight = Math.max(0, ...[...chains.values()].map(chain => chain.totalWeight));
+    for (const [groupId, chain] of chains) {
+      if (chain.levelOneWeight <= 0) continue;
+      // Values are integer order-value units. Round the expected number of
+      // launches needed for a level-1 drop; this keeps a 70% primary output
+      // at 1 while pricing a 30% byproduct at about 3.
+      const baseCost = Math.max(1, Math.round(totalWeight / chain.levelOneWeight));
+      setMinimum(directBaseCosts, groupId, baseCost);
+      if (chain.totalWeight < highestChainWeight) {
+        setMinimum(byproductBaseCosts, groupId, baseCost);
+      }
+    }
+  }
+
+  for (const launcher of items.launcher) {
+    for (const itemId of launcher.fixed_spawns ?? []) {
+      const item = byId.get(Number(itemId));
+      const groupId = Number(item?.group_id);
+      if (Number(item?.type) === 0 && Number.isInteger(groupId)) {
+        setMinimum(directBaseCosts, groupId, 1);
+      }
+    }
+  }
+  return { directBaseCosts, byproductBaseCosts };
+}
+
 function calculateValues(items, recipes) {
   const allItems = [...items.regular, ...items.launcher, ...items.crafting, ...(items.effect ?? [])];
   const byId = new Map();
   for (const item of allItems) if (!byId.has(Number(item.id))) byId.set(Number(item.id), item);
 
   const changedMergeItems = [];
+  const { directBaseCosts, byproductBaseCosts } = calculateSpawnBaseCosts(items, byId);
   const mergeChains = new Map();
   for (const item of items.regular.filter(item => Number(item.type) === 0 && Number.isInteger(Number(item.group_id)))) {
     const groupId = Number(item.group_id);
@@ -62,16 +116,22 @@ function calculateValues(items, recipes) {
   }
   for (const chain of mergeChains.values()) {
     chain.sort((a, b) => Number(a.level) - Number(b.level));
-    let previousItem = null;
-    for (const item of chain) {
+    const groupId = Number(chain[0]?.group_id);
+    let previousValue = null;
+    for (const [index, item] of chain.entries()) {
       const oldValue = asInt(item.value) ?? DEFAULT_MATERIAL_VALUE;
-      let newValue = Math.max(DEFAULT_MATERIAL_VALUE, oldValue);
-      if (previousItem && Number(item.level) === Number(previousItem.level) + 1) {
-        newValue = Math.max(newValue, withPremium(Number(previousItem.value) * 2));
+      let newValue = oldValue;
+      if (index === 0 && byproductBaseCosts.has(groupId)) {
+        newValue = byproductBaseCosts.get(groupId);
+      } else if (index === 0 && asInt(item.value) === null && directBaseCosts.has(groupId)) {
+        newValue = directBaseCosts.get(groupId);
+      } else if (index > 0 && Number(item.level) === Number(chain[index - 1].level) + 1 && previousValue !== null) {
+        newValue = withPremium(previousValue * 2);
       }
+      newValue = Math.max(DEFAULT_MATERIAL_VALUE, Number(newValue));
       item.value = newValue;
       if (newValue !== oldValue) changedMergeItems.push({ id: Number(item.id), oldValue, newValue });
-      previousItem = item;
+      previousValue = newValue;
     }
   }
 
@@ -110,7 +170,13 @@ function calculateValues(items, recipes) {
     item.value = newValue;
     if (newValue !== oldValue) changedRecipeProducts.push({ id: resultId, oldValue, newValue });
   }
-  return { changedMergeItems, changedRecipeProducts, productIds: new Set(recipesByResult.keys()) };
+  return {
+    changedMergeItems,
+    changedRecipeProducts,
+    productIds: new Set(recipesByResult.keys()),
+    directBaseCosts,
+    byproductBaseCosts,
+  };
 }
 
 const workbook = await openWorkbook();
@@ -178,6 +244,7 @@ if (process.argv.includes("--verify")) {
 const regularRowsUpdated = updateValuesById(workbook.worksheets.getItem("items_regular"), regularValues);
 const recipeRowsUpdated = updateValuesById(workbook.worksheets.getItem("items_recipe_product"), recipeValues);
 
+workbook.recalculate();
 const tempWorkbookPath = `${workbookPath}.tmp`;
 const output = await SpreadsheetFile.exportXlsx(workbook);
 await output.save(tempWorkbookPath);
@@ -187,11 +254,12 @@ await renderWorkbook(workbook, "after");
 
 console.log(JSON.stringify({
   premiumRate: PREMIUM_RATE,
+  byproductBaseCosts: Object.fromEntries(result.byproductBaseCosts),
   changedMergeItems: result.changedMergeItems.length,
   changedRecipeProducts: result.changedRecipeProducts.length,
   regularRowsUpdated,
   recipeRowsUpdated,
   level4Byproducts: items.regular
     .filter(item => Number(item.type) === 0 && Number(item.level) === 4 && [2, 6, 8, 10, 12, 14].includes(Number(item.group_id)))
-    .map(item => ({ id: item.id, name: item.name, value: item.value, orderReward: item.value * 10 })),
+    .map(item => ({ id: item.id, name: item.name, value: item.value, orderReward: item.value })),
 }, null, 2));

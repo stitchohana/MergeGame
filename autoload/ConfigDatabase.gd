@@ -204,11 +204,13 @@ func get_launchers_for_item(item_id: int) -> Array:
 	for id in _items_data:
 		if id is int:
 			var item: Dictionary = _items_data[id]
-			if item.get("type", 0) != Constants.ItemType.LAUNCHER:
+			# JSON tables may encode numeric fields as strings (for example, type="1").
+			# Coerce both the item type and spawn id so every configured launcher is considered.
+			if _coerce_int(item.get("type", 0)) != Constants.ItemType.LAUNCHER:
 				continue
 			var spawns: Array = item.get("spawns", [])
-			for s in spawns:
-				if s.get("id", 0) == item_id:
+			for spawn in spawns:
+				if _coerce_int(spawn.get("id", 0)) == item_id:
 					result.append(item)
 					break
 	return result

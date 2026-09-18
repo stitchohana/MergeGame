@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/reward_received_popup_ui_smoke.gd" id="1_script"]
+
+[node name="RewardReceivedPopupUISmoke" type="Node"]
+script = ExtResource("1_script")

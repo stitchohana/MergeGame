@@ -81,14 +81,13 @@ const tokenCol = rewardHeaders.indexOf("tokens(token:amount)");
 let orderRewardRow = rewardRows.findIndex((row, index) => index > 0 && Number(row[rewardIdCol]) === 219);
 if (orderRewardRow < 0) orderRewardRow = rewardRows.length;
 rewardSheet.getCell(orderRewardRow, rewardIdCol).values = [[219]];
-rewardSheet.getCell(orderRewardRow, tokenCol).values = [["2:10"]];
+rewardSheet.getCell(orderRewardRow, tokenCol).values = [["2:1"]];
 await save(rewardBook, "rewards");
 
 const home = await readJson("home_meridians.json");
 const homeBook = await open("home_meridians");
 const homeSheet = homeBook.worksheets.getItem("home_meridians");
 updateById(homeSheet, "name", "qi_cost", new Map(home.stages.map(stage => [stage.name, stage.qi_cost])));
-updateById(homeSheet, "name", "acupoint_exp", new Map(home.stages.map(stage => [stage.name, stage.acupoint_exp ?? 0])));
 updateById(homeSheet, "name", "circulation_reward", new Map(home.stages.map(stage => [
   stage.name,
   JSON.stringify(stage.circulation_reward ?? {}),

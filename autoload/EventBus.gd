@@ -22,3 +22,6 @@ signal settings_requested()
 
 # Toast notification
 signal show_toast(message: String)
+
+# Launcher runtime state changed after a spawn confirmation.
+signal launcher_charge_changed(uid: int)

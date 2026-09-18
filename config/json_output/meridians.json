@@ -55,7 +55,7 @@
       "count_min": 1,
       "count_max": 1,
       "acupoint_rewards": 219,
-      "order_count": 7,
+      "order_count": 6,
       "fixed_orders": [
         {
           "item_ids": [
@@ -69,11 +69,6 @@
             9003,
             9004,
             10001
-          ]
-        },
-        {
-          "item_ids": [
-            27001
           ]
         }
       ]

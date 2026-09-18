@@ -808,6 +808,8 @@ func _on_grid_updated() -> void:
 	_reset_board_idle()
 
 func _sync_all_items() -> void:
+	print("[StatusTrace] sync_all_begin frame=", Engine.get_process_frames(),
+		" old_nodes=", _item_nodes.size(), " grid_count=", GridManager.count_items())
 	_reset_board_idle()
 	_clear_all_item_nodes()
 	var layer := _get_items_layer()
@@ -819,6 +821,8 @@ func _sync_all_items() -> void:
 		item.setup(entry.data, entry.pos, CELL_STEP)
 		_item_nodes["%d,%d" % [entry.pos.x, entry.pos.y]] = item
 		_try_start_launcher_cd(entry.data)
+	print("[StatusTrace] sync_all_end frame=", Engine.get_process_frames(),
+		" new_nodes=", _item_nodes.size())
 
 func _remove_item_node(pos: Vector2i) -> void:
 	var key := "%d,%d" % [pos.x, pos.y]
@@ -828,6 +832,7 @@ func _remove_item_node(pos: Vector2i) -> void:
 	_item_nodes.erase(key)
 
 func _clear_all_item_nodes() -> void:
+	print("[StatusTrace] clear_nodes frame=", Engine.get_process_frames(), " count=", _item_nodes.size())
 	_clear_crafting_hints("grid_rebuild")
 	for key in _item_nodes:
 		var node = _item_nodes[key]
@@ -1010,11 +1015,39 @@ func _on_craft_retrieve_ready(result_id: int, result_uid: int, table_pos: Vector
 	EventBus.show_toast.emit("制作完成：%s" % result_data.get("name", "未知"))
 
 func _on_craft_visual_update(table_item: Dictionary, state: int) -> void:
+	var table_uid: int = int(table_item.get("_uid", 0))
+	print("[CraftStatusTrace] visual_update frame=", Engine.get_process_frames(),
+		" uid=", table_uid, " id=", int(table_item.get("id", 0)),
+		" state=", state, " nodes=", _item_nodes.size(),
+		" stored=", (table_item.get("_craft_stored", []) as Array).size())
+	var matched: bool = false
 	for key in _item_nodes:
 		var node = _item_nodes[key]
-		if node and is_instance_valid(node) and node.item_data == table_item:
+		if node and is_instance_valid(node) and (
+			(node.item_data == table_item)
+			or (table_uid > 0 and int(node.item_data.get("_uid", 0)) == table_uid)
+		):
+			matched = true
+			# CraftingService mutates the authoritative table dictionary before
+			# this signal; update the live node explicitly so its transparent
+			# state icon is not left stale after material insertion.
+			node.item_data = table_item
 			node.set_crafting_state(state)
+			node.refresh_status_icons()
+			print("[CraftStatusTrace] node_updated frame=", Engine.get_process_frames(),
+				" key=", key, " uid=", int(node.item_data.get("_uid", 0)),
+				" idle=", node.status_idle_icon.visible,
+				" loaded=", node.status_loaded_icon.visible,
+				" working=", node.status_working_icon.visible,
+				" ready=", node.status_ready_icon.visible)
 			break
+	if not matched:
+		var node_uids: Array[int] = []
+		for raw_node: Variant in _item_nodes.values():
+			var candidate: GridItem = raw_node as GridItem
+			if candidate != null and is_instance_valid(candidate):
+				node_uids.append(int(candidate.item_data.get("_uid", 0)))
+		print("[CraftStatusTrace] node_not_found uid=", table_uid, " node_uids=", node_uids)
 
 func _on_craft_start_requested(table_pos: Vector2i) -> void:
 	var table: Variant = GridManager.get_item(table_pos)
@@ -1388,6 +1421,7 @@ func _play_spawn_fly(target_pos: Vector2i, launcher_pos: Vector2i) -> void:
 	tween.tween_property(fly_node, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BOUNCE)
 
 func _on_launcher_charge_update(uid: int, text: String, color: Color) -> void:
+	EventBus.launcher_charge_changed.emit(uid)
 	for node_key in _item_nodes:
 		var node = _item_nodes[node_key]
 		if is_instance_valid(node) and node.item_data.get("_uid", 0) == uid:

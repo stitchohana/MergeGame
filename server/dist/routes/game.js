@@ -804,6 +804,22 @@ function createGameRouter(storage, engine, jwtSecret) {
         await storage.saveState(userId, state);
         res.json(result);
     }));
+    // POST /api/game/home_meridian/run
+    router.post("/home_meridian/run", op(async (req, res, userId) => {
+        const { stage } = req.body;
+        if (typeof stage !== "number") {
+            res.status(400).json({ error: "invalid_params" });
+            return;
+        }
+        const state = await getOrCreateState(userId);
+        const result = engine.runHomeMeridianCirculation(state, stage);
+        if (!result.ok) {
+            res.status(400).json({ error: result.reason });
+            return;
+        }
+        await storage.saveState(userId, state);
+        res.json(result);
+    }));
     // GET /api/leaderboard
     router.get("/leaderboard", async (_req, res) => {
         try {

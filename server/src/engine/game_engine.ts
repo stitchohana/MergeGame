@@ -329,12 +329,8 @@ export class GameEngine {
   }
 
   private _getAcupointReward(def: any, _acupointIndex: number): RewardConfig {
-    const exp = Math.max(0, Number(def.acupoint_exp ?? 0));
     return {
-      tokens: [
-        { token: TokenType.EXP, amount: exp },
-        { token: TokenType.STAMINA, amount: 15 },
-      ],
+      tokens: [{ token: TokenType.STAMINA, amount: 15 }],
       items: [],
     };
   }
@@ -355,8 +351,30 @@ export class GameEngine {
     return maxIndex;
   }
 
+  private hasReadyHomeMeridianCirculation(state: GameState): boolean {
+    const progressList = Array.isArray(state.home_meridian_progress)
+      ? state.home_meridian_progress
+      : [];
+    const maxStageIndex = this._maxUnlockedHomeStageIndex(state.cultivation.current_level);
+    return progressList.some(progress => {
+      const stageIndex = Number(progress?.stage ?? -1);
+      if (!Number.isInteger(stageIndex) || stageIndex < 0 || stageIndex > maxStageIndex) {
+        return false;
+      }
+      if (progress.circulation_completed === true) return false;
+      const def = this.homeMeridianDefs[stageIndex];
+      const acupointCount = Number(def?.acupoints ?? 0);
+      if (!Number.isInteger(acupointCount) || acupointCount <= 0) return false;
+      const lit = Array.isArray(progress.lit) ? progress.lit : [];
+      for (let index = 0; index < acupointCount; index += 1) {
+        if (!Boolean(lit[index])) return false;
+      }
+      return true;
+    });
+  }
+
   lightHomeAcupoint(state: GameState, stageIndex: number, acupointIndex: number):
-    { ok: true; circulation_completed: boolean; cultivation: any; spirit_stones: number; stamina: number; pending_rewards: any[]; home_meridian_progress: any[]; meridian_acupoints: any[] }
+    { ok: true; circulation_completed: boolean; circulation_ready: boolean; rewards: RewardConfig; cultivation: any; spirit_stones: number; stamina: number; pending_rewards: any[]; home_meridian_progress: any[]; meridian_acupoints: any[] }
     | { ok: false; reason: string }
   {
     if (this.isBreakthroughReady(state.cultivation.current_level, state.cultivation.current_exp)) {
@@ -416,24 +434,17 @@ export class GameEngine {
       rewardsApplied.items!.push(...(r.items || []));
     }
 
-    // Check circulation completion
+    // Lighting the final node only makes the circulation ready. The actual
+    // circulation reward is granted by runHomeMeridianCirculation after the
+    // player explicitly presses the run button.
     const allLit = stageProgress.lit.every(l => l);
-    if (allLit) {
-      stageProgress.circulation_completed = true;
-      if (def.circulation_reward) {
-        const r = this.applyRewards(state, def.circulation_reward);
-        rewardsApplied.tokens!.push(...(r.tokens || []));
-        rewardsApplied.items!.push(...(r.items || []));
-      }
-    }
-
-    const meridianThreshold = this._findMeridianThreshold(state.cultivation.current_level);
-    this._tryRevealFixedOrders(state, meridianThreshold);
 
     state.version += 1;
     return {
       ok: true,
-      circulation_completed: allLit,
+      circulation_completed: Boolean(stageProgress.circulation_completed),
+      circulation_ready: allLit && !stageProgress.circulation_completed,
+      rewards: rewardsApplied,
       cultivation: state.cultivation,
       spirit_stones: state.spirit_stones,
       stamina: state.stamina,
@@ -441,6 +452,77 @@ export class GameEngine {
       home_meridian_progress: state.home_meridian_progress,
       meridian_acupoints: state.meridian_acupoints || [],
     };
+  }
+
+  runHomeMeridianCirculation(state: GameState, stageIndex: number):
+    { ok: true; circulation_completed: true; circulation_ready: false; rewards: RewardConfig; cultivation: any; spirit_stones: number; stamina: number; pending_rewards: any[]; home_meridian_progress: any[]; meridian_acupoints: any[]; grid: GridItem[]; launchers_refreshed: number }
+    | { ok: false; reason: string }
+  {
+    if (stageIndex < 0 || stageIndex >= this.homeMeridianDefs.length) {
+      return { ok: false, reason: "invalid_stage" };
+    }
+    if (stageIndex > this._maxUnlockedHomeStageIndex(state.cultivation.current_level)) {
+      return { ok: false, reason: "stage_locked" };
+    }
+
+    const def = this.homeMeridianDefs[stageIndex];
+    state.home_meridian_progress = state.home_meridian_progress || [];
+    let stageProgress = state.home_meridian_progress.find(progress => progress.stage === stageIndex);
+    if (!stageProgress) {
+      return { ok: false, reason: "circulation_not_ready" };
+    }
+    stageProgress.lit = Array.from(
+      { length: def.acupoints },
+      (_value, index) => Boolean(stageProgress.lit[index]),
+    );
+    if (stageProgress.circulation_completed) {
+      return { ok: false, reason: "circulation_completed" };
+    }
+    if (!stageProgress.lit.every(isLit => isLit)) {
+      return { ok: false, reason: "circulation_not_ready" };
+    }
+
+    const rewardsApplied: RewardConfig = def.circulation_reward
+      ? this.applyRewards(state, def.circulation_reward)
+      : { tokens: [], items: [] };
+    const launchersRefreshed = this.refreshBoardLaunchers(state);
+    stageProgress.circulation_completed = true;
+    this.syncBreakthroughOrder(state);
+
+    // Reveal the next fixed onboarding wave only after the explicit run
+    // action has completed the current circulation.
+    const meridianThreshold = this._findMeridianThreshold(state.cultivation.current_level);
+    state.meridian_fixed_wave_pending = false;
+    this._tryRevealFixedOrders(state, meridianThreshold);
+
+    state.version += 1;
+    return {
+      ok: true,
+      circulation_completed: true,
+      circulation_ready: false,
+      rewards: rewardsApplied,
+      cultivation: state.cultivation,
+      spirit_stones: state.spirit_stones,
+      stamina: state.stamina,
+      pending_rewards: state.pending_rewards,
+      home_meridian_progress: state.home_meridian_progress,
+      meridian_acupoints: state.meridian_acupoints || [],
+      grid: state.grid,
+      launchers_refreshed: launchersRefreshed,
+    };
+  }
+
+  private refreshBoardLaunchers(state: GameState): number {
+    let refreshed = 0;
+    for (const item of state.grid || []) {
+      const itemDef = this.getItemData(item.id);
+      if (!itemDef || !this.isLauncher(itemDef)) continue;
+      item.charges = itemDef.max_charges ?? 3;
+      delete item.last_charge_time;
+      delete (item as any)._recharge_remaining;
+      refreshed += 1;
+    }
+    return refreshed;
   }
 
   gmActivateHomeAcupoints(state: GameState, amount: number): { activated: number; completed_stages: number } {
@@ -518,6 +600,7 @@ export class GameEngine {
       // A cursor belongs to one threshold.  Do not let a completed wave from
       // an earlier cultivation stage skip fixed orders in a later one.
       state.meridian_fixed_order_cursor = 0;
+      state.meridian_fixed_wave_pending = false;
       state.meridian_acupoints = [];
     }
     state.meridian_threshold_idx = foundIdx;
@@ -525,6 +608,16 @@ export class GameEngine {
       return { acupoints: state.meridian_acupoints };
     }
     if (fixedOrderWaves.length > 0) {
+      // Saves created before meridian_fixed_wave_pending existed can already
+      // be sitting between waves: an empty list with an advanced cursor. Treat
+      // that shape as pending as well so merely reopening the board cannot
+      // reveal the next tutorial wave.
+      const fixedCursor = Number(state.meridian_fixed_order_cursor ?? 0);
+      if (state.meridian_fixed_wave_pending === true
+        || (state.meridian_fixed_wave_pending === undefined && fixedCursor > 0)) {
+        state.meridian_fixed_wave_pending = true;
+        return { acupoints: [] };
+      }
       this._tryRevealFixedOrders(state, t);
       return { acupoints: state.meridian_acupoints || [] };
     }
@@ -568,10 +661,11 @@ export class GameEngine {
       ? state.meridian_acupoints
       : [];
 
-    const breakthroughRequired = this.getRequiredBreakthroughItems(
-      state.cultivation.current_level,
-      state.cultivation.current_exp,
-    ).length > 0;
+    const breakthroughRequired = !this.hasReadyHomeMeridianCirculation(state)
+      && this.getRequiredBreakthroughItems(
+        state.cultivation.current_level,
+        state.cultivation.current_exp,
+      ).length > 0;
     if (breakthroughRequired) {
       this.syncBreakthroughOrder(state);
       const acupoints = state.meridian_acupoints || [];
@@ -2175,6 +2269,7 @@ export class GameEngine {
   }
 
   syncBreakthroughOrder(state: GameState): boolean {
+    if (this.hasReadyHomeMeridianCirculation(state)) return false;
     const level = state.cultivation.current_level;
     const requirements = this.getRequiredBreakthroughItems(level, state.cultivation.current_exp);
     if (requirements.length === 0) return false;
@@ -2248,6 +2343,9 @@ export class GameEngine {
     if (!this.isBreakthroughReady(level, exp)) {
       console.log(`[engine] tryBreakthrough: not ready (need exp=${this.getExpToNextLevel(level)} have=${exp})`);
       return { ok: false, reason: "not_ready" };
+    }
+    if (this.hasReadyHomeMeridianCirculation(state)) {
+      return { ok: false, reason: "circulation_pending" };
     }
     if (!this.cultivation) return { ok: false, reason: "no_config" };
 
@@ -2715,8 +2813,13 @@ export class GameEngine {
         console.log(`[engine] meridian order #${index} completed, no craftable replacement available`);
       }
     } else {
-      const revealed = this._tryRevealFixedOrders(state, newThreshold);
-      console.log(`[engine] meridian fixed order #${index} completed, next wave revealed: ${revealed}`);
+      // Fixed onboarding orders advance only after the player runs a complete
+      // home-meridian circulation. Keep the list empty until that explicit
+      // circulation action reveals the next configured wave.
+      if (state.meridian_acupoints.length === 0) {
+        state.meridian_fixed_wave_pending = true;
+      }
+      console.log(`[engine] meridian fixed order #${index} completed, next wave deferred until circulation`);
     }
 
     return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina };

@@ -147,6 +147,16 @@ func _update_status_icons() -> void:
 		status_loaded_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.HAS_ITEMS
 		status_working_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.CRAFTING
 		status_ready_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.READY
+		if is_crafting_table:
+			print("[CraftStatusTrace] icon_refresh frame=", Engine.get_process_frames(),
+				" uid=", int(item_data.get("_uid", 0)), " id=", int(item_data.get("id", 0)),
+				" pos=", grid_position, " state=", craft_state,
+				" stored=", (item_data.get("_craft_stored", []) as Array).size(),
+				" idle=", status_idle_icon.visible,
+				" loaded=", status_loaded_icon.visible,
+				" working=", status_working_icon.visible,
+				" ready=", status_ready_icon.visible,
+				" node_visible=", visible, " alpha=", modulate.a)
 
 func _item_type() -> int:
 	return int(item_data.get("type", Constants.ItemType.REGULAR))
@@ -199,7 +209,16 @@ func set_visual_position(pos: Vector2) -> void:
 
 func set_required(required: bool) -> void:
 	if require_icon:
+		var previous_visible: bool = require_icon.visible
 		require_icon.visible = required and not bool(item_data.get("immovable", false))
+		if previous_visible != require_icon.visible:
+			print("[StatusTrace] require_toggle uid=", int(item_data.get("_uid", 0)),
+				" item=", int(item_data.get("id", 0)),
+				" pos=", grid_position,
+				" visible=", require_icon.visible,
+				" required=", required,
+				" immovable=", bool(item_data.get("immovable", false)),
+				" frame=", Engine.get_process_frames())
 
 func is_required() -> bool:
 	return require_icon != null and require_icon.visible

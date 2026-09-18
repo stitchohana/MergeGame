@@ -44,6 +44,8 @@ signal pending_reward_claimed(result: Dictionary)
 signal pending_reward_claimed_rejected(reason: String)
 signal home_meridian_light_confirmed(result: Dictionary)
 signal home_meridian_light_rejected(reason: String)
+signal home_meridian_run_confirmed(result: Dictionary)
+signal home_meridian_run_rejected(reason: String)
 signal craft_add_rejected(reason: String)
 signal craft_start_confirmed(result: Dictionary)
 signal craft_start_rejected(reason: String)
@@ -129,6 +131,7 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("quest_claim", _on_quest_claim_response, quest_claim_rejected, quest_claim_rejected, quest_claim_rejected)
 	_register_endpoint("claim_pending_reward", _on_claim_pending_reward_response, pending_reward_claimed_rejected, pending_reward_claimed_rejected, pending_reward_claimed_rejected)
 	_register_endpoint("home_meridian_light", _on_home_meridian_light_response, home_meridian_light_rejected, home_meridian_light_rejected, home_meridian_light_rejected)
+	_register_endpoint("home_meridian_run", _on_home_meridian_run_response, home_meridian_run_rejected, home_meridian_run_rejected, home_meridian_run_rejected)
 	_register_endpoint("craft_add", _on_craft_add_response, craft_add_rejected, craft_add_rejected, craft_add_rejected)
 	_register_endpoint("craft_start", _on_craft_start_response, craft_start_rejected, craft_start_rejected, craft_start_rejected)
 	_register_endpoint("craft_remove", _on_craft_remove_response, craft_remove_rejected, craft_remove_rejected, craft_remove_rejected)
@@ -377,6 +380,10 @@ func submit_light_home_acupoint(stage: int, index: int) -> void:
 	var body := JSON.stringify({"stage": stage, "index": index})
 	_send_authed_request("home_meridian_light", "/api/game/home_meridian/light", HTTPClient.Method.METHOD_POST, body)
 
+func submit_run_home_meridian(stage: int) -> void:
+	var body := JSON.stringify({"stage": stage})
+	_send_authed_request("home_meridian_run", "/api/game/home_meridian/run", HTTPClient.Method.METHOD_POST, body)
+
 func _on_meridian_complete_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		meridian_complete_confirmed.emit(data)
@@ -394,6 +401,12 @@ func _on_home_meridian_light_response(data: Dictionary) -> void:
 		home_meridian_light_confirmed.emit(data)
 	else:
 		home_meridian_light_rejected.emit(data.get("error", "unknown_error"))
+
+func _on_home_meridian_run_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		home_meridian_run_confirmed.emit(data)
+	else:
+		home_meridian_run_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_claim_pending_reward_response(data: Dictionary) -> void:
 	if data.get("ok", false):

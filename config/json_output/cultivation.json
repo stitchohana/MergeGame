@@ -8,6 +8,10 @@
         {
           "item_id": 14101,
           "count": 1
+        },
+        {
+          "item_id": 27001,
+          "count": 1
         }
       ],
       "breakthrough_reward_id": 313
@@ -93,7 +97,7 @@
     {
       "name": "筑基前期",
       "exp": 900,
-      "max_qi": 100000,
+      "max_qi": 153200,
       "breakthrough_items": [
         {
           "item_id": 28052,
@@ -129,7 +133,7 @@
     {
       "name": "金丹前期",
       "exp": 2200,
-      "max_qi": 1000000,
+      "max_qi": 4792200,
       "breakthrough_items": [
         {
           "item_id": 28055,
@@ -141,7 +145,7 @@
     {
       "name": "金丹中期",
       "exp": 6300,
-      "max_qi": 4000000,
+      "max_qi": 4792200,
       "breakthrough_items": [
         {
           "item_id": 28056,
@@ -165,7 +169,7 @@
     {
       "name": "元婴前期",
       "exp": 4700,
-      "max_qi": 100000000,
+      "max_qi": 421700300,
       "breakthrough_items": [
         {
           "item_id": 28058,
@@ -201,7 +205,7 @@
     {
       "name": "化神前期",
       "exp": 99999999,
-      "max_qi": 0
+      "max_qi": 454136600
     }
   ]
 }

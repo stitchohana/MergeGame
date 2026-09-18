@@ -111,9 +111,27 @@ export declare class GameEngine {
     getHomeMeridianDefs(): any[];
     private _getAcupointReward;
     private _maxUnlockedHomeStageIndex;
+    private hasReadyHomeMeridianCirculation;
     lightHomeAcupoint(state: GameState, stageIndex: number, acupointIndex: number): {
         ok: true;
         circulation_completed: boolean;
+        circulation_ready: boolean;
+        rewards: RewardConfig;
+        cultivation: any;
+        spirit_stones: number;
+        stamina: number;
+        pending_rewards: any[];
+        home_meridian_progress: any[];
+        meridian_acupoints: any[];
+    } | {
+        ok: false;
+        reason: string;
+    };
+    runHomeMeridianCirculation(state: GameState, stageIndex: number): {
+        ok: true;
+        circulation_completed: true;
+        circulation_ready: false;
+        rewards: RewardConfig;
         cultivation: any;
         spirit_stones: number;
         stamina: number;

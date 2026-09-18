@@ -638,7 +638,6 @@ print("Building home_meridians.json...")
 wb = open_book("home_meridians")
 home_stages = []
 for row in read_rows(wb["home_meridians"]):
-    acupoint_exp = parse_int(row.get("acupoint_exp", "")) or 0
     circulation_reward = parse_reward_config(row.get("circulation_reward", ""))
     if circulation_reward is None:
         raise ValueError(f"home meridian {row['name']} is missing circulation_reward")
@@ -651,7 +650,6 @@ for row in read_rows(wb["home_meridians"]):
         "cultivation_level": parse_int(row.get("cultivation_level")),
         "name": row["name"], "acupoints": parse_int(row["acupoints"]),
         "qi_cost": parse_int(row["qi_cost"]),
-        "acupoint_exp": acupoint_exp,
         "circulation_reward": circulation_reward,
     })
 
@@ -670,8 +668,7 @@ def reward_exp_amount(reward_config):
 
 
 def home_stage_exp_total(home_stage):
-    acupoint_total = home_stage["acupoints"] * int(home_stage.get("acupoint_exp", 0))
-    return acupoint_total + reward_exp_amount(home_stage["circulation_reward"])
+    return reward_exp_amount(home_stage["circulation_reward"])
 
 
 validate_home_progression(home_stages, stages, rewards, {"regular": regular, "launcher": launcher, "crafting": crafting})
@@ -771,11 +768,6 @@ def validate_facility_rewards():
         item_id = int(item["id"])
         setup_ids.add(item_id)
         add_available_facility(item_id)
-
-    starter_facilities = {12001, 16001, 17001}
-    missing_starters = sorted(starter_facilities - setup_ids)
-    if missing_starters:
-        raise ValueError(f"initial setup is missing tutorial facilities: {missing_starters}")
 
     mine_circulation_ids = []
     for stage_index, home_stage in enumerate(home_stages):

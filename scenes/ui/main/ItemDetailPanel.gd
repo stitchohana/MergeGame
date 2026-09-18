@@ -49,6 +49,8 @@ func _ready() -> void:
 	CloudService.launcher_speedup_confirmed.connect(_on_launcher_speedup_confirmed)
 	CloudService.launcher_speedup_rejected.connect(_on_launcher_speedup_rejected)
 	GameState.spirit_stones_changed.connect(_on_spirit_stones_changed)
+	if not EventBus.launcher_charge_changed.is_connected(_on_launcher_charge_changed):
+		EventBus.launcher_charge_changed.connect(_on_launcher_charge_changed)
 
 func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> void:
 	if item_data.is_empty():
@@ -196,17 +198,12 @@ func _populate_materials(items: Array) -> void:
 		if remaining > 0:
 			stored_counts[ingredient_id] = remaining - 1
 			continue
-		var board_remaining: int = int(board_counts.get(ingredient_id, 0))
-		if board_remaining > 0:
-			board_counts[ingredient_id] = board_remaining - 1
-			print("[CraftDetail] ghost_skipped reason=board_item_available item_id=",
-				ingredient_id, " remaining_board=", board_counts[ingredient_id])
-			continue
 		var ghost_data: Dictionary = ConfigDatabase.get_item_data(ingredient_id)
 		var ghost: ItemWidget = _build_material_icon(ghost_data, -1, true)
 		has_ghost_material = true
 		materials_row.add_child(ghost)
 		print("[CraftDetail] ghost_added item_id=", ingredient_id,
+			" reason=not_stored board_available=", int(board_counts.get(ingredient_id, 0)),
 			" data_found=", not ghost_data.is_empty(), " modulate_a=", ghost.modulate.a,
 			" self_modulate_a=", ghost.self_modulate.a,
 			" child_count=", materials_row.get_child_count())
@@ -356,12 +353,34 @@ func _build_material_icon(item_data: Dictionary, uid: int, ghost: bool = false) 
 	if ghost:
 		entry.modulate = Color(1, 1, 1, PREVIEW_GHOST_ALPHA)
 		entry.self_modulate = Color.WHITE
+	var icon_path: String = str(item_data.get("icon", ""))
+	var icon: TextureRect = entry.get_node_or_null("IconRect") as TextureRect
+	print("[CraftDetail][MaterialIcon] build role=", "ghost" if ghost else "stored",
+		" item_id=", int(item_data.get("id", 0)), " uid=", uid,
+		" icon_path=", icon_path, " data_keys=", item_data.keys(),
+		" entry_visible=", entry.visible, " entry_alpha=", entry.modulate.a,
+		" icon_visible_before_ready=", icon.visible if icon != null else false)
 
 	if ghost:
 		entry.pressed.connect(func(): material_source_requested.emit(int(item_data.get("id", 0))))
 	else:
 		entry.pressed.connect(func(): material_clicked.emit(uid, int(item_data.get("id", 0))))
+	entry.call_deferred("_update_visuals")
+	call_deferred("_log_material_icon_state", entry, "deferred_build", ghost)
 	return entry
+
+func _log_material_icon_state(slot: ItemWidget, role: String, ghost: bool) -> void:
+	if slot == null or not is_instance_valid(slot):
+		print("[CraftDetail][MaterialIcon] state role=", role, " ghost=", ghost, " valid=false")
+		return
+	var icon: TextureRect = slot.get_node_or_null("IconRect") as TextureRect
+	print("[CraftDetail][MaterialIcon] state role=", role, " ghost=", ghost,
+		" visible=", slot.visible, " visible_in_tree=", slot.is_visible_in_tree(),
+		" alpha=", slot.modulate.a, " self_alpha=", slot.self_modulate.a,
+		" icon_exists=", icon != null,
+		" icon_visible=", icon.visible if icon != null else false,
+		" icon_alpha=", icon.modulate.a if icon != null else -1.0,
+		" texture=", icon.texture.resource_path if icon != null and icon.texture != null else "")
 
 func _log_material_slot_runtime(slot: ItemWidget, role: String, item_id: int) -> void:
 	if slot == null or not is_instance_valid(slot):
@@ -503,6 +522,11 @@ func _on_countdown_tick() -> void:
 		return
 	var item_type: int = int(_current_item_data.get("type", 0))
 	if item_type == Constants.ItemType.CRAFTING:
+		var uid: int = int(_current_item_data.get("_uid", 0))
+		if uid > 0:
+			var latest: Dictionary = GridManager.find_by_uid(uid)
+			if not latest.is_empty():
+				_current_item_data = latest
 		var state: int = _current_item_data.get("_craft_state", CraftingService.TableState.IDLE)
 		if state != CraftingService.TableState.CRAFTING:
 			_stop_countdown_timer()
@@ -588,8 +612,23 @@ func _hide_speedup_button() -> void:
 		speedup_btn.hide()
 
 func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
-	if not _current_item_data.is_empty() and _current_item_data.get("_uid", 0) == table_item.get("_uid", -1):
-		_refresh_materials()
+	if _current_item_data.is_empty():
+		return
+	var current_uid: int = int(_current_item_data.get("_uid", 0))
+	var changed_uid: int = int(table_item.get("_uid", -1))
+	if current_uid <= 0 or current_uid != changed_uid:
+		return
+	# The signal payload can be a stale dictionary copy. Refresh from the grid
+	# before reading _craft_state/_craft_end_time, otherwise the panel may stop
+	# its timer while the table is already crafting.
+	var latest: Dictionary = GridManager.find_by_uid(current_uid)
+	if not latest.is_empty():
+		_current_item_data = latest
+	print("[CraftDetail] state_changed uid=", current_uid, " signal_state=", state,
+		" payload_state=", int(table_item.get("_craft_state", -1)),
+		" latest_state=", int(_current_item_data.get("_craft_state", -1)),
+		" end_time=", _current_item_data.get("_craft_end_time", 0))
+	_refresh_materials()
 
 func _on_speedup_pressed() -> void:
 	if not _pending_speedup.is_empty():
@@ -682,6 +721,17 @@ func _refresh_current_speedup_state() -> void:
 func _on_spirit_stones_changed(_amount: int) -> void:
 	if speedup_btn.visible:
 		speedup_btn.disabled = not _pending_speedup.is_empty()
+
+func _on_launcher_charge_changed(uid: int) -> void:
+	if _current_item_data.is_empty() or int(_current_item_data.get("_uid", 0)) != uid:
+		return
+	var latest: Dictionary = GridManager.find_by_uid(uid)
+	if not latest.is_empty():
+		_current_item_data = latest
+	print("[CraftDetail][Launcher] charge_changed uid=", uid,
+		" charges=", _current_item_data.get("charges", -1),
+		" recharge_remaining=", _current_item_data.get("_recharge_remaining", 0))
+	_refresh_launcher_speedup()
 
 func _on_view_pressed() -> void:
 	if _current_item_data.is_empty():

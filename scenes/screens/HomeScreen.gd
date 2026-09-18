@@ -17,6 +17,9 @@ var _home_progress: Array = []
 var _current_stage_idx: int = -1
 var _load_token: int = -1
 var _activation_pending: bool = false
+var _circulation_pending: bool = false
+var _circulation_animating: bool = false
+var _pending_circulation_result: Dictionary = {}
 var _breakthrough_items_scroll: ScrollContainer = null
 var _breakthrough_items_row: HBoxContainer = null
 
@@ -28,11 +31,14 @@ func _ready() -> void:
 	CloudService.state_loaded.connect(_on_state_loaded)
 	CloudService.home_meridian_light_confirmed.connect(_on_light_confirmed)
 	CloudService.home_meridian_light_rejected.connect(_on_light_rejected)
+	CloudService.home_meridian_run_confirmed.connect(_on_circulation_run_confirmed)
+	CloudService.home_meridian_run_rejected.connect(_on_circulation_run_rejected)
 	CloudService.breakthrough_confirmed.connect(_on_breakthrough_done)
 	CloudService.breakthrough_rejected.connect(_on_breakthrough_rejected)
 	CultivationService.exp_changed.connect(_on_cultivation_exp_changed)
 	CultivationService.stage_changed.connect(_on_cultivation_stage_changed)
 	_setup_acupoint_ui()
+	_setup_circulation_btn()
 	_setup_breakthrough_btn()
 	_refresh_cultivation_info()
 
@@ -110,12 +116,16 @@ func _on_state_loaded(state: Dictionary) -> void:
 
 
 func _refresh_display() -> void:
-	if CultivationService.is_breakthrough_ready():
+	if _circulation_animating:
+		return
+	if CultivationService.is_breakthrough_ready() and not _has_ready_circulation():
 		acupoint_layer.hide()
+		_refresh_circulation_btn(false)
 		return
 	acupoint_layer.show()
 	_set_acupoint_nodes([], 0, 0)
 	if _home_defs.is_empty():
+		_refresh_circulation_btn(false)
 		return
 
 	# Find first incomplete stage, or next after all completed
@@ -147,6 +157,26 @@ func _refresh_display() -> void:
 			lit.append(false)
 
 	_set_acupoint_nodes(lit, int(def.get("acupoints", 0)), int(def.get("qi_cost", 0)))
+	_refresh_circulation_btn(_get_next_acupoint_index(lit, int(def.get("acupoints", 0))) < 0 and not bool(progress.get("circulation_completed", false)))
+
+
+func _has_ready_circulation() -> bool:
+	for progress_variant in _home_progress:
+		if not progress_variant is Dictionary:
+			continue
+		var progress: Dictionary = progress_variant as Dictionary
+		if bool(progress.get("circulation_completed", false)):
+			continue
+		var stage_index: int = int(progress.get("stage", -1))
+		if stage_index < 0 or stage_index >= _home_defs.size():
+			continue
+		if stage_index > _max_unlocked_home_stage_index():
+			continue
+		var def: Dictionary = _home_defs[stage_index]
+		var lit: Array = progress.get("lit", [])
+		if _get_next_acupoint_index(lit, int(def.get("acupoints", 0))) < 0:
+			return true
+	return false
 
 
 func _max_unlocked_home_stage_index() -> int:
@@ -168,6 +198,36 @@ func _set_acupoint_nodes(lit: Array, count: int, qi_cost: int) -> void:
 			node.set_progress(completed, config_range.y - config_range.x)
 			if slot_index == next_slot_index:
 				node.show_activation(next_acupoint_index, count, qi_cost, _activation_pending)
+
+
+func _setup_circulation_btn() -> void:
+	var btn := Button.new()
+	btn.name = "RunCirculationBtn"
+	btn.text = "运转周天"
+	btn.add_theme_font_size_override("font_size", 18)
+	btn.pressed.connect(_on_circulation_run_pressed)
+	btn.visible = false
+	btn.disabled = false
+	btn.flat = true
+	btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	btn.offset_left = 240
+	btn.offset_top = 1268
+	btn.offset_right = 560
+	btn.offset_bottom = 1304
+	btn.z_index = 4
+	add_child(btn)
+
+
+func _refresh_circulation_btn(ready: bool) -> void:
+	var btn := get_node_or_null("RunCirculationBtn") as Button
+	if btn == null:
+		return
+	btn.visible = ready
+	btn.disabled = _circulation_pending or _circulation_animating
+	if _circulation_pending:
+		btn.text = "运转中..."
+	else:
+		btn.text = "运转周天"
 
 
 func _get_visible_slot_count(config_count: int) -> int:
@@ -260,7 +320,6 @@ func _get_acupoint_rewards(def: Dictionary, target_index: int) -> Dictionary:
 		return {}
 	return {
 		"tokens": [
-			{"token": 4, "amount": int(def.get("acupoint_exp", 0))},
 			{"token": 3, "amount": 15},
 		],
 		"items": [],
@@ -277,6 +336,7 @@ func _submit_acupoint(stage_index: int, target_index: int) -> void:
 
 func _on_light_confirmed(result: Dictionary) -> void:
 	_activation_pending = false
+	_apply_server_resources(result)
 	if result.has("home_meridian_progress"):
 		_home_progress = result.home_meridian_progress
 		GameState.home_meridian_progress = _home_progress.duplicate(true)
@@ -291,6 +351,153 @@ func _on_light_confirmed(result: Dictionary) -> void:
 func _on_light_rejected(_reason: String) -> void:
 	_activation_pending = false
 	_refresh_display()
+
+
+func _on_circulation_run_pressed() -> void:
+	if _circulation_pending or _circulation_animating or _current_stage_idx < 0:
+		return
+	if _home_defs.is_empty():
+		return
+	var def: Dictionary = _home_defs[_current_stage_idx]
+	var progress: Dictionary = {}
+	for stage_progress in _home_progress:
+		if stage_progress.get("stage", -1) == _current_stage_idx:
+			progress = stage_progress
+			break
+	if progress.is_empty():
+		return
+	var lit: Array = progress.get("lit", [])
+	if _get_next_acupoint_index(lit, int(def.get("acupoints", 0))) >= 0:
+		return
+	_circulation_pending = true
+	# Hold the current stage on screen while the authoritative response is
+	# processed and the qi animation plays. Other state listeners may receive
+	# the same response before this screen's handler.
+	_circulation_animating = true
+	_refresh_circulation_btn(true)
+	_refresh_breakthrough_btn()
+	CloudService.submit_run_home_meridian(_current_stage_idx)
+
+
+func _on_circulation_run_confirmed(result: Dictionary) -> void:
+	if _circulation_pending == false and _circulation_animating == false:
+		return
+	_circulation_pending = false
+	_circulation_animating = true
+	_pending_circulation_result = result.duplicate(true)
+	_refresh_circulation_btn(false)
+	_refresh_breakthrough_btn()
+	_apply_server_resources(result)
+	if result.has("home_meridian_progress"):
+		_home_progress = result.home_meridian_progress
+		GameState.home_meridian_progress = _home_progress.duplicate(true)
+	if result.has("cultivation"):
+		CultivationService.deserialize(result.cultivation)
+	if result.has("meridian_acupoints"):
+		GameState.meridian_acupoints = result.meridian_acupoints.duplicate(true)
+		GameState.meridian_updated.emit()
+	if result.has("grid"):
+		GameState.main_grid_cache = (result.get("grid", []) as Array).duplicate(true)
+	_play_circulation_animation()
+
+
+func _on_circulation_run_rejected(_reason: String) -> void:
+	_circulation_pending = false
+	_circulation_animating = false
+	_pending_circulation_result = {}
+	_refresh_display()
+	_refresh_breakthrough_btn()
+
+
+func _apply_server_resources(result: Dictionary) -> void:
+	if result.has("stamina"):
+		GameState.stamina = int(result.get("stamina", GameState.stamina))
+		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	if result.has("spirit_stones"):
+		GameState.spirit_stones = int(result.get("spirit_stones", GameState.spirit_stones))
+		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+
+
+func _play_circulation_animation() -> void:
+	var positions: Array[Vector2] = []
+	for node in acupoint_nodes:
+		if node.visible:
+			positions.append(node.get_global_rect().get_center())
+	if positions.is_empty():
+		_finish_circulation_animation()
+		return
+
+	var qi_orb := Panel.new()
+	qi_orb.name = "CirculationQiOrb"
+	qi_orb.custom_minimum_size = Vector2(22, 22)
+	qi_orb.size = Vector2(22, 22)
+	qi_orb.pivot_offset = Vector2(11, 11)
+	qi_orb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	qi_orb.z_index = 8
+	var orb_style := StyleBoxFlat.new()
+	orb_style.bg_color = Color(0.38, 0.94, 1.0, 0.98)
+	orb_style.border_width_left = 2
+	orb_style.border_width_top = 2
+	orb_style.border_width_right = 2
+	orb_style.border_width_bottom = 2
+	orb_style.border_color = Color(0.85, 1.0, 1.0, 0.95)
+	orb_style.corner_radius_top_left = 11
+	orb_style.corner_radius_top_right = 11
+	orb_style.corner_radius_bottom_left = 11
+	orb_style.corner_radius_bottom_right = 11
+	qi_orb.add_theme_stylebox_override("panel", orb_style)
+	add_child(qi_orb)
+	qi_orb.global_position = positions[0] - Vector2(11, 11)
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	for index in range(1, positions.size()):
+		var position: Vector2 = positions[index]
+		tween.tween_property(qi_orb, "global_position", position - Vector2(11, 11), 0.16)
+	var dantian_position: Vector2 = _get_dantian_position(positions)
+	tween.tween_property(qi_orb, "global_position", dantian_position - Vector2(11, 11), 0.35)
+	tween.tween_property(qi_orb, "scale", Vector2(1.65, 1.65), 0.14)
+	tween.tween_property(qi_orb, "modulate:a", 0.0, 0.2)
+	tween.finished.connect(_on_circulation_animation_finished.bind(qi_orb))
+
+
+func _get_dantian_position(positions: Array[Vector2]) -> Vector2:
+	var total := Vector2.ZERO
+	for position: Vector2 in positions:
+		total += position
+	return total / float(maxi(positions.size(), 1))
+
+
+func _on_circulation_animation_finished(qi_orb: Panel) -> void:
+	if is_instance_valid(qi_orb):
+		qi_orb.queue_free()
+	_finish_circulation_animation()
+
+
+func _finish_circulation_animation() -> void:
+	_circulation_animating = false
+	var result: Dictionary = _pending_circulation_result
+	_pending_circulation_result = {}
+	_refresh_display()
+	_refresh_breakthrough_btn()
+	var rewards_variant: Variant = result.get("rewards", {})
+	var rewards: Dictionary = {}
+	if rewards_variant is Dictionary:
+		rewards = rewards_variant as Dictionary
+	_show_received_reward_popup(
+		rewards,
+		"收到奖励",
+		"周天运转完成，灵气归于丹田"
+	)
+
+
+func _show_received_reward_popup(rewards: Dictionary, title: String, message: String) -> void:
+	var popup := preload("res://scenes/ui/home/RewardReceivedPopup.tscn").instantiate() as RewardReceivedPopup
+	if popup == null:
+		return
+	UIManager.show_popup(popup)
+	popup.setup(title, message, rewards)
 
 
 func _on_game_pressed() -> void:
@@ -344,7 +551,10 @@ func _refresh_breakthrough_btn() -> void:
 	var btn := get_node_or_null("BreakthroughBtn") as Button
 	if btn == null or _breakthrough_items_scroll == null or _breakthrough_items_row == null:
 		return
-	var ready: bool = CultivationService.is_breakthrough_ready()
+	var ready: bool = not _circulation_pending \
+		and not _circulation_animating \
+		and CultivationService.is_breakthrough_ready() \
+		and not _has_ready_circulation()
 	btn.visible = ready
 	_breakthrough_items_scroll.visible = ready
 	if not ready:
@@ -409,6 +619,8 @@ func _on_breakthrough_item_pressed(item_id: int) -> void:
 	source_popup.setup_for_item(item_id)
 
 func _on_breakthrough_pressed() -> void:
+	if _circulation_pending or _circulation_animating or _has_ready_circulation():
+		return
 	var requirements: Array = CultivationService.get_required_breakthrough_items()
 	if not requirements.is_empty():
 		var popup := preload("res://scenes/ui/home/BreakthroughConfirmPopup.tscn").instantiate() as BreakthroughConfirmPopup
@@ -427,6 +639,8 @@ func _try_show_pending_breakthrough_prompt() -> void:
 		return
 	if not CultivationService.is_breakthrough_ready():
 		return
+	if _has_ready_circulation():
+		return
 	GameState.pending_breakthrough_prompt = false
 	call_deferred("_on_breakthrough_pressed")
 
@@ -443,12 +657,17 @@ func _format_breakthrough_confirmation(requirements: Array) -> String:
 	return "确认消耗：%s\n进行突破吗？" % ", ".join(labels)
 
 func _do_breakthrough() -> void:
+	if _circulation_pending or _circulation_animating or _has_ready_circulation():
+		return
 	CultivationService.try_breakthrough()
 
-func _on_breakthrough_done(_result: Dictionary) -> void:
+func _on_breakthrough_done(result: Dictionary) -> void:
+	_apply_server_resources(result)
 	_refresh_breakthrough_btn()
 	_refresh_display()
 
 func _on_breakthrough_rejected(reason: String) -> void:
 	if reason == "breakthrough_items_insufficient":
 		EventBus.show_toast.emit("突破材料不足")
+	elif reason == "circulation_pending":
+		EventBus.show_toast.emit("请先运转周天")

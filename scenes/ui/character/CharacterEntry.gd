@@ -14,6 +14,7 @@ func _ready() -> void:
 		reward_button.pressed.connect(_on_reward_button_pressed)
 	CloudService.state_loaded.connect(_on_state_loaded)
 	CloudService.home_meridian_light_confirmed.connect(_on_home_meridian_light_confirmed)
+	CloudService.home_meridian_run_confirmed.connect(_on_home_meridian_run_confirmed)
 	CultivationService.stage_changed.connect(_on_cultivation_stage_changed)
 	_home_defs = GameState.home_meridian_defs.duplicate(true)
 	_home_progress = GameState.home_meridian_progress.duplicate(true)
@@ -40,6 +41,10 @@ func _on_home_meridian_light_confirmed(result: Dictionary) -> void:
 	GameState.home_meridian_progress = progress.duplicate(true)
 	_refresh_progress()
 	_refresh_reward_button()
+
+
+func _on_home_meridian_run_confirmed(result: Dictionary) -> void:
+	_on_home_meridian_light_confirmed(result)
 
 
 func _on_cultivation_stage_changed(_level: int, _stage_name: String) -> void:
