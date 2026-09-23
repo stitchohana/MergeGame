@@ -6,7 +6,10 @@ const engine = new GameEngine(gameConfigTables);
 const homeConfig: any = gameConfigTables.homeMeridians;
 const meridianConfig: any = gameConfigTables.meridians;
 const launcherConfig: any[] = gameConfigTables.items.launcher as any[];
+const regularConfig: any[] = gameConfigTables.items.regular as any[];
 const launcherById = new Map(launcherConfig.map((item: any) => [Number(item.id), item]));
+const regularById = new Map(regularConfig.map((item: any) => [Number(item.id), item]));
+const groupByItemId = new Map(regularConfig.map((item: any) => [Number(item.id), Number(item.group_id)]));
 
 for (let level = 1; level <= 16; level += 1) {
   const mine = launcherById.get(25000 + level);
@@ -15,10 +18,21 @@ for (let level = 1; level <= 16; level += 1) {
   assert.equal(mine.recharge_time, 43200);
   assert.deepEqual(mine.spawns.map((spawn: any) => spawn.id), [1601]);
   assert.equal(mine.spawns[0].weight, 1000);
-  const jadeSpawns = mineral.spawns.filter((spawn: any) => spawn.id >= 1501 && spawn.id <= 1516);
-  assert.equal(jadeSpawns.reduce((sum: number, spawn: any) => sum + spawn.weight, 0), 50);
+  const weightByGroup = new Map<number, number>();
+  for (const spawn of mineral.spawns) {
+    const groupId = groupByItemId.get(Number(spawn.id));
+    weightByGroup.set(groupId, (weightByGroup.get(groupId) ?? 0) + Number(spawn.weight));
+  }
+  assert.equal(weightByGroup.get(3), 500);
+  assert.equal(weightByGroup.get(6), 250);
+  assert.equal(weightByGroup.get(40), 250);
   assert.equal(mineral.spawns.reduce((sum: number, spawn: any) => sum + spawn.weight, 0), 1000);
 }
+
+assert.equal(regularById.get(2001).value, 2);
+assert.equal(regularById.get(4001).value, 4);
+assert.equal(regularById.get(1501).value, 4);
+assert.equal(regularById.get(28001).value, 8);
 
 assert.equal(Object.prototype.hasOwnProperty.call(homeConfig, "production_rewards"), false);
 assert.equal(Object.prototype.hasOwnProperty.call(homeConfig, "production_reward_rules"), false);
@@ -26,14 +40,84 @@ assert.equal(Object.prototype.hasOwnProperty.call(homeConfig.stages[0], "acupoin
 assert.equal(Object.prototype.hasOwnProperty.call(homeConfig.stages[0], "circulation_exp"), false);
 assert.equal(Object.prototype.hasOwnProperty.call(homeConfig.stages[0], "acupoint_exp"), false);
 assert.equal(Object.prototype.hasOwnProperty.call(homeConfig.stages[0], "circulation_reward"), true);
-assert.equal(homeConfig.stages.length, 666);
+assert.equal(homeConfig.stages.length, 556);
+assert.deepEqual(
+  Array.from({ length: 20 }, (_value, index) =>
+    homeConfig.stages.filter((stage: any) => stage.cultivation_level === index + 1).length,
+  ),
+  [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 35, 38, 41, 44, 48, 51, 54, 57, 60, 63],
+);
 assert.equal(homeConfig.stages.every((stage: any, index: number) =>
-  stage.circulation_reward.items.length === ([1, 0, 2][index] ?? 2)), true);
+  stage.circulation_reward.items.length === ([1, 2][index] ?? 2)), true);
 assert.equal(homeConfig.stages.every((stage: any) => stage.circulation_reward.tokens.some((token: any) => token.token === 4 && token.amount > 0)), true);
+assert.deepEqual(
+  gameConfigTables.cultivation.stages.slice(0, 10).map((stage: any) => stage.exp),
+  [12, 48, 80, 104, 128, 228, 264, 300, 348, 384],
+);
+
+const facilityFamily = (item: any): number => Math.floor(Number(item.id) / 100);
+const stagesAtLevel = (cultivationLevel: number): any[] => homeConfig.stages.filter(
+  (stage: any) => Number(stage.cultivation_level) === cultivationLevel,
+);
+const rewardedFamilies = (cultivationLevels: number[]): number[] => stagesAtLevel(cultivationLevels[0])
+  .concat(...cultivationLevels.slice(1).map(stagesAtLevel))
+  .flatMap((stage: any) => stage.circulation_reward.items.map(facilityFamily));
+const firstFamilyStage = (cultivationLevel: number, family: number): number => stagesAtLevel(cultivationLevel)
+  .findIndex((stage: any) => stage.circulation_reward.items.some((item: any) => facilityFamily(item) === family));
+const firstFamilyItemId = (cultivationLevel: number, family: number): number => stagesAtLevel(cultivationLevel)
+  .flatMap((stage: any) => stage.circulation_reward.items)
+  .find((item: any) => facilityFamily(item) === family).id;
+
+const qiFamilies = rewardedFamilies([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+assert.equal(qiFamilies.every((family: number) => [110, 120, 130, 150, 170, 180].includes(family)), true);
+assert.deepEqual([...new Set(qiFamilies)].sort((a, b) => a - b), [110, 120, 130, 150, 170, 180]);
+assert.equal(
+  homeConfig.stages[2].circulation_reward.items.every((item: any) => Number(item.id) % 100 === 2),
+  true,
+);
+assert.equal(
+  Math.max(
+    ...stagesAtLevel(10).flatMap((stage: any) =>
+      stage.circulation_reward.items.map((item: any) => Number(item.id) % 100),
+    ),
+  ),
+  4,
+);
+
+const foundationEarlyFamilies = new Set(rewardedFamilies([11]));
+assert.equal(foundationEarlyFamilies.has(140), true);
+assert.equal(foundationEarlyFamilies.has(210), true);
+assert.equal(foundationEarlyFamilies.has(230), false);
+assert.equal(firstFamilyStage(11, 140) < firstFamilyStage(11, 210), true);
+assert.equal(firstFamilyItemId(11, 140), 14001);
+assert.equal(firstFamilyItemId(11, 210), 21001);
+
+const foundationMiddleFamilies = new Set(rewardedFamilies([12]));
+assert.equal(foundationMiddleFamilies.has(230), true);
+assert.equal(foundationMiddleFamilies.has(200), true);
+assert.equal(foundationMiddleFamilies.has(160), false);
+assert.equal(firstFamilyStage(12, 230) < firstFamilyStage(12, 200), true);
+assert.equal(firstFamilyItemId(12, 230), 23001);
+assert.equal(firstFamilyItemId(12, 200), 20001);
+
+const foundationLateFamilies = new Set(rewardedFamilies([13]));
+assert.equal(foundationLateFamilies.has(160), true);
+assert.equal(foundationLateFamilies.has(240), true);
+assert.equal(foundationLateFamilies.has(190), true);
+assert.equal(firstFamilyStage(13, 160) < firstFamilyStage(13, 190), true);
+assert.equal(firstFamilyStage(13, 240) < firstFamilyStage(13, 190), true);
+assert.equal(firstFamilyItemId(13, 160), 16001);
+assert.equal(firstFamilyItemId(13, 240), 24001);
+assert.equal(firstFamilyItemId(13, 190), 19001);
+
 assert.equal(Object.prototype.hasOwnProperty.call(meridianConfig, "order_pool"), false);
 assert.equal(Object.prototype.hasOwnProperty.call(meridianConfig, "order_level_ranges"), true);
 assert.equal(Object.prototype.hasOwnProperty.call(meridianConfig.thresholds[0], "fixed_order_batches"), false);
 assert.equal(meridianConfig.thresholds[0].order_count, 6);
+assert.deepEqual(
+  meridianConfig.thresholds.slice(1).map((threshold: any) => threshold.order_count),
+  [4, 4, 4, 5, 5, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+);
 assert.deepEqual(
   meridianConfig.thresholds[0].fixed_orders.map((wave: any) => wave.item_ids),
   [[5003, 5004, 6001], [9003, 9004, 10001]],
@@ -43,11 +127,10 @@ assert.deepEqual(
   [{ item_id: 14101, count: 1 }, { item_id: 27001, count: 1 }],
 );
 assert.deepEqual(
-  homeConfig.stages[2].circulation_reward.items,
+  homeConfig.stages[1].circulation_reward.items,
   [{ id: 16001, count: 1 }, { id: 17001, count: 1 }],
 );
 assert.deepEqual(homeConfig.stages[0].circulation_reward.items, [{ id: 12001, count: 1 }]);
-assert.deepEqual(homeConfig.stages[1].circulation_reward.items, []);
 assert.equal(homeConfig.stages[1].circulation_reward.tokens.some((token: any) =>
   token.token === 1 && token.amount === 10), true);
 
@@ -70,7 +153,10 @@ const secondTutorialCirculation = engine.runHomeMeridianCirculation(secondTutori
 assert.equal(secondTutorialCirculation.ok, true);
 if (!secondTutorialCirculation.ok) throw new Error("second tutorial circulation failed");
 assert.equal(secondTutorialCirculationState.spirit_stones, 10);
-assert.deepEqual(secondTutorialCirculation.rewards.items, []);
+assert.deepEqual(secondTutorialCirculation.rewards.items, [
+  { id: 16001, count: 1 },
+  { id: 17001, count: 1 },
+]);
 const refreshedLauncher = secondTutorialCirculationState.grid.find((item: any) => item.uid === 999);
 assert.equal(refreshedLauncher.charges, launcherById.get(11001).max_charges);
 assert.equal(Object.prototype.hasOwnProperty.call(refreshedLauncher, "last_charge_time"), false);
@@ -78,18 +164,10 @@ assert.equal(Object.prototype.hasOwnProperty.call(refreshedLauncher, "_recharge_
 assert.equal(secondTutorialCirculation.grid, secondTutorialCirculationState.grid);
 assert.equal(secondTutorialCirculation.launchers_refreshed > 0, true);
 
-const thirdTutorialCirculationState: any = engine.createInitialState();
-thirdTutorialCirculationState.home_meridian_progress = [{
-  stage: 2,
-  lit: new Array(homeConfig.stages[2].acupoints).fill(true),
-  circulation_completed: false,
-}];
-const thirdTutorialCirculation = engine.runHomeMeridianCirculation(thirdTutorialCirculationState, 2);
-assert.equal(thirdTutorialCirculation.ok, true);
-if (!thirdTutorialCirculation.ok) throw new Error("third tutorial circulation failed");
-assert.equal(thirdTutorialCirculation.rewards.items?.some((item: any) =>
-  item.id === 17001 && item.count === 1), true);
-assert.equal(thirdTutorialCirculationState.pending_rewards.some((item: any) => item.id === 17001), true);
+assert.deepEqual(
+  homeConfig.stages[2].circulation_reward.items,
+  [{ id: 15002, count: 1 }, { id: 11002, count: 1 }],
+);
 assert.deepEqual((engine as any)._genFixedAcupoint({ item_id: 5003 }).item_ids, [5003]);
 assert.deepEqual((engine as any)._genFixedAcupoint({ item_ids: [5004] }).item_ids, [5004]);
 assert.deepEqual(
@@ -196,7 +274,7 @@ state.cultivation.current_qi = 10000;
 const level2Stages = homeConfig.stages
   .map((stage: any, index: number) => ({ stage, index }))
   .filter(({ stage }: any) => stage.cultivation_level === 2);
-assert.equal(level2Stages.length, 6);
+assert.equal(level2Stages.length, 3);
 let expectedPendingRewardCount = 0;
 let expectedExp = 0;
 for (const { stage, index } of level2Stages) {
@@ -240,7 +318,7 @@ for (const { stage, index } of level2Stages) {
   const cycleExp = (runResult.rewards.tokens ?? [])
     .filter((token: any) => token.token === 4)
     .reduce((sum: number, token: any) => sum + Number(token.amount ?? 0), 0);
-  assert.equal(cycleExp, 8);
+  assert.equal(cycleExp > 0, true);
   expectedExp += cycleExp;
   assert.equal(state.cultivation.current_exp, expectedExp);
   expectedPendingRewardCount += 2;
@@ -251,7 +329,7 @@ assert.equal(expectedExp, 48);
 assert.equal(engine.isBreakthroughReady(2, state.cultivation.current_exp), true);
 assert.deepEqual(
   state.pending_rewards.map((reward: any) => reward.id).length,
-  12,
+  6,
 );
 
 const duplicateRun = engine.runHomeMeridianCirculation(state, level2Stages[0].index);

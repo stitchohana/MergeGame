@@ -21,6 +21,14 @@ function op(handler) {
 function createGameRouter(storage, engine, jwtSecret) {
     const router = new http_1.Router();
     router.use((0, auth_1.createAuthRequired)(jwtSecret));
+    function staminaMultiplierResponse(state) {
+        const multiplier = engine.getStaminaMultiplierState(state);
+        return {
+            stamina_multiplier_max: multiplier.maxMultiplier,
+            stamina_multiplier_expires_at: multiplier.expiresAt,
+            stamina_multiplier_remaining_seconds: multiplier.remainingSeconds,
+        };
+    }
     async function getOrCreateState(userId) {
         let state = await storage.loadState(userId);
         if (!state) {
@@ -44,6 +52,13 @@ function createGameRouter(storage, engine, jwtSecret) {
             }
             if (!Array.isArray(state.crafted_item_ids)) {
                 state.crafted_item_ids = [];
+                stateMigrated = true;
+            }
+            if (!Number.isInteger(state.stamina_multiplier_max)
+                || typeof state.stamina_multiplier_expires_at !== "number") {
+                state.stamina_multiplier_max = 1;
+                state.stamina_multiplier_expires_at = 0;
+                engine.refreshStaminaMultiplierFromBalance(state);
                 stateMigrated = true;
             }
             if (engine.initializeProductionUnlocks(state)) {
@@ -152,6 +167,8 @@ function createGameRouter(storage, engine, jwtSecret) {
                 await storage.saveState(userId, state);
             }
             engine.tickStamina(state);
+            if (engine.tickStaminaMultiplier(state))
+                stateMigrated = true;
             engine.tickLauncherRecharge(state);
             if (stateMigrated) {
                 await storage.saveState(userId, state);
@@ -172,6 +189,7 @@ function createGameRouter(storage, engine, jwtSecret) {
             cultivation: state.cultivation,
             stamina: state.stamina,
             max_stamina: state.max_stamina,
+            ...staminaMultiplierResponse(state),
             spirit_stones: state.spirit_stones,
             regen_remaining_ms: regenRemainingMs,
             battle_map_id: state.battle_map_id,
@@ -348,7 +366,7 @@ function createGameRouter(storage, engine, jwtSecret) {
     }));
     // POST /api/game/spawn
     router.post("/spawn", op(async (req, res, userId) => {
-        const { launcher_pos, request_id, expected_sequence, predicted_id, predicted_target } = req.body;
+        const { launcher_pos, request_id, expected_sequence, predicted_id, predicted_target, predicted_items, stamina_multiplier } = req.body;
         if (!Array.isArray(launcher_pos) || launcher_pos.length !== 2) {
             res.status(400).json({ error: "invalid_params" });
             return;
@@ -365,9 +383,13 @@ function createGameRouter(storage, engine, jwtSecret) {
             res.status(400).json({ error: "invalid_spawn_sequence" });
             return;
         }
+        if (stamina_multiplier !== undefined && (!Number.isInteger(stamina_multiplier) || stamina_multiplier < 1)) {
+            res.status(400).json({ error: "invalid_stamina_multiplier" });
+            return;
+        }
         const state = await getOrCreateState(userId);
         const cached = request_id ? state.spawn_history?.find(entry => entry.request_id === request_id) : undefined;
-        const result = cached?.result ?? engine.executeSpawn(state, launcher_pos[0], launcher_pos[1], expected_sequence);
+        const result = cached?.result ?? engine.executeSpawn(state, launcher_pos[0], launcher_pos[1], expected_sequence, stamina_multiplier ?? 1);
         if (!result.ok) {
             res.status(result.reason === "spawn_sequence_mismatch" ? 409 : 400).json({
                 error: result.reason,
@@ -383,13 +405,25 @@ function createGameRouter(storage, engine, jwtSecret) {
             if (state.spawn_history.length > 32)
                 state.spawn_history.splice(0, state.spawn_history.length - 32);
         }
-        const hasPrediction = Number.isInteger(predicted_id)
+        const hasBatchPrediction = Array.isArray(predicted_items);
+        const hasLegacyPrediction = Number.isInteger(predicted_id)
             && Array.isArray(predicted_target)
             && predicted_target.length === 2;
-        const predictionMatches = !hasPrediction || (predicted_id === result.spawnedId
-            && predicted_target[0] === result.targetCol
-            && predicted_target[1] === result.targetRow);
+        const predictionMatches = hasBatchPrediction
+            ? predicted_items.length === result.spawnedItems.length
+                && predicted_items.every((prediction, index) => {
+                    const spawned = result.spawnedItems[index];
+                    return Number(prediction?.id) === spawned.id
+                        && Array.isArray(prediction?.target)
+                        && prediction.target[0] === spawned.targetCol
+                        && prediction.target[1] === spawned.targetRow;
+                })
+            : !hasLegacyPrediction || (result.spawnedItems.length === 1
+                && predicted_id === result.spawnedId
+                && predicted_target[0] === result.targetCol
+                && predicted_target[1] === result.targetRow);
         await storage.saveState(userId, state);
+        const staminaMultiplierState = engine.getStaminaMultiplierState(state);
         res.json({
             ok: true,
             request_id,
@@ -398,10 +432,27 @@ function createGameRouter(storage, engine, jwtSecret) {
             spawned_uid: result.spawnedUid,
             spawned_id: result.spawnedId,
             spawned_name: result.spawnedName,
+            spawned_items: result.spawnedItems.map((item) => ({
+                uid: item.uid,
+                id: item.id,
+                name: item.name,
+                target_col: item.targetCol,
+                target_row: item.targetRow,
+                atk_base: item.atkBase,
+                stamina_units: item.staminaUnits,
+            })),
             target_col: result.targetCol,
             target_row: result.targetRow,
             stamina: state.stamina,
             max_stamina: state.max_stamina,
+            stamina_cost: result.staminaCost,
+            stamina_multiplier: result.staminaMultiplier,
+            requested_stamina_multiplier: result.requestedStaminaMultiplier,
+            stamina_refund: result.staminaRefund,
+            order_priority: result.orderPriority,
+            stamina_multiplier_max: staminaMultiplierState.maxMultiplier,
+            stamina_multiplier_expires_at: staminaMultiplierState.expiresAt,
+            stamina_multiplier_remaining_seconds: staminaMultiplierState.remainingSeconds,
             charges: result.charges,
             max_charges: result.maxCharges,
             recharge_time: result.rechargeTime,
@@ -660,7 +711,7 @@ function createGameRouter(storage, engine, jwtSecret) {
             return;
         }
         await storage.saveState(userId, state);
-        res.json({ ...result, quest_progress: state.quest_progress });
+        res.json({ ...result, quest_progress: state.quest_progress, ...staminaMultiplierResponse(state) });
     }));
     // POST /api/game/board/switch
     router.post("/board/switch", op(async (req, res, userId) => {
@@ -752,7 +803,7 @@ function createGameRouter(storage, engine, jwtSecret) {
             return;
         }
         await storage.saveState(userId, state);
-        res.json({ ok: true, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage, quest_progress: state.quest_progress, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, pending_rewards: state.pending_rewards });
+        res.json({ ok: true, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage, quest_progress: state.quest_progress, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, pending_rewards: state.pending_rewards, ...staminaMultiplierResponse(state) });
     }));
     // POST /api/game/quest_claim
     router.post("/quest_claim", op(async (req, res, userId) => {
@@ -769,7 +820,7 @@ function createGameRouter(storage, engine, jwtSecret) {
         }
         await storage.saveState(userId, state);
         engine.enrichGridWithRechargeRemaining(state.grid);
-        res.json({ ok: true, quest_id, rewards: result.rewards, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, grid: state.grid, pouch: state.pouch, quest_progress: state.quest_progress, pending_rewards: state.pending_rewards });
+        res.json({ ok: true, quest_id, rewards: result.rewards, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, grid: state.grid, pouch: state.pouch, quest_progress: state.quest_progress, pending_rewards: state.pending_rewards, ...staminaMultiplierResponse(state) });
     }));
     // POST /api/game/claim_pending_reward
     router.post("/claim_pending_reward", op(async (req, res, userId) => {
@@ -802,7 +853,7 @@ function createGameRouter(storage, engine, jwtSecret) {
             return;
         }
         await storage.saveState(userId, state);
-        res.json(result);
+        res.json({ ...result, ...staminaMultiplierResponse(state) });
     }));
     // POST /api/game/home_meridian/run
     router.post("/home_meridian/run", op(async (req, res, userId) => {
@@ -818,7 +869,7 @@ function createGameRouter(storage, engine, jwtSecret) {
             return;
         }
         await storage.saveState(userId, state);
-        res.json(result);
+        res.json({ ...result, ...staminaMultiplierResponse(state) });
     }));
     // GET /api/leaderboard
     router.get("/leaderboard", async (_req, res) => {

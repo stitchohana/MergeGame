@@ -100,7 +100,7 @@ func _on_state_sync(state: Dictionary) -> void:
 		GridManager._skip_anims = true
 		GridManager.populate_from_server(grid_data)
 		GridManager._skip_anims = false
-	print("[GM] synced")
+	print("[PlayerAction] gm_sync")
 
 func _on_close() -> void:
 	UIManager.hide_popup(self)

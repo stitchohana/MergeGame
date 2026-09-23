@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/main/StaminaMultiplierControl.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_control"]
+bg_color = Color(0.96, 0.92, 0.76, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.56, 0.51, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="StaminaMultiplierControl" type="Control"]
+custom_minimum_size = Vector2(286, 52)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 286.0
+offset_bottom = 52.0
+script = ExtResource("1_script")
+
+[node name="MultiplierMenu" type="MenuButton" parent="."]
+layout_mode = 0
+offset_right = 174.0
+offset_bottom = 52.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.2, 0.32, 0.27, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBox_control")
+theme_override_styles/hover = SubResource("StyleBox_control")
+theme_override_styles/pressed = SubResource("StyleBox_control")
+text = "体力 ×2"
+
+[node name="TimerLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 180.0
+offset_right = 286.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.35, 0.24, 0.16, 1)
+theme_override_font_sizes/font_size = 17
+text = "1时"
+horizontal_alignment = 1
+vertical_alignment = 1

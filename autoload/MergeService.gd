@@ -62,7 +62,6 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		merge_failed.emit("Invalid item")
 		return false
 	if not can_merge(item_a, item_b):
-		print("[MergeService] can_merge failed: #" + str(item_a.get("id",0)) + " vs #" + str(item_b.get("id",0)))
 		var reason: String = "craft_table_has_materials" if is_merge_blocked_by_craft_materials(item_a, item_b) else "Cannot merge"
 		merge_failed.emit(reason)
 		return false
@@ -91,7 +90,9 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	predicted["_pending_merge"] = true
 	GridManager.add_item(predicted, to_pos)
 
-	print("[MergeService] submit_merge: from=" + str(from_pos) + " id=" + str(item_a.get("id",0)) + " to=" + str(to_pos) + " id=" + str(item_b.get("id",0)))
+	print("[PlayerAction] merge_submit source=", from_pos,
+		" source_item_id=", int(item_a.get("id", 0)), " target=", to_pos,
+		" target_item_id=", int(item_b.get("id", 0)))
 	CloudService.submit_merge(from_pos.x, from_pos.y, to_pos.x, to_pos.y)
 	return true
 

@@ -1,9 +1,9 @@
 """Dependency helpers for staged home-meridian facility rewards.
 
 The home-meridian workbook contains both launcher and crafting-table rewards.
-Crafting tables expose every recipe assigned to their table family, so a table
-must not be granted until every launcher family used by those recipes has
-already been granted (or is present on the initial board).
+A table may be granted once at least one assigned recipe has all of its
+launcher families available.  Later realms can then unlock production lines
+for the table's more advanced recipes.
 """
 
 from collections import defaultdict
@@ -133,6 +133,25 @@ def required_launcher_families_by_crafting_class(
     recipes: Sequence[Mapping[str, Any]],
 ) -> Dict[int, Set[int]]:
     """Return launcher-family dependencies for each crafting-table class."""
+    recipe_requirements = required_launcher_families_by_recipe(items, recipes)
+    requirements: Dict[int, Set[int]] = defaultdict(set)
+    for table in items.get("crafting", []) or []:
+        table_id = _item_id(table)
+        if table_id is None or not isinstance(table, Mapping):
+            continue
+        table_class = table_id // 100
+        for raw_recipe_id in table.get("recipes", []) or []:
+            recipe_id = _as_int(raw_recipe_id)
+            if recipe_id is not None:
+                requirements[table_class].update(recipe_requirements.get(recipe_id, set()))
+    return dict(requirements)
+
+
+def required_launcher_families_by_recipe(
+    items: Mapping[str, Any],
+    recipes: Sequence[Mapping[str, Any]],
+) -> Dict[int, Set[int]]:
+    """Return recursively resolved launcher-family dependencies per recipe."""
     _, families_by_item = launcher_family_maps(items)
     recipes_by_id = {
         recipe_id: recipe
@@ -157,30 +176,23 @@ def required_launcher_families_by_crafting_class(
         next_visiting = set(visiting)
         next_visiting.add(item_id)
         result = set(families_by_item.get(item_id, set()))
-        for recipe in recipes_by_result.get(item_id, []):
-            for ingredient in recipe.get("ingredients", []) or []:
+        for producer in recipes_by_result.get(item_id, []):
+            for ingredient in producer.get("ingredients", []) or []:
                 ingredient_id = _as_int(ingredient)
                 if ingredient_id is not None:
                     result.update(dependency_families(ingredient_id, next_visiting))
         cache[item_id] = set(result)
         return result
 
-    requirements: Dict[int, Set[int]] = defaultdict(set)
-    for table in items.get("crafting", []) or []:
-        table_id = _item_id(table)
-        if table_id is None or not isinstance(table, Mapping):
-            continue
-        table_class = table_id // 100
-        for recipe_id in table.get("recipes", []) or []:
-            parsed_recipe_id = _as_int(recipe_id)
-            recipe = recipes_by_id.get(parsed_recipe_id) if parsed_recipe_id is not None else None
-            if recipe is None:
-                continue
-            for ingredient in recipe.get("ingredients", []) or []:
-                ingredient_id = _as_int(ingredient)
-                if ingredient_id is not None:
-                    requirements[table_class].update(dependency_families(ingredient_id))
-    return dict(requirements)
+    requirements: Dict[int, Set[int]] = {}
+    for recipe_id, recipe in recipes_by_id.items():
+        families: Set[int] = set()
+        for ingredient in recipe.get("ingredients", []) or []:
+            ingredient_id = _as_int(ingredient)
+            if ingredient_id is not None:
+                families.update(dependency_families(ingredient_id))
+        requirements[recipe_id] = families
+    return requirements
 
 
 def first_launcher_family_stages(
@@ -228,7 +240,17 @@ def validate_facility_reward_order(
         for table in items.get("crafting", []) or []
         if (item_id := _item_id(table)) is not None
     }
-    requirements = required_launcher_families_by_crafting_class(items, recipes)
+    recipe_requirements = required_launcher_families_by_recipe(items, recipes)
+    recipe_ids_by_table_class = {
+        table_id // 100: [
+            recipe_id
+            for raw_recipe_id in table.get("recipes", []) or []
+            if (recipe_id := _as_int(raw_recipe_id)) is not None
+        ]
+        for table in items.get("crafting", []) or []
+        if isinstance(table, Mapping)
+        and (table_id := _item_id(table)) is not None
+    }
     setup_ids = setup_item_ids(initial_setup)
     granted_families = {
         item_id // 100
@@ -254,17 +276,27 @@ def validate_facility_reward_order(
                 continue
             if item_id in crafting_ids and item_id not in granted_tables:
                 # The fixed tutorial intentionally grants the starter alchemy
-                # furnace on mortal circulation 3.  This is a teaching
+                # furnace on the final mortal circulation. This is a teaching
                 # exception; all later crafting-table rewards remain subject
                 # to the normal launcher dependency checks.
-                if label == "stage 2" and item_id == 17001:
+                if label in {"stage 1", "stage 2"} and item_id == 17001:
                     continue
-                missing = sorted(requirements.get(item_id // 100, set()) - granted_families)
-                if missing:
-                    labels = ", ".join(f"{family}xx" for family in missing)
+                dependency_options = [
+                    recipe_requirements.get(recipe_id, set())
+                    for recipe_id in recipe_ids_by_table_class.get(item_id // 100, [])
+                ]
+                if dependency_options and not any(
+                    dependencies.issubset(granted_families)
+                    for dependencies in dependency_options
+                ):
+                    closest = min(
+                        (dependencies - granted_families for dependencies in dependency_options),
+                        key=lambda missing: (len(missing), sorted(missing)),
+                    )
+                    labels = ", ".join(f"{family}xx" for family in sorted(closest))
                     issues.append(
-                        f"{label} grants crafting table {item_id} before "
-                        f"launcher families {labels}"
+                        f"{label} grants crafting table {item_id} before any recipe is usable; "
+                        f"closest recipe still needs launcher families {labels}"
                     )
 
     def grant_reward_items(reward_items: Sequence[Mapping[str, Any]]) -> None:

@@ -100,20 +100,13 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 
 func _refresh_materials() -> void:
 	if _current_item_data.is_empty():
-		print("[CraftDetail] refresh_abort reason=current_item_empty")
 		_hide_materials()
 		return
 	_refresh_output_slot()
 	var state: int = _current_item_data.get("_craft_state", CraftingService.TableState.IDLE)
-	var stored_debug: Array = CraftingService.get_stored_items(_current_item_data)
-	print("[CraftDetail] refresh table_id=", int(_current_item_data.get("id", 0)),
-		" uid=", int(_current_item_data.get("_uid", 0)), " state=", state,
-		" stored_count=", stored_debug.size(), " table_recipe_count=", _current_recipes.size(),
-		" active_order_count=", GameState.meridian_acupoints.size())
 	var timer_exists: bool = _countdown_timer != null and is_instance_valid(_countdown_timer)
 	var timer_in_tree: bool = timer_exists and _countdown_timer.is_inside_tree()
 	if state == CraftingService.TableState.CRAFTING:
-		print("[CraftDetail] materials_hidden reason=table_crafting")
 		var remaining: float = CraftingService.get_remaining_craft_seconds(_current_item_data)
 		if remaining > 0:
 			status_label.text = "制作中... %s" % TimeUtils.format_countdown(remaining)
@@ -129,7 +122,6 @@ func _refresh_materials() -> void:
 		_refresh_speedup_button("craft", remaining)
 		return
 	if state == CraftingService.TableState.READY:
-		print("[CraftDetail] materials_hidden reason=table_ready")
 		_stop_countdown_timer()
 		_hide_speedup_button()
 		status_label.text = "制作完成！点击取出"
@@ -146,18 +138,11 @@ func _refresh_materials() -> void:
 	materials_label.hide()
 	materials_container.visible = not stored.is_empty()
 	desc_label.visible = stored.is_empty()
-	print("[CraftDetail] container_prepare visible=", materials_container.visible,
-		" size=", materials_container.size, " stored_count=", stored.size(),
-		" children_before_rebuild=", materials_row.get_child_count())
 	_populate_materials(stored)
 
 func _populate_materials(items: Array) -> void:
-	print("[CraftDetail] populate_begin items=", items.size(),
-		" container_visible=", materials_container.visible,
-		" children_to_clear=", materials_row.get_child_count())
 	_clear_material_slots()
 	if items.is_empty():
-		print("[CraftDetail] populate_abort reason=no_stored_items container_visible=", materials_container.visible)
 		return
 
 	if items.is_empty():
@@ -174,23 +159,12 @@ func _populate_materials(items: Array) -> void:
 		var uid: int = item.get("uid", item.get("_uid", 0)) as int
 		var entry: ItemWidget = _build_material_icon(data, uid)
 		materials_row.add_child(entry)
-		print("[CraftDetail] stored_added item_id=", iid, " uid=", uid,
-			" child_count=", materials_row.get_child_count())
-		call_deferred("_log_material_slot_runtime", entry, "stored", iid)
 
 	var matching_recipe: Dictionary = _find_order_recipe(items)
 	if matching_recipe.is_empty():
-		print("[CraftDetail] ghost_abort reason=no_matching_recipe stored_ids=", _count_stored_item_ids(items),
-			" active_order_ids=", _get_active_order_item_ids().keys())
 		return
-	print("[CraftDetail] recipe_selected recipe_id=", int(matching_recipe.get("id", 0)),
-		" result_id=", int(matching_recipe.get("result", 0)),
-		" ingredients=", matching_recipe.get("ingredients", []))
 	_show_output_slot_for_recipe(matching_recipe, "candidate_recipe")
 	var stored_counts: Dictionary = _count_stored_item_ids(items)
-	var board_counts: Dictionary = _count_board_available_item_ids()
-	print("[CraftDetail] material_availability stored_counts=", stored_counts,
-		" board_counts=", board_counts)
 	var has_ghost_material: bool = false
 	for ingredient_variant in matching_recipe.get("ingredients", []):
 		var ingredient_id: int = int(ingredient_variant)
@@ -202,14 +176,7 @@ func _populate_materials(items: Array) -> void:
 		var ghost: ItemWidget = _build_material_icon(ghost_data, -1, true)
 		has_ghost_material = true
 		materials_row.add_child(ghost)
-		print("[CraftDetail] ghost_added item_id=", ingredient_id,
-			" reason=not_stored board_available=", int(board_counts.get(ingredient_id, 0)),
-			" data_found=", not ghost_data.is_empty(), " modulate_a=", ghost.modulate.a,
-			" self_modulate_a=", ghost.self_modulate.a,
-			" child_count=", materials_row.get_child_count())
-		call_deferred("_log_material_slot_runtime", ghost, "ghost", ingredient_id)
 	_set_output_slot_ghost(has_ghost_material)
-	call_deferred("_log_output_slot_runtime", "materials_populated")
 
 func _count_stored_item_ids(items: Array) -> Dictionary:
 	var counts: Dictionary = {}
@@ -250,60 +217,115 @@ func _count_recipe_ingredients(ingredients: Array) -> Dictionary:
 
 func _get_active_order_item_ids() -> Dictionary:
 	var order_item_ids: Dictionary = {}
-	for order_variant in GameState.meridian_acupoints:
+	for item_id_variant: Variant in _get_active_order_item_counts().keys():
+		order_item_ids[item_id_variant] = true
+	return order_item_ids
+
+func _get_active_order_item_counts() -> Dictionary:
+	var order_item_counts: Dictionary = {}
+	for order_index: int in range(GameState.meridian_acupoints.size()):
+		var order_variant: Variant = GameState.meridian_acupoints[order_index]
 		var order: Dictionary = order_variant as Dictionary
 		if bool(order.get("completed", false)):
 			continue
-		for item_variant in order.get("items", []):
-			var item: Dictionary = item_variant as Dictionary
-			var item_id: int = int(item.get("item_id", 0))
+		var configured: Array = order.get("item_ids", []) as Array
+		if configured.is_empty():
+			configured = order.get("items", []) as Array
+		for item_variant: Variant in configured:
+			var item_id: int = (
+				int((item_variant as Dictionary).get("item_id", 0))
+				if item_variant is Dictionary
+				else int(item_variant)
+			)
 			if item_id > 0:
-				order_item_ids[item_id] = true
-	return order_item_ids
+				order_item_counts[item_id] = int(order_item_counts.get(item_id, 0)) + 1
+	return order_item_counts
+
+func _get_order_recipe_demand_counts(order_counts: Dictionary, board_counts: Dictionary) -> Dictionary:
+	var demand_counts: Dictionary = {}
+	var expanded_counts: Dictionary = {}
+	for item_id_variant: Variant in order_counts.keys():
+		_expand_order_recipe_demand(int(item_id_variant), int(order_counts[item_id_variant]),
+			demand_counts, expanded_counts, board_counts, {})
+	return demand_counts
+
+func _expand_order_recipe_demand(item_id: int, count: int, demand_counts: Dictionary,
+		expanded_counts: Dictionary, board_counts: Dictionary, path: Dictionary) -> void:
+	if item_id <= 0 or count <= 0 or path.has(item_id):
+		return
+	demand_counts[item_id] = int(demand_counts.get(item_id, 0)) + count
+	var shortage: int = maxi(0, int(demand_counts[item_id]) - int(board_counts.get(item_id, 0)))
+	var to_expand: int = shortage - int(expanded_counts.get(item_id, 0))
+	if to_expand <= 0:
+		return
+	expanded_counts[item_id] = shortage
+	var ingredient_demands: Dictionary = {}
+	for recipe_variant: Variant in ConfigDatabase.get_recipes_for_result(item_id):
+		if not recipe_variant is Dictionary:
+			continue
+		var recipe_counts: Dictionary = _count_recipe_ingredients((recipe_variant as Dictionary).get("ingredients", []))
+		for ingredient_id_variant: Variant in recipe_counts.keys():
+			var ingredient_id: int = int(ingredient_id_variant)
+			ingredient_demands[ingredient_id] = maxi(
+				int(ingredient_demands.get(ingredient_id, 0)), int(recipe_counts[ingredient_id]))
+	var next_path: Dictionary = path.duplicate()
+	next_path[item_id] = true
+	for ingredient_id_variant: Variant in ingredient_demands.keys():
+		_expand_order_recipe_demand(int(ingredient_id_variant),
+			to_expand * int(ingredient_demands[ingredient_id_variant]), demand_counts,
+			expanded_counts, board_counts, next_path)
 
 func _get_order_recipe_target_ids() -> Dictionary:
 	var target_ids: Dictionary = _get_active_order_item_ids()
-	if target_ids.is_empty():
-		return target_ids
-	var craftable_result_ids: Dictionary = {}
-	for recipe_variant in _current_recipes:
-		var recipe: Dictionary = recipe_variant as Dictionary
-		var result_id: int = int(recipe.get("result", 0))
-		if result_id > 0:
-			craftable_result_ids[result_id] = true
-	var changed: bool = true
-	while changed:
-		changed = false
-		for recipe_variant in _current_recipes:
-			var recipe: Dictionary = recipe_variant as Dictionary
-			var result_id: int = int(recipe.get("result", 0))
-			if not target_ids.has(result_id):
-				continue
-			for ingredient_variant in recipe.get("ingredients", []):
-				var ingredient_id: int = int(ingredient_variant)
-				if craftable_result_ids.has(ingredient_id) and not target_ids.has(ingredient_id):
-					target_ids[ingredient_id] = true
-					changed = true
+	var visited_item_ids: Dictionary = {}
+	for item_id_variant: Variant in target_ids.keys():
+		_collect_order_recipe_target_ids(
+			int(item_id_variant), target_ids, visited_item_ids
+		)
 	return target_ids
 
+func _collect_order_recipe_target_ids(
+	item_id: int,
+	target_ids: Dictionary,
+	visited_item_ids: Dictionary
+) -> void:
+	if item_id <= 0 or visited_item_ids.has(item_id):
+		return
+	visited_item_ids[item_id] = true
+	var result_recipes: Array = ConfigDatabase.get_recipes_for_result(item_id)
+	for recipe_variant: Variant in result_recipes:
+		if not recipe_variant is Dictionary:
+			continue
+		var recipe: Dictionary = recipe_variant as Dictionary
+		for ingredient_variant: Variant in recipe.get("ingredients", []):
+			var ingredient_id: int = int(ingredient_variant)
+			var ingredient_recipes: Array = ConfigDatabase.get_recipes_for_result(ingredient_id)
+			if ingredient_recipes.is_empty():
+				continue
+			target_ids[ingredient_id] = true
+			_collect_order_recipe_target_ids(
+				ingredient_id, target_ids, visited_item_ids
+			)
+
 func _find_order_recipe(items: Array) -> Dictionary:
-	var active_order_item_ids: Dictionary = _get_active_order_item_ids()
+	var active_order_counts: Dictionary = _get_active_order_item_counts()
+	var active_order_item_ids: Dictionary = {}
+	for item_id_variant: Variant in active_order_counts.keys():
+		active_order_item_ids[item_id_variant] = true
 	var order_target_ids: Dictionary = _get_order_recipe_target_ids()
 	var has_order_filter: bool = not order_target_ids.is_empty()
 	var stored_counts: Dictionary = _count_stored_item_ids(items)
 	var board_counts: Dictionary = _count_board_available_item_ids()
+	var demand_counts: Dictionary = _get_order_recipe_demand_counts(active_order_counts, board_counts)
 	var best_recipe: Dictionary = {}
 	var best_order_priority: int = 2147483647
 	var fewest_missing: int = 2147483647
-	var compatible_count: int = 0
 	for recipe_variant in _current_recipes:
 		var recipe: Dictionary = recipe_variant as Dictionary
 		var result_id: int = int(recipe.get("result", 0))
 		if has_order_filter and not order_target_ids.has(result_id):
 			continue
-		if int(board_counts.get(result_id, 0)) > 0:
-			print("[CraftDetail] recipe_skipped reason=result_already_on_board result_id=",
-				result_id, " board_count=", board_counts[result_id])
+		if int(board_counts.get(result_id, 0)) >= maxi(1, int(demand_counts.get(result_id, 0))):
 			continue
 		var recipe_ingredients: Array = recipe.get("ingredients", [])
 		var required_counts: Dictionary = _count_recipe_ingredients(recipe_ingredients)
@@ -315,7 +337,6 @@ func _find_order_recipe(items: Array) -> Dictionary:
 				break
 		if not compatible:
 			continue
-		compatible_count += 1
 		var available_counts: Dictionary = stored_counts.duplicate()
 		for board_item_id_variant in board_counts.keys():
 			var board_item_id: int = int(board_item_id_variant)
@@ -335,14 +356,6 @@ func _find_order_recipe(items: Array) -> Dictionary:
 			best_order_priority = order_priority
 			fewest_missing = missing
 			best_recipe = recipe
-	print("[CraftDetail] recipe_match_summary stored_ids=", stored_counts,
-		" order_filter=", has_order_filter, " active_order_ids=", active_order_item_ids.keys(),
-		" order_target_ids=", order_target_ids.keys(),
-		" board_counts=", board_counts,
-		" candidates=", compatible_count, " selected_recipe_id=", int(best_recipe.get("id", 0)),
-		" selected_result_id=", int(best_recipe.get("result", 0)),
-		" selected_order_priority=", best_order_priority if not best_recipe.is_empty() else -1,
-		" missing=", fewest_missing if not best_recipe.is_empty() else -1)
 	return best_recipe
 
 func _build_material_icon(item_data: Dictionary, uid: int, ghost: bool = false) -> ItemWidget:
@@ -353,82 +366,28 @@ func _build_material_icon(item_data: Dictionary, uid: int, ghost: bool = false) 
 	if ghost:
 		entry.modulate = Color(1, 1, 1, PREVIEW_GHOST_ALPHA)
 		entry.self_modulate = Color.WHITE
-	var icon_path: String = str(item_data.get("icon", ""))
-	var icon: TextureRect = entry.get_node_or_null("IconRect") as TextureRect
-	print("[CraftDetail][MaterialIcon] build role=", "ghost" if ghost else "stored",
-		" item_id=", int(item_data.get("id", 0)), " uid=", uid,
-		" icon_path=", icon_path, " data_keys=", item_data.keys(),
-		" entry_visible=", entry.visible, " entry_alpha=", entry.modulate.a,
-		" icon_visible_before_ready=", icon.visible if icon != null else false)
 
 	if ghost:
 		entry.pressed.connect(func(): material_source_requested.emit(int(item_data.get("id", 0))))
 	else:
 		entry.pressed.connect(func(): material_clicked.emit(uid, int(item_data.get("id", 0))))
 	entry.call_deferred("_update_visuals")
-	call_deferred("_log_material_icon_state", entry, "deferred_build", ghost)
 	return entry
-
-func _log_material_icon_state(slot: ItemWidget, role: String, ghost: bool) -> void:
-	if slot == null or not is_instance_valid(slot):
-		print("[CraftDetail][MaterialIcon] state role=", role, " ghost=", ghost, " valid=false")
-		return
-	var icon: TextureRect = slot.get_node_or_null("IconRect") as TextureRect
-	print("[CraftDetail][MaterialIcon] state role=", role, " ghost=", ghost,
-		" visible=", slot.visible, " visible_in_tree=", slot.is_visible_in_tree(),
-		" alpha=", slot.modulate.a, " self_alpha=", slot.self_modulate.a,
-		" icon_exists=", icon != null,
-		" icon_visible=", icon.visible if icon != null else false,
-		" icon_alpha=", icon.modulate.a if icon != null else -1.0,
-		" texture=", icon.texture.resource_path if icon != null and icon.texture != null else "")
-
-func _log_material_slot_runtime(slot: ItemWidget, role: String, item_id: int) -> void:
-	if slot == null or not is_instance_valid(slot):
-		print("[CraftDetail] slot_runtime role=", role, " item_id=", item_id,
-			" valid=false")
-		return
-	var icon: TextureRect = slot.get_node_or_null("IconRect") as TextureRect
-	var click_button: Button = slot.get_node_or_null("ClickButton") as Button
-	var icon_path: String = ""
-	var icon_visible: bool = false
-	var slot_rect: Rect2 = slot.get_global_rect()
-	var container_rect: Rect2 = materials_container.get_global_rect()
-	if icon != null:
-		icon_visible = icon.visible
-		if icon.texture != null:
-			icon_path = icon.texture.resource_path
-	print("[CraftDetail] slot_runtime role=", role, " item_id=", item_id,
-		" valid=true visible=", slot.visible, " visible_in_tree=", slot.is_visible_in_tree(),
-		" size=", slot.size, " global_rect=", slot_rect,
-		" container_rect=", container_rect, " inside_container=", container_rect.encloses(slot_rect),
-		" intersects_container=", container_rect.intersects(slot_rect),
-	" child_index=", slot.get_index(), " child_count=", materials_row.get_child_count(),
-		" modulate=", slot.modulate, " self_modulate=", slot.self_modulate,
-		" icon_visible=", icon_visible, " icon_path=", icon_path,
-		" click_mouse_filter=", click_button.mouse_filter if click_button != null else -1,
-		" container_visible=", materials_container.visible,
-		" container_visible_in_tree=", materials_container.is_visible_in_tree())
 
 func _refresh_output_slot() -> void:
 	var recipe: Dictionary = CraftingService.get_current_recipe(_current_item_data)
 	var result_id: int = int(recipe.get("result", _current_item_data.get("_craft_result_id", 0)))
-	print("[CraftDetail][OutputPreview] initial_refresh table_id=", int(_current_item_data.get("id", 0)),
-		" state=", int(_current_item_data.get("_craft_state", CraftingService.TableState.IDLE)),
-		" stored_count=", CraftingService.get_stored_items(_current_item_data).size(),
-		" active_recipe_id=", int(recipe.get("id", 0)), " result_id=", result_id)
 	_show_output_slot_for_result(result_id, "active_recipe")
 
 func _show_output_slot_for_recipe(recipe: Dictionary, reason: String) -> void:
 	_show_output_slot_for_result(int(recipe.get("result", 0)), reason)
 
-func _show_output_slot_for_result(result_id: int, reason: String) -> void:
+func _show_output_slot_for_result(result_id: int, _reason: String) -> void:
 	if result_id <= 0:
-		print("[CraftDetail][OutputPreview] hide reason=", reason, " result_id=", result_id)
 		_hide_output_slot()
 		return
 	var result_data: Dictionary = ConfigDatabase.get_item_data(result_id)
 	if result_data.is_empty():
-		print("[CraftDetail][OutputPreview] hide reason=missing_result_data result_id=", result_id)
 		_hide_output_slot()
 		return
 	_output_item_id = result_id
@@ -437,34 +396,12 @@ func _show_output_slot_for_result(result_id: int, reason: String) -> void:
 	_set_output_slot_ghost(false)
 	output_label.show()
 	output_slot.show()
-	print("[CraftDetail][OutputPreview] show reason=", reason, " result_id=", result_id,
-		" visible=", output_slot.visible, " alpha=", output_slot.modulate.a)
 
 func _set_output_slot_ghost(ghost: bool) -> void:
 	if output_slot == null:
 		return
-	var previous_alpha: float = output_slot.modulate.a
 	output_slot.modulate = Color(1, 1, 1, PREVIEW_GHOST_ALPHA if ghost else 1.0)
 	output_slot.self_modulate = Color.WHITE
-	print("[CraftDetail][OutputPreview] ghost_apply requested=", ghost,
-		" output_id=", _output_item_id, " visible=", output_slot.visible,
-		" alpha_before=", previous_alpha, " alpha_after=", output_slot.modulate.a)
-
-func _log_output_slot_runtime(reason: String) -> void:
-	if output_slot == null or not is_instance_valid(output_slot):
-		print("[CraftDetail][OutputPreview] runtime reason=", reason, " valid=false")
-		return
-	var icon: TextureRect = output_slot.get_node_or_null("IconRect") as TextureRect
-	var icon_path: String = ""
-	if icon != null and icon.texture != null:
-		icon_path = icon.texture.resource_path
-	print("[CraftDetail][OutputPreview] runtime reason=", reason,
-		" output_id=", _output_item_id, " visible=", output_slot.visible,
-		" visible_in_tree=", output_slot.is_visible_in_tree(),
-		" modulate=", output_slot.modulate, " self_modulate=", output_slot.self_modulate,
-		" icon_modulate=", icon.modulate if icon != null else Color.WHITE,
-		" icon_self_modulate=", icon.self_modulate if icon != null else Color.WHITE,
-		" icon_path=", icon_path, " rect=", output_slot.get_global_rect())
 
 func _hide_output_slot() -> void:
 	_output_item_id = 0
@@ -559,9 +496,6 @@ func _refresh_launcher_speedup() -> void:
 	var remaining_ms: float = float(_current_item_data.get("_recharge_remaining", 0.0))
 	var remaining: float = maxf(0.0, remaining_ms / 1000.0)
 	var is_recharging: bool = charges <= 0 and remaining > 0.0
-	print("[CraftDetail][Launcher] detail_state item_id=", int(_current_item_data.get("id", 0)),
-		" charges=", charges, "/", max_charges, " remaining_ms=", remaining_ms,
-		" is_recharging=", is_recharging)
 	if not is_recharging:
 		_stop_countdown_timer()
 		_hide_speedup_button()
@@ -600,7 +534,7 @@ func _hide_speedup_button() -> void:
 	if speedup_btn:
 		speedup_btn.hide()
 
-func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
+func _on_table_state_changed(table_item: Dictionary, _state: int) -> void:
 	if _current_item_data.is_empty():
 		return
 	var current_uid: int = int(_current_item_data.get("_uid", 0))
@@ -613,10 +547,6 @@ func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
 	var latest: Dictionary = GridManager.find_by_uid(current_uid)
 	if not latest.is_empty():
 		_current_item_data = latest
-	print("[CraftDetail] state_changed uid=", current_uid, " signal_state=", state,
-		" payload_state=", int(table_item.get("_craft_state", -1)),
-		" latest_state=", int(_current_item_data.get("_craft_state", -1)),
-		" end_time=", _current_item_data.get("_craft_end_time", 0))
 	_refresh_materials()
 
 func _on_speedup_pressed() -> void:
@@ -717,9 +647,6 @@ func _on_launcher_charge_changed(uid: int) -> void:
 	var latest: Dictionary = GridManager.find_by_uid(uid)
 	if not latest.is_empty():
 		_current_item_data = latest
-	print("[CraftDetail][Launcher] charge_changed uid=", uid,
-		" charges=", _current_item_data.get("charges", -1),
-		" recharge_remaining=", _current_item_data.get("_recharge_remaining", 0))
 	_refresh_launcher_speedup()
 
 func _on_view_pressed() -> void:

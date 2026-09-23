@@ -34,7 +34,7 @@ func _on_show_toast(message: String) -> void:
 		_toast.show_message(message)
 
 func _on_kicked() -> void:
-	print("[Main] Kicked: connection lost, returning to login")
+	push_warning("Connection lost; returning to login")
 	UIManager.clear_all_screens()
 	var login := preload("res://scenes/screens/LoginScreen.tscn").instantiate()
 	UIManager.push_screen(login)

@@ -22,6 +22,7 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.stamina = state.get("stamina", 100)
 	GameState.max_stamina = state.get("max_stamina", 100)
 	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	GameState.sync_stamina_multiplier(state)
 	GameState.spirit_stones = state.get("spirit_stones", 0)
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 	GameState.spawn_seed = state.get("spawn_seed", 0)
@@ -36,7 +37,6 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.battle_grid_cache = state.get("battle_grid", [])
 	GameState.home_meridian_defs = state.get("home_meridian_defs", [])
 	GameState.home_meridian_progress = state.get("home_meridian_progress", [])
-	print("[Save] main_grid_cache=", GameState.main_grid_cache.size(), " battle_grid_cache=", GameState.battle_grid_cache.size())
 
 	# Cultivation
 	var cultivation_data: Dictionary = state.get("cultivation", {})

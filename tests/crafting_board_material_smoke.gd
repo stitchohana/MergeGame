@@ -32,11 +32,14 @@ func _ready() -> void:
 	detail_panel.show_item(table_data)
 	await get_tree().process_frame
 
-	assert(detail_panel.materials_row.get_child_count() == 1)
+	assert(detail_panel.materials_row.get_child_count() == 2)
 	var stored_slot: ItemWidget = detail_panel.materials_row.get_child(0) as ItemWidget
+	var board_ghost: ItemWidget = detail_panel.materials_row.get_child(1) as ItemWidget
 	assert(stored_slot.item_data.get("id", 0) == 9004)
+	assert(board_ghost.item_data.get("id", 0) == BOARD_PRODUCT_ID)
+	assert(is_equal_approx(board_ghost.modulate.a, ItemDetailPanel.PREVIEW_GHOST_ALPHA))
 	assert(detail_panel.get_output_item_id() == DIRECT_ORDER_ID)
-	assert(is_equal_approx(detail_panel.output_slot.modulate.a, 1.0))
+	assert(is_equal_approx(detail_panel.output_slot.modulate.a, ItemDetailPanel.PREVIEW_GHOST_ALPHA))
 
 	var prioritized_recipe: Dictionary = detail_panel._find_order_recipe([])
 	assert(prioritized_recipe.get("result", 0) == DIRECT_ORDER_ID)

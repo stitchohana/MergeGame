@@ -25,7 +25,14 @@ class GameEngine {
     cultivation = null;
     get cultivationStages() { return this.cultivation?.stages ?? []; }
     initialSetups = new Map();
-    staminaConfig = { max: 100, spawnCost: 10, regenInterval: 120, regenAmount: 1 };
+    staminaConfig = {
+        max: 100,
+        spawnCost: 10,
+        regenInterval: 120,
+        regenAmount: 1,
+        multiplierThresholdBase: 100,
+        multiplierDuration: 3600,
+    };
     speedupConfig = { craftStoneCostPerMinute: 1, launcherStoneCostPerMinute: 1 };
     questResetHour = 0;
     shopConfig = { shopItems: [], sellPrices: {}, buyPrices: {} };
@@ -65,6 +72,8 @@ class GameEngine {
                     spawnCost: s.spawn_cost ?? 10,
                     regenInterval: s.regen_interval ?? 120,
                     regenAmount: s.regen_amount ?? 1,
+                    multiplierThresholdBase: Math.max(1, Number(s.multiplier_threshold_base ?? 100)),
+                    multiplierDuration: Math.max(1, Number(s.multiplier_duration ?? 3600)),
                 };
                 console.log(`[engine] Stamina config: max=${this.staminaConfig.max} cost=${this.staminaConfig.spawnCost} regen=${this.staminaConfig.regenAmount}/${this.staminaConfig.regenInterval}s`);
             }
@@ -342,8 +351,6 @@ class GameEngine {
         // circulation reward is granted by runHomeMeridianCirculation after the
         // player explicitly presses the run button.
         const allLit = stageProgress.lit.every(l => l);
-        const meridianThreshold = this._findMeridianThreshold(state.cultivation.current_level);
-        this._tryRevealFixedOrders(state, meridianThreshold);
         state.version += 1;
         return {
             ok: true,
@@ -381,9 +388,13 @@ class GameEngine {
         const rewardsApplied = def.circulation_reward
             ? this.applyRewards(state, def.circulation_reward)
             : { tokens: [], items: [] };
+        const launchersRefreshed = this.refreshBoardLaunchers(state);
         stageProgress.circulation_completed = true;
         this.syncBreakthroughOrder(state);
+        // Reveal the next fixed onboarding wave only after the explicit run
+        // action has completed the current circulation.
         const meridianThreshold = this._findMeridianThreshold(state.cultivation.current_level);
+        state.meridian_fixed_wave_pending = false;
         this._tryRevealFixedOrders(state, meridianThreshold);
         state.version += 1;
         return {
@@ -397,7 +408,22 @@ class GameEngine {
             pending_rewards: state.pending_rewards,
             home_meridian_progress: state.home_meridian_progress,
             meridian_acupoints: state.meridian_acupoints || [],
+            grid: state.grid,
+            launchers_refreshed: launchersRefreshed,
         };
+    }
+    refreshBoardLaunchers(state) {
+        let refreshed = 0;
+        for (const item of state.grid || []) {
+            const itemDef = this.getItemData(item.id);
+            if (!itemDef || !this.isLauncher(itemDef))
+                continue;
+            item.charges = itemDef.max_charges ?? 3;
+            delete item.last_charge_time;
+            delete item._recharge_remaining;
+            refreshed += 1;
+        }
+        return refreshed;
     }
     gmActivateHomeAcupoints(state, amount) {
         const requestedAmount = Math.max(0, amount);
@@ -464,6 +490,7 @@ class GameEngine {
             // A cursor belongs to one threshold.  Do not let a completed wave from
             // an earlier cultivation stage skip fixed orders in a later one.
             state.meridian_fixed_order_cursor = 0;
+            state.meridian_fixed_wave_pending = false;
             state.meridian_acupoints = [];
         }
         state.meridian_threshold_idx = foundIdx;
@@ -471,25 +498,28 @@ class GameEngine {
             return { acupoints: state.meridian_acupoints };
         }
         if (fixedOrderWaves.length > 0) {
+            // Saves created before meridian_fixed_wave_pending existed can already
+            // be sitting between waves: an empty list with an advanced cursor. Treat
+            // that shape as pending as well so merely reopening the board cannot
+            // reveal the next tutorial wave.
+            const fixedCursor = Number(state.meridian_fixed_order_cursor ?? 0);
+            if (state.meridian_fixed_wave_pending === true
+                || (state.meridian_fixed_wave_pending === undefined && fixedCursor > 0)) {
+                state.meridian_fixed_wave_pending = true;
+                return { acupoints: [] };
+            }
             this._tryRevealFixedOrders(state, t);
             return { acupoints: state.meridian_acupoints || [] };
         }
-        const pool = this.getUnlockedOrderPool(state);
+        const weightedPool = this.getUnlockedOrderPoolWithWeights(state);
+        const pool = weightedPool.ids;
         const typeMin = t.count_min ?? 1;
         const typeMax = t.count_max ?? 3;
         if (pool.length === 0) {
             state.meridian_acupoints = [];
             return { acupoints: [] };
         }
-        const templateRewards = t.acupoint_rewards;
-        const acupoints = [];
-        for (let i = 0; i < orderCount; i++) {
-            const order = this._genOneAcupoint(pool, typeMin, typeMax);
-            if (!order.fixed_order_rewards && templateRewards && order.total_value > 0) {
-                order.rewards = this._scaleRewardConfig(templateRewards, order.total_value);
-            }
-            acupoints.push(order);
-        }
+        const acupoints = this._generateRandomMeridianBatch(pool, weightedPool.weights, orderCount, typeMin, typeMax, t.acupoint_rewards);
         state.meridian_acupoints = acupoints;
         return { acupoints };
     }
@@ -676,7 +706,28 @@ class GameEngine {
         }
         return this.meridianThresholds[0] ?? null;
     }
-    _genOneAcupoint(pool, typeMin, typeMax) {
+    _generateRandomMeridianBatch(pool, weights, orderCount, typeMin, typeMax, templateRewards) {
+        const acupoints = [];
+        const availablePool = [...pool];
+        for (let i = 0; i < orderCount; i++) {
+            const remainingOrders = orderCount - i - 1;
+            const maxTypes = Math.min(typeMax, Math.max(0, availablePool.length - remainingOrders));
+            const minTypes = Math.min(typeMin, maxTypes);
+            const order = this._genOneAcupoint(availablePool, minTypes, maxTypes, weights);
+            const selectedIds = new Set(order.item_ids.map((itemId) => Number(itemId)));
+            for (let poolIndex = availablePool.length - 1; poolIndex >= 0; poolIndex--) {
+                if (selectedIds.has(availablePool[poolIndex]))
+                    availablePool.splice(poolIndex, 1);
+            }
+            if (templateRewards && order.total_value > 0) {
+                order.rewards = this._scaleRewardConfig(templateRewards, order.total_value);
+            }
+            acupoints.push(order);
+        }
+        acupoints.sort((left, right) => Number(left.total_value ?? 0) - Number(right.total_value ?? 0));
+        return acupoints;
+    }
+    _genOneAcupoint(pool, typeMin, typeMax, weights) {
         const numTypes = typeMin + Math.floor(Math.random() * (typeMax - typeMin + 1));
         const pickedIds = [];
         const names = [];
@@ -684,7 +735,20 @@ class GameEngine {
         let totalValue = 0;
         const available = [...pool];
         for (let j = 0; j < numTypes && available.length > 0; j++) {
-            const idx = Math.floor(Math.random() * available.length);
+            const availableWeights = available.map(itemId => {
+                const weight = Number(weights?.get(itemId) ?? 1);
+                return Number.isFinite(weight) && weight > 0 ? weight : 1;
+            });
+            const totalWeight = availableWeights.reduce((sum, weight) => sum + weight, 0);
+            let roll = Math.random() * totalWeight;
+            let idx = available.length - 1;
+            for (let candidateIndex = 0; candidateIndex < available.length; candidateIndex++) {
+                roll -= availableWeights[candidateIndex];
+                if (roll < 0) {
+                    idx = candidateIndex;
+                    break;
+                }
+            }
             const itemId = available[idx];
             available.splice(idx, 1);
             const itemData = this.getItemData(itemId);
@@ -812,13 +876,17 @@ class GameEngine {
         return changed;
     }
     getUnlockedOrderPool(state) {
+        return this.getUnlockedOrderPoolWithWeights(state).ids;
+    }
+    getUnlockedOrderPoolWithWeights(state) {
         const obtainableIds = new Set();
         const regularIds = new Set();
         const byproductIds = new Set();
         const recipeProductIds = new Set();
         const availableRecipes = new Map();
+        const sourceWeights = new Map();
         const cultivationLevel = Number(state.cultivation?.current_level ?? 1);
-        const addSpawnMergeChain = (itemId, sourceIds) => {
+        const addSpawnMergeChain = (itemId, sourceIds, chainWeight) => {
             let changed = false;
             let itemDef = this.getItemData(itemId);
             const visitedIds = new Set();
@@ -829,6 +897,8 @@ class GameEngine {
                     changed = true;
                 }
                 sourceIds.add(itemDef.id);
+                const previousWeight = sourceWeights.get(itemDef.id) ?? 0;
+                sourceWeights.set(itemDef.id, previousWeight + Math.max(0, chainWeight));
                 itemDef = this.getNextLevel(itemDef.type, itemDef.level, itemDef.group_id);
             }
             return changed;
@@ -854,25 +924,37 @@ class GameEngine {
                 continue;
             if (this.isLauncher(production)) {
                 const spawnWeightsByChain = new Map();
+                const spawnByChain = new Map();
                 for (const spawn of production.spawns || []) {
                     const chainKey = getSpawnChainKey(spawn.id);
-                    spawnWeightsByChain.set(chainKey, (spawnWeightsByChain.get(chainKey) ?? 0) + Number(spawn.weight));
+                    const weight = Number(spawn.weight);
+                    spawnWeightsByChain.set(chainKey, (spawnWeightsByChain.get(chainKey) ?? 0) + (Number.isFinite(weight) ? Math.max(0, weight) : 0));
+                    if (!spawnByChain.has(chainKey))
+                        spawnByChain.set(chainKey, spawn.id);
                 }
                 const highestChainWeight = Math.max(0, ...spawnWeightsByChain.values());
                 const byproductChainKeys = new Set([...spawnWeightsByChain]
                     .filter(([, totalWeight]) => totalWeight < highestChainWeight)
                     .map(([chainKey]) => chainKey));
-                for (const spawn of production.spawns || []) {
-                    const sourceIds = byproductChainKeys.has(getSpawnChainKey(spawn.id))
+                const totalSpawnWeight = [...spawnWeightsByChain.values()].reduce((sum, weight) => sum + weight, 0);
+                for (const [chainKey, chainWeight] of spawnWeightsByChain) {
+                    const spawnId = spawnByChain.get(chainKey);
+                    if (spawnId === undefined)
+                        continue;
+                    const sourceIds = byproductChainKeys.has(chainKey)
                         ? byproductIds
                         : regularIds;
-                    addSpawnMergeChain(spawn.id, sourceIds);
+                    const normalizedWeight = totalSpawnWeight > 0 ? chainWeight / totalSpawnWeight : 1;
+                    addSpawnMergeChain(spawnId, sourceIds, normalizedWeight);
                 }
                 for (const spawnId of production.fixed_spawns || []) {
-                    const sourceIds = byproductChainKeys.has(getSpawnChainKey(spawnId))
+                    const chainKey = getSpawnChainKey(spawnId);
+                    const sourceIds = byproductChainKeys.has(chainKey)
                         ? byproductIds
                         : regularIds;
-                    addSpawnMergeChain(spawnId, sourceIds);
+                    // Fixed spawns are guaranteed outputs rather than weighted rolls;
+                    // keep them eligible with a small, neutral contribution.
+                    addSpawnMergeChain(spawnId, sourceIds, 1);
                 }
             }
             if (production.type === 2) {
@@ -895,6 +977,13 @@ class GameEngine {
                         addedRecipeProduct = true;
                     }
                     recipeProductIds.add(recipe.result);
+                    const ingredientWeights = recipe.ingredients.map((ingredientId) => sourceWeights.get(ingredientId) ?? 0);
+                    if (ingredientWeights.length > 0 && ingredientWeights.every(weight => weight > 0)) {
+                        // A crafted result cannot be more likely than its least likely
+                        // required material. This keeps recipe orders tied to the
+                        // launcher probability of their dependency chain.
+                        sourceWeights.set(recipe.result, Math.min(...ingredientWeights));
+                    }
                 }
             }
         }
@@ -909,7 +998,13 @@ class GameEngine {
         addSourceCandidates(regularIds, "items_regular");
         addSourceCandidates(byproductIds, "items_byproduct");
         addSourceCandidates(recipeProductIds, "items_recipe_product");
-        return [...orderIds].sort((a, b) => a - b);
+        const ids = [...orderIds].sort((a, b) => a - b);
+        const weights = new Map();
+        for (const itemId of ids) {
+            const weight = sourceWeights.get(itemId) ?? 0;
+            weights.set(itemId, weight > 0 ? weight : 1);
+        }
+        return { ids, weights };
     }
     repairInvalidMeridianOrders(state) {
         if (this.getRequiredBreakthroughItems(state.cultivation.current_level, state.cultivation.current_exp).length > 0) {
@@ -990,6 +1085,219 @@ class GameEngine {
     getMaxCharges(itemId) {
         return this.getItemData(itemId)?.max_charges ?? 3;
     }
+    getCultivationStaminaMultiplierCap(state) {
+        const currentLevel = Math.max(1, Number(state.cultivation?.current_level ?? 1));
+        const realmCaps = [
+            { realm: "元婴", cap: 32 },
+            { realm: "金丹", cap: 16 },
+            { realm: "筑基", cap: 8 },
+        ];
+        for (const { realm, cap } of realmCaps) {
+            const realmStart = this.cultivationStages.findIndex(stage => stage.name.startsWith(realm));
+            if (realmStart >= 0 && currentLevel >= realmStart + 1)
+                return cap;
+        }
+        return 4;
+    }
+    getStaminaMultiplierState(state, now = Date.now()) {
+        const expiresAt = Math.max(0, Number(state.stamina_multiplier_expires_at ?? 0));
+        const configuredMax = Math.max(1, Number(state.stamina_multiplier_max ?? 1));
+        const isActive = expiresAt > now && this.isPowerOfTwo(configuredMax);
+        const realmCap = this.getCultivationStaminaMultiplierCap(state);
+        return {
+            maxMultiplier: isActive ? Math.min(configuredMax, realmCap) : 1,
+            expiresAt: isActive ? expiresAt : 0,
+            remainingSeconds: isActive ? Math.max(0, Math.ceil((expiresAt - now) / 1000)) : 0,
+        };
+    }
+    tickStaminaMultiplier(state, now = Date.now()) {
+        const current = this.getStaminaMultiplierState(state, now);
+        if (current.maxMultiplier > 1) {
+            const changed = Number(state.stamina_multiplier_max ?? 1) !== current.maxMultiplier;
+            state.stamina_multiplier_max = current.maxMultiplier;
+            return changed;
+        }
+        const changed = Number(state.stamina_multiplier_max ?? 1) !== 1
+            || Number(state.stamina_multiplier_expires_at ?? 0) !== 0;
+        state.stamina_multiplier_max = 1;
+        state.stamina_multiplier_expires_at = 0;
+        return changed;
+    }
+    addStamina(state, amount, now = Date.now()) {
+        if (!Number.isFinite(amount) || amount <= 0)
+            return this.getStaminaMultiplierState(state, now);
+        state.stamina += amount;
+        return this.refreshStaminaMultiplierFromBalance(state, now);
+    }
+    refreshStaminaMultiplierFromBalance(state, now = Date.now()) {
+        const triggered = Math.min(this.getTriggeredStaminaMultiplier(state.stamina), this.getCultivationStaminaMultiplierCap(state));
+        if (triggered > 1) {
+            const active = this.getStaminaMultiplierState(state, now);
+            state.stamina_multiplier_max = Math.max(active.maxMultiplier, triggered);
+            state.stamina_multiplier_expires_at = now + this.staminaConfig.multiplierDuration * 1000;
+        }
+        return this.getStaminaMultiplierState(state, now);
+    }
+    getLauncherSafeStaminaMultiplier(launcherId) {
+        const launcher = this.getItemData(launcherId);
+        if (!launcher || !this.isLauncher(launcher))
+            return 1;
+        const outputIds = [
+            ...(launcher.spawns ?? []).map(spawn => spawn.id),
+            ...(launcher.fixed_spawns ?? []),
+        ];
+        if (outputIds.length === 0)
+            return 1;
+        let safeSteps = Number.MAX_SAFE_INTEGER;
+        for (const outputId of outputIds) {
+            const output = this.getItemData(outputId);
+            if (!output)
+                return 1;
+            let steps = 0;
+            while (this.getItemByLevel(output.type, output.level + steps + 1, output.group_id))
+                steps += 1;
+            safeSteps = Math.min(safeSteps, steps);
+        }
+        return 2 ** Math.min(30, Math.max(0, safeSteps));
+    }
+    getTriggeredStaminaMultiplier(stamina) {
+        let multiplier = 1;
+        while (multiplier < 2 ** 30) {
+            const next = multiplier * 2;
+            if (stamina < this.staminaConfig.multiplierThresholdBase * next)
+                break;
+            multiplier = next;
+        }
+        return multiplier;
+    }
+    isPowerOfTwo(value) {
+        return Number.isInteger(value) && value >= 1 && Math.log2(value) % 1 === 0;
+    }
+    upgradeSpawnResult(base, multiplier) {
+        const levelGain = Math.log2(multiplier);
+        if (!Number.isInteger(levelGain) || levelGain < 0)
+            return null;
+        return this.getItemByLevel(base.type, base.level + levelGain, base.group_id);
+    }
+    getOutstandingOrderItemCounts(state) {
+        const orderTargets = new Map();
+        const addRequired = (itemId) => {
+            if (itemId > 0)
+                orderTargets.set(itemId, (orderTargets.get(itemId) ?? 0) + 1);
+        };
+        for (const order of state.meridian_acupoints ?? []) {
+            if (order?.completed === true)
+                continue;
+            const configuredIds = Array.isArray(order?.item_ids)
+                ? order.item_ids
+                : order?.items;
+            if (!Array.isArray(configuredIds))
+                continue;
+            for (const entry of configuredIds) {
+                addRequired(Number(entry && typeof entry === "object" ? entry.item_id : entry));
+            }
+        }
+        const available = new Map();
+        const addAvailable = (itemId) => {
+            if (itemId > 0)
+                available.set(itemId, (available.get(itemId) ?? 0) + 1);
+        };
+        for (const gridItem of state.grid) {
+            const itemDef = this.getItemData(gridItem.id);
+            if (itemDef?.type !== 2) {
+                if (gridItem.immovable !== true)
+                    addAvailable(gridItem.id);
+                continue;
+            }
+            for (const stored of gridItem.craft?._craft_stored ?? []) {
+                addAvailable(Number(stored?.id ?? 0));
+            }
+            const craftState = gridItem.craft?._craft_state;
+            if (craftState !== TableState.CRAFTING && craftState !== TableState.READY)
+                continue;
+            addAvailable(Number(gridItem.craft?._craft_result_id
+                || gridItem.craft?._craft_recipe?.result
+                || 0));
+        }
+        for (const pouchEntry of state.pouch) {
+            addAvailable(this.getStoredItemId(pouchEntry));
+        }
+        const outstanding = new Map();
+        for (const [itemId, requiredCount] of orderTargets) {
+            this.addRecipeMaterialRequirements(itemId, requiredCount, outstanding, available, new Set());
+        }
+        return outstanding;
+    }
+    consumeAvailableOrderItems(available, itemId, count) {
+        const consumed = Math.min(count, available.get(itemId) ?? 0);
+        if (consumed <= 0)
+            return count;
+        const left = (available.get(itemId) ?? 0) - consumed;
+        if (left > 0)
+            available.set(itemId, left);
+        else
+            available.delete(itemId);
+        return count - consumed;
+    }
+    addRecipeMaterialRequirements(itemId, count, requirements, available, visiting) {
+        if (itemId <= 0 || count <= 0)
+            return;
+        const missingCount = this.consumeAvailableOrderItems(available, itemId, count);
+        if (missingCount <= 0)
+            return;
+        const recipe = this.recipes.find(candidate => candidate.result === itemId);
+        if (!recipe || visiting.has(itemId)) {
+            requirements.set(itemId, (requirements.get(itemId) ?? 0) + missingCount);
+            return;
+        }
+        visiting.add(itemId);
+        for (const ingredientId of recipe.ingredients) {
+            this.addRecipeMaterialRequirements(ingredientId, missingCount, requirements, available, visiting);
+        }
+        visiting.delete(itemId);
+    }
+    getOrderPrioritySpawnPlan(state, base, boosted, requestedMultiplier, maxStaminaUnits) {
+        if (requestedMultiplier <= 1 || boosted.level <= base.level) {
+            return {
+                output: { item: boosted, staminaUnits: requestedMultiplier },
+                orderPriority: false,
+            };
+        }
+        const candidates = [];
+        for (const [itemId, count] of this.getOutstandingOrderItemCounts(state)) {
+            if (count <= 0)
+                continue;
+            const candidate = this.getItemData(itemId);
+            if (!candidate
+                || candidate.type !== base.type
+                || candidate.group_id !== base.group_id
+                || candidate.level >= boosted.level)
+                continue;
+            const reachable = this.getItemByLevel(base.type, candidate.level, base.group_id);
+            if (reachable?.id === candidate.id) {
+                candidates.push({
+                    item: candidate,
+                    count,
+                    staminaUnits: candidate.level <= base.level
+                        ? 1
+                        : 2 ** (candidate.level - base.level),
+                });
+            }
+        }
+        candidates.sort((a, b) => a.item.level - b.item.level || a.item.id - b.item.id);
+        for (const candidate of candidates) {
+            if (candidate.staminaUnits <= Math.min(requestedMultiplier, Math.max(0, maxStaminaUnits))) {
+                return {
+                    output: { item: candidate.item, staminaUnits: candidate.staminaUnits },
+                    orderPriority: true,
+                };
+            }
+        }
+        return {
+            output: { item: boosted, staminaUnits: requestedMultiplier },
+            orderPriority: false,
+        };
+    }
     _nextUid(state) {
         state.uid_counter = (state.uid_counter ?? 0) + 1;
         return state.uid_counter;
@@ -1013,7 +1321,7 @@ class GameEngine {
                 state.last_stamina_tick = now;
                 break;
             }
-            state.stamina += this.staminaConfig.regenAmount;
+            this.addStamina(state, this.staminaConfig.regenAmount, now);
             state.last_stamina_tick += intervalMs;
         }
         state.stamina = Math.min(state.stamina, this.staminaConfig.max);
@@ -1158,7 +1466,7 @@ class GameEngine {
                         console.log(`[reward] +${t.amount} qi (total: ${state.cultivation.current_qi}/${state.cultivation.max_qi})`);
                         break;
                     case interface_1.TokenType.STAMINA:
-                        state.stamina += t.amount;
+                        this.addStamina(state, t.amount);
                         console.log(`[reward] +${t.amount} stamina (total: ${state.stamina})`);
                         break;
                     case interface_1.TokenType.EXP:
@@ -1212,6 +1520,8 @@ class GameEngine {
             stamina: 100,
             max_stamina: 100,
             last_stamina_tick: now,
+            stamina_multiplier_max: 1,
+            stamina_multiplier_expires_at: 0,
             spirit_stones: 0,
             version: 0,
             board_type: boardType,
@@ -1426,7 +1736,7 @@ class GameEngine {
         };
     }
     // --- Launcher spawn ---
-    executeSpawn(state, launcherCol, launcherRow, expectedSequence) {
+    executeSpawn(state, launcherCol, launcherRow, expectedSequence, requestedMultiplier = 1) {
         const sequence = state.spawn_sequence ?? 0;
         if (expectedSequence !== undefined && expectedSequence !== sequence) {
             return { ok: false, reason: "spawn_sequence_mismatch" };
@@ -1445,6 +1755,22 @@ class GameEngine {
         const charges = launcherItem.charges ?? maxC;
         if (charges <= 0) {
             return { ok: false, reason: "no_charges" };
+        }
+        const isBattle = state.board_type === 1;
+        if (!this.isPowerOfTwo(requestedMultiplier)) {
+            return { ok: false, reason: "invalid_stamina_multiplier" };
+        }
+        if ((isBattle || launcherData.no_cost) && requestedMultiplier !== 1) {
+            return { ok: false, reason: "stamina_multiplier_not_applicable" };
+        }
+        if (!isBattle && !launcherData.no_cost) {
+            const boost = this.getStaminaMultiplierState(state);
+            if (requestedMultiplier > boost.maxMultiplier) {
+                return { ok: false, reason: "stamina_multiplier_not_active" };
+            }
+            if (requestedMultiplier > this.getLauncherSafeStaminaMultiplier(launcherItem.id)) {
+                return { ok: false, reason: "stamina_multiplier_above_launcher_cap" };
+            }
         }
         // Determine rolled ID: fixed spawns or random weighted
         let rolledId;
@@ -1471,8 +1797,29 @@ class GameEngine {
                 roll -= s.weight;
             }
         }
-        // Cost check: skip for no_cost launchers, else qi/stamina
-        const isBattle = state.board_type === 1;
+        const baseSpawnResult = this.getItemData(rolledId);
+        if (!baseSpawnResult)
+            return { ok: false, reason: "spawn_failed" };
+        const boostedSpawnResult = this.upgradeSpawnResult(baseSpawnResult, requestedMultiplier);
+        if (!boostedSpawnResult)
+            return { ok: false, reason: "stamina_multiplier_above_output_cap" };
+        const baseStaminaCost = this.staminaConfig.spawnCost;
+        const maxStaminaUnits = !isBattle && !launcherData.no_cost
+            ? Math.floor(state.stamina / baseStaminaCost)
+            : requestedMultiplier;
+        const spawnPlan = this.getOrderPrioritySpawnPlan(state, baseSpawnResult, boostedSpawnResult, requestedMultiplier, maxStaminaUnits);
+        const target = this.findNearestEmpty(map, launcherCol, launcherRow);
+        if (!target)
+            return { ok: false, reason: "no_empty_cell" };
+        const spentStaminaUnits = spawnPlan.output.staminaUnits;
+        // Cost check: order-priority output charges only its represented multiplier.
+        const requestedStaminaCost = !isBattle && !launcherData.no_cost
+            ? this.staminaConfig.spawnCost * requestedMultiplier
+            : 0;
+        const staminaCost = !isBattle && !launcherData.no_cost
+            ? baseStaminaCost * spentStaminaUnits
+            : 0;
+        const staminaRefund = requestedStaminaCost - staminaCost;
         if (!launcherData.no_cost) {
             if (isBattle) {
                 if (state.cultivation.current_qi < 1) {
@@ -1480,23 +1827,10 @@ class GameEngine {
                 }
             }
             else {
-                if (state.stamina < this.staminaConfig.spawnCost) {
+                if (state.stamina < staminaCost) {
                     return { ok: false, reason: "insufficient_stamina" };
                 }
             }
-        }
-        const spawnResult = this.getItemData(rolledId);
-        if (!spawnResult)
-            return { ok: false, reason: "spawn_failed" };
-        const target = this.findNearestEmpty(map, launcherCol, launcherRow);
-        if (!target)
-            return { ok: false, reason: "no_empty_cell" };
-        // Double-check: ensure the cell is truly empty in the grid array
-        const targetKey = this.posKey(target.col, target.row);
-        if (state.grid.some(g => this.posKey(g.col, g.row) === targetKey)) {
-            console.log(`[engine] spawn: target (${target.col},${target.row}) already occupied! Grid has ${state.grid.length} items:`);
-            state.grid.forEach(g => console.log(`  #${g.id} uid=${g.uid} at (${g.col},${g.row})`));
-            return { ok: false, reason: "no_empty_cell" };
         }
         // Deduct cost (skip for no_cost launchers)
         if (!launcherData.no_cost) {
@@ -1504,7 +1838,7 @@ class GameEngine {
                 state.cultivation.current_qi = Math.max(0, state.cultivation.current_qi - 1);
             }
             else {
-                state.stamina = Math.max(0, state.stamina - this.staminaConfig.spawnCost);
+                state.stamina = Math.max(0, state.stamina - staminaCost);
             }
         }
         launcherItem.charges = charges - 1;
@@ -1514,7 +1848,13 @@ class GameEngine {
             state.grid = state.grid.filter((g) => !(g.col === launcherCol && g.row === launcherRow));
             console.log(`[engine] launcher #${launcherItem.id} at (${launcherCol},${launcherRow}) depleted and removed`);
         }
-        const newItem = { uid: this._nextUid(state), id: spawnResult.id, col: target.col, row: target.row };
+        const spawnResult = spawnPlan.output.item;
+        const newItem = {
+            uid: this._nextUid(state),
+            id: spawnResult.id,
+            col: target.col,
+            row: target.row,
+        };
         if (spawnResult.type === 1 || this.isLauncher(spawnResult)) {
             newItem.charges = this.getMaxCharges(spawnResult.id);
             newItem.last_charge_time = Date.now();
@@ -1523,31 +1863,43 @@ class GameEngine {
             const stage = this.cultivationStages[state.cultivation.current_level - 1];
             const stageAtk = stage?.atk ?? 0;
             newItem.atk_base = stageAtk + (launcherData.value ?? 0);
-            console.log(`[engine] spawn: atk_base=${newItem.atk_base} (stageAtk=${stageAtk} + swordValue=${launcherData.value}) effect_type=${launcherData.effect_type}`);
-        }
-        else {
-            console.log(`[engine] spawn: launcher #${launcherItem.id} effect_type=${launcherData.effect_type} — NOT atk boost`);
         }
         state.grid.push(newItem);
         this.registerProductionUnlock(state, newItem.id);
+        const spawnedItems = [{
+                uid: newItem.uid ?? 0,
+                id: spawnResult.id,
+                name: spawnResult.name,
+                targetCol: target.col,
+                targetRow: target.row,
+                atkBase: newItem.atk_base ?? 0,
+                staminaUnits: spawnPlan.output.staminaUnits,
+            }];
         state.spawn_sequence = sequence + 1;
         state.version += 1;
-        console.log(`[engine] spawn: launcher #${launcherItem.id} -> ${spawnResult.name}(#${spawnResult.id}) at (${target.col},${target.row}) | effect_value=${spawnResult.effect_value} atk_base=${newItem.atk_base ?? 0} | v${state.version}`);
-        this.questEngine.incrementQuestProgress(state, interface_1.QuestType.SPAWN, 1, this);
+        const firstSpawn = spawnedItems[0];
+        console.log(`[engine] spawn: launcher #${launcherItem.id} -> ${spawnedItems.map(item => `${item.name}(#${item.id})`).join(", ")} | units=${spentStaminaUnits}/${requestedMultiplier} refund=${staminaRefund} order_priority=${spawnPlan.orderPriority} | v${state.version}`);
+        this.questEngine.incrementQuestProgress(state, interface_1.QuestType.SPAWN, spawnedItems.length, this);
         return {
             ok: true,
-            spawnedUid: newItem.uid ?? 0,
-            spawnedId: spawnResult.id,
-            spawnedName: spawnResult.name,
-            targetCol: target.col,
-            targetRow: target.row,
+            spawnedUid: firstSpawn.uid,
+            spawnedId: firstSpawn.id,
+            spawnedName: firstSpawn.name,
+            targetCol: firstSpawn.targetCol,
+            targetRow: firstSpawn.targetRow,
             newVersion: state.version,
             charges: launcherItem.charges,
             maxCharges: this.getMaxCharges(launcherItem.id),
             rechargeTime: launcherData.recharge_time ?? 0,
-            atkBase: newItem.atk_base ?? 0,
+            atkBase: firstSpawn.atkBase,
             sequenceUsed: sequence,
             spawnSequence: state.spawn_sequence,
+            staminaMultiplier: spentStaminaUnits,
+            requestedStaminaMultiplier: requestedMultiplier,
+            staminaCost,
+            staminaRefund,
+            orderPriority: spawnPlan.orderPriority,
+            spawnedItems,
         };
     }
     // --- Move item (for pushing items around) ---
@@ -2246,7 +2598,7 @@ class GameEngine {
         }
         state.grid.splice(idx, 1);
         console.log(`[engine]   removed from grid at idx=${idx}`);
-        state.stamina += amount;
+        this.addStamina(state, amount);
         state.last_stamina_tick = Date.now();
         state.version += 1;
         console.log(`[engine] consume stamina pill: #${pillId} (uid=${uid}) | stamina +${amount} total=${state.stamina} | v${state.version}`);
@@ -2387,24 +2739,34 @@ class GameEngine {
         const newThreshold = this._findMeridianThreshold(state.cultivation.current_level);
         const fixedOrderWaves = this._getFixedOrderWaves(newThreshold);
         if (fixedOrderWaves.length === 0) {
-            const newPool = this.getUnlockedOrderPool(state);
-            if (newPool.length > 0) {
-                const newTypeMin = newThreshold?.count_min ?? 1;
-                const newTypeMax = newThreshold?.count_max ?? 3;
-                const newOrder = this._genOneAcupoint(newPool, newTypeMin, newTypeMax);
-                if (newThreshold?.acupoint_rewards && newOrder.total_value > 0) {
-                    newOrder.rewards = this._scaleRewardConfig(newThreshold.acupoint_rewards, newOrder.total_value);
+            if (state.meridian_acupoints.length === 0) {
+                // Random orders are a batch: do not replace an order until every
+                // configured order in the current batch has been completed.
+                const launchersRefreshed = this.refreshBoardLaunchers(state);
+                const weightedPool = this.getUnlockedOrderPoolWithWeights(state);
+                const orderCount = Math.max(0, Math.floor(Number(newThreshold?.order_count ?? newThreshold?.acupoints ?? 0)));
+                if (weightedPool.ids.length > 0 && orderCount > 0) {
+                    const newTypeMin = newThreshold?.count_min ?? 1;
+                    const newTypeMax = newThreshold?.count_max ?? 3;
+                    state.meridian_acupoints = this._generateRandomMeridianBatch(weightedPool.ids, weightedPool.weights, orderCount, newTypeMin, newTypeMax, newThreshold?.acupoint_rewards);
+                    console.log(`[engine] meridian random batch completed; refreshed ${state.meridian_acupoints.length} orders and ${launchersRefreshed} launchers`);
                 }
-                state.meridian_acupoints.push(newOrder);
-                console.log(`[engine] meridian order #${index} completed, new random order generated`);
+                else {
+                    console.log(`[engine] meridian random batch completed; no craftable replacement available (launchers_refreshed=${launchersRefreshed})`);
+                }
             }
             else {
-                console.log(`[engine] meridian order #${index} completed, no craftable replacement available`);
+                console.log(`[engine] meridian order #${index} completed; ${state.meridian_acupoints.length} random orders remain in batch`);
             }
         }
         else {
-            const revealed = this._tryRevealFixedOrders(state, newThreshold);
-            console.log(`[engine] meridian fixed order #${index} completed, next wave revealed: ${revealed}`);
+            // Fixed onboarding orders advance only after the player runs a complete
+            // home-meridian circulation. Keep the list empty until that explicit
+            // circulation action reveals the next configured wave.
+            if (state.meridian_acupoints.length === 0) {
+                state.meridian_fixed_wave_pending = true;
+            }
+            console.log(`[engine] meridian fixed order #${index} completed, next wave deferred until circulation`);
         }
         return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina };
     }

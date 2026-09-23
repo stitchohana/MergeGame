@@ -132,6 +132,8 @@ export interface GameState {
   stamina: number;
   max_stamina: number;
   last_stamina_tick: number;
+  stamina_multiplier_max?: number;
+  stamina_multiplier_expires_at?: number;
   spirit_stones: number;
   version: number;
   board_type?: number;

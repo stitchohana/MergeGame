@@ -134,7 +134,6 @@ func _load_recipes(path: String) -> void:
 				if not _recipes_by_table.has(item_id):
 					_recipes_by_table[item_id] = []
 				_recipes_by_table[item_id].append(recipe)
-	print("[ConfigDatabase] Loaded ", recipes.size(), " recipes")
 
 func get_item_data(item_id: int) -> Dictionary:
 	return _items_data.get(item_id, {}) 
@@ -166,6 +165,47 @@ func _add_item_by_type_level(item_data: Dictionary) -> void:
 
 func get_next_level(type: int, level: int, group_id: int = 0) -> Dictionary:
 	return get_item_by_level(type, level + 1, group_id)
+
+
+func get_upgraded_item_for_multiplier(item_id: int, multiplier: int) -> Dictionary:
+	var base_item: Dictionary = get_item_data(item_id)
+	if base_item.is_empty() or multiplier < 1:
+		return {}
+	var level_gain: int = 0
+	var remaining: int = multiplier
+	while remaining > 1 and remaining % 2 == 0:
+		remaining = int(remaining / 2)
+		level_gain += 1
+	if remaining != 1:
+		return {}
+	return get_item_by_level(
+		_coerce_int(base_item.get("type", 0)),
+		_coerce_int(base_item.get("level", 0)) + level_gain,
+		_coerce_int(base_item.get("group_id", 0))
+	)
+
+
+func get_launcher_safe_stamina_multiplier(launcher: Dictionary) -> int:
+	var output_ids: Array[int] = []
+	for spawn: Dictionary in launcher.get("spawns", []):
+		output_ids.append(_coerce_int(spawn.get("id", 0)))
+	for fixed_id: Variant in launcher.get("fixed_spawns", []):
+		output_ids.append(_coerce_int(fixed_id))
+	if output_ids.is_empty():
+		return 1
+	var safe_steps: int = 30
+	for output_id: int in output_ids:
+		var output: Dictionary = get_item_data(output_id)
+		if output.is_empty():
+			return 1
+		var steps: int = 0
+		var item_type: int = _coerce_int(output.get("type", 0))
+		var level: int = _coerce_int(output.get("level", 0))
+		var group_id: int = _coerce_int(output.get("group_id", 0))
+		while not get_item_by_level(item_type, level + steps + 1, group_id).is_empty():
+			steps += 1
+		safe_steps = mini(safe_steps, steps)
+	return int(pow(2, safe_steps))
 
 # Roll a spawn outcome for a launcher based on weighted probabilities
 func roll_spawn(launcher_id: int) -> Dictionary:
@@ -253,14 +293,12 @@ func get_recipes_for_item(item_id: int) -> Array:
 func _load_expedition(path: String) -> void:
 	var data := _load_json(path)
 	if data.is_empty():
-		print("[ConfigDatabase] Expedition data is empty or failed to load: ", path)
+		push_warning("Expedition data is empty or failed to load: %s" % path)
 		return
 	var maps: Array = data.get("maps", [])
-	print("[ConfigDatabase] Loaded ", maps.size(), " expedition maps")
 	for m in maps:
 		_expedition_maps[_coerce_int(m.get("id", 0))] = m
 	var monsters: Array = data.get("monsters", [])
-	print("[ConfigDatabase] Loaded ", monsters.size(), " monsters")
 	for mo in monsters:
 		_monsters_data[_coerce_int(mo.get("id", 0))] = mo
 

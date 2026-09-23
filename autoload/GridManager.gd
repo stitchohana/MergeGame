@@ -50,10 +50,6 @@ func _ready() -> void:
 	init_grid(current_board_type)
 
 func init_grid(board_type: int = Constants.BoardType.MAIN) -> void:
-	var previous_item_count: int = count_items() if _grid.size() == GRID_ROWS else 0
-	print("[GridManager] init_grid: board=", board_type,
-		" previous_items=", previous_item_count,
-		" caller=", get_stack())
 	current_board_type = board_type
 	# Emit removal signals for all existing items before clearing
 	if not _grid.is_empty():
@@ -101,7 +97,7 @@ func add_item(item_data: Dictionary, pos: Vector2i) -> bool:
 			or item_data.get("_optimistic_action", false)
 		)
 		if not is_optimistic:
-			print("[ERROR] GridManager.add_item: no server uid for id=#" + str(item_data.get("id", 0)) + " has no server uid!")
+			push_error("GridManager.add_item: item #%s has no server uid" % item_data.get("id", 0))
 	_grid[pos.y][pos.x] = item_data
 
 	# Track position for this item_id
@@ -300,7 +296,10 @@ func is_grid_full() -> bool:
 
 # Get all positions that have a specific item_id
 func get_positions_by_item_id(item_id: int) -> Array[Vector2i]:
-	return _item_positions.get(item_id, []).duplicate()
+	var positions: Array[Vector2i] = []
+	for pos: Vector2i in _item_positions.get(item_id, []):
+		positions.append(pos)
+	return positions
 
 # Find an item by its unique instance ID — O(1) via uid index
 func find_by_uid(uid: int) -> Dictionary:
@@ -404,7 +403,6 @@ static func _sanitize_json_ints(data: Variant) -> Variant:
 
 # Populate grid from server entries — shared by all screen restore paths
 func populate_from_server(server_grid: Array) -> void:
-	print("[GridManager] populate_from_server: entries=", server_grid.size())
 	_begin_grid_update_batch()
 	# One authoritative snapshot should produce one UI refresh, even when empty.
 	_grid_update_pending = true
@@ -489,6 +487,11 @@ func reconcile_from_server(server_grid: Array) -> bool:
 		local_item.clear()
 		local_item.merge(authoritative, true)
 		_uid_to_pos[int(authoritative["_uid"])] = pos
+		# Reconciliation replaces the dictionary contents and therefore drops
+		# the scene-local Timer object. Rebuild it from the authoritative craft
+		# timestamp here so every sync path keeps the detail-panel countdown live.
+		if int(local_item.get("type", 0)) == Constants.ItemType.CRAFTING:
+			CraftingService.restore_craft_timer_for_item(local_item)
 
 	_notify_grid_updated()
 	return true

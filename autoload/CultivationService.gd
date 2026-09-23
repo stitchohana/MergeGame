@@ -24,7 +24,7 @@ func _ready() -> void:
 # --- Server response handlers ---
 
 func _on_breakthrough_confirmed(result: Dictionary) -> void:
-	print("[Cultivation] breakthrough confirmed")
+	print("[PlayerAction] breakthrough_accept")
 	if result.has("grid"):
 		var server_grid: Array = result.get("grid", []) as Array
 		GridManager.populate_from_server(server_grid)
@@ -55,9 +55,7 @@ func _on_exp_pill_consume_confirmed(result: Dictionary) -> void:
 # --- Public operations (submit to server) ---
 
 func try_breakthrough(uid: int = 0) -> bool:
-	print("[Cultivation] try_breakthrough uid=" + str(uid))
-	if uid <= 0:
-		print("[Cultivation] try_breakthrough uid=0, server will consume configured items")
+	print("[PlayerAction] breakthrough_submit uid=", uid)
 	if CloudService.online:
 		CloudService.submit_breakthrough(uid)
 		return true
@@ -81,7 +79,6 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 	total_exp = c.get("total_exp", 0)
 	current_qi = c.get("current_qi", 0)
 	max_qi = c.get("max_qi", 100)
-	print("[Cultivation] apply_state: level=" + str(current_level) + " exp=" + str(current_exp) + " qi=" + str(current_qi) + "/" + str(max_qi))
 
 	if current_level != old_level:
 		var stage_name: String = get_stage_name()
@@ -89,7 +86,6 @@ func _apply_cultivation_state(c: Dictionary) -> void:
 
 	if current_exp != old_exp:
 		var e2n = get_exp_to_next_level()
-		print("[Cultivation] exp_changed: " + str(current_exp) + "/" + str(e2n))
 		exp_changed.emit(current_exp, e2n)
 
 	if current_qi != old_qi or max_qi != old_max_qi:
@@ -134,6 +130,34 @@ func _needs_breakthrough_items() -> bool:
 
 func get_formatted_stage() -> String:
 	return ConfigDatabase.get_stage_name(current_level)
+
+
+func get_current_realm_item_level_cap() -> int:
+	var stage_name: String = get_stage_name()
+	if stage_name.begins_with("元婴"):
+		return 16
+	if stage_name.begins_with("金丹"):
+		return 12
+	if stage_name.begins_with("筑基"):
+		return 8
+	if stage_name == "凡人" or stage_name.begins_with("练气"):
+		return 4
+	return 0
+
+
+func get_current_realm_label() -> String:
+	var stage_name: String = get_stage_name()
+	for realm: String in ["元婴", "金丹", "筑基", "练气"]:
+		if stage_name.begins_with(realm):
+			return realm + "期"
+	if stage_name == "凡人":
+		return "练气期"
+	return stage_name
+
+
+func is_item_level_above_current_realm(item_level: int) -> bool:
+	var level_cap: int = get_current_realm_item_level_cap()
+	return level_cap > 0 and item_level > level_cap
 
 # --- Save/Load (now from server) ---
 

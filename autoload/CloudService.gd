@@ -159,7 +159,6 @@ func _load_config() -> void:
 			base_url = data.get("base_url", "http://localhost:3000")
 			_timeout = data.get("timeout", 10.0)
 			_max_retries = data.get("max_retries", 2)
-			print("[CloudService] Configured: ", base_url)
 		else:
 			push_error("[CloudService] Failed to parse server.json")
 	else:
@@ -191,7 +190,6 @@ func _on_login_response(data: Dictionary) -> void:
 		online = true
 		connected.emit()
 		login_success.emit(user_id)
-		print("[CloudService] Login success: ", user_id)
 	else:
 		login_failed.emit("invalid_response")
 
@@ -204,6 +202,8 @@ func fetch_state() -> void:
 	_send_authed_request("fetch_state", "/api/game/state", HTTPClient.Method.METHOD_GET)
 
 func _on_fetch_state_response(data: Dictionary) -> void:
+	if data.has("crafted_item_ids"):
+		GameState.set_crafted_item_ids(data.get("crafted_item_ids", []))
 	state_loaded.emit(data)
 
 # --- Merge ---
@@ -225,8 +225,11 @@ func _on_merge_response(data: Dictionary) -> void:
 
 func submit_spawn(launcher_col: int, launcher_row: int, request_id: String = "",
 		expected_sequence: int = -1, predicted_id: int = 0,
-		predicted_target: Vector2i = Vector2i(-1, -1)) -> void:
-	var payload: Dictionary = {"launcher_pos": [launcher_col, launcher_row]}
+		predicted_target: Vector2i = Vector2i(-1, -1), stamina_multiplier: int = 1) -> void:
+	var payload: Dictionary = {
+		"launcher_pos": [launcher_col, launcher_row],
+		"stamina_multiplier": stamina_multiplier,
+	}
 	if not request_id.is_empty():
 		payload["request_id"] = request_id
 	if expected_sequence >= 0:
@@ -415,11 +418,9 @@ func _on_claim_pending_reward_response(data: Dictionary) -> void:
 		pending_reward_claimed_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_breakthrough_response(data: Dictionary) -> void:
-	print("[CloudService] breakthrough response: " + str(data))
 	if data.get("ok", false):
 		breakthrough_confirmed.emit(data)
 	else:
-		print("[CloudService] breakthrough REJECTED: " + str(data.get("error", "unknown")))
 		breakthrough_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_consume_exp_pill_response(data: Dictionary) -> void:
@@ -698,10 +699,46 @@ func _finish_tag(tag: String) -> void:
 		_state_request_in_flight = false
 
 func _dispatch_response(tag: String, data: Dictionary) -> void:
+	if bool(data.get("ok", false)) and tag != "fetch_state" and tag != "login":
+		_register_confirmed_item_discoveries(tag, data)
 	var ep: Dictionary = _endpoints.get(tag, {})
 	var cb: Callable = ep.get("response_cb", Callable())
 	if cb.is_valid():
 		cb.call(data)
+
+
+func _register_confirmed_item_discoveries(tag: String, data: Dictionary) -> void:
+	var acquired_ids: Array = []
+	acquired_ids.append_array(data.get("newly_discovered_item_ids", []))
+	match tag:
+		"spawn":
+			var spawned_items: Array = data.get("spawned_items", [])
+			if spawned_items.is_empty():
+				acquired_ids.append(data.get("spawned_id", 0))
+			else:
+				for entry: Variant in spawned_items:
+					if entry is Dictionary:
+						acquired_ids.append(entry.get("id", 0))
+		"merge", "craft_retrieve", "buy":
+			acquired_ids.append(data.get("result_id", data.get("item_id", 0)))
+		"action_batch":
+			for entry: Variant in data.get("results", []):
+				if entry is Dictionary and entry.get("type", "") == "merge":
+					acquired_ids.append(entry.get("result_id", 0))
+		"battle_attack":
+			acquired_ids.append_array(data.get("loot", []))
+
+	for entry: Variant in data.get("pending_rewards", []):
+		if entry is Dictionary:
+			acquired_ids.append(entry.get("id", 0))
+	var rewards: Variant = data.get("rewards", {})
+	if rewards is Dictionary:
+		for entry: Variant in rewards.get("items", []):
+			if entry is Dictionary:
+				acquired_ids.append(entry.get("id", 0))
+	GameState.register_new_item_ids(acquired_ids)
+	if data.has("crafted_item_ids"):
+		GameState.set_crafted_item_ids(data.get("crafted_item_ids", []))
 
 func _handle_network_error(tag: String) -> void:
 	_finish_tag(tag)

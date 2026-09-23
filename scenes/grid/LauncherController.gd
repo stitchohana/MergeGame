@@ -50,15 +50,23 @@ func try_spawn(grid_pos: Vector2i, launcher_uid: int, launcher_config: Dictionar
 		return false
 
 	var is_no_cost: bool = launcher_config.get("no_cost", false)
+	var stamina_multiplier: int = 1
+	var stamina_cost: int = 0
+	var reserved_cost: int = 0
 	if not is_no_cost:
-		var reserved_cost: int = _pending_paid_spawn_count(GameState.current_board_type)
+		reserved_cost = _pending_paid_spawn_cost(GameState.current_board_type)
 		if GameState.current_board_type == Constants.BoardType.BATTLE:
 			if CultivationService.current_qi - reserved_cost < 1:
 				spawn_failed.emit("insufficient_qi", {})
 				return false
-		elif GameState.stamina - reserved_cost < 1:
-			spawn_failed.emit("insufficient_stamina", {})
-			return false
+		else:
+			GameState.expire_stamina_multiplier_if_needed()
+			var safe_multiplier: int = ConfigDatabase.get_launcher_safe_stamina_multiplier(launcher_config)
+			stamina_multiplier = mini(GameState.stamina_multiplier_selected, safe_multiplier)
+			if stamina_multiplier < GameState.stamina_multiplier_selected:
+				EventBus.show_toast.emit(
+					"该设施最高支持 ×%d，已按 ×%d 消耗" % [safe_multiplier, stamina_multiplier]
+				)
 
 	if charges <= 0 and _launcher_cd.has(launcher_uid):
 		spawn_failed.emit("no_charges", {})
@@ -73,9 +81,21 @@ func try_spawn(grid_pos: Vector2i, launcher_uid: int, launcher_config: Dictionar
 		return false
 
 	var sequence: int = GameState.spawn_sequence + _pending_spawns.size()
-	var predicted_id: int = _predict_spawn_id(
+	var base_predicted_id: int = _predict_spawn_id(
 		launcher_config, effective_charges, GameState.spawn_seed, sequence, launcher_uid
 	)
+	var spawn_plan: Dictionary = _get_order_priority_spawn(
+		base_predicted_id, stamina_multiplier
+	)
+	var predicted_item: Dictionary = spawn_plan.get("item", {}) as Dictionary
+	var applied_multiplier: int = int(spawn_plan.get("multiplier", stamina_multiplier))
+	var base_stamina_cost: int = int(ConfigDatabase.get_game_config("stamina.spawn_cost", 1))
+	if not is_no_cost and GameState.current_board_type != Constants.BoardType.BATTLE:
+		stamina_cost = maxi(0, base_stamina_cost * applied_multiplier)
+		if GameState.stamina - reserved_cost < stamina_cost:
+			spawn_failed.emit("insufficient_stamina", {})
+			return false
+	var predicted_id: int = int(predicted_item.get("id", 0))
 	var request_id: String = _create_request_id(launcher_uid)
 	var prediction: Dictionary = {
 		"request_id": request_id,
@@ -87,14 +107,185 @@ func try_spawn(grid_pos: Vector2i, launcher_uid: int, launcher_config: Dictionar
 		"sequence": sequence,
 		"board_type": GameState.current_board_type,
 		"is_no_cost": is_no_cost,
+		"stamina_multiplier": stamina_multiplier,
+		"applied_stamina_multiplier": applied_multiplier,
+		"stamina_cost": stamina_cost,
+		"stamina_refund": maxi(
+			0, base_stamina_cost * (stamina_multiplier - applied_multiplier)
+		),
+		"order_priority": bool(spawn_plan.get("order_priority", false)),
 	}
 	_next_temp_uid -= 1
 	_pending_spawns.push_back(prediction)
 	spawn_started.emit(prediction)
 	CloudService.submit_spawn(
-		grid_pos.x, grid_pos.y, request_id, sequence, predicted_id, target_pos
+		grid_pos.x, grid_pos.y, request_id, sequence, predicted_id, target_pos,
+		stamina_multiplier
 	)
 	return true
+
+
+func _get_order_priority_spawn(
+	base_item_id: int,
+	requested_multiplier: int
+) -> Dictionary:
+	var boosted: Dictionary = ConfigDatabase.get_upgraded_item_for_multiplier(
+		base_item_id, requested_multiplier
+	)
+	var base: Dictionary = ConfigDatabase.get_item_data(base_item_id)
+	if base.is_empty() or boosted.is_empty() or requested_multiplier <= 1:
+		return {
+			"item": boosted,
+			"multiplier": requested_multiplier,
+			"order_priority": false,
+		}
+	var base_level: int = int(base.get("level", 0))
+	var boosted_level: int = int(boosted.get("level", 0))
+	var base_type: int = int(base.get("type", 0))
+	var base_group: int = int(base.get("group_id", 0))
+	var best_item: Dictionary = {}
+	var best_multiplier: int = requested_multiplier
+	for item_id_variant: Variant in _get_outstanding_order_item_counts().keys():
+		var item_id: int = int(item_id_variant)
+		var candidate: Dictionary = ConfigDatabase.get_item_data(item_id)
+		if candidate.is_empty():
+			continue
+		var candidate_level: int = int(candidate.get("level", 0))
+		if (
+			int(candidate.get("type", 0)) != base_type
+			or int(candidate.get("group_id", 0)) != base_group
+			or candidate_level >= boosted_level
+		):
+			continue
+		var reachable: Dictionary = ConfigDatabase.get_item_by_level(
+			base_type, candidate_level, base_group
+		)
+		if int(reachable.get("id", 0)) != item_id:
+			continue
+		var candidate_multiplier: int = (
+			1 if candidate_level <= base_level
+			else 1 << (candidate_level - base_level)
+		)
+		if (
+			best_item.is_empty()
+			or candidate_level < int(best_item.get("level", 0))
+			or (
+				candidate_level == int(best_item.get("level", 0))
+				and item_id < int(best_item.get("id", 0))
+			)
+		):
+			best_item = candidate
+			best_multiplier = candidate_multiplier
+	if best_item.is_empty():
+		return {
+			"item": boosted,
+			"multiplier": requested_multiplier,
+			"order_priority": false,
+		}
+	return {
+		"item": best_item,
+		"multiplier": best_multiplier,
+		"order_priority": true,
+	}
+
+
+func _get_outstanding_order_item_counts() -> Dictionary:
+	var order_targets: Dictionary = {}
+	for order_variant: Variant in GameState.meridian_acupoints:
+		if not order_variant is Dictionary:
+			continue
+		var order: Dictionary = order_variant as Dictionary
+		if bool(order.get("completed", false)):
+			continue
+		var configured: Array = order.get("item_ids", []) as Array
+		if configured.is_empty():
+			configured = order.get("items", []) as Array
+		for entry: Variant in configured:
+			var item_id: int = int((entry as Dictionary).get("item_id", 0)) if entry is Dictionary else int(entry)
+			if item_id > 0:
+				order_targets[item_id] = int(order_targets.get(item_id, 0)) + 1
+	var available: Dictionary = {}
+	for grid_entry: Dictionary in GridManager.get_all_items():
+		var item: Dictionary = grid_entry.get("data", {}) as Dictionary
+		var item_id: int = int(item.get("id", 0))
+		if int(item.get("type", 0)) != Constants.ItemType.CRAFTING:
+			if not bool(item.get("immovable", false)):
+				_add_available_order_item(available, item_id)
+			continue
+		for stored_variant: Variant in item.get("_craft_stored", []):
+			if stored_variant is Dictionary:
+				_add_available_order_item(
+					available, int((stored_variant as Dictionary).get("id", 0))
+				)
+		var craft_state: int = int(item.get("_craft_state", CraftingService.TableState.IDLE))
+		if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
+			var result_id: int = int(item.get("_craft_result_id", 0))
+			if result_id <= 0:
+				var recipe: Dictionary = item.get("_craft_recipe", {}) as Dictionary
+				result_id = int(recipe.get("result", 0))
+			_add_available_order_item(available, result_id)
+	for pouch_variant: Variant in StoragePouch.items:
+		var pouch_id: int = (
+			int((pouch_variant as Dictionary).get("id", 0))
+			if pouch_variant is Dictionary
+			else int(pouch_variant)
+		)
+		_add_available_order_item(available, pouch_id)
+
+	var outstanding: Dictionary = {}
+	for target_id_variant: Variant in order_targets.keys():
+		var target_id: int = int(target_id_variant)
+		_add_recipe_material_requirements(
+			target_id,
+			int(order_targets[target_id]),
+			outstanding,
+			available,
+			{}
+		)
+	return outstanding
+
+
+func _add_available_order_item(available: Dictionary, item_id: int) -> void:
+	if item_id <= 0:
+		return
+	available[item_id] = int(available.get(item_id, 0)) + 1
+
+
+func _consume_available_order_items(available: Dictionary, item_id: int, count: int) -> int:
+	var consumed: int = mini(count, int(available.get(item_id, 0)))
+	if consumed <= 0:
+		return count
+	var remaining_available: int = int(available.get(item_id, 0)) - consumed
+	if remaining_available > 0:
+		available[item_id] = remaining_available
+	else:
+		available.erase(item_id)
+	return count - consumed
+
+
+func _add_recipe_material_requirements(
+	item_id: int,
+	count: int,
+	requirements: Dictionary,
+	available: Dictionary,
+	visiting: Dictionary
+) -> void:
+	if item_id <= 0 or count <= 0:
+		return
+	var missing_count: int = _consume_available_order_items(available, item_id, count)
+	if missing_count <= 0:
+		return
+	var recipes: Array = ConfigDatabase.get_recipes_for_result(item_id)
+	if recipes.is_empty() or visiting.has(item_id):
+		requirements[item_id] = int(requirements.get(item_id, 0)) + missing_count
+		return
+	visiting[item_id] = true
+	var recipe: Dictionary = recipes[0] as Dictionary
+	for ingredient_variant: Variant in recipe.get("ingredients", []):
+		_add_recipe_material_requirements(
+			int(ingredient_variant), missing_count, requirements, available, visiting
+		)
+	visiting.erase(item_id)
 
 func _predict_spawn_id(launcher_config: Dictionary, effective_charges: int,
 		seed: int, sequence: int, launcher_uid: int) -> int:
@@ -161,11 +352,11 @@ func _on_spawn_confirmed(result: Dictionary) -> void:
 			launcher_item.erase("_recharge_remaining")
 			charge_visual_update.emit(launcher_uid, "%d/%d" % [charges_val, max_c], Color(1, 1, 1, 0.7))
 
-		spawn_finished.emit(result, prediction)
 		if charges_val <= 0 and cd_time <= 0:
 			var launcher_pos: Vector2i = GridManager.find_pos_by_uid(launcher_uid)
+			spawn_finished.emit(result, prediction)
 			depleted_launcher_removed.emit(launcher_uid, launcher_pos)
-		return
+			return
 
 	spawn_finished.emit(result, prediction)
 
@@ -194,12 +385,15 @@ func _pending_count_for_launcher(launcher_uid: int) -> int:
 			count += 1
 	return count
 
-func _pending_paid_spawn_count(board_type: int) -> int:
-	var count: int = 0
+func _pending_paid_spawn_cost(board_type: int) -> int:
+	var cost: int = 0
 	for pending: Dictionary in _pending_spawns:
 		if pending.get("board_type", -1) == board_type and not pending.get("is_no_cost", false):
-			count += 1
-	return count
+			if board_type == Constants.BoardType.BATTLE:
+				cost += 1
+			else:
+				cost += int(pending.get("stamina_cost", 1))
+	return cost
 
 func _on_cd_tick() -> void:
 	if _launcher_cd.is_empty():

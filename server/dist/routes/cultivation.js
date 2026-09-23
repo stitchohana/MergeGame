@@ -20,6 +20,14 @@ function op(handler) {
 function createCultivationRouter(storage, engine, jwtSecret) {
     const router = new http_1.Router();
     router.use((0, auth_1.createAuthRequired)(jwtSecret));
+    function staminaMultiplierResponse(state) {
+        const multiplier = engine.getStaminaMultiplierState(state);
+        return {
+            stamina_multiplier_max: multiplier.maxMultiplier,
+            stamina_multiplier_expires_at: multiplier.expiresAt,
+            stamina_multiplier_remaining_seconds: multiplier.remainingSeconds,
+        };
+    }
     async function getOrCreateState(userId) {
         let state = await storage.loadState(userId);
         if (!state) {
@@ -29,8 +37,9 @@ function createCultivationRouter(storage, engine, jwtSecret) {
         }
         else {
             engine.tickStamina(state);
+            const multiplierExpired = engine.tickStaminaMultiplier(state);
             engine.tickLauncherRecharge(state);
-            if (engine.tickCraftingState(state)) {
+            if (engine.tickCraftingState(state) || multiplierExpired) {
                 await storage.saveState(userId, state);
             }
         }
@@ -71,7 +80,13 @@ function createCultivationRouter(storage, engine, jwtSecret) {
             return;
         }
         await storage.saveState(userId, state);
-        res.json({ ok: true, stamina: result.stamina, max_stamina: result.max_stamina, quest_progress: state.quest_progress });
+        res.json({
+            ok: true,
+            stamina: result.stamina,
+            max_stamina: result.max_stamina,
+            quest_progress: state.quest_progress,
+            ...staminaMultiplierResponse(state),
+        });
     }));
     // POST /api/cultivation/consume-spirit-stone
     router.post("/consume-spirit-stone", op(async (req, res, userId) => {
@@ -116,6 +131,7 @@ function createCultivationRouter(storage, engine, jwtSecret) {
             rewards: result.rewards,
             spirit_stones: state.spirit_stones,
             stamina: state.stamina,
+            ...staminaMultiplierResponse(state),
             pending_rewards: state.pending_rewards,
             quest_progress: state.quest_progress,
             meridian_acupoints: state.meridian_acupoints || [],

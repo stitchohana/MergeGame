@@ -112,6 +112,8 @@ export interface GameState {
     stamina: number;
     max_stamina: number;
     last_stamina_tick: number;
+    stamina_multiplier_max?: number;
+    stamina_multiplier_expires_at?: number;
     spirit_stones: number;
     version: number;
     board_type?: number;
@@ -133,6 +135,8 @@ export interface GameState {
     meridian_threshold_idx?: number;
     /** Number of fixed orders already revealed in the active threshold's waves. */
     meridian_fixed_order_cursor?: number;
+    /** Fixed onboarding wave is complete and the next wave must wait for circulation. */
+    meridian_fixed_wave_pending?: boolean;
     quest_progress?: Record<number, QuestProgress>;
     quests_initialized?: boolean;
     quest_last_reset?: number;

@@ -136,6 +136,9 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
         const state = await storage.loadState(userId);
         if (!state) { res.status(404).json({ error: "user_not_found" }); return; }
 
+        engine.initializeItemDiscoveries(state);
+        const knownItemIds = new Set(state.crafted_item_ids);
+
         engine.tickStamina(state);
         engine.tickLauncherRecharge(state);
 
@@ -286,9 +289,11 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
             return;
         }
 
+        engine.initializeItemDiscoveries(state);
+        const newlyDiscoveredItemIds = state.crafted_item_ids.filter(id => !knownItemIds.has(id));
         await storage.saveState(userId, state);
         console.log(`[gm] ${userId}: ${cmd} — ${msg}`);
-        res.json({ ok: true, msg, ...gmResult });
+        res.json({ ok: true, msg, newly_discovered_item_ids: newlyDiscoveredItemIds, ...gmResult });
       });
     } catch (e: any) {
       console.error("[gm] error:", e);

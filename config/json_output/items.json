@@ -360,7 +360,7 @@
       "group_id": 3,
       "describe": "赤髓铜生于浅山赤岩，断面可见赤色髓线。",
       "type": 0,
-      "value": 1,
+      "value": 2,
       "sell_price": 5
     },
     {
@@ -371,7 +371,7 @@
       "group_id": 3,
       "describe": "传闻北岭黑脉最早孕出乌纹铁，铁纹层层交叠。",
       "type": 0,
-      "value": 3,
+      "value": 5,
       "sell_price": 15
     },
     {
@@ -382,7 +382,7 @@
       "group_id": 3,
       "describe": "月照旧矿偶有月蚀银现世，银辉随月色明灭。",
       "type": 0,
-      "value": 8,
+      "value": 12,
       "sell_price": 35
     },
     {
@@ -393,7 +393,7 @@
       "group_id": 3,
       "describe": "每逢霜风掠谷，太白金母金质沉静而无杂色。",
       "type": 0,
-      "value": 20,
+      "value": 29,
       "sell_price": 80
     },
     {
@@ -404,7 +404,7 @@
       "group_id": 3,
       "describe": "玄冰陨铁采自冰原陨坑，矿皮终年结霜。",
       "type": 0,
-      "value": 48,
+      "value": 70,
       "sell_price": 180
     },
     {
@@ -415,7 +415,7 @@
       "group_id": 3,
       "describe": "古籍称地火炎晶出于地火裂谷，晶心仿佛藏着火苗。",
       "type": 0,
-      "value": 116,
+      "value": 168,
       "sell_price": 400
     },
     {
@@ -426,7 +426,7 @@
       "group_id": 3,
       "describe": "青罡玉生于苍梧玉山，玉中生有青色罡纹。",
       "type": 0,
-      "value": 279,
+      "value": 404,
       "sell_price": 900
     },
     {
@@ -437,7 +437,7 @@
       "group_id": 3,
       "describe": "传闻雷暴荒泽最早孕出雷极砂，砂粒彼此牵引作响。",
       "type": 0,
-      "value": 670,
+      "value": 970,
       "sell_price": 2000
     },
     {
@@ -448,7 +448,7 @@
       "group_id": 3,
       "describe": "坤元地脉偶有坤元髓晶现世，矿髓厚重如山根。",
       "type": 0,
-      "value": 1608,
+      "value": 2328,
       "sell_price": 4500
     },
     {
@@ -459,7 +459,7 @@
       "group_id": 3,
       "describe": "每逢月上中天，星陨铁核内部嵌着银白星屑。",
       "type": 0,
-      "value": 3860,
+      "value": 5588,
       "sell_price": 10000
     },
     {
@@ -470,7 +470,7 @@
       "group_id": 3,
       "describe": "太虚碧玉采自紫烟洞府，玉心终年蒸出淡紫云气。",
       "type": 0,
-      "value": 9264,
+      "value": 13412,
       "sell_price": 22000
     },
     {
@@ -481,7 +481,7 @@
       "group_id": 3,
       "describe": "古籍称九幽沉铁出于九曲地宫，铁纹层层盘成九曲。",
       "type": 0,
-      "value": 22234,
+      "value": 32189,
       "sell_price": 50000
     },
     {
@@ -492,7 +492,7 @@
       "group_id": 3,
       "describe": "日精真金生于涅火天隙，金面有日火般的光纹流动。",
       "type": 0,
-      "value": 53362,
+      "value": 77254,
       "sell_price": 110000
     },
     {
@@ -503,7 +503,7 @@
       "group_id": 3,
       "describe": "传闻龙眠古渊最早孕出月魄寒玉，寒玉深处封着一轮月影。",
       "type": 0,
-      "value": 128069,
+      "value": 185410,
       "sell_price": 250000
     },
     {
@@ -514,7 +514,7 @@
       "group_id": 3,
       "describe": "凤栖神木偶有天河神砂现世，砂砾聚拢时显出天河轮廓。",
       "type": 0,
-      "value": 307366,
+      "value": 444984,
       "sell_price": 550000
     },
     {
@@ -525,7 +525,7 @@
       "group_id": 3,
       "describe": "每逢古木生风，鸿蒙母晶内部的清浊云气仍未分明。",
       "type": 0,
-      "value": 737679,
+      "value": 1067962,
       "sell_price": 1200000
     },
     {
@@ -2118,7 +2118,7 @@
       "name": "青灵枝",
       "icon": "res://assets/items/icons_simple/1101.png",
       "group_id": 36,
-      "describe": "青灵枝是灵木一脉的1级材料，可用于对应层次的修真制作。",
+      "describe": "青灵枝是灵木一脉的1级材料。",
       "type": 0,
       "value": 1,
       "sell_price": 3
@@ -2129,7 +2129,7 @@
       "name": "云纹木",
       "icon": "res://assets/items/icons_simple/1102.png",
       "group_id": 36,
-      "describe": "云纹木是灵木一脉的2级材料，可用于对应层次的修真制作。",
+      "describe": "云纹木是灵木一脉的2级材料。",
       "type": 0,
       "value": 3,
       "sell_price": 10
@@ -2140,7 +2140,7 @@
       "name": "赤霞杉",
       "icon": "res://assets/items/icons_simple/1103.png",
       "group_id": 36,
-      "describe": "赤霞杉是灵木一脉的3级材料，可用于对应层次的修真制作。",
+      "describe": "赤霞杉是灵木一脉的3级材料。",
       "type": 0,
       "value": 8,
       "sell_price": 25
@@ -2151,7 +2151,7 @@
       "name": "月桂灵木",
       "icon": "res://assets/items/icons_simple/1104.png",
       "group_id": 36,
-      "describe": "月桂灵木是灵木一脉的4级材料，可用于对应层次的修真制作。",
+      "describe": "月桂灵木是灵木一脉的4级材料。",
       "type": 0,
       "value": 20,
       "sell_price": 60
@@ -2162,7 +2162,7 @@
       "name": "雷击桃木",
       "icon": "res://assets/items/icons_simple/1105.png",
       "group_id": 36,
-      "describe": "雷击桃木是灵木一脉的5级材料，可用于对应层次的修真制作。",
+      "describe": "雷击桃木是灵木一脉的5级材料。",
       "type": 0,
       "value": 48,
       "sell_price": 140
@@ -2173,7 +2173,7 @@
       "name": "玄冰梧桐",
       "icon": "res://assets/items/icons_simple/1106.png",
       "group_id": 36,
-      "describe": "玄冰梧桐是灵木一脉的6级材料，可用于对应层次的修真制作。",
+      "describe": "玄冰梧桐是灵木一脉的6级材料。",
       "type": 0,
       "value": 116,
       "sell_price": 300
@@ -2184,7 +2184,7 @@
       "name": "地脉沉香",
       "icon": "res://assets/items/icons_simple/1107.png",
       "group_id": 36,
-      "describe": "地脉沉香是灵木一脉的7级材料，可用于对应层次的修真制作。",
+      "describe": "地脉沉香是灵木一脉的7级材料。",
       "type": 0,
       "value": 279,
       "sell_price": 700
@@ -2195,7 +2195,7 @@
       "name": "星辉紫檀",
       "icon": "res://assets/items/icons_simple/1108.png",
       "group_id": 36,
-      "describe": "星辉紫檀是灵木一脉的8级材料，可用于对应层次的修真制作。",
+      "describe": "星辉紫檀是灵木一脉的8级材料。",
       "type": 0,
       "value": 670,
       "sell_price": 1500
@@ -2206,7 +2206,7 @@
       "name": "龙血古木",
       "icon": "res://assets/items/icons_simple/1109.png",
       "group_id": 36,
-      "describe": "龙血古木是灵木一脉的9级材料，可用于对应层次的修真制作。",
+      "describe": "龙血古木是灵木一脉的9级材料。",
       "type": 0,
       "value": 1608,
       "sell_price": 3500
@@ -2217,7 +2217,7 @@
       "name": "凤栖神木",
       "icon": "res://assets/items/icons_simple/1110.png",
       "group_id": 36,
-      "describe": "凤栖神木是灵木一脉的10级材料，可用于对应层次的修真制作。",
+      "describe": "凤栖神木是灵木一脉的10级材料。",
       "type": 0,
       "value": 3860,
       "sell_price": 8000
@@ -2228,7 +2228,7 @@
       "name": "九幽冥木",
       "icon": "res://assets/items/icons_simple/1111.png",
       "group_id": 36,
-      "describe": "九幽冥木是灵木一脉的11级材料，可用于对应层次的修真制作。",
+      "describe": "九幽冥木是灵木一脉的11级材料。",
       "type": 0,
       "value": 9264,
       "sell_price": 18000
@@ -2239,7 +2239,7 @@
       "name": "扶桑阳木",
       "icon": "res://assets/items/icons_simple/1112.png",
       "group_id": 36,
-      "describe": "扶桑阳木是灵木一脉的12级材料，可用于对应层次的修真制作。",
+      "describe": "扶桑阳木是灵木一脉的12级材料。",
       "type": 0,
       "value": 22234,
       "sell_price": 40000
@@ -2250,7 +2250,7 @@
       "name": "建木灵芯",
       "icon": "res://assets/items/icons_simple/1113.png",
       "group_id": 36,
-      "describe": "建木灵芯是灵木一脉的13级材料，可用于对应层次的修真制作。",
+      "describe": "建木灵芯是灵木一脉的13级材料。",
       "type": 0,
       "value": 53362,
       "sell_price": 90000
@@ -2261,7 +2261,7 @@
       "name": "菩提道木",
       "icon": "res://assets/items/icons_simple/1114.png",
       "group_id": 36,
-      "describe": "菩提道木是灵木一脉的14级材料，可用于对应层次的修真制作。",
+      "describe": "菩提道木是灵木一脉的14级材料。",
       "type": 0,
       "value": 128069,
       "sell_price": 200000
@@ -2272,7 +2272,7 @@
       "name": "鸿蒙祖木",
       "icon": "res://assets/items/icons_simple/1115.png",
       "group_id": 36,
-      "describe": "鸿蒙祖木是灵木一脉的15级材料，可用于对应层次的修真制作。",
+      "describe": "鸿蒙祖木是灵木一脉的15级材料。",
       "type": 0,
       "value": 307366,
       "sell_price": 450000
@@ -2283,7 +2283,7 @@
       "name": "世界树心",
       "icon": "res://assets/items/icons_simple/1116.png",
       "group_id": 36,
-      "describe": "世界树心是灵木一脉的16级材料，可用于对应层次的修真制作。",
+      "describe": "世界树心是灵木一脉的16级材料。",
       "type": 0,
       "value": 737679,
       "sell_price": 1000000
@@ -2294,7 +2294,7 @@
       "name": "松露灵脂",
       "icon": "res://assets/items/icons_simple/1201.png",
       "group_id": 37,
-      "describe": "松露灵脂是灵脂一脉的1级材料，可用于对应层次的修真制作。",
+      "describe": "松露灵脂是灵脂一脉的1级材料。",
       "type": 0,
       "value": 3,
       "sell_price": 3
@@ -2305,7 +2305,7 @@
       "name": "青檀脂",
       "icon": "res://assets/items/icons_simple/1202.png",
       "group_id": 37,
-      "describe": "青檀脂是灵脂一脉的2级材料，可用于对应层次的修真制作。",
+      "describe": "青檀脂是灵脂一脉的2级材料。",
       "type": 0,
       "value": 8,
       "sell_price": 10
@@ -2316,7 +2316,7 @@
       "name": "赤枫脂",
       "icon": "res://assets/items/icons_simple/1203.png",
       "group_id": 37,
-      "describe": "赤枫脂是灵脂一脉的3级材料，可用于对应层次的修真制作。",
+      "describe": "赤枫脂是灵脂一脉的3级材料。",
       "type": 0,
       "value": 20,
       "sell_price": 25
@@ -2327,7 +2327,7 @@
       "name": "月桂凝脂",
       "icon": "res://assets/items/icons_simple/1204.png",
       "group_id": 37,
-      "describe": "月桂凝脂是灵脂一脉的4级材料，可用于对应层次的修真制作。",
+      "describe": "月桂凝脂是灵脂一脉的4级材料。",
       "type": 0,
       "value": 48,
       "sell_price": 60
@@ -2338,7 +2338,7 @@
       "name": "桃木雷脂",
       "icon": "res://assets/items/icons_simple/1205.png",
       "group_id": 37,
-      "describe": "桃木雷脂是灵脂一脉的5级材料，可用于对应层次的修真制作。",
+      "describe": "桃木雷脂是灵脂一脉的5级材料。",
       "type": 0,
       "value": 116,
       "sell_price": 140
@@ -2349,7 +2349,7 @@
       "name": "冰梧寒脂",
       "icon": "res://assets/items/icons_simple/1206.png",
       "group_id": 37,
-      "describe": "冰梧寒脂是灵脂一脉的6级材料，可用于对应层次的修真制作。",
+      "describe": "冰梧寒脂是灵脂一脉的6级材料。",
       "type": 0,
       "value": 279,
       "sell_price": 300
@@ -2360,7 +2360,7 @@
       "name": "沉香地髓",
       "icon": "res://assets/items/icons_simple/1207.png",
       "group_id": 37,
-      "describe": "沉香地髓是灵脂一脉的7级材料，可用于对应层次的修真制作。",
+      "describe": "沉香地髓是灵脂一脉的7级材料。",
       "type": 0,
       "value": 670,
       "sell_price": 700
@@ -2371,7 +2371,7 @@
       "name": "紫檀星脂",
       "icon": "res://assets/items/icons_simple/1208.png",
       "group_id": 37,
-      "describe": "紫檀星脂是灵脂一脉的8级材料，可用于对应层次的修真制作。",
+      "describe": "紫檀星脂是灵脂一脉的8级材料。",
       "type": 0,
       "value": 1608,
       "sell_price": 1500
@@ -2382,7 +2382,7 @@
       "name": "龙血木脂",
       "icon": "res://assets/items/icons_simple/1209.png",
       "group_id": 37,
-      "describe": "龙血木脂是灵脂一脉的9级材料，可用于对应层次的修真制作。",
+      "describe": "龙血木脂是灵脂一脉的9级材料。",
       "type": 0,
       "value": 3860,
       "sell_price": 3500
@@ -2393,7 +2393,7 @@
       "name": "凤栖香脂",
       "icon": "res://assets/items/icons_simple/1210.png",
       "group_id": 37,
-      "describe": "凤栖香脂是灵脂一脉的10级材料，可用于对应层次的修真制作。",
+      "describe": "凤栖香脂是灵脂一脉的10级材料。",
       "type": 0,
       "value": 9264,
       "sell_price": 8000
@@ -2404,7 +2404,7 @@
       "name": "九幽玄脂",
       "icon": "res://assets/items/icons_simple/1211.png",
       "group_id": 37,
-      "describe": "九幽玄脂是灵脂一脉的11级材料，可用于对应层次的修真制作。",
+      "describe": "九幽玄脂是灵脂一脉的11级材料。",
       "type": 0,
       "value": 22234,
       "sell_price": 18000
@@ -2415,7 +2415,7 @@
       "name": "扶桑日脂",
       "icon": "res://assets/items/icons_simple/1212.png",
       "group_id": 37,
-      "describe": "扶桑日脂是灵脂一脉的12级材料，可用于对应层次的修真制作。",
+      "describe": "扶桑日脂是灵脂一脉的12级材料。",
       "type": 0,
       "value": 53362,
       "sell_price": 40000
@@ -2426,7 +2426,7 @@
       "name": "建木玉脂",
       "icon": "res://assets/items/icons_simple/1213.png",
       "group_id": 37,
-      "describe": "建木玉脂是灵脂一脉的13级材料，可用于对应层次的修真制作。",
+      "describe": "建木玉脂是灵脂一脉的13级材料。",
       "type": 0,
       "value": 128069,
       "sell_price": 90000
@@ -2437,7 +2437,7 @@
       "name": "菩提心脂",
       "icon": "res://assets/items/icons_simple/1214.png",
       "group_id": 37,
-      "describe": "菩提心脂是灵脂一脉的14级材料，可用于对应层次的修真制作。",
+      "describe": "菩提心脂是灵脂一脉的14级材料。",
       "type": 0,
       "value": 307366,
       "sell_price": 200000
@@ -2448,7 +2448,7 @@
       "name": "鸿蒙源脂",
       "icon": "res://assets/items/icons_simple/1215.png",
       "group_id": 37,
-      "describe": "鸿蒙源脂是灵脂一脉的15级材料，可用于对应层次的修真制作。",
+      "describe": "鸿蒙源脂是灵脂一脉的15级材料。",
       "type": 0,
       "value": 737679,
       "sell_price": 450000
@@ -2459,7 +2459,7 @@
       "name": "太初神脂",
       "icon": "res://assets/items/icons_simple/1216.png",
       "group_id": 37,
-      "describe": "太初神脂是灵脂一脉的16级材料，可用于对应层次的修真制作。",
+      "describe": "太初神脂是灵脂一脉的16级材料。",
       "type": 0,
       "value": 1770430,
       "sell_price": 1000000
@@ -2470,7 +2470,7 @@
       "name": "青鳞灵鱼",
       "icon": "res://assets/items/icons_simple/1301.png",
       "group_id": 38,
-      "describe": "青鳞灵鱼是灵鱼一脉的1级材料，可用于对应层次的修真制作。",
+      "describe": "青鳞灵鱼是灵鱼一脉的1级材料。",
       "type": 0,
       "value": 1,
       "sell_price": 3
@@ -2481,7 +2481,7 @@
       "name": "银须鲫",
       "icon": "res://assets/items/icons_simple/1302.png",
       "group_id": 38,
-      "describe": "银须鲫是灵鱼一脉的2级材料，可用于对应层次的修真制作。",
+      "describe": "银须鲫是灵鱼一脉的2级材料。",
       "type": 0,
       "value": 3,
       "sell_price": 10
@@ -2492,7 +2492,7 @@
       "name": "赤尾鲤",
       "icon": "res://assets/items/icons_simple/1303.png",
       "group_id": 38,
-      "describe": "赤尾鲤是灵鱼一脉的3级材料，可用于对应层次的修真制作。",
+      "describe": "赤尾鲤是灵鱼一脉的3级材料。",
       "type": 0,
       "value": 8,
       "sell_price": 25
@@ -2503,7 +2503,7 @@
       "name": "月纹鳜",
       "icon": "res://assets/items/icons_simple/1304.png",
       "group_id": 38,
-      "describe": "月纹鳜是灵鱼一脉的4级材料，可用于对应层次的修真制作。",
+      "describe": "月纹鳜是灵鱼一脉的4级材料。",
       "type": 0,
       "value": 20,
       "sell_price": 60
@@ -2514,7 +2514,7 @@
       "name": "雷鳍鲶",
       "icon": "res://assets/items/icons_simple/1305.png",
       "group_id": 38,
-      "describe": "雷鳍鲶是灵鱼一脉的5级材料，可用于对应层次的修真制作。",
+      "describe": "雷鳍鲶是灵鱼一脉的5级材料。",
       "type": 0,
       "value": 48,
       "sell_price": 140
@@ -2525,7 +2525,7 @@
       "name": "冰魄鲑",
       "icon": "res://assets/items/icons_simple/1306.png",
       "group_id": 38,
-      "describe": "冰魄鲑是灵鱼一脉的6级材料，可用于对应层次的修真制作。",
+      "describe": "冰魄鲑是灵鱼一脉的6级材料。",
       "type": 0,
       "value": 116,
       "sell_price": 300
@@ -2536,7 +2536,7 @@
       "name": "地脉鳅",
       "icon": "res://assets/items/icons_simple/1307.png",
       "group_id": 38,
-      "describe": "地脉鳅是灵鱼一脉的7级材料，可用于对应层次的修真制作。",
+      "describe": "地脉鳅是灵鱼一脉的7级材料。",
       "type": 0,
       "value": 279,
       "sell_price": 700
@@ -2547,7 +2547,7 @@
       "name": "星斑鲷",
       "icon": "res://assets/items/icons_simple/1308.png",
       "group_id": 38,
-      "describe": "星斑鲷是灵鱼一脉的8级材料，可用于对应层次的修真制作。",
+      "describe": "星斑鲷是灵鱼一脉的8级材料。",
       "type": 0,
       "value": 670,
       "sell_price": 1500
@@ -2558,7 +2558,7 @@
       "name": "龙须鲤",
       "icon": "res://assets/items/icons_simple/1309.png",
       "group_id": 38,
-      "describe": "龙须鲤是灵鱼一脉的9级材料，可用于对应层次的修真制作。",
+      "describe": "龙须鲤是灵鱼一脉的9级材料。",
       "type": 0,
       "value": 1608,
       "sell_price": 3500
@@ -2569,7 +2569,7 @@
       "name": "凤尾锦鲤",
       "icon": "res://assets/items/icons_simple/1310.png",
       "group_id": 38,
-      "describe": "凤尾锦鲤是灵鱼一脉的10级材料，可用于对应层次的修真制作。",
+      "describe": "凤尾锦鲤是灵鱼一脉的10级材料。",
       "type": 0,
       "value": 3860,
       "sell_price": 8000
@@ -2580,7 +2580,7 @@
       "name": "九幽玄鱼",
       "icon": "res://assets/items/icons_simple/1311.png",
       "group_id": 38,
-      "describe": "九幽玄鱼是灵鱼一脉的11级材料，可用于对应层次的修真制作。",
+      "describe": "九幽玄鱼是灵鱼一脉的11级材料。",
       "type": 0,
       "value": 9264,
       "sell_price": 18000
@@ -2591,7 +2591,7 @@
       "name": "扶桑金鲤",
       "icon": "res://assets/items/icons_simple/1312.png",
       "group_id": 38,
-      "describe": "扶桑金鲤是灵鱼一脉的12级材料，可用于对应层次的修真制作。",
+      "describe": "扶桑金鲤是灵鱼一脉的12级材料。",
       "type": 0,
       "value": 22234,
       "sell_price": 40000
@@ -2602,7 +2602,7 @@
       "name": "建木游龙",
       "icon": "res://assets/items/icons_simple/1313.png",
       "group_id": 38,
-      "describe": "建木游龙是灵鱼一脉的13级材料，可用于对应层次的修真制作。",
+      "describe": "建木游龙是灵鱼一脉的13级材料。",
       "type": 0,
       "value": 53362,
       "sell_price": 90000
@@ -2613,7 +2613,7 @@
       "name": "菩提慧鱼",
       "icon": "res://assets/items/icons_simple/1314.png",
       "group_id": 38,
-      "describe": "菩提慧鱼是灵鱼一脉的14级材料，可用于对应层次的修真制作。",
+      "describe": "菩提慧鱼是灵鱼一脉的14级材料。",
       "type": 0,
       "value": 128069,
       "sell_price": 200000
@@ -2624,7 +2624,7 @@
       "name": "鸿蒙鲲苗",
       "icon": "res://assets/items/icons_simple/1315.png",
       "group_id": 38,
-      "describe": "鸿蒙鲲苗是灵鱼一脉的15级材料，可用于对应层次的修真制作。",
+      "describe": "鸿蒙鲲苗是灵鱼一脉的15级材料。",
       "type": 0,
       "value": 307366,
       "sell_price": 450000
@@ -2635,7 +2635,7 @@
       "name": "太初神鲲",
       "icon": "res://assets/items/icons_simple/1316.png",
       "group_id": 38,
-      "describe": "太初神鲲是灵鱼一脉的16级材料，可用于对应层次的修真制作。",
+      "describe": "太初神鲲是灵鱼一脉的16级材料。",
       "type": 0,
       "value": 737679,
       "sell_price": 1000000
@@ -2646,7 +2646,7 @@
       "name": "清水灵珠",
       "icon": "res://assets/items/icons_simple/1401.png",
       "group_id": 39,
-      "describe": "清水灵珠是灵珠一脉的1级材料，可用于对应层次的修真制作。",
+      "describe": "清水灵珠是灵珠一脉的1级材料。",
       "type": 0,
       "value": 3,
       "sell_price": 3
@@ -2657,7 +2657,7 @@
       "name": "青波珠",
       "icon": "res://assets/items/icons_simple/1402.png",
       "group_id": 39,
-      "describe": "青波珠是灵珠一脉的2级材料，可用于对应层次的修真制作。",
+      "describe": "青波珠是灵珠一脉的2级材料。",
       "type": 0,
       "value": 8,
       "sell_price": 10
@@ -2668,7 +2668,7 @@
       "name": "赤潮珠",
       "icon": "res://assets/items/icons_simple/1403.png",
       "group_id": 39,
-      "describe": "赤潮珠是灵珠一脉的3级材料，可用于对应层次的修真制作。",
+      "describe": "赤潮珠是灵珠一脉的3级材料。",
       "type": 0,
       "value": 20,
       "sell_price": 25
@@ -2679,7 +2679,7 @@
       "name": "月华珠",
       "icon": "res://assets/items/icons_simple/1404.png",
       "group_id": 39,
-      "describe": "月华珠是灵珠一脉的4级材料，可用于对应层次的修真制作。",
+      "describe": "月华珠是灵珠一脉的4级材料。",
       "type": 0,
       "value": 48,
       "sell_price": 60
@@ -2690,7 +2690,7 @@
       "name": "雷鸣珠",
       "icon": "res://assets/items/icons_simple/1405.png",
       "group_id": 39,
-      "describe": "雷鸣珠是灵珠一脉的5级材料，可用于对应层次的修真制作。",
+      "describe": "雷鸣珠是灵珠一脉的5级材料。",
       "type": 0,
       "value": 116,
       "sell_price": 140
@@ -2701,7 +2701,7 @@
       "name": "玄冰珠",
       "icon": "res://assets/items/icons_simple/1406.png",
       "group_id": 39,
-      "describe": "玄冰珠是灵珠一脉的6级材料，可用于对应层次的修真制作。",
+      "describe": "玄冰珠是灵珠一脉的6级材料。",
       "type": 0,
       "value": 279,
       "sell_price": 300
@@ -2712,7 +2712,7 @@
       "name": "地泉珠",
       "icon": "res://assets/items/icons_simple/1407.png",
       "group_id": 39,
-      "describe": "地泉珠是灵珠一脉的7级材料，可用于对应层次的修真制作。",
+      "describe": "地泉珠是灵珠一脉的7级材料。",
       "type": 0,
       "value": 670,
       "sell_price": 700
@@ -2723,7 +2723,7 @@
       "name": "星澜珠",
       "icon": "res://assets/items/icons_simple/1408.png",
       "group_id": 39,
-      "describe": "星澜珠是灵珠一脉的8级材料，可用于对应层次的修真制作。",
+      "describe": "星澜珠是灵珠一脉的8级材料。",
       "type": 0,
       "value": 1608,
       "sell_price": 1500
@@ -2734,7 +2734,7 @@
       "name": "龙涎珠",
       "icon": "res://assets/items/icons_simple/1409.png",
       "group_id": 39,
-      "describe": "龙涎珠是灵珠一脉的9级材料，可用于对应层次的修真制作。",
+      "describe": "龙涎珠是灵珠一脉的9级材料。",
       "type": 0,
       "value": 3860,
       "sell_price": 3500
@@ -2745,7 +2745,7 @@
       "name": "凤泪珠",
       "icon": "res://assets/items/icons_simple/1410.png",
       "group_id": 39,
-      "describe": "凤泪珠是灵珠一脉的10级材料，可用于对应层次的修真制作。",
+      "describe": "凤泪珠是灵珠一脉的10级材料。",
       "type": 0,
       "value": 9264,
       "sell_price": 8000
@@ -2756,7 +2756,7 @@
       "name": "九幽玄珠",
       "icon": "res://assets/items/icons_simple/1411.png",
       "group_id": 39,
-      "describe": "九幽玄珠是灵珠一脉的11级材料，可用于对应层次的修真制作。",
+      "describe": "九幽玄珠是灵珠一脉的11级材料。",
       "type": 0,
       "value": 22234,
       "sell_price": 18000
@@ -2767,7 +2767,7 @@
       "name": "扶桑日珠",
       "icon": "res://assets/items/icons_simple/1412.png",
       "group_id": 39,
-      "describe": "扶桑日珠是灵珠一脉的12级材料，可用于对应层次的修真制作。",
+      "describe": "扶桑日珠是灵珠一脉的12级材料。",
       "type": 0,
       "value": 53362,
       "sell_price": 40000
@@ -2778,7 +2778,7 @@
       "name": "建木碧珠",
       "icon": "res://assets/items/icons_simple/1413.png",
       "group_id": 39,
-      "describe": "建木碧珠是灵珠一脉的13级材料，可用于对应层次的修真制作。",
+      "describe": "建木碧珠是灵珠一脉的13级材料。",
       "type": 0,
       "value": 128069,
       "sell_price": 90000
@@ -2789,7 +2789,7 @@
       "name": "菩提心珠",
       "icon": "res://assets/items/icons_simple/1414.png",
       "group_id": 39,
-      "describe": "菩提心珠是灵珠一脉的14级材料，可用于对应层次的修真制作。",
+      "describe": "菩提心珠是灵珠一脉的14级材料。",
       "type": 0,
       "value": 307366,
       "sell_price": 200000
@@ -2800,7 +2800,7 @@
       "name": "鸿蒙源珠",
       "icon": "res://assets/items/icons_simple/1415.png",
       "group_id": 39,
-      "describe": "鸿蒙源珠是灵珠一脉的15级材料，可用于对应层次的修真制作。",
+      "describe": "鸿蒙源珠是灵珠一脉的15级材料。",
       "type": 0,
       "value": 737679,
       "sell_price": 450000
@@ -2811,7 +2811,7 @@
       "name": "太初神珠",
       "icon": "res://assets/items/icons_simple/1416.png",
       "group_id": 39,
-      "describe": "太初神珠是灵珠一脉的16级材料，可用于对应层次的修真制作。",
+      "describe": "太初神珠是灵珠一脉的16级材料。",
       "type": 0,
       "value": 1770430,
       "sell_price": 1000000
@@ -2822,9 +2822,9 @@
       "name": "青白玉",
       "icon": "res://assets/items/icons_simple/1501.png",
       "group_id": 40,
-      "describe": "青白玉是玉石一脉的1级材料，可用于对应层次的修真制作。",
+      "describe": "青白玉是玉石一脉的1级材料。",
       "type": 0,
-      "value": 20,
+      "value": 4,
       "sell_price": 3
     },
     {
@@ -2833,9 +2833,9 @@
       "name": "云纹玉",
       "icon": "res://assets/items/icons_simple/1502.png",
       "group_id": 40,
-      "describe": "云纹玉是玉石一脉的2级材料，可用于对应层次的修真制作。",
+      "describe": "云纹玉是玉石一脉的2级材料。",
       "type": 0,
-      "value": 48,
+      "value": 10,
       "sell_price": 10
     },
     {
@@ -2844,9 +2844,9 @@
       "name": "赤霞玉",
       "icon": "res://assets/items/icons_simple/1503.png",
       "group_id": 40,
-      "describe": "赤霞玉是玉石一脉的3级材料，可用于对应层次的修真制作。",
+      "describe": "赤霞玉是玉石一脉的3级材料。",
       "type": 0,
-      "value": 116,
+      "value": 24,
       "sell_price": 25
     },
     {
@@ -2855,9 +2855,9 @@
       "name": "月华玉",
       "icon": "res://assets/items/icons_simple/1504.png",
       "group_id": 40,
-      "describe": "月华玉是玉石一脉的4级材料，可用于对应层次的修真制作。",
+      "describe": "月华玉是玉石一脉的4级材料。",
       "type": 0,
-      "value": 279,
+      "value": 58,
       "sell_price": 60
     },
     {
@@ -2866,9 +2866,9 @@
       "name": "雷纹玉",
       "icon": "res://assets/items/icons_simple/1505.png",
       "group_id": 40,
-      "describe": "雷纹玉是玉石一脉的5级材料，可用于对应层次的修真制作。",
+      "describe": "雷纹玉是玉石一脉的5级材料。",
       "type": 0,
-      "value": 670,
+      "value": 140,
       "sell_price": 140
     },
     {
@@ -2877,9 +2877,9 @@
       "name": "玄冰玉",
       "icon": "res://assets/items/icons_simple/1506.png",
       "group_id": 40,
-      "describe": "玄冰玉是玉石一脉的6级材料，可用于对应层次的修真制作。",
+      "describe": "玄冰玉是玉石一脉的6级材料。",
       "type": 0,
-      "value": 1608,
+      "value": 336,
       "sell_price": 300
     },
     {
@@ -2888,9 +2888,9 @@
       "name": "地髓玉",
       "icon": "res://assets/items/icons_simple/1507.png",
       "group_id": 40,
-      "describe": "地髓玉是玉石一脉的7级材料，可用于对应层次的修真制作。",
+      "describe": "地髓玉是玉石一脉的7级材料。",
       "type": 0,
-      "value": 3860,
+      "value": 807,
       "sell_price": 700
     },
     {
@@ -2899,9 +2899,9 @@
       "name": "星辉玉",
       "icon": "res://assets/items/icons_simple/1508.png",
       "group_id": 40,
-      "describe": "星辉玉是玉石一脉的8级材料，可用于对应层次的修真制作。",
+      "describe": "星辉玉是玉石一脉的8级材料。",
       "type": 0,
-      "value": 9264,
+      "value": 1937,
       "sell_price": 1500
     },
     {
@@ -2910,9 +2910,9 @@
       "name": "龙血玉",
       "icon": "res://assets/items/icons_simple/1509.png",
       "group_id": 40,
-      "describe": "龙血玉是玉石一脉的9级材料，可用于对应层次的修真制作。",
+      "describe": "龙血玉是玉石一脉的9级材料。",
       "type": 0,
-      "value": 22234,
+      "value": 4649,
       "sell_price": 3500
     },
     {
@@ -2921,9 +2921,9 @@
       "name": "凤栖玉",
       "icon": "res://assets/items/icons_simple/1510.png",
       "group_id": 40,
-      "describe": "凤栖玉是玉石一脉的10级材料，可用于对应层次的修真制作。",
+      "describe": "凤栖玉是玉石一脉的10级材料。",
       "type": 0,
-      "value": 53362,
+      "value": 11158,
       "sell_price": 8000
     },
     {
@@ -2932,9 +2932,9 @@
       "name": "九幽玄玉",
       "icon": "res://assets/items/icons_simple/1511.png",
       "group_id": 40,
-      "describe": "九幽玄玉是玉石一脉的11级材料，可用于对应层次的修真制作。",
+      "describe": "九幽玄玉是玉石一脉的11级材料。",
       "type": 0,
-      "value": 128069,
+      "value": 26780,
       "sell_price": 18000
     },
     {
@@ -2943,9 +2943,9 @@
       "name": "扶桑阳玉",
       "icon": "res://assets/items/icons_simple/1512.png",
       "group_id": 40,
-      "describe": "扶桑阳玉是玉石一脉的12级材料，可用于对应层次的修真制作。",
+      "describe": "扶桑阳玉是玉石一脉的12级材料。",
       "type": 0,
-      "value": 307366,
+      "value": 64272,
       "sell_price": 40000
     },
     {
@@ -2954,9 +2954,9 @@
       "name": "建木碧玉",
       "icon": "res://assets/items/icons_simple/1513.png",
       "group_id": 40,
-      "describe": "建木碧玉是玉石一脉的13级材料，可用于对应层次的修真制作。",
+      "describe": "建木碧玉是玉石一脉的13级材料。",
       "type": 0,
-      "value": 737679,
+      "value": 154253,
       "sell_price": 90000
     },
     {
@@ -2965,9 +2965,9 @@
       "name": "菩提心玉",
       "icon": "res://assets/items/icons_simple/1514.png",
       "group_id": 40,
-      "describe": "菩提心玉是玉石一脉的14级材料，可用于对应层次的修真制作。",
+      "describe": "菩提心玉是玉石一脉的14级材料。",
       "type": 0,
-      "value": 1770430,
+      "value": 370208,
       "sell_price": 200000
     },
     {
@@ -2976,9 +2976,9 @@
       "name": "鸿蒙源玉",
       "icon": "res://assets/items/icons_simple/1515.png",
       "group_id": 40,
-      "describe": "鸿蒙源玉是玉石一脉的15级材料，可用于对应层次的修真制作。",
+      "describe": "鸿蒙源玉是玉石一脉的15级材料。",
       "type": 0,
-      "value": 4249032,
+      "value": 888500,
       "sell_price": 450000
     },
     {
@@ -2987,9 +2987,9 @@
       "name": "太初神玉",
       "icon": "res://assets/items/icons_simple/1516.png",
       "group_id": 40,
-      "describe": "太初神玉是玉石一脉的16级材料，可用于对应层次的修真制作。",
+      "describe": "太初神玉是玉石一脉的16级材料。",
       "type": 0,
-      "value": 10197677,
+      "value": 2132400,
       "sell_price": 1000000
     },
     {
@@ -4322,7 +4322,7 @@
       "icon": "res://assets/items/icons_simple/28001.png",
       "describe": "青木短剑以赤髓铜为骨、雾晶砂为脉反复锻成，剑身留有青木年轮。",
       "type": 4,
-      "value": 5,
+      "value": 8,
       "max_charges": 5,
       "recharge_time": 600,
       "spawns": [
@@ -4988,7 +4988,7 @@
       "level": 1,
       "name": "松露养元散",
       "icon": "res://assets/items/icons_simple/28101.png",
-      "describe": "松露养元散以松露灵脂、青鳞灵鱼、雾芽草合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "松露养元散以松露灵脂、青鳞灵鱼、雾芽草合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 8
     },
@@ -4997,7 +4997,7 @@
       "level": 2,
       "name": "银鳞抱元丸",
       "icon": "res://assets/items/icons_simple/28102.png",
-      "describe": "银鳞抱元丸以银须鲫、青络花合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "银鳞抱元丸以银须鲫、青络花合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 16
     },
@@ -5006,7 +5006,7 @@
       "level": 4,
       "name": "月桂玉露丹",
       "icon": "res://assets/items/icons_simple/28103.png",
-      "describe": "月桂玉露丹以月桂凝脂、月纹鳜、玉壶露合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "月桂玉露丹以月桂凝脂、月纹鳜、玉壶露合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 168
     },
@@ -5015,7 +5015,7 @@
       "level": 5,
       "name": "雷脂雪魄丸",
       "icon": "res://assets/items/icons_simple/28104.png",
-      "describe": "雷脂雪魄丸以桃木雷脂、雷鳍鲶、雪魄莲合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "雷脂雪魄丸以桃木雷脂、雷鳍鲶、雪魄莲合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 394
     },
@@ -5024,7 +5024,7 @@
       "level": 7,
       "name": "沉香青冥丹",
       "icon": "res://assets/items/icons_simple/28105.png",
-      "describe": "沉香青冥丹以沉香地髓、地脉鳅、苍梧藤合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "沉香青冥丹以沉香地髓、地脉鳅、苍梧藤合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 2015
     },
@@ -5033,7 +5033,7 @@
       "level": 8,
       "name": "星脂霆元丹",
       "icon": "res://assets/items/icons_simple/28106.png",
-      "describe": "星脂霆元丹以紫檀星脂、星斑鲷、霆光竹合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "星脂霆元丹以紫檀星脂、星斑鲷、霆光竹合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 4404
     },
@@ -5042,7 +5042,7 @@
       "level": 10,
       "name": "凤鲤星华丹",
       "icon": "res://assets/items/icons_simple/28107.png",
-      "describe": "凤鲤星华丹以凤栖香脂、凤尾锦鲤、星坠蕊合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "凤鲤星华丹以凤栖香脂、凤尾锦鲤、星坠蕊合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 23832
     },
@@ -5051,7 +5051,7 @@
       "level": 12,
       "name": "扶桑九转丹",
       "icon": "res://assets/items/icons_simple/28108.png",
-      "describe": "扶桑九转丹以扶桑日脂、扶桑金鲤、九曲槲合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "扶桑九转丹以扶桑日脂、扶桑金鲤、九曲槲合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 122681
     },
@@ -5060,7 +5060,7 @@
       "level": 14,
       "name": "菩提龙元丹",
       "icon": "res://assets/items/icons_simple/28109.png",
-      "describe": "菩提龙元丹以菩提心脂、菩提慧鱼、螭涎兰合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "菩提龙元丹以菩提心脂、菩提慧鱼、螭涎兰合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 676205
     },
@@ -5069,7 +5069,7 @@
       "level": 16,
       "name": "太初造化丹",
       "icon": "res://assets/items/icons_simple/28110.png",
-      "describe": "太初造化丹以太初神脂、太初神鲲、太初道种合炼而成，丹药灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "太初造化丹以太初神脂、太初神鲲、太初道种合炼而成，丹药灵韵层次分明。",
       "type": 4,
       "value": 3894946
     },
@@ -5078,7 +5078,7 @@
       "level": 1,
       "name": "松露青果酿",
       "icon": "res://assets/items/icons_simple/28111.png",
-      "describe": "松露青果酿以松露灵脂、山青果合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "松露青果酿以松露灵脂、山青果合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 14
     },
@@ -5087,7 +5087,7 @@
       "level": 2,
       "name": "银须青禾酒",
       "icon": "res://assets/items/icons_simple/28112.png",
-      "describe": "银须青禾酒以银须鲫、青禾米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "银须青禾酒以银须鲫、青禾米合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 16
     },
@@ -5096,7 +5096,7 @@
       "level": 4,
       "name": "赤枫金铃酿",
       "icon": "res://assets/items/icons_simple/28113.png",
-      "describe": "赤枫金铃酿以赤枫脂、赤尾鲤、金铃果合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "赤枫金铃酿以赤枫脂、赤尾鲤、金铃果合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 214
     },
@@ -5105,7 +5105,7 @@
       "level": 5,
       "name": "雷脂雪纹酒",
       "icon": "res://assets/items/icons_simple/28114.png",
-      "describe": "雷脂雪纹酒以桃木雷脂、雷鳍鲶、雪纹米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "雷脂雪纹酒以桃木雷脂、雷鳍鲶、雪纹米合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 394
     },
@@ -5114,7 +5114,7 @@
       "level": 7,
       "name": "冰魄苍梧酿",
       "icon": "res://assets/items/icons_simple/28115.png",
-      "describe": "冰魄苍梧酿以冰梧寒脂、冰魄鲑、苍梧子合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "冰魄苍梧酿以冰梧寒脂、冰魄鲑、苍梧子合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 2851
     },
@@ -5123,7 +5123,7 @@
       "level": 8,
       "name": "星脂雷芒酒",
       "icon": "res://assets/items/icons_simple/28116.png",
-      "describe": "星脂雷芒酒以紫檀星脂、星斑鲷、雷芒米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "星脂雷芒酒以紫檀星脂、星斑鲷、雷芒米合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 4404
     },
@@ -5132,7 +5132,7 @@
       "level": 10,
       "name": "龙血星子酿",
       "icon": "res://assets/items/icons_simple/28117.png",
-      "describe": "龙血星子酿以龙血木脂、龙须鲤、星子米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "龙血星子酿以龙血木脂、龙须鲤、星子米合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 13032
     },
@@ -5141,7 +5141,7 @@
       "level": 12,
       "name": "九幽九曲醪",
       "icon": "res://assets/items/icons_simple/28118.png",
-      "describe": "九幽九曲醪以九幽玄脂、九幽玄鱼、九曲米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "九幽九曲醪以九幽玄脂、九幽玄鱼、九曲米合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 69881
     },
@@ -5150,7 +5150,7 @@
       "level": 14,
       "name": "建木龙牙酿",
       "icon": "res://assets/items/icons_simple/28119.png",
-      "describe": "建木龙牙酿以建木玉脂、建木游龙、龙牙米合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "建木龙牙酿以建木玉脂、建木游龙、龙牙米合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 371400
     },
@@ -5159,7 +5159,7 @@
       "level": 16,
       "name": "鸿蒙玄粟酒",
       "icon": "res://assets/items/icons_simple/28120.png",
-      "describe": "鸿蒙玄粟酒以鸿蒙源脂、鸿蒙鲲苗、太初玄粟合炼而成，灵酒灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "鸿蒙玄粟酒以鸿蒙源脂、鸿蒙鲲苗、太初玄粟合炼而成，灵酒灵韵层次分明。",
       "type": 4,
       "value": 2139269
     },
@@ -5168,7 +5168,7 @@
       "level": 1,
       "name": "青枝铜骨剑",
       "icon": "res://assets/items/icons_simple/28121.png",
-      "describe": "青枝铜骨剑以青灵枝、赤髓铜合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "青枝铜骨剑以青灵枝、赤髓铜合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 5
     },
@@ -5177,7 +5177,7 @@
       "level": 2,
       "name": "云木乌铁刀",
       "icon": "res://assets/items/icons_simple/28122.png",
-      "describe": "云木乌铁刀以云纹木、乌纹铁合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "云木乌铁刀以云纹木、乌纹铁合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 16
     },
@@ -5186,7 +5186,7 @@
       "level": 4,
       "name": "月桂白金杖",
       "icon": "res://assets/items/icons_simple/28123.png",
-      "describe": "月桂白金杖以月桂灵木、月华玉、太白金母合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "月桂白金杖以月桂灵木、月华玉、太白金母合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 383
     },
@@ -5195,7 +5195,7 @@
       "level": 5,
       "name": "雷木玄冰枪",
       "icon": "res://assets/items/icons_simple/28124.png",
-      "describe": "雷木玄冰枪以雷击桃木、雷纹玉、玄冰陨铁合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "雷木玄冰枪以雷击桃木、雷纹玉、玄冰陨铁合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 920
     },
@@ -5204,7 +5204,7 @@
       "level": 7,
       "name": "沉香青罡印",
       "icon": "res://assets/items/icons_simple/28125.png",
-      "describe": "沉香青罡印以地脉沉香、地髓玉、青罡玉合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "沉香青罡印以地脉沉香、地髓玉、青罡玉合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 5302
     },
@@ -5213,7 +5213,7 @@
       "level": 8,
       "name": "紫檀雷极轮",
       "icon": "res://assets/items/icons_simple/28126.png",
-      "describe": "紫檀雷极轮以星辉紫檀、星辉玉、雷极砂合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "紫檀雷极轮以星辉紫檀、星辉玉、雷极砂合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 12725
     },
@@ -5222,7 +5222,7 @@
       "level": 10,
       "name": "凤木星陨弓",
       "icon": "res://assets/items/icons_simple/28127.png",
-      "describe": "凤木星陨弓以凤栖神木、凤栖玉、星陨铁核合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "凤木星陨弓以凤栖神木、凤栖玉、星陨铁核合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 73299
     },
@@ -5231,7 +5231,7 @@
       "level": 12,
       "name": "扶桑九幽戟",
       "icon": "res://assets/items/icons_simple/28128.png",
-      "describe": "扶桑九幽戟以扶桑阳木、扶桑阳玉、九幽沉铁合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "扶桑九幽戟以扶桑阳木、扶桑阳玉、九幽沉铁合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 422201
     },
@@ -5240,7 +5240,7 @@
       "level": 14,
       "name": "菩提月魄钟",
       "icon": "res://assets/items/icons_simple/28129.png",
-      "describe": "菩提月魄钟以菩提道木、菩提心玉、月魄寒玉合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "菩提月魄钟以菩提道木、菩提心玉、月魄寒玉合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 2431882
     },
@@ -5249,7 +5249,7 @@
       "level": 16,
       "name": "世界树开天斧",
       "icon": "res://assets/items/icons_simple/28130.png",
-      "describe": "世界树开天斧以世界树心、太初神玉、鸿蒙母晶合炼而成，锻造灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "世界树开天斧以世界树心、太初神玉、鸿蒙母晶合炼而成，锻造灵韵层次分明。",
       "type": 4,
       "value": 14007642
     },
@@ -5258,7 +5258,7 @@
       "level": 1,
       "name": "清珠岚障阵",
       "icon": "res://assets/items/icons_simple/28131.png",
-      "describe": "清珠岚障阵以清水灵珠、青白玉、清岚障图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "清珠岚障阵以清水灵珠、青白玉、清岚障图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 29
     },
@@ -5267,7 +5267,7 @@
       "level": 2,
       "name": "云玉聚炁阵",
       "icon": "res://assets/items/icons_simple/28132.png",
-      "describe": "云玉聚炁阵以青波珠、云纹玉、引星聚炁图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "云玉聚炁阵以青波珠、云纹玉、引星聚炁图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 71
     },
@@ -5276,7 +5276,7 @@
       "level": 4,
       "name": "月珠锁灵阵",
       "icon": "res://assets/items/icons_simple/28133.png",
-      "describe": "月珠锁灵阵以赤潮珠、月华珠、赤霞玉、三垣锁灵图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "月珠锁灵阵以赤潮珠、月华珠、赤霞玉、三垣锁灵图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 245
     },
@@ -5285,7 +5285,7 @@
       "level": 5,
       "name": "雷珠寒光阵",
       "icon": "res://assets/items/icons_simple/28134.png",
-      "describe": "雷珠寒光阵以雷鸣珠、雷纹玉、四渎寒图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "雷珠寒光阵以雷鸣珠、雷纹玉、四渎寒图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 1001
     },
@@ -5294,7 +5294,7 @@
       "level": 7,
       "name": "地珠载岳阵",
       "icon": "res://assets/items/icons_simple/28135.png",
-      "describe": "地珠载岳阵以玄冰珠、地泉珠、玄冰玉、玄龟载岳图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "地珠载岳阵以玄冰珠、地泉珠、玄冰玉、玄龟载岳图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 3404
     },
@@ -5303,7 +5303,7 @@
       "level": 8,
       "name": "星珠九霄阵",
       "icon": "res://assets/items/icons_simple/28136.png",
-      "describe": "星珠九霄阵以星澜珠、星辉玉、九霄雷篆图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "星珠九霄阵以星澜珠、星辉玉、九霄雷篆图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 13851
     },
@@ -5312,7 +5312,7 @@
       "level": 10,
       "name": "凤珠星罗阵",
       "icon": "res://assets/items/icons_simple/28137.png",
-      "describe": "凤珠星罗阵以龙涎珠、凤泪珠、龙血玉、星罗天盘图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "凤珠星罗阵以龙涎珠、凤泪珠、龙血玉、星罗天盘图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 47062
     },
@@ -5321,7 +5321,7 @@
       "level": 12,
       "name": "日珠续命阵",
       "icon": "res://assets/items/icons_simple/28138.png",
-      "describe": "日珠续命阵以九幽玄珠、扶桑日珠、九幽玄玉、九幽续命图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "日珠续命阵以九幽玄珠、扶桑日珠、九幽玄玉、九幽续命图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 271079
     },
@@ -5330,7 +5330,7 @@
       "level": 14,
       "name": "心珠御龙阵",
       "icon": "res://assets/items/icons_simple/28139.png",
-      "describe": "心珠御龙阵以建木碧珠、菩提心珠、建木碧玉、苍龙御天图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "心珠御龙阵以建木碧珠、菩提心珠、建木碧玉、苍龙御天图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 1561420
     },
@@ -5339,7 +5339,7 @@
       "level": 16,
       "name": "太初万象阵",
       "icon": "res://assets/items/icons_simple/28140.png",
-      "describe": "太初万象阵以鸿蒙源珠、太初神珠、鸿蒙源玉、太一归元图合炼而成，阵法灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "太初万象阵以鸿蒙源珠、太初神珠、鸿蒙源玉、太一归元图合炼而成，阵法灵韵层次分明。",
       "type": 4,
       "value": 8993784
     },
@@ -5348,7 +5348,7 @@
       "level": 1,
       "name": "青枝镇煞符",
       "icon": "res://assets/items/icons_simple/28141.png",
-      "describe": "青枝镇煞符以青灵枝、山豕血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "青枝镇煞符以青灵枝、山豕血合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 14
     },
@@ -5357,7 +5357,7 @@
       "level": 2,
       "name": "青檀净心符",
       "icon": "res://assets/items/icons_simple/28142.png",
-      "describe": "青檀净心符以青檀脂、云鹿灵血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "青檀净心符以青檀脂、云鹿灵血合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 38
     },
@@ -5366,7 +5366,7 @@
       "level": 4,
       "name": "赤霞金身符",
       "icon": "res://assets/items/icons_simple/28143.png",
-      "describe": "赤霞金身符以赤霞杉、月桂凝脂、金蟾髓合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "赤霞金身符以赤霞杉、月桂凝脂、金蟾髓合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 256
     },
@@ -5375,7 +5375,7 @@
       "level": 5,
       "name": "雷木寒霜符",
       "icon": "res://assets/items/icons_simple/28144.png",
-      "describe": "雷木寒霜符以雷击桃木、桃木雷脂、冰蛇寒血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "雷木寒霜符以雷击桃木、桃木雷脂、冰蛇寒血合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 706
     },
@@ -5384,7 +5384,7 @@
       "level": 7,
       "name": "冰梧青鸾符",
       "icon": "res://assets/items/icons_simple/28145.png",
-      "describe": "冰梧青鸾符以玄冰梧桐、沉香地髓、青鸾碧血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "冰梧青鸾符以玄冰梧桐、沉香地髓、青鸾碧血合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 3331
     },
@@ -5393,7 +5393,7 @@
       "level": 8,
       "name": "紫檀雷鹏符",
       "icon": "res://assets/items/icons_simple/28146.png",
-      "describe": "紫檀雷鹏符以星辉紫檀、紫檀星脂、雷鹏紫血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "紫檀雷鹏符以星辉紫檀、紫檀星脂、雷鹏紫血合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 8716
     },
@@ -5402,7 +5402,7 @@
       "level": 10,
       "name": "龙血星狼符",
       "icon": "res://assets/items/icons_simple/28147.png",
-      "describe": "龙血星狼符以龙血古木、凤栖香脂、星狼银血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "龙血星狼符以龙血古木、凤栖香脂、星狼银血合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 43268
     },
@@ -5411,7 +5411,7 @@
       "level": 12,
       "name": "九幽九命符",
       "icon": "res://assets/items/icons_simple/28148.png",
-      "describe": "九幽九命符以九幽冥木、扶桑日脂、九命猫血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "九幽九命符以九幽冥木、扶桑日脂、九命猫血合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 239339
     },
@@ -5420,7 +5420,7 @@
       "level": 14,
       "name": "建木龙血符",
       "icon": "res://assets/items/icons_simple/28149.png",
-      "describe": "建木龙血符以建木灵芯、菩提心脂、苍龙真血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "建木龙血符以建木灵芯、菩提心脂、苍龙真血合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 1325698
     },
@@ -5429,7 +5429,7 @@
       "level": 16,
       "name": "鸿蒙太古符",
       "icon": "res://assets/items/icons_simple/28150.png",
-      "describe": "鸿蒙太古符以鸿蒙祖木、太初神脂、太古源血合炼而成，符箓灵韵层次分明，可用于对应境界的订单与制作循环。",
+      "describe": "鸿蒙太古符以鸿蒙祖木、太初神脂、太古源血合炼而成，符箓灵韵层次分明。",
       "type": 4,
       "value": 7371541
     }
@@ -7715,20 +7715,20 @@
       "group_id": 21,
       "max_charges": 15,
       "recharge_time": 1800,
-      "describe": "浅砂矿口以河砂与碎岩筑成，矿壁留有新凿出的浅痕，并有小概率产出玉石。",
+      "describe": "浅砂矿口以河砂与碎岩筑成，矿壁留有新凿出的浅痕，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 665
+          "weight": 500
         },
         {
           "id": 4001,
-          "weight": 285
+          "weight": 250
         },
         {
           "id": 1501,
-          "weight": 50
+          "weight": 250
         }
       ]
     },
@@ -7740,32 +7740,32 @@
       "group_id": 21,
       "max_charges": 20,
       "recharge_time": 2400,
-      "describe": "乌铁矿井立于溪谷缓坡，井下回声沉闷如钟，并有小概率产出玉石。",
+      "describe": "乌铁矿井立于溪谷缓坡，井下回声沉闷如钟，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 652
+          "weight": 490
         },
         {
           "id": 4001,
-          "weight": 279
+          "weight": 245
         },
         {
           "id": 2002,
-          "weight": 13
+          "weight": 10
         },
         {
           "id": 4002,
-          "weight": 6
+          "weight": 5
         },
         {
           "id": 1501,
-          "weight": 49
+          "weight": 245
         },
         {
           "id": 1502,
-          "weight": 1
+          "weight": 5
         }
       ]
     },
@@ -7777,32 +7777,32 @@
       "group_id": 21,
       "max_charges": 25,
       "recharge_time": 3000,
-      "describe": "匠人取月银石柱建成月银矿洞，洞顶在月夜泛出银辉，并有小概率产出玉石。",
+      "describe": "匠人取月银石柱建成月银矿洞，洞顶在月夜泛出银辉，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 638
+          "weight": 480
         },
         {
           "id": 4001,
-          "weight": 274
+          "weight": 240
         },
         {
           "id": 2002,
-          "weight": 27
+          "weight": 20
         },
         {
           "id": 4002,
-          "weight": 11
+          "weight": 10
         },
         {
           "id": 1501,
-          "weight": 48
+          "weight": 240
         },
         {
           "id": 1502,
-          "weight": 2
+          "weight": 10
         }
       ]
     },
@@ -7814,32 +7814,32 @@
       "group_id": 21,
       "max_charges": 30,
       "recharge_time": 3600,
-      "describe": "传闻白金矿脉旧址在云崖石台，金脉沿岩层纵横生长，并有小概率产出玉石。",
+      "describe": "传闻白金矿脉旧址在云崖石台，金脉沿岩层纵横生长，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 625
+          "weight": 470
         },
         {
           "id": 4001,
-          "weight": 268
+          "weight": 235
         },
         {
           "id": 2002,
-          "weight": 40
+          "weight": 30
         },
         {
           "id": 4002,
-          "weight": 17
+          "weight": 15
         },
         {
           "id": 1501,
-          "weight": 47
+          "weight": 235
         },
         {
           "id": 1502,
-          "weight": 3
+          "weight": 15
         }
       ]
     },
@@ -7851,32 +7851,32 @@
       "group_id": 21,
       "max_charges": 35,
       "recharge_time": 4200,
-      "describe": "寒谷背阴处所见的冰陨深井由冰陨石与寒木构成，井口吐出的风带着冰屑，并有小概率产出玉石。",
+      "describe": "寒谷背阴处所见的冰陨深井由冰陨石与寒木构成，井口吐出的风带着冰屑，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 612
+          "weight": 460
         },
         {
           "id": 4001,
-          "weight": 262
+          "weight": 230
         },
         {
           "id": 2002,
-          "weight": 53
+          "weight": 40
         },
         {
           "id": 4002,
-          "weight": 23
+          "weight": 20
         },
         {
           "id": 1501,
-          "weight": 46
+          "weight": 230
         },
         {
           "id": 1502,
-          "weight": 4
+          "weight": 20
         }
       ]
     },
@@ -7888,32 +7888,32 @@
       "group_id": 21,
       "max_charges": 40,
       "recharge_time": 4800,
-      "describe": "地火晶窟以地火岩与赤铜筑成，晶窟深处常有红光跃动，并有小概率产出玉石。",
+      "describe": "地火晶窟以地火岩与赤铜筑成，晶窟深处常有红光跃动，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 605
+          "weight": 455
         },
         {
           "id": 4001,
-          "weight": 259
+          "weight": 227
         },
         {
           "id": 2002,
-          "weight": 60
+          "weight": 45
         },
         {
           "id": 4002,
-          "weight": 26
+          "weight": 23
         },
         {
           "id": 1501,
-          "weight": 46
+          "weight": 230
         },
         {
           "id": 1502,
-          "weight": 4
+          "weight": 20
         }
       ]
     },
@@ -7925,32 +7925,32 @@
       "group_id": 21,
       "max_charges": 45,
       "recharge_time": 5400,
-      "describe": "青罡玉坑立于苍梧秘境，玉壁内云纹缓缓迁移，并有小概率产出玉石。",
+      "describe": "青罡玉坑立于苍梧秘境，玉壁内云纹缓缓迁移，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 599
+          "weight": 450
         },
         {
           "id": 4001,
-          "weight": 257
+          "weight": 225
         },
         {
           "id": 2002,
-          "weight": 66
+          "weight": 50
         },
         {
           "id": 4002,
-          "weight": 28
+          "weight": 25
         },
         {
           "id": 1501,
-          "weight": 45
+          "weight": 225
         },
         {
           "id": 1502,
-          "weight": 5
+          "weight": 25
         }
       ]
     },
@@ -7962,44 +7962,44 @@
       "group_id": 21,
       "max_charges": 50,
       "recharge_time": 6000,
-      "describe": "匠人取雷极砂砖建成雷极砂场，砂层摩擦时传来细雷，并有小概率产出玉石。",
+      "describe": "匠人取雷极砂砖建成雷极砂场，砂层摩擦时传来细雷，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 572
+          "weight": 430
         },
         {
           "id": 4001,
-          "weight": 245
+          "weight": 215
         },
         {
           "id": 2002,
-          "weight": 80
+          "weight": 60
         },
         {
           "id": 4002,
-          "weight": 34
+          "weight": 30
         },
         {
           "id": 2003,
-          "weight": 13
+          "weight": 10
         },
         {
           "id": 4003,
-          "weight": 6
+          "weight": 5
         },
         {
           "id": 1501,
-          "weight": 43
+          "weight": 215
         },
         {
           "id": 1502,
-          "weight": 6
+          "weight": 30
         },
         {
           "id": 1503,
-          "weight": 1
+          "weight": 5
         }
       ]
     },
@@ -8011,44 +8011,44 @@
       "group_id": 21,
       "max_charges": 55,
       "recharge_time": 6600,
-      "describe": "传闻坤髓矿府旧址在坤元地脉，地脉气息沿矿壁缓缓升起，并有小概率产出玉石。",
+      "describe": "传闻坤髓矿府旧址在坤元地脉，地脉气息沿矿壁缓缓升起，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 545
+          "weight": 410
         },
         {
           "id": 4001,
-          "weight": 234
+          "weight": 205
         },
         {
           "id": 2002,
-          "weight": 100
+          "weight": 75
         },
         {
           "id": 4002,
-          "weight": 43
+          "weight": 38
         },
         {
           "id": 2003,
-          "weight": 20
+          "weight": 15
         },
         {
           "id": 4003,
-          "weight": 8
+          "weight": 7
         },
         {
           "id": 1501,
-          "weight": 41
+          "weight": 205
         },
         {
           "id": 1502,
-          "weight": 8
+          "weight": 40
         },
         {
           "id": 1503,
-          "weight": 1
+          "weight": 5
         }
       ]
     },
@@ -8060,44 +8060,44 @@
       "group_id": 21,
       "max_charges": 60,
       "recharge_time": 7200,
-      "describe": "星落天原所见的星陨矿坑由星陨铁与天河砂构成，夜间矿壁会映出群星轨迹，并有小概率产出玉石。",
+      "describe": "星落天原所见的星陨矿坑由星陨铁与天河砂构成，夜间矿壁会映出群星轨迹，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 505
+          "weight": 380
         },
         {
           "id": 4001,
-          "weight": 217
+          "weight": 190
         },
         {
           "id": 2002,
-          "weight": 133
+          "weight": 100
         },
         {
           "id": 4002,
-          "weight": 57
+          "weight": 50
         },
         {
           "id": 2003,
-          "weight": 27
+          "weight": 20
         },
         {
           "id": 4003,
-          "weight": 11
-        },
-        {
-          "id": 1501,
-          "weight": 38
-        },
-        {
-          "id": 1502,
           "weight": 10
         },
         {
+          "id": 1501,
+          "weight": 190
+        },
+        {
+          "id": 1502,
+          "weight": 50
+        },
+        {
           "id": 1503,
-          "weight": 2
+          "weight": 10
         }
       ]
     },
@@ -8109,44 +8109,44 @@
       "group_id": 21,
       "max_charges": 65,
       "recharge_time": 7800,
-      "describe": "太虚玉窟以紫府玉与烟霞木筑成，紫色云烟常在矿壁周围盘旋，并有小概率产出玉石。",
+      "describe": "太虚玉窟以紫府玉与烟霞木筑成，紫色云烟常在矿壁周围盘旋，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 466
+          "weight": 350
         },
         {
           "id": 4001,
-          "weight": 200
+          "weight": 176
         },
         {
           "id": 2002,
-          "weight": 166
+          "weight": 125
         },
         {
           "id": 4002,
-          "weight": 71
+          "weight": 62
         },
         {
           "id": 2003,
-          "weight": 33
+          "weight": 25
         },
         {
           "id": 4003,
-          "weight": 14
+          "weight": 12
         },
         {
           "id": 1501,
-          "weight": 35
+          "weight": 175
         },
         {
           "id": 1502,
-          "weight": 13
+          "weight": 65
         },
         {
           "id": 1503,
-          "weight": 2
+          "weight": 10
         }
       ]
     },
@@ -8158,36 +8158,36 @@
       "group_id": 21,
       "max_charges": 70,
       "recharge_time": 8400,
-      "describe": "九幽铁渊立于九曲地宫，矿壁依九曲方位层层展开，并有小概率产出玉石。",
+      "describe": "九幽铁渊立于九曲地宫，矿壁依九曲方位层层展开，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 439
+          "weight": 330
         },
         {
           "id": 4001,
-          "weight": 188
+          "weight": 165
         },
         {
           "id": 2002,
-          "weight": 173
+          "weight": 130
         },
         {
           "id": 4002,
-          "weight": 74
+          "weight": 65
         },
         {
           "id": 2003,
-          "weight": 46
+          "weight": 35
         },
         {
           "id": 4003,
-          "weight": 20
+          "weight": 17
         },
         {
           "id": 2004,
-          "weight": 7
+          "weight": 5
         },
         {
           "id": 4004,
@@ -8195,15 +8195,15 @@
         },
         {
           "id": 1501,
-          "weight": 33
+          "weight": 165
         },
         {
           "id": 1502,
-          "weight": 13
+          "weight": 65
         },
         {
           "id": 1503,
-          "weight": 4
+          "weight": 20
         }
       ]
     },
@@ -8215,56 +8215,56 @@
       "group_id": 21,
       "max_charges": 75,
       "recharge_time": 9000,
-      "describe": "匠人取涅火晶与赤金建成日精金脉，赤金纹路随天火明灭不定，并有小概率产出玉石。",
+      "describe": "匠人取涅火晶与赤金建成日精金脉，赤金纹路随天火明灭不定，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 412
+          "weight": 310
         },
         {
           "id": 4001,
-          "weight": 177
+          "weight": 155
         },
         {
           "id": 2002,
-          "weight": 179
+          "weight": 135
         },
         {
           "id": 4002,
-          "weight": 77
+          "weight": 67
         },
         {
           "id": 2003,
-          "weight": 60
+          "weight": 45
         },
         {
           "id": 4003,
-          "weight": 26
+          "weight": 23
         },
         {
           "id": 2004,
-          "weight": 13
+          "weight": 10
         },
         {
           "id": 4004,
-          "weight": 6
+          "weight": 5
         },
         {
           "id": 1501,
-          "weight": 31
+          "weight": 155
         },
         {
           "id": 1502,
-          "weight": 14
+          "weight": 70
         },
         {
           "id": 1503,
-          "weight": 4
+          "weight": 20
         },
         {
           "id": 1504,
-          "weight": 1
+          "weight": 5
         }
       ]
     },
@@ -8276,56 +8276,56 @@
       "group_id": 21,
       "max_charges": 80,
       "recharge_time": 9600,
-      "describe": "传闻月魄玉山旧址在龙眠古渊，矿壁上隐约盘着龙形云气，并有小概率产出玉石。",
+      "describe": "传闻月魄玉山旧址在龙眠古渊，矿壁上隐约盘着龙形云气，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 386
+          "weight": 290
         },
         {
           "id": 4001,
-          "weight": 165
+          "weight": 145
         },
         {
           "id": 2002,
-          "weight": 186
+          "weight": 140
         },
         {
           "id": 4002,
-          "weight": 80
+          "weight": 70
         },
         {
           "id": 2003,
-          "weight": 73
+          "weight": 55
         },
         {
           "id": 4003,
-          "weight": 31
+          "weight": 27
         },
         {
           "id": 2004,
-          "weight": 20
+          "weight": 15
         },
         {
           "id": 4004,
-          "weight": 9
+          "weight": 8
         },
         {
           "id": 1501,
-          "weight": 29
+          "weight": 145
         },
         {
           "id": 1502,
-          "weight": 14
+          "weight": 70
         },
         {
           "id": 1503,
-          "weight": 6
+          "weight": 30
         },
         {
           "id": 1504,
-          "weight": 1
+          "weight": 5
         }
       ]
     },
@@ -8337,56 +8337,56 @@
       "group_id": 21,
       "max_charges": 85,
       "recharge_time": 10200,
-      "describe": "凤栖神木所见的天河砂海由凤羽晶与梧桐神木构成，高处常有凤鸟虚影掠过，并有小概率产出玉石。",
+      "describe": "凤栖神木所见的天河砂海由凤羽晶与梧桐神木构成，高处常有凤鸟虚影掠过，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 359
+          "weight": 270
         },
         {
           "id": 4001,
-          "weight": 154
+          "weight": 135
         },
         {
           "id": 2002,
-          "weight": 193
+          "weight": 145
         },
         {
           "id": 4002,
-          "weight": 83
+          "weight": 73
         },
         {
           "id": 2003,
-          "weight": 86
+          "weight": 65
         },
         {
           "id": 4003,
-          "weight": 37
+          "weight": 32
         },
         {
           "id": 2004,
-          "weight": 27
+          "weight": 20
         },
         {
           "id": 4004,
-          "weight": 11
+          "weight": 10
         },
         {
           "id": 1501,
-          "weight": 27
+          "weight": 135
         },
         {
           "id": 1502,
-          "weight": 15
+          "weight": 75
         },
         {
           "id": 1503,
-          "weight": 6
+          "weight": 30
         },
         {
           "id": 1504,
-          "weight": 2
+          "weight": 10
         }
       ]
     },
@@ -8398,56 +8398,56 @@
       "group_id": 21,
       "max_charges": 90,
       "recharge_time": 10800,
-      "describe": "鸿蒙晶域以太初晶与鸿蒙母金筑成，近看矿壁仿佛隔着太初雾海，并有小概率产出玉石。",
+      "describe": "鸿蒙晶域以太初晶与鸿蒙母金筑成，近看矿壁仿佛隔着太初雾海，并有四分之一概率产出玉石。",
       "type": "1",
       "spawns": [
         {
           "id": 2001,
-          "weight": 333
+          "weight": 250
         },
         {
           "id": 4001,
-          "weight": 143
+          "weight": 125
         },
         {
           "id": 2002,
-          "weight": 199
+          "weight": 150
         },
         {
           "id": 4002,
-          "weight": 85
+          "weight": 75
         },
         {
           "id": 2003,
-          "weight": 100
+          "weight": 75
         },
         {
           "id": 4003,
-          "weight": 43
+          "weight": 38
         },
         {
           "id": 2004,
-          "weight": 33
-        },
-        {
-          "id": 4004,
-          "weight": 14
-        },
-        {
-          "id": 1501,
           "weight": 25
         },
         {
+          "id": 4004,
+          "weight": 12
+        },
+        {
+          "id": 1501,
+          "weight": 125
+        },
+        {
           "id": 1502,
-          "weight": 15
+          "weight": 75
         },
         {
           "id": 1503,
-          "weight": 8
+          "weight": 40
         },
         {
           "id": 1504,
-          "weight": 2
+          "weight": 10
         }
       ]
     },

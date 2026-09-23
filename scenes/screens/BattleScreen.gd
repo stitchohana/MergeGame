@@ -87,7 +87,7 @@ func _on_board_switch_confirmed(result: Dictionary) -> void:
 		_load_token = -1
 
 func _on_board_switch_rejected(reason: String) -> void:
-	print("[BattleScreen] Board switch rejected: ", reason)
+	print("[PlayerAction] battle_board_switch_reject reason=", reason)
 	_init_battle_grid()
 	if _load_token > 0:
 		LoadingManager.end(_load_token)
@@ -143,7 +143,8 @@ func _on_item_use_requested(item_data: Dictionary, grid_pos: Vector2i) -> void:
 	if _item_use_pending:
 		return
 	var effect_type: int = int(item_data.get("effect_type", 0))
-	print("[BattleScreen] item_use: id=", item_data.get("id", 0), " effect_type=", effect_type, " uid=", item_data.get("_uid", 0))
+	print("[PlayerAction] battle_item_use item_id=", item_data.get("id", 0),
+		" effect_type=", effect_type, " uid=", item_data.get("_uid", 0))
 	if effect_type <= 0:
 		return
 	var uid: int = item_data.get("_uid", 0)
@@ -185,7 +186,8 @@ func _qi_label() -> void:
 		qi_label.text = "灵力 %d/%d" % [CultivationService.current_qi, CultivationService.max_qi]
 
 func _on_battle_attack_confirmed(result: Dictionary) -> void:
-	print("[BattleScreen] attack_confirmed: monsters=", result.get("monsters", []).size(), " loot=", result.get("loot", []), " stage_complete=", result.get("stage_complete", false))
+	print("[PlayerAction] battle_attack_accept monsters=", result.get("monsters", []).size(),
+		" loot=", result.get("loot", []), " stage_complete=", result.get("stage_complete", false))
 	_item_use_pending = false
 	if _pending_attack_uid > 0:
 		var item_data: Dictionary = GridManager.find_by_uid(_pending_attack_uid)

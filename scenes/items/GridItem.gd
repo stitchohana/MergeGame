@@ -147,16 +147,6 @@ func _update_status_icons() -> void:
 		status_loaded_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.HAS_ITEMS
 		status_working_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.CRAFTING
 		status_ready_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.READY
-		if is_crafting_table:
-			print("[CraftStatusTrace] icon_refresh frame=", Engine.get_process_frames(),
-				" uid=", int(item_data.get("_uid", 0)), " id=", int(item_data.get("id", 0)),
-				" pos=", grid_position, " state=", craft_state,
-				" stored=", (item_data.get("_craft_stored", []) as Array).size(),
-				" idle=", status_idle_icon.visible,
-				" loaded=", status_loaded_icon.visible,
-				" working=", status_working_icon.visible,
-				" ready=", status_ready_icon.visible,
-				" node_visible=", visible, " alpha=", modulate.a)
 
 func _item_type() -> int:
 	return int(item_data.get("type", Constants.ItemType.REGULAR))
@@ -209,16 +199,7 @@ func set_visual_position(pos: Vector2) -> void:
 
 func set_required(required: bool) -> void:
 	if require_icon:
-		var previous_visible: bool = require_icon.visible
 		require_icon.visible = required and not bool(item_data.get("immovable", false))
-		if previous_visible != require_icon.visible:
-			print("[StatusTrace] require_toggle uid=", int(item_data.get("_uid", 0)),
-				" item=", int(item_data.get("id", 0)),
-				" pos=", grid_position,
-				" visible=", require_icon.visible,
-				" required=", required,
-				" immovable=", bool(item_data.get("immovable", false)),
-				" frame=", Engine.get_process_frames())
 
 func is_required() -> bool:
 	return require_icon != null and require_icon.visible
@@ -234,9 +215,6 @@ func show_crafting_hint(icon: Texture2D) -> void:
 	craft_hint_bubble.rotation_degrees = 0.0
 	craft_hint_bubble.scale = Vector2.ONE
 	craft_hint_bubble.show()
-	print("[CraftHint] bubble_show table_id=", int(item_data.get("id", 0)), " table_pos=", grid_position,
-		" visible=", craft_hint_bubble.visible, " global_rect=", craft_hint_bubble.get_global_rect(),
-		" icon_path=", icon.resource_path)
 	_craft_hint_tween = create_tween().set_loops()
 	_craft_hint_tween.tween_property(craft_hint_bubble, "rotation_degrees", -6.0, 0.16).set_trans(Tween.TRANS_SINE)
 	_craft_hint_tween.parallel().tween_property(craft_hint_bubble, "scale", Vector2(1.08, 1.08), 0.16).set_trans(Tween.TRANS_SINE)
@@ -246,7 +224,6 @@ func show_crafting_hint(icon: Texture2D) -> void:
 	_craft_hint_tween.parallel().tween_property(craft_hint_bubble, "scale", Vector2.ONE, 0.16).set_trans(Tween.TRANS_SINE)
 
 func hide_crafting_hint() -> void:
-	var was_visible: bool = craft_hint_bubble != null and craft_hint_bubble.visible
 	if _craft_hint_tween != null and _craft_hint_tween.is_valid():
 		_craft_hint_tween.kill()
 	_craft_hint_tween = null
@@ -254,8 +231,6 @@ func hide_crafting_hint() -> void:
 		craft_hint_bubble.rotation_degrees = 0.0
 		craft_hint_bubble.scale = Vector2.ONE
 		craft_hint_bubble.hide()
-	if was_visible:
-		print("[CraftHint] bubble_hide table_id=", int(item_data.get("id", 0)), " table_pos=", grid_position)
 
 func play_merge_hint(offset: Vector2, scale_factor: float = 1.08,
 		move_duration: float = 0.22, pause_duration: float = 0.14) -> void:

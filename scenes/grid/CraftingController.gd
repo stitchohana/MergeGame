@@ -22,6 +22,7 @@ var _pending_table_item: Dictionary = {}
 var _pending_dragged_item: Dictionary = {}
 var _pending_table_pos: Vector2i = Vector2i(-1, -1)
 var _pending_ingredient_id: int = -1
+var _craft_retrieve_pending: bool = false
 
 func setup_signals() -> void:
 	CloudService.craft_add_confirmed.connect(_on_craft_add_confirmed)
@@ -153,7 +154,12 @@ func get_ingredient_acceptance_debug(table_item: Dictionary, ingredient_id: int)
 
 func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Vector2i, ingredient_id: int, drag_item_data: Dictionary) -> bool:
 	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
+	print("[PlayerAction] craft_drop_begin table_id=", int(table_item.get("id", 0)),
+		" table_uid=", int(table_item.get("_uid", 0)), " table_pos=", table_pos,
+		" source_pos=", src_pos, " ingredient_id=", ingredient_id,
+		" state=", craft_state, " stored=", CraftingService.get_stored_items(table_item))
 	if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
+		print("[PlayerAction] craft_drop_reject reason=table_busy")
 		craft_rejected.emit("snap_back")
 		return false
 
@@ -169,6 +175,9 @@ func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Ve
 		if valid:
 			break
 	if not valid:
+		print("[PlayerAction] craft_drop_reject reason=ingredient_not_in_table_recipes",
+			" table_id=", table_id, " ingredient_id=", ingredient_id,
+			" allowed_recipe_count=", allowed_recipes.size())
 		craft_rejected.emit("此材料无法放入")
 		return false
 
@@ -176,6 +185,8 @@ func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Ve
 	var stored: Array = CraftingService.get_stored_items(table_item)
 	for s in stored:
 		if s.get("id", 0) == ingredient_id:
+			print("[PlayerAction] craft_drop_reject reason=ingredient_already_stored",
+				" ingredient_id=", ingredient_id)
 			craft_rejected.emit("该材料已放入")
 			return false
 
@@ -204,9 +215,13 @@ func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Ve
 			if can_match:
 				break
 		if not can_match:
+			print("[PlayerAction] craft_drop_reject reason=incompatible_with_stored",
+				" ingredient_id=", ingredient_id, " stored=", stored)
 			craft_rejected.emit("无法与已有材料形成配方")
 			return false
 
+	print("[PlayerAction] craft_drop_accept table_id=", table_id,
+		" ingredient_id=", ingredient_id, " allowed_recipe_count=", allowed_recipes.size())
 	craft_add_queued.emit(src_pos, table_pos, ingredient_id)
 	item_accepted_for_craft.emit("%d,%d" % [src_pos.x, src_pos.y], src_pos)
 	CraftingService.add_ingredient(table_item, drag_item_data)
@@ -216,6 +231,15 @@ func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Ve
 func try_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 	if table_item.is_empty():
 		return
+	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
+	if craft_state != CraftingService.TableState.READY:
+		print("[PlayerAction] craft_retrieve_skip reason=not_ready state=", craft_state,
+			" table_uid=", int(table_item.get("_uid", 0)))
+		return
+	if _craft_retrieve_pending:
+		print("[PlayerAction] craft_retrieve_skip reason=request_pending")
+		return
+	_craft_retrieve_pending = true
 	_craft_table_item = table_item
 	_craft_table_pos = table_pos
 	CloudService.submit_craft_retrieve(table_pos.x, table_pos.y)
@@ -269,6 +293,7 @@ func _on_craft_start_rejected(reason: String) -> void:
 	craft_rejected.emit("开始制作失败：" + reason)
 
 func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
+	_craft_retrieve_pending = false
 	var result_id: int = result.get("result_id", 0) as int
 	if result_id <= 0:
 		return
@@ -279,6 +304,8 @@ func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
 	craft_retrieve_ready.emit(result_id, result.get("result_uid", 0) as int, table_pos)
 
 func _on_craft_retrieve_rejected(reason: String) -> void:
+	_craft_retrieve_pending = false
+	_craft_table_item = {}
 	craft_rejected.emit("取件失败：" + reason)
 
 var _craft_start_pending: bool = false

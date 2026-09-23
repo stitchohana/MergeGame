@@ -3,7 +3,9 @@
 	"max": 100,
 	"spawn_cost": 1,
 	"regen_interval": 120,
-	"regen_amount": 1
+	"regen_amount": 1,
+	"multiplier_threshold_base": 100,
+	"multiplier_duration": 3600
   },
   "reset_hour": 5,
   "craft_speedup_stone_cost_per_minute": 1,

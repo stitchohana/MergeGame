@@ -17,7 +17,6 @@ func begin(message: String = "加载中") -> int:
 	_next_token += 1
 	_tokens.append(token)
 	_total += 1
-	print("[LoadingMgr] begin token=", token, " msg=", message, " total_tokens=", _tokens.size())
 
 	if _tokens.size() == 1 and _total == 1:
 		_show()
@@ -30,14 +29,12 @@ func begin(message: String = "加载中") -> int:
 
 
 func end(token: int) -> void:
-	print("[LoadingMgr] end token=", token, " remaining=", _tokens.size() - 1)
 	var idx := _tokens.find(token)
 	if idx >= 0:
 		_tokens.remove_at(idx)
 	_update_progress()
 
 	if _tokens.is_empty():
-		print("[LoadingMgr] all tokens done, hiding loading")
 		_hide()
 
 

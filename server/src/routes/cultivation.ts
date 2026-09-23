@@ -21,6 +21,15 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
   const router = new Router();
   router.use(createAuthRequired(jwtSecret));
 
+  function staminaMultiplierResponse(state: any) {
+    const multiplier = engine.getStaminaMultiplierState(state);
+    return {
+      stamina_multiplier_max: multiplier.maxMultiplier,
+      stamina_multiplier_expires_at: multiplier.expiresAt,
+      stamina_multiplier_remaining_seconds: multiplier.remainingSeconds,
+    };
+  }
+
   async function getOrCreateState(userId: string) {
     let state = await storage.loadState(userId);
     if (!state) {
@@ -29,8 +38,9 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       console.log(`[cult] new player ${userId}, init with ${state.grid.length} items`);
     } else {
       engine.tickStamina(state);
+      const multiplierExpired = engine.tickStaminaMultiplier(state);
       engine.tickLauncherRecharge(state);
-      if (engine.tickCraftingState(state)) {
+      if (engine.tickCraftingState(state) || multiplierExpired) {
         await storage.saveState(userId, state);
       }
     }
@@ -52,6 +62,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       cultivation: state.cultivation,
       quest_progress: state.quest_progress,
       meridian_acupoints: state.meridian_acupoints || [],
+      pending_rewards: state.pending_rewards,
     });
   }));
 
@@ -65,7 +76,14 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
     const result = engine.consumeStaminaPill(state, pill_id, uid);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, stamina: result.stamina, max_stamina: result.max_stamina, quest_progress: state.quest_progress });
+    res.json({
+      ok: true,
+      stamina: result.stamina,
+      max_stamina: result.max_stamina,
+      quest_progress: state.quest_progress,
+      pending_rewards: state.pending_rewards,
+      ...staminaMultiplierResponse(state),
+    });
   }));
 
   // POST /api/cultivation/consume-spirit-stone
@@ -83,6 +101,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       amount: result.amount,
       spirit_stones: result.spiritStones,
       quest_progress: state.quest_progress,
+      pending_rewards: state.pending_rewards,
     });
   }));
 
@@ -110,6 +129,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       rewards: result.rewards,
       spirit_stones: state.spirit_stones,
       stamina: state.stamina,
+      ...staminaMultiplierResponse(state),
       pending_rewards: state.pending_rewards,
       quest_progress: state.quest_progress,
       meridian_acupoints: state.meridian_acupoints || [],

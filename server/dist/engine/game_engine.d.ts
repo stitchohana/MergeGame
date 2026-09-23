@@ -61,6 +61,40 @@ type SpeedupFailure = {
     remainingSeconds?: number;
     spiritStones?: number;
 };
+type StaminaMultiplierState = {
+    maxMultiplier: number;
+    expiresAt: number;
+    remainingSeconds: number;
+};
+type SpawnSuccess = {
+    ok: true;
+    spawnedUid: number;
+    spawnedId: number;
+    spawnedName: string;
+    targetCol: number;
+    targetRow: number;
+    newVersion: number;
+    charges: number;
+    maxCharges: number;
+    rechargeTime: number;
+    atkBase: number;
+    sequenceUsed: number;
+    spawnSequence: number;
+    staminaMultiplier: number;
+    requestedStaminaMultiplier: number;
+    staminaCost: number;
+    staminaRefund: number;
+    orderPriority: boolean;
+    spawnedItems: Array<{
+        uid: number;
+        id: number;
+        name: string;
+        targetCol: number;
+        targetRow: number;
+        atkBase: number;
+        staminaUnits: number;
+    }>;
+};
 export declare class GameEngine {
     readonly GRID_COLS = 7;
     readonly GRID_ROWS = 9;
@@ -77,6 +111,8 @@ export declare class GameEngine {
         spawnCost: number;
         regenInterval: number;
         regenAmount: number;
+        multiplierThresholdBase: number;
+        multiplierDuration: number;
     };
     speedupConfig: {
         craftStoneCostPerMinute: number;
@@ -138,10 +174,13 @@ export declare class GameEngine {
         pending_rewards: any[];
         home_meridian_progress: any[];
         meridian_acupoints: any[];
+        grid: GridItem[];
+        launchers_refreshed: number;
     } | {
         ok: false;
         reason: string;
     };
+    private refreshBoardLaunchers;
     gmActivateHomeAcupoints(state: GameState, amount: number): {
         activated: number;
         completed_stages: number;
@@ -169,6 +208,7 @@ export declare class GameEngine {
     private _tryRevealFixedOrders;
     private _scaleRewardConfig;
     private _findMeridianThreshold;
+    private _generateRandomMeridianBatch;
     private _genOneAcupoint;
     private _genFixedAcupoint;
     private isOrderCandidate;
@@ -176,6 +216,7 @@ export declare class GameEngine {
     /** Backfill the unlock history for old saves and initialize new saves. */
     initializeProductionUnlocks(state: GameState): boolean;
     private getUnlockedOrderPool;
+    private getUnlockedOrderPoolWithWeights;
     repairInvalidMeridianOrders(state: GameState): boolean;
     private loadInitialSetup;
     getItemData(id: number): ItemDef | null;
@@ -191,6 +232,19 @@ export declare class GameEngine {
         atk_base?: number;
     }[];
     getMaxCharges(itemId: number): number;
+    getCultivationStaminaMultiplierCap(state: GameState): number;
+    getStaminaMultiplierState(state: GameState, now?: number): StaminaMultiplierState;
+    tickStaminaMultiplier(state: GameState, now?: number): boolean;
+    addStamina(state: GameState, amount: number, now?: number): StaminaMultiplierState;
+    refreshStaminaMultiplierFromBalance(state: GameState, now?: number): StaminaMultiplierState;
+    getLauncherSafeStaminaMultiplier(launcherId: number): number;
+    private getTriggeredStaminaMultiplier;
+    private isPowerOfTwo;
+    private upgradeSpawnResult;
+    private getOutstandingOrderItemCounts;
+    private consumeAvailableOrderItems;
+    private addRecipeMaterialRequirements;
+    private getOrderPrioritySpawnPlan;
     _nextUid(state: GameState): number;
     getRechargeTime(itemId: number): number;
     isInBounds(col: number, row: number): boolean;
@@ -250,21 +304,7 @@ export declare class GameEngine {
         ok: false;
         reason: string;
     };
-    executeSpawn(state: GameState, launcherCol: number, launcherRow: number, expectedSequence?: number): {
-        ok: true;
-        spawnedUid: number;
-        spawnedId: number;
-        spawnedName: string;
-        targetCol: number;
-        targetRow: number;
-        newVersion: number;
-        charges: number;
-        maxCharges: number;
-        rechargeTime: number;
-        atkBase: number;
-        sequenceUsed: number;
-        spawnSequence: number;
-    } | {
+    executeSpawn(state: GameState, launcherCol: number, launcherRow: number, expectedSequence?: number, requestedMultiplier?: number): SpawnSuccess | {
         ok: false;
         reason: string;
     };

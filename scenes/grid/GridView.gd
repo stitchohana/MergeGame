@@ -5,6 +5,7 @@ class_name GridView extends Control
 const LauncherControllerClass := preload("res://scenes/grid/LauncherController.gd")
 const CraftingControllerClass := preload("res://scenes/grid/CraftingController.gd")
 const ACTION_SYNC_SCREEN_SCENE := preload("res://scenes/screens/ActionSyncScreen.tscn")
+const CONFIRM_POPUP_SCENE := preload("res://scenes/ui/common/ConfirmPopup.tscn")
 const CELL_SIZE := Constants.CELL_SIZE
 const CELL_STEP := Constants.CELL_STEP
 const DRAG_THRESHOLD := 10.0  # pixels before drag starts
@@ -146,7 +147,6 @@ func _process(delta: float) -> void:
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	print("[GridView] _ready: size=", size, " position=", position, " visible=", visible)
 	_create_cells_layer()
 	_create_items_layer()
 	_launcher_ctrl = LauncherControllerClass.new()
@@ -243,7 +243,8 @@ func _input(event: InputEvent) -> void:
 			_finish_drag(cell_pos)
 		elif _pressed_has_moved == false and not _pressed_item.is_empty():
 			_select_item(_press_start_pos)
-			print("[CraftHint] input=click item_id=", int(_pressed_item.get("id", 0)), " source_pos=", _press_start_pos)
+			print("[PlayerAction] craft_hint_click item_id=", int(_pressed_item.get("id", 0)),
+				" source_pos=", _press_start_pos)
 			_show_crafting_hints(_pressed_item, _press_start_pos, false)
 			item_clicked.emit(_pressed_item, _press_start_pos)
 
@@ -503,7 +504,7 @@ func _start_drag(pos: Vector2i) -> void:
 	_drag_source_pos = pos
 	_drag_item_data = item
 	_is_dragging = true
-	print("[CraftHint] input=drag_start item_id=", int(item.get("id", 0)), " source_pos=", pos)
+	print("[PlayerAction] drag_start item_id=", int(item.get("id", 0)), " source_pos=", pos)
 	_show_crafting_hints(item, pos, true)
 	var drag_key := "%d,%d" % [pos.x, pos.y]
 	var drag_node = _item_nodes.get(drag_key)
@@ -560,7 +561,11 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		else:
 			_snap_back()
 
-func _try_optimistic_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
+func _try_optimistic_merge(
+	from_pos: Vector2i,
+	to_pos: Vector2i,
+	skip_realm_warning: bool = false
+) -> bool:
 	var from_item: Variant = GridManager.get_item(from_pos)
 	var to_item: Variant = GridManager.get_item(to_pos)
 	if from_item == null or to_item == null:
@@ -578,6 +583,18 @@ func _try_optimistic_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	)
 	if next_item.is_empty():
 		return false
+	if not skip_realm_warning and CultivationService.is_item_level_above_current_realm(
+		int(next_item.get("level", 0))
+	):
+		_snap_back_to(from_pos)
+		_show_over_realm_merge_confirmation(
+			from_pos,
+			to_pos,
+			int((from_item as Dictionary).get("_uid", 0)),
+			int((to_item as Dictionary).get("_uid", 0)),
+			next_item
+		)
+		return true
 	var spawn_requests: Array[String] = _collect_spawn_requests(
 		from_item as Dictionary, to_item as Dictionary
 	)
@@ -599,6 +616,49 @@ func _try_optimistic_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		"spawn_request_ids": spawn_requests,
 	})
 	return true
+
+
+func _show_over_realm_merge_confirmation(
+	from_pos: Vector2i,
+	to_pos: Vector2i,
+	from_uid: int,
+	to_uid: int,
+	result_item: Dictionary
+) -> void:
+	var popup: ConfirmPopup = CONFIRM_POPUP_SCENE.instantiate() as ConfirmPopup
+	UIManager.show_popup(popup)
+	var result_name: String = str(result_item.get("name", "该物品"))
+	var result_level: int = int(result_item.get("level", 0))
+	var realm_label: String = CultivationService.get_current_realm_label()
+	var level_cap: int = CultivationService.get_current_realm_item_level_cap()
+	popup.setup(
+		"越境合成提示",
+		"合成后将获得%s（%d级），超出当前%s的物品等级上限（%d级），是否继续合成？" % [
+			result_name, result_level, realm_label, level_cap,
+		],
+		func(): _confirm_over_realm_merge(from_pos, to_pos, from_uid, to_uid)
+	)
+
+
+func _confirm_over_realm_merge(
+	from_pos: Vector2i,
+	to_pos: Vector2i,
+	from_uid: int,
+	to_uid: int
+) -> void:
+	var from_item: Variant = GridManager.get_item(from_pos)
+	var to_item: Variant = GridManager.get_item(to_pos)
+	if from_item == null or to_item == null:
+		EventBus.show_toast.emit("物品状态已变化，请重试")
+		return
+	if (
+		int((from_item as Dictionary).get("_uid", 0)) != from_uid
+		or int((to_item as Dictionary).get("_uid", 0)) != to_uid
+		or not MergeService.can_merge(from_item as Dictionary, to_item as Dictionary)
+	):
+		EventBus.show_toast.emit("物品状态已变化，请重试")
+		return
+	_try_optimistic_merge(from_pos, to_pos, true)
 
 
 func _try_optimistic_push(from_pos: Vector2i, to_pos: Vector2i) -> bool:
@@ -680,8 +740,9 @@ func _on_pouch_deposit_rejected(reason: String) -> void:
 	EventBus.show_toast.emit("存入背包失败：" + reason)
 
 func _on_push_place_confirmed(result: Dictionary) -> void:
-	print("[GridView] push_place_confirmed: src=", _pending_push_src, " tgt=", _pending_push_target, " pushed=", Vector2i(result.get("pushed_col", -1), result.get("pushed_row", -1)))
-	print("[GridView] push_place confirmed: pushed=(" + str(result.get("pushed_col", -1)) + "," + str(result.get("pushed_row", -1)) + ")")
+	print("[PlayerAction] push_place_accept source=", _pending_push_src,
+		" target=", _pending_push_target, " pushed=",
+		Vector2i(result.get("pushed_col", -1), result.get("pushed_row", -1)))
 	var pushed_pos := Vector2i(result.get("pushed_col", -1), result.get("pushed_row", -1))
 	if _pending_push_target.x >= 0 and pushed_pos.x >= 0:
 		var src_key := "%d,%d" % [_pending_push_src.x, _pending_push_src.y]
@@ -697,7 +758,7 @@ func _on_push_place_confirmed(result: Dictionary) -> void:
 	_pending_push_src = Vector2i(-1, -1)
 	_pending_push_target = Vector2i(-1, -1)
 func _on_push_place_rejected(reason: String) -> void:
-	print("[GridView] push_place REJECTED: " + reason)
+	print("[PlayerAction] push_place_reject reason=", reason)
 	if _pending_push_src.x >= 0:
 		_snap_back_to(_pending_push_src)
 	_pending_push_src = Vector2i(-1, -1)
@@ -808,8 +869,6 @@ func _on_grid_updated() -> void:
 	_reset_board_idle()
 
 func _sync_all_items() -> void:
-	print("[StatusTrace] sync_all_begin frame=", Engine.get_process_frames(),
-		" old_nodes=", _item_nodes.size(), " grid_count=", GridManager.count_items())
 	_reset_board_idle()
 	_clear_all_item_nodes()
 	var layer := _get_items_layer()
@@ -821,8 +880,6 @@ func _sync_all_items() -> void:
 		item.setup(entry.data, entry.pos, CELL_STEP)
 		_item_nodes["%d,%d" % [entry.pos.x, entry.pos.y]] = item
 		_try_start_launcher_cd(entry.data)
-	print("[StatusTrace] sync_all_end frame=", Engine.get_process_frames(),
-		" new_nodes=", _item_nodes.size())
 
 func _remove_item_node(pos: Vector2i) -> void:
 	var key := "%d,%d" % [pos.x, pos.y]
@@ -832,7 +889,6 @@ func _remove_item_node(pos: Vector2i) -> void:
 	_item_nodes.erase(key)
 
 func _clear_all_item_nodes() -> void:
-	print("[StatusTrace] clear_nodes frame=", Engine.get_process_frames(), " count=", _item_nodes.size())
 	_clear_crafting_hints("grid_rebuild")
 	for key in _item_nodes:
 		var node = _item_nodes[key]
@@ -852,43 +908,29 @@ func _show_crafting_hints(item_data: Dictionary, source_pos: Vector2i, persisten
 	var source_node: GridItem = _item_nodes.get(source_key) as GridItem
 	var source_valid: bool = source_node != null and is_instance_valid(source_node)
 	var source_required: bool = source_valid and source_node.is_required()
-	print("[CraftHint] request item_id=", int(item_data.get("id", 0)), " source_pos=", source_pos,
-		" persistent=", persistent, " source_node_found=", source_valid, " required=", source_required)
 	if not source_valid:
-		print("[CraftHint] abort reason=source_node_missing source_key=", source_key, " known_nodes=", _item_nodes.size())
 		return
 	if not source_required:
-		print("[CraftHint] abort reason=source_not_required require_visible=", source_node.require_icon.visible)
 		return
 	var ingredient_id: int = int(item_data.get("id", 0))
 	var ingredient_icon: Texture2D = source_node.icon_rect.texture
 	if ingredient_id <= 0 or ingredient_icon == null:
-		print("[CraftHint] abort reason=invalid_item_or_icon ingredient_id=", ingredient_id, " icon_null=", ingredient_icon == null)
 		return
 
-	var crafting_table_count: int = 0
 	for entry: Dictionary in GridManager.get_all_items():
 		var table_item: Dictionary = entry.get("data", {}) as Dictionary
 		if int(table_item.get("type", -1)) != Constants.ItemType.CRAFTING:
 			continue
-		crafting_table_count += 1
 		var table_pos: Vector2i = entry.get("pos", Vector2i(-1, -1)) as Vector2i
 		var acceptance: Dictionary = _craft_ctrl.get_ingredient_hint_debug(table_item, ingredient_id)
-		print("[CraftHint] table_check table_id=", int(table_item.get("id", 0)), " table_pos=", table_pos,
-			" accepted=", bool(acceptance.get("accepted", false)), " reason=", acceptance.get("reason", "unknown"),
-			" state=", acceptance.get("state", -1), " recipes=", acceptance.get("recipe_count", 0),
-			" stored=", acceptance.get("stored_count", 0), " recipe_id=", acceptance.get("recipe_id", 0))
 		if not bool(acceptance.get("accepted", false)):
 			continue
 		var table_key: String = "%d,%d" % [table_pos.x, table_pos.y]
 		var table_node: GridItem = _item_nodes.get(table_key) as GridItem
 		if table_node == null or not is_instance_valid(table_node):
-			print("[CraftHint] table_skip reason=table_node_missing table_id=", int(table_item.get("id", 0)), " table_key=", table_key)
 			continue
 		table_node.show_crafting_hint(ingredient_icon)
 		_craft_hint_nodes.append(table_node)
-	print("[CraftHint] summary ingredient_id=", ingredient_id, " crafting_tables=", crafting_table_count,
-		" bubbles_shown=", _craft_hint_nodes.size())
 
 	if not persistent and not _craft_hint_nodes.is_empty():
 		var hint_token: int = _craft_hint_token
@@ -897,10 +939,8 @@ func _show_crafting_hints(item_data: Dictionary, source_pos: Vector2i, persisten
 				_clear_crafting_hints("click_timeout")
 		)
 
-func _clear_crafting_hints(reason: String = "reset") -> void:
+func _clear_crafting_hints(_reason: String = "reset") -> void:
 	_craft_hint_token += 1
-	if not _craft_hint_nodes.is_empty():
-		print("[CraftHint] clear reason=", reason, " bubble_count=", _craft_hint_nodes.size())
 	for table_node: GridItem in _craft_hint_nodes:
 		if table_node != null and is_instance_valid(table_node):
 			table_node.hide_crafting_hint()
@@ -972,7 +1012,7 @@ func _on_storage_deposit_confirmed(result: Dictionary) -> void:
 	_pending_storage_storage_pos = Vector2i(-1, -1)
 
 func _on_storage_deposit_rejected(reason: String) -> void:
-	print("[GridView] Storage deposit rejected: ", reason)
+	print("[PlayerAction] storage_deposit_reject reason=", reason)
 	EventBus.show_toast.emit("存入仓库失败：" + reason)
 	if _pending_storage_deposit_src.x >= 0:
 		_snap_back_to(_pending_storage_deposit_src)
@@ -1016,38 +1056,19 @@ func _on_craft_retrieve_ready(result_id: int, result_uid: int, table_pos: Vector
 
 func _on_craft_visual_update(table_item: Dictionary, state: int) -> void:
 	var table_uid: int = int(table_item.get("_uid", 0))
-	print("[CraftStatusTrace] visual_update frame=", Engine.get_process_frames(),
-		" uid=", table_uid, " id=", int(table_item.get("id", 0)),
-		" state=", state, " nodes=", _item_nodes.size(),
-		" stored=", (table_item.get("_craft_stored", []) as Array).size())
-	var matched: bool = false
 	for key in _item_nodes:
 		var node = _item_nodes[key]
 		if node and is_instance_valid(node) and (
 			(node.item_data == table_item)
 			or (table_uid > 0 and int(node.item_data.get("_uid", 0)) == table_uid)
 		):
-			matched = true
 			# CraftingService mutates the authoritative table dictionary before
 			# this signal; update the live node explicitly so its transparent
 			# state icon is not left stale after material insertion.
 			node.item_data = table_item
 			node.set_crafting_state(state)
 			node.refresh_status_icons()
-			print("[CraftStatusTrace] node_updated frame=", Engine.get_process_frames(),
-				" key=", key, " uid=", int(node.item_data.get("_uid", 0)),
-				" idle=", node.status_idle_icon.visible,
-				" loaded=", node.status_loaded_icon.visible,
-				" working=", node.status_working_icon.visible,
-				" ready=", node.status_ready_icon.visible)
 			break
-	if not matched:
-		var node_uids: Array[int] = []
-		for raw_node: Variant in _item_nodes.values():
-			var candidate: GridItem = raw_node as GridItem
-			if candidate != null and is_instance_valid(candidate):
-				node_uids.append(int(candidate.item_data.get("_uid", 0)))
-		print("[CraftStatusTrace] node_not_found uid=", table_uid, " node_uids=", node_uids)
 
 func _on_craft_start_requested(table_pos: Vector2i) -> void:
 	var table: Variant = GridManager.get_item(table_pos)
@@ -1152,6 +1173,9 @@ func _on_launcher_speedup_confirmed(result: Dictionary) -> void:
 
 func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> void:
 	_apply_spawn_resources(result)
+	var stamina_refund: int = int(result.get("stamina_refund", 0))
+	if bool(result.get("order_priority", false)) and stamina_refund > 0:
+		EventBus.show_toast.emit("优先生成订单物品，返还 %d 体力" % stamina_refund)
 	call_deferred("_flush_spawn_action_batch")
 	call_deferred("_finalize_action_sync")
 	call_deferred("_try_finish_action_sync_barrier")
@@ -1163,16 +1187,7 @@ func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> 
 	var prediction_matches: bool = server_prediction_matches and predicted_id == spawned_id and predicted_pos == target_pos
 	var request_id: String = prediction.get("request_id", "")
 	if not prediction_matches:
-		print("[GridView] spawn prediction mismatch: request=", request_id,
-			" predicted_id=", predicted_id,
-			" actual_id=", spawned_id,
-			" predicted_target=", predicted_pos,
-			" actual_target=", target_pos,
-			" server_reported_match=", server_prediction_matches,
-			" client_seed=", GameState.spawn_seed,
-			" client_sequence=", prediction.get("sequence", -1),
-			" server_sequence_used=", result.get("sequence_used", -1),
-			" server_next_sequence=", result.get("spawn_sequence", -1))
+		push_warning("Spawn prediction mismatch for request %s" % request_id)
 
 	var current_pos: Vector2i = _find_temp_spawn_pos(prediction.get("temp_uid", -1))
 
@@ -1190,7 +1205,6 @@ func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> 
 
 	if result.has("grid"):
 		if _has_unsynced_actions():
-			print("[GridView] spawn snapshot recovery deferred: unsynced actions still pending, request=", request_id)
 			return
 		_rollback_spawn_prediction(prediction)
 		_sync_grid_from_server(result)
@@ -1202,7 +1216,6 @@ func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> 
 			GridManager.remove_item(target_pos)
 		else:
 			if _has_unsynced_actions():
-				print("[GridView] spawn recovery deferred: unsynced actions still pending, request=", request_id)
 				return
 			_rollback_spawn_prediction(prediction)
 			CloudService.fetch_state()
@@ -1220,7 +1233,7 @@ func _on_launcher_spawn_finished(result: Dictionary, prediction: Dictionary) -> 
 		_play_spawn_fly(target_pos, prediction.get("launcher_pos", Vector2i(-1, -1)))
 
 func _on_launcher_spawn_failed(reason: String, prediction: Dictionary) -> void:
-	print("[GridView] launcher spawn failed: reason=", reason,
+	print("[PlayerAction] launcher_spawn_reject reason=", reason,
 		" request=", prediction.get("request_id", ""),
 		" launcher_uid=", prediction.get("launcher_uid", -1),
 		" client_sequence=", prediction.get("sequence", -1),
@@ -1397,6 +1410,7 @@ func _rollback_spawn_prediction(prediction: Dictionary) -> void:
 		GridManager.remove_item(target_pos)
 
 func _apply_spawn_resources(result: Dictionary) -> void:
+	GameState.sync_stamina_multiplier(result)
 	var regen_ms: float = result.get("regen_remaining_ms", 0.0)
 	if regen_ms > 0:
 		GameState.regen_remaining_ms = regen_ms
@@ -1452,12 +1466,13 @@ func _select_item(pos: Vector2i) -> void:
 				EventBus.show_toast.emit("该物品无法使用")
 				return
 			if Constants.has_launcher_config(item):
-				print("[GridView] double-click spawn: id=" + str(item.get("id",0)))
+				print("[PlayerAction] launcher_double_click item_id=", int(item.get("id", 0)))
 				_handle_launcher_click(pos)
 			elif _has_storage_slots(item):
 				_handle_storage_click(pos)
 			else:
-				print("[GridView] double-click use: id=" + str(item.get("id",0)) + " type=" + str(item.get("type","")))
+				print("[PlayerAction] item_double_click item_id=", int(item.get("id", 0)),
+					" type=", item.get("type", ""))
 				_request_item_use(item as Dictionary, pos)
 		return
 	_deselect_all()
@@ -1469,15 +1484,10 @@ func _select_item(pos: Vector2i) -> void:
 func _sync_grid_from_server(result: Dictionary) -> void:
 	var server_grid: Array = result.get("grid", [])
 	if server_grid.is_empty():
-		print("[GridView] _sync_grid_from_server skipped: empty snapshot")
 		return
 	if GridManager.reconcile_from_server(server_grid):
-		print("[GridView] _sync_grid_from_server reconciled in place: entries=", server_grid.size())
 		_restore_crafting_timers()
 		return
-	print("[GridView] _sync_grid_from_server rebuilding: entries=", server_grid.size(),
-		" local_items=", GridManager.count_items(),
-		" caller=", get_stack())
 	_skip_anims = true
 	GridManager.init_grid(GameState.current_board_type)
 	for entry in server_grid:

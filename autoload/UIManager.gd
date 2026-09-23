@@ -105,25 +105,18 @@ func replace_top_screen(screen: BaseScreen) -> void:
 	if _screen_stack.size() > 0:
 		old = _screen_stack.back()
 
-	print("[UIMgr] replace_top_screen: screen=", screen.name, " old=", old.name if old else "null")
 	_layers[Layer.GAME].add_child(screen)
 	_screen_stack.append(screen)
-	print("[UIMgr] screen added, scheduling call_deferred _finish_replace")
 	call_deferred("_finish_replace", old, screen)
 
 
 func _finish_replace(old: BaseScreen, screen: BaseScreen) -> void:
-	print("[UIMgr] _finish_replace: screen=", screen.name, " old=", old.name if old else "null")
 	if is_instance_valid(old):
 		old.on_exit()
-		print("[UIMgr] old.on_exit() done, erasing from stack")
 		_screen_stack.erase(old)
 		old.queue_free()
-	print("[UIMgr] calling screen.on_enter(): ", screen.name)
 	screen.on_enter()
-	print("[UIMgr] on_enter done, emitting post_screen_changed")
 	post_screen_changed.emit(screen.name if screen else "", "replaced")
-	print("[UIMgr] _finish_replace complete")
 
 
 func get_current_screen() -> BaseScreen:

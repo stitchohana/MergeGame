@@ -30,6 +30,7 @@ func _init_craft_data(table_item: Dictionary) -> void:
 	table_item["_craft_recipe"] = {}
 	table_item["_craft_progress"] = 0.0
 	table_item["_craft_result_id"] = -1
+	table_item["_craft_start_time"] = 0
 
 func _get_state(table_item: Dictionary) -> int:
 	return table_item.get("_craft_state", TableState.IDLE)
@@ -37,12 +38,25 @@ func _get_state(table_item: Dictionary) -> int:
 func _set_state(table_item: Dictionary, state: int) -> void:
 	table_item["_craft_state"] = state
 
+func _stop_craft_timer(table_item: Dictionary) -> void:
+	var timer: Variant = table_item.get("_craft_timer")
+	if timer is Timer and is_instance_valid(timer):
+		timer.stop()
+		timer.queue_free()
+	table_item.erase("_craft_timer")
+
 # --- Public API ---
 
 func add_ingredient(table_item: Dictionary, ingredient_data: Dictionary) -> bool:
 	_init_craft_data(table_item)
+	# An authoritative sync can replace a stale local craft snapshot while an
+	# old timer is still alive. It must not be allowed to turn HAS_ITEMS into
+	# READY after the new ingredient is stored.
+	_stop_craft_timer(table_item)
 	var stored: Array = table_item["_craft_stored"]
-	stored.append({"uid": ingredient_data.get("_uid", ingredient_data.get("uid", 0)) as int, "id": ingredient_data.get("id", 0) as int})
+	var ingredient_id: int = int(ingredient_data.get("id", 0))
+	var ingredient_uid: int = int(ingredient_data.get("_uid", ingredient_data.get("uid", 0)))
+	stored.append({"uid": ingredient_uid, "id": ingredient_id})
 	_set_state(table_item, TableState.HAS_ITEMS)
 
 	var table_id: int = table_item.get("id", 0)
@@ -69,6 +83,9 @@ func start_craft(table_item: Dictionary) -> bool:
 	table_item["_craft_progress"] = 0.0
 	table_item["_craft_stored"] = []
 	table_item["_craft_result_id"] = recipe.get("result", 0)
+	# Keep an authoritative-compatible timestamp in the local snapshot so a
+	# later board sync or scene change can rebuild the countdown accurately.
+	table_item["_craft_start_time"] = int(Time.get_unix_time_from_system() * 1000.0)
 
 	var timer := Timer.new()
 	timer.one_shot = true
@@ -83,17 +100,14 @@ func start_craft(table_item: Dictionary) -> bool:
 
 func restore_craft_timers() -> void:
 	# Called after server state restore — recreates local timers for CRAFTING tables
-	print("[Crafting] restore_craft_timers: grid has ", GridManager.count_items(), " items")
-	for entry in GridManager.get_all_items():
-		var cs: int = entry.data.get("_craft_state", -1)
-		if cs != -1:
-			print("[Crafting]   item #", entry.data.get("id", 0), " at (", entry.pos.x, ",", entry.pos.y, ") craft_state=", cs)
 	for entry in GridManager.get_all_items():
 		var item: Dictionary = entry.data
 		if item.get("_craft_state", TableState.IDLE) != TableState.CRAFTING:
+			_stop_craft_timer(item)
 			continue
 		var recipe: Dictionary = item.get("_craft_recipe", {})
 		if recipe.is_empty():
+			_stop_craft_timer(item)
 			continue
 		var total_time: float = recipe.get("craft_time", 3.0)
 		var start_time: float = item.get("_craft_start_time", 0)
@@ -121,9 +135,11 @@ func restore_craft_timers() -> void:
 
 func restore_craft_timer_for_item(item: Dictionary) -> void:
 	if item.get("_craft_state", TableState.IDLE) != TableState.CRAFTING:
+		_stop_craft_timer(item)
 		return
 	var recipe: Dictionary = item.get("_craft_recipe", {})
 	if recipe.is_empty():
+		_stop_craft_timer(item)
 		return
 	var total_time: float = recipe.get("craft_time", 3.0)
 	var start_time: float = item.get("_craft_start_time", 0)
@@ -148,9 +164,14 @@ func restore_craft_timer_for_item(item: Dictionary) -> void:
 
 func get_remaining_craft_seconds(table_item: Dictionary) -> float:
 	var timer: Timer = table_item.get("_craft_timer")
-	if not is_instance_valid(timer) or not timer.is_inside_tree():
+	if is_instance_valid(timer) and timer.is_inside_tree():
+		return timer.time_left
+	var recipe: Dictionary = table_item.get("_craft_recipe", {})
+	var total_time: float = float(recipe.get("craft_time", 0.0))
+	var start_time: float = float(table_item.get("_craft_start_time", 0))
+	if total_time <= 0.0 or start_time <= 0.0:
 		return 0.0
-	return timer.time_left
+	return maxf(0.0, total_time - (Time.get_unix_time_from_system() * 1000.0 - start_time) / 1000.0)
 
 func complete_craft_now(table_item: Dictionary) -> void:
 	if table_item.is_empty():
@@ -165,6 +186,11 @@ func complete_craft_now(table_item: Dictionary) -> void:
 	table_state_changed.emit(table_item, TableState.READY)
 
 func _on_craft_timeout(table_item: Dictionary) -> void:
+	# Timers may outlive an authoritative grid reconciliation. Never promote a
+	# table that is no longer in the CRAFTING state.
+	if _get_state(table_item) != TableState.CRAFTING:
+		_stop_craft_timer(table_item)
+		return
 	_set_state(table_item, TableState.READY)
 	table_item["_craft_progress"] = 1.0
 	var timer: Timer = table_item.get("_craft_timer")
@@ -192,7 +218,7 @@ func _clear_craft_data(table_item: Dictionary) -> void:
 	if timer:
 		timer.queue_free()
 	for key in ["_craft_init", "_craft_state", "_craft_stored", "_craft_recipe",
-			"_craft_progress", "_craft_result_id", "_craft_timer"]:
+			"_craft_progress", "_craft_result_id", "_craft_start_time", "_craft_timer"]:
 		table_item.erase(key)
 
 func reset_all() -> void:

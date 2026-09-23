@@ -41,12 +41,10 @@ func load_scene_and_replace(scene_path: String, after_load: Callable = Callable(
 		)
 	UIManager.replace_top_screen(screen)
 
-	print("[STM] load_scene_and_replace: ", scene_path, " skip=", skip_loading_overlay)
 	var timer := Timer.new()
 	timer.one_shot = true
 	timer.wait_time = MIN_DISPLAY_TIME
 	timer.timeout.connect(func():
-		print("[STM] timer fired, ending token=", token)
 		timer.queue_free()
 		if not skip_loading_overlay:
 			LoadingManager.end(token)

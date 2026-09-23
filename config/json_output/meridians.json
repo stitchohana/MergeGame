@@ -78,56 +78,56 @@
       "count_min": 1,
       "count_max": 2,
       "acupoint_rewards": 219,
-      "order_count": 7
+      "order_count": 4
     },
     {
       "stage": 3,
       "count_min": 1,
       "count_max": 3,
       "acupoint_rewards": 219,
-      "order_count": 7
+      "order_count": 4
     },
     {
       "stage": 4,
       "count_min": 2,
       "count_max": 3,
       "acupoint_rewards": 219,
-      "order_count": 7
+      "order_count": 4
     },
     {
       "stage": 5,
       "count_min": 2,
       "count_max": 3,
       "acupoint_rewards": 219,
-      "order_count": 7
+      "order_count": 5
     },
     {
       "stage": 6,
       "count_min": 2,
       "count_max": 4,
       "acupoint_rewards": 219,
-      "order_count": 7
+      "order_count": 5
     },
     {
       "stage": 7,
       "count_min": 2,
       "count_max": 4,
       "acupoint_rewards": 219,
-      "order_count": 7
+      "order_count": 6
     },
     {
       "stage": 8,
       "count_min": 2,
       "count_max": 4,
       "acupoint_rewards": 219,
-      "order_count": 7
+      "order_count": 6
     },
     {
       "stage": 9,
       "count_min": 2,
       "count_max": 5,
       "acupoint_rewards": 219,
-      "order_count": 7
+      "order_count": 6
     },
     {
       "stage": 10,

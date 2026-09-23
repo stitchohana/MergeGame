@@ -217,9 +217,6 @@ func _update_source_card(entries: Array[Dictionary]) -> void:
 		return
 
 	var first_entry: Dictionary = entries[0]
-	print("[CraftPathTrace] source_card entries=", _describe_source_entries(entries),
-		" selected_id=", ConfigDatabase._coerce_int(first_entry.get("id", 0)),
-		" selected_level=", ConfigDatabase._coerce_int(first_entry.get("level", 0)))
 	source_item.show()
 	source_item.setup(first_entry)
 	source_item.set_selected(false)
@@ -237,8 +234,9 @@ func _configure_discovery_visual(widget: ItemWidget, item_data: Dictionary) -> v
 	var lock_icon: TextureRect = widget.get_node_or_null("IconLock") as TextureRect
 	var item_id: int = ConfigDatabase._coerce_int(item_data.get("id", 0))
 	var item_level: int = ConfigDatabase._coerce_int(item_data.get("level", 0))
+	var is_present_on_board: bool = not GridManager.get_positions_by_item_id(item_id).is_empty()
 	var is_discovered: bool = not item_data.is_empty() and (
-		item_level <= 1 or GameState.has_crafted_item(item_id)
+		item_level <= 1 or GameState.has_crafted_item(item_id) or is_present_on_board
 	)
 	if icon_rect:
 		icon_rect.visible = is_discovered
@@ -249,7 +247,6 @@ func _configure_discovery_visual(widget: ItemWidget, item_data: Dictionary) -> v
 
 func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 	var present_launcher_ids: Dictionary = {}
-	var board_launchers: Array[Dictionary] = []
 	for entry: Dictionary in GridManager.get_all_items():
 		var board_item: Dictionary = entry.get("data", {})
 		if ConfigDatabase._coerce_int(board_item.get("type", 0)) != Constants.ItemType.LAUNCHER:
@@ -257,14 +254,9 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 		var launcher_id: int = ConfigDatabase._coerce_int(board_item.get("id", 0))
 		if launcher_id > 0:
 			present_launcher_ids[launcher_id] = true
-			board_launchers.append(board_item)
 
 	var result: Array[Dictionary] = []
 	var launchers: Array = ConfigDatabase.get_launchers_for_item(item_id)
-	print("[CraftPathTrace] source_candidates item_id=", item_id,
-		" board_launchers=", _describe_source_entries(board_launchers),
-		" configured_candidates=", _describe_source_entries(launchers),
-		" current_level=", maxi(1, int(CultivationService.current_level)))
 	for raw_launcher: Variant in launchers:
 		if not raw_launcher is Dictionary:
 			continue
@@ -281,8 +273,6 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 		if level_a != level_b:
 			return level_a > level_b
 		return ConfigDatabase._coerce_int(a.get("id", 0)) > ConfigDatabase._coerce_int(b.get("id", 0)))
-	print("[CraftPathTrace] source_sorted item_id=", item_id,
-		" present_result=", _describe_source_entries(result))
 	if not result.is_empty():
 		return result
 
@@ -293,17 +283,6 @@ func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 		if raw_launcher is Dictionary:
 			result.append(raw_launcher as Dictionary)
 	return result
-
-func _describe_source_entries(entries: Array) -> Array[String]:
-	var result: Array[String] = []
-	for raw: Variant in entries:
-		if raw is Dictionary:
-			var data: Dictionary = raw as Dictionary
-			result.append("%d(lv%d)" % [
-				ConfigDatabase._coerce_int(data.get("id", 0)),
-				ConfigDatabase._coerce_int(data.get("level", 0))])
-	return result
-
 
 func _filter_launchers_by_cultivation_level(launchers: Array) -> Array:
 	# Source icons should reflect the mine levels currently available to the

@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://d4bv61jk3x6ah" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_button.png" id="8_hofs8"]
 [ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/main/PouchDropZone.tscn" id="8_pouch"]
 [ext_resource type="Texture2D" uid="uid://cv2pn225isxby" path="res://assets/ui/xianxia_v3_layers_v2/layers/shop_button.png" id="10_ehb84"]
+[ext_resource type="PackedScene" path="res://scenes/ui/main/StaminaMultiplierControl.tscn" id="11_multiplier"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_nav_normal"]
 bg_color = Color(1, 0.976, 0.902, 0.98)
@@ -90,6 +91,14 @@ z_index = 10
 layout_mode = 0
 offset_top = 158.0
 offset_bottom = 250.0
+
+[node name="StaminaMultiplierControl" parent="." instance=ExtResource("11_multiplier")]
+z_index = 11
+layout_mode = 0
+offset_left = 24.0
+offset_top = 254.0
+offset_right = 310.0
+offset_bottom = 306.0
 
 [node name="RequirementList" parent="." unique_id=2099547480 instance=ExtResource("7_req")]
 z_index = 10

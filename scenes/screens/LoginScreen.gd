@@ -48,7 +48,6 @@ func _get_device_id() -> String:
 func _status(msg: String) -> void:
 	if status_label:
 		status_label.text = msg
-		print("[LoginScreen] ", msg)
 
 func _on_login() -> void:
 	var device_id := device_input.text.strip_edges()

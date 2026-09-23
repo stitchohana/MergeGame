@@ -82,6 +82,8 @@ export declare const gameConfigTables: {
             spawn_cost: number;
             regen_interval: number;
             regen_amount: number;
+            multiplier_threshold_base: number;
+            multiplier_duration: number;
         };
         reset_hour: number;
         craft_speedup_stone_cost_per_minute: number;
@@ -126,19 +128,6 @@ export declare const gameConfigTables: {
             type: number;
             value: number;
             sell_price: number;
-            max_charges?: undefined;
-            recharge_time?: undefined;
-            spawns?: undefined;
-        } | {
-            id: number;
-            level: number;
-            name: string;
-            icon: string;
-            group_id: number;
-            describe: string;
-            type: number;
-            sell_price: number;
-            value?: undefined;
             max_charges?: undefined;
             recharge_time?: undefined;
             spawns?: undefined;

@@ -54,11 +54,9 @@ func _show_day(day: int) -> void:
 		child.queue_free()
 
 	var today: int = GameState.activity_current_day
-	print("[WeeklyPanel] activity_current_day=", today, " showing day=", day)
 	for i in range(day_buttons.get_child_count()):
 		var btn := day_buttons.get_child(i) as Button
 		btn.disabled = i > today
-		print("[WeeklyPanel] day button", i, "disabled=", btn.disabled)
 		if i == day:
 			btn.add_theme_color_override("font_color", Color(1, 0.85, 0.2, 1))
 		else:

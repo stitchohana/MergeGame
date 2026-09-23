@@ -1,26 +1,41 @@
-"""Shared progression rules for the 666 home-meridian circulations."""
+"""Shared progression rules for the home-meridian circulations."""
 
 from collections import Counter
 from typing import Any, Mapping, Sequence
 
 
-TOTAL_CIRCULATIONS = 666
-CIRCULATIONS_BY_LEVEL = [3, 6, 10, 13, 16, 19, 22, 25, 29, 32, 35, 38, 41, 44, 48, 51, 54, 57, 60, 63]
+TOTAL_CIRCULATIONS = 556
+# Mortal has two circulations.  Qi starts at three and grows by one per
+# level.  Later realms keep their existing distribution; the removed early
+# circulations are intentionally not back-filled.
+CIRCULATIONS_BY_LEVEL = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 35, 38, 41, 44, 48, 51, 54, 57, 60, 63]
 SPIRIT_STONE_MINE_ID = 25001
 MINE_ONLY_REWARD_ID = 313
 MINE_FAMILY = SPIRIT_STONE_MINE_ID // 100
+QI_FACILITY_FAMILIES = frozenset({110, 120, 130, 150, 170, 180})
+FOUNDATION_FACILITY_FAMILIES_BY_LEVEL = {
+    11: QI_FACILITY_FAMILIES | {140, 210},
+    12: QI_FACILITY_FAMILIES | {140, 210, 230, 200},
+    13: QI_FACILITY_FAMILIES | {140, 210, 230, 200, 160, 240, 190},
+}
+FOUNDATION_UNLOCK_FAMILIES_BY_LEVEL = {
+    11: frozenset({140, 210}),
+    12: frozenset({230, 200}),
+    13: frozenset({160, 240, 190}),
+}
 
 # The initial ten cultivation levels keep four nodes per circulation. The
-# tutorial (凡人) uses 5 qi per node so its three circulations cost 60 qi,
-# closely matching the 65 qi produced by the seven fixed onboarding orders.
+# tutorial (凡人) uses 5 qi per node so its two circulations cost 40 qi.
 # Later levels are derived from current order values so a maximum order fills
 # about half of one circulation after order rewards switch to 1:1 value-to-qi.
 # Index 0 is 凡人; indexes 1-9 are the 练气 levels.
 EARLY_STAGE_NODES_PER_CIRCULATION = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
 EARLY_STAGE_QI_COST = [5, 126, 210, 262, 315, 377, 440, 440, 587, 587]
 # EXP formerly granted one node at a time is now included in the completed
-# circulation reward. Keep the per-circulation budget here for balance checks.
-EARLY_STAGE_EXP_PER_CIRCULATION = [4, 8, 8, 8, 8, 12, 12, 12, 12, 12]
+# circulation reward. Keep the per-level totals here for balance checks.
+# These are the existing total EXP budgets for 凡人 and 练气.  The generator
+# distributes each total across that level's new circulation count.
+EARLY_STAGE_TOTAL_EXP = [12, 48, 80, 104, 128, 228, 264, 300, 348, 384]
 
 
 def _as_int(value: Any, default: int = 0) -> int:
@@ -60,21 +75,18 @@ def facility_level_cap(cultivation_level: int) -> int:
 
 
 def early_stage_exp(cultivation_level: int, circulation_count: int) -> int:
-    """Return the reduced EXP budget for 凡人/练气 levels."""
+    """Return the unchanged total EXP budget for 凡人/练气 levels."""
     index = cultivation_level - 1
-    if index < 0 or index >= len(EARLY_STAGE_NODES_PER_CIRCULATION):
+    if index < 0 or index >= len(EARLY_STAGE_TOTAL_EXP):
         raise ValueError(f"not an early cultivation level: {cultivation_level}")
-    return (
-        circulation_count
-        * EARLY_STAGE_EXP_PER_CIRCULATION[index]
-    )
+    return EARLY_STAGE_TOTAL_EXP[index]
 
 
 def validate_facility_reward_schedule(
     home_stages: Sequence[Mapping[str, Any]],
     items: Mapping[str, Any],
 ) -> None:
-    """Validate reward levels and family coverage for the 666-stage schedule."""
+    """Validate reward levels and family coverage for the staged schedule."""
     levels_by_id = {}
     families = set()
     for section in ("launcher", "crafting"):
@@ -91,6 +103,7 @@ def validate_facility_reward_schedule(
         raise ValueError(f"expected 13 non-mine facility families, got {sorted(families)}")
 
     family_by_realm = {"qi": set(), "foundation": set(), "gold": set(), "nascent": set()}
+    family_by_level = {level: set() for level in range(1, 21)}
     level16_families = set()
     for stage_index, stage in enumerate(home_stages):
         cultivation_level = _as_int(stage.get("cultivation_level"))
@@ -116,12 +129,31 @@ def validate_facility_reward_schedule(
                 )
             if realm in family_by_realm:
                 family_by_realm[realm].add(item_id // 100)
+            family_by_level.setdefault(cultivation_level, set()).add(item_id // 100)
+            family = item_id // 100
+            if 2 <= cultivation_level <= 10 and family not in QI_FACILITY_FAMILIES:
+                raise ValueError(
+                    f"练气期周天 {stage_index} 提前发放设施族群 {family}"
+                )
+            if 11 <= cultivation_level <= 13:
+                allowed = FOUNDATION_FACILITY_FAMILIES_BY_LEVEL[cultivation_level]
+                if family not in allowed:
+                    raise ValueError(
+                        f"筑基阶段 {cultivation_level} 周天 {stage_index} 提前发放设施族群 {family}"
+                    )
             if cultivation_level >= 17 and facility_level == 16:
                 level16_families.add(item_id // 100)
 
-    missing_qi = sorted(families - family_by_realm["qi"])
+    missing_qi = sorted(QI_FACILITY_FAMILIES - family_by_realm["qi"])
     if missing_qi:
         raise ValueError(f"练气期未覆盖设施族群: {missing_qi}")
+    extra_qi = sorted(family_by_realm["qi"] - QI_FACILITY_FAMILIES)
+    if extra_qi:
+        raise ValueError(f"练气期包含未开放设施族群: {extra_qi}")
+    for level, unlock_families in FOUNDATION_UNLOCK_FAMILIES_BY_LEVEL.items():
+        missing_unlocks = sorted(unlock_families - family_by_level.get(level, set()))
+        if missing_unlocks:
+            raise ValueError(f"筑基阶段 {level} 未发放设施族群: {missing_unlocks}")
     missing_foundation = sorted(families - family_by_realm["foundation"])
     if missing_foundation:
         raise ValueError(f"筑基期未覆盖设施族群: {missing_foundation}")
@@ -174,7 +206,7 @@ def validate_home_progression(
         if isinstance(reward_config, int) and rewards is not None:
             reward_config = rewards.get(str(reward_config), {})
         reward_items = reward_config.get("items", []) if isinstance(reward_config, Mapping) else []
-        mortal_facility_counts = (1, 0, 2)
+        mortal_facility_counts = (1, 2)
         expected_facility_count = (
             mortal_facility_counts[counts[level] - 1]
             if level == 1
@@ -202,8 +234,8 @@ def validate_home_progression(
         raise ValueError(
             f"home circulation distribution must be {CIRCULATIONS_BY_LEVEL}, got {actual_counts}"
         )
-    if any(actual_counts[index] >= actual_counts[index + 1] for index in range(len(actual_counts) - 1)):
-        raise ValueError("home circulation counts must strictly increase by cultivation level")
+    if any(actual_counts[index] >= actual_counts[index + 1] for index in range(1, len(actual_counts) - 1)):
+        raise ValueError("home circulation counts must strictly increase after the mortal stage")
 
     for level, cultivation_stage in enumerate(cultivation_stages, 1):
         expected_exp = _as_int(cultivation_stage.get("exp"))
@@ -227,7 +259,6 @@ def validate_home_progression(
         ]
         expected_nodes = EARLY_STAGE_NODES_PER_CIRCULATION[level - 1]
         expected_cost = EARLY_STAGE_QI_COST[level - 1]
-        expected_cycle_exp = EARLY_STAGE_EXP_PER_CIRCULATION[level - 1]
         for stage in level_rows:
             if _as_int(stage.get("acupoints")) != expected_nodes:
                 raise ValueError(
@@ -237,7 +268,11 @@ def validate_home_progression(
                 raise ValueError(
                     f"early cultivation level {level} must use qi_cost {expected_cost}"
                 )
-            if reward_token_amount(stage.get("circulation_reward"), 4) != expected_cycle_exp:
-                raise ValueError(
-                    f"early cultivation level {level} must grant {expected_cycle_exp} EXP per circulation"
-                )
+        actual_level_exp = sum(
+            reward_token_amount(stage.get("circulation_reward"), 4)
+            for stage in level_rows
+        )
+        if actual_level_exp != expected_exp:
+            raise ValueError(
+                f"early cultivation level {level} must grant {expected_exp} total EXP"
+            )

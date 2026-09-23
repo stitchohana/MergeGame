@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Expand home meridians to 666 staged circulations.
+"""Expand home meridians to the configured staged circulations.
 
 The transformation preserves each cultivation level's total acupoints, qi
-cost, EXP budget, circulation stamina, and non-mine facility quantities.  It
-adds explicit ``cultivation_level`` ownership, spreads facility units across
-the full progression, and moves the level-1 spirit-stone mine to every
+cost, EXP budget, and circulation stamina. It adds explicit
+``cultivation_level`` ownership, redistributes facility rewards across the
+configured progression, and moves the level-1 spirit-stone mine to every
 breakthrough reward.
 """
 
@@ -26,6 +26,7 @@ from home_meridian_progression import (
     CIRCULATIONS_BY_LEVEL,
     EARLY_STAGE_NODES_PER_CIRCULATION,
     EARLY_STAGE_QI_COST,
+    QI_FACILITY_FAMILIES,
     MINE_ONLY_REWARD_ID,
     SPIRIT_STONE_MINE_ID,
     TOTAL_CIRCULATIONS,
@@ -36,6 +37,10 @@ from home_meridian_progression import (
 
 BASE = Path(__file__).parent
 JSON_DIR = BASE / "json_output"
+# The previous Qi distribution is used only to calculate the compression
+# boost for facility rewards.  The removed circulations are represented by
+# higher-level facilities rather than being back-filled later.
+LEGACY_CIRCULATIONS_BY_LEVEL = [3, 6, 10, 13, 16, 19, 22, 25, 29, 32]
 def read_json(name: str) -> Any:
     with open(JSON_DIR / name, encoding="utf-8") as handle:
         return json.load(handle)
@@ -242,14 +247,7 @@ def facility_reward_schedule(
     expanded_stages: Sequence[Mapping[str, Any]],
     items: Mapping[str, Any],
 ) -> List[List[Dict[str, int]]]:
-    """Build two facility rewards per circulation with realm-based level caps.
-
-    The first pass through the families is launcher-first so every crafting
-    table is preceded by all of its launcher dependencies.  Within each
-    broad cultivation realm, each family ramps from the previous realm's
-    starting level to that realm's cap.  This gives all 13 families level-16
-    rewards by the Nascent Soul realm while keeping early rewards modest.
-    """
+    """Build two facility rewards per circulation from staged family pools."""
     levels = facility_level_map(items)
     families = sorted({family for family, _level in levels if family != SPIRIT_STONE_MINE_ID // 100})
     if len(families) != 13:
@@ -259,64 +257,69 @@ def facility_reward_schedule(
             if (family, level) not in levels:
                 raise ValueError(f"facility family {family} is missing level {level}")
 
-    def realm(level: int) -> Tuple[str, int, int]:
+    def realm(level: int, family: int) -> Tuple[str, int, int]:
         if level <= 1:
             return "mortal", 1, 1
         if level <= 10:
             return "qi", 1, 4
         if level <= 13:
-            return "foundation", 5, 8
+            start = 5 if family in QI_FACILITY_FAMILIES else 1
+            return "foundation", start, 8
         if level <= 16:
             return "gold", 9, 12
         return "nascent", 13, 16
 
-    # Keep launchers ahead of crafting tables on the first pass.  The family
-    # IDs are naturally ordered as launcher families (11x..16x, 23x, 24x)
-    # followed by crafting-table families (17x..21x).
-    launcher_families = sorted({as_int(item.get("id")) // 100
-                                for item in items.get("launcher", []) or []
-                                if isinstance(item, Mapping)
-                                and as_int(item.get("id")) // 100 != SPIRIT_STONE_MINE_ID // 100})
-    crafting_families = sorted(set(families) - set(launcher_families))
-    family_order = launcher_families + crafting_families
-    if family_order != families:
-        # The validator is authoritative, but this guard makes an accidental
-        # family classification change visible in the generator output.
-        if set(family_order) != set(families):
-            raise ValueError(f"facility family order is incomplete: {family_order}")
+    all_family_order = [110, 120, 130, 140, 150, 160, 230, 240, 170, 180, 190, 200, 210]
+    if set(all_family_order) != set(families):
+        raise ValueError(f"facility family order is incomplete: {all_family_order}")
+    family_order_by_level = {
+        # Production facilities precede their first dependent table by at
+        # least one circulation.  The ordering repeats within each level.
+        **{level: [150, 110, 130, 120, 180, 170] for level in range(2, 11)},
+        11: [140, 110, 210, 120, 130, 150, 170, 180],
+        12: [230, 110, 200, 120, 130, 140, 150, 170, 180, 210],
+        13: [160, 240, 110, 190, 120, 130, 140, 150, 170, 180, 200, 210, 230],
+    }
 
-    slots = len(expanded_stages) * 2
-    phase_slots: Dict[str, Dict[int, int]] = defaultdict(lambda: defaultdict(int))
-    phase_totals: Dict[str, int] = defaultdict(int)
+    family_rows: List[List[int]] = []
+    level_cursors: Dict[int, int] = defaultdict(int)
     for stage in expanded_stages:
-        phase, _start, _cap = realm(as_int(stage.get("cultivation_level")))
-        phase_totals[phase] += 2
-    phase_occurrences: Dict[str, Dict[int, int]] = defaultdict(lambda: defaultdict(int))
-    for slot_index in range(slots):
-        stage = expanded_stages[slot_index // 2]
-        phase, _start, _cap = realm(as_int(stage.get("cultivation_level")))
-        family = family_order[slot_index % len(family_order)]
-        phase_slots[phase][family] += 1
+        cultivation_level = as_int(stage.get("cultivation_level"))
+        order = family_order_by_level.get(cultivation_level, all_family_order)
+        cursor = level_cursors[cultivation_level]
+        row = [order[(cursor + offset) % len(order)] for offset in range(2)]
+        if row[0] == row[1]:
+            raise ValueError(f"cultivation level {cultivation_level} repeats family {row[0]}")
+        family_rows.append(row)
+        level_cursors[cultivation_level] += 2
 
+    phase_slots: Dict[str, Dict[int, int]] = defaultdict(lambda: defaultdict(int))
+    for stage, row in zip(expanded_stages, family_rows):
+        cultivation_level = as_int(stage.get("cultivation_level"))
+        for family in row:
+            phase, _start, _cap = realm(cultivation_level, family)
+            phase_slots[phase][family] += 1
+
+    phase_occurrences: Dict[str, Dict[int, int]] = defaultdict(lambda: defaultdict(int))
     schedule: List[List[Dict[str, int]]] = []
-    for slot_index in range(slots):
-        stage = expanded_stages[slot_index // 2]
-        phase, start, cap = realm(as_int(stage.get("cultivation_level")))
-        family = family_order[slot_index % len(family_order)]
-        ordinal = phase_occurrences[phase][family]
-        phase_occurrences[phase][family] += 1
-        family_total = phase_slots[phase][family]
-        if family_total <= 1:
-            reward_level = cap
-        else:
-            reward_level = start + math.floor(
+    for stage, row in zip(expanded_stages, family_rows):
+        cultivation_level = as_int(stage.get("cultivation_level"))
+        rewards = []
+        for family in row:
+            phase, start, cap = realm(cultivation_level, family)
+            ordinal = phase_occurrences[phase][family]
+            phase_occurrences[phase][family] += 1
+            family_total = phase_slots[phase][family]
+            reward_level = cap if family_total <= 1 else start + math.floor(
                 ordinal * (cap - start) / (family_total - 1)
             )
-        reward = {"id": levels[(family, reward_level)], "count": 1}
-        if slot_index % 2 == 0:
-            schedule.append([reward])
-        else:
-            schedule[-1].append(reward)
+            if 2 <= cultivation_level <= 10:
+                legacy_count = LEGACY_CIRCULATIONS_BY_LEVEL[cultivation_level - 1]
+                current_count = CIRCULATIONS_BY_LEVEL[cultivation_level - 1]
+                compression_boost = math.floor(math.log2(legacy_count / current_count))
+                reward_level = min(cap, reward_level + compression_boost)
+            rewards.append({"id": levels[(family, reward_level)], "count": 1})
+        schedule.append(rewards)
 
     if len(schedule) != len(expanded_stages) or any(len(row) != 2 for row in schedule):
         raise ValueError("facility schedule must contain exactly two rewards per circulation")
@@ -496,12 +499,14 @@ def reorder_units_for_dependencies(
 
 def main() -> None:
     if sum(CIRCULATIONS_BY_LEVEL) != TOTAL_CIRCULATIONS:
-        raise ValueError("configured circulation counts do not total 666")
+        raise ValueError(
+            f"configured circulation counts do not total {TOTAL_CIRCULATIONS}"
+        )
     if any(
         CIRCULATIONS_BY_LEVEL[index] >= CIRCULATIONS_BY_LEVEL[index + 1]
-        for index in range(len(CIRCULATIONS_BY_LEVEL) - 1)
+        for index in range(1, len(CIRCULATIONS_BY_LEVEL) - 1)
     ):
-        raise ValueError("circulation counts must strictly increase by cultivation level")
+        raise ValueError("circulation counts must strictly increase after the mortal stage")
 
     home = read_json("home_meridians.json")
     cultivation = read_json("cultivation.json")
@@ -527,28 +532,16 @@ def main() -> None:
         {"token": 1, "amount": 10}
     )
     facility_schedule = facility_reward_schedule(expanded_stages, items)
-    # Preserve the original three-circulation tutorial rewards.  The third
-    # tutorial circulation grants the alchemy furnace (17001) together with
-    # the wood-spirit launcher (16001).
+    # Preserve the tutorial's key facilities while fitting the mortal stage
+    # into two circulations.  The second circulation keeps the historical
+    # alchemy-furnace teaching exception and also grants the wood-spirit
+    # launcher needed by later recipes.
     facility_schedule[0] = [{"id": 12001, "count": 1}]
-    facility_schedule[1] = []
-    facility_schedule[2] = [
+    facility_schedule[1] = [
         {"id": 16001, "count": 1},
         {"id": 17001, "count": 1},
     ]
 
-    # At 练气一层, grant the remaining 230/240 launcher families first; each
-    # later crafting table then has every launcher family needed by its recipes.
-    first_qi_facilities = [
-        [{"id": 23001, "count": 1}, {"id": 24001, "count": 1}],
-        [{"id": 15001, "count": 1}, {"id": 11001, "count": 1}],
-        [{"id": 13001, "count": 1}, {"id": 14001, "count": 1}],
-        [{"id": 18001, "count": 1}, {"id": 19001, "count": 1}],
-        [{"id": 20001, "count": 1}, {"id": 21001, "count": 1}],
-        [{"id": 11001, "count": 1}, {"id": 12001, "count": 1}],
-    ]
-    for offset, facilities in enumerate(first_qi_facilities):
-        facility_schedule[3 + offset] = facilities
     for stage, facilities in zip(expanded_stages, facility_schedule):
         stage["circulation_reward"]["items"] = facilities
 
@@ -574,7 +567,10 @@ def main() -> None:
     print(json.dumps({
         "total_circulations": len(expanded_stages),
         "circulations_by_level": CIRCULATIONS_BY_LEVEL,
-        "facility_units": len(expanded_stages) * 2,
+        "facility_units": sum(
+            len(stage["circulation_reward"].get("items", []))
+            for stage in expanded_stages
+        ),
         "facility_families": 13,
         "breakthroughs_with_mine": len(cultivation_stages) - 1,
     }, ensure_ascii=False, indent=2))

@@ -142,6 +142,21 @@ func _run() -> void:
 	assert(not intermediate_node.is_required())
 	assert(not source_node.is_required())
 	assert(not second_source_node.is_required())
+	# One stored material satisfies only one active order. A second order that
+	# needs the same material must keep the remaining board item highlighted.
+	stored_board_table["_craft_state"] = CraftingService.TableState.HAS_ITEMS
+	stored_board_table["_craft_stored"] = [{"id": 9002, "uid": 900004}]
+	GameState.meridian_acupoints = [
+		{"completed": false, "items": [{"item_id": 28036}]},
+	]
+	recursive_screen_probe.call("_refresh_required_indicators")
+	assert(not source_node.is_required())
+	GameState.meridian_acupoints = [
+		{"completed": false, "items": [{"item_id": 28036}]},
+		{"completed": false, "items": [{"item_id": 28018}]},
+	]
+	recursive_screen_probe.call("_refresh_required_indicators")
+	assert(source_node.is_required())
 	# A product already on the board must satisfy its matching order even when
 	# other active orders still need recipe products.
 	stored_board_table["_craft_state"] = CraftingService.TableState.IDLE

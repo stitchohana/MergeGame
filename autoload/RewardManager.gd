@@ -35,6 +35,7 @@ func _on_state_loaded(state: Dictionary) -> void:
 
 
 func _on_reward_response(result: Dictionary) -> void:
+	GameState.sync_stamina_multiplier(result)
 	if result.has("cultivation"):
 		CultivationService.deserialize(result.cultivation)
 	if result.has("spirit_stones"):

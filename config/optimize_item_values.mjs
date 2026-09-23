@@ -79,8 +79,7 @@ function calculateSpawnBaseCosts(items, byId) {
     for (const [groupId, chain] of chains) {
       if (chain.levelOneWeight <= 0) continue;
       // Values are integer order-value units. Round the expected number of
-      // launches needed for a level-1 drop; this keeps a 70% primary output
-      // at 1 while pricing a 30% byproduct at about 3.
+      // launches needed for a level-1 drop from the launcher's actual weights.
       const baseCost = Math.max(1, Math.round(totalWeight / chain.levelOneWeight));
       setMinimum(directBaseCosts, groupId, baseCost);
       if (chain.totalWeight < highestChainWeight) {
@@ -123,7 +122,7 @@ function calculateValues(items, recipes) {
       let newValue = oldValue;
       if (index === 0 && byproductBaseCosts.has(groupId)) {
         newValue = byproductBaseCosts.get(groupId);
-      } else if (index === 0 && asInt(item.value) === null && directBaseCosts.has(groupId)) {
+      } else if (index === 0 && directBaseCosts.has(groupId)) {
         newValue = directBaseCosts.get(groupId);
       } else if (index > 0 && Number(item.level) === Number(chain[index - 1].level) + 1 && previousValue !== null) {
         newValue = withPremium(previousValue * 2);
