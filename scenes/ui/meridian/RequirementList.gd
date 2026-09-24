@@ -170,6 +170,20 @@ func set_requirements(reqs: Array, priority_indices: Dictionary = {}, match_coun
 	call_deferred("_restore_scroll_position", preserved_scroll, restore_request_id)
 
 
+func sort_fixed_entries() -> void:
+	var fixed_entries: Array[Node] = []
+	for child: Node in container.get_children():
+		if not child is RequirementEntry:
+			fixed_entries.append(child)
+	var ordered_entries: Array[Node] = []
+	for rank in [0, 1, 2, 3]:
+		for child: Node in fixed_entries:
+			if _fixed_entry_rank(child) == rank:
+				ordered_entries.append(child)
+	for index in range(ordered_entries.size()):
+		container.move_child(ordered_entries[index], index)
+
+
 func _restore_scroll_position(scroll_position: int, request_id: int) -> void:
 	await get_tree().process_frame
 	if request_id != _scroll_restore_request_id or not is_inside_tree():
@@ -306,6 +320,7 @@ func get_entry_rank(index: int) -> Dictionary:
 
 
 func _sort_entries_by_availability() -> void:
+	sort_fixed_entries()
 	var ordered_entries: Array[RequirementEntry] = _get_entries()
 	ordered_entries.sort_custom(_compare_entry_priority)
 	var start_index: int = _get_order_start_index()
@@ -331,6 +346,16 @@ func _get_order_start_index() -> int:
 		if not child is RequirementEntry:
 			fixed_child_count += 1
 	return fixed_child_count
+
+
+func _fixed_entry_rank(child: Node) -> int:
+	if child is WeeklyActivityEntry or child is BattlePassEntry:
+		return 0
+	if child is CharacterEntry:
+		return 1
+	if child is PendingRewardBar:
+		return 2
+	return 3
 
 
 func _animate_promoted_entry(entry: RequirementEntry, start_position: Vector2, focus_available: bool) -> void:

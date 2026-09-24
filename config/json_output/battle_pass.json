@@ -1,0 +1,1010 @@
+{
+  "passes": [
+    {
+      "activity_id": 4,
+      "points_token_id": 5,
+      "tiers": [
+        {
+          "level": 1,
+          "required_points": 10,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 2,
+          "required_points": 20,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 3,
+          "required_points": 30,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 4,
+          "required_points": 40,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 5,
+          "required_points": 50,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 6,
+          "required_points": 60,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 7,
+          "required_points": 70,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 8,
+          "required_points": 80,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 9,
+          "required_points": 90,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 10,
+          "required_points": 100,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 11,
+          "required_points": 110,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 12,
+          "required_points": 120,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 13,
+          "required_points": 130,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 14,
+          "required_points": 140,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 15,
+          "required_points": 150,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 16,
+          "required_points": 160,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 17,
+          "required_points": 170,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 18,
+          "required_points": 180,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 19,
+          "required_points": 190,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 20,
+          "required_points": 200,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 21,
+          "required_points": 210,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 22,
+          "required_points": 220,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 23,
+          "required_points": 230,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 24,
+          "required_points": 240,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 25,
+          "required_points": 250,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 26,
+          "required_points": 260,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 27,
+          "required_points": 270,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 28,
+          "required_points": 280,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 29,
+          "required_points": 290,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 30,
+          "required_points": 300,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 31,
+          "required_points": 310,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 32,
+          "required_points": 320,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 33,
+          "required_points": 330,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 34,
+          "required_points": 340,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 35,
+          "required_points": 350,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 36,
+          "required_points": 360,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 37,
+          "required_points": 370,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 38,
+          "required_points": 380,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 39,
+          "required_points": 390,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 40,
+          "required_points": 400,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 41,
+          "required_points": 410,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 42,
+          "required_points": 420,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 43,
+          "required_points": 430,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 44,
+          "required_points": 440,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 45,
+          "required_points": 450,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 46,
+          "required_points": 460,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 47,
+          "required_points": 470,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 48,
+          "required_points": 480,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 49,
+          "required_points": 490,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        },
+        {
+          "level": 50,
+          "required_points": 500,
+          "free_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          },
+          "premium_rewards": {
+            "tokens": [
+              {
+                "token": 3,
+                "amount": 10
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

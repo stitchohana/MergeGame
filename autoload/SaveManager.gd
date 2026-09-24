@@ -53,6 +53,8 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.activity_defs = state.get("activity_defs", [])
 	GameState.activity_progress = state.get("activity_progress", {})
 	GameState.activity_current_day = state.get("activity_current_day", 0)
+	GameState.battle_pass_progress = state.get("battle_pass_progress", {})
+	GameState.battle_pass_changed.emit(GameState.battle_pass_progress)
 
 	# Restore crafting timers for in-progress crafts
 	GridManager._skip_anims = false

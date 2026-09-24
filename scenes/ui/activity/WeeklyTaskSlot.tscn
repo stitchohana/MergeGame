@@ -1,84 +1,70 @@
-[gd_scene format=3 uid="uid://rvgnrq1q6d55"]
+[gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" uid="uid://kliba2rwofop" path="res://scenes/ui/activity/WeeklyTaskSlot.gd" id="1_gd"]
-[ext_resource type="Texture2D" uid="uid://bdm0iuunobn72" path="res://assets/ui/weekly/weekly_claim_button.png" id="3_claim_texture"]
-[ext_resource type="Texture2D" uid="uid://cj53xpn0mjop3" path="res://assets/ui/weekly/weekly_task_slot_bg.png" id="4_slot_texture"]
+[ext_resource type="Script" path="res://scenes/ui/activity/WeeklyTaskSlot.gd" id="1_gd"]
+[ext_resource type="Texture2D" uid="uid://cj53xpn0mjop3" path="res://assets/ui/weekly/weekly_task_slot_bg.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://bdm0iuunobn72" path="res://assets/ui/weekly/weekly_claim_button.png" id="3_claim"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBox_claim_normal"]
-texture = ExtResource("3_claim_texture")
+[sub_resource type="StyleBoxTexture" id="StyleBox_claim"]
+texture = ExtResource("3_claim")
 texture_margin_left = 26.0
 texture_margin_top = 18.0
 texture_margin_right = 26.0
 texture_margin_bottom = 18.0
 
-[sub_resource type="StyleBoxTexture" id="StyleBox_claim_pressed"]
-texture = ExtResource("3_claim_texture")
-texture_margin_left = 26.0
-texture_margin_top = 18.0
-texture_margin_right = 26.0
-texture_margin_bottom = 18.0
-modulate_color = Color(0.82, 0.86, 0.82, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBox_progress_bg"]
+bg_color = Color(0.76, 0.71, 0.57, 0.72)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxTexture" id="StyleBox_claim_hover"]
-texture = ExtResource("3_claim_texture")
-texture_margin_left = 26.0
-texture_margin_top = 18.0
-texture_margin_right = 26.0
-texture_margin_bottom = 18.0
-modulate_color = Color(1, 1, 0.86, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBox_progress_fill"]
+bg_color = Color(0.26, 0.48, 0.34, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxTexture" id="StyleBox_claim_disabled"]
-texture = ExtResource("3_claim_texture")
-texture_margin_left = 26.0
-texture_margin_top = 18.0
-texture_margin_right = 26.0
-texture_margin_bottom = 18.0
-modulate_color = Color(0.58, 0.61, 0.56, 0.78)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBox_focus_empty"]
-
-[node name="WeeklyTaskSlot" type="Control" unique_id=364069552]
-custom_minimum_size = Vector2(0, 96)
+[node name="WeeklyTaskSlot" type="Control"]
+custom_minimum_size = Vector2(0, 110)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_gd")
 
-[node name="Background" type="NinePatchRect" parent="." unique_id=556409489]
+[node name="Background" type="NinePatchRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("4_slot_texture")
+texture = ExtResource("2_bg")
 patch_margin_left = 60
 patch_margin_top = 36
 patch_margin_right = 60
 patch_margin_bottom = 36
 
-[node name="Content" type="MarginContainer" parent="." unique_id=1773456747]
+[node name="Content" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 8
 
-[node name="Row" type="HBoxContainer" parent="Content" unique_id=1367195201]
+[node name="Column" type="VBoxContainer" parent="Content"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 5
 
-[node name="TaskInfo" type="VBoxContainer" parent="Content/Row" unique_id=420898608]
+[node name="Header" type="HBoxContainer" parent="Content/Column"]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
 
-[node name="NameLabel" type="Label" parent="Content/Row/TaskInfo" unique_id=2027992513]
-custom_minimum_size = Vector2(240, 24)
+[node name="NameLabel" type="Label" parent="Content/Column/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.18, 0.29, 0.21, 1)
@@ -87,60 +73,68 @@ text = "任务名称"
 vertical_alignment = 1
 text_overrun_behavior = 3
 
-[node name="MetaRow" type="HBoxContainer" parent="Content/Row/TaskInfo" unique_id=1927838349]
+[node name="ProgressLabel" type="Label" parent="Content/Column/Header"]
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.43, 0.31, 1)
+theme_override_font_sizes/font_size = 13
+text = "0 / 1"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="Content/Column"]
+custom_minimum_size = Vector2(0, 7)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBox_progress_bg")
+theme_override_styles/fill = SubResource("StyleBox_progress_fill")
+show_percentage = false
+value = 0.0
+
+[node name="Footer" type="HBoxContainer" parent="Content/Column"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ProgressCaption" type="Label" parent="Content/Row/TaskInfo/MetaRow" unique_id=1875772398]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.45, 0.35, 1)
-theme_override_font_sizes/font_size = 12
-text = "进度"
-
-[node name="ProgressLabel" type="Label" parent="Content/Row/TaskInfo/MetaRow" unique_id=333222226]
-custom_minimum_size = Vector2(52, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
-
-[node name="Divider" type="VSeparator" parent="Content/Row/TaskInfo/MetaRow" unique_id=1433101757]
-custom_minimum_size = Vector2(1, 18)
-layout_mode = 2
-
-[node name="RewardCaption" type="Label" parent="Content/Row/TaskInfo/MetaRow" unique_id=1341659640]
+[node name="RewardCaption" type="Label" parent="Content/Column/Footer"]
+custom_minimum_size = Vector2(36, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.42, 0.45, 0.35, 1)
 theme_override_font_sizes/font_size = 12
 text = "奖励"
+vertical_alignment = 1
 
-[node name="RewardsContainer" type="HBoxContainer" parent="Content/Row/TaskInfo/MetaRow" unique_id=563268647]
+[node name="RewardsContainer" type="HBoxContainer" parent="Content/Column/Footer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 5
 
-[node name="ActionArea" type="CenterContainer" parent="Content/Row" unique_id=1157909175]
-custom_minimum_size = Vector2(96, 0)
-layout_mode = 2
-
-[node name="ClaimButton" type="Button" parent="Content/Row/ActionArea" unique_id=945952851]
+[node name="ClaimButton" type="Button" parent="Content/Column/Footer"]
 visible = false
-custom_minimum_size = Vector2(92, 44)
+custom_minimum_size = Vector2(82, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.96, 0.72, 1)
-theme_override_colors/font_pressed_color = Color(0.92, 0.88, 0.66, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 0.86, 1)
 theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBox_claim_normal")
-theme_override_styles/pressed = SubResource("StyleBox_claim_pressed")
-theme_override_styles/hover = SubResource("StyleBox_claim_hover")
-theme_override_styles/disabled = SubResource("StyleBox_claim_disabled")
-theme_override_styles/focus = SubResource("StyleBox_focus_empty")
+theme_override_styles/normal = SubResource("StyleBox_claim")
+theme_override_styles/hover = SubResource("StyleBox_claim")
+theme_override_styles/pressed = SubResource("StyleBox_claim")
 text = "领取"
 
-[node name="DoneLabel" type="Label" parent="Content/Row/ActionArea" unique_id=1223414780]
+[node name="DoneLabel" type="Label" parent="Content/Column/Footer"]
 visible = false
+custom_minimum_size = Vector2(64, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.18, 0.55, 0.25, 1)
-theme_override_font_sizes/font_size = 14
-text = "已领取"
+theme_override_font_sizes/font_size = 13
+text = "已领取 ✓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StateLabel" type="Label" parent="Content/Column/Footer"]
+visible = false
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.45, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "进行中"
 horizontal_alignment = 1
 vertical_alignment = 1

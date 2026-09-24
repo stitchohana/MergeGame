@@ -38,6 +38,8 @@ signal meridian_refresh_confirmed(result: Dictionary)
 signal meridian_refresh_rejected(reason: String)
 signal meridian_complete_confirmed(result: Dictionary)
 signal meridian_complete_rejected(reason: String)
+signal battle_pass_action_confirmed(result: Dictionary)
+signal battle_pass_action_rejected(reason: String)
 signal quest_claim_confirmed(result: Dictionary)
 signal quest_claim_rejected(reason: String)
 signal pending_reward_claimed(result: Dictionary)
@@ -128,6 +130,8 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("pouch_withdraw", _on_pouch_withdraw_response, pouch_withdraw_rejected, pouch_withdraw_rejected, pouch_withdraw_rejected)
 	_register_endpoint("meridian_refresh", _on_meridian_refresh_response, meridian_refresh_rejected, meridian_refresh_rejected, meridian_refresh_rejected)
 	_register_endpoint("meridian_complete", _on_meridian_complete_response, meridian_complete_rejected, meridian_complete_rejected, meridian_complete_rejected)
+	_register_endpoint("battle_pass_unlock", _on_battle_pass_response, battle_pass_action_rejected, battle_pass_action_rejected, battle_pass_action_rejected)
+	_register_endpoint("battle_pass_claim", _on_battle_pass_response, battle_pass_action_rejected, battle_pass_action_rejected, battle_pass_action_rejected)
 	_register_endpoint("quest_claim", _on_quest_claim_response, quest_claim_rejected, quest_claim_rejected, quest_claim_rejected)
 	_register_endpoint("claim_pending_reward", _on_claim_pending_reward_response, pending_reward_claimed_rejected, pending_reward_claimed_rejected, pending_reward_claimed_rejected)
 	_register_endpoint("home_meridian_light", _on_home_meridian_light_response, home_meridian_light_rejected, home_meridian_light_rejected, home_meridian_light_rejected)
@@ -204,6 +208,8 @@ func fetch_state() -> void:
 func _on_fetch_state_response(data: Dictionary) -> void:
 	if data.has("crafted_item_ids"):
 		GameState.set_crafted_item_ids(data.get("crafted_item_ids", []))
+	GameState.sync_stamina_multiplier(data)
+	_sync_battle_pass_progress(data)
 	state_loaded.emit(data)
 
 # --- Merge ---
@@ -368,7 +374,8 @@ func _on_meridian_refresh_response(data: Dictionary) -> void:
 		meridian_refresh_confirmed.emit(data)
 
 func submit_meridian_complete(index: int, item_ids: Array) -> void:
-	var body := JSON.stringify({"index": index, "item_ids": item_ids})
+	var request_id: String = "%d-%d" % [int(Time.get_unix_time_from_system() * 1000.0), randi()]
+	var body := JSON.stringify({"index": index, "item_ids": item_ids, "request_id": request_id})
 	_send_authed_request("meridian_complete", "/api/game/meridian/complete", HTTPClient.Method.METHOD_POST, body)
 
 func submit_quest_claim(quest_id: int) -> void:
@@ -389,9 +396,38 @@ func submit_run_home_meridian(stage: int) -> void:
 
 func _on_meridian_complete_response(data: Dictionary) -> void:
 	if data.get("ok", false):
+		_sync_battle_pass_progress(data)
 		meridian_complete_confirmed.emit(data)
 	else:
 		meridian_complete_rejected.emit(data.get("error", "unknown_error"))
+
+func submit_battle_pass_unlock(activity_id: int) -> void:
+	_send_authed_request("battle_pass_unlock", "/api/game/battle_pass/unlock", HTTPClient.Method.METHOD_POST, JSON.stringify({"activity_id": activity_id}))
+
+func submit_battle_pass_claim(activity_id: int, level: int, track: String) -> void:
+	_send_authed_request("battle_pass_claim", "/api/game/battle_pass/claim", HTTPClient.Method.METHOD_POST, JSON.stringify({"activity_id": activity_id, "level": level, "track": track}))
+
+func _on_battle_pass_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		GameState.sync_stamina_multiplier(data)
+		_sync_battle_pass_progress(data)
+		if data.has("spirit_stones"):
+			GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+			GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+		if data.has("stamina"):
+			GameState.stamina = int(data.get("stamina", GameState.stamina))
+			GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+		if data.has("pending_rewards"):
+			var pending_rewards: Array = data.get("pending_rewards", [])
+			GameState.pending_rewards_changed.emit(pending_rewards.size())
+		battle_pass_action_confirmed.emit(data)
+	else:
+		battle_pass_action_rejected.emit(data.get("error", "unknown_error"))
+
+func _sync_battle_pass_progress(data: Dictionary) -> void:
+	if data.has("battle_pass_progress"):
+		GameState.battle_pass_progress = data.get("battle_pass_progress", {})
+		GameState.battle_pass_changed.emit(GameState.battle_pass_progress)
 
 func _on_quest_claim_response(data: Dictionary) -> void:
 	if data.get("ok", false):
@@ -808,6 +844,8 @@ func submit_gm_exec(cmd: String, amount: int, item_id: int = 0, col: int = -1, r
 
 func _on_gm_exec_response(data: Dictionary) -> void:
 	if data.get("ok", false):
+		GameState.sync_stamina_multiplier(data)
+		_sync_battle_pass_progress(data)
 		gm_exec_confirmed.emit(data)
 	else:
 		gm_exec_rejected.emit(data.get("error", "unknown_error"))

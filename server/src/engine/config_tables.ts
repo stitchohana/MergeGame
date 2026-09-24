@@ -1,5 +1,6 @@
 export interface GameConfigTables {
-	activities: unknown;
+  activities: unknown;
+  battlePass: unknown;
 	cultivation: unknown;
 	expedition: unknown;
 	gameConfig: unknown;
@@ -11,5 +12,6 @@ export interface GameConfigTables {
 	recipes: unknown;
 	rewards: unknown;
 	shop: unknown;
-	weeklyTasks: unknown;
+  weeklyTasks: unknown;
+  tokens: unknown;
 }

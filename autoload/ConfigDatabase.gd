@@ -14,6 +14,7 @@ var _monsters_data: Dictionary = {}
 var _meridian_thresholds: Array = []
 var _tokens_data: Dictionary = {}
 var _weekly_tasks: Dictionary = {}
+var _battle_passes: Dictionary = {}
 var _recipes_by_table: Dictionary = {}  # table_id -> Array[recipe]
 
 func _ready() -> void:
@@ -31,6 +32,7 @@ func load_all() -> void:
 	_load_meridians("res://config/json_output/meridians.json")
 	_load_tokens("res://config/json_output/tokens.json")
 	_load_weekly_tasks("res://config/json_output/weekly_tasks.json")
+	_load_battle_passes("res://config/json_output/battle_pass.json")
 
 func _load_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -485,3 +487,13 @@ func _load_weekly_tasks(path: String) -> void:
 
 func get_weekly_tasks(activity_id: int) -> Array:
 	return _weekly_tasks.get(activity_id, [])
+
+func _load_battle_passes(path: String) -> void:
+	_battle_passes.clear()
+	var data := _load_json(path)
+	for pass_data: Variant in data.get("passes", []):
+		if pass_data is Dictionary:
+			_battle_passes[_coerce_int(pass_data.get("activity_id", 0))] = pass_data
+
+func get_battle_pass(activity_id: int) -> Dictionary:
+	return _battle_passes.get(activity_id, {})

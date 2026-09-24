@@ -210,14 +210,37 @@
 |------|------|------|
 | `id` | int | 活动 ID |
 | `name` | string | 名称 |
-| `cycle` | int | 周期 0=一次性 1=每日 2=每周 |
+| `cycle` | int | 周期 0=一次性 1=每日 2=每周 3=每月 |
 | `widget` | string | 入口 widget 类名（可选） |
 | `start_time` | string | 开始时间 ISO 格式（一次性活动） |
 | `end_time` | string | 结束时间 ISO 格式（一次性活动） |
+| `enabled` | bool | 可选，显式启停活动；未配置时沿用旧行为 |
+
+## 9. battle_pass.json — 战令配置
+
+战令等级和奖励只维护在 battle_pass.json；积分倍率与进阶线解锁价格维护在
+game_config.json 的 `battle_pass.points_per_value` 和 `battle_pass.premium_unlock_cost`；活动标题与起止时间只维护在
+activities.json。activity_id 必须关联活动表；启用中的活动必须在活动表配置合法的
+开始与结束时间。战令积分按活动独立保存，不作为可消耗货币结算。
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| passes | array | 战令活动定义，首期仅支持配置一个 |
+| activity_id | int | 关联的活动 ID |
+| points_token_id | int | tokens.json 中的战令积分 token ID，仅用于显示元数据 |
+| tiers | array | 按等级递增的奖励门槛和免费/进阶奖励 |
+| level | int | 战令等级 |
+| required_points | int | 领取该等级奖励需要的累计积分 |
+| free_rewards / premium_rewards | object | 使用现有奖励格式，例如 tokens 数组配置 token 与 amount |
+
+首期配置暂定为 50 级、每级 10 积分、两条轨道每级各奖励 10 体力。
+订单积分倍率由 `game_config.json` 统一配置为 0.1，进阶线解锁价格统一配置为 500 灵石。
+首期战令已启用，活动时间为 2026 年 9 月 1 日至 9 月 30 日（北京时间）；`end_time`
+填写次日零点，作为排他结束边界。
 
 ---
 
-## 9. meridians.json — 经脉表
+## 10. meridians.json — 经脉表
 
 订单候选由当前棋盘上的发射器和制作台计算，固定包含主产物、副产物与配方产物三类。
 系统从 `spawns` 与 `recipes` 递归计算真正可制作的订单物品；发射器内产出权重较低
@@ -243,7 +266,7 @@
 
 ---
 
-## 10. game_config.json — 游戏参数
+## 11. game_config.json — 游戏参数
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -252,10 +275,12 @@
 | `stamina.regen_interval` | int | 恢复间隔（秒） |
 | `stamina.regen_amount` | int | 每次恢复量 |
 | `reset_hour` | int | 每日重置时间（小时，本地时间） |
+| `battle_pass.premium_unlock_cost` | int | 解锁战令进阶线所需灵石 |
+| `battle_pass.points_per_value` | number | 订单价值积分倍率，积分为 floor(total_value * points_per_value) |
 
 ---
 
-## 11. initial_setup.json — 初始棋盘
+## 12. initial_setup.json — 初始棋盘
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -264,7 +289,7 @@
 
 ---
 
-## 12. home_meridians.json — 家园经脉
+## 13. home_meridians.json — 家园经脉
 
 设施奖励直接配置在对应阶段的 `circulation_reward.items` 中，完成整个周天时一次发放；
 不再维护全局生产奖励表。初始棋盘不再直接摆放三个可移动教程设施，设施统一随周天进度发放。
@@ -305,7 +330,7 @@
 
 ---
 
-## 13. shop.json — 商店表
+## 14. shop.json — 商店表
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -313,7 +338,7 @@
 
 ---
 
-## 14. server.json — 服务端配置
+## 15. server.json — 服务端配置
 
 客户端 `HTTPRequest` 连接地址。
 

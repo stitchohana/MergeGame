@@ -6,6 +6,10 @@ class_name HomeScreen extends BaseScreen
 @onready var exp_bar: TextureProgressBar = $ExpBar
 @onready var exp_label: Label = $ExpLabel
 @onready var acupoint_layer: Control = $AcupointLayer
+@onready var activity_left: VBoxContainer = $ActivityLeft
+@onready var activity_right: VBoxContainer = $ActivityRight
+@onready var activity_left_entries: VBoxContainer = $ActivityLeft/Scroll/Entries
+@onready var activity_right_entries: VBoxContainer = $ActivityRight/Scroll/Entries
 
 const ITEM_WIDGET_SCENE: PackedScene = preload("res://scenes/ui/common/ItemWidget.tscn")
 const BREAKTHROUGH_ITEM_SIZE: int = 72
@@ -40,6 +44,7 @@ func _ready() -> void:
 	_setup_acupoint_ui()
 	_setup_circulation_btn()
 	_setup_breakthrough_btn()
+	_refresh_activity_lists()
 	_refresh_cultivation_info()
 
 
@@ -72,6 +77,7 @@ func _on_cultivation_stage_changed(_level: int, stage_name: String) -> void:
 
 func on_enter() -> void:
 	modulate = Color.TRANSPARENT
+	_refresh_activity_lists()
 	if not GameState.home_meridian_defs.is_empty():
 		_home_defs = GameState.home_meridian_defs.duplicate(true)
 		_home_progress = GameState.home_meridian_progress.duplicate(true)
@@ -106,6 +112,7 @@ func _on_state_loaded(state: Dictionary) -> void:
 	if state.has("home_meridian_progress"):
 		_home_progress = state.home_meridian_progress
 		GameState.home_meridian_progress = _home_progress.duplicate(true)
+	_refresh_activity_lists()
 	_refresh_cultivation_info()
 	_refresh_display()
 	_refresh_breakthrough_btn()
@@ -113,6 +120,22 @@ func _on_state_loaded(state: Dictionary) -> void:
 	_try_auto_acupoint()
 	var fade := create_tween()
 	fade.tween_property(self, "modulate", Color.WHITE, 0.15)
+
+
+func _refresh_activity_lists() -> void:
+	for container: VBoxContainer in [activity_left_entries, activity_right_entries]:
+		for child: Node in container.get_children():
+			container.remove_child(child)
+			child.queue_free()
+	var activities: Array = ActivityManager.get_active_activities()
+	for index in range(activities.size()):
+		var activity: Dictionary = activities[index]
+		var container: VBoxContainer = activity_left_entries if index % 2 == 0 else activity_right_entries
+		var entry: HomeActivityCard = preload("res://scenes/ui/activity/HomeActivityCard.tscn").instantiate() as HomeActivityCard
+		container.add_child(entry)
+		entry.setup(activity)
+	activity_left.visible = not activity_left_entries.get_children().is_empty()
+	activity_right.visible = not activity_right_entries.get_children().is_empty()
 
 
 func _refresh_display() -> void:
@@ -410,6 +433,7 @@ func _on_circulation_run_rejected(_reason: String) -> void:
 
 
 func _apply_server_resources(result: Dictionary) -> void:
+	GameState.sync_stamina_multiplier(result)
 	if result.has("stamina"):
 		GameState.stamina = int(result.get("stamina", GameState.stamina))
 		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)

@@ -1,0 +1,131 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/activity/BattlePassEntry.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_normal"]
+bg_color = Color(0.11, 0.2, 0.18, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 0.57, 0.3, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_hover"]
+bg_color = Color(0.17, 0.3, 0.25, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.94, 0.76, 0.4, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_pressed"]
+bg_color = Color(0.07, 0.13, 0.12, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.82, 0.64, 0.32, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_icon_frame"]
+bg_color = Color(0.93, 0.87, 0.68, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.82, 0.68, 0.38, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[node name="BattlePassEntry" type="Button"]
+visible = false
+custom_minimum_size = Vector2(176, 160)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
+theme_override_colors/font_hover_color = Color(1, 0.99, 0.9, 1)
+theme_override_colors/font_pressed_color = Color(0.9, 0.8, 0.58, 1)
+theme_override_styles/normal = SubResource("StyleBox_normal")
+theme_override_styles/hover = SubResource("StyleBox_hover")
+theme_override_styles/pressed = SubResource("StyleBox_pressed")
+theme_override_styles/focus = SubResource("StyleBox_normal")
+flat = true
+script = ExtResource("1_script")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="IconFrame" type="Panel" parent="Content"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBox_icon_frame")
+
+[node name="IconLabel" type="Label" parent="Content/IconFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.22, 0.27, 0.2, 1)
+theme_override_font_sizes/font_size = 26
+text = "战"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameLabel" type="Label" parent="Content"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.96, 0.81, 0.5, 1)
+theme_override_font_sizes/font_size = 15
+text = "首期战令"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="ProgressLabel" type="Label" parent="Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.88, 0.91, 0.84, 1)
+theme_override_font_sizes/font_size = 14
+text = "0 / 500 积分"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.95, 0.84, 0.61, 1)
+theme_override_font_sizes/font_size = 11
+text = "点击查看 · 进阶线未解锁"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3

@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://dtqffbbhnmvni" path="res://scenes/ui/meridian/RequirementEntry.tscn" id="3_order"]
 [ext_resource type="Texture2D" uid="uid://d4bv61jk3x6ah" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_button.png" id="4_cultivation"]
 [ext_resource type="PackedScene" uid="uid://bof11cd54u80c" path="res://scenes/ui/main/PendingRewardBar.tscn" id="5_pending_rewards"]
+[ext_resource type="PackedScene" path="res://scenes/ui/activity/BattlePassEntry.tscn" id="6_battle_pass"]
 
 [node name="RequirementList" type="Control" unique_id=1307681079]
 custom_minimum_size = Vector2(780, 235)
@@ -57,6 +58,10 @@ stretch_mode = 5
 
 [node name="PendingRewardBar" parent="Panel/ScrollContainer/HBoxContainer" unique_id=2087902455 instance=ExtResource("5_pending_rewards")]
 custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="BattlePassEntry" parent="Panel/ScrollContainer/HBoxContainer" instance=ExtResource("6_battle_pass")]
 layout_mode = 2
 size_flags_vertical = 4
 

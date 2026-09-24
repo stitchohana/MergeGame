@@ -28,7 +28,7 @@ func _populate_cmds() -> void:
 	if cmd_option.item_count > 0:
 		cmd_option.select(0)
 		return
-	var cmds := ["增加经验", "增加灵石", "设置体力", "设置灵力", "升级", "突破", "添加道具", "重置发射器CD", "激活穴位节点", "下发订单道具", "刷新所有订单"]
+	var cmds := ["增加经验", "增加灵石", "增加战令积分", "设置体力", "设置灵力", "升级", "突破", "添加道具", "重置发射器CD", "激活穴位节点", "下发订单道具", "刷新所有订单"]
 	for c in cmds:
 		cmd_option.add_item(c)
 	cmd_option.select(0)
@@ -48,6 +48,7 @@ func _on_exec() -> void:
 	match cmd:
 		"增加经验": cmd_key = "add_exp"
 		"增加灵石": cmd_key = "add_stones"
+		"增加战令积分": cmd_key = "add_battle_pass_points"
 		"设置体力": cmd_key = "set_stamina"
 		"设置灵力": cmd_key = "set_qi"
 		"升级": cmd_key = "levelup"

@@ -452,7 +452,12 @@ def unflatten(rows):
         val = row["value"]
         if not key or val == "":
             continue
-        v = parse_int(val) if val.lstrip("-").isdigit() else val
+        if re.fullmatch(r"-?\\d+", val):
+            v = parse_int(val)
+        elif re.fullmatch(r"-?(?:\\d+\\.\\d*|\\.\\d+)", val):
+            v = float(val)
+        else:
+            v = val
         parts = key.split(".")
         target = result
         for part in parts[:-1]:
@@ -614,12 +619,36 @@ activities = []
 for row in read_rows(wb["activities"]):
     act = {"id": parse_int(row["id"]), "name": row["name"],
            "cycle": parse_int(row["cycle"]), "widget": row.get("widget", "")}
+    if row.get("enabled") not in (None, ""):
+        act["enabled"] = parse_bool(row["enabled"])
     if row.get("start_time"):
         act["start_time"] = row["start_time"]
     if row.get("end_time"):
         act["end_time"] = row["end_time"]
     activities.append(act)
 save_json("activities.json", {"activities": activities})
+
+# ─── battle_pass ────────────────────────────────────────────
+print("Building battle_pass.json...")
+wb = open_book("battle_pass")
+passes_by_activity = {}
+for row in read_rows(wb["tiers"]):
+    activity_id = parse_int(row["activity_id"])
+    if activity_id not in passes_by_activity:
+        passes_by_activity[activity_id] = {
+            "activity_id": activity_id,
+            "points_token_id": parse_int(row["points_token_id"]),
+            "tiers": [],
+        }
+    free_rewards = json.loads(row["free_rewards"])
+    premium_rewards = json.loads(row["premium_rewards"])
+    passes_by_activity[activity_id]["tiers"].append({
+        "level": parse_int(row["level"]),
+        "required_points": parse_int(row["required_points"]),
+        "free_rewards": free_rewards,
+        "premium_rewards": premium_rewards,
+    })
+save_json("battle_pass.json", {"passes": list(passes_by_activity.values())})
 
 # ─── weekly_tasks ───────────────────────────────────────────
 print("Building weekly_tasks.json...")

@@ -161,10 +161,31 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
             msg = `Stones now: ${state.spirit_stones}`;
             break;
           }
+          case "add_battle_pass_points": {
+            const amt = amount;
+            if (!Number.isSafeInteger(amt) || amt <= 0) { res.status(400).json({ error: "invalid_amount" }); return; }
+            const passes = engine.battlePassService.getDefinitions();
+            if (passes.length !== 1) { res.status(400).json({ error: "battle_pass_not_configured" }); return; }
+            const activityId = passes[0].activity_id;
+            const progress = engine.battlePassService.ensureProgress(state);
+            const total = progress[activityId].points + amt;
+            if (!Number.isSafeInteger(total)) { res.status(400).json({ error: "invalid_amount" }); return; }
+            progress[activityId].points = total;
+            gmResult = { battle_pass_progress: progress };
+            msg = `Battle pass ${activityId} points now: ${total}`;
+            break;
+          }
           case "set_stamina": {
             const amt = parseInt(amount, 10);
-            if (isNaN(amt) || amt < 0) { res.status(400).json({ error: "invalid_amount" }); return; }
-            state.stamina = Math.min(amt, engine.staminaConfig.max);
+            if (!Number.isSafeInteger(amt) || amt < 0) { res.status(400).json({ error: "invalid_amount" }); return; }
+            if (amt > state.stamina) engine.addStamina(state, amt - state.stamina);
+            else state.stamina = amt;
+            const multiplier = engine.getStaminaMultiplierState(state);
+            gmResult = {
+              stamina: state.stamina,
+              stamina_multiplier_max: multiplier.maxMultiplier,
+              stamina_multiplier_expires_at: multiplier.expiresAt,
+            };
             msg = `Stamina set to ${state.stamina}`;
             break;
           }
@@ -285,7 +306,7 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
             break;
           }
           default:
-            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid","activate_home_acupoints","grant_order_items","refresh_orders","refresh_all_orders"] });
+            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","add_battle_pass_points","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid","activate_home_acupoints","grant_order_items","refresh_orders","refresh_all_orders"] });
             return;
         }
 

@@ -405,14 +405,35 @@ save(wb, "quests")
 print("Building activities.xlsx...")
 data = json.load(open(JSON_DIR / "activities.json", encoding="utf-8"))
 wb = new_book()
-h = ["id","name","cycle","start_time","end_time","widget"]
+h = ["id","name","cycle","start_time","end_time","widget","enabled"]
 r = []
 for a in data["activities"]:
     r.append([a.get("id",""), a.get("name",""), a.get("cycle",""),
-              a.get("start_time",""), a.get("end_time",""), a.get("widget","")])
+              a.get("start_time",""), a.get("end_time",""), a.get("widget",""),
+              "TRUE" if a.get("enabled") else ("FALSE" if "enabled" in a else "")])
 ws = wb.create_sheet("activities")
 add_sheet(ws, h, r)
 save(wb, "activities")
+
+# ════════════════════════════════════════════════════════════
+#  battle_pass.xlsx
+# ════════════════════════════════════════════════════════════
+print("Building battle_pass.xlsx...")
+data = json.load(open(JSON_DIR / "battle_pass.json", encoding="utf-8"))
+wb = new_book()
+h = ["activity_id", "points_token_id", "level", "required_points", "free_rewards", "premium_rewards"]
+r = []
+for battle_pass in data.get("passes", []):
+    for tier in battle_pass.get("tiers", []):
+        r.append([
+            battle_pass.get("activity_id", ""), battle_pass.get("points_token_id", ""),
+            tier.get("level", ""), tier.get("required_points", ""),
+            json.dumps(tier.get("free_rewards", {}), ensure_ascii=False, separators=(",", ":")),
+            json.dumps(tier.get("premium_rewards", {}), ensure_ascii=False, separators=(",", ":")),
+        ])
+ws = wb.create_sheet("tiers")
+add_sheet(ws, h, r)
+save(wb, "battle_pass")
 
 # ════════════════════════════════════════════════════════════
 #  weekly_tasks.xlsx

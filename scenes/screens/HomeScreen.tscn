@@ -286,3 +286,65 @@ offset_right = 691.0
 offset_bottom = 1623.0
 texture = ExtResource("14_cryq0")
 expand_mode = 2
+
+[node name="ActivityLeft" type="VBoxContainer" parent="."]
+visible = false
+z_index = 3
+offset_left = 4.0
+offset_top = 330.0
+offset_right = 134.0
+offset_bottom = 790.0
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="ActivityLeft"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.68, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.2, 0.15, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
+text = "活动"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="ActivityLeft"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Entries" type="VBoxContainer" parent="ActivityLeft/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ActivityRight" type="VBoxContainer" parent="."]
+visible = false
+z_index = 3
+offset_left = 648.0
+offset_top = 330.0
+offset_right = 778.0
+offset_bottom = 790.0
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="ActivityRight"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.68, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.2, 0.15, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
+text = "活动"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="ActivityRight"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Entries" type="VBoxContainer" parent="ActivityRight/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+alignment = 1

@@ -1,0 +1,109 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/activity/BattlePassPanel.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+bg_color = Color(0.12, 0.17, 0.19, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.72, 0.57, 0.3, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_left = 22.0
+content_margin_top = 18.0
+content_margin_right = 22.0
+content_margin_bottom = 18.0
+
+[node name="BattlePassPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.015, 0.025, 0.035, 0.72)
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.08
+anchor_top = 0.055
+anchor_right = 0.92
+anchor_bottom = 0.945
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="Content" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Panel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Panel/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.94, 0.79, 0.48, 1)
+theme_override_font_sizes/font_size = 28
+text = "首期战令"
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Panel/Content/Header"]
+custom_minimum_size = Vector2(48, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "×"
+
+[node name="ProgressRow" type="HBoxContainer" parent="Panel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PointsIcon" type="TextureRect" parent="Panel/Content/ProgressRow"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Progress" type="Label" parent="Panel/Content/ProgressRow"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.88, 0.9, 0.84, 1)
+theme_override_font_sizes/font_size = 18
+text = "战令积分 0 / 500"
+
+[node name="UnlockButton" type="Button" parent="Panel/Content"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.17, 0.14, 0.09, 1)
+theme_override_font_sizes/font_size = 17
+text = "解锁进阶线 · 500 灵石"
+
+[node name="Status" type="Label" parent="Panel/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.76, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "免费线始终开放 · 解锁进阶线可领取第二轨奖励"
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 1
+
+[node name="Tiers" type="VBoxContainer" parent="Panel/Content/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6

@@ -33,6 +33,7 @@ var home_meridian_progress: Array = []
 var activity_defs: Array = []
 var activity_progress: Dictionary = {}
 var activity_current_day: int = 0
+var battle_pass_progress: Dictionary = {}
 
 # Auto-acupoint activation from RequirementList
 var pending_auto_acupoint: bool = false
@@ -45,6 +46,7 @@ signal pending_rewards_changed(count: int)
 signal stamina_changed(current: int, max: int)
 signal stamina_multiplier_changed(max_multiplier: int, selected_multiplier: int, expires_at: int)
 signal spirit_stones_changed(amount: int)
+signal battle_pass_changed(progress: Dictionary)
 
 
 func sync_stamina_multiplier(data: Dictionary) -> void:

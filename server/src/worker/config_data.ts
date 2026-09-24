@@ -1,4 +1,5 @@
 import activities from "../../../config/json_output/activities.json";
+import battlePass from "../../../config/json_output/battle_pass.json";
 import cultivation from "../../../config/json_output/cultivation.json";
 import expedition from "../../../config/json_output/expedition.json";
 import gameConfig from "../../../config/json_output/game_config.json";
@@ -11,10 +12,12 @@ import recipes from "../../../config/json_output/recipes.json";
 import rewards from "../../../config/json_output/rewards.json";
 import shop from "../../../config/json_output/shop.json";
 import weeklyTasks from "../../../config/json_output/weekly_tasks.json";
+import tokens from "../../../config/json_output/tokens.json";
 import type { GameConfigTables } from "../engine/config_tables";
 
 export const gameConfigTables = {
 	activities,
+	battlePass,
 	cultivation,
 	expedition,
 	gameConfig,
@@ -27,6 +30,7 @@ export const gameConfigTables = {
 	rewards,
 	shop,
 	weeklyTasks,
+	tokens,
 };
 
 export type { GameConfigTables };

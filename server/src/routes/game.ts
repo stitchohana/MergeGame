@@ -177,6 +177,17 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
         await storage.saveState(userId, state);
       }
     }
+    const battlePassBefore = JSON.stringify(state.battle_pass_progress ?? {});
+    const battlePassState = structuredClone(state);
+    engine.battlePassService.ensureProgress(battlePassState);
+    const battlePassSettled = engine.battlePassService.settleExpired(
+      battlePassState,
+      rewards => engine.applyRewards(battlePassState, rewards),
+    );
+    if (battlePassBefore !== JSON.stringify(battlePassState.battle_pass_progress) || battlePassSettled) {
+      await storage.saveState(userId, battlePassState);
+      state = battlePassState;
+    }
     return state;
   }
 
@@ -205,6 +216,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       quest_defs: engine.questEngine.getResolvedQuestDefs(engine), home_meridian_defs: engine.getHomeMeridianDefs(),
       activity_defs: engine.activityEngine.getActivities().map(a => ({ ...a, active: engine.activityEngine.isActive(a) })),
       activity_progress: state.activity_progress,
+      battle_pass_progress: engine.battlePassService.ensureProgress(state),
       spawn_seed: state.spawn_seed,
       spawn_sequence: state.spawn_sequence,
       crafted_item_ids: state.crafted_item_ids,
@@ -221,7 +233,19 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
   router.get("/state", async (req: Request, res: Response) => {
     try {
       const userId = req.auth!.userId;
-      const state = await getOrCreateState(userId);
+      let state: any;
+      let stateLoadFailed = false;
+      await enqueue(userId, async () => {
+        try {
+          state = await getOrCreateState(userId);
+        } catch (error) {
+          stateLoadFailed = true;
+          console.error("[game] failed to load or settle battle pass:", error);
+        }
+      });
+      if (stateLoadFailed || !state) {
+        res.status(500).json({ error: "state_unavailable" }); return;
+      }
       // Restore main grid if returning from battle after reconnect, unless still on battle board
       if (state.board_type !== 1 && state.saved_grid && state.saved_grid.length > 0) {
         state.grid = state.saved_grid;
@@ -670,12 +694,15 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
 
   // POST /api/game/meridian/complete
   router.post("/meridian/complete", op(async (req, res, userId) => {
-    const { index, item_ids } = req.body;
+    const { index, item_ids, request_id } = req.body;
     if (typeof index !== "number" || !Array.isArray(item_ids)) {
       res.status(400).json({ error: "invalid_params" }); return;
     }
+    if (request_id !== undefined && (typeof request_id !== "string" || request_id.length > 100)) {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
     const state = await getOrCreateState(userId);
-    const result = engine.completeMeridianAcupoint(state, index, item_ids);
+    const result = engine.completeMeridianAcupoint(state, index, item_ids, request_id ?? "");
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     res.json({ ...result, quest_progress: state.quest_progress, ...staminaMultiplierResponse(state) });
@@ -790,6 +817,57 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     res.json({ ...result, ...staminaMultiplierResponse(state) });
+  }));
+
+  router.post("/battle_pass/unlock", op(async (req, res, userId) => {
+    const activityId = Number(req.body.activity_id);
+    if (!Number.isInteger(activityId) || activityId <= 0) {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const updatedState = structuredClone(state);
+    const result = engine.battlePassService.unlock(updatedState, activityId);
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    try {
+      await storage.saveState(userId, updatedState);
+    } catch {
+      res.status(500).json({ error: "save_failed" }); return;
+    }
+    res.json({ ok: true, battle_pass_progress: result.progress, spirit_stones: updatedState.spirit_stones });
+  }));
+
+  router.post("/battle_pass/claim", op(async (req, res, userId) => {
+    const activityId = Number(req.body.activity_id);
+    const level = Number(req.body.level);
+    const track = req.body.track;
+    if (!Number.isInteger(activityId) || !Number.isInteger(level) || typeof track !== "string") {
+      res.status(400).json({ error: "invalid_params" }); return;
+    }
+    const state = await getOrCreateState(userId);
+    const updatedState = structuredClone(state);
+    const result = engine.battlePassService.claim(
+      updatedState,
+      activityId,
+      level,
+      track,
+      rewards => engine.applyRewards(updatedState, rewards),
+    );
+    if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+    try {
+      await storage.saveState(userId, updatedState);
+    } catch {
+      res.status(500).json({ error: "save_failed" }); return;
+    }
+    res.json({
+      ok: true,
+      battle_pass_progress: result.progress,
+      rewards: result.rewards,
+      spirit_stones: updatedState.spirit_stones,
+      stamina: updatedState.stamina,
+      ...staminaMultiplierResponse(updatedState),
+      cultivation: updatedState.cultivation,
+      pending_rewards: updatedState.pending_rewards,
+    });
   }));
 
   // POST /api/game/home_meridian/run

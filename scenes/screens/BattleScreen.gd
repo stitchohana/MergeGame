@@ -335,6 +335,7 @@ func _play_monster_hit() -> void:
 
 func _on_stamina_restore_confirmed(result: Dictionary) -> void:
 	_item_use_pending = false
+	GameState.sync_stamina_multiplier(result)
 	var stam: int = result.get("stamina", 0)
 	if stam > 0:
 		GameState.stamina = stam

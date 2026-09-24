@@ -8,6 +8,10 @@
 	"multiplier_duration": 3600
   },
   "reset_hour": 5,
+  "battle_pass": {
+	"premium_unlock_cost": 500,
+	"points_per_value": 0.1
+  },
   "craft_speedup_stone_cost_per_minute": 1,
   "launcher_speedup_stone_cost_per_minute": 1
 }

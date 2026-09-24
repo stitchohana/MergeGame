@@ -19,6 +19,15 @@
       "name": "周常任务",
       "cycle": 2,
       "widget": "WeeklyActivityEntry"
+    },
+    {
+      "id": 4,
+      "name": "首期战令",
+      "cycle": 0,
+      "widget": "BattlePass",
+      "enabled": true,
+      "start_time": "2026-09-01T00:00:00+08:00",
+      "end_time": "2026-10-01T00:00:00+08:00"
     }
   ]
 }

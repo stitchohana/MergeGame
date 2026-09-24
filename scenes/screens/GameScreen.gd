@@ -3,6 +3,7 @@ class_name GameScreen extends BaseScreen
 @onready var detail_panel: ItemDetailPanel = $ItemDetailPanel
 @onready var grid_view: GridView = $GridView
 @onready var requirement_list: RequirementList = $RequirementList
+@onready var battle_pass_entry: BattlePassEntry = $RequirementList/Panel/ScrollContainer/HBoxContainer/BattlePassEntry
 @onready var battle_btn: Button = $BattleButton
 @onready var home_btn: Button = $HomeButton
 @onready var shop_btn: Button = $ShopButton
@@ -51,6 +52,8 @@ func _ready() -> void:
 	CloudService.spirit_stone_consume_rejected.connect(_on_spirit_stone_consume_rejected)
 	CloudService.state_loaded.connect(_on_state_loaded_for_orders)
 	GameState.meridian_updated.connect(_on_meridian_updated)
+	if not GameState.battle_pass_changed.is_connected(_on_battle_pass_changed):
+		GameState.battle_pass_changed.connect(_on_battle_pass_changed)
 	CultivationService.stage_changed.connect(_on_stage_changed_for_meridian)
 	CloudService.breakthrough_confirmed.connect(func(_r): _item_use_pending = false)
 	CloudService.breakthrough_rejected.connect(func(_r): _item_use_pending = false)
@@ -67,6 +70,10 @@ func _ready() -> void:
 
 
 func _on_state_loaded_for_orders(state: Dictionary) -> void:
+	if state.has("activity_current_day"):
+		GameState.activity_current_day = int(state.get("activity_current_day", 0))
+	_refresh_activity_entries()
+	_refresh_battle_pass_entry()
 	if not state.has("meridian_acupoints"):
 		return
 	var acupoints: Array = state.get("meridian_acupoints", []) as Array
@@ -80,14 +87,61 @@ func _on_meridian_updated() -> void:
 		_display_meridian()
 
 func _setup_extras() -> void:
-	# Design order: cultivation character -> order cards.
+	# Keep activity entries ahead of the cultivation character and order cards.
+	var has_character_entry: bool = false
 	for child: Node in requirement_list.container.get_children():
 		if child is CharacterEntry:
 			requirement_list.container.move_child(child, 0)
-			return
-	var character_entry: CharacterEntry = preload("res://scenes/ui/character/CharacterEntry.tscn").instantiate() as CharacterEntry
-	requirement_list.container.add_child(character_entry)
-	requirement_list.container.move_child(character_entry, 0)
+			has_character_entry = true
+			break
+	if not has_character_entry:
+		var character_entry: CharacterEntry = preload("res://scenes/ui/character/CharacterEntry.tscn").instantiate() as CharacterEntry
+		requirement_list.container.add_child(character_entry)
+		requirement_list.container.move_child(character_entry, 0)
+	_refresh_activity_entries()
+	requirement_list.sort_fixed_entries()
+	_refresh_battle_pass_entry()
+
+
+func _on_battle_pass_changed(_progress: Dictionary) -> void:
+	_refresh_battle_pass_entry()
+
+
+func _refresh_battle_pass_entry() -> void:
+	if battle_pass_entry == null:
+		return
+	for activity_variant: Variant in GameState.activity_defs:
+		if not activity_variant is Dictionary:
+			continue
+		var activity: Dictionary = activity_variant as Dictionary
+		if str(activity.get("widget", "")) != "BattlePass":
+			continue
+		battle_pass_entry.visible = bool(activity.get("active", false))
+		if battle_pass_entry.visible:
+			battle_pass_entry.setup(activity)
+		requirement_list.sort_fixed_entries()
+		return
+	battle_pass_entry.visible = false
+	requirement_list.sort_fixed_entries()
+
+
+func _refresh_activity_entries() -> void:
+	for child: Node in requirement_list.container.get_children():
+		if child is WeeklyActivityEntry:
+			requirement_list.container.remove_child(child)
+			child.queue_free()
+
+	var insert_index: int = 0
+	for activity: Dictionary in ActivityManager.get_active_activities():
+		if activity.get("widget", "").is_empty():
+			continue
+		var entry: Control = _create_activity_entry(activity)
+		if entry == null:
+			continue
+		requirement_list.container.add_child(entry)
+		requirement_list.container.move_child(entry, insert_index)
+		entry.call("setup", activity)
+		insert_index += 1
 
 func on_enter() -> void:
 	_initial_order_reset_token += 1
@@ -605,13 +659,57 @@ func _display_meridian() -> void:
 		var req: Dictionary = GameState.meridian_acupoints[i]
 		if not req.get("completed", false):
 			var display_index: int = display_reqs.size()
-			display_reqs.append(req.duplicate())
+			display_reqs.append(_with_active_activity_rewards(req))
 			_display_index_map.append(i)
 			var stats: Dictionary = _get_requirement_match_stats(req)
 			priority_indices[display_index] = int(stats.get("priority", 0))
 			match_counts[display_index] = int(stats.get("matched_count", 0))
 	requirement_list.set_requirements(display_reqs, priority_indices, match_counts)
 	_refresh_requirement_buttons()
+
+
+func _with_active_activity_rewards(req: Dictionary) -> Dictionary:
+	var display_req: Dictionary = req.duplicate(true)
+	var total_value: int = int(req.get("total_value", 0))
+	if total_value <= 0:
+		return display_req
+	var rewards_variant: Variant = display_req.get("rewards", {})
+	var rewards: Dictionary = rewards_variant.duplicate(true) if rewards_variant is Dictionary else {}
+	var tokens_variant: Variant = rewards.get("tokens", [])
+	var tokens: Array = tokens_variant.duplicate(true) if tokens_variant is Array else []
+	var points_rate: float = float(ConfigDatabase.get_game_config("battle_pass.points_per_value", 0.0))
+	if points_rate <= 0.0:
+		return display_req
+	for activity_variant: Variant in GameState.activity_defs:
+		if not activity_variant is Dictionary:
+			continue
+		var activity: Dictionary = activity_variant as Dictionary
+		if not bool(activity.get("active", false)):
+			continue
+		var activity_id: int = int(activity.get("id", 0))
+		var pass_data: Dictionary = ConfigDatabase.get_battle_pass(activity_id)
+		if pass_data.is_empty():
+			continue
+		var points: int = floori(float(total_value) * points_rate)
+		if points <= 0:
+			continue
+		var points_token_id: int = int(pass_data.get("points_token_id", 0))
+		if points_token_id <= 0:
+			continue
+		var already_present: bool = false
+		for token_variant: Variant in tokens:
+			if token_variant is Dictionary and int((token_variant as Dictionary).get("token", 0)) == points_token_id:
+				var token: Dictionary = token_variant as Dictionary
+				token["amount"] = int(token.get("amount", 0)) + points
+				already_present = true
+				break
+		if not already_present:
+			tokens.append({"token": points_token_id, "amount": points})
+	if tokens.is_empty():
+		return display_req
+	rewards["tokens"] = tokens
+	display_req["rewards"] = rewards
+	return display_req
 
 func _on_meridian_complete(display_index: int) -> void:
 	if _meridian_submit_pending:

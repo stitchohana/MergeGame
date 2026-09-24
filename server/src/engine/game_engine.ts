@@ -3,6 +3,7 @@ import { QuestEngine } from "./quest_engine";
 import { ActivityEngine } from "./activity_engine";
 import { GameConfigTables } from "./config_tables";
 import { deterministicSpawnRoll } from "./spawn_rng";
+import { BattlePassService } from "./battle_pass";
 
 // --- Config types ---
 
@@ -150,11 +151,18 @@ export class GameEngine {
   private homeMeridianDefs: any[] = [];
   questEngine: QuestEngine;
   activityEngine: ActivityEngine;
+  battlePassService: BattlePassService;
 
   constructor(configTables: GameConfigTables) {
     this.loadConfigs(configTables);
     this.questEngine = new QuestEngine(configTables.quests);
     this.activityEngine = new ActivityEngine(configTables.activities, configTables.weeklyTasks);
+    this.battlePassService = new BattlePassService(
+      configTables.battlePass,
+      configTables.activities,
+      configTables.tokens,
+      configTables.gameConfig,
+    );
     this.loadRewards(configTables.rewards);
     this.loadHomeMeridians(configTables.homeMeridians);
   }
@@ -1820,6 +1828,7 @@ export class GameEngine {
       board_type: boardType,
       uid_counter: 0,
       pending_rewards: [],
+      battle_pass_progress: {},
       spawn_seed: this.createSpawnSeed(),
       spawn_sequence: 0,
       spawn_history: [],
@@ -3179,7 +3188,7 @@ export class GameEngine {
 
   // --- Meridian ---
 
-  completeMeridianAcupoint(state: GameState, index: number, itemIds: number[]): { ok: true; newVersion: number; meridian_acupoints: any[]; qi_gained: number; qi_full: boolean; grid: any[]; cultivation: any; spirit_stones: number; stamina: number } | { ok: false; reason: string } {
+  completeMeridianAcupoint(state: GameState, index: number, itemIds: number[], requestId = ""): { ok: true; newVersion: number; meridian_acupoints: any[]; qi_gained: number; qi_full: boolean; grid: any[]; cultivation: any; spirit_stones: number; stamina: number } | { ok: false; reason: string } {
     if (!state.meridian_acupoints || index < 0 || index >= state.meridian_acupoints.length) {
       return { ok: false, reason: "invalid_index" };
     }
@@ -3275,7 +3284,8 @@ export class GameEngine {
       console.log(`[engine] meridian fixed order #${index} completed, next wave deferred until circulation`);
     }
 
-    return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina };
+    this.battlePassService.awardOrderPoints(state, totalValue, requestId);
+    return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, battle_pass_progress: this.battlePassService.ensureProgress(state) };
   }
 
   // --- Storage ---

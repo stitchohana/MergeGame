@@ -44,6 +44,7 @@ export class ActivityEngine {
   }
 
   isActive(a: ActivityDef): boolean {
+    if (a.enabled === false) return false;
     if (a.cycle === ActivityCycle.ONCE) {
       const now = Date.now();
       if (a.start_time) {
@@ -52,7 +53,7 @@ export class ActivityEngine {
       }
       if (a.end_time) {
         const et = new Date(a.end_time).getTime();
-        if (now > et) return false;
+        if (now >= et) return false;
       }
       return true;
     }

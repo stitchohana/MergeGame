@@ -24,6 +24,8 @@ export interface ActivityDef {
   id: number;
   name: string;
   cycle: number;
+  widget?: string;
+  enabled?: boolean;
   start_time?: string;
   end_time?: string;
 }
@@ -70,6 +72,13 @@ export interface RewardItem {
 export interface RewardConfig {
   tokens?: RewardToken[];
   items?: RewardItem[];
+}
+
+export interface BattlePassProgress {
+  points: number;
+  premium_unlocked: boolean;
+  free_claimed_levels: number[];
+  premium_claimed_levels: number[];
 }
 
 export interface HomeMeridianStageProgress {
@@ -160,6 +169,8 @@ export interface GameState {
   /** Production facilities acquired at least once; kept after merge/consumption. */
   unlocked_production_item_ids?: number[];
   activity_progress?: Record<number, ActivityProgress>;
+  battle_pass_progress?: Record<number, BattlePassProgress>;
+  battle_pass_order_requests?: string[];
   spawn_seed?: number;
   spawn_sequence?: number;
   spawn_history?: SpawnHistoryEntry[];
