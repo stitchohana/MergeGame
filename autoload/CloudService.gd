@@ -40,6 +40,11 @@ signal meridian_complete_confirmed(result: Dictionary)
 signal meridian_complete_rejected(reason: String)
 signal battle_pass_action_confirmed(result: Dictionary)
 signal battle_pass_action_rejected(reason: String)
+signal card_collection_confirmed(result: Dictionary)
+signal card_collection_rejected(reason: String)
+var card_collection_request: Dictionary = {}
+var card_collection_busy: bool = false
+var _card_collection_user_id: String = ""
 signal quest_claim_confirmed(result: Dictionary)
 signal quest_claim_rejected(reason: String)
 signal pending_reward_claimed(result: Dictionary)
@@ -132,6 +137,8 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("meridian_complete", _on_meridian_complete_response, meridian_complete_rejected, meridian_complete_rejected, meridian_complete_rejected)
 	_register_endpoint("battle_pass_unlock", _on_battle_pass_response, battle_pass_action_rejected, battle_pass_action_rejected, battle_pass_action_rejected)
 	_register_endpoint("battle_pass_claim", _on_battle_pass_response, battle_pass_action_rejected, battle_pass_action_rejected, battle_pass_action_rejected)
+	_register_endpoint("card_collection", _on_card_collection_response, card_collection_rejected, card_collection_rejected, card_collection_rejected)
+	card_collection_rejected.connect(_on_card_collection_error)
 	_register_endpoint("quest_claim", _on_quest_claim_response, quest_claim_rejected, quest_claim_rejected, quest_claim_rejected)
 	_register_endpoint("claim_pending_reward", _on_claim_pending_reward_response, pending_reward_claimed_rejected, pending_reward_claimed_rejected, pending_reward_claimed_rejected)
 	_register_endpoint("home_meridian_light", _on_home_meridian_light_response, home_meridian_light_rejected, home_meridian_light_rejected, home_meridian_light_rejected)
@@ -190,6 +197,11 @@ func _on_login_response(data: Dictionary) -> void:
 	var user: Dictionary = data.get("user", {})
 	var user_id: String = user.get("user_id", "")
 	if not token.is_empty() and not user_id.is_empty():
+		if not _card_collection_user_id.is_empty() and _card_collection_user_id != user_id:
+			card_collection_request.clear()
+			card_collection_busy = false
+			GameState.card_collection_progress.clear()
+		_card_collection_user_id = user_id
 		_save_token()
 		online = true
 		connected.emit()
@@ -735,12 +747,85 @@ func _finish_tag(tag: String) -> void:
 		_state_request_in_flight = false
 
 func _dispatch_response(tag: String, data: Dictionary) -> void:
+	_sync_card_collection(data, tag)
 	if bool(data.get("ok", false)) and tag != "fetch_state" and tag != "login":
 		_register_confirmed_item_discoveries(tag, data)
 	var ep: Dictionary = _endpoints.get(tag, {})
 	var cb: Callable = ep.get("response_cb", Callable())
 	if cb.is_valid():
 		cb.call(data)
+
+
+func submit_card_collection(action: String, collection_id: int, target_id: int) -> void:
+	if card_collection_busy:
+		return
+	if not card_collection_request.is_empty():
+		card_collection_rejected.emit("pending_operation")
+		return
+	var progress: Dictionary = GameState.get_card_collection_progress(collection_id)
+	card_collection_request = {
+		"action": action, "collection_id": collection_id,
+		"pack_id": target_id, "set_id": target_id,
+		"request_id": Crypto.new().generate_random_bytes(16).hex_encode(),
+		"expected_opened_count": int(progress.get("opened_count", 0)),
+	}
+	retry_card_collection()
+
+
+func retry_card_collection() -> void:
+	if card_collection_busy or card_collection_request.is_empty():
+		return
+	card_collection_busy = true
+	_send_authed_request("card_collection", "/api/game/card_collection/" + str(card_collection_request.action), HTTPClient.Method.METHOD_POST, JSON.stringify(card_collection_request))
+
+
+func _on_card_collection_error(reason: String) -> void:
+	card_collection_busy = false
+	if reason in ["invalid_params", "pack_not_found", "set_not_found", "insufficient_packs", "activity_inactive", "state_conflict", "already_claimed", "set_incomplete", "request_mismatch"]:
+		card_collection_request.clear()
+		fetch_state()
+
+
+func _on_card_collection_response(data: Dictionary) -> void:
+	card_collection_busy = false
+	if not bool(data.get("ok", false)):
+		card_collection_rejected.emit(str(data.get("error", "request_failed")))
+		return
+	card_collection_request.clear()
+	GameState.sync_stamina_multiplier(data)
+	GameState.stamina = int(data.get("stamina", GameState.stamina))
+	GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+	card_collection_confirmed.emit(data)
+
+
+func _sync_card_collection(data: Dictionary, tag: String) -> void:
+	if data.has("activity_defs"):
+		GameState.activity_defs = data.get("activity_defs", [])
+	if data.has("card_collection_config"):
+		ConfigDatabase.card_collection = data.get("card_collection_config", {})
+	if not data.has("card_collection_progress"):
+		return
+	var next_progress: Dictionary = data.get("card_collection_progress", {})
+	var gained: PackedStringArray = []
+	for collection_id: Variant in next_progress:
+		var previous: Dictionary = GameState.get_card_collection_progress(int(collection_id))
+		if int(next_progress[collection_id].get("revision", 0)) < int(previous.get("revision", 0)):
+			next_progress[collection_id] = previous
+			continue
+		var old: Dictionary = previous.get("packs", {})
+		var packs: Dictionary = next_progress[collection_id].get("packs", {})
+		for pack_id: Variant in packs:
+			var increase: int = maxi(0, int(packs[pack_id]) - int(old.get(str(pack_id), old.get(int(pack_id), 0))))
+			if increase > 0:
+				for pack: Dictionary in ConfigDatabase.card_collection.get("packs", []):
+					if int(pack.pack_id) == int(pack_id):
+						gained.append("%s ×%d" % [str(pack.name), increase])
+	GameState.card_collection_progress = next_progress
+	GameState.card_collection_changed.emit()
+	if not gained.is_empty() and tag != "fetch_state" and tag != "card_collection":
+		EventBus.show_toast.emit("获得%s，可前往万象仙册开启" % "、".join(gained))
 
 
 func _register_confirmed_item_discoveries(tag: String, data: Dictionary) -> void:

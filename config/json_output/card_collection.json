@@ -1,0 +1,320 @@
+{
+  "collections": [
+    {
+      "collection_id": 1,
+      "activity_id": 5,
+      "name": "万象仙册"
+    }
+  ],
+  "card_sets": [
+    {
+      "set_id": 1,
+      "collection_id": 1,
+      "name": "山海灵踪",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 300
+          },
+          {
+            "token": 1,
+            "amount": 1000
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 2,
+      "collection_id": 1,
+      "name": "洞天仙物",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 500
+          },
+          {
+            "token": 1,
+            "amount": 2000
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 3,
+      "collection_id": 1,
+      "name": "九霄奇珍",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 800
+          },
+          {
+            "token": 1,
+            "amount": 3000
+          }
+        ]
+      }
+    }
+  ],
+  "cards": [
+    {
+      "card_id": 101,
+      "set_id": 1,
+      "name": "青竹灵鼠",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 102,
+      "set_id": 1,
+      "name": "踏云白鹿",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 103,
+      "set_id": 1,
+      "name": "赤羽灵鹤",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 104,
+      "set_id": 1,
+      "name": "玄水蛟龙",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 105,
+      "set_id": 1,
+      "name": "九尾天狐",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 106,
+      "set_id": 2,
+      "name": "引灵灯",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 107,
+      "set_id": 2,
+      "name": "凝露瓶",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 108,
+      "set_id": 2,
+      "name": "青莲鼎",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 109,
+      "set_id": 2,
+      "name": "紫霄剑",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 110,
+      "set_id": 2,
+      "name": "太虚仙镜",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 111,
+      "set_id": 3,
+      "name": "山间灵泉",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 112,
+      "set_id": 3,
+      "name": "月下莲台",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 113,
+      "set_id": 3,
+      "name": "云海仙舟",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 114,
+      "set_id": 3,
+      "name": "星河宫阙",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 115,
+      "set_id": 3,
+      "name": "九霄天门",
+      "star": 5,
+      "icon": ""
+    }
+  ],
+  "packs": [
+    {
+      "pack_id": 1,
+      "collection_id": 1,
+      "name": "1星卡包",
+      "star": 1,
+      "icon": "",
+      "card_count": 2,
+      "normal_weights": [
+        55,
+        28,
+        12,
+        4,
+        1
+      ]
+    },
+    {
+      "pack_id": 2,
+      "collection_id": 1,
+      "name": "2星卡包",
+      "star": 2,
+      "icon": "",
+      "card_count": 3,
+      "normal_weights": [
+        55,
+        28,
+        12,
+        4,
+        1
+      ]
+    },
+    {
+      "pack_id": 3,
+      "collection_id": 1,
+      "name": "3星卡包",
+      "star": 3,
+      "icon": "",
+      "card_count": 4,
+      "normal_weights": [
+        55,
+        28,
+        12,
+        4,
+        1
+      ]
+    },
+    {
+      "pack_id": 4,
+      "collection_id": 1,
+      "name": "4星卡包",
+      "star": 4,
+      "icon": "",
+      "card_count": 5,
+      "normal_weights": [
+        55,
+        28,
+        12,
+        4,
+        1
+      ]
+    },
+    {
+      "pack_id": 5,
+      "collection_id": 1,
+      "name": "5星卡包",
+      "star": 5,
+      "icon": "",
+      "card_count": 6,
+      "normal_weights": [
+        55,
+        28,
+        12,
+        4,
+        1
+      ]
+    }
+  ],
+  "source_rewards": [
+    {
+      "collection_id": 1,
+      "source_type": "quest",
+      "min_value": 0,
+      "pack_id": 1,
+      "count": 1,
+      "enabled": true
+    },
+    {
+      "collection_id": 1,
+      "source_type": "quest",
+      "min_value": 10,
+      "pack_id": 2,
+      "count": 1,
+      "enabled": true
+    },
+    {
+      "collection_id": 1,
+      "source_type": "quest",
+      "min_value": 50,
+      "pack_id": 3,
+      "count": 1,
+      "enabled": true
+    },
+    {
+      "collection_id": 1,
+      "source_type": "order",
+      "min_value": 0,
+      "pack_id": 1,
+      "count": 1,
+      "enabled": true
+    },
+    {
+      "collection_id": 1,
+      "source_type": "order",
+      "min_value": 200,
+      "pack_id": 2,
+      "count": 1,
+      "enabled": true
+    },
+    {
+      "collection_id": 1,
+      "source_type": "order",
+      "min_value": 600,
+      "pack_id": 3,
+      "count": 1,
+      "enabled": true
+    },
+    {
+      "collection_id": 1,
+      "source_type": "circulation",
+      "min_value": 0,
+      "pack_id": 3,
+      "count": 1,
+      "enabled": true
+    },
+    {
+      "collection_id": 1,
+      "source_type": "circulation",
+      "min_value": 4,
+      "pack_id": 4,
+      "count": 1,
+      "enabled": true
+    },
+    {
+      "collection_id": 1,
+      "source_type": "circulation",
+      "min_value": 8,
+      "pack_id": 5,
+      "count": 1,
+      "enabled": true
+    }
+  ]
+}

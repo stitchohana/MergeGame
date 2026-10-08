@@ -1,3 +1,5 @@
+import type { CollectionProgress } from "../engine/card_collection";
+
 // --- Game data types ---
 
 export enum TokenType {
@@ -79,6 +81,8 @@ export interface BattlePassProgress {
   premium_unlocked: boolean;
   free_claimed_levels: number[];
   premium_claimed_levels: number[];
+  /** China Standard Time calendar month, for example 2026-10. */
+  period_key?: string;
 }
 
 export interface HomeMeridianStageProgress {
@@ -135,6 +139,9 @@ export interface CultivationData {
 }
 
 export interface GameState {
+  storage_revision?: number;
+  card_collection_progress?: Record<number, CollectionProgress>;
+  card_collection_order_requests?: string[];
   grid: GridItem[];
   pouch: number[];
   cultivation: CultivationData;

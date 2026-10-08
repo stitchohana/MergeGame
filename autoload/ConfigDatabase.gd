@@ -15,6 +15,7 @@ var _meridian_thresholds: Array = []
 var _tokens_data: Dictionary = {}
 var _weekly_tasks: Dictionary = {}
 var _battle_passes: Dictionary = {}
+var card_collection: Dictionary = {}
 var _recipes_by_table: Dictionary = {}  # table_id -> Array[recipe]
 
 func _ready() -> void:
@@ -33,6 +34,7 @@ func load_all() -> void:
 	_load_tokens("res://config/json_output/tokens.json")
 	_load_weekly_tasks("res://config/json_output/weekly_tasks.json")
 	_load_battle_passes("res://config/json_output/battle_pass.json")
+	card_collection = _load_json("res://config/json_output/card_collection.json")
 
 func _load_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)

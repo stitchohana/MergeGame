@@ -7,10 +7,12 @@ Output: config/xlsx/*.xlsx
 """
 
 import json
+import sys
 from pathlib import Path
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+from card_collection_table import CARD_COLLECTION_COLUMNS, card_collection_rows
 
 from facility_reward_validation import validate_facility_reward_order
 from home_meridian_progression import validate_home_progression
@@ -135,6 +137,19 @@ def save(wb, name):
         print(f"  -> xlsx/{name}.xlsx ({len(wb.sheetnames)} sheet(s): {', '.join(wb.sheetnames)})")
     except PermissionError:
         print(f"  SKIP xlsx/{name}.xlsx — 文件被占用，请关闭后重试")
+
+
+def build_card_collection():
+    data = json.load(open(JSON_DIR / "card_collection.json", encoding="utf-8"))
+    wb = new_book()
+    for name, headers in CARD_COLLECTION_COLUMNS.items():
+        add_sheet(wb.create_sheet(name), headers, card_collection_rows(data, name))
+    save(wb, "card_collection")
+
+
+if "--only-card-collection" in sys.argv:
+    build_card_collection()
+    raise SystemExit(0)
 
 
 # ════════════════════════════════════════════════════════════
@@ -403,6 +418,7 @@ save(wb, "quests")
 #  activities.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building activities.xlsx...")
+build_card_collection()
 data = json.load(open(JSON_DIR / "activities.json", encoding="utf-8"))
 wb = new_book()
 h = ["id","name","cycle","start_time","end_time","widget","enabled"]

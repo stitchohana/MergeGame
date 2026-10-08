@@ -23,9 +23,14 @@ export class D1Storage implements IStorage {
 	}
 
 	async saveState(userId: string, state: GameState): Promise<void> {
-		await this.db.prepare(
-			"INSERT INTO game_states (user_id, state_json, updated_at) VALUES (?, ?, unixepoch()) ON CONFLICT(user_id) DO UPDATE SET state_json = excluded.state_json, updated_at = excluded.updated_at"
-		).bind(userId, JSON.stringify(state)).run();
+		// Compare the persisted revision, including legacy rows without one. All writers
+		// use this path, so a concurrent Worker cannot overwrite a committed opening.
+		const revision = state.storage_revision ?? 0;
+		const result = await this.db.prepare(
+			"INSERT INTO game_states (user_id, state_json, updated_at) VALUES (?, ?, unixepoch()) ON CONFLICT(user_id) DO UPDATE SET state_json = excluded.state_json, updated_at = excluded.updated_at WHERE COALESCE(json_extract(game_states.state_json, '$.storage_revision'), 0) = ?"
+		).bind(userId, JSON.stringify({ ...state, storage_revision: revision + 1 }), revision).run();
+		if (result.meta.changes !== 1) throw new Error("state_conflict");
+		state.storage_revision = revision + 1;
 	}
 
 	async getLeaderboard(limit: number): Promise<LeaderboardEntry[]> {

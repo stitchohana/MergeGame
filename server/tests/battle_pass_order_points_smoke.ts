@@ -6,6 +6,7 @@ import { gameConfigTables } from "../src/worker/config_data";
 const config: any = structuredClone(gameConfigTables.battlePass);
 const activities: any = structuredClone(gameConfigTables.activities);
 const activity = activities.activities.find((entry: any) => entry.id === config.passes[0].activity_id);
+activity.cycle = 0;
 activity.enabled = true;
 activity.start_time = "2026-09-22T00:00:00Z";
 activity.end_time = "2999-01-01T00:00:00Z";

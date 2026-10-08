@@ -3,6 +3,7 @@ import { QuestEngine } from "./quest_engine";
 import { ActivityEngine } from "./activity_engine";
 import { GameConfigTables } from "./config_tables";
 import { deterministicSpawnRoll } from "./spawn_rng";
+import { CardCollectionService } from "./card_collection";
 import { BattlePassService } from "./battle_pass";
 
 // --- Config types ---
@@ -152,6 +153,7 @@ export class GameEngine {
   questEngine: QuestEngine;
   activityEngine: ActivityEngine;
   battlePassService: BattlePassService;
+  cardCollectionService: CardCollectionService;
 
   constructor(configTables: GameConfigTables) {
     this.loadConfigs(configTables);
@@ -163,6 +165,7 @@ export class GameEngine {
       configTables.tokens,
       configTables.gameConfig,
     );
+    this.cardCollectionService = new CardCollectionService(configTables.cardCollection, this.activityEngine.getActivities());
     this.loadRewards(configTables.rewards);
     this.loadHomeMeridians(configTables.homeMeridians);
   }
@@ -540,6 +543,7 @@ export class GameEngine {
       : { tokens: [], items: [] };
     const launchersRefreshed = this.refreshBoardLaunchers(state);
     stageProgress.circulation_completed = true;
+    this.cardCollectionService.awardSource(state, "circulation", stageIndex, stageIndex + 1);
     this.syncBreakthroughOrder(state);
 
     // Reveal the next fixed onboarding wave only after the explicit run
@@ -3192,10 +3196,18 @@ export class GameEngine {
     if (!state.meridian_acupoints || index < 0 || index >= state.meridian_acupoints.length) {
       return { ok: false, reason: "invalid_index" };
     }
+    if (!Number.isInteger(index)) return { ok: false, reason: "invalid_index" };
+    if (requestId && state.card_collection_order_requests?.includes(requestId)) return { ok: false, reason: "already_completed" };
     const req = state.meridian_acupoints[index];
     if (req.completed) return { ok: false, reason: "already_completed" };
     if (req.breakthrough_order === true) {
       return { ok: false, reason: "breakthrough_confirmation_required" };
+    }
+    const requiredIds: number[] = Array.isArray((req as any).item_ids)
+      ? [...(req as any).item_ids] : Array.from({ length: req.count }, () => req.item_id);
+    requiredIds.sort((a, b) => a - b);
+    if (requiredIds.length === 0 || itemIds.length !== requiredIds.length || [...itemIds].sort((a, b) => a - b).some((id, i) => id !== requiredIds[i])) {
+      return { ok: false, reason: "invalid_order_items" };
     }
     // Consume one of each required item from grid
     const toRemove: number[] = [];
@@ -3285,6 +3297,8 @@ export class GameEngine {
     }
 
     this.battlePassService.awardOrderPoints(state, totalValue, requestId);
+    this.cardCollectionService.awardSource(state, "order", 0, totalValue);
+    if (requestId) state.card_collection_order_requests = [...(state.card_collection_order_requests ?? []), requestId].slice(-128);
     return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, battle_pass_progress: this.battlePassService.ensureProgress(state) };
   }
 

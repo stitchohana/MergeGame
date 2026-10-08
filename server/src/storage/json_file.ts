@@ -67,7 +67,15 @@ export class JsonFileStorage implements IStorage {
   }
 
   async saveState(userId: string, state: GameState): Promise<void> {
-    fs.writeFileSync(this.statePath(userId), JSON.stringify(state, null, 2));
+    const file = this.statePath(userId);
+    const revision = state.storage_revision ?? 0;
+    // The local server serializes player operations; keep the same revision contract as D1.
+    const stored = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : null;
+    if ((stored?.storage_revision ?? 0) !== revision) throw new Error("state_conflict");
+    const pending = file + ".tmp";
+    fs.writeFileSync(pending, JSON.stringify({ ...state, storage_revision: revision + 1 }, null, 2));
+    fs.renameSync(pending, file);
+    state.storage_revision = revision + 1;
   }
 
   async getLeaderboard(limit: number): Promise<LeaderboardEntry[]> {

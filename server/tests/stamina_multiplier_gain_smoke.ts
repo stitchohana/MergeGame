@@ -28,7 +28,7 @@ async function main(): Promise<void> {
   const state = engine.createInitialState();
   state.stamina = 190;
   state.battle_pass_progress = {
-    4: { points: 10, premium_unlocked: false, free_claimed_levels: [], premium_claimed_levels: [] },
+    4: { points: 10, premium_unlocked: false, free_claimed_levels: [], premium_claimed_levels: [], period_key: engine.battlePassService.getPeriodKey() },
   };
   const storage = new MemoryStorage(state);
   const secret = "stamina-gain-smoke-secret";

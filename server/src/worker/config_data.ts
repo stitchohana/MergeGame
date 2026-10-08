@@ -1,4 +1,5 @@
 import activities from "../../../config/json_output/activities.json";
+import cardCollection from "../../../config/json_output/card_collection.json";
 import battlePass from "../../../config/json_output/battle_pass.json";
 import cultivation from "../../../config/json_output/cultivation.json";
 import expedition from "../../../config/json_output/expedition.json";
@@ -18,6 +19,7 @@ import type { GameConfigTables } from "../engine/config_tables";
 export const gameConfigTables = {
 	activities,
 	battlePass,
+	cardCollection,
 	cultivation,
 	expedition,
 	gameConfig,

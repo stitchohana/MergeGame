@@ -1,4 +1,4 @@
-import { ActivityDef, BattlePassProgress, GameState, RewardConfig } from "../storage/interface";
+import { ActivityCycle, ActivityDef, BattlePassProgress, GameState, RewardConfig } from "../storage/interface";
 
 export interface BattlePassTier {
   level: number;
@@ -15,11 +15,12 @@ export interface BattlePassDefinition {
 
 type BattlePassResponse = { ok: true; progress: Record<number, BattlePassProgress>; rewards?: RewardConfig } | { ok: false; reason: string };
 
-const newProgress = (): BattlePassProgress => ({
+const newProgress = (periodKey?: string): BattlePassProgress => ({
   points: 0,
   premium_unlocked: false,
   free_claimed_levels: [],
   premium_claimed_levels: [],
+  ...(periodKey ? { period_key: periodKey } : {}),
 });
 
 export class BattlePassService {
@@ -54,7 +55,7 @@ export class BattlePassService {
         throw new Error("battle_pass_time_must_come_from_activity");
       }
       if (!tokenIds.has(definition.points_token_id)) throw new Error("battle_pass_points_token_not_found");
-      if (activity.enabled === true) {
+      if (activity.enabled === true && activity.cycle === ActivityCycle.ONCE) {
         const start = activity.start_time ? Date.parse(activity.start_time) : Number.NaN;
         const end = activity.end_time ? Date.parse(activity.end_time) : Number.NaN;
         if (!Number.isFinite(start) || !Number.isFinite(end) || start >= end) {
@@ -103,16 +104,32 @@ export class BattlePassService {
     return this.passes.get(activityId);
   }
 
-  ensureProgress(state: GameState): Record<number, BattlePassProgress> {
+  getPeriodKey(now = Date.now()): string {
+    // Battle pass seasons follow China Standard Time calendar months.
+    const chinaNow = new Date(now + 8 * 60 * 60 * 1000);
+    return `${chinaNow.getUTCFullYear()}-${String(chinaNow.getUTCMonth() + 1).padStart(2, "0")}`;
+  }
+
+  private isMonthly(activityId: number): boolean {
+    return this.activities.get(activityId)?.cycle === ActivityCycle.MONTHLY;
+  }
+
+  ensureProgress(state: GameState, now = Date.now()): Record<number, BattlePassProgress> {
     state.battle_pass_progress ??= {};
+    const periodKey = this.getPeriodKey(now);
     for (const activityId of this.passes.keys()) {
       const current = state.battle_pass_progress[activityId];
-      if (!current) state.battle_pass_progress[activityId] = newProgress();
+      if (!current) state.battle_pass_progress[activityId] = newProgress(this.isMonthly(activityId) ? periodKey : undefined);
       else {
+        if (this.isMonthly(activityId) && current.period_key !== periodKey) {
+          state.battle_pass_progress[activityId] = newProgress(periodKey);
+          continue;
+        }
         current.points = Math.max(0, Math.floor(Number(current.points) || 0));
         current.premium_unlocked = current.premium_unlocked === true;
         current.free_claimed_levels = Array.isArray(current.free_claimed_levels) ? current.free_claimed_levels : [];
         current.premium_claimed_levels = Array.isArray(current.premium_claimed_levels) ? current.premium_claimed_levels : [];
+        if (this.isMonthly(activityId)) current.period_key = periodKey;
       }
     }
     return state.battle_pass_progress;
@@ -121,6 +138,7 @@ export class BattlePassService {
   isActive(activityId: number, now = Date.now()): boolean {
     const activity = this.activities.get(activityId);
     if (!activity || activity.enabled !== true) return false;
+    if (activity.cycle === ActivityCycle.MONTHLY) return true;
     const start = Date.parse(activity.start_time ?? "");
     const end = Date.parse(activity.end_time ?? "");
     return Number.isFinite(start) && Number.isFinite(end) && now >= start && now < end;
@@ -135,7 +153,7 @@ export class BattlePassService {
     }
     if (!Number.isFinite(totalValue) || totalValue <= 0) return false;
     let changed = false;
-    const progress = this.ensureProgress(state);
+    const progress = this.ensureProgress(state, now);
     for (const pass of this.passes.values()) {
       if (!this.isActive(pass.activity_id, now)) continue;
       const points = Math.floor(totalValue * this.pointsPerValue);
@@ -150,12 +168,12 @@ export class BattlePassService {
     const pass = this.passes.get(activityId);
     if (!pass) return { ok: false, reason: "invalid_activity" };
     if (!this.isActive(activityId, now)) return { ok: false, reason: "activity_inactive" };
-    const progress = this.ensureProgress(state)[activityId];
-    if (progress.premium_unlocked) return { ok: true, progress: this.ensureProgress(state) };
+    const progress = this.ensureProgress(state, now)[activityId];
+    if (progress.premium_unlocked) return { ok: true, progress: this.ensureProgress(state, now) };
     if (state.spirit_stones < this.premiumUnlockCost) return { ok: false, reason: "insufficient_spirit_stones" };
     state.spirit_stones -= this.premiumUnlockCost;
     progress.premium_unlocked = true;
-    return { ok: true, progress: this.ensureProgress(state) };
+    return { ok: true, progress: this.ensureProgress(state, now) };
   }
 
   claim(
@@ -172,21 +190,22 @@ export class BattlePassService {
     if (track !== "free" && track !== "premium") return { ok: false, reason: "invalid_track" };
     const tier = pass.tiers.find(entry => entry.level === level);
     if (!tier) return { ok: false, reason: "invalid_level" };
-    const progress = this.ensureProgress(state)[activityId];
+    const progress = this.ensureProgress(state, now)[activityId];
     if (progress.points < tier.required_points) return { ok: false, reason: "insufficient_points" };
     if (track === "premium" && !progress.premium_unlocked) return { ok: false, reason: "premium_not_unlocked" };
     const claimed = track === "free" ? progress.free_claimed_levels : progress.premium_claimed_levels;
     if (claimed.includes(level)) return { ok: false, reason: "already_claimed" };
     const rewards = applyRewards(track === "free" ? tier.free_rewards : tier.premium_rewards);
     claimed.push(level);
-    return { ok: true, progress: this.ensureProgress(state), rewards };
+    return { ok: true, progress: this.ensureProgress(state, now), rewards };
   }
 
   settleExpired(state: GameState, applyRewards: (rewards: RewardConfig) => RewardConfig, now = Date.now()): boolean {
     let changed = false;
-    const progress = this.ensureProgress(state);
+    const progress = this.ensureProgress(state, now);
     for (const pass of this.passes.values()) {
       const activity = this.activities.get(pass.activity_id);
+      if (activity?.cycle === ActivityCycle.MONTHLY) continue;
       const end = activity?.end_time ? Date.parse(activity.end_time) : Number.NaN;
       if (activity?.enabled !== true || !Number.isFinite(end) || now < end) continue;
       const passProgress = progress[pass.activity_id];

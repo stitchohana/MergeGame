@@ -19,7 +19,9 @@ export function defaultGameState(): GameState {
     max_stamina: 100,
     last_stamina_tick: now,
     spirit_stones: 0,
-    pending_rewards: []
+    pending_rewards: [],
+    version: 0,
+    crafted_item_ids: []
       };
 }
 
@@ -45,11 +47,14 @@ export class MemoryStorage implements IStorage {
   }
 
   async loadState(userId: string): Promise<GameState | null> {
-    return this.states.get(userId) ?? null;
+    return structuredClone(this.states.get(userId) ?? null);
   }
 
   async saveState(userId: string, state: GameState): Promise<void> {
-    this.states.set(userId, state);
+    const revision = state.storage_revision ?? 0;
+    if ((this.states.get(userId)?.storage_revision ?? 0) !== revision) throw new Error("state_conflict");
+    state.storage_revision = revision + 1;
+    this.states.set(userId, structuredClone(state));
   }
 
   async getLeaderboard(limit: number): Promise<LeaderboardEntry[]> {

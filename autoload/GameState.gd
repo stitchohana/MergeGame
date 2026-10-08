@@ -34,6 +34,12 @@ var activity_defs: Array = []
 var activity_progress: Dictionary = {}
 var activity_current_day: int = 0
 var battle_pass_progress: Dictionary = {}
+var card_collection_progress: Dictionary = {}
+signal card_collection_changed()
+
+
+func get_card_collection_progress(collection_id: int) -> Dictionary:
+	return card_collection_progress.get(str(collection_id), card_collection_progress.get(collection_id, {}))
 
 # Auto-acupoint activation from RequirementList
 var pending_auto_acupoint: bool = false

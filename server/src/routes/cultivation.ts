@@ -12,7 +12,10 @@ function op(handler: (req: Request, res: Response, userId: string) => Promise<vo
       await enqueue(userId, () => handler(req, res, userId));
     } catch (err) {
       console.error("[cult] op error:", err);
-      if (!res.headersSent) res.status(500).json({ error: "internal_error" });
+      if (!res.headersSent) {
+        const conflict = err instanceof Error && err.message === "state_conflict";
+        res.status(conflict ? 409 : 500).json({ error: conflict ? "state_conflict" : "internal_error" });
+      }
     }
   };
 }
@@ -60,7 +63,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
     res.json({
       ok: true,
       cultivation: state.cultivation,
-      quest_progress: state.quest_progress,
+      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
       meridian_acupoints: state.meridian_acupoints || [],
       pending_rewards: state.pending_rewards,
     });
@@ -80,7 +83,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       ok: true,
       stamina: result.stamina,
       max_stamina: result.max_stamina,
-      quest_progress: state.quest_progress,
+      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
       pending_rewards: state.pending_rewards,
       ...staminaMultiplierResponse(state),
     });
@@ -100,7 +103,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       ok: true,
       amount: result.amount,
       spirit_stones: result.spiritStones,
-      quest_progress: state.quest_progress,
+      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
       pending_rewards: state.pending_rewards,
     });
   }));
@@ -131,7 +134,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       stamina: state.stamina,
       ...staminaMultiplierResponse(state),
       pending_rewards: state.pending_rewards,
-      quest_progress: state.quest_progress,
+      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
       meridian_acupoints: state.meridian_acupoints || [],
     });
   }));

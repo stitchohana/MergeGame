@@ -23,11 +23,16 @@
     {
       "id": 4,
       "name": "首期战令",
-      "cycle": 0,
+      "cycle": 3,
       "widget": "BattlePass",
-      "enabled": true,
-      "start_time": "2026-09-01T00:00:00+08:00",
-      "end_time": "2026-10-01T00:00:00+08:00"
+      "enabled": true
+    },
+    {
+      "id": 5,
+      "name": "万象仙册",
+      "cycle": 0,
+      "widget": "CardCollection",
+      "enabled": true
     }
   ]
 }

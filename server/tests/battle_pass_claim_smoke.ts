@@ -23,6 +23,7 @@ class MemoryStorage implements IStorage {
 
 const tables: any = structuredClone(gameConfigTables);
 const activity = tables.activities.activities.find((entry: any) => entry.id === 4);
+activity.cycle = 0;
 activity.enabled = true;
 activity.start_time = "2026-09-22T00:00:00Z";
 activity.end_time = "2999-01-01T00:00:00Z";

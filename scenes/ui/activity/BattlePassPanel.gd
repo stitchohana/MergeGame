@@ -47,9 +47,12 @@ func _refresh() -> void:
 		if activity is Dictionary and int(activity.get("id", 0)) == _activity_id:
 			activity_name = str(activity.get("name", activity_name))
 			_activity_active = bool(activity.get("active", false))
-			var end_time: String = str(activity.get("end_time", ""))
-			if not end_time.is_empty():
-				_activity_end_text = " · 截止 %s" % end_time.replace("T", " ").replace("Z", " UTC")
+			if int(activity.get("cycle", 0)) == 3:
+				_activity_end_text = " · 每月刷新"
+			else:
+				var end_time: String = str(activity.get("end_time", ""))
+				if not end_time.is_empty():
+					_activity_end_text = " · 截止 %s" % end_time.replace("T", " ").replace("Z", " UTC")
 			break
 	title_label.text = activity_name
 	var progress: Dictionary = _get_progress()

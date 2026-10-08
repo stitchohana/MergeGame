@@ -5,9 +5,10 @@ Usage: cd config && python xlsx_to_json.py
 Output: config/json_output/
 """
 
-import json, re
+import json, re, sys
 from pathlib import Path
 from openpyxl import load_workbook
+from card_collection_table import read_card_collection
 
 from facility_reward_validation import validate_facility_reward_order
 from home_meridian_progression import SPIRIT_STONE_MINE_ID, validate_home_progression
@@ -218,6 +219,11 @@ def save_json(filename, data):
 
 def open_book(name):
     return load_workbook(XLSX_DIR / f"{name}.xlsx")
+
+
+if "--only-card-collection" in sys.argv:
+    save_json("card_collection.json", read_card_collection(open_book("card_collection")))
+    raise SystemExit(0)
 
 
 def read_recipe_definitions():
@@ -614,6 +620,7 @@ save_json("quests.json", {"quests": quests})
 
 # ─── activities ────────────────────────────────────────────
 print("Building activities.json...")
+save_json("card_collection.json", read_card_collection(open_book("card_collection")))
 wb = open_book("activities")
 activities = []
 for row in read_rows(wb["activities"]):

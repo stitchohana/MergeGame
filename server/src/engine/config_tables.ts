@@ -1,6 +1,7 @@
 export interface GameConfigTables {
   activities: unknown;
   battlePass: unknown;
+  cardCollection?: unknown;
 	cultivation: unknown;
 	expedition: unknown;
 	gameConfig: unknown;

@@ -220,8 +220,9 @@
 
 战令等级和奖励只维护在 battle_pass.json；积分倍率与进阶线解锁价格维护在
 game_config.json 的 `battle_pass.points_per_value` 和 `battle_pass.premium_unlock_cost`；活动标题与起止时间只维护在
-activities.json。activity_id 必须关联活动表；启用中的活动必须在活动表配置合法的
-开始与结束时间。战令积分按活动独立保存，不作为可消耗货币结算。
+activities.json。activity_id 必须关联活动表；月循环战令使用 `cycle=3`，按中国标准时间
+自然月刷新，且不需要配置起止时间。战令积分按活动独立保存，不作为可消耗货币结算；每月刷新时
+积分、领取记录和进阶线解锁状态都会重置。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -235,8 +236,7 @@ activities.json。activity_id 必须关联活动表；启用中的活动必须�
 
 首期配置暂定为 50 级、每级 10 积分、两条轨道每级各奖励 10 体力。
 订单积分倍率由 `game_config.json` 统一配置为 0.1，进阶线解锁价格统一配置为 500 灵石。
-首期战令已启用，活动时间为 2026 年 9 月 1 日至 9 月 30 日（北京时间）；`end_time`
-填写次日零点，作为排他结束边界。
+首期战令已启用，按 `cycle=3` 每月循环开放。
 
 ---
 
@@ -348,6 +348,34 @@ activities.json。activity_id 必须关联活动表；启用中的活动必须�
 | `port` | int | 端口 |
 
 ---
+
+## 16. card_collection.json — 万象仙册集卡活动
+
+源表为 `config/xlsx/card_collection.xlsx`，包含 `collections`、`card_sets`、`cards`、`packs`、`source_rewards` 五个工作表。活动开关和起止时间仍在 `activities` 表维护，入口 widget 为 `CardCollection`。当前为常驻活动 ID 5、收藏 ID 1。
+
+| 数据段 | 字段与规则 |
+| --- | --- |
+| collections | collection_id、activity_id、name；不同收藏 ID 的库存和进度独立 |
+| card_sets | set_id、collection_id、name、rewards（JSON，体力 token=3、灵石 token=1） |
+| cards | card_id、set_id、name、star（1–5）、icon（可留空，显示文字卡面） |
+| packs | pack_id、collection_id、name、star（1–5）、icon、card_count（1–100）、normal_weights（JSON 数组，按 1–5 星顺序） |
+| source_rewards | collection_id、source_type（quest/order/circulation）、source_id（留空匹配默认）、min_value、pack_id、count、enabled |
+
+**同星保底：** n 星卡包第一卡位必出一张恰好 n 星卡片，计入 `card_count`。其他卡位按 `normal_weights` 抽星级，同星卡等概率，允许重复。总张数为 1 时仅抽保底槽。所有可抽星级必须有有效卡片，服务端启动时校验。
+
+初始调试配置：1–5 星卡包分别 2/3/4/5/6 张，其余槽权重均为 `[55,28,12,4,1]`。三组卡片各 5 张；集齐后分别领取 300/500/800 体力和 1000/2000/3000 灵石。重复卡保留数量，领取不消耗卡片，每组一次。
+
+产出规则按达到的最高 `min_value` 档位发放一次；指定 `source_id` 优先于默认规则，指定规则 `enabled=false` 可以禁止该来源发包。
+
+| 来源 | min_value 的含义 | 当前档位（每次一个卡包） |
+| --- | --- | --- |
+| quest | 已完成任务的 target_count | 0→1星，10→2星，50→3星 |
+| order | 成功订单的 total_value | 0→1星，200→2星，600→3星 |
+| circulation | 周天 stage 的序号（stage + 1） | 0→3星，4→4星，8→5星 |
+
+`source_id` 对任务为任务 ID，对周天为从 0 开始的 stage；订单当前默认 ID 为 0。任务在首次完成时发包，领取原任务奖励不再次发包；每日/每周重置后可再次获得。旧存档不补发历史奖励。活动停用时暂停产出、开包和领奖，保留存档。
+
+仅转换集卡表可运行 `python config/xlsx_to_json.py --only-card-collection`；反向同步可运行 `python config/json_to_xlsx.py --only-card-collection`。常规全量转换也包含此表。
 
 ## 验证方式
 

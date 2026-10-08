@@ -9,6 +9,7 @@ var _activity: Dictionary = {}
 
 func _ready() -> void:
 	pressed.connect(_on_pressed)
+	GameState.card_collection_changed.connect(_refresh_collection_badge)
 
 
 func setup(activity: Dictionary) -> void:
@@ -25,11 +26,42 @@ func setup(activity: Dictionary) -> void:
 		activity_mark.text = "日" if int(activity.get("cycle", -1)) == 1 else "活"
 		activity_icon.hide()
 		activity_mark.show()
+	_refresh_collection_badge()
+
+
+func _refresh_collection_badge() -> void:
+	if str(_activity.get("widget", "")) != "CardCollection":
+		return
+	var total: int = 0
+	var claimable: bool = false
+	for collection: Dictionary in ConfigDatabase.card_collection.get("collections", []):
+		if int(collection.get("activity_id", 0)) != int(_activity.get("id", 0)):
+			continue
+		var progress: Dictionary = GameState.get_card_collection_progress(int(collection.collection_id))
+		for count: Variant in progress.get("packs", {}).values():
+			total += int(count)
+		for card_set: Dictionary in ConfigDatabase.card_collection.get("card_sets", []):
+			if int(card_set.collection_id) != int(collection.collection_id) or card_set.set_id in progress.get("claimed_sets", []):
+				continue
+			var complete: bool = true
+			var owned: Dictionary = progress.get("cards", {})
+			for card: Dictionary in ConfigDatabase.card_collection.get("cards", []):
+				if int(card.set_id) == int(card_set.set_id) and int(owned.get(str(card.card_id), owned.get(int(card.card_id), 0))) <= 0:
+					complete = false
+			claimable = claimable or complete
+	activity_mark.text = "领" if claimable else (str(total) if total > 0 else "册")
+	tooltip_text = "卡组奖励可领取" if claimable else "待开卡包 ×%d" % total
 
 
 func _on_pressed() -> void:
 	var activity_id: int = int(_activity.get("id", 0))
 	var widget: String = str(_activity.get("widget", ""))
+	if widget == "CardCollection":
+		var collection_panel := preload("res://scenes/ui/activity/CardCollectionPanel.tscn").instantiate()
+		UIManager.show_popup(collection_panel)
+		collection_panel.setup(activity_id)
+		CloudService.fetch_state()
+		return
 	if widget == "BattlePass":
 		var battle_pass := preload("res://scenes/ui/activity/BattlePassPanel.tscn").instantiate() as BattlePassPanel
 		UIManager.show_popup(battle_pass)

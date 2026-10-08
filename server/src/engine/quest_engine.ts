@@ -126,6 +126,7 @@ export class QuestEngine {
     engine: GameEngine
   ): void {
     this.initQuestProgress(state);
+    this.checkAndResetQuests(state, engine.questResetHour);
     for (const q of this.quests) {
       if (q.type !== type) continue;
       const p = state.quest_progress![q.id];
@@ -133,6 +134,7 @@ export class QuestEngine {
       p.current_count = Math.min(p.current_count + count, q.target_count);
       if (p.current_count >= q.target_count) {
         p.completed = true;
+        engine.cardCollectionService.awardSource(state, "quest", q.id, q.target_count);
         console.log(`[quest] #${q.id} "${q.name}" completed`);
         if (q.auto_reward) {
           engine.applyRewards(state, q.rewards);

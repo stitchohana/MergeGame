@@ -12,7 +12,10 @@ function op(handler: (req: Request, res: Response, userId: string) => Promise<vo
       await enqueue(userId, () => handler(req, res, userId));
     } catch (err) {
       console.error("[game] op error:", err);
-      if (!res.headersSent) res.status(500).json({ error: "internal_error" });
+      if (!res.headersSent) {
+        const conflict = err instanceof Error && err.message === "state_conflict";
+        res.status(conflict ? 409 : 500).json({ error: conflict ? "state_conflict" : "internal_error" });
+      }
     }
   };
 }
@@ -21,6 +24,29 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
   const router = new Router();
 
   router.use(createAuthRequired(jwtSecret));
+
+  for (const action of ["open", "claim"] as const) {
+    router.post(`/card_collection/${action}`, op(async (req, res, userId) => {
+      const { collection_id, pack_id, set_id, request_id, expected_opened_count } = req.body ?? {};
+      const target = action === "open" ? pack_id : set_id;
+      if (!Number.isSafeInteger(collection_id) || collection_id <= 0 || !Number.isSafeInteger(target) || target <= 0 || typeof request_id !== "string" || !request_id.trim() || request_id.length > 100 ||
+        (action === "open" && (!Number.isSafeInteger(expected_opened_count) || expected_opened_count < 0))) {
+        res.status(400).json({ error: "invalid_params" }); return;
+      }
+      const updated = structuredClone(await getOrCreateState(userId));
+      const service = engine.cardCollectionService;
+      const result = action === "open"
+        ? service.open(updated, collection_id, pack_id, request_id, expected_opened_count)
+        : service.claim(updated, collection_id, set_id, request_id, reward => engine.applyRewards(updated, reward));
+      if (!result.ok) { res.status(result.reason === "state_conflict" ? 409 : 400).json({ error: result.reason }); return; }
+      try { await storage.saveState(userId, updated); }
+      catch (error) {
+        const conflict = error instanceof Error && error.message === "state_conflict";
+        res.status(conflict ? 409 : 500).json({ error: conflict ? "state_conflict" : "save_failed" }); return;
+      }
+      res.json({ ...result, spirit_stones: updated.spirit_stones, stamina: updated.stamina, card_collection_progress: engine.cardCollectionService.publicProgress(updated), ...staminaMultiplierResponse(updated) });
+    }));
+  }
 
   function staminaMultiplierResponse(state: any) {
     const multiplier = engine.getStaminaMultiplierState(state);
@@ -212,10 +238,11 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       meridian_acupoints: state.meridian_acupoints,
       meridian_circulations: state.meridian_circulations,
       meridian_threshold_idx: state.meridian_threshold_idx,
-      quest_progress: state.quest_progress,
+      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
       quest_defs: engine.questEngine.getResolvedQuestDefs(engine), home_meridian_defs: engine.getHomeMeridianDefs(),
       activity_defs: engine.activityEngine.getActivities().map(a => ({ ...a, active: engine.activityEngine.isActive(a) })),
       activity_progress: state.activity_progress,
+      card_collection_config: engine.cardCollectionService.config,
       battle_pass_progress: engine.battlePassService.ensureProgress(state),
       spawn_seed: state.spawn_seed,
       spawn_sequence: state.spawn_sequence,
@@ -283,7 +310,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     const result = engine.executeMerge(state, from[0], from[1], to[0], to[1]);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, atk_base: result.atkBase ?? 0, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress, crafted_item_ids: state.crafted_item_ids, pending_rewards: state.pending_rewards });
+    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, atk_base: result.atkBase ?? 0, from_col: result.fromCol, from_row: result.fromRow, to_col: result.toCol, to_row: result.toRow, regen_remaining_ms: engine.getRegenRemainingMs(state), quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state), crafted_item_ids: state.crafted_item_ids, pending_rewards: state.pending_rewards });
   }));
 
   // POST /api/game/actions/batch
@@ -383,6 +410,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       cultivation: workingState.cultivation,
       regen_remaining_ms: engine.getRegenRemainingMs(workingState),
       quest_progress: workingState.quest_progress,
+      card_collection_progress: engine.cardCollectionService.publicProgress(workingState),
       crafted_item_ids: workingState.crafted_item_ids,
       pending_rewards: workingState.pending_rewards,
     });
@@ -481,7 +509,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
       atk_base: result.atkBase,
       cultivation: state.cultivation,
       regen_remaining_ms: engine.getRegenRemainingMs(state),
-      quest_progress: state.quest_progress,
+      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
       spawn_seed: state.spawn_seed,
       spawn_sequence: state.spawn_sequence,
       sequence_used: result.sequenceUsed,
@@ -548,7 +576,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     const result = engine.executeCraftRetrieve(state, table_col, table_row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, quest_progress: state.quest_progress, pending_rewards: state.pending_rewards });
+    res.json({ ok: true, result_uid: result.resultUid, result_id: result.resultId, quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state), pending_rewards: state.pending_rewards });
   }));
 
 
@@ -625,7 +653,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     const result = engine.sellItem(state, uid);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, spirit_stones: result.stones, quest_progress: state.quest_progress, pending_rewards: state.pending_rewards });
+    res.json({ ok: true, spirit_stones: result.stones, quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state), pending_rewards: state.pending_rewards });
   }));
 
   // POST /api/game/shop/buy
@@ -705,7 +733,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     const result = engine.completeMeridianAcupoint(state, index, item_ids, request_id ?? "");
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ...result, quest_progress: state.quest_progress, ...staminaMultiplierResponse(state) });
+    res.json({ ...result, quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state), ...staminaMultiplierResponse(state) });
   }));
 
   // POST /api/game/board/switch
@@ -775,7 +803,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     const result = engine.battleAttack(state, item_id, effect_id, uid, col, row);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ok: true, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage, quest_progress: state.quest_progress, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, pending_rewards: state.pending_rewards, ...staminaMultiplierResponse(state) });
+    res.json({ ok: true, grid: result.grid, monsters: result.monsters, stage_complete: result.stage_complete, loot: result.loot, battle_stage: state.battle_stage, quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state), cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, pending_rewards: state.pending_rewards, ...staminaMultiplierResponse(state) });
   }));
 
   // POST /api/game/quest_claim
@@ -789,7 +817,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
     engine.enrichGridWithRechargeRemaining(state.grid);
-    res.json({ ok: true, quest_id, rewards: result.rewards, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, grid: state.grid, pouch: state.pouch, quest_progress: state.quest_progress, pending_rewards: state.pending_rewards, ...staminaMultiplierResponse(state) });
+    res.json({ ok: true, quest_id, rewards: result.rewards, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, grid: state.grid, pouch: state.pouch, quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state), pending_rewards: state.pending_rewards, ...staminaMultiplierResponse(state) });
   }));
 
   // POST /api/game/claim_pending_reward
@@ -816,7 +844,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     const result = engine.lightHomeAcupoint(state, stage, index);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ...result, ...staminaMultiplierResponse(state) });
+    res.json({ ...result, card_collection_progress: engine.cardCollectionService.publicProgress(state), ...staminaMultiplierResponse(state) });
   }));
 
   router.post("/battle_pass/unlock", op(async (req, res, userId) => {
@@ -880,7 +908,7 @@ export function createGameRouter(storage: IStorage, engine: GameEngine, jwtSecre
     const result = engine.runHomeMeridianCirculation(state, stage);
     if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
     await storage.saveState(userId, state);
-    res.json({ ...result, ...staminaMultiplierResponse(state) });
+    res.json({ ...result, card_collection_progress: engine.cardCollectionService.publicProgress(state), ...staminaMultiplierResponse(state) });
   }));
 
   // GET /api/leaderboard
