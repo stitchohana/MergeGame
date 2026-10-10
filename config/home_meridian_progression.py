@@ -177,6 +177,10 @@ def validate_home_progression(
             f"home meridians must contain {TOTAL_CIRCULATIONS} circulations, got {len(home_stages)}"
         )
 
+    pack_ids = {
+        _as_int(item.get("id")) for item in (items or {}).get("effect", [])
+        if isinstance(item, Mapping) and _as_int(item.get("effect_type")) == 9
+    }
     counts = Counter()
     previous_level = 0
     exp_by_level = Counter()
@@ -212,12 +216,20 @@ def validate_home_progression(
             if level == 1
             else 2
         )
-        if not isinstance(reward_items, list) or len(reward_items) != expected_facility_count:
+        if not isinstance(reward_items, list) or any(not isinstance(item, Mapping) for item in reward_items):
+            raise ValueError(f"home circulation {stage_index} has invalid item rewards")
+        for item in reward_items:
+            if _as_int(item.get("id")) in pack_ids:
+                count = item.get("count", 1)
+                if type(count) is not int or count <= 0:
+                    raise ValueError(f"home circulation {stage_index} has invalid card pack count")
+        facility_rewards = [item for item in reward_items if _as_int(item.get("id")) not in pack_ids]
+        if len(facility_rewards) != expected_facility_count:
             raise ValueError(
                 f"home circulation {stage_index} must grant exactly "
                 f"{expected_facility_count} facilities, got {reward_items}"
             )
-        for facility in reward_items:
+        for facility in facility_rewards:
             facility_id = _as_int(facility.get("id")) if isinstance(facility, Mapping) else 0
             facility_count = _as_int(facility.get("count"), 1) if isinstance(facility, Mapping) else 0
             if facility_id == SPIRIT_STONE_MINE_ID:

@@ -47,6 +47,7 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 		items_container.remove_child(child)
 		child.queue_free()
 	for child in reward_box.get_children():
+		reward_box.remove_child(child)
 		child.queue_free()
 
 	for item_variant in items:
@@ -89,6 +90,17 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 				reward_box.add_child(slot)
 				slot.setup(item_id, count)
 				slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var stair_points: int = int(rewards.get("stair_climb_points", 0))
+	if stair_points > 0 and not completed:
+		var stair_label := Label.new()
+		stair_label.name = "StairClimbPoints"
+		stair_label.text = "天梯 +%d" % stair_points
+		stair_label.tooltip_text = "完成本单获得 %d 天梯积分" % stair_points
+		stair_label.add_theme_font_size_override("font_size", 14)
+		stair_label.add_theme_color_override("font_color", Color("806022"))
+		stair_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		reward_box.add_child(stair_label)
 
 	if completed:
 		complete_btn.text = ""
@@ -146,12 +158,16 @@ func get_display_index() -> int:
 
 
 func refresh_item_selection(present_item_ids: Dictionary) -> void:
+	var remaining: Dictionary = present_item_ids.duplicate()
 	var items_container: HBoxContainer = $ItemsContainer
 	for child in items_container.get_children():
 		if child is ItemWidget:
 			var widget: ItemWidget = child as ItemWidget
 			var item_id: int = int(widget.item_data.get("id", 0))
-			widget.set_selected(item_id > 0 and present_item_ids.has(item_id))
+			var count: int = int(remaining.get(item_id, 0))
+			widget.set_selected(item_id > 0 and count > 0)
+			if count > 0:
+				remaining[item_id] = count - 1
 
 
 func refresh_item_crafting(crafting_item_ids: Dictionary) -> void:
@@ -179,10 +195,14 @@ func show_completed_empty_state() -> void:
 
 
 func _on_btn_pressed() -> void:
+	if RequirementList.is_scroll_click_cancelled(self):
+		return
 	complete_pressed.emit()
 
 
 func _on_item_pressed(item_id: int) -> void:
+	if RequirementList.is_scroll_click_cancelled(self):
+		return
 	if item_id > 0:
 		item_pressed.emit(item_id)
 

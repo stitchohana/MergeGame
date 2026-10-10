@@ -13,6 +13,8 @@ var previous_screen_name: String = ""
 var spawn_seed: int = 0
 var spawn_sequence: int = 0
 var crafted_item_ids: Dictionary = {}
+var item_catalog_claimed_ids: Dictionary = {}
+signal item_catalog_changed()
 var stamina_multiplier_max: int = 1
 var stamina_multiplier_selected: int = 1
 var stamina_multiplier_expires_at: int = 0
@@ -35,6 +37,7 @@ var activity_progress: Dictionary = {}
 var activity_current_day: int = 0
 var battle_pass_progress: Dictionary = {}
 var card_collection_progress: Dictionary = {}
+var stair_climb_progress: Dictionary = {}
 signal card_collection_changed()
 
 
@@ -123,6 +126,7 @@ func set_crafted_item_ids(ids: Array) -> void:
 		var item_id: int = ConfigDatabase._coerce_int(value)
 		if item_id > 0 and not ConfigDatabase.get_item_data(item_id).is_empty():
 			crafted_item_ids[item_id] = true
+	item_catalog_changed.emit()
 
 
 func register_new_item_ids(ids: Array) -> void:
@@ -137,6 +141,7 @@ func register_new_item_ids(ids: Array) -> void:
 		crafted_item_ids[item_id] = true
 		new_names.append(String(item_data.get("name", "#%d" % item_id)))
 	if not new_names.is_empty():
+		item_catalog_changed.emit()
 		# Let the ordinary action result toast display first; otherwise it can
 		# immediately replace the first-time discovery notification.
 		EventBus.call_deferred("emit_signal", "show_toast", "解锁新物品：%s" % "、".join(new_names))
@@ -144,3 +149,24 @@ func register_new_item_ids(ids: Array) -> void:
 
 func has_crafted_item(item_id: int) -> bool:
 	return item_id > 0 and crafted_item_ids.has(item_id)
+
+
+func set_item_catalog_claimed_ids(ids: Array) -> void:
+	item_catalog_claimed_ids.clear()
+	for value: Variant in ids:
+		var item_id: int = ConfigDatabase._coerce_int(value)
+		if item_id > 0 and not ConfigDatabase.get_item_data(item_id).is_empty():
+			item_catalog_claimed_ids[item_id] = true
+	item_catalog_changed.emit()
+
+
+func can_claim_item_catalog_reward(item_id: int) -> bool:
+	return has_crafted_item(item_id) and not item_catalog_claimed_ids.has(item_id)
+
+
+func get_item_catalog_claimable_count() -> int:
+	var count: int = 0
+	for item_id: int in crafted_item_ids:
+		if can_claim_item_catalog_reward(item_id):
+			count += 1
+	return count

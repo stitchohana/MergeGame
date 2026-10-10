@@ -22,6 +22,7 @@ const IDLE_MERGE_HINT_PAUSE_DURATION := 0.14
 signal item_clicked(item_data: Dictionary, grid_pos: Vector2i)
 signal pill_dropped_outside(item_data: Dictionary, drop_position: Vector2)
 signal item_use_requested(item_data: Dictionary, grid_pos: Vector2i)
+signal action_sync_cancelled()
 
 var _item_nodes: Dictionary = {}  # "col,row" -> GridItem
 
@@ -105,6 +106,7 @@ func _try_finish_action_sync_barrier() -> void:
 func _cancel_action_sync_waiters(message: String) -> void:
 	_action_sync_waiters.clear()
 	_hide_action_sync_screen()
+	action_sync_cancelled.emit()
 	if not message.is_empty():
 		EventBus.show_toast.emit(message)
 
@@ -427,6 +429,8 @@ func _on_craft_add_queued(from_pos: Vector2i, table_pos: Vector2i, ingredient_id
 	}, {"kind": "craft_add"})
 
 func queue_craft_remove(table_pos: Vector2i, ingredient_id: int, target_pos: Vector2i) -> void:
+	if not GridManager.is_valid_pos(target_pos) or not GridManager.is_empty(target_pos):
+		return
 	var table_item: Variant = GridManager.get_item(table_pos)
 	if table_item == null:
 		return
@@ -435,7 +439,10 @@ func queue_craft_remove(table_pos: Vector2i, ingredient_id: int, target_pos: Vec
 		return
 	var item_data: Dictionary = ConfigDatabase.get_item_data(ingredient_id)
 	var new_item: Dictionary = item_data.duplicate(true) if not item_data.is_empty() else {"id": ingredient_id}
-	new_item["_uid"] = removed.get("uid", removed.get("_uid", 0))
+	# Stored server materials contain only IDs. Taking one out allocates a new
+	# server UID, so keep this local preview pending until the batch syncs it.
+	new_item["_uid"] = 0
+	new_item["_optimistic_action"] = true
 	_skip_anims = true
 	var added: bool = GridManager.add_item(new_item, target_pos)
 	_skip_anims = false
@@ -728,16 +735,21 @@ func _place_dragged_item(target_pos: Vector2i) -> void:
 	})
 
 func _do_pouch_deposit() -> void:
+	_snap_back()
 	if _drag_item_data.is_empty():
 		return
 	var item_id: int = _drag_item_data.get("id", 0)
 	if item_id <= 0:
 		return
 	if StoragePouch:
-		StoragePouch.deposit(_drag_item_data.get("_uid", 0))
+		var uid: int = int(_drag_item_data.get("_uid", 0))
+		run_after_action_sync(func(): StoragePouch.deposit(uid))
 
 func _on_pouch_deposit_rejected(reason: String) -> void:
-	EventBus.show_toast.emit("存入背包失败：" + reason)
+	match reason:
+		"pouch_full": EventBus.show_toast.emit("储物袋已满，请取出物品或解锁更多格子")
+		"request_in_flight": EventBus.show_toast.emit("正在存入物品，请稍候")
+		_: EventBus.show_toast.emit("存入储物袋失败，请稍后重试")
 
 func _on_push_place_confirmed(result: Dictionary) -> void:
 	print("[PlayerAction] push_place_accept source=", _pending_push_src,
@@ -867,6 +879,14 @@ func _on_items_swapped(_item_a: Dictionary, _item_b: Dictionary, pos_a: Vector2i
 
 func _on_grid_updated() -> void:
 	_reset_board_idle()
+	# Reconciliation can clear craft data without emitting a state signal.
+	# Refresh IDLE as well as active states from each live board instance.
+	for entry: Dictionary in GridManager.get_all_items():
+		var item: Dictionary = entry.data
+		if int(item.get("type", 0)) == Constants.ItemType.CRAFTING:
+			_refresh_craft_table_visual(entry.pos)
+	if _craft_ctrl != null:
+		_craft_ctrl.refresh_button()
 
 func _sync_all_items() -> void:
 	_reset_board_idle()
@@ -1054,21 +1074,32 @@ func _on_craft_retrieve_ready(result_id: int, result_uid: int, table_pos: Vector
 	item_clicked.emit({}, Vector2i(-1, -1))
 	EventBus.show_toast.emit("制作完成：%s" % result_data.get("name", "未知"))
 
-func _on_craft_visual_update(table_item: Dictionary, state: int) -> void:
+func _on_craft_visual_update(table_item: Dictionary, _state: int) -> void:
 	var table_uid: int = int(table_item.get("_uid", 0))
-	for key in _item_nodes:
-		var node = _item_nodes[key]
-		if node and is_instance_valid(node) and (
-			(node.item_data == table_item)
-			or (table_uid > 0 and int(node.item_data.get("_uid", 0)) == table_uid)
-		):
-			# CraftingService mutates the authoritative table dictionary before
-			# this signal; update the live node explicitly so its transparent
-			# state icon is not left stale after material insertion.
-			node.item_data = table_item
-			node.set_crafting_state(state)
-			node.refresh_status_icons()
+	if table_uid > 0:
+		_refresh_craft_table_visual(GridManager.find_pos_by_uid(table_uid))
+		return
+	# Optimistic instances may share the same contents but have no UID yet.
+	for entry: Dictionary in GridManager.get_all_items():
+		if is_same(entry.data, table_item):
+			_refresh_craft_table_visual(entry.pos)
 			break
+
+func _refresh_craft_table_visual(table_pos: Vector2i) -> void:
+	var item_variant: Variant = GridManager.get_item(table_pos)
+	if not item_variant is Dictionary:
+		return
+	var live_item: Dictionary = item_variant as Dictionary
+	if int(live_item.get("type", 0)) != Constants.ItemType.CRAFTING:
+		return
+	var key: String = "%d,%d" % [table_pos.x, table_pos.y]
+	var node: GridItem = _item_nodes.get(key) as GridItem
+	if not is_instance_valid(node):
+		return
+	# A delayed signal may carry a detached snapshot. Never replace the live
+	# dictionary or promote its state based on that old notification.
+	node.item_data = live_item
+	node.refresh_status_icons()
 
 func _on_craft_start_requested(table_pos: Vector2i) -> void:
 	var table: Variant = GridManager.get_item(table_pos)

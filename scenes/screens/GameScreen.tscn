@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://byfmp2yrtf3gm" path="res://scenes/ui/main/PouchDropZone.tscn" id="8_pouch"]
 [ext_resource type="Texture2D" uid="uid://cv2pn225isxby" path="res://assets/ui/xianxia_v3_layers_v2/layers/shop_button.png" id="10_ehb84"]
 [ext_resource type="PackedScene" path="res://scenes/ui/main/StaminaMultiplierControl.tscn" id="11_multiplier"]
+[ext_resource type="PackedScene" path="res://scenes/ui/activity/OrderSupplyEntry.tscn" id="12_supply"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_nav_normal"]
 bg_color = Color(1, 0.976, 0.902, 0.98)
@@ -100,6 +101,14 @@ offset_top = 254.0
 offset_right = 310.0
 offset_bottom = 306.0
 
+[node name="OrderSupplyEntry" parent="." instance=ExtResource("12_supply")]
+z_index = 11
+layout_mode = 0
+offset_left = 324.0
+offset_top = 254.0
+offset_right = 756.0
+offset_bottom = 306.0
+
 [node name="RequirementList" parent="." unique_id=2099547480 instance=ExtResource("7_req")]
 z_index = 10
 layout_mode = 0
@@ -134,12 +143,14 @@ grow_vertical = 2
 scale = Vector2(1.14, 1.14)
 
 [node name="PouchDropZone" parent="." unique_id=1901697533 instance=ExtResource("8_pouch")]
-visible = false
+z_index = 11
 layout_mode = 0
 offset_left = 664.0
-offset_top = 255.0
+offset_top = 38.0
 offset_right = 774.0
-offset_bottom = 365.0
+offset_bottom = 148.0
+tooltip_text = "储物袋：点击查看，拖入物品存放"
+mouse_default_cursor_shape = 2
 
 [node name="HomeButton" type="Button" parent="." unique_id=923494637]
 z_index = 10

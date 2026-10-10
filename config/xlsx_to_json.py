@@ -12,7 +12,12 @@ from card_collection_table import read_card_collection
 
 from facility_reward_validation import validate_facility_reward_order
 from home_meridian_progression import SPIRIT_STONE_MINE_ID, validate_home_progression
-from recipe_validation import validate_no_launcher_ingredients
+from recipe_validation import (
+    validate_no_duplicate_ingredients,
+    validate_no_launcher_ingredients,
+    validate_no_subrecipe_conflicts,
+    validate_regular_ingredients,
+)
 
 BASE = Path(__file__).parent
 XLSX_DIR = BASE / "xlsx"
@@ -236,6 +241,7 @@ def read_recipe_definitions():
             "result": parse_int(row["result"]),
             "craft_time": parse_int(row["craft_time"]),
         })
+    validate_no_duplicate_ingredients(recipes)
     return recipes
 
 
@@ -395,6 +401,8 @@ if "items_effect" in [ws.title for ws in wb.worksheets]:
             item["value"] = parse_int(row["value"])
 
         effect_items.append(item)
+validate_regular_ingredients(recipe_definitions, regular)
+validate_no_subrecipe_conflicts(recipe_definitions, crafting)
 save_json("items.json", {"regular": regular, "launcher": launcher, "crafting": crafting, "effect": effect_items})
 
 # ─── meridians ─────────────────────────────────────────────
@@ -632,6 +640,8 @@ for row in read_rows(wb["activities"]):
         act["start_time"] = row["start_time"]
     if row.get("end_time"):
         act["end_time"] = row["end_time"]
+    if row.get("config"):
+        act["config"] = json.loads(row["config"])
     activities.append(act)
 save_json("activities.json", {"activities": activities})
 
@@ -707,14 +717,14 @@ def home_stage_exp_total(home_stage):
     return reward_exp_amount(home_stage["circulation_reward"])
 
 
-validate_home_progression(home_stages, stages, rewards, {"regular": regular, "launcher": launcher, "crafting": crafting})
+validate_home_progression(home_stages, stages, rewards, {"regular": regular, "launcher": launcher, "crafting": crafting, "effect": effect_items})
 
 
 def validate_facility_rewards():
     """Validate the staged facility rewards after the schema migration."""
     validate_facility_reward_order(
         home_stages,
-        {"regular": regular, "launcher": launcher, "crafting": crafting},
+        {"regular": regular, "launcher": launcher, "crafting": crafting, "effect": effect_items},
         recipe_definitions,
         setup,
         rewards,
@@ -806,9 +816,11 @@ def validate_facility_rewards():
         add_available_facility(item_id)
 
     mine_circulation_ids = []
+    pack_ids = {item["id"] for item in effect_items if item.get("effect_type") == 9}
     for stage_index, home_stage in enumerate(home_stages):
         seen_ids = set()
-        stage_items = list(iter_reward_items(home_stage.get("circulation_reward")))
+        all_stage_items = list(iter_reward_items(home_stage.get("circulation_reward")))
+        stage_items = [item for item in all_stage_items if parse_int(item.get("id")) not in pack_ids]
         for item in stage_items:
             item_id = parse_int(item.get("id"))
             count = parse_int(item.get("count", 1)) or 0

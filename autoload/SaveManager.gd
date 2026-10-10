@@ -45,7 +45,7 @@ func _restore_from_server(state: Dictionary) -> void:
 
 	# Meridian
 	GameState.meridian_acupoints = state.get("meridian_acupoints", [])
-	StoragePouch.restore_from_server(state.get("pouch", []))
+	StoragePouch.restore_from_server(state.get("pouch", []), state)
 	GameState.meridian_circulations = state.get("meridian_circulations", 0)
 	GameState.meridian_threshold_idx = state.get("meridian_threshold_idx", 0)
 
@@ -53,7 +53,7 @@ func _restore_from_server(state: Dictionary) -> void:
 	GameState.activity_defs = state.get("activity_defs", [])
 	GameState.activity_progress = state.get("activity_progress", {})
 	GameState.activity_current_day = state.get("activity_current_day", 0)
-	GameState.card_collection_progress = state.get("card_collection_progress", {})
+	# CloudService applies card progress with revision checks before state_loaded.
 	GameState.card_collection_changed.emit()
 	GameState.battle_pass_progress = state.get("battle_pass_progress", {})
 	GameState.battle_pass_changed.emit(GameState.battle_pass_progress)

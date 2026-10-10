@@ -34,12 +34,19 @@ signal pouch_deposit_confirmed(result: Dictionary)
 signal pouch_deposit_rejected(reason: String)
 signal pouch_withdraw_confirmed(result: Dictionary)
 signal pouch_withdraw_rejected(reason: String)
+signal pouch_unlock_confirmed(result: Dictionary)
+signal pouch_unlock_rejected(reason: String)
 signal meridian_refresh_confirmed(result: Dictionary)
 signal meridian_refresh_rejected(reason: String)
 signal meridian_complete_confirmed(result: Dictionary)
 signal meridian_complete_rejected(reason: String)
+signal order_supply_claim_confirmed(result: Dictionary)
+signal order_supply_claim_rejected(reason: String)
 signal battle_pass_action_confirmed(result: Dictionary)
 signal battle_pass_action_rejected(reason: String)
+signal stair_climb_loaded(data: Dictionary)
+signal stair_climb_failed(reason: String)
+var _stair_climb_revision: int = -1
 signal card_collection_confirmed(result: Dictionary)
 signal card_collection_rejected(reason: String)
 var card_collection_request: Dictionary = {}
@@ -47,6 +54,10 @@ var card_collection_busy: bool = false
 var _card_collection_user_id: String = ""
 signal quest_claim_confirmed(result: Dictionary)
 signal quest_claim_rejected(reason: String)
+signal item_catalog_claim_confirmed(result: Dictionary)
+signal item_catalog_claim_rejected(reason: String)
+var item_catalog_claim_pending: int = 0
+var _item_catalog_revision: int = -1
 signal pending_reward_claimed(result: Dictionary)
 signal pending_reward_claimed_rejected(reason: String)
 signal home_meridian_light_confirmed(result: Dictionary)
@@ -133,13 +144,18 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("board_switch", _on_board_switch_response, board_switch_rejected, board_switch_rejected, board_switch_rejected)
 	_register_endpoint("pouch_deposit", _on_pouch_deposit_response, pouch_deposit_rejected, pouch_deposit_rejected, pouch_deposit_rejected)
 	_register_endpoint("pouch_withdraw", _on_pouch_withdraw_response, pouch_withdraw_rejected, pouch_withdraw_rejected, pouch_withdraw_rejected)
+	_register_endpoint("pouch_unlock", _on_pouch_unlock_response, pouch_unlock_rejected, pouch_unlock_rejected, pouch_unlock_rejected)
 	_register_endpoint("meridian_refresh", _on_meridian_refresh_response, meridian_refresh_rejected, meridian_refresh_rejected, meridian_refresh_rejected)
 	_register_endpoint("meridian_complete", _on_meridian_complete_response, meridian_complete_rejected, meridian_complete_rejected, meridian_complete_rejected)
+	_register_endpoint("order_supply_claim", _on_order_supply_claim_response, order_supply_claim_rejected, order_supply_claim_rejected, order_supply_claim_rejected)
 	_register_endpoint("battle_pass_unlock", _on_battle_pass_response, battle_pass_action_rejected, battle_pass_action_rejected, battle_pass_action_rejected)
 	_register_endpoint("battle_pass_claim", _on_battle_pass_response, battle_pass_action_rejected, battle_pass_action_rejected, battle_pass_action_rejected)
+	_register_endpoint("stair_climb", _on_stair_climb_response, stair_climb_failed, stair_climb_failed, stair_climb_failed)
 	_register_endpoint("card_collection", _on_card_collection_response, card_collection_rejected, card_collection_rejected, card_collection_rejected)
 	card_collection_rejected.connect(_on_card_collection_error)
 	_register_endpoint("quest_claim", _on_quest_claim_response, quest_claim_rejected, quest_claim_rejected, quest_claim_rejected)
+	_register_endpoint("item_catalog_claim", _on_item_catalog_claim_response, item_catalog_claim_rejected, item_catalog_claim_rejected, item_catalog_claim_rejected)
+	item_catalog_claim_rejected.connect(_on_item_catalog_claim_error)
 	_register_endpoint("claim_pending_reward", _on_claim_pending_reward_response, pending_reward_claimed_rejected, pending_reward_claimed_rejected, pending_reward_claimed_rejected)
 	_register_endpoint("home_meridian_light", _on_home_meridian_light_response, home_meridian_light_rejected, home_meridian_light_rejected, home_meridian_light_rejected)
 	_register_endpoint("home_meridian_run", _on_home_meridian_run_response, home_meridian_run_rejected, home_meridian_run_rejected, home_meridian_run_rejected)
@@ -201,6 +217,15 @@ func _on_login_response(data: Dictionary) -> void:
 			card_collection_request.clear()
 			card_collection_busy = false
 			GameState.card_collection_progress.clear()
+			GameState.stair_climb_progress.clear()
+			ActivityManager.stair_climb.clear()
+			ActivityManager.reset_progress()
+			_stair_climb_revision = -1
+			RewardManager.reset_pending()
+			_item_catalog_revision = -1
+			item_catalog_claim_pending = 0
+			GameState.set_crafted_item_ids([])
+			GameState.set_item_catalog_claimed_ids([])
 		_card_collection_user_id = user_id
 		_save_token()
 		online = true
@@ -340,6 +365,16 @@ func submit_pouch_withdraw(uid: int) -> void:
 	var body := JSON.stringify({"uid": uid})
 	_send_authed_request("pouch_withdraw", "/api/game/pouch/withdraw", HTTPClient.Method.METHOD_POST, body)
 
+func submit_pouch_unlock(expected_capacity: int) -> void:
+	var body := JSON.stringify({"expected_capacity": expected_capacity})
+	_send_authed_request("pouch_unlock", "/api/game/pouch/unlock", HTTPClient.Method.METHOD_POST, body)
+
+func _on_pouch_unlock_response(data: Dictionary) -> void:
+	if data.get("ok", false):
+		pouch_unlock_confirmed.emit(data)
+	else:
+		pouch_unlock_rejected.emit(data.get("error", "unknown_error"))
+
 func submit_battle_heal(item_id: int, uid: int, effect_id: int = 0) -> void:
 	var body := JSON.stringify({"item_id": item_id, "effect_id": effect_id, "uid": uid})
 	_send_authed_request("battle_heal", "/api/game/battle/heal", HTTPClient.Method.METHOD_POST, body)
@@ -416,6 +451,18 @@ func _on_meridian_complete_response(data: Dictionary) -> void:
 func submit_battle_pass_unlock(activity_id: int) -> void:
 	_send_authed_request("battle_pass_unlock", "/api/game/battle_pass/unlock", HTTPClient.Method.METHOD_POST, JSON.stringify({"activity_id": activity_id}))
 
+
+func submit_order_supply_claim(activity_id: int, expected_claim_count: int) -> void:
+	_send_authed_request("order_supply_claim", "/api/game/activity/order_supply/claim", HTTPClient.Method.METHOD_POST,
+		JSON.stringify({"activity_id": activity_id, "expected_claim_count": expected_claim_count}))
+
+
+func _on_order_supply_claim_response(data: Dictionary) -> void:
+	if bool(data.get("ok", false)):
+		order_supply_claim_confirmed.emit(data)
+	else:
+		order_supply_claim_rejected.emit(str(data.get("error", "unknown_error")))
+
 func submit_battle_pass_claim(activity_id: int, level: int, track: String) -> void:
 	_send_authed_request("battle_pass_claim", "/api/game/battle_pass/claim", HTTPClient.Method.METHOD_POST, JSON.stringify({"activity_id": activity_id, "level": level, "track": track}))
 
@@ -430,8 +477,8 @@ func _on_battle_pass_response(data: Dictionary) -> void:
 			GameState.stamina = int(data.get("stamina", GameState.stamina))
 			GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 		if data.has("pending_rewards"):
-			var pending_rewards: Array = data.get("pending_rewards", [])
-			GameState.pending_rewards_changed.emit(pending_rewards.size())
+			RewardManager.sync_pending(data)
+			GameState.pending_rewards_changed.emit(RewardManager.pending_rewards.size())
 		battle_pass_action_confirmed.emit(data)
 	else:
 		battle_pass_action_rejected.emit(data.get("error", "unknown_error"))
@@ -747,13 +794,58 @@ func _finish_tag(tag: String) -> void:
 		_state_request_in_flight = false
 
 func _dispatch_response(tag: String, data: Dictionary) -> void:
+	_sync_item_catalog(data)
+	if data.has("activity_progress") or data.has("activity_defs"):
+		ActivityManager.sync_state(data)
 	_sync_card_collection(data, tag)
+	_sync_stair_climb(data)
 	if bool(data.get("ok", false)) and tag != "fetch_state" and tag != "login":
 		_register_confirmed_item_discoveries(tag, data)
 	var ep: Dictionary = _endpoints.get(tag, {})
 	var cb: Callable = ep.get("response_cb", Callable())
 	if cb.is_valid():
 		cb.call(data)
+
+
+func _sync_item_catalog(data: Dictionary) -> void:
+	if not data.has("item_catalog_claimed_ids"):
+		return
+	var revision: int = int(data.get("storage_revision", -1))
+	if revision < _item_catalog_revision:
+		return
+	_item_catalog_revision = revision
+	GameState.set_item_catalog_claimed_ids(data.get("item_catalog_claimed_ids", []))
+
+
+func submit_item_catalog_claim(item_id: int) -> void:
+	if item_catalog_claim_pending > 0 or not GameState.can_claim_item_catalog_reward(item_id):
+		return
+	item_catalog_claim_pending = item_id
+	GameState.item_catalog_changed.emit()
+	_send_authed_request("item_catalog_claim", "/api/game/item_catalog/claim", HTTPClient.Method.METHOD_POST,
+		JSON.stringify({"item_id": item_id}))
+
+
+func _on_item_catalog_claim_response(data: Dictionary) -> void:
+	if not bool(data.get("ok", false)):
+		item_catalog_claim_rejected.emit(str(data.get("error", "unknown_error")))
+		return
+	item_catalog_claim_pending = 0
+	GameState.stamina = int(data.get("stamina", GameState.stamina))
+	GameState.max_stamina = int(data.get("max_stamina", GameState.max_stamina))
+	GameState.regen_remaining_ms = float(data.get("regen_remaining_ms", GameState.regen_remaining_ms))
+	GameState.sync_stamina_multiplier(data)
+	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	GameState.item_catalog_changed.emit()
+	item_catalog_claim_confirmed.emit(data)
+	EventBus.show_toast.emit("图鉴奖励：体力 +1" if not bool(data.get("already_claimed", false)) else "该物品奖励已领取")
+
+
+func _on_item_catalog_claim_error(reason: String) -> void:
+	item_catalog_claim_pending = 0
+	GameState.item_catalog_changed.emit()
+	if reason == "state_conflict" or reason == "item_locked":
+		fetch_state()
 
 
 func submit_card_collection(action: String, collection_id: int, target_id: int) -> void:
@@ -765,7 +857,9 @@ func submit_card_collection(action: String, collection_id: int, target_id: int) 
 	var progress: Dictionary = GameState.get_card_collection_progress(collection_id)
 	card_collection_request = {
 		"action": action, "collection_id": collection_id,
-		"pack_id": target_id, "set_id": target_id,
+		"set_id": target_id,
+		"pack_uid": target_id,
+		"open_all": action == "open_all",
 		"request_id": Crypto.new().generate_random_bytes(16).hex_encode(),
 		"expected_opened_count": int(progress.get("opened_count", 0)),
 	}
@@ -776,7 +870,8 @@ func retry_card_collection() -> void:
 	if card_collection_busy or card_collection_request.is_empty():
 		return
 	card_collection_busy = true
-	_send_authed_request("card_collection", "/api/game/card_collection/" + str(card_collection_request.action), HTTPClient.Method.METHOD_POST, JSON.stringify(card_collection_request))
+	var endpoint_action: String = "open" if str(card_collection_request.action).begins_with("open") else str(card_collection_request.action)
+	_send_authed_request("card_collection", "/api/game/card_collection/" + endpoint_action, HTTPClient.Method.METHOD_POST, JSON.stringify(card_collection_request))
 
 
 func _on_card_collection_error(reason: String) -> void:
@@ -801,6 +896,7 @@ func _on_card_collection_response(data: Dictionary) -> void:
 
 
 func _sync_card_collection(data: Dictionary, tag: String) -> void:
+	RewardManager.sync_pending(data, tag != "fetch_state" and tag != "card_collection")
 	if data.has("activity_defs"):
 		GameState.activity_defs = data.get("activity_defs", [])
 	if data.has("card_collection_config"):
@@ -808,24 +904,13 @@ func _sync_card_collection(data: Dictionary, tag: String) -> void:
 	if not data.has("card_collection_progress"):
 		return
 	var next_progress: Dictionary = data.get("card_collection_progress", {})
-	var gained: PackedStringArray = []
 	for collection_id: Variant in next_progress:
 		var previous: Dictionary = GameState.get_card_collection_progress(int(collection_id))
 		if int(next_progress[collection_id].get("revision", 0)) < int(previous.get("revision", 0)):
 			next_progress[collection_id] = previous
 			continue
-		var old: Dictionary = previous.get("packs", {})
-		var packs: Dictionary = next_progress[collection_id].get("packs", {})
-		for pack_id: Variant in packs:
-			var increase: int = maxi(0, int(packs[pack_id]) - int(old.get(str(pack_id), old.get(int(pack_id), 0))))
-			if increase > 0:
-				for pack: Dictionary in ConfigDatabase.card_collection.get("packs", []):
-					if int(pack.pack_id) == int(pack_id):
-						gained.append("%s ×%d" % [str(pack.name), increase])
 	GameState.card_collection_progress = next_progress
 	GameState.card_collection_changed.emit()
-	if not gained.is_empty() and tag != "fetch_state" and tag != "card_collection":
-		EventBus.show_toast.emit("获得%s，可前往万象仙册开启" % "、".join(gained))
 
 
 func _register_confirmed_item_discoveries(tag: String, data: Dictionary) -> void:
@@ -851,12 +936,17 @@ func _register_confirmed_item_discoveries(tag: String, data: Dictionary) -> void
 
 	for entry: Variant in data.get("pending_rewards", []):
 		if entry is Dictionary:
-			acquired_ids.append(entry.get("id", 0))
+			if str(entry.get("kind", "item")) != "card_pack":
+				acquired_ids.append(entry.get("id", 0))
 	var rewards: Variant = data.get("rewards", {})
 	if rewards is Dictionary:
 		for entry: Variant in rewards.get("items", []):
 			if entry is Dictionary:
-				acquired_ids.append(entry.get("id", 0))
+				var item_id: int = int(entry.get("id", 0))
+				var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
+				if int(item_data.get("type", -1)) == Constants.ItemType.EFFECT and int(item_data.get("effect_type", 0)) == Constants.EffectType.CARD_PACK:
+					continue
+				acquired_ids.append(item_id)
 	GameState.register_new_item_ids(acquired_ids)
 	if data.has("crafted_item_ids"):
 		GameState.set_crafted_item_ids(data.get("crafted_item_ids", []))
@@ -976,3 +1066,35 @@ func clear_token() -> void:
 	var path := "user://auth_token"
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
+
+
+func fetch_stair_climb() -> void:
+	_send_authed_request("stair_climb", "/api/game/stair_climb", HTTPClient.Method.METHOD_GET)
+
+
+func _sync_stair_climb(data: Dictionary) -> void:
+	if not data.has("stair_climb_progress"):
+		return
+	var revision: int = int(data.get("storage_revision", -1))
+	if revision < _stair_climb_revision:
+		return
+	_stair_climb_revision = revision
+	GameState.stair_climb_progress = data.get("stair_climb_progress", {})
+
+
+func _on_stair_climb_response(data: Dictionary) -> void:
+	var revision: int = int(data.get("storage_revision", -1))
+	if revision < _stair_climb_revision:
+		stair_climb_failed.emit("state_conflict")
+		return
+	_stair_climb_revision = revision
+	_sync_stair_climb(data)
+	GameState.sync_stamina_multiplier(data)
+	ActivityManager.stair_climb = data.get("stair_climb", {})
+	ActivityManager.stair_climb_received_ticks = Time.get_ticks_msec()
+	GameState.stamina = int(data.get("stamina", GameState.stamina))
+	GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+	ActivityManager.stair_climb_updated.emit()
+	stair_climb_loaded.emit(ActivityManager.stair_climb)

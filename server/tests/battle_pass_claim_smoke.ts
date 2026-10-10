@@ -1,16 +1,17 @@
 import assert from "node:assert/strict";
 import { signToken } from "../src/middleware/auth";
 import { GameEngine } from "../src/engine/game_engine";
-import { GameState, IStorage, LeaderboardEntry, User } from "../src/storage/interface";
+import { GameState, LeaderboardEntry, User } from "../src/storage/interface";
+import { MemoryStorage as SharedStorage } from "../src/storage/memory";
 import { gameConfigTables } from "../src/worker/config_data";
 import { Router, WorkerRequest, WorkerResponse } from "../src/worker/http";
 import { createGameRouter } from "../src/routes/game";
 
-class MemoryStorage implements IStorage {
+class MemoryStorage extends SharedStorage {
   state: GameState;
   failNextSave = false;
 
-  constructor(state: GameState) { this.state = structuredClone(state); }
+  constructor(state: GameState) { super(); this.state = structuredClone(state); }
   async findUser(_deviceId: string): Promise<User | null> { return null; }
   async createUser(_deviceId: string): Promise<User> { throw new Error("unused"); }
   async loadState(_userId: string): Promise<GameState | null> { return structuredClone(this.state); }
@@ -86,19 +87,46 @@ assert.equal(premiumClaim.data.battle_pass_progress[4].premium_claimed_levels.in
 assert.equal(storage.state.stamina, 60);
 assert.equal(storage.state.battle_pass_progress?.[4].premium_claimed_levels.includes(1), true);
 
+const pendingBefore = structuredClone(storage.state.pending_rewards ?? []);
+storage.failNextSave = true;
+const failedPackSave = await request("/battle_pass/claim", { activity_id: 4, level: 2, track: "free" });
+assert.equal(failedPackSave.status, 500);
+assert.deepEqual(storage.state.pending_rewards, pendingBefore);
+assert.equal(storage.state.battle_pass_progress?.[4].free_claimed_levels.includes(2), false);
+for (const track of ["free", "premium"]) {
+  const claim = await request("/battle_pass/claim", { activity_id: 4, level: 2, track });
+  assert.equal(claim.status, 200);
+  assert.deepEqual(claim.data.rewards.items, [{ id: 1701, count: 1 }]);
+  const pack = claim.data.pending_rewards.at(-1);
+  assert.equal(pack.id, 1701);
+  assert.equal(pack.kind, "card_pack");
+  assert.equal(pack.pack_id, 1);
+  assert.equal(storage.state.stamina, 60);
+  const pendingAfter = structuredClone(storage.state.pending_rewards);
+  const duplicate = await request("/battle_pass/claim", { activity_id: 4, level: 2, track });
+  assert.equal(duplicate.status, 400);
+  assert.equal(duplicate.data.error, "already_claimed");
+  assert.deepEqual(storage.state.pending_rewards, pendingAfter);
+}
+assert.equal(storage.state.pending_rewards.length, pendingBefore.length + 2);
+
 activity.end_time = "2026-09-22T00:00:00Z";
 storage.failNextSave = true;
 const failedSettlement = await request("/state", {}, "GET");
 assert.equal(failedSettlement.status, 500);
-assert.equal(storage.state.battle_pass_progress?.[4].free_claimed_levels.length, 1);
+assert.equal(storage.state.battle_pass_progress?.[4].free_claimed_levels.length, 2);
 const settled = await request("/state", {}, "GET");
 assert.equal(settled.status, 200);
 assert.equal(storage.state.battle_pass_progress?.[4].free_claimed_levels.length, 50);
 assert.equal(storage.state.battle_pass_progress?.[4].premium_claimed_levels.length, 50);
 const staminaAfterSettlement = storage.state.stamina;
+assert.equal(staminaAfterSettlement, 540);
+assert.equal(storage.state.pending_rewards.length, pendingBefore.length + 50);
+const pendingAfterSettlement = structuredClone(storage.state.pending_rewards);
 const settlementRetry = await request("/state", {}, "GET");
 assert.equal(settlementRetry.status, 200);
 assert.equal(storage.state.stamina, staminaAfterSettlement);
+assert.deepEqual(storage.state.pending_rewards, pendingAfterSettlement);
 console.log("battle_pass_claim_smoke: ok");
 }
 

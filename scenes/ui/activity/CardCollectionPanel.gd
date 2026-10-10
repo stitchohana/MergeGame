@@ -3,6 +3,7 @@ class_name CardCollectionPanel extends BasePopup
 const STAR_COLORS: Array[Color] = [Color("b5c7bf"), Color("74c6a4"), Color("7eafe4"), Color("ba95dd"), Color("efd081")]
 var collection_id: int = 1
 var _activity_id: int = 5
+var _title: Label
 var _body: VBoxContainer
 var _status: Label
 var _summary: Label
@@ -31,16 +32,16 @@ func _ready() -> void:
 	panel.add_child(layout)
 	var header := HBoxContainer.new()
 	layout.add_child(header)
-	var title: Label = _label("万象仙册", 28, Color("eed5a3"))
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(title)
+	_title = _label("万象仙册", 28, Color("eed5a3"))
+	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(_title)
 	var close: Button = _button("关闭")
 	close.pressed.connect(func() -> void: UIManager.hide_popup(self))
 	header.add_child(close)
-	_summary = _label("收集山海万象 · 集齐卡组领取厚礼", 17)
+	_summary = _label("收集山海万象 · 集齐卡组获得厚礼", 17)
 	_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	layout.add_child(_summary)
-	_status = _label("完成任务、提交订单、运转周天，获得卡包", 14, Color("a9bdb5"))
+	_status = _label("完成任务、提交订单、运转周天获得卡包，在物品暂存区点击开启", 14, Color("a9bdb5"))
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	layout.add_child(_status)
 	_retry = _button("重试上次操作")
@@ -96,50 +97,11 @@ func _refresh() -> void:
 	var config: Dictionary = ConfigDatabase.card_collection
 	var progress: Dictionary = GameState.get_card_collection_progress(collection_id)
 	var owned: Dictionary = progress.get("cards", {})
-	var packs: Dictionary = progress.get("packs", {})
 	var busy: bool = CloudService.card_collection_busy or not CloudService.card_collection_request.is_empty()
 	var active: bool = _is_active()
 	_retry.visible = not CloudService.card_collection_request.is_empty()
 	_retry.disabled = CloudService.card_collection_busy
-	_status.text = "正在结算，请稍候…" if CloudService.card_collection_busy else ("上次操作未确认，请重试以恢复结果" if busy else ("完成任务、提交订单、运转周天，获得卡包" if active else "活动当前不可参与，已收集卡片会保留"))
-	_body.add_child(_label("我的卡包", 21, Color("eed5a3")))
-	for pack: Dictionary in config.get("packs", []):
-		if int(pack.collection_id) != collection_id:
-			continue
-		var row := HBoxContainer.new()
-		_body.add_child(row)
-		var pack_icon_path: String = str(pack.get("icon", ""))
-		if not pack_icon_path.is_empty() and ResourceLoader.exists(pack_icon_path):
-			var pack_icon := TextureRect.new()
-			pack_icon.custom_minimum_size = Vector2(40, 40)
-			pack_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			pack_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			pack_icon.texture = load(pack_icon_path) as Texture2D
-			row.add_child(pack_icon)
-		var star: int = int(pack.star)
-		var info: Label = _label("%s  %s\n%d 张卡 · 必得 1 张 %d 星卡" % ["★".repeat(star), str(pack.name), int(pack.card_count), star], 16, STAR_COLORS[star - 1])
-		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		row.add_child(info)
-		var count: int = _count(packs, int(pack.pack_id))
-		var open: Button = _button("开启 ×%d" % count)
-		open.disabled = count <= 0 or busy or not active
-		open.pressed.connect(_submit.bind("open", int(pack.pack_id)))
-		row.add_child(open)
-		var details: Button = _button("详情")
-		details.pressed.connect(_show_pack_details.bind(pack))
-		row.add_child(details)
-	if not _result_data.is_empty():
-		_build_result(_result_data)
-	else:
-		var last_open: Dictionary = progress.get("last_open", {})
-		if not last_open.is_empty():
-			var last_button: Button = _button("查看上次开包结果")
-			last_button.pressed.connect(func() -> void:
-				_result_data = last_open
-				_refresh()
-			)
-			_body.add_child(last_button)
+	_status.text = "正在结算，请稍候…" if CloudService.card_collection_busy else ("上次操作未确认，请重试以恢复结果" if busy else ("完成任务、提交订单、运转周天获得卡包，在物品暂存区点击开启" if active else "活动当前不可参与，已收集卡片会保留"))
 	_body.add_child(_label("珍藏图鉴", 21, Color("eed5a3")))
 	var total: int = 0
 	var collected: int = 0
@@ -167,45 +129,43 @@ func _refresh() -> void:
 		for card: Dictionary in set_cards:
 			grid.add_child(_card_tile(card, _count(owned, int(card.card_id))))
 		var claimed: bool = card_set.set_id in progress.get("claimed_sets", [])
-		var claim: Button = _button(("已领取 · " if claimed else "集齐领取 · ") + _reward_text(card_set.get("rewards", {})))
-		claim.disabled = busy or not active or claimed or set_count < set_cards.size()
-		claim.pressed.connect(_submit.bind("claim", int(card_set.set_id)))
-		section.add_child(claim)
-	_summary.text = "已收集 %d / %d 张 · 集齐卡组领取体力与灵石" % [collected, total]
+		var reward_label: Label = _label(("已发放 · " if claimed else "集齐奖励 · ") + _reward_text(card_set.get("rewards", {})), 17, Color("eed5a3"))
+		reward_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		section.add_child(reward_label)
+	_summary.text = "已收集 %d / %d 张 · 集齐卡组获得体力与灵石" % [collected, total]
 	_resize_grids()
-
-
-func _submit(action: String, target: int) -> void:
-	CloudService.submit_card_collection(action, collection_id, target)
-	_refresh()
 
 
 func _on_confirmed(data: Dictionary) -> void:
 	if int(data.get("collection_id", 0)) != collection_id:
 		return
-	if data.has("cards"):
-		_result_data = data
-	else:
+	if not data.has("cards"):
 		EventBus.show_toast.emit("卡组奖励到账：" + _reward_text(data.get("rewards", {})))
 	_refresh()
-	if data.has("cards"):
-		_reveal_tween = create_tween()
-		for child: Node in _result.get_children():
-			if child is GridContainer:
-				for tile: Control in child.get_children():
-					tile.modulate.a = 0.0
-					_reveal_tween.tween_property(tile, "modulate:a", 1.0, 0.16)
 
 
 func _on_rejected(reason: String) -> void:
 	_refresh()
-	var messages: Dictionary = {"insufficient_packs": "卡包不足", "activity_inactive": "活动当前不可参与", "state_conflict": "进度已更新，正在同步", "already_claimed": "奖励已领取", "set_incomplete": "卡组尚未集齐", "pending_operation": "请先重试上次操作", "save_failed": "保存未完成，请重试"}
+	var messages: Dictionary = {"pack_not_found": "当前卡包已不在暂存区，正在同步", "insufficient_packs": "暂存区没有可开启的卡包", "activity_inactive": "活动当前不可参与", "state_conflict": "进度已更新，正在同步", "already_claimed": "奖励已领取", "set_incomplete": "卡组尚未集齐", "pending_operation": "请先重试上次操作", "save_failed": "保存未完成，请重试"}
 	_status.text = str(messages.get(reason, "操作未确认，请检查网络后重试"))
 
 
 func _build_result(data: Dictionary) -> void:
 	_result = VBoxContainer.new()
 	_body.add_child(_result)
+	var completed_sets: Array = data.get("completed_sets", [])
+	if not completed_sets.is_empty():
+		var names: PackedStringArray = []
+		for completed: Dictionary in completed_sets:
+			for card_set: Dictionary in ConfigDatabase.card_collection.get("card_sets", []):
+				if int(card_set.set_id) == int(completed.get("set_id", 0)):
+					names.append(str(card_set.name))
+		var set_label: Label = _label("卡组集齐：" + "、".join(names), 19, Color("eed5a3"))
+		set_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_result.add_child(set_label)
+		var reward_label: Label = _label("奖励已到账：" + _reward_text(data.get("rewards", {})), 17, Color("eed5a3"))
+		reward_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_result.add_child(reward_label)
 	_result.add_child(_label("开包所得", 21, Color("eed5a3")))
 	var grid := GridContainer.new()
 	_result.add_child(grid)
@@ -213,7 +173,7 @@ func _build_result(data: Dictionary) -> void:
 	for drawn: Dictionary in data.get("cards", []):
 		for card: Dictionary in ConfigDatabase.card_collection.get("cards", []):
 			if int(card.card_id) == int(drawn.card_id):
-				grid.add_child(_card_tile(card, int(drawn.count), "新获得" if bool(drawn.is_new) else "重复卡 +1"))
+				grid.add_child(_card_tile(card, int(drawn.count), ("新获得" if bool(drawn.is_new) else "重复卡") + " +%d" % int(drawn.get("gained", 1))))
 	var skip: Button = _button("全部展示 / 跳过动画")
 	skip.pressed.connect(func() -> void:
 		if _reveal_tween and _reveal_tween.is_valid():
@@ -260,8 +220,10 @@ func _show_pack_details(pack: Dictionary) -> void:
 	var rates: PackedStringArray = []
 	for i: int in range(weights.size()):
 		rates.append("%d星 %.1f%%" % [i + 1, float(weights[i]) * 100.0 / maxf(1.0, weight_sum)])
-	var sources: PackedStringArray = []
-	var source_names: Dictionary = {"quest": "任务目标数", "order": "订单价值", "circulation": "周天序号"}
+	var sources: PackedStringArray = ["配置了此卡包的任务奖励"]
+	if int(pack.get("star", 0)) == 4:
+		sources.append("完成周天奖励")
+	var source_names: Dictionary = {"order": "订单价值", "circulation": "周天序号"}
 	for source: Dictionary in ConfigDatabase.card_collection.get("source_rewards", []):
 		if int(source.pack_id) == int(pack.pack_id) and bool(source.get("enabled", true)):
 			sources.append("%s达到%d（按最高档发放）" % [str(source_names.get(str(source.source_type), "进度")), int(source.min_value)])

@@ -53,6 +53,8 @@ func _on_cultivation_stage_changed(_level: int, _stage_name: String) -> void:
 
 
 func _on_reward_button_pressed() -> void:
+	if RequirementList.is_scroll_click_cancelled(self):
+		return
 	var popup := preload("res://scenes/ui/home/BreakthroughRewardPreviewPopup.tscn").instantiate() as BreakthroughRewardPreviewPopup
 	UIManager.show_popup(popup)
 	popup.setup_for_current_stage()

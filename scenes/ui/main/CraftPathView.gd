@@ -20,6 +20,7 @@ const ITEM_WIDGET_SCENE: PackedScene = preload("res://scenes/ui/common/ItemWidge
 @export_group("Design Textures")
 @export var arrow_texture: Texture2D = preload("res://assets/ui/craft_path_v1_layers/layers/craft_path_arrow.png")
 
+var _selected_item: Dictionary = {}
 var _items: Array[Dictionary] = []
 var _item_controls: Array[ItemWidget] = []
 
@@ -35,6 +36,10 @@ var _item_controls: Array[ItemWidget] = []
 
 func _ready() -> void:
 	close_button.pressed.connect(_on_close)
+	StoragePouch.pouch_updated.connect(func(_items: Array):
+		if not _selected_item.is_empty():
+			_update_selected_item(_selected_item)
+	)
 
 
 func show_for_item(item_data: Dictionary) -> void:
@@ -60,6 +65,7 @@ func _sort_items(left: Dictionary, right: Dictionary) -> bool:
 
 
 func _update_selected_item(selected: Dictionary) -> void:
+	_selected_item = selected
 	if title_label:
 		title_label.text = String(selected.get("name", ""))
 	descript_label.text = String(selected.get("describe", ""))
@@ -234,7 +240,7 @@ func _configure_discovery_visual(widget: ItemWidget, item_data: Dictionary) -> v
 	var lock_icon: TextureRect = widget.get_node_or_null("IconLock") as TextureRect
 	var item_id: int = ConfigDatabase._coerce_int(item_data.get("id", 0))
 	var item_level: int = ConfigDatabase._coerce_int(item_data.get("level", 0))
-	var is_present_on_board: bool = not GridManager.get_positions_by_item_id(item_id).is_empty()
+	var is_present_on_board: bool = GridManager.get_inventory_item_counts(true, true, true).has(item_id)
 	var is_discovered: bool = not item_data.is_empty() and (
 		item_level <= 1 or GameState.has_crafted_item(item_id) or is_present_on_board
 	)
@@ -247,7 +253,7 @@ func _configure_discovery_visual(widget: ItemWidget, item_data: Dictionary) -> v
 
 func _get_present_launchers_for_item(item_id: int) -> Array[Dictionary]:
 	var present_launcher_ids: Dictionary = {}
-	for entry: Dictionary in GridManager.get_all_items():
+	for entry: Dictionary in GridManager.get_inventory_items(true):
 		var board_item: Dictionary = entry.get("data", {})
 		if ConfigDatabase._coerce_int(board_item.get("type", 0)) != Constants.ItemType.LAUNCHER:
 			continue

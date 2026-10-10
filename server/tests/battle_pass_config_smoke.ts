@@ -7,12 +7,22 @@ const definitions = service.getDefinitions();
 assert.equal(definitions.length, 1);
 assert.equal(definitions[0].activity_id, 4);
 assert.equal(definitions[0].points_token_id, 5);
-assert.equal(gameConfigTables.gameConfig.battle_pass.points_per_value, 0.1);
-assert.equal(gameConfigTables.gameConfig.battle_pass.premium_unlock_cost, 500);
+assert.equal(Number(gameConfigTables.gameConfig.battle_pass.points_per_value), 0.1);
+assert.equal(Number(gameConfigTables.gameConfig.battle_pass.premium_unlock_cost), 500);
 assert.equal(definitions[0].tiers.length, 50);
 assert.equal(definitions[0].tiers[49].required_points, 500);
 assert.equal(service.getDefinition(4)?.tiers[0].free_rewards.tokens?.[0].amount, 10);
 assert.equal(service.getDefinition(4)?.tiers[0].premium_rewards.tokens?.[0].amount, 10);
+const rewards = definitions[0].tiers.flatMap(tier => [tier.free_rewards, tier.premium_rewards]);
+assert.equal(rewards.filter(reward => reward.tokens?.[0]?.token === 3).length, 50);
+assert.equal(rewards.filter(reward => reward.items?.[0]?.id === 1701).length, 50);
+for (const tier of definitions[0].tiers) {
+  const expected = tier.level % 2 === 0
+    ? { items: [{ id: 1701, count: 1 }] }
+    : { tokens: [{ token: 3, amount: 10 }] };
+  assert.deepEqual(tier.free_rewards, expected);
+  assert.deepEqual(tier.premium_rewards, expected);
+}
 assert.equal(gameConfigTables.activities.activities.find((entry: any) => entry.id === 4)?.cycle, 3);
 assert.equal(service.isActive(4, Date.parse("2026-08-31T23:59:59+08:00")), true);
 assert.equal(service.isActive(4, Date.parse("2026-09-01T00:00:00+08:00")), true);

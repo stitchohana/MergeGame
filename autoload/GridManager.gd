@@ -340,6 +340,84 @@ func get_all_items() -> Array[Dictionary]:
 				})
 	return result
 
+# Ownership queries include the pouch; physical grid APIs stay position based.
+# main_board_only is used by home/source views while the battle board is active.
+func get_server_grid_snapshot() -> Array:
+	var snapshot: Array = []
+	for entry: Dictionary in get_all_items():
+		var data: Dictionary = entry.data
+		var raw: Dictionary = {"id": int(data.get("id", 0)), "uid": int(data.get("_uid", 0)),
+			"col": entry.pos.x, "row": entry.pos.y}
+		for key: String in ["charges", "last_charge_time", "immovable", "_recharge_remaining", "storage", "atk_base"]:
+			if data.has(key):
+				raw[key] = data[key]
+		if data.has("_craft_init") or data.has("_craft_state"):
+			var craft: Dictionary = {}
+			for key: String in ["_craft_init", "_craft_state", "_craft_stored", "_craft_recipe",
+					"_craft_progress", "_craft_result_id", "_craft_start_time"]:
+				if data.has(key):
+					craft[key] = data[key]
+			raw["craft"] = craft
+		snapshot.append(raw.duplicate(true))
+	return snapshot
+
+func get_inventory_items(main_board_only: bool = false) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var seen_uids: Dictionary = {}
+	if main_board_only and current_board_type != Constants.BoardType.MAIN:
+		for raw_entry: Variant in GameState.main_grid_cache:
+			if raw_entry is Dictionary:
+				var data: Dictionary = item_data_from_server(raw_entry)
+				_append_inventory_item(result, seen_uids, data, Vector2i(-1, -1), "cache")
+	else:
+		for entry: Dictionary in get_all_items():
+			_append_inventory_item(result, seen_uids, entry.data, entry.pos, "grid")
+	for raw_entry: Variant in StoragePouch.items:
+		var entry: Dictionary = raw_entry if raw_entry is Dictionary else {"id": int(raw_entry)}
+		_append_inventory_item(result, seen_uids, item_data_from_server(entry), Vector2i(-1, -1), "pouch")
+	return result
+
+func _append_inventory_item(result: Array[Dictionary], seen_uids: Dictionary,
+		data: Dictionary, pos: Vector2i, source: String) -> void:
+	if data.is_empty():
+		return
+	var uid: int = int(data.get("_uid", 0))
+	# Deposit confirmation can briefly contain the same instance in both sources.
+	if uid > 0:
+		if seen_uids.has(uid):
+			return
+		seen_uids[uid] = true
+	result.append({"data": data, "pos": pos, "source": source})
+
+func get_inventory_item_counts(include_immovable: bool = false,
+		include_crafting: bool = true, main_board_only: bool = false) -> Dictionary:
+	var counts: Dictionary = {}
+	for entry: Dictionary in get_inventory_items(main_board_only):
+		var data: Dictionary = entry.data
+		if not include_immovable and bool(data.get("immovable", false)):
+			continue
+		if not include_crafting and int(data.get("type", 0)) == Constants.ItemType.CRAFTING:
+			continue
+		var item_id: int = int(data.get("id", 0))
+		if item_id > 0:
+			counts[item_id] = int(counts.get(item_id, 0)) + 1
+	return counts
+
+# One conversion for board snapshots, cached boards and stored instances.
+func item_data_from_server(raw_entry: Dictionary) -> Dictionary:
+	var entry: Dictionary = _sanitize_json_ints(raw_entry) as Dictionary
+	var item: Dictionary = ConfigDatabase.get_item_data(int(entry.get("id", 0))).duplicate(true)
+	if item.is_empty():
+		return {}
+	item["_uid"] = int(entry.get("uid", 0))
+	for key: String in ["charges", "last_charge_time", "immovable", "_recharge_remaining", "storage", "atk_base"]:
+		if entry.has(key):
+			item[key] = entry[key]
+	var craft: Variant = entry.get("craft", null)
+	if craft is Dictionary:
+		item.merge(craft as Dictionary, true)
+	return item
+
 # Get all items of a specific type
 func get_all_items_of_type(type: String) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
@@ -408,29 +486,9 @@ func populate_from_server(server_grid: Array) -> void:
 	_grid_update_pending = true
 	for raw_entry in server_grid:
 		var entry: Dictionary = _sanitize_json_ints(raw_entry) as Dictionary
-		var item_data: Dictionary = ConfigDatabase.get_item_data(entry.id)
-		if item_data.is_empty():
+		var item: Dictionary = item_data_from_server(entry)
+		if item.is_empty():
 			continue
-		var item := item_data.duplicate(true)
-		item["_uid"] = entry.uid
-		if entry.has("charges"):
-			item["charges"] = entry.charges
-		if entry.has("last_charge_time"):
-			item["last_charge_time"] = entry.last_charge_time
-		if entry.has("immovable"):
-			item["immovable"] = entry.immovable
-		var craft_data: Variant = entry.get("craft", null)
-		if craft_data is Dictionary and not (craft_data as Dictionary).is_empty():
-			for key in craft_data as Dictionary:
-				item[key] = craft_data[key]
-		var recharge_rem: Variant = entry.get("_recharge_remaining", null)
-		if recharge_rem != null:
-			item["_recharge_remaining"] = recharge_rem
-		var entry_storage: Variant = entry.get("storage", null)
-		if entry_storage != null:
-			item["storage"] = entry_storage
-		if entry.has("atk_base"):
-			item["atk_base"] = entry.atk_base
 		add_item(item, Vector2i(entry.col, entry.row))
 	_end_grid_update_batch()
 
@@ -463,26 +521,7 @@ func reconcile_from_server(server_grid: Array) -> bool:
 	for entry in entries:
 		var pos := Vector2i(int(entry.get("col", -1)), int(entry.get("row", -1)))
 		var local_item: Dictionary = _grid[pos.y][pos.x]
-		var authoritative: Dictionary = ConfigDatabase.get_item_data(int(entry.get("id", 0))).duplicate(true)
-		authoritative["_uid"] = int(entry.get("uid", 0))
-		if entry.has("charges"):
-			authoritative["charges"] = entry.charges
-		if entry.has("last_charge_time"):
-			authoritative["last_charge_time"] = entry.last_charge_time
-		if entry.has("immovable"):
-			authoritative["immovable"] = entry.immovable
-		var craft_data: Variant = entry.get("craft", null)
-		if craft_data is Dictionary and not (craft_data as Dictionary).is_empty():
-			for key in craft_data as Dictionary:
-				authoritative[key] = craft_data[key]
-		var recharge_remaining: Variant = entry.get("_recharge_remaining", null)
-		if recharge_remaining != null:
-			authoritative["_recharge_remaining"] = recharge_remaining
-		var storage_data: Variant = entry.get("storage", null)
-		if storage_data != null:
-			authoritative["storage"] = storage_data
-		if entry.has("atk_base"):
-			authoritative["atk_base"] = entry.atk_base
+		var authoritative: Dictionary = item_data_from_server(entry)
 
 		local_item.clear()
 		local_item.merge(authoritative, true)

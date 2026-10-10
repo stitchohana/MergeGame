@@ -52,6 +52,8 @@ func _refresh() -> void:
 
 
 func _on_pressed() -> void:
+	if RequirementList.is_scroll_click_cancelled(self):
+		return
 	if _activity_id <= 0:
 		return
 	var panel := preload("res://scenes/ui/activity/BattlePassPanel.tscn").instantiate() as BattlePassPanel

@@ -3,6 +3,7 @@ class_name HomeActivityCard extends Button
 @onready var activity_icon: TextureRect = $Content/IconFrame/ActivityIcon
 @onready var activity_mark: Label = $Content/IconFrame/ActivityMark
 @onready var name_label: Label = $Content/NameLabel
+@onready var status_label: Label = $Content/StatusLabel
 
 var _activity: Dictionary = {}
 
@@ -26,36 +27,30 @@ func setup(activity: Dictionary) -> void:
 		activity_mark.text = "日" if int(activity.get("cycle", -1)) == 1 else "活"
 		activity_icon.hide()
 		activity_mark.show()
+	if widget == "StairClimb":
+		activity_mark.text = "梯"
+		status_label.text = "● 比拼中" if bool(activity.get("active", false)) else "查看结算"
+		tooltip_text = "完成订单累积积分，查看本组排名与奖励"
 	_refresh_collection_badge()
 
 
 func _refresh_collection_badge() -> void:
 	if str(_activity.get("widget", "")) != "CardCollection":
 		return
-	var total: int = 0
-	var claimable: bool = false
-	for collection: Dictionary in ConfigDatabase.card_collection.get("collections", []):
-		if int(collection.get("activity_id", 0)) != int(_activity.get("id", 0)):
-			continue
-		var progress: Dictionary = GameState.get_card_collection_progress(int(collection.collection_id))
-		for count: Variant in progress.get("packs", {}).values():
-			total += int(count)
-		for card_set: Dictionary in ConfigDatabase.card_collection.get("card_sets", []):
-			if int(card_set.collection_id) != int(collection.collection_id) or card_set.set_id in progress.get("claimed_sets", []):
-				continue
-			var complete: bool = true
-			var owned: Dictionary = progress.get("cards", {})
-			for card: Dictionary in ConfigDatabase.card_collection.get("cards", []):
-				if int(card.set_id) == int(card_set.set_id) and int(owned.get(str(card.card_id), owned.get(int(card.card_id), 0))) <= 0:
-					complete = false
-			claimable = claimable or complete
-	activity_mark.text = "领" if claimable else (str(total) if total > 0 else "册")
-	tooltip_text = "卡组奖励可领取" if claimable else "待开卡包 ×%d" % total
+	activity_mark.text = "册"
+	tooltip_text = "查看卡片收集与卡组奖励"
 
 
 func _on_pressed() -> void:
+	if RequirementList.is_scroll_click_cancelled(self):
+		return
 	var activity_id: int = int(_activity.get("id", 0))
 	var widget: String = str(_activity.get("widget", ""))
+	if widget == "StairClimb":
+		var stair_panel := preload("res://scenes/ui/activity/StairClimbPanel.tscn").instantiate()
+		UIManager.show_popup(stair_panel)
+		stair_panel.setup(activity_id)
+		return
 	if widget == "CardCollection":
 		var collection_panel := preload("res://scenes/ui/activity/CardCollectionPanel.tscn").instantiate()
 		UIManager.show_popup(collection_panel)

@@ -142,6 +142,17 @@ func _load_recipes(path: String) -> void:
 func get_item_data(item_id: int) -> Dictionary:
 	return _items_data.get(item_id, {}) 
 
+func get_effect_item(effect_type: int, effect_value: int) -> Dictionary:
+	for value: Variant in _items_data.values():
+		if not value is Dictionary:
+			continue
+		var item: Dictionary = value as Dictionary
+		if int(item.get("type", -1)) == Constants.ItemType.EFFECT \
+			and int(item.get("effect_type", 0)) == effect_type \
+			and int(item.get("effect_value", 0)) == effect_value:
+			return item
+	return {}
+
 # Get item data by type, level, and optional group_id
 func get_item_by_level(type: int, level: int, group_id: int = 0) -> Dictionary:
 	var by_level: Dictionary = _items_by_type_level.get(type, {})
@@ -278,6 +289,20 @@ func get_all_items_of_type(type: int) -> Array:
 		for item in items:
 			result.append(item)
 	return result
+
+# Get unique, authoritative item definitions for catalog pages.
+func get_items_for_catalog(type: int) -> Array[Dictionary]:
+	# Some config tables repeat IDs. Use the same final definition as gameplay
+	# and the server, so one item has one tile and one discovery reward.
+	var result: Array[Dictionary] = []
+	for item_id: Variant in _items_data:
+		if not item_id is int:
+			continue
+		var item: Dictionary = _items_data[item_id]
+		if _coerce_int(item.get("type"), -1) == type:
+			result.append(item)
+	return result
+
 
 # Get recipes list
 func get_recipes() -> Array:

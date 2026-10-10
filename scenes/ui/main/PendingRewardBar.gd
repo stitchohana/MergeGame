@@ -2,6 +2,8 @@ class_name PendingRewardBar extends Control
 
 @onready var claim_button: Button = $Button
 @onready var item_icon: TextureRect = $Button/ItemIcon
+@onready var count_badge: PanelContainer = $Button/CountBadge
+@onready var count_label: Label = $Button/CountBadge/CountLabel
 
 var grid_view: Control = null
 var _claim_pending: bool = false
@@ -25,28 +27,41 @@ func setup(grid: Control) -> void:
 
 func _refresh(_count: int) -> void:
 	var rewards: Array = RewardManager.pending_rewards
+	count_label.text = str(rewards.size())
+	count_badge.visible = not rewards.is_empty()
 	if rewards.is_empty():
 		item_icon.texture = null
+		claim_button.text = ""
 		claim_button.disabled = _claim_pending
 		hide()
 		return
 
 	var reward: Dictionary = rewards[0]
+	var is_pack: bool = str(reward.get("kind", "item")) == "card_pack"
 	var item_id: int = int(reward.get("id", 0))
-	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
-	var icon_path: String = str(item_data.get("icon", reward.get("icon", "")))
+	var item_data: Dictionary = {} if is_pack else ConfigDatabase.get_item_data(item_id)
+	var icon_path: String = str(reward.get("icon", "")) if is_pack else str(item_data.get("icon", reward.get("icon", "")))
 	var texture: Texture2D = load(icon_path) as Texture2D if not icon_path.is_empty() else null
 	item_icon.texture = texture
-	claim_button.tooltip_text = "%s (点击放入棋盘)" % str(reward.get("name", "暂存道具"))
+	claim_button.text = (str(reward.get("name", "卡包")) + "\n点击开启" if is_pack and texture == null else "")
+	claim_button.add_theme_color_override("font_color", Color("efd081"))
+	claim_button.tooltip_text = "%s（点击打开）" % str(reward.get("name", "卡包")) if is_pack else "%s (点击放入棋盘)" % str(reward.get("name", "暂存道具"))
 	claim_button.disabled = _claim_pending
 	show()
 
 func _on_claim_button_pressed() -> void:
+	if RequirementList.is_scroll_click_cancelled(self):
+		return
 	if _claim_pending or RewardManager.pending_rewards.is_empty():
 		return
 	var reward: Dictionary = RewardManager.pending_rewards[0]
 	var uid: int = int(reward.get("uid", -1))
 	if uid < 0:
+		return
+	if str(reward.get("kind", "item")) == "card_pack":
+		var popup := preload("res://scenes/ui/activity/CardPackOpeningPopup.tscn").instantiate()
+		UIManager.show_popup(popup)
+		popup.setup_pack(reward)
 		return
 	_claim_pending = true
 	_claim_pending_uid = uid

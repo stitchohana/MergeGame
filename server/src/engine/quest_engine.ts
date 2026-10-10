@@ -134,7 +134,6 @@ export class QuestEngine {
       p.current_count = Math.min(p.current_count + count, q.target_count);
       if (p.current_count >= q.target_count) {
         p.completed = true;
-        engine.cardCollectionService.awardSource(state, "quest", q.id, q.target_count);
         console.log(`[quest] #${q.id} "${q.name}" completed`);
         if (q.auto_reward) {
           engine.applyRewards(state, q.rewards);
@@ -168,6 +167,8 @@ export class QuestEngine {
     state.pending_rewards = state.pending_rewards || [];
     const idx = state.pending_rewards.findIndex(r => r.uid === uid);
     if (idx < 0) return { ok: false, reason: "reward_not_found" };
+
+    if (state.pending_rewards[idx].kind === "card_pack") return { ok: false, reason: "card_pack_open_required" };
 
     // Server finds empty cell
     const map = engine.buildGridMap(state.grid);

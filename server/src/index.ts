@@ -145,6 +145,16 @@ function main(): void {
   // Dependencies
   const storage = createStorage();
   const engine = new GameEngine(gameConfigTables);
+  let stairSettlementRunning = false;
+  const settleStairClimb = async () => {
+    if (stairSettlementRunning) return;
+    stairSettlementRunning = true;
+    try { await engine.stairClimbService.settleBatch(storage, (state, reward) => engine.applyRewards(state, reward)); }
+    catch (error) { console.error("[stair-climb] settlement failed; retry next minute", error); }
+    finally { stairSettlementRunning = false; }
+  };
+  setInterval(() => { void settleStairClimb(); }, 60_000).unref();
+  void settleStairClimb();
 
   console.log("[server] Game engine loaded");
   console.log(`[server] Grid: ${engine.GRID_COLS}x${engine.GRID_ROWS}`);

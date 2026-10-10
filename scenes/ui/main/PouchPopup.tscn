@@ -1,6 +1,27 @@
 [gd_scene format=3 uid="uid://d3mppjwx54eqq"]
 
 [ext_resource type="Script" uid="uid://mlk11j8esfnt" path="res://scenes/ui/main/PouchPopup.gd" id="1_gd"]
+[ext_resource type="Texture2D" path="res://assets/game/storage_pouch.png" id="2_pouch"]
+[ext_resource type="Texture2D" path="res://assets/ui/xianxia_v3_layers_v2/layers/spirit_stone_icon.png" id="3_stone"]
+
+[sub_resource type="StyleBoxFlat" id="Style_panel"]
+bg_color = Color(0.985, 0.963, 0.895, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.34, 0.56, 0.46, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[sub_resource type="StyleBoxFlat" id="Style_unlock"]
+bg_color = Color(0.22, 0.46, 0.36, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
 
 [node name="PouchPopup" type="Control" unique_id=26155102]
 layout_mode = 3
@@ -29,19 +50,32 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -310.0
-offset_top = -500.0
+offset_top = -325.0
 offset_right = 310.0
-offset_bottom = 500.0
+offset_bottom = 325.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("Style_panel")
+
+[node name="PouchIcon" type="TextureRect" parent="Panel"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 78.0
+offset_bottom = 74.0
+mouse_filter = 2
+texture = ExtResource("2_pouch")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="TitleLabel" type="Label" parent="Panel" unique_id=1303402559]
 layout_mode = 0
-offset_left = 28.0
+offset_left = 88.0
 offset_top = 24.0
 offset_right = 548.0
 offset_bottom = 64.0
 theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.2, 0.36, 0.29, 1)
 text = "储物袋"
 
 [node name="CloseButton" type="Button" parent="Panel" unique_id=1753911355]
@@ -53,12 +87,54 @@ offset_bottom = 70.0
 theme_override_font_sizes/font_size = 20
 text = "X"
 
-[node name="ItemContainer" type="GridContainer" parent="Panel" unique_id=396190488]
+[node name="HintLabel" type="Label" parent="Panel"]
 layout_mode = 0
 offset_left = 28.0
-offset_top = 84.0
+offset_top = 72.0
 offset_right = 592.0
-offset_bottom = 960.0
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 14
-columns = 5
+offset_bottom = 102.0
+theme_override_colors/font_color = Color(0.43, 0.49, 0.39, 1)
+theme_override_font_sizes/font_size = 18
+text = "点击物品取出到棋盘，拖入储物袋存放"
+
+[node name="Scroll" type="ScrollContainer" parent="Panel"]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 108.0
+offset_right = 592.0
+offset_bottom = 512.0
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="ItemContainer" type="GridContainer" parent="Panel/Scroll" unique_id=396190488]
+layout_mode = 2
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 10
+columns = 7
+
+[node name="BalanceLabel" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 522.0
+offset_right = 592.0
+offset_bottom = 552.0
+theme_override_colors/font_color = Color(0.2, 0.36, 0.29, 1)
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+
+[node name="UnlockButton" type="Button" parent="Panel"]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 566.0
+offset_right = 592.0
+offset_bottom = 626.0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("Style_unlock")
+theme_override_styles/hover = SubResource("Style_unlock")
+theme_override_styles/pressed = SubResource("Style_unlock")
+theme_override_font_sizes/font_size = 24
+icon = ExtResource("3_stone")
+icon_alignment = 0
+expand_icon = true
+theme_override_constants/icon_max_width = 32
+text = "解锁 1 格 · 100 灵石"

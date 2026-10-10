@@ -9,17 +9,25 @@ const ITEM_BUTTON_TEXTURE: Texture2D = preload("res://assets/ui/recipe/recipe_it
 @onready var empty_label: Label = $Panel/Margin/VBox/EmptyLabel
 @onready var close_btn: Button = $Panel/Margin/VBox/Header/CloseButton
 
+var _target_item_id: int = 0
+
 func _ready() -> void:
 	close_btn.pressed.connect(_on_close)
+	StoragePouch.pouch_updated.connect(func(_items: Array):
+		if _target_item_id > 0:
+			setup_for_item(_target_item_id)
+	)
 
 # Existing crafting-table entry point.
 func setup(recipes: Array, table_name: String) -> void:
+	_target_item_id = 0
 	title_label.text = table_name + " 配方"
 	target_container.hide()
 	_populate(recipes, false)
 
 # Requirement-order entry point.
 func setup_for_item(item_id: int) -> void:
+	_target_item_id = item_id
 	var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
 	var item_name: String = item_data.get("name", "未知道具")
 	title_label.text = item_name + " · 制作配方"
@@ -89,7 +97,7 @@ func _build_entry(recipe: Dictionary, show_board_table: bool) -> Control:
 		table_row.add_theme_constant_override("separation", 10)
 		table_row.add_child(_make_label("放入制作台", 13, Color(0.48, 0.32, 0.2, 1)))
 		if table.is_empty():
-			table_row.add_child(_make_label("棋盘上暂无可用制作台", 14, Color(1, 0.48, 0.42, 1)))
+			table_row.add_child(_make_label("暂无持有可用制作台", 14, Color(1, 0.48, 0.42, 1)))
 		else:
 			table_row.add_child(_make_item_widget(table, 52))
 			var table_name: String = "%s  Lv.%d" % [table.get("name", "制作台"), int(table.get("level", 0))]
@@ -100,7 +108,7 @@ func _build_entry(recipe: Dictionary, show_board_table: bool) -> Control:
 
 func _find_highest_board_table(recipe_id: int) -> Dictionary:
 	var best: Dictionary = {}
-	for entry in GridManager.get_all_items():
+	for entry in GridManager.get_inventory_items(true):
 		var board_item: Dictionary = entry.get("data", {})
 		if int(board_item.get("type", 0)) != Constants.ItemType.CRAFTING:
 			continue

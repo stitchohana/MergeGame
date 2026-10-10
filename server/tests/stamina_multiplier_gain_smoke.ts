@@ -3,14 +3,15 @@ import { GameEngine } from "../src/engine/game_engine";
 import { signToken } from "../src/middleware/auth";
 import { createGameRouter } from "../src/routes/game";
 import { createGMRouter } from "../src/routes/gm";
-import { GameState, IStorage, LeaderboardEntry, User } from "../src/storage/interface";
+import { GameState, LeaderboardEntry, User } from "../src/storage/interface";
+import { MemoryStorage as SharedStorage } from "../src/storage/memory";
 import { gameConfigTables } from "../src/worker/config_data";
 import { Router, WorkerRequest, WorkerResponse } from "../src/worker/http";
 
-class MemoryStorage implements IStorage {
+class MemoryStorage extends SharedStorage {
   state: GameState;
 
-  constructor(state: GameState) { this.state = structuredClone(state); }
+  constructor(state: GameState) { super(); this.state = structuredClone(state); }
   async findUser(_deviceId: string): Promise<User | null> { return null; }
   async createUser(_deviceId: string): Promise<User> { throw new Error("unused"); }
   async loadState(_userId: string): Promise<GameState | null> { return structuredClone(this.state); }

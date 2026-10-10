@@ -10,6 +10,7 @@ class_name GameScreen extends BaseScreen
 @onready var pouch_zone: PouchDropZone = $PouchDropZone
 @onready var pending_bar: PendingRewardBar
 @onready var top_bar: TopBar = $TopBar
+@onready var order_supply_entry: OrderSupplyEntry = $OrderSupplyEntry
 
 var _pending_item_ids: Array = []
 var _meridian_submit_pending: bool = false
@@ -21,14 +22,19 @@ var _load_token: int = -1
 var _pending_order_animation: Dictionary = {}
 var _order_animation_input_token: int = -1
 var _is_initial_game_load: bool = true
-var _initial_order_reset_token: int = 0
+var _initial_order_focus_token: int = 0
 var _require_refresh_queued: bool = false
 var _suppress_requirement_refresh: bool = false
+var _order_supply_input_token: int = -1
+var _order_supply_reward_tween: Tween = null
+var _order_supply_flying_icons: Array[TextureRect] = []
+var _order_supply_hidden_items: Dictionary = {}  # uid -> grid position
 
 func _ready() -> void:
 	randomize()
 
 	GridManager.grid_updated.connect(_on_grid_changed)
+	StoragePouch.pouch_updated.connect(func(_items: Array): _queue_requirement_refresh())
 	grid_view.set_pouch_zone(pouch_zone)
 	requirement_list.setup_pending_reward_bar(grid_view)
 
@@ -65,8 +71,156 @@ func _ready() -> void:
 	if shop_btn:
 		shop_btn.pressed.connect(_on_shop_pressed)
 	requirement_list.complete_clicked.connect(_on_meridian_complete)
+	order_supply_entry.claim_requested.connect(_on_order_supply_claim_requested)
+	grid_view.action_sync_cancelled.connect(_on_order_supply_sync_cancelled)
+	CloudService.order_supply_claim_confirmed.connect(_on_order_supply_claim_confirmed)
+	CloudService.order_supply_claim_rejected.connect(_on_order_supply_claim_rejected)
 	_refresh_meridian()
 	_setup_extras()
+
+
+func _on_order_supply_claim_requested(activity_id: int, completed_rounds: int) -> void:
+	grid_view.run_after_action_sync(func():
+		if not CloudService.online or not visible or GameState.current_board_type != Constants.BoardType.MAIN:
+			CloudService.order_supply_claim_rejected.emit("offline")
+			return
+		_order_supply_input_token = UIManager.begin_input_block("order_supply_claim")
+		CloudService.submit_order_supply_claim(activity_id, completed_rounds)
+	)
+
+
+func _on_order_supply_sync_cancelled() -> void:
+	order_supply_entry._on_claim_rejected("sync_cancelled")
+	_end_order_supply_input_lock()
+
+
+func _on_order_supply_claim_confirmed(result: Dictionary) -> void:
+	_finish_order_supply_reward_animation()
+	GameState.main_grid_cache = result.get("grid", [])
+	var animating: bool = false
+	if GameState.current_board_type == Constants.BoardType.MAIN and is_inside_tree() and visible:
+		grid_view._sync_grid_from_server(result)
+		grid_view._restore_crafting_timers()
+		detail_panel.refresh_from_grid()
+		animating = _play_order_supply_reward_animation(result.get("spawned_items", []))
+	if not animating:
+		_end_order_supply_input_lock()
+	var pending_added: int = int(result.get("pending_rewards_added", 0))
+	if pending_added > 0 and result.get("spawned_items", []).is_empty():
+		EventBus.show_toast.emit("棋盘无空位，订单素材已放入暂存区")
+	elif pending_added > 0:
+		EventBus.show_toast.emit("订单素材已发到棋盘，剩余素材已放入暂存区")
+	else:
+		EventBus.show_toast.emit("订单素材已发到棋盘")
+	if int(result.get("crafts_completed", 0)) > 0:
+		EventBus.show_toast.emit("正在制作的物品已完成，可点击制作台取出")
+
+
+func _play_order_supply_reward_animation(spawned_items: Array) -> bool:
+	var from_pos: Vector2 = order_supply_entry.get_global_rect().get_center()
+	var index: int = 0
+	for entry_variant: Variant in spawned_items:
+		if not entry_variant is Dictionary:
+			continue
+		var entry: Dictionary = entry_variant
+		var pos := Vector2i(int(entry.get("col", -1)), int(entry.get("row", -1)))
+		var uid: int = int(entry.get("uid", 0))
+		var node: GridItem = grid_view._item_nodes.get("%d,%d" % [pos.x, pos.y]) as GridItem
+		if not is_instance_valid(node) or int(node.item_data.get("_uid", 0)) != uid:
+			continue
+		var texture: Texture2D = node.icon_rect.texture
+		if texture == null:
+			continue
+		if _order_supply_reward_tween == null:
+			_order_supply_reward_tween = create_tween().set_parallel(true)
+			if _order_supply_input_token < 0:
+				_order_supply_input_token = UIManager.begin_input_block("order_supply_animation")
+		var target_rect: Rect2 = node.icon_rect.get_global_rect()
+		var fly := TextureRect.new()
+		fly.texture = texture
+		fly.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		fly.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		fly.size = target_rect.size
+		fly.pivot_offset = fly.size / 2.0
+		fly.scale = Vector2.ONE * 0.65
+		fly.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fly.z_index = 1000
+		add_child(fly)
+		fly.global_position = from_pos - fly.size / 2.0
+		fly.hide()
+		_order_supply_flying_icons.append(fly)
+		_order_supply_hidden_items[uid] = pos
+		node.hide()
+		var delay: float = float(index) * Constants.ORDER_SUPPLY_FLY_STAGGER
+		var duration: float = Constants.ORDER_SUPPLY_FLY_DURATION
+		_order_supply_reward_tween.tween_callback(fly.show).set_delay(delay)
+		_order_supply_reward_tween.tween_property(fly, "global_position", target_rect.position, duration).set_delay(delay).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		_order_supply_reward_tween.tween_property(fly, "scale", Vector2.ONE, duration).set_delay(delay).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		_order_supply_reward_tween.tween_callback(_on_order_supply_item_landed.bind(uid, fly)).set_delay(delay + duration)
+		index += 1
+	if _order_supply_reward_tween == null:
+		return false
+	_order_supply_reward_tween.finished.connect(_finish_order_supply_reward_animation)
+	return true
+
+
+func _on_order_supply_item_landed(uid: int, fly: TextureRect) -> void:
+	var pos: Vector2i = _order_supply_hidden_items.get(uid, Vector2i(-1, -1))
+	var node: GridItem = grid_view._item_nodes.get("%d,%d" % [pos.x, pos.y]) as GridItem
+	if is_instance_valid(node) and int(node.item_data.get("_uid", 0)) == uid:
+		node.show()
+	_order_supply_hidden_items.erase(uid)
+	_order_supply_flying_icons.erase(fly)
+	if is_instance_valid(fly):
+		fly.queue_free()
+
+
+func _hide_order_supply_pending_items() -> void:
+	for uid: int in _order_supply_hidden_items:
+		var pos: Vector2i = _order_supply_hidden_items[uid]
+		var node: GridItem = grid_view._item_nodes.get("%d,%d" % [pos.x, pos.y]) as GridItem
+		if is_instance_valid(node) and int(node.item_data.get("_uid", 0)) == uid:
+			node.hide()
+
+
+func _finish_order_supply_reward_animation() -> void:
+	if _order_supply_reward_tween != null:
+		_order_supply_reward_tween.kill()
+		_order_supply_reward_tween = null
+	for uid: int in _order_supply_hidden_items.keys():
+		_on_order_supply_item_landed(uid, null)
+	for fly: TextureRect in _order_supply_flying_icons:
+		if is_instance_valid(fly):
+			fly.queue_free()
+	_order_supply_flying_icons.clear()
+	_end_order_supply_input_lock()
+
+
+func _exit_tree() -> void:
+	_finish_order_supply_reward_animation()
+
+
+func _on_order_supply_claim_rejected(reason: String) -> void:
+	_end_order_supply_input_lock()
+	match reason:
+		"board_full":
+			EventBus.show_toast.emit("棋盘空位不足，请腾出空间后领取")
+		"activity_not_completed":
+			EventBus.show_toast.emit("生成、合成订单物品或开始制作订单成品，累计次数达标后可领取")
+		"no_order_materials":
+			EventBus.show_toast.emit("暂无可领取的订单素材")
+		"offline", "network_error":
+			EventBus.show_toast.emit("请联网后领取订单补给")
+		_:
+			EventBus.show_toast.emit("领取失败，请重试")
+	if CloudService.online:
+		grid_view._request_action_recovery_state()
+
+
+func _end_order_supply_input_lock() -> void:
+	if _order_supply_input_token >= 0:
+		UIManager.end_input_block(_order_supply_input_token)
+		_order_supply_input_token = -1
 
 
 func _on_state_loaded_for_orders(state: Dictionary) -> void:
@@ -127,7 +281,7 @@ func _refresh_battle_pass_entry() -> void:
 
 func _refresh_activity_entries() -> void:
 	for child: Node in requirement_list.container.get_children():
-		if child is WeeklyActivityEntry:
+		if child is WeeklyActivityEntry or child is HomeActivityCard:
 			requirement_list.container.remove_child(child)
 			child.queue_free()
 
@@ -144,7 +298,7 @@ func _refresh_activity_entries() -> void:
 		insert_index += 1
 
 func on_enter() -> void:
-	_initial_order_reset_token += 1
+	_initial_order_focus_token += 1
 	_is_initial_game_load = true
 	requirement_list.reset_scroll_to_start()
 	GameState.current_board_type = Constants.BoardType.MAIN
@@ -162,7 +316,7 @@ func on_enter() -> void:
 	if CloudService.online:
 		CloudService.submit_board_switch(Constants.BoardType.MAIN)
 	else:
-		_schedule_initial_order_list_reset()
+		_schedule_initial_order_list_focus()
 		requirement_list.reset_scroll_to_start()
 
 func _render_main_grid_cache() -> void:
@@ -172,7 +326,10 @@ func _render_main_grid_cache() -> void:
 	grid_view.set_skip_animations(false)
 
 func on_exit() -> void:
-	_initial_order_reset_token += 1
+	if GridManager.current_board_type == Constants.BoardType.MAIN:
+		GameState.main_grid_cache = GridManager.get_server_grid_snapshot()
+	_initial_order_focus_token += 1
+	_finish_order_supply_reward_animation()
 	_end_order_animation_input_lock()
 	if GridManager.grid_updated.is_connected(_on_grid_changed):
 		GridManager.grid_updated.disconnect(_on_grid_changed)
@@ -189,7 +346,7 @@ func _on_main_board_switch_confirmed(result: Dictionary) -> void:
 	grid_view.set_skip_animations(false)
 	grid_view.visible = true
 	requirement_list.reset_scroll_to_start()
-	_schedule_initial_order_list_reset()
+	_schedule_initial_order_list_focus()
 	if _load_token > 0:
 		LoadingManager.end(_load_token)
 		_load_token = -1
@@ -198,25 +355,27 @@ func _on_main_board_switch_rejected(_reason: String) -> void:
 	if not GameState.main_grid_cache.is_empty():
 		_render_main_grid_cache()
 	requirement_list.reset_scroll_to_start()
-	_schedule_initial_order_list_reset()
+	_schedule_initial_order_list_focus()
 	grid_view.visible = true
 	if _load_token > 0:
 		LoadingManager.end(_load_token)
 		_load_token = -1
 
-func _schedule_initial_order_list_reset() -> void:
-	_initial_order_reset_token += 1
-	var reset_token: int = _initial_order_reset_token
-	call_deferred("_finish_initial_order_list_reset", reset_token)
+func _schedule_initial_order_list_focus() -> void:
+	_initial_order_focus_token += 1
+	var focus_token: int = _initial_order_focus_token
+	call_deferred("_finish_initial_order_list_focus", focus_token)
 
-func _finish_initial_order_list_reset(reset_token: int) -> void:
+func _finish_initial_order_list_focus(focus_token: int) -> void:
 	await get_tree().process_frame
-	if reset_token != _initial_order_reset_token or not is_inside_tree():
+	if focus_token != _initial_order_focus_token or not is_inside_tree():
 		return
-	requirement_list.reset_scroll_to_start()
 	await get_tree().process_frame
-	if reset_token != _initial_order_reset_token or not is_inside_tree():
+	if focus_token != _initial_order_focus_token or not is_inside_tree():
 		return
+	if requirement_list.get_order_entries().is_empty():
+		return
+	requirement_list.focus_next_order()
 	_is_initial_game_load = false
 
 func _allow_available_order_focus() -> bool:
@@ -326,6 +485,8 @@ func _on_restart() -> void:
 		CloudService.fetch_state()
 
 func _on_grid_changed() -> void:
+	if not _order_supply_hidden_items.is_empty():
+		call_deferred("_hide_order_supply_pending_items")
 	_queue_requirement_refresh()
 
 func _on_craft_table_state_changed(_table_item: Dictionary, state: int) -> void:
@@ -352,7 +513,7 @@ func _flush_requirement_refresh() -> void:
 
 func _get_reserved_crafting_item_counts() -> Dictionary:
 	var reserved_counts: Dictionary = {}
-	for entry: Dictionary in GridManager.get_all_items():
+	for entry: Dictionary in GridManager.get_inventory_items():
 		var table_item: Dictionary = entry.get("data", {}) as Dictionary
 		if int(table_item.get("type", 0)) != Constants.ItemType.CRAFTING:
 			continue
@@ -388,10 +549,14 @@ func _get_reserved_crafting_item_counts() -> Dictionary:
 func _get_finished_order_item_counts() -> Dictionary:
 	var finished_counts: Dictionary = {}
 	var known_positions: Dictionary = {}
-	for entry: Dictionary in GridManager.get_all_items():
+	var known_uids: Dictionary = {}
+	for entry: Dictionary in GridManager.get_inventory_items():
 		var item_data: Dictionary = entry.get("data", {}) as Dictionary
 		var entry_pos: Vector2i = entry.get("pos", Vector2i(-1, -1)) as Vector2i
 		known_positions["%d,%d" % [entry_pos.x, entry_pos.y]] = true
+		var uid: int = int(item_data.get("_uid", 0))
+		if uid > 0:
+			known_uids[uid] = true
 		var item_id: int = int(item_data.get("id", 0))
 		var item_type: int = int(item_data.get("type", 0))
 		# An order product can inherit an immovable flag from its board snapshot.
@@ -415,6 +580,8 @@ func _get_finished_order_item_counts() -> Dictionary:
 			var node: GridItem = grid_view._item_nodes[node_key] as GridItem
 			if node == null or not is_instance_valid(node):
 				continue
+			if known_uids.has(int(node.item_data.get("_uid", 0))):
+				continue
 			var node_item_id: int = int(node.item_data.get("id", 0))
 			var node_item_type: int = int(node.item_data.get("type", 0))
 			if node_item_id <= 0 or node_item_type == Constants.ItemType.CRAFTING:
@@ -424,7 +591,7 @@ func _get_finished_order_item_counts() -> Dictionary:
 
 func _count_grid_item(item_id: int) -> int:
 	var count := 0
-	for entry in GridManager.get_all_items():
+	for entry in GridManager.get_inventory_items():
 		var item_data: Dictionary = entry.data
 		if not bool(item_data.get("immovable", false)) and int(item_data.get("id", 0)) == item_id:
 			count += 1
@@ -513,15 +680,7 @@ func _refresh_requirement_buttons() -> void:
 		)
 
 func _refresh_requirement_item_selection() -> void:
-	var present_item_ids: Dictionary = {}
-	for entry in GridManager.get_all_items():
-		var item_data: Dictionary = entry.data
-		if bool(item_data.get("immovable", false)):
-			continue
-		var item_id: int = int(item_data.get("id", 0))
-		if item_id > 0:
-			present_item_ids[item_id] = true
-	requirement_list.refresh_item_selection(present_item_ids)
+	requirement_list.refresh_item_selection(GridManager.get_inventory_item_counts())
 
 
 func _refresh_requirement_crafting_badges() -> void:
@@ -530,7 +689,7 @@ func _refresh_requirement_crafting_badges() -> void:
 
 func _get_crafting_result_item_ids() -> Dictionary:
 	var crafting_item_ids: Dictionary = {}
-	for entry in GridManager.get_all_items():
+	for entry in GridManager.get_inventory_items():
 		var table_item: Dictionary = entry.get("data", {})
 		if int(table_item.get("type", 0)) != Constants.ItemType.CRAFTING:
 			continue
@@ -633,8 +792,8 @@ func _collect_recipe_dependency_ids(item_id: int, required_ids: Dictionary,
 			)
 
 func _refresh_meridian() -> void:
+	_display_meridian()
 	if not GameState.meridian_acupoints.is_empty():
-		_display_meridian()
 		return
 	if CloudService.online:
 		CloudService.meridian_refresh_confirmed.connect(_on_meridian_refresh_confirmed, CONNECT_ONE_SHOT)
@@ -666,15 +825,20 @@ func _display_meridian() -> void:
 			match_counts[display_index] = int(stats.get("matched_count", 0))
 	requirement_list.set_requirements(display_reqs, priority_indices, match_counts)
 	_refresh_requirement_buttons()
+	if _is_initial_game_load and grid_view.visible:
+		_schedule_initial_order_list_focus()
 
 
 func _with_active_activity_rewards(req: Dictionary) -> Dictionary:
 	var display_req: Dictionary = req.duplicate(true)
 	var total_value: int = int(req.get("total_value", 0))
-	if total_value <= 0:
+	if bool(req.get("breakthrough_order", false)):
 		return display_req
 	var rewards_variant: Variant = display_req.get("rewards", {})
 	var rewards: Dictionary = rewards_variant.duplicate(true) if rewards_variant is Dictionary else {}
+	_append_order_card_pack_reward(rewards, total_value)
+	rewards["stair_climb_points"] = _get_order_stair_climb_points(req)
+	display_req["rewards"] = rewards
 	var tokens_variant: Variant = rewards.get("tokens", [])
 	var tokens: Array = tokens_variant.duplicate(true) if tokens_variant is Array else []
 	var points_rate: float = float(ConfigDatabase.get_game_config("battle_pass.points_per_value", 0.0))
@@ -710,6 +874,62 @@ func _with_active_activity_rewards(req: Dictionary) -> Dictionary:
 	rewards["tokens"] = tokens
 	display_req["rewards"] = rewards
 	return display_req
+
+
+func _get_order_stair_climb_points(req: Dictionary) -> int:
+	if bool(req.get("breakthrough_order", false)) or bool(req.get("completed", false)):
+		return 0
+	var item_ids: Array = []
+	if req.get("item_ids") is Array:
+		item_ids = req.get("item_ids", [])
+	else:
+		for _index: int in range(maxi(0, int(req.get("count", 0)))):
+			item_ids.append(int(req.get("item_id", 0)))
+	var order_value: float = 0.0
+	for item_id: Variant in item_ids:
+		var item: Dictionary = ConfigDatabase.get_item_data(int(item_id))
+		order_value += float(item.get("value", 0))
+	if order_value <= 0.0:
+		return 0
+	for activity: Dictionary in GameState.activity_defs:
+		if str(activity.get("widget", "")) != "StairClimb":
+			continue
+		if not bool(activity.get("active", false)) or not bool(activity.get("enabled", true)):
+			return 0
+		var now: float = Time.get_unix_time_from_system()
+		var start: float = Time.get_unix_time_from_datetime_string(str(activity.get("start_time", "")))
+		var end: float = Time.get_unix_time_from_datetime_string(str(activity.get("end_time", "")))
+		if now < start or now >= end:
+			return 0
+		var settings: Dictionary = activity.get("config", {})
+		var ratio: float = float(settings.get("order_points_ratio", 0.0))
+		if ratio <= 0.0 or not is_finite(ratio):
+			return 0
+		return maxi(1, floori(order_value * ratio + 0.000000001))
+	return 0
+
+
+func _append_order_card_pack_reward(rewards: Dictionary, total_value: int) -> void:
+	var items_variant: Variant = rewards.get("items", [])
+	var items: Array = items_variant.duplicate(true) if items_variant is Array else []
+	for collection: Dictionary in ConfigDatabase.card_collection.get("collections", []):
+		var active: bool = GameState.activity_defs.any(func(activity: Dictionary) -> bool: return int(activity.get("id", 0)) == int(collection.get("activity_id", 0)) and bool(activity.get("active", false)))
+		if not active:
+			continue
+		var best: Dictionary = {}
+		for rule: Dictionary in ConfigDatabase.card_collection.get("source_rewards", []):
+			if int(rule.get("collection_id", 0)) != int(collection.get("collection_id", 0)) or str(rule.get("source_type", "")) != "order" or int(rule.get("min_value", 0)) > total_value:
+				continue
+			if rule.has("source_id") and int(rule.source_id) != 0:
+				continue
+			if best.is_empty() or (rule.has("source_id") and not best.has("source_id")) or (rule.has("source_id") == best.has("source_id") and int(rule.min_value) > int(best.min_value)):
+				best = rule
+		if best.is_empty() or not bool(best.get("enabled", true)):
+			continue
+		var pack_item: Dictionary = ConfigDatabase.get_effect_item(Constants.EffectType.CARD_PACK, int(best.get("pack_id", 0)))
+		if not pack_item.is_empty():
+			items.append({"id": int(pack_item.get("id", 0)), "count": int(best.get("count", 1))})
+	rewards["items"] = items
 
 func _on_meridian_complete(display_index: int) -> void:
 	if _meridian_submit_pending:
@@ -763,24 +983,28 @@ func _capture_order_animation(display_index: int) -> void:
 	_pending_order_animation = {"entry": entry, "sources": sources, "required_ids": required_ids, "completed_display_index": display_index, "completed_visual_index": completed_visual_index, "previous_positions": previous_positions, "start_qi": CultivationService.current_qi}
 
 func _find_grid_item_source(item_id: int, used_grid_keys: Dictionary) -> Dictionary:
-	for key in grid_view._item_nodes:
-		var key_string: String = str(key)
-		if used_grid_keys.has(key_string):
+	var inventory: Array[Dictionary] = GridManager.get_inventory_items()
+	for index: int in range(inventory.size()):
+		var entry: Dictionary = inventory[index]
+		var data: Dictionary = entry.data
+		if bool(data.get("immovable", false)) or int(data.get("id", 0)) != item_id:
 			continue
-		var node: GridItem = grid_view._item_nodes[key] as GridItem
-		if node == null or not is_instance_valid(node) or bool(node.item_data.get("immovable", false)) or int(node.item_data.get("id", 0)) != item_id:
+		var source: String = entry.source
+		var pos: Vector2i = entry.pos
+		var key: String = "%d,%d" % [pos.x, pos.y] if source == "grid" else "pouch:%d" % index
+		if used_grid_keys.has(key):
 			continue
-		var icon_rect: TextureRect = node.get_node_or_null("IconRect") as TextureRect
-		var texture: Texture2D = icon_rect.texture if icon_rect else null
-		var item_center: Vector2 = icon_rect.get_global_rect().get_center() if icon_rect else node.get_global_rect().get_center()
-		used_grid_keys[key_string] = true
-		return {"from": item_center, "texture": texture, "node": node, "grid_key": key_string}
-	for grid_entry in GridManager.get_all_items():
-		var item_data: Dictionary = grid_entry.data
-		if not bool(item_data.get("immovable", false)) and int(item_data.get("id", 0)) == item_id:
-			var fallback_center: Vector2 = grid_view.to_global(Vector2(grid_entry.pos.x * Constants.CELL_STEP, grid_entry.pos.y * Constants.CELL_STEP) + Vector2(Constants.CELL_SIZE * 0.5, Constants.CELL_SIZE * 0.5))
-			return {"from": fallback_center}
+		used_grid_keys[key] = true
+		if source == "pouch":
+			return {"from": pouch_zone.get_global_rect().get_center(), "source": "pouch"}
+		var node: GridItem = grid_view._item_nodes.get(key) as GridItem
+		if node != null and is_instance_valid(node):
+			var icon: TextureRect = node.get_node_or_null("IconRect") as TextureRect
+			return {"from": icon.get_global_rect().get_center() if icon else node.get_global_rect().get_center(),
+				"texture": icon.texture if icon else null, "node": node, "grid_key": key}
+		return {"from": grid_view.to_global(Vector2(pos.x * Constants.CELL_STEP, pos.y * Constants.CELL_STEP) + Vector2.ONE * Constants.CELL_SIZE * 0.5)}
 	return {}
+
 
 func _build_order_sources(entry: RequirementEntry, required_ids: Array) -> Array[Dictionary]:
 	var sources: Array[Dictionary] = []
@@ -844,6 +1068,9 @@ func _on_meridian_confirmed(result: Dictionary) -> void:
 
 	var server_grid: Array = result.get("grid", [])
 	_suppress_requirement_refresh = true
+	GameState.main_grid_cache = server_grid.duplicate(true)
+	if result.has("pouch"):
+		StoragePouch.restore_from_server(result.pouch, result)
 	grid_view.set_skip_animations(true)
 	# The optimistic completion has already removed submitted items locally.
 	# Reconcile the authoritative snapshot in place so surviving GridItem nodes
@@ -1081,4 +1308,10 @@ func _create_activity_entry(act: Dictionary) -> Control:
 		"WeeklyActivityEntry":
 			var we := preload("res://scenes/ui/activity/WeeklyActivityEntry.tscn").instantiate() as WeeklyActivityEntry
 			return we
+		"CardCollection", "StairClimb":
+			var entry := preload("res://scenes/ui/activity/HomeActivityCard.tscn").instantiate() as HomeActivityCard
+			entry.name = "StairClimbEntry" if widget == "StairClimb" else "CardCollectionEntry"
+			entry.custom_minimum_size = Vector2(176, 160)
+			entry.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			return entry
 	return null

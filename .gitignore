@@ -12,6 +12,9 @@ Thumbs.db
 *.swp
 *.swo
 *.tmp
+# Local development artifacts
+.codex_tmp/
+Godot/
 # Python
 __pycache__/
 *.py[cod]

@@ -1,4 +1,5 @@
-import type { CollectionProgress } from "../engine/card_collection";
+import type { StairClimbProgress, StairClimbRegistry } from "../engine/stair_climb";
+import type { CollectionProgress, CardOperationResult } from "../engine/card_collection";
 
 // --- Game data types ---
 
@@ -30,6 +31,7 @@ export interface ActivityDef {
   enabled?: boolean;
   start_time?: string;
   end_time?: string;
+  config?: Record<string, unknown>;
 }
 
 export interface WeeklyTask {
@@ -41,6 +43,8 @@ export interface ActivityProgress {
   completed: boolean;
   claimed: boolean;
   last_reset?: number;
+  current_count?: number;
+  claim_count?: number;
 }
 
 export enum QuestType {
@@ -59,6 +63,10 @@ export interface PendingReward {
   uid: number;
   id: number;
   name: string;
+  kind?: "item" | "card_pack";
+  collection_id?: number;
+  pack_id?: number;
+  icon?: string;
 }
 
 export interface RewardToken {
@@ -142,8 +150,11 @@ export interface GameState {
   storage_revision?: number;
   card_collection_progress?: Record<number, CollectionProgress>;
   card_collection_order_requests?: string[];
+  card_pack_operations?: { request_id: string; signature: string; result: CardOperationResult }[];
   grid: GridItem[];
-  pouch: number[];
+  pouch: Array<number | (Omit<GridItem, "col" | "row"> & { uid: number })>;
+  pouch_capacity?: number;
+  pouch_unlock_count?: number;
   cultivation: CultivationData;
   stamina: number;
   max_stamina: number;
@@ -178,10 +189,14 @@ export interface GameState {
   activity_progress?: Record<number, ActivityProgress>;
   battle_pass_progress?: Record<number, BattlePassProgress>;
   battle_pass_order_requests?: string[];
+  stair_climb_progress?: StairClimbProgress;
+
   spawn_seed?: number;
   spawn_sequence?: number;
   spawn_history?: SpawnHistoryEntry[];
   crafted_item_ids: number[];
+  /** Item discovery rewards already claimed, retained after item consumption. */
+  item_catalog_claimed_ids?: number[];
 }
 
 export interface SpawnHistoryEntry {
@@ -219,4 +234,7 @@ export interface IStorage {
   loadState(userId: string): Promise<GameState | null>;
   saveState(userId: string, state: GameState): Promise<void>;
   getLeaderboard(limit: number): Promise<LeaderboardEntry[]>;
+  listStairClimbCandidates(level: number): Promise<string[]>;
+  loadStairClimb(eventId: string): Promise<StairClimbRegistry | null>;
+  saveStairClimb(registry: StairClimbRegistry): Promise<void>;
 }

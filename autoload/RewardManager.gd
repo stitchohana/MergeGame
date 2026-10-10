@@ -6,6 +6,7 @@ extends Node
 
 signal pending_rewards_changed(count: int)
 
+var _pending_revision: int = -1
 var pending_rewards: Array = []  # [{id, name, uid}]
 
 
@@ -28,10 +29,32 @@ func _ready() -> void:
 		CloudService.pending_reward_claimed.connect(_on_reward_response)
 
 
+func reset_pending() -> void:
+	_pending_revision = -1
+	pending_rewards.clear()
+	pending_rewards_changed.emit(0)
+
+
+func sync_pending(data: Dictionary, notify: bool = false) -> void:
+	if not data.has("pending_rewards"):
+		return
+	var revision: int = int(data.get("storage_revision", -1))
+	if revision < _pending_revision:
+		return
+	var old_uids: Array = pending_rewards.map(func(reward: Dictionary) -> int: return int(reward.get("uid", 0)))
+	var gained_pack: bool = false
+	for reward: Dictionary in data.get("pending_rewards", []):
+		if str(reward.get("kind", "")) == "card_pack" and int(reward.get("uid", 0)) not in old_uids:
+			gained_pack = true
+	_pending_revision = revision
+	pending_rewards = data.get("pending_rewards", []).duplicate(true)
+	pending_rewards_changed.emit(pending_rewards.size())
+	if notify and gained_pack:
+		EventBus.show_toast.emit("获得卡包，已放入物品暂存区")
+
+
 func _on_state_loaded(state: Dictionary) -> void:
-	if state.has("pending_rewards"):
-		pending_rewards = state.pending_rewards
-		pending_rewards_changed.emit(pending_rewards.size())
+	sync_pending(state)
 
 
 func _on_reward_response(result: Dictionary) -> void:
@@ -44,9 +67,7 @@ func _on_reward_response(result: Dictionary) -> void:
 	if result.has("stamina"):
 		GameState.stamina = result.stamina
 		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
-	if result.has("pending_rewards"):
-		pending_rewards = result.pending_rewards
-		pending_rewards_changed.emit(pending_rewards.size())
+	sync_pending(result)
 
 
 func _on_breakthrough_reward_response(result: Dictionary) -> void:

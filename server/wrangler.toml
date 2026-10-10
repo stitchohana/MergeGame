@@ -11,6 +11,9 @@ routes = [
 [vars]
 MAINTENANCE_MODE = "false"
 
+[triggers]
+crons = ["* * * * *"]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "mergegame-db-apac"

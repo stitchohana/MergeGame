@@ -1,10 +1,29 @@
 import { GameState, IStorage, LeaderboardEntry, User } from "./interface";
+import type { StairClimbRegistry } from "../engine/stair_climb";
 
 type UserRow = { user_id: string; device_id: string; created_at: string };
 type StateRow = { state_json: string };
 
 export class D1Storage implements IStorage {
 	constructor(private readonly db: D1Database) {}
+
+	async listStairClimbCandidates(level: number): Promise<string[]> {
+		const result = await this.db.prepare("SELECT user_id FROM game_states WHERE json_extract(state_json, '$.cultivation.current_level') = ?").bind(level).all<{ user_id: string }>();
+		return result.results.map(row => row.user_id);
+	}
+
+	async loadStairClimb(eventId: string): Promise<StairClimbRegistry | null> {
+		const row = await this.db.prepare("SELECT registry_json FROM stair_climb_events WHERE event_id = ?").bind(eventId).first<{ registry_json: string }>();
+		return row ? JSON.parse(row.registry_json) : null;
+	}
+
+	async saveStairClimb(registry: StairClimbRegistry): Promise<void> {
+		const next = { ...registry, revision: registry.revision + 1 };
+		const result = await this.db.prepare("INSERT INTO stair_climb_events (event_id, revision, registry_json) VALUES (?, ?, ?) ON CONFLICT(event_id) DO UPDATE SET revision = excluded.revision, registry_json = excluded.registry_json WHERE stair_climb_events.revision = ?")
+			.bind(registry.event_id, next.revision, JSON.stringify(next), registry.revision).run();
+		if (result.meta.changes !== 1) throw new Error("state_conflict");
+		registry.revision = next.revision;
+	}
 
 	async findUser(deviceId: string): Promise<User | null> {
 		const row = await this.db.prepare("SELECT user_id, device_id, created_at FROM users WHERE device_id = ? LIMIT 1").bind(deviceId).first<UserRow>();

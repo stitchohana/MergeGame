@@ -4330,7 +4330,9 @@
           "id": 15101,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 5
     },
     {
       "id": 28002,
@@ -4347,7 +4349,9 @@
           "id": 15101,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 6
     },
     {
       "id": 28003,
@@ -4364,7 +4368,9 @@
           "id": 15101,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 7
     },
     {
       "id": 28004,
@@ -4381,7 +4387,9 @@
           "id": 15101,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 8
     },
     {
       "id": 28005,
@@ -4398,7 +4406,9 @@
           "id": 15102,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 9
     },
     {
       "id": 28006,
@@ -4415,7 +4425,9 @@
           "id": 15102,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 10
     },
     {
       "id": 28007,
@@ -4432,7 +4444,9 @@
           "id": 15102,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 11
     },
     {
       "id": 28008,
@@ -4449,7 +4463,9 @@
           "id": 15102,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 12
     },
     {
       "id": 28009,
@@ -4466,7 +4482,9 @@
           "id": 15104,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 13
     },
     {
       "id": 28010,
@@ -4483,7 +4501,9 @@
           "id": 15104,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 14
     },
     {
       "id": 28011,
@@ -4500,7 +4520,9 @@
           "id": 15104,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 15
     },
     {
       "id": 28012,
@@ -4517,7 +4539,9 @@
           "id": 15104,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 16
     },
     {
       "id": 28013,
@@ -4534,7 +4558,9 @@
           "id": 15108,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 17
     },
     {
       "id": 28014,
@@ -4551,7 +4577,9 @@
           "id": 15108,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 18
     },
     {
       "id": 28015,
@@ -4568,7 +4596,9 @@
           "id": 15108,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 19
     },
     {
       "id": 28016,
@@ -4585,7 +4615,9 @@
           "id": 15108,
           "weight": 100
         }
-      ]
+      ],
+      "effect_type": 7,
+      "effect_value": 20
     },
     {
       "id": 28017,
@@ -15621,182 +15653,6 @@
       "type": 5
     },
     {
-      "id": 28001,
-      "level": 1,
-      "name": "青木短剑",
-      "icon": "res://assets/items/icons_simple/28001.png",
-      "group_id": null,
-      "describe": "青木短剑以赤髓铜为骨、雾晶砂为脉反复锻成，剑身留有青木年轮。",
-      "effect_type": 7,
-      "effect_value": 5,
-      "type": 5
-    },
-    {
-      "id": 28002,
-      "level": 2,
-      "name": "溪铁剑",
-      "icon": "res://assets/items/icons_simple/28002.png",
-      "group_id": null,
-      "describe": "铸剑师熔乌纹铁入坯，再嵌白玉晶珠定形，得剑溪铁剑，刃口清亮如溪水。",
-      "effect_type": 7,
-      "effect_value": 6,
-      "type": 5
-    },
-    {
-      "id": 28003,
-      "level": 3,
-      "name": "月银剑",
-      "icon": "res://assets/items/icons_simple/28003.png",
-      "group_id": null,
-      "describe": "月蚀银经九度淬火，与苍木晶合铸为月银剑，银辉沿剑脊缓缓流动。",
-      "effect_type": 7,
-      "effect_value": 7,
-      "type": 5
-    },
-    {
-      "id": 28004,
-      "level": 4,
-      "name": "白金尺",
-      "icon": "res://assets/items/icons_simple/28004.png",
-      "group_id": null,
-      "describe": "古谱所载的白金尺须取太白金母与星尘晶核同炉锻造，尺形无锋却寒光内敛。",
-      "effect_type": 7,
-      "effect_value": 8,
-      "type": 5
-    },
-    {
-      "id": 28005,
-      "level": 5,
-      "name": "霜痕剑",
-      "icon": "res://assets/items/icons_simple/28005.png",
-      "group_id": null,
-      "describe": "霜痕剑以玄冰陨铁为骨、涅火心晶为脉反复锻成，剑面凝着一道霜痕。",
-      "effect_type": 7,
-      "effect_value": 9,
-      "type": 5
-    },
-    {
-      "id": 28006,
-      "level": 6,
-      "name": "离火锋",
-      "icon": "res://assets/items/icons_simple/28006.png",
-      "group_id": null,
-      "describe": "铸剑师熔地火炎晶入坯，再嵌太初晶胎定形，得剑离火锋，刃中似有赤焰呼吸。",
-      "effect_type": 7,
-      "effect_value": 10,
-      "type": 5
-    },
-    {
-      "id": 28007,
-      "level": 7,
-      "name": "苍梧木剑",
-      "icon": "res://assets/items/icons_simple/28007.png",
-      "group_id": null,
-      "describe": "青罡玉经九度淬火，与三棱灵晶合铸为苍梧木剑，木纹深处藏着青光。",
-      "effect_type": 7,
-      "effect_value": 11,
-      "type": 5
-    },
-    {
-      "id": 28008,
-      "level": 8,
-      "name": "九霄雷剑",
-      "icon": "res://assets/items/icons_simple/28008.png",
-      "group_id": null,
-      "describe": "古谱所载的九霄雷剑须取雷极砂与赤焰晶同炉锻造，雷纹从剑格直抵剑尖。",
-      "effect_type": 7,
-      "effect_value": 12,
-      "type": 5
-    },
-    {
-      "id": 28009,
-      "level": 9,
-      "name": "坤岳重剑",
-      "icon": "res://assets/items/icons_simple/28009.png",
-      "group_id": null,
-      "describe": "坤岳重剑以坤元髓晶为骨、坤元厚晶为脉反复锻成，剑脊厚重如山梁。",
-      "effect_type": 7,
-      "effect_value": 13,
-      "type": 5
-    },
-    {
-      "id": 28010,
-      "level": 10,
-      "name": "星陨长锋",
-      "icon": "res://assets/items/icons_simple/28010.png",
-      "group_id": null,
-      "describe": "铸剑师熔星陨铁核入坯，再嵌九曲晶轮定形，得剑星陨长锋，剑身映着细碎星屑。",
-      "effect_type": 7,
-      "effect_value": 14,
-      "type": 5
-    },
-    {
-      "id": 28011,
-      "level": 11,
-      "name": "太虚影剑",
-      "icon": "res://assets/items/icons_simple/28011.png",
-      "group_id": null,
-      "describe": "太虚碧玉经九度淬火，与凤羽天晶合铸为太虚影剑，刃影在光下近乎透明。",
-      "effect_type": 7,
-      "effect_value": 15,
-      "type": 5
-    },
-    {
-      "id": 28012,
-      "level": 12,
-      "name": "九幽玄锋",
-      "icon": "res://assets/items/icons_simple/28012.png",
-      "group_id": null,
-      "describe": "古谱所载的九幽玄锋须取九幽沉铁与青方晶同炉锻造，黑色剑纹如深渊回旋。",
-      "effect_type": 7,
-      "effect_value": 16,
-      "type": 5
-    },
-    {
-      "id": 28013,
-      "level": 13,
-      "name": "日曜神剑",
-      "icon": "res://assets/items/icons_simple/28013.png",
-      "group_id": null,
-      "describe": "日曜神剑以日精真金为骨、霜棱簇为脉反复锻成，金辉沿刃口如日轮升起。",
-      "effect_type": 7,
-      "effect_value": 17,
-      "type": 5
-    },
-    {
-      "id": 28014,
-      "level": 14,
-      "name": "月魄寒锋",
-      "icon": "res://assets/items/icons_simple/28014.png",
-      "group_id": null,
-      "describe": "铸剑师熔月魄寒玉入坯，再嵌雷纹晶定形，得剑月魄寒锋，幽蓝剑光宛如月华凝霜。",
-      "effect_type": 7,
-      "effect_value": 18,
-      "type": 5
-    },
-    {
-      "id": 28015,
-      "level": 15,
-      "name": "天河剑",
-      "icon": "res://assets/items/icons_simple/28015.png",
-      "group_id": null,
-      "describe": "天河神砂经九度淬火，与紫烟晶合铸为天河剑，挥动时星点汇成一线天河。",
-      "effect_type": 7,
-      "effect_value": 19,
-      "type": 5
-    },
-    {
-      "id": 28016,
-      "level": 16,
-      "name": "太初开天剑",
-      "icon": "res://assets/items/icons_simple/28016.png",
-      "group_id": null,
-      "describe": "古谱所载的太初开天剑须取鸿蒙母晶与龙纹晶骨同炉锻造，剑中云气翻涌，仿佛天地将开。",
-      "effect_type": 7,
-      "effect_value": 20,
-      "type": 5
-    },
-    {
       "id": 28049,
       "level": 1,
       "name": "引炁筑基散",
@@ -15970,6 +15826,61 @@
       "describe": "极品灵石，点击使用可获得40灵石。",
       "effect_type": 8,
       "effect_value": 40,
+      "type": 5
+    },
+    {
+      "id": 1701,
+      "level": 1,
+      "name": "1星卡包",
+      "icon": "res://assets/items/card_pack.svg",
+      "group_id": null,
+      "describe": "在物品暂存区开启，保底获得一张1星卡片。",
+      "effect_type": 9,
+      "effect_value": 1,
+      "type": 5
+    },
+    {
+      "id": 1702,
+      "level": 2,
+      "name": "2星卡包",
+      "icon": "res://assets/items/card_pack.svg",
+      "group_id": null,
+      "describe": "在物品暂存区开启，保底获得一张2星卡片。",
+      "effect_type": 9,
+      "effect_value": 2,
+      "type": 5
+    },
+    {
+      "id": 1703,
+      "level": 3,
+      "name": "3星卡包",
+      "icon": "res://assets/items/card_pack.svg",
+      "group_id": null,
+      "describe": "在物品暂存区开启，保底获得一张3星卡片。",
+      "effect_type": 9,
+      "effect_value": 3,
+      "type": 5
+    },
+    {
+      "id": 1704,
+      "level": 4,
+      "name": "4星卡包",
+      "icon": "res://assets/items/card_pack.svg",
+      "group_id": null,
+      "describe": "在物品暂存区开启，保底获得一张4星卡片。",
+      "effect_type": 9,
+      "effect_value": 4,
+      "type": 5
+    },
+    {
+      "id": 1705,
+      "level": 5,
+      "name": "5星卡包",
+      "icon": "res://assets/items/card_pack.svg",
+      "group_id": null,
+      "describe": "在物品暂存区开启，保底获得一张5星卡片。",
+      "effect_type": 9,
+      "effect_value": 5,
       "type": 5
     }
   ]

@@ -65,7 +65,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       cultivation: state.cultivation,
       quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
       meridian_acupoints: state.meridian_acupoints || [],
-      pending_rewards: state.pending_rewards,
+      storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
     });
   }));
 
@@ -84,7 +84,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       stamina: result.stamina,
       max_stamina: result.max_stamina,
       quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
-      pending_rewards: state.pending_rewards,
+      storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
       ...staminaMultiplierResponse(state),
     });
   }));
@@ -104,7 +104,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       amount: result.amount,
       spirit_stones: result.spiritStones,
       quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
-      pending_rewards: state.pending_rewards,
+      storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
     });
   }));
 
@@ -133,7 +133,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       spirit_stones: state.spirit_stones,
       stamina: state.stamina,
       ...staminaMultiplierResponse(state),
-      pending_rewards: state.pending_rewards,
+      storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
       quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
       meridian_acupoints: state.meridian_acupoints || [],
     });

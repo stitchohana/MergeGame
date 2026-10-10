@@ -1,17 +1,25 @@
 {
   "stamina": {
-	"max": 100,
-	"spawn_cost": 1,
-	"regen_interval": 120,
-	"regen_amount": 1,
-	"multiplier_threshold_base": 100,
-	"multiplier_duration": 3600
+	"max": "100",
+	"spawn_cost": "1",
+	"regen_interval": "120",
+	"regen_amount": "1",
+	"multiplier_threshold_base": "100",
+	"multiplier_duration": "3600"
   },
-  "reset_hour": 5,
+  "reset_hour": "5",
+  "craft_speedup_stone_cost_per_minute": "1",
+  "launcher_speedup_stone_cost_per_minute": "1",
+  "orders": {
+	"recipe_product_probability": 0.8
+  },
+  "pouch": {
+	"initial_slots": 7,
+	"unlock_cost_base": 100,
+	"unlock_cost_increment": 50
+  },
   "battle_pass": {
-	"premium_unlock_cost": 500,
-	"points_per_value": 0.1
-  },
-  "craft_speedup_stone_cost_per_minute": 1,
-  "launcher_speedup_stone_cost_per_minute": 1
+	"premium_unlock_cost": "500",
+	"points_per_value": "0.1"
+  }
 }

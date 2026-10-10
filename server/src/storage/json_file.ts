@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { IStorage, User, GameState, LeaderboardEntry } from "./interface";
 import { defaultGameState } from "./memory";
+import type { StairClimbRegistry } from "../engine/stair_climb";
 
 export class JsonFileStorage implements IStorage {
   private dir: string;
@@ -34,6 +35,35 @@ export class JsonFileStorage implements IStorage {
 
   private statePath(userId: string): string {
     return path.join(this.statesDir, `${userId}.json`);
+  }
+
+  private stairClimbPath(eventId: string): string {
+    return path.join(this.dir, `stair-climb-${encodeURIComponent(eventId)}.json`);
+  }
+
+  async listStairClimbCandidates(level: number): Promise<string[]> {
+    const ids: string[] = [];
+    for (const userId of this.readUsers().keys()) {
+      const state = await this.loadState(userId);
+      if (state?.cultivation.current_level === level) ids.push(userId);
+    }
+    return ids;
+  }
+
+  async loadStairClimb(eventId: string): Promise<StairClimbRegistry | null> {
+    const file = this.stairClimbPath(eventId);
+    return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : null;
+  }
+
+  async saveStairClimb(registry: StairClimbRegistry): Promise<void> {
+    // No await between read/check/rename: atomic relative to the local Node process.
+    const file = this.stairClimbPath(registry.event_id);
+    const saved = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : null;
+    if ((saved?.revision ?? 0) !== registry.revision) throw new Error("state_conflict");
+    const next = { ...registry, revision: registry.revision + 1 };
+    fs.writeFileSync(file + ".tmp", JSON.stringify(next));
+    fs.renameSync(file + ".tmp", file);
+    registry.revision = next.revision;
   }
 
   async findUser(deviceId: string): Promise<User | null> {

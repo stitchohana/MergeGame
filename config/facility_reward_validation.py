@@ -259,6 +259,8 @@ def validate_facility_reward_order(
     }
     granted_tables = setup_ids.intersection(crafting_ids)
     issues: List[str] = []
+    pack_ids = {_item_id(item) for item in items.get("effect", [])
+                if isinstance(item, Mapping) and _as_int(item.get("effect_type")) == 9}
 
     def validate_reward_items(
         reward_items: Sequence[Mapping[str, Any]],
@@ -271,7 +273,7 @@ def validate_facility_reward_order(
                 issues.append(f"{label} contains a facility reward without an item id")
                 continue
             if item_id not in launcher_ids and item_id not in crafting_ids:
-                if require_facilities:
+                if require_facilities and item_id not in pack_ids:
                     issues.append(f"{label} references unknown facility {item_id}")
                 continue
             if item_id in crafting_ids and item_id not in granted_tables:

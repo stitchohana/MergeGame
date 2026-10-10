@@ -1,0 +1,54 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/activity/OrderSupplyEntry.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/xianxia_v3_layers_v2/layers/cultivation_reward_icon.png" id="2_icon"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_normal"]
+bg_color = Color(0.94, 0.97, 0.89, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.56, 0.51, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+content_margin_left = 12.0
+content_margin_right = 12.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_ready"]
+bg_color = Color(0.99, 0.91, 0.6, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.56, 0.51, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+content_margin_left = 12.0
+content_margin_right = 12.0
+
+[node name="OrderSupplyEntry" type="Button"]
+visible = false
+custom_minimum_size = Vector2(432, 52)
+offset_right = 432.0
+offset_bottom = 52.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.17, 0.32, 0.27, 1)
+theme_override_colors/font_hover_color = Color(0.17, 0.32, 0.27, 1)
+theme_override_colors/font_pressed_color = Color(0.17, 0.32, 0.27, 1)
+theme_override_colors/font_disabled_color = Color(0.35, 0.43, 0.38, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_constants/icon_max_width = 34
+theme_override_constants/h_separation = 10
+theme_override_styles/normal = SubResource("StyleBox_ready")
+theme_override_styles/hover = SubResource("StyleBox_ready")
+theme_override_styles/pressed = SubResource("StyleBox_normal")
+theme_override_styles/disabled = SubResource("StyleBox_normal")
+text = "订单补给  0/5"
+icon = ExtResource("2_icon")
+expand_icon = true
+script = ExtResource("1_script")

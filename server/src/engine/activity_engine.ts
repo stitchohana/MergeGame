@@ -1,5 +1,5 @@
-import { GameState, ActivityDef, WeeklyTask, ActivityCycle, ActivityProgress } from "../storage/interface";
-import { GameEngine } from "./game_engine";
+import { GameState, ActivityDef, ActivityCycle, GridItem, RewardConfig } from "../storage/interface";
+import type { GameEngine } from "./game_engine";
 
 export class ActivityEngine {
   private activities: ActivityDef[] = [];
@@ -73,6 +73,92 @@ export class ActivityEngine {
         state.activity_progress[a.id] = { completed: false, claimed: false, last_reset: 0 };
       }
     }
+  }
+
+  recordOrderSupplyAction(state: GameState, itemId: number): void {
+    if (!(state.meridian_acupoints ?? []).some(order => {
+      if (order.completed || (order as any).breakthrough_order) return false;
+      const ids: number[] = (order as any).item_ids;
+      return Array.isArray(ids) ? ids.includes(itemId) : order.item_id === itemId && order.count > 0;
+    })) return;
+    this.initProgress(state);
+    for (const activity of this.activities) {
+      if (activity.widget !== "OrderSupply" || !this.isActive(activity)) continue;
+      const progress = state.activity_progress![activity.id];
+      const target = this.orderSupplyCount(activity, "target_count", 5);
+      progress.current_count = Math.min(target, (progress.current_count ?? 0) + 1);
+      progress.completed = progress.current_count >= target;
+    }
+  }
+
+  claimOrderSupply(state: GameState, activityId: number, expectedClaimCount: number, engine: GameEngine):
+    { ok: true; rewards: RewardConfig; spawned_items: GridItem[]; pending_rewards_added: number; crafts_completed: number } | { ok: false; reason: string }
+  {
+    const activity = this.activities.find(a => a.id === activityId && a.widget === "OrderSupply");
+    if (!activity) return { ok: false, reason: "invalid_activity" };
+    if (!this.isActive(activity)) return { ok: false, reason: "activity_inactive" };
+    if (state.board_type === 1) return { ok: false, reason: "main_board_required" };
+    this.initProgress(state);
+    const progress = state.activity_progress![activityId];
+    if ((progress.claim_count ?? 0) !== expectedClaimCount) return { ok: false, reason: "already_claimed" };
+    const target = this.orderSupplyCount(activity, "target_count", 5);
+    if ((progress.current_count ?? 0) < target) return { ok: false, reason: "activity_not_completed" };
+    const rewardCount = this.orderSupplyCount(activity, "reward_count", 3);
+    const grid = engine.buildGridMap(state.grid);
+    const positions: { col: number; row: number }[] = [];
+    for (let i = 0; i < rewardCount; i++) {
+      const pos = engine.findEmptyByRow(grid);
+      if (!pos) break;
+      positions.push(pos);
+      grid.set(engine.posKey(pos.col, pos.row), { id: 0, ...pos });
+    }
+
+    // Prefer material shortages after accounting for recipes and usable inventory.
+    const required: number[] = [];
+    for (const order of state.meridian_acupoints ?? []) {
+      if (order.completed || (order as any).breakthrough_order) continue;
+      const ids: number[] = Array.isArray((order as any).item_ids)
+        ? (order as any).item_ids : Array.from({ length: order.count }, () => order.item_id);
+      required.push(...ids.filter(id => [0, 4].includes(engine.getItemData(id)?.type ?? -1)));
+    }
+    const cultivationLevel = Number(state.cultivation?.current_level ?? 1);
+    let candidates = engine.getMissingOrderSupplyMaterials(state);
+    if (!candidates.length) candidates = [...new Set(required.flatMap(id => engine.getOrderSupplyMaterials(id, cultivationLevel)))];
+    if (!candidates.length) candidates = [...new Set(engine.getUnlockedOrderPool(state)
+      .flatMap(id => engine.getOrderSupplyMaterials(id, cultivationLevel)))];
+    if (!candidates.length) return { ok: false, reason: "no_order_materials" };
+    const rewards: RewardConfig = { items: [] };
+    const spawned: GridItem[] = [];
+    let pendingRewardsAdded = 0;
+    state.pending_rewards ??= [];
+    for (let i = 0; i < rewardCount; i++) {
+      const id = candidates[i % candidates.length];
+      engine.recordItemDiscovery(state, id);
+      const reward = rewards.items!.find(entry => entry.id === id);
+      if (reward) reward.count++;
+      else rewards.items!.push({ id, count: 1 });
+      if (i < positions.length) {
+        const item: GridItem = { id, uid: engine._nextUid(state), ...positions[i] };
+        spawned.push(item);
+      } else {
+        const itemData = engine.getItemData(id);
+        state.pending_rewards.push({ uid: engine._nextUid(state), id, name: itemData?.name ?? `#${id}` });
+        pendingRewardsAdded++;
+      }
+    }
+    const craftsCompleted = engine.finishBoardCrafting(state);
+    state.grid.push(...spawned);
+    state.version++;
+    progress.current_count = 0;
+    progress.completed = false;
+    progress.claimed = false;
+    progress.claim_count = expectedClaimCount + 1;
+    return { ok: true, rewards, spawned_items: spawned, pending_rewards_added: pendingRewardsAdded, crafts_completed: craftsCompleted };
+  }
+
+  private orderSupplyCount(activity: ActivityDef, key: string, fallback: number): number {
+    const value = Number(activity.config?.[key] ?? fallback);
+    return Number.isSafeInteger(value) && value > 0 ? value : fallback;
   }
 
   checkAndReset(state: GameState, resetHour: number): void {

@@ -12,6 +12,18 @@
 [ext_resource type="Texture2D" uid="uid://cpjm2o10x1kw1" path="res://assets/ui/cultivation_screen_v3/layers/enter_board_icon.png" id="13_qqfj8"]
 [ext_resource type="Texture2D" uid="uid://dhhyaliggus04" path="res://assets/ui/cultivation_screen_v3/layers/enter_trial_icon.png" id="14_cryq0"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBox_catalog"]
+bg_color = Color(0.08, 0.19, 0.18, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.73, 0.60, 0.36, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_left = 12
+corner_radius_bottom_right = 12
+
 [node name="HomeScreen" type="Control" unique_id=1217280749]
 layout_mode = 3
 anchors_preset = 15
@@ -286,6 +298,21 @@ offset_right = 691.0
 offset_bottom = 1623.0
 texture = ExtResource("14_cryq0")
 expand_mode = 2
+
+[node name="ItemCatalogButton" type="Button" parent="."]
+z_index = 4
+layout_mode = 0
+offset_left = 648.0
+offset_top = 810.0
+offset_right = 776.0
+offset_bottom = 892.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.94, 0.84, 0.64, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBox_catalog")
+theme_override_styles/hover = SubResource("StyleBox_catalog")
+theme_override_styles/pressed = SubResource("StyleBox_catalog")
+text = "图鉴"
 
 [node name="ActivityLeft" type="VBoxContainer" parent="."]
 visible = false

@@ -13,6 +13,8 @@ func setup(activity: Dictionary) -> void:
 
 
 func _on_pressed() -> void:
+	if RequirementList.is_scroll_click_cancelled(self):
+		return
 	var panel := preload("res://scenes/ui/activity/WeeklyActivityPanel.tscn").instantiate() as WeeklyActivityPanel
 	UIManager.show_popup(panel)
 	panel.setup(_activity_id)

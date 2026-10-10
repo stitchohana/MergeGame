@@ -172,7 +172,7 @@
       "collection_id": 1,
       "name": "1星卡包",
       "star": 1,
-      "icon": "",
+      "icon": "res://assets/items/card_pack.svg",
       "card_count": 2,
       "normal_weights": [
         55,
@@ -187,7 +187,7 @@
       "collection_id": 1,
       "name": "2星卡包",
       "star": 2,
-      "icon": "",
+      "icon": "res://assets/items/card_pack.svg",
       "card_count": 3,
       "normal_weights": [
         55,
@@ -202,7 +202,7 @@
       "collection_id": 1,
       "name": "3星卡包",
       "star": 3,
-      "icon": "",
+      "icon": "res://assets/items/card_pack.svg",
       "card_count": 4,
       "normal_weights": [
         55,
@@ -217,7 +217,7 @@
       "collection_id": 1,
       "name": "4星卡包",
       "star": 4,
-      "icon": "",
+      "icon": "res://assets/items/card_pack.svg",
       "card_count": 5,
       "normal_weights": [
         55,
@@ -232,7 +232,7 @@
       "collection_id": 1,
       "name": "5星卡包",
       "star": 5,
-      "icon": "",
+      "icon": "res://assets/items/card_pack.svg",
       "card_count": 6,
       "normal_weights": [
         55,
@@ -244,30 +244,6 @@
     }
   ],
   "source_rewards": [
-    {
-      "collection_id": 1,
-      "source_type": "quest",
-      "min_value": 0,
-      "pack_id": 1,
-      "count": 1,
-      "enabled": true
-    },
-    {
-      "collection_id": 1,
-      "source_type": "quest",
-      "min_value": 10,
-      "pack_id": 2,
-      "count": 1,
-      "enabled": true
-    },
-    {
-      "collection_id": 1,
-      "source_type": "quest",
-      "min_value": 50,
-      "pack_id": 3,
-      "count": 1,
-      "enabled": true
-    },
     {
       "collection_id": 1,
       "source_type": "order",
@@ -289,30 +265,6 @@
       "source_type": "order",
       "min_value": 600,
       "pack_id": 3,
-      "count": 1,
-      "enabled": true
-    },
-    {
-      "collection_id": 1,
-      "source_type": "circulation",
-      "min_value": 0,
-      "pack_id": 3,
-      "count": 1,
-      "enabled": true
-    },
-    {
-      "collection_id": 1,
-      "source_type": "circulation",
-      "min_value": 4,
-      "pack_id": 4,
-      "count": 1,
-      "enabled": true
-    },
-    {
-      "collection_id": 1,
-      "source_type": "circulation",
-      "min_value": 8,
-      "pack_id": 5,
       "count": 1,
       "enabled": true
     }

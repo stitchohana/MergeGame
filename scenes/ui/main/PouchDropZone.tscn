@@ -26,11 +26,11 @@ stretch_mode = 5
 [node name="CountLabel" type="Label" parent="." unique_id=596740812]
 layout_mode = 0
 anchor_right = 1.0
-offset_left = -24.0
+offset_left = -64.0
 offset_top = 2.0
 offset_right = -2.0
 offset_bottom = 22.0
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_font_sizes/font_size = 14
-text = "0"
+text = "0/7"
 horizontal_alignment = 2

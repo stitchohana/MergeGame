@@ -2,6 +2,7 @@ class_name HomeScreen extends BaseScreen
 
 @onready var game_btn: Button = $GameButton
 @onready var battle_btn: Button = $BattleButton
+@onready var item_catalog_btn: Button = $ItemCatalogButton
 @onready var realm_label: Label = $RealmLabel
 @onready var exp_bar: TextureProgressBar = $ExpBar
 @onready var exp_label: Label = $ExpLabel
@@ -32,6 +33,9 @@ func _ready() -> void:
 	modulate = Color.TRANSPARENT
 	game_btn.pressed.connect(_on_game_pressed)
 	battle_btn.pressed.connect(_on_battle_pressed)
+	item_catalog_btn.pressed.connect(_on_item_catalog_pressed)
+	GameState.item_catalog_changed.connect(_refresh_item_catalog_entry)
+	_refresh_item_catalog_entry()
 	CloudService.state_loaded.connect(_on_state_loaded)
 	CloudService.home_meridian_light_confirmed.connect(_on_light_confirmed)
 	CloudService.home_meridian_light_rejected.connect(_on_light_rejected)
@@ -136,6 +140,16 @@ func _refresh_activity_lists() -> void:
 		entry.setup(activity)
 	activity_left.visible = not activity_left_entries.get_children().is_empty()
 	activity_right.visible = not activity_right_entries.get_children().is_empty()
+
+
+func _refresh_item_catalog_entry() -> void:
+	var count: int = GameState.get_item_catalog_claimable_count()
+	item_catalog_btn.text = "图鉴\n待领取 %d" % count if count > 0 else "图鉴"
+
+
+func _on_item_catalog_pressed() -> void:
+	var popup: BasePopup = preload("res://scenes/ui/home/ItemCatalogPanel.tscn").instantiate() as BasePopup
+	UIManager.show_popup(popup)
 
 
 func _refresh_display() -> void:

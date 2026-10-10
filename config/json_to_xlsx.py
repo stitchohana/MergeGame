@@ -16,7 +16,12 @@ from card_collection_table import CARD_COLLECTION_COLUMNS, card_collection_rows
 
 from facility_reward_validation import validate_facility_reward_order
 from home_meridian_progression import validate_home_progression
-from recipe_validation import validate_no_launcher_ingredients
+from recipe_validation import (
+    validate_no_duplicate_ingredients,
+    validate_no_launcher_ingredients,
+    validate_no_subrecipe_conflicts,
+    validate_regular_ingredients,
+)
 
 BASE = Path(__file__).parent
 JSON_DIR = BASE / "json_output"
@@ -292,7 +297,10 @@ save(wb, "game_config")
 print("Building recipes.xlsx...")
 data = json.load(open(JSON_DIR / "recipes.json", encoding="utf-8"))
 items_data = json.load(open(JSON_DIR / "items.json", encoding="utf-8"))
+validate_no_duplicate_ingredients(data["recipes"])
 validate_no_launcher_ingredients(data["recipes"], items_data.get("launcher", []))
+validate_regular_ingredients(data["recipes"], items_data.get("regular", []))
+validate_no_subrecipe_conflicts(data["recipes"], items_data.get("crafting", []))
 wb = new_book()
 h = ["id","name","ingredients","result","craft_time"]
 r = []
@@ -421,12 +429,13 @@ print("Building activities.xlsx...")
 build_card_collection()
 data = json.load(open(JSON_DIR / "activities.json", encoding="utf-8"))
 wb = new_book()
-h = ["id","name","cycle","start_time","end_time","widget","enabled"]
+h = ["id","name","cycle","start_time","end_time","widget","enabled","config"]
 r = []
 for a in data["activities"]:
     r.append([a.get("id",""), a.get("name",""), a.get("cycle",""),
               a.get("start_time",""), a.get("end_time",""), a.get("widget",""),
-              "TRUE" if a.get("enabled") else ("FALSE" if "enabled" in a else "")])
+              "TRUE" if a.get("enabled") else ("FALSE" if "enabled" in a else ""),
+              json.dumps(a.get("config"), ensure_ascii=False, separators=(",", ":")) if a.get("config") else ""])
 ws = wb.create_sheet("activities")
 add_sheet(ws, h, r)
 save(wb, "activities")

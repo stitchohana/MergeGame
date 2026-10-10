@@ -33,6 +33,7 @@ const PREVIEW_GHOST_ALPHA: float = 0.35
 
 func _ready() -> void:
 	clear()
+	StoragePouch.pouch_updated.connect(func(_items: Array): call_deferred("refresh_from_grid"))
 	recipe_btn.pressed.connect(_on_recipe_btn_pressed)
 	if sell_btn:
 		sell_btn.pressed.connect(_on_sell_pressed)
@@ -97,6 +98,17 @@ func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> 
 		recipe_btn.hide()
 		_hide_materials()
 		_refresh_launcher_speedup()
+
+func refresh_from_grid() -> void:
+	if _current_item_data.is_empty():
+		return
+	var uid: int = _get_current_uid()
+	var latest: Dictionary = GridManager.find_by_uid(uid)
+	if latest.is_empty():
+		clear()
+		return
+	show_item(latest, GridManager.find_pos_by_uid(uid))
+
 
 func _refresh_materials() -> void:
 	if _current_item_data.is_empty():
@@ -187,20 +199,8 @@ func _count_stored_item_ids(items: Array) -> Dictionary:
 	return counts
 
 func _count_board_available_item_ids() -> Dictionary:
-	var counts: Dictionary = {}
-	for entry in GridManager.get_all_items():
-		var item_data: Dictionary = entry.get("data", {}) as Dictionary
-		if item_data.is_empty():
-			continue
-		if int(item_data.get("type", -1)) == Constants.ItemType.CRAFTING:
-			continue
-		if bool(item_data.get("immovable", false)):
-			continue
-		var item_id: int = int(item_data.get("id", 0))
-		if item_id <= 0:
-			continue
-		counts[item_id] = int(counts.get(item_id, 0)) + 1
-	return counts
+	return GridManager.get_inventory_item_counts(false, false)
+
 
 func _clear_material_slots() -> void:
 	materials_container.scroll_horizontal = 0

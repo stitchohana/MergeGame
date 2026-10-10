@@ -9,6 +9,8 @@ const launcherConfig: any[] = gameConfigTables.items.launcher as any[];
 const regularConfig: any[] = gameConfigTables.items.regular as any[];
 const launcherById = new Map(launcherConfig.map((item: any) => [Number(item.id), item]));
 const regularById = new Map(regularConfig.map((item: any) => [Number(item.id), item]));
+const facilityIds = new Set([...gameConfigTables.items.launcher, ...gameConfigTables.items.crafting].map(item=>item.id));
+const facilities = (items: any[]): any[] => items.filter(item=>facilityIds.has(item.id));
 const groupByItemId = new Map(regularConfig.map((item: any) => [Number(item.id), Number(item.group_id)]));
 
 for (let level = 1; level <= 16; level += 1) {
@@ -48,7 +50,8 @@ assert.deepEqual(
   [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 35, 38, 41, 44, 48, 51, 54, 57, 60, 63],
 );
 assert.equal(homeConfig.stages.every((stage: any, index: number) =>
-  stage.circulation_reward.items.length === ([1, 2][index] ?? 2)), true);
+  facilities(stage.circulation_reward.items).length === ([1, 2][index] ?? 2)), true);
+assert.equal(homeConfig.stages.every((stage:any)=>stage.circulation_reward.items.filter((item:any)=>item.id===1704 && item.count===1).length===1),true);
 assert.equal(homeConfig.stages.every((stage: any) => stage.circulation_reward.tokens.some((token: any) => token.token === 4 && token.amount > 0)), true);
 assert.deepEqual(
   gameConfigTables.cultivation.stages.slice(0, 10).map((stage: any) => stage.exp),
@@ -61,7 +64,7 @@ const stagesAtLevel = (cultivationLevel: number): any[] => homeConfig.stages.fil
 );
 const rewardedFamilies = (cultivationLevels: number[]): number[] => stagesAtLevel(cultivationLevels[0])
   .concat(...cultivationLevels.slice(1).map(stagesAtLevel))
-  .flatMap((stage: any) => stage.circulation_reward.items.map(facilityFamily));
+  .flatMap((stage: any) => facilities(stage.circulation_reward.items).map(facilityFamily));
 const firstFamilyStage = (cultivationLevel: number, family: number): number => stagesAtLevel(cultivationLevel)
   .findIndex((stage: any) => stage.circulation_reward.items.some((item: any) => facilityFamily(item) === family));
 const firstFamilyItemId = (cultivationLevel: number, family: number): number => stagesAtLevel(cultivationLevel)
@@ -72,13 +75,13 @@ const qiFamilies = rewardedFamilies([2, 3, 4, 5, 6, 7, 8, 9, 10]);
 assert.equal(qiFamilies.every((family: number) => [110, 120, 130, 150, 170, 180].includes(family)), true);
 assert.deepEqual([...new Set(qiFamilies)].sort((a, b) => a - b), [110, 120, 130, 150, 170, 180]);
 assert.equal(
-  homeConfig.stages[2].circulation_reward.items.every((item: any) => Number(item.id) % 100 === 2),
+  facilities(homeConfig.stages[2].circulation_reward.items).every((item: any) => Number(item.id) % 100 === 2),
   true,
 );
 assert.equal(
   Math.max(
     ...stagesAtLevel(10).flatMap((stage: any) =>
-      stage.circulation_reward.items.map((item: any) => Number(item.id) % 100),
+      facilities(stage.circulation_reward.items).map((item: any) => Number(item.id) % 100),
     ),
   ),
   4,
@@ -128,9 +131,9 @@ assert.deepEqual(
 );
 assert.deepEqual(
   homeConfig.stages[1].circulation_reward.items,
-  [{ id: 16001, count: 1 }, { id: 17001, count: 1 }],
+  [{ id: 16001, count: 1 }, { id: 17001, count: 1 }, { id: 1704, count: 1 }],
 );
-assert.deepEqual(homeConfig.stages[0].circulation_reward.items, [{ id: 12001, count: 1 }]);
+assert.deepEqual(homeConfig.stages[0].circulation_reward.items, [{ id: 12001, count: 1 }, { id: 1704, count: 1 }]);
 assert.equal(homeConfig.stages[1].circulation_reward.tokens.some((token: any) =>
   token.token === 1 && token.amount === 10), true);
 
@@ -156,6 +159,7 @@ assert.equal(secondTutorialCirculationState.spirit_stones, 10);
 assert.deepEqual(secondTutorialCirculation.rewards.items, [
   { id: 16001, count: 1 },
   { id: 17001, count: 1 },
+  { id: 1704, count: 1 },
 ]);
 const refreshedLauncher = secondTutorialCirculationState.grid.find((item: any) => item.uid === 999);
 assert.equal(refreshedLauncher.charges, launcherById.get(11001).max_charges);
@@ -166,7 +170,7 @@ assert.equal(secondTutorialCirculation.launchers_refreshed > 0, true);
 
 assert.deepEqual(
   homeConfig.stages[2].circulation_reward.items,
-  [{ id: 15002, count: 1 }, { id: 11002, count: 1 }],
+  [{ id: 15002, count: 1 }, { id: 11002, count: 1 }, { id: 1704, count: 1 }],
 );
 assert.deepEqual((engine as any)._genFixedAcupoint({ item_id: 5003 }).item_ids, [5003]);
 assert.deepEqual((engine as any)._genFixedAcupoint({ item_ids: [5004] }).item_ids, [5004]);
@@ -292,7 +296,7 @@ for (const { stage, index } of level2Stages) {
     );
     assert.equal(state.cultivation.current_exp, expectedExp);
   }
-  assert.equal(state.pending_rewards.length, expectedPendingRewardCount);
+  assert.equal(state.pending_rewards.filter(reward => reward.kind !== "card_pack").length, expectedPendingRewardCount);
   if (index === level2Stages[level2Stages.length - 1].index) {
     const expBeforeGate = state.cultivation.current_exp;
     // Verify the explicit run gate independently of whether the pending
@@ -314,7 +318,7 @@ for (const { stage, index } of level2Stages) {
   if (!runResult.ok) throw new Error(`circulation ${index} failed`);
   assert.equal(runResult.circulation_completed, true);
   assert.equal(runResult.circulation_ready, false);
-  assert.equal(runResult.rewards.items?.length ?? 0, 2);
+  assert.equal(runResult.rewards.items?.length ?? 0, 3);
   const cycleExp = (runResult.rewards.tokens ?? [])
     .filter((token: any) => token.token === 4)
     .reduce((sum: number, token: any) => sum + Number(token.amount ?? 0), 0);
@@ -328,9 +332,11 @@ assert.equal(state.cultivation.current_exp, expectedExp);
 assert.equal(expectedExp, 48);
 assert.equal(engine.isBreakthroughReady(2, state.cultivation.current_exp), true);
 assert.deepEqual(
-  state.pending_rewards.map((reward: any) => reward.id).length,
+  state.pending_rewards.filter((reward: any) => reward.kind !== "card_pack").length,
   6,
 );
+
+assert.equal(state.pending_rewards.filter((reward: any) => reward.kind === "card_pack").length, level2Stages.length);
 
 const duplicateRun = engine.runHomeMeridianCirculation(state, level2Stages[0].index);
 assert.equal(duplicateRun.ok, false);

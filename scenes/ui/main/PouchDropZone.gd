@@ -30,4 +30,4 @@ func _on_pouch_updated(_items: Array) -> void:
 
 func _update_count() -> void:
 	if count_label:
-		count_label.text = "%d" % StoragePouch.items.size()
+		count_label.text = "%d/%d" % [StoragePouch.items.size(), StoragePouch.capacity]

@@ -33,6 +33,101 @@
       "cycle": 0,
       "widget": "CardCollection",
       "enabled": true
+    },
+    {
+      "id": 7,
+      "name": "订单补给",
+      "cycle": 0,
+      "widget": "OrderSupply",
+      "enabled": true,
+      "config": {
+        "target_count": 5,
+        "reward_count": 3
+      }
+    },
+    {
+      "id": 6,
+      "name": "爬天梯",
+      "cycle": 0,
+      "widget": "StairClimb",
+      "enabled": true,
+      "start_time": "2026-10-07T16:00:00Z",
+      "end_time": "2026-10-10T16:00:00Z",
+      "config": {
+        "group_size": 20,
+        "bot_min_minutes": 30,
+        "bot_max_minutes": 90,
+        "rewards": [
+          {
+            "min_rank": 1,
+            "max_rank": 1,
+            "stamina": 300,
+            "spirit_stones": 3000
+          },
+          {
+            "min_rank": 2,
+            "max_rank": 2,
+            "stamina": 275,
+            "spirit_stones": 2750
+          },
+          {
+            "min_rank": 3,
+            "max_rank": 3,
+            "stamina": 250,
+            "spirit_stones": 2500
+          },
+          {
+            "min_rank": 4,
+            "max_rank": 4,
+            "stamina": 225,
+            "spirit_stones": 2250
+          },
+          {
+            "min_rank": 5,
+            "max_rank": 5,
+            "stamina": 200,
+            "spirit_stones": 2000
+          },
+          {
+            "min_rank": 6,
+            "max_rank": 6,
+            "stamina": 175,
+            "spirit_stones": 1750
+          },
+          {
+            "min_rank": 7,
+            "max_rank": 7,
+            "stamina": 150,
+            "spirit_stones": 1500
+          },
+          {
+            "min_rank": 8,
+            "max_rank": 8,
+            "stamina": 125,
+            "spirit_stones": 1250
+          },
+          {
+            "min_rank": 9,
+            "max_rank": 9,
+            "stamina": 100,
+            "spirit_stones": 1000
+          },
+          {
+            "min_rank": 10,
+            "max_rank": 10,
+            "stamina": 75,
+            "spirit_stones": 750
+          },
+          {
+            "min_rank": 11,
+            "max_rank": 20,
+            "stamina": 50,
+            "spirit_stones": 500
+          }
+        ],
+        "order_points_ratio": 0.1,
+        "bot_order_value": 100
+      }
     }
   ]
 }

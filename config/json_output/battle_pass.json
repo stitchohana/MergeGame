@@ -28,18 +28,18 @@
           "level": 2,
           "required_points": 20,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -68,18 +68,18 @@
           "level": 4,
           "required_points": 40,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -108,18 +108,18 @@
           "level": 6,
           "required_points": 60,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -148,18 +148,18 @@
           "level": 8,
           "required_points": 80,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -188,18 +188,18 @@
           "level": 10,
           "required_points": 100,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -228,18 +228,18 @@
           "level": 12,
           "required_points": 120,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -268,18 +268,18 @@
           "level": 14,
           "required_points": 140,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -308,18 +308,18 @@
           "level": 16,
           "required_points": 160,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -348,18 +348,18 @@
           "level": 18,
           "required_points": 180,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -388,18 +388,18 @@
           "level": 20,
           "required_points": 200,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -428,18 +428,18 @@
           "level": 22,
           "required_points": 220,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -468,18 +468,18 @@
           "level": 24,
           "required_points": 240,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -508,18 +508,18 @@
           "level": 26,
           "required_points": 260,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -548,18 +548,18 @@
           "level": 28,
           "required_points": 280,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -588,18 +588,18 @@
           "level": 30,
           "required_points": 300,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -628,18 +628,18 @@
           "level": 32,
           "required_points": 320,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -668,18 +668,18 @@
           "level": 34,
           "required_points": 340,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -708,18 +708,18 @@
           "level": 36,
           "required_points": 360,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -748,18 +748,18 @@
           "level": 38,
           "required_points": 380,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -788,18 +788,18 @@
           "level": 40,
           "required_points": 400,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -828,18 +828,18 @@
           "level": 42,
           "required_points": 420,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -868,18 +868,18 @@
           "level": 44,
           "required_points": 440,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -908,18 +908,18 @@
           "level": 46,
           "required_points": 460,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -948,18 +948,18 @@
           "level": 48,
           "required_points": 480,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }
@@ -988,18 +988,18 @@
           "level": 50,
           "required_points": 500,
           "free_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           },
           "premium_rewards": {
-            "tokens": [
+            "items": [
               {
-                "token": 3,
-                "amount": 10
+                "id": 1701,
+                "count": 1
               }
             ]
           }

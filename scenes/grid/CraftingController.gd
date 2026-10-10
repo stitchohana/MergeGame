@@ -265,6 +265,21 @@ func hide_button() -> void:
 func is_button_visible() -> bool:
 	return _craft_button != null and _craft_button.visible
 
+func refresh_button() -> void:
+	if not is_button_visible():
+		return
+	var table_pos: Vector2i = _get_table_grid_pos(_craft_table_item)
+	var table_item_variant: Variant = GridManager.get_item(table_pos)
+	if not table_item_variant is Dictionary:
+		hide_button()
+		return
+	var table_item: Dictionary = table_item_variant as Dictionary
+	var recipe: Dictionary = CraftingService.get_current_recipe(table_item)
+	if int(table_item.get("_craft_state", CraftingService.TableState.IDLE)) != CraftingService.TableState.HAS_ITEMS or recipe.is_empty():
+		hide_button()
+		return
+	show_button_for_table(recipe, table_pos, _cell_size)
+
 func is_point_over_button(point: Vector2) -> bool:
 	if not is_button_visible():
 		return false
@@ -330,26 +345,28 @@ func submit_craft_start(table_item: Dictionary, table_pos: Vector2i) -> void:
 		CloudService.submit_craft_start(table_pos.x, table_pos.y)
 
 func _on_table_state_changed(table_item: Dictionary, state: int) -> void:
+	table_visual_update.emit(table_item, state)
 	if state == CraftingService.TableState.HAS_ITEMS:
-		table_visual_update.emit(table_item, state)
 		var recipe := CraftingService.get_current_recipe(table_item)
 		if not recipe.is_empty():
-			_craft_table_item = table_item
 			var tpos := _get_table_grid_pos(table_item)
 			if tpos.x >= 0:
-				_craft_table_pos = tpos
-			if _craft_button:
-				_craft_button.show_for_recipe(recipe)
-				_craft_button.set_table_pos(tpos, _cell_size)
-		else:
+				show_button_for_table(recipe, tpos, _cell_size)
+		elif _is_button_for_table(table_item):
 			hide_button()
-	elif state == CraftingService.TableState.CRAFTING:
-		table_visual_update.emit(table_item, state)
+	elif _is_button_for_table(table_item):
 		hide_button()
-	else:
-		table_visual_update.emit(table_item, state)
 
 # --- Internal ---
+
+func _is_button_for_table(table_item: Dictionary) -> bool:
+	if not is_button_visible() or _craft_table_item.is_empty():
+		return false
+	var table_uid: int = int(table_item.get("_uid", 0))
+	var button_table_uid: int = int(_craft_table_item.get("_uid", 0))
+	if table_uid > 0 and button_table_uid > 0:
+		return table_uid == button_table_uid
+	return table_item == _craft_table_item
 
 func _clear_pending() -> void:
 	_pending_src_key = ""

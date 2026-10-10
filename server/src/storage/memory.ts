@@ -1,4 +1,5 @@
 import { IStorage, User, GameState, LeaderboardEntry } from "./interface";
+import type { StairClimbRegistry } from "../engine/stair_climb";
 
 const defaultCultivation = {
   current_level: 1,
@@ -28,6 +29,21 @@ export function defaultGameState(): GameState {
 export class MemoryStorage implements IStorage {
   private users = new Map<string, User>();
   private states = new Map<string, GameState>();
+  private stairClimb = new Map<string, StairClimbRegistry>();
+
+  async listStairClimbCandidates(level: number): Promise<string[]> {
+    return [...this.states].filter(([, state]) => state.cultivation.current_level === level).map(([id]) => id);
+  }
+
+  async loadStairClimb(eventId: string): Promise<StairClimbRegistry | null> {
+    return structuredClone(this.stairClimb.get(eventId) ?? null);
+  }
+
+  async saveStairClimb(registry: StairClimbRegistry): Promise<void> {
+    if ((this.stairClimb.get(registry.event_id)?.revision ?? 0) !== registry.revision) throw new Error("state_conflict");
+    registry.revision++;
+    this.stairClimb.set(registry.event_id, structuredClone(registry));
+  }
 
   async findUser(deviceId: string): Promise<User | null> {
     for (const u of this.users.values()) {

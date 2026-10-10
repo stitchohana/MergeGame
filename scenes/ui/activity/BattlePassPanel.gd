@@ -116,18 +116,34 @@ func _has_claimed_level(claimed_levels: Variant, level: int) -> bool:
 func _make_reward_button(reward_value: Variant, track_name: String, level: int, track: String, can_claim: bool, claimed: bool) -> Button:
 	var rewards: Dictionary = reward_value if reward_value is Dictionary else {}
 	var tokens: Array = rewards.get("tokens", [])
-	var amount: int = int(tokens[0].get("amount", 0)) if not tokens.is_empty() and tokens[0] is Dictionary else 0
+	var items: Array = rewards.get("items", [])
+	var descriptions: PackedStringArray = []
+	var icon_path: String = ""
+	for token: Variant in tokens:
+		if not token is Dictionary:
+			continue
+		var token_data: Dictionary = ConfigDatabase.get_token_data(int(token.get("token", 0)))
+		descriptions.append("%s ×%d" % [str(token_data.get("name", "积分")), int(token.get("amount", 0))])
+		if icon_path.is_empty():
+			icon_path = str(token_data.get("icon", ""))
+	for item: Variant in items:
+		if not item is Dictionary:
+			continue
+		var item_id: int = int(item.get("id", 0))
+		var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
+		descriptions.append("%s ×%d" % [str(item_data.get("name", "道具 #%d" % item_id)), int(item.get("count", 0))])
+		if icon_path.is_empty():
+			icon_path = str(item_data.get("icon", ""))
+	var reward_text: String = "、".join(descriptions)
 	var button := Button.new()
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.custom_minimum_size = Vector2(0, 76)
 	button.add_theme_font_size_override("font_size", 14)
-	if not tokens.is_empty() and tokens[0] is Dictionary:
-		var token_data: Dictionary = ConfigDatabase.get_token_data(int(tokens[0].get("token", 0)))
-		var icon_path: String = str(token_data.get("icon", ""))
-		if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
-			button.icon = load(icon_path) as Texture2D
-			button.expand_icon = true
-			button.add_theme_constant_override("h_separation", 8)
+	button.tooltip_text = reward_text
+	if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+		button.icon = load(icon_path) as Texture2D
+		button.expand_icon = true
+		button.add_theme_constant_override("h_separation", 8)
 	if claimed:
 		button.text = "%s · 已领取" % track_name
 		button.disabled = true
@@ -135,7 +151,7 @@ func _make_reward_button(reward_value: Variant, track_name: String, level: int, 
 		button.text = "%s · %s" % [track_name, "未解锁" if track == "premium" else "未达成"]
 		button.disabled = true
 	else:
-		button.text = "%s · 领取 %d 体力" % [track_name, amount]
+		button.text = "%s · 领取 %s" % [track_name, reward_text]
 		button.disabled = _pending
 		button.pressed.connect(_on_claim.bind(level, track, button))
 	return button

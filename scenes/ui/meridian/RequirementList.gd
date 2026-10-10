@@ -8,7 +8,7 @@ const ORDER_ANIMATION_FOREGROUND_Z: int = 100
 var _entry_scene: PackedScene = preload("res://scenes/ui/meridian/RequirementEntry.tscn")
 var _dragging: bool = false
 var _drag_moved: bool = false
-var _drag_start_x: float = 0.0
+var _drag_start_position: Vector2 = Vector2.ZERO
 var _drag_start_scroll: int = 0
 var _available_scroll_request_pending: bool = false
 var _available_scroll_request_id: int = 0
@@ -39,8 +39,20 @@ func _input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton or event is InputEventMouseMotion):
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		if _dragging and _drag_start_position.distance_to(event.position) >= DRAG_THRESHOLD:
+			_drag_moved = true
 		_dragging = false
 		call_deferred("_reset_drag_gesture")
+		return
+	if event is InputEventMouseMotion and _dragging:
+		var delta_x: float = _drag_start_position.x - event.position.x
+		if _drag_start_position.distance_to(event.position) >= DRAG_THRESHOLD:
+			_drag_moved = true
+		var target_scroll: int = int(_drag_start_scroll + delta_x)
+		var max_scroll: int = int(scroll.get_h_scroll_bar().max_value)
+		scroll.scroll_horizontal = clampi(target_scroll, 0, max_scroll)
+		get_viewport().set_input_as_handled()
+		return
 	if not is_inside_tree() or not scroll.get_global_rect().has_point(event.position):
 		return
 
@@ -49,7 +61,7 @@ func _input(event: InputEvent) -> void:
 			if event.pressed:
 				_dragging = true
 				_drag_moved = false
-				_drag_start_x = event.position.x
+				_drag_start_position = event.position
 				_drag_start_scroll = scroll.scroll_horizontal
 			return
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
@@ -59,15 +71,6 @@ func _input(event: InputEvent) -> void:
 			scroll.scroll_horizontal = mini(scroll.scroll_horizontal + 80, scroll.get_h_scroll_bar().max_value)
 			get_viewport().set_input_as_handled()
 		return
-
-	if event is InputEventMouseMotion and _dragging:
-		var delta_x: float = _drag_start_x - event.position.x
-		if absf(delta_x) >= DRAG_THRESHOLD:
-			_drag_moved = true
-		var target_scroll: int = int(_drag_start_scroll + delta_x)
-		var max_scroll: int = int(scroll.get_h_scroll_bar().max_value)
-		scroll.scroll_horizontal = clampi(target_scroll, 0, max_scroll)
-		get_viewport().set_input_as_handled()
 
 func set_title(_text: String) -> void:
 	pass
@@ -128,6 +131,8 @@ func _get_stage_lit(home_progress: Array, stage_idx: int) -> Array:
 	return []
 
 func _on_cultivation_pressed() -> void:
+	if _drag_moved:
+		return
 	if not _can_activate_acupoint():
 		_refresh_cultivation_button()
 		return
@@ -216,6 +221,15 @@ func show_item_source(item_id: int) -> void:
 
 func _reset_drag_gesture() -> void:
 	_drag_moved = false
+
+
+static func is_scroll_click_cancelled(entry: Node) -> bool:
+	var ancestor: Node = entry.get_parent()
+	while ancestor != null:
+		if ancestor is RequirementList:
+			return ancestor._drag_moved
+		ancestor = ancestor.get_parent()
+	return false
 
 func _get_entries() -> Array[RequirementEntry]:
 	var entries: Array[RequirementEntry] = []
@@ -349,7 +363,7 @@ func _get_order_start_index() -> int:
 
 
 func _fixed_entry_rank(child: Node) -> int:
-	if child is WeeklyActivityEntry or child is BattlePassEntry:
+	if child is WeeklyActivityEntry or child is BattlePassEntry or child is HomeActivityCard:
 		return 0
 	if child is CharacterEntry:
 		return 1
@@ -386,6 +400,19 @@ func _schedule_available_order_scroll() -> void:
 
 func focus_first_available_order() -> void:
 	_schedule_available_order_scroll()
+
+
+func focus_next_order() -> void:
+	_scroll_restore_request_id += 1
+	_available_scroll_request_id += 1
+	_available_scroll_request_pending = false
+	var entries: Array[RequirementEntry] = _get_entries()
+	for entry: RequirementEntry in entries:
+		if not entry.is_available():
+			_scroll_entry_to_center(entry)
+			return
+	if not entries.is_empty():
+		_scroll_entry_to_center(entries[0])
 
 
 func _scroll_to_first_available_order(request_id: int) -> void:

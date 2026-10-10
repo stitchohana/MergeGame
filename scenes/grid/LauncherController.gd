@@ -205,7 +205,7 @@ func _get_outstanding_order_item_counts() -> Dictionary:
 			if item_id > 0:
 				order_targets[item_id] = int(order_targets.get(item_id, 0)) + 1
 	var available: Dictionary = {}
-	for grid_entry: Dictionary in GridManager.get_all_items():
+	for grid_entry: Dictionary in GridManager.get_inventory_items():
 		var item: Dictionary = grid_entry.get("data", {}) as Dictionary
 		var item_id: int = int(item.get("id", 0))
 		if int(item.get("type", 0)) != Constants.ItemType.CRAFTING:
@@ -224,13 +224,6 @@ func _get_outstanding_order_item_counts() -> Dictionary:
 				var recipe: Dictionary = item.get("_craft_recipe", {}) as Dictionary
 				result_id = int(recipe.get("result", 0))
 			_add_available_order_item(available, result_id)
-	for pouch_variant: Variant in StoragePouch.items:
-		var pouch_id: int = (
-			int((pouch_variant as Dictionary).get("id", 0))
-			if pouch_variant is Dictionary
-			else int(pouch_variant)
-		)
-		_add_available_order_item(available, pouch_id)
 
 	var outstanding: Dictionary = {}
 	for target_id_variant: Variant in order_targets.keys():

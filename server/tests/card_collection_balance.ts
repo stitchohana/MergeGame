@@ -14,13 +14,15 @@ for (const star of [1, 3, 5]) {
   for (let player = 1; player <= sampleSize; player++) {
     let seed = player * 104729;
     const random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
-    const service = new CardCollectionService(gameConfigTables.cardCollection, gameConfigTables.activities.activities, random);
+    const service = new CardCollectionService(gameConfigTables.cardCollection, gameConfigTables.activities.activities, random,
+      (state, rewards) => engine.applyRewards(state, rewards));
     const state = structuredClone(initial); const progress = service.ensureProgress(state)[1];
     progress.packs[star] = 3000;
+    service.migratePacksToPending(state);
     for (let opened = 0; opened < 3000; opened++) {
-      const result = service.open(state, 1, star, `sim-${opened}`, opened);
+      const result = service.openPending(state, 1, state.pending_rewards[0].uid, false, `sim-${opened}`, opened);
       if (!result.ok) throw new Error(result.reason);
-      totalCards += result.cards!.length; uniqueCards += result.cards!.filter(c => c.is_new).length;
+      totalCards += result.cards!.reduce((n,c)=>n+(c.gained??1),0); uniqueCards += result.cards!.filter(c => c.is_new).length;
       if (Object.keys(progress.cards).length === gameConfigTables.cardCollection.cards.length) { completions.push(opened + 1); break; }
     }
   }

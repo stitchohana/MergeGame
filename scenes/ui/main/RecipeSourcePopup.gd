@@ -13,9 +13,14 @@ const INGREDIENT_SIZE: int = 112
 @onready var close_btn: TextureButton = $Panel/CloseButton
 
 var _pending_item_id: int = 0
+var _target_item_id: int = 0
 
 
 func _ready() -> void:
+	StoragePouch.pouch_updated.connect(func(_items: Array):
+		if _target_item_id > 0:
+			setup_for_item(_target_item_id)
+	)
 	if close_btn:
 		close_btn.pressed.connect(_on_close)
 	if _pending_item_id > 0:
@@ -25,6 +30,7 @@ func _ready() -> void:
 
 
 func setup_for_item(item_id: int) -> void:
+	_target_item_id = item_id
 	if not is_node_ready():
 		_pending_item_id = item_id
 		return
@@ -76,7 +82,7 @@ func _populate_sources(recipes: Array, result_data: Dictionary) -> void:
 
 func _find_crafting_table_for_recipe(recipe_id: int) -> Dictionary:
 	var best: Dictionary = {}
-	for entry in GridManager.get_all_items():
+	for entry in GridManager.get_inventory_items(true):
 		var board_item: Dictionary = entry.get("data", {})
 		if int(board_item.get("type", 0)) != Constants.ItemType.CRAFTING:
 			continue
