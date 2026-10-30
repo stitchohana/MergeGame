@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ActivityEngine = void 0;
 const interface_1 = require("../storage/interface");
+const reset_period_1 = require("./reset_period");
+const activity_access_1 = require("./activity_access");
 class ActivityEngine {
     activities = [];
     weeklyTasks = new Map();
@@ -33,14 +35,11 @@ class ActivityEngine {
         const quests = this.weeklyTasks.get(activityId);
         if (!quests)
             return 0;
-        const rawNow = new Date();
-        const now = new Date(rawNow.getTime() - resetHour * 3600000);
-        let dow = now.getDay();
-        const converted = dow === 0 ? 6 : dow - 1;
-        console.log(`[activity] getCurrentDay: local=${rawNow.toLocaleString()} adjusted=${now.toLocaleString()} rawDow=${dow} converted=${converted} resetHour=${resetHour}`);
-        return Math.min(converted, quests.length - 1);
+        return Math.min((0, reset_period_1.getResetPeriod)(Date.now(), resetHour).weekday, quests.length - 1);
     }
     isActive(a) {
+        if (a.enabled === false)
+            return false;
         if (a.cycle === interface_1.ActivityCycle.ONCE) {
             const now = Date.now();
             if (a.start_time) {
@@ -50,7 +49,7 @@ class ActivityEngine {
             }
             if (a.end_time) {
                 const et = new Date(a.end_time).getTime();
-                if (now > et)
+                if (now >= et)
                     return false;
             }
             return true;
@@ -64,6 +63,8 @@ class ActivityEngine {
         return quests[day];
     }
     initProgress(state) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return;
         state.activity_progress = state.activity_progress || {};
         for (const a of this.activities) {
             if (!state.activity_progress[a.id]) {
@@ -71,7 +72,129 @@ class ActivityEngine {
             }
         }
     }
+    recordOrderSupplyAction(state, itemId, availableBefore = 0) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return;
+        const matching = (state.meridian_acupoints ?? []).flatMap(order => {
+            if (order.completed || order.breakthrough_order)
+                return [];
+            const ids = order.item_ids;
+            const required = ids.filter(id => id === itemId).length;
+            return required > 0 ? [{ order, required }] : [];
+        });
+        if (!matching.length)
+            return;
+        // Completion belongs to an order slot, and survives supply claims and
+        // moving/selling its product. Existing inventory covers slots without points.
+        let credited = 0;
+        for (const { order, required } of matching) {
+            order.order_supply_completed_counts ??= {};
+            const count = Math.min(required, Math.max(0, order.order_supply_completed_counts[itemId] ?? 0));
+            order.order_supply_completed_counts[itemId] = count;
+            credited += count;
+        }
+        let existing = Math.max(0, availableBefore - credited);
+        for (const { order, required } of matching) {
+            const counts = order.order_supply_completed_counts;
+            const covered = Math.min(existing, required - counts[itemId]);
+            counts[itemId] += covered;
+            existing -= covered;
+        }
+        const slot = matching.find(({ order, required }) => order.order_supply_completed_counts[itemId] < required);
+        if (!slot)
+            return;
+        slot.order.order_supply_completed_counts[itemId]++;
+        this.initProgress(state);
+        for (const activity of this.activities) {
+            if (activity.widget !== "OrderSupply" || !this.isActive(activity))
+                continue;
+            const progress = state.activity_progress[activity.id];
+            const target = this.orderSupplyCount(activity, "target_count", 5);
+            progress.current_count = Math.min(target, (progress.current_count ?? 0) + 1);
+            progress.completed = progress.current_count >= target;
+        }
+    }
+    claimOrderSupply(state, activityId, expectedClaimCount, engine) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return { ok: false, reason: "activity_locked" };
+        const activity = this.activities.find(a => a.id === activityId && a.widget === "OrderSupply");
+        if (!activity)
+            return { ok: false, reason: "invalid_activity" };
+        if (!this.isActive(activity))
+            return { ok: false, reason: "activity_inactive" };
+        if (state.board_type === 1)
+            return { ok: false, reason: "main_board_required" };
+        this.initProgress(state);
+        const progress = state.activity_progress[activityId];
+        if ((progress.claim_count ?? 0) !== expectedClaimCount)
+            return { ok: false, reason: "already_claimed" };
+        const target = this.orderSupplyCount(activity, "target_count", 5);
+        if ((progress.current_count ?? 0) < target)
+            return { ok: false, reason: "activity_not_completed" };
+        const rewardCount = this.orderSupplyCount(activity, "reward_count", 3);
+        const grid = engine.buildGridMap(state.grid);
+        const positions = [];
+        for (let i = 0; i < rewardCount; i++) {
+            const pos = engine.findEmptyByRow(grid);
+            if (!pos)
+                break;
+            positions.push(pos);
+            grid.set(engine.posKey(pos.col, pos.row), { id: 0, ...pos });
+        }
+        // Prefer material shortages after accounting for recipes and usable inventory.
+        const required = [];
+        for (const order of state.meridian_acupoints ?? []) {
+            if (order.completed || order.breakthrough_order)
+                continue;
+            const ids = order.item_ids;
+            required.push(...ids.filter(id => [0, 4].includes(engine.getItemData(id)?.type ?? -1)));
+        }
+        const cultivationLevel = Number(state.cultivation?.current_level ?? 1);
+        let candidates = engine.getMissingOrderSupplyMaterials(state);
+        if (!candidates.length)
+            candidates = [...new Set(required.flatMap(id => engine.getOrderSupplyMaterials(id, cultivationLevel)))];
+        if (!candidates.length)
+            candidates = [...new Set(engine.getUnlockedOrderPool(state)
+                    .flatMap(id => engine.getOrderSupplyMaterials(id, cultivationLevel, false)))];
+        if (!candidates.length)
+            return { ok: false, reason: "no_order_materials" };
+        const rewards = { items: [] };
+        const spawned = [];
+        let pendingRewardsAdded = 0;
+        for (let i = 0; i < rewardCount; i++) {
+            const id = candidates[i % candidates.length];
+            engine.recordItemDiscovery(state, id);
+            const reward = rewards.items.find(entry => entry.id === id);
+            if (reward)
+                reward.count++;
+            else
+                rewards.items.push({ id, count: 1 });
+            if (i < positions.length) {
+                const item = { id, uid: engine._nextUid(state), ...positions[i] };
+                spawned.push(item);
+            }
+            else {
+                const itemData = engine.getItemData(id);
+                state.pending_rewards.push({ uid: engine._nextUid(state), id, name: itemData?.name ?? `#${id}` });
+                pendingRewardsAdded++;
+            }
+        }
+        const craftsCompleted = engine.finishBoardCrafting(state);
+        state.grid.push(...spawned);
+        state.version++;
+        progress.current_count = 0;
+        progress.completed = false;
+        progress.claimed = false;
+        progress.claim_count = expectedClaimCount + 1;
+        return { ok: true, rewards, spawned_items: spawned, pending_rewards_added: pendingRewardsAdded, crafts_completed: craftsCompleted };
+    }
+    orderSupplyCount(activity, key, fallback) {
+        const value = Number(activity.config?.[key] ?? fallback);
+        return Number.isSafeInteger(value) && value > 0 ? value : fallback;
+    }
     checkAndReset(state, resetHour) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return;
         const now = Date.now();
         state.activity_progress = state.activity_progress || {};
         for (const a of this.activities) {
@@ -113,23 +236,16 @@ class ActivityEngine {
     isNewPeriod(lastTime, now, resetHour, period) {
         if (lastTime <= 0)
             return true;
-        const adjustMs = resetHour * 3600000;
-        const last = new Date(lastTime - adjustMs);
-        const cur = new Date(now - adjustMs);
+        const last = (0, reset_period_1.getResetPeriod)(lastTime, resetHour);
+        const cur = (0, reset_period_1.getResetPeriod)(now, resetHour);
         if (period === "day") {
-            return last.getDate() !== cur.getDate() || last.getMonth() !== cur.getMonth() || last.getFullYear() !== cur.getFullYear();
+            return cur.day > last.day;
         }
         if (period === "week") {
-            const getWeek = (d) => {
-                const jan4 = new Date(d.getFullYear(), 0, 4);
-                const jan4Day = jan4.getDay() || 7;
-                const days = (d.getTime() - jan4.getTime()) / 86400000;
-                return Math.floor((days + jan4Day + 3) / 7);
-            };
-            return last.getFullYear() !== cur.getFullYear() || getWeek(last) !== getWeek(cur);
+            return cur.week > last.week;
         }
         if (period === "month") {
-            return last.getMonth() !== cur.getMonth() || last.getFullYear() !== cur.getFullYear();
+            return cur.month > last.month;
         }
         return false;
     }

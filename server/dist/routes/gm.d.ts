@@ -17,4 +17,11 @@ export type RefreshAllOrdersResult = {
 };
 export declare function grantCurrentOrderItems(state: GameState, engine: GameEngine): GrantCurrentOrderItemsResult;
 export declare function refreshAllOrders(state: GameState, engine: GameEngine): RefreshAllOrdersResult;
+export declare function clearBoardItems(state: GameState, engine: GameEngine): number;
+export declare function mergeAllBoardItems(state: GameState, engine: GameEngine): number;
+export declare function claimAllPendingItems(state: GameState, engine: GameEngine): {
+    claimedCount: number;
+    remainingCount: number;
+    skippedCount: number;
+};
 export declare function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret: string, gmKey: string): Router;

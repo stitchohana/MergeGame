@@ -29,14 +29,27 @@ var _order_supply_input_token: int = -1
 var _order_supply_reward_tween: Tween = null
 var _order_supply_flying_icons: Array[TextureRect] = []
 var _order_supply_hidden_items: Dictionary = {}  # uid -> grid position
+var _basin_controller: Node
+var _furnace_controller: Node
 
 func _ready() -> void:
+	grid_view.scale = Vector2.ONE * Constants.BOARD_DISPLAY_SCALE
 	randomize()
 
 	GridManager.grid_updated.connect(_on_grid_changed)
 	StoragePouch.pouch_updated.connect(func(_items: Array): _queue_requirement_refresh())
 	grid_view.set_pouch_zone(pouch_zone)
+	$GoldenFingerBar.artifact_pressed.connect(_on_artifact_pressed)
 	requirement_list.setup_pending_reward_bar(grid_view)
+	_basin_controller = preload("res://scenes/ui/main/BasinController.gd").new()
+	add_child(_basin_controller)
+	_basin_controller.setup(grid_view, $GoldenFingerBar.entries.basin.button,
+		requirement_list.get_node("Panel/ScrollContainer/HBoxContainer/PendingRewardBar") as PendingRewardBar)
+	_furnace_controller = preload("res://scenes/ui/main/BasinController.gd").new()
+	_furnace_controller.artifact_id = "furnace"
+	add_child(_furnace_controller)
+	_furnace_controller.setup(grid_view, $GoldenFingerBar.entries.furnace.button,
+		requirement_list.get_node("Panel/ScrollContainer/HBoxContainer/PendingRewardBar") as PendingRewardBar)
 
 
 	EventBus.restart_requested.connect(_on_restart)
@@ -58,6 +71,8 @@ func _ready() -> void:
 	CloudService.spirit_stone_consume_rejected.connect(_on_spirit_stone_consume_rejected)
 	CloudService.state_loaded.connect(_on_state_loaded_for_orders)
 	GameState.meridian_updated.connect(_on_meridian_updated)
+	ActivityManager.order_duel_updated.connect(_refresh_order_activity_rewards)
+	CloudService.secret_realm_updated.connect(func(_view: Dictionary): _refresh_order_activity_rewards())
 	if not GameState.battle_pass_changed.is_connected(_on_battle_pass_changed):
 		GameState.battle_pass_changed.connect(_on_battle_pass_changed)
 	CultivationService.stage_changed.connect(_on_stage_changed_for_meridian)
@@ -77,6 +92,14 @@ func _ready() -> void:
 	CloudService.order_supply_claim_rejected.connect(_on_order_supply_claim_rejected)
 	_refresh_meridian()
 	_setup_extras()
+
+
+func _on_artifact_pressed(artifact_id: String) -> void:
+	grid_view.run_after_action_sync(func():
+		var popup: BasePopup = preload("res://scenes/ui/main/GoldenFingerPopup.gd").new()
+		popup.artifact_id = artifact_id
+		UIManager.show_popup(popup)
+	)
 
 
 func _on_order_supply_claim_requested(activity_id: int, completed_rounds: int) -> void:
@@ -263,6 +286,10 @@ func _on_battle_pass_changed(_progress: Dictionary) -> void:
 
 func _refresh_battle_pass_entry() -> void:
 	if battle_pass_entry == null:
+		return
+	if not ActivityManager.is_unlocked():
+		battle_pass_entry.visible = false
+		requirement_list.sort_fixed_entries()
 		return
 	for activity_variant: Variant in GameState.activity_defs:
 		if not activity_variant is Dictionary:
@@ -511,11 +538,24 @@ func _flush_requirement_refresh() -> void:
 		return
 	_refresh_requirement_buttons()
 
-func _get_reserved_crafting_item_counts() -> Dictionary:
+func _get_reserved_crafting_item_counts(result_id: int = 0, claimed_tables: Dictionary = {}) -> Dictionary:
 	var reserved_counts: Dictionary = {}
+	var required_recipe_ids: Dictionary = (
+		CraftingService.get_recipe_dependency_ids(result_id) if result_id > 0
+		else CraftingService.get_required_order_recipe_ids()
+	)
 	for entry: Dictionary in GridManager.get_inventory_items():
 		var table_item: Dictionary = entry.get("data", {}) as Dictionary
 		if int(table_item.get("type", 0)) != Constants.ItemType.CRAFTING:
+			continue
+		var craft_state: int = int(table_item.get("_craft_state", CraftingService.TableState.IDLE))
+		# A started craft reserves its output, not reusable ingredient quantities.
+		if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
+			continue
+		if not CraftingService.table_supports_order_materials(table_item, required_recipe_ids):
+			continue
+		var table_uid: int = int(table_item.get("_uid", 0))
+		if table_uid > 0 and claimed_tables.has(table_uid):
 			continue
 		var table_counts: Dictionary = {}
 		for stored_variant: Variant in table_item.get("_craft_stored", []):
@@ -525,28 +565,22 @@ func _get_reserved_crafting_item_counts() -> Dictionary:
 			var stored_id: int = int(stored_item.get("id", 0))
 			if stored_id > 0:
 				table_counts[stored_id] = int(table_counts.get(stored_id, 0)) + 1
-		var craft_state: int = int(table_item.get("_craft_state", CraftingService.TableState.IDLE))
-		if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
-			var recipe_counts: Dictionary = {}
-			var active_recipe: Dictionary = table_item.get("_craft_recipe", {}) as Dictionary
-			for ingredient_variant: Variant in active_recipe.get("ingredients", []):
-				var ingredient_id: int = int(ingredient_variant)
-				if ingredient_id > 0:
-					recipe_counts[ingredient_id] = int(recipe_counts.get(ingredient_id, 0)) + 1
-			for ingredient_variant: Variant in recipe_counts.keys():
-				var ingredient_id: int = int(ingredient_variant)
-				table_counts[ingredient_id] = maxi(
-					int(table_counts.get(ingredient_id, 0)),
-					int(recipe_counts[ingredient_id])
-				)
+		if table_counts.is_empty():
+			continue
+		# One loaded table can prepare one product, even when several orders
+		# share ingredients. Do not lend its materials to another product.
+		if table_uid > 0:
+			claimed_tables[table_uid] = true
 		for item_id_variant: Variant in table_counts.keys():
 			var item_id: int = int(item_id_variant)
 			reserved_counts[item_id] = (
 				int(reserved_counts.get(item_id, 0)) + int(table_counts[item_id])
 			)
+		if result_id > 0:
+			break
 	return reserved_counts
 
-func _get_finished_order_item_counts() -> Dictionary:
+func _get_finished_order_item_counts(include_crafting: bool = false) -> Dictionary:
 	var finished_counts: Dictionary = {}
 	var known_positions: Dictionary = {}
 	var known_uids: Dictionary = {}
@@ -565,7 +599,10 @@ func _get_finished_order_item_counts() -> Dictionary:
 			finished_counts[item_id] = int(finished_counts.get(item_id, 0)) + 1
 		if int(item_data.get("type", 0)) != Constants.ItemType.CRAFTING:
 			continue
-		if int(item_data.get("_craft_state", CraftingService.TableState.IDLE)) != CraftingService.TableState.READY:
+		var craft_state: int = int(item_data.get("_craft_state", CraftingService.TableState.IDLE))
+		if craft_state != CraftingService.TableState.READY and not (
+			include_crafting and craft_state == CraftingService.TableState.CRAFTING
+		):
 			continue
 		var result_id: int = int(item_data.get("_craft_result_id", 0))
 		if result_id <= 0:
@@ -710,11 +747,17 @@ func _refresh_required_indicators() -> void:
 		return
 	var required_ids: Dictionary = {}
 	var finished_order_item_ids: Dictionary = {}
-	var reserved_crafting_counts: Dictionary = _get_reserved_crafting_item_counts()
-	var finished_order_item_counts: Dictionary = _get_finished_order_item_counts()
-	# An order product already on the board shows require itself. Its recipe
-	# materials are already satisfied, so do not mark the material tree for that
-	# order. Missing order products still collect every required material below.
+	var claimed_tables: Dictionary = {}
+	var finished_order_item_counts: Dictionary = _get_finished_order_item_counts(true)
+	var available_recipe_materials: Dictionary = _get_recipe_selection_material_counts()
+	var recipe_assignments: Array[Dictionary] = preload("res://scripts/utils/CraftingRecipeHints.gd").build_assignments()
+	var assigned_recipes: Dictionary = {}
+	for assignment: Dictionary in recipe_assignments:
+		var recipe: Dictionary = assignment.get("recipe", {}) as Dictionary
+		if not recipe.is_empty():
+			assigned_recipes[int(recipe.get("result", 0))] = recipe
+	# Existing and in-progress products each cover one order target. Only expand
+	# the recipes for the remaining copies, including alternative recipes.
 	for req_variant: Variant in GameState.meridian_acupoints:
 		var req: Dictionary = req_variant as Dictionary
 		if bool(req.get("completed", false)):
@@ -728,7 +771,10 @@ func _refresh_required_indicators() -> void:
 				finished_order_item_ids[item_id] = true
 				required_ids[item_id] = true
 				continue
-			_collect_recipe_material_ids(item_id, required_ids, reserved_crafting_counts)
+			var reserved_crafting_counts: Dictionary = _get_reserved_crafting_item_counts(item_id, claimed_tables)
+			_collect_recipe_material_ids(
+				item_id, required_ids, reserved_crafting_counts, available_recipe_materials, assigned_recipes
+			)
 
 	# Update all grid items
 	var seen_node_keys: Dictionary = {}
@@ -755,22 +801,74 @@ func _refresh_required_indicators() -> void:
 			var stale_node: GridItem = grid_view._item_nodes[node_key] as GridItem
 			if stale_node != null and is_instance_valid(stale_node):
 				stale_node.set_required(false)
+
+
+func _get_recipe_selection_material_counts() -> Dictionary:
+	var counts: Dictionary = {}
+	for entry: Dictionary in GridManager.get_inventory_items():
+		var item: Dictionary = entry.get("data", {}) as Dictionary
+		if int(item.get("type", 0)) == Constants.ItemType.CRAFTING:
+			continue
+		if bool(item.get("immovable", false)):
+			continue
+		var item_id: int = int(item.get("id", 0))
+		if item_id > 0:
+			counts[item_id] = int(counts.get(item_id, 0)) + 1
+	return counts
+
+
 func _collect_recipe_material_ids(result_id: int, required_ids: Dictionary,
-		reserved_counts: Dictionary) -> void:
+		reserved_counts: Dictionary, available_counts: Dictionary = {}, assigned_recipes: Dictionary = {}) -> void:
 	if result_id <= 0:
 		return
 	var reserved_for_target: Dictionary = {}
-	for recipe_variant: Variant in ConfigDatabase.get_recipes_for_result(result_id):
+	var recipes: Array = ConfigDatabase.get_recipes_for_result(result_id)
+	var selected_recipe: Dictionary = _select_requirement_recipe(recipes, available_counts, assigned_recipes)
+	if selected_recipe.is_empty():
+		return
+	for ingredient_variant: Variant in selected_recipe.get("ingredients", []):
+		_collect_recipe_dependency_ids(
+			int(ingredient_variant), required_ids, reserved_counts, reserved_for_target,
+			available_counts, assigned_recipes
+		)
+
+
+func _select_requirement_recipe(recipes: Array, available_counts: Dictionary, assigned_recipes: Dictionary = {}) -> Dictionary:
+	var best: Dictionary = {}
+	var best_water: int = 2147483647
+	var best_missing: int = 2147483647
+	for recipe_variant: Variant in recipes:
 		if not recipe_variant is Dictionary:
 			continue
 		var recipe: Dictionary = recipe_variant as Dictionary
+		var remaining: Dictionary = available_counts.duplicate()
+		var missing: int = 0
+		var water_count: int = 0
 		for ingredient_variant: Variant in recipe.get("ingredients", []):
-			_collect_recipe_dependency_ids(
-				int(ingredient_variant), required_ids, reserved_counts, reserved_for_target
-			)
+			var ingredient_id: int = int(ingredient_variant)
+			if ingredient_id >= 9001 and ingredient_id <= 9004:
+				water_count += 1
+			var owned: int = int(remaining.get(ingredient_id, 0))
+			if owned > 0:
+				remaining[ingredient_id] = owned - 1
+			else:
+				missing += 1
+		# Fallback for products without an assigned table: prefer fewer water
+		# ingredients, then fewer missing materials. Assigned previews override it below.
+		if water_count < best_water or (water_count == best_water and missing < best_missing):
+			best = recipe
+			best_missing = missing
+			best_water = water_count
+	# Preview, destination hints and require badges must follow the same path.
+	# An alternative recipe cannot replace a recipe already assigned to a table.
+	var assigned_recipe: Dictionary = assigned_recipes.get(int(best.get("result", 0)), {}) as Dictionary
+	if not assigned_recipe.is_empty():
+		best = assigned_recipe
+	return best
 
 func _collect_recipe_dependency_ids(item_id: int, required_ids: Dictionary,
-		reserved_counts: Dictionary, reserved_for_target: Dictionary) -> void:
+		reserved_counts: Dictionary, reserved_for_target: Dictionary,
+		available_counts: Dictionary = {}, assigned_recipes: Dictionary = {}) -> void:
 	if item_id <= 0 or required_ids.has(item_id) or reserved_for_target.has(item_id):
 		return
 	var reserved_count: int = int(reserved_counts.get(item_id, 0))
@@ -782,14 +880,13 @@ func _collect_recipe_dependency_ids(item_id: int, required_ids: Dictionary,
 		reserved_for_target[item_id] = true
 		return
 	required_ids[item_id] = true
-	for recipe_variant: Variant in ConfigDatabase.get_recipes_for_result(item_id):
-		if not recipe_variant is Dictionary:
-			continue
-		var recipe: Dictionary = recipe_variant as Dictionary
-		for ingredient_variant: Variant in recipe.get("ingredients", []):
-			_collect_recipe_dependency_ids(
-				int(ingredient_variant), required_ids, reserved_counts, reserved_for_target
-			)
+	var recipes: Array = ConfigDatabase.get_recipes_for_result(item_id)
+	var selected_recipe: Dictionary = _select_requirement_recipe(recipes, available_counts, assigned_recipes)
+	for ingredient_variant: Variant in selected_recipe.get("ingredients", []):
+		_collect_recipe_dependency_ids(
+			int(ingredient_variant), required_ids, reserved_counts, reserved_for_target,
+			available_counts, assigned_recipes
+		)
 
 func _refresh_meridian() -> void:
 	_display_meridian()
@@ -830,6 +927,19 @@ func _display_meridian() -> void:
 
 
 func _with_active_activity_rewards(req: Dictionary) -> Dictionary:
+	if not ActivityManager.is_unlocked():
+		var novice := req.duplicate(true)
+		var rewards_variant: Variant = novice.get("rewards", {})
+		if rewards_variant is Dictionary:
+			var rewards: Dictionary = rewards_variant
+			var activity_tokens: Array[int] = ConfigDatabase.get_activity_token_ids()
+			rewards["tokens"] = (rewards.get("tokens", []) as Array).filter(func(t: Variant) -> bool: return t is Dictionary and not activity_tokens.has(int((t as Dictionary).get("token", 0))))
+			rewards["items"] = (rewards.get("items", []) as Array).filter(func(i: Variant) -> bool: return i is Dictionary and ConfigDatabase.get_item_data(int((i as Dictionary).get("id", 0))).get("effect_type", -1) != Constants.EffectType.CARD_PACK)
+			rewards.erase("stair_climb_points")
+			rewards.erase("order_duel_points")
+			rewards.erase("secret_realm_swords")
+			novice["rewards"] = rewards
+		return novice
 	var display_req: Dictionary = req.duplicate(true)
 	var total_value: int = int(req.get("total_value", 0))
 	if bool(req.get("breakthrough_order", false)):
@@ -838,6 +948,8 @@ func _with_active_activity_rewards(req: Dictionary) -> Dictionary:
 	var rewards: Dictionary = rewards_variant.duplicate(true) if rewards_variant is Dictionary else {}
 	_append_order_card_pack_reward(rewards, total_value)
 	rewards["stair_climb_points"] = _get_order_stair_climb_points(req)
+	rewards["order_duel_points"] = _get_order_duel_points(req)
+	rewards["secret_realm_swords"] = _get_order_secret_realm_swords(req)
 	display_req["rewards"] = rewards
 	var tokens_variant: Variant = rewards.get("tokens", [])
 	var tokens: Array = tokens_variant.duplicate(true) if tokens_variant is Array else []
@@ -876,19 +988,89 @@ func _with_active_activity_rewards(req: Dictionary) -> Dictionary:
 	return display_req
 
 
+func _refresh_order_activity_rewards() -> void:
+	# Update only activity rewards: polling must not rebuild orders or interrupt submission animations.
+	for child: Node in requirement_list.container.get_children():
+		if not child is RequirementEntry:
+			continue
+		var entry: RequirementEntry = child as RequirementEntry
+		var display_index: int = entry.get_display_index()
+		if display_index < 0 or display_index >= _display_index_map.size():
+			continue
+		var data_index: int = int(_display_index_map[display_index])
+		if data_index < 0 or data_index >= GameState.meridian_acupoints.size():
+			continue
+		entry.set_order_duel_points(_get_order_duel_points(GameState.meridian_acupoints[data_index]))
+		entry.set_secret_realm_swords(_get_order_secret_realm_swords(GameState.meridian_acupoints[data_index]))
+
+
+func _get_order_secret_realm_swords(req: Dictionary) -> Array:
+	if not ActivityManager.is_unlocked() or GameState.current_board_type != Constants.BoardType.MAIN or bool(req.get("breakthrough_order", false)) or bool(req.get("completed", false)):
+		return []
+	var config: Dictionary = ConfigDatabase.secret_realm
+	var settings: Array = config.get("settings", [])
+	if settings.is_empty():
+		return []
+	var view: Dictionary = CloudService.secret_realm_state
+	if str(view.get("period", "")) == str(settings[0].get("period", "")) and bool(view.get("completed", false)):
+		return []
+	for activity: Dictionary in GameState.activity_defs:
+		if str(activity.get("widget", "")) != "SecretRealm" or int(activity.get("id", 0)) != int(settings[0].get("activity_id", 0)):
+			continue
+		if not bool(activity.get("active", false)) or not bool(activity.get("enabled", true)):
+			return []
+		var now: float = Time.get_unix_time_from_system()
+		var start: String = str(activity.get("start_time", ""))
+		var end: String = str(activity.get("end_time", ""))
+		if (not start.is_empty() and now < Time.get_unix_time_from_datetime_string(start)) or (not end.is_empty() and now >= Time.get_unix_time_from_datetime_string(end)):
+			return []
+		for rule: Dictionary in config.get("order_supply_realms", []):
+			if CultivationService.current_level >= int(rule.get("cultivation_min", 0)) and CultivationService.current_level <= int(rule.get("cultivation_max", 0)):
+				return rule.get("drops", []).duplicate(true)
+		return config.get("order_supply", []).duplicate(true)
+	return []
+
+
+func _get_order_duel_points(req: Dictionary) -> int:
+	if not ActivityManager.is_unlocked() or bool(req.get("breakthrough_order", false)) or bool(req.get("completed", false)):
+		return 0
+	var duel: Dictionary = ActivityManager.order_duel
+	if not bool(duel.get("active", false)) or str(duel.get("status", "")) != "playing":
+		return 0
+	for activity: Dictionary in GameState.activity_defs:
+		if str(activity.get("widget", "")) != "OrderDuel" or int(activity.get("id", 0)) != int(duel.get("activity_id", 0)):
+			continue
+		if not bool(activity.get("active", false)) or not bool(activity.get("enabled", true)):
+			return 0
+		var now: float = Time.get_unix_time_from_system()
+		var start: String = str(activity.get("start_time", ""))
+		var end: String = str(activity.get("end_time", ""))
+		if (not start.is_empty() and now < Time.get_unix_time_from_datetime_string(start)) or (not end.is_empty() and now >= Time.get_unix_time_from_datetime_string(end)):
+			return 0
+		var settings: Dictionary = duel.get("settings", {})
+		var ratio: float = float(settings.get("order_points_ratio", 0.0))
+		var value: float = _get_order_item_value(req)
+		if ratio <= 0.0 or not is_finite(ratio) or value <= 0.0:
+			return 0
+		var remaining: int = maxi(0, int(settings.get("target_points", 0)) - int(duel.get("my_points", 0)))
+		return mini(remaining, maxi(1, floori(value * ratio + 0.000000001)))
+	return 0
+
+
+func _get_order_item_value(req: Dictionary) -> float:
+	var item_ids: Array = req.get("item_ids", [])
+	var value: float = 0.0
+	for item_id: Variant in item_ids:
+		value += float(ConfigDatabase.get_item_data(int(item_id)).get("value", 0))
+	return value
+
+
 func _get_order_stair_climb_points(req: Dictionary) -> int:
+	if not ActivityManager.is_unlocked():
+		return 0
 	if bool(req.get("breakthrough_order", false)) or bool(req.get("completed", false)):
 		return 0
-	var item_ids: Array = []
-	if req.get("item_ids") is Array:
-		item_ids = req.get("item_ids", [])
-	else:
-		for _index: int in range(maxi(0, int(req.get("count", 0)))):
-			item_ids.append(int(req.get("item_id", 0)))
-	var order_value: float = 0.0
-	for item_id: Variant in item_ids:
-		var item: Dictionary = ConfigDatabase.get_item_data(int(item_id))
-		order_value += float(item.get("value", 0))
+	var order_value: float = _get_order_item_value(req)
 	if order_value <= 0.0:
 		return 0
 	for activity: Dictionary in GameState.activity_defs:
@@ -910,6 +1092,8 @@ func _get_order_stair_climb_points(req: Dictionary) -> int:
 
 
 func _append_order_card_pack_reward(rewards: Dictionary, total_value: int) -> void:
+	if not ActivityManager.is_unlocked():
+		return
 	var items_variant: Variant = rewards.get("items", [])
 	var items: Array = items_variant.duplicate(true) if items_variant is Array else []
 	for collection: Dictionary in ConfigDatabase.card_collection.get("collections", []):
@@ -957,8 +1141,6 @@ func _capture_order_animation(display_index: int) -> void:
 			break
 	if entry == null:
 		return
-	var sources: Array[Dictionary] = []
-	var used_grid_keys: Dictionary = {}
 	var required_ids: Array = []
 	for item_variant in entry._items_setup:
 		if not item_variant is Dictionary:
@@ -968,11 +1150,7 @@ func _capture_order_animation(display_index: int) -> void:
 		if item_id <= 0:
 			continue
 		required_ids.append(item_id)
-		var source: Dictionary = _find_grid_item_source(item_id, used_grid_keys)
-		if not source.is_empty():
-			source["item_id"] = item_id
-			source["to"] = entry.get_item_widget_center(item_id)
-			sources.append(source)
+	var sources: Array[Dictionary] = _build_order_sources(entry, required_ids)
 	var previous_positions: Dictionary = {}
 	# Capture the actual visual order because RequirementList may sort entries by
 	# availability independently of their display/data indices.
@@ -996,7 +1174,8 @@ func _find_grid_item_source(item_id: int, used_grid_keys: Dictionary) -> Diction
 			continue
 		used_grid_keys[key] = true
 		if source == "pouch":
-			return {"from": pouch_zone.get_global_rect().get_center(), "source": "pouch"}
+			return {"from": pouch_zone.get_global_rect().get_center(), "source": "pouch",
+				"uid": int(data.get("_uid", 0))}
 		var node: GridItem = grid_view._item_nodes.get(key) as GridItem
 		if node != null and is_instance_valid(node):
 			var icon: TextureRect = node.get_node_or_null("IconRect") as TextureRect
@@ -1009,6 +1188,7 @@ func _find_grid_item_source(item_id: int, used_grid_keys: Dictionary) -> Diction
 func _build_order_sources(entry: RequirementEntry, required_ids: Array) -> Array[Dictionary]:
 	var sources: Array[Dictionary] = []
 	var used_grid_keys: Dictionary = {}
+	var used_widgets: Dictionary = {}
 	for item_id_variant in required_ids:
 		var item_id: int = int(item_id_variant)
 		if item_id <= 0:
@@ -1016,8 +1196,17 @@ func _build_order_sources(entry: RequirementEntry, required_ids: Array) -> Array
 		var source: Dictionary = _find_grid_item_source(item_id, used_grid_keys)
 		if source.is_empty():
 			continue
+		var target_widget: ItemWidget = null
+		for child: Node in entry.get_node("ItemsContainer").get_children():
+			if child is ItemWidget and int(child.item_data.get("id", 0)) == item_id and not used_widgets.has(child):
+				target_widget = child as ItemWidget
+				used_widgets[child] = true
+				break
+		if target_widget == null:
+			continue
 		source["item_id"] = item_id
-		source["to"] = entry.get_item_widget_center(item_id)
+		source["target_icon"] = target_widget.icon_rect
+		source["to"] = target_widget.icon_rect.get_global_rect().get_center()
 		sources.append(source)
 	return sources
 
@@ -1040,9 +1229,16 @@ func _submit_meridian_complete(display_index: int) -> void:
 		CloudService.submit_meridian_complete(data_index, _pending_item_ids)
 
 func _on_meridian_confirmed(result: Dictionary) -> void:
+	if _order_animation_input_token >= 0:
+		return
 	if CloudService.meridian_complete_rejected.is_connected(_on_meridian_rejected):
 		CloudService.meridian_complete_rejected.disconnect(_on_meridian_rejected)
 	_begin_order_animation_input_lock()
+	# The list and inventory may have changed while waiting for synchronization
+	# or the response. Capture the current card and sources before playing.
+	var display_index: int = int(_pending_order_animation.get("completed_display_index", -1))
+	if display_index >= 0:
+		_capture_order_animation(display_index)
 	var animation: Dictionary = _pending_order_animation.duplicate(true)
 	_pending_order_animation.clear()
 	var animation_entry: RequirementEntry = animation.get("entry") as RequirementEntry
@@ -1132,8 +1328,9 @@ func _end_order_animation_input_lock() -> void:
 
 
 func _play_order_completion_animation(animation: Dictionary) -> void:
-	if animation.is_empty():
+	if animation.is_empty() or bool(animation.get("completion_started", false)):
 		return
+	animation["completion_started"] = true
 	var sources: Array = animation.get("sources", [])
 	if not bool(animation.get("materials_played", false)) and not sources.is_empty():
 		var hide_duration: float = Constants.ORDER_SOURCE_HIDE_DURATION
@@ -1175,20 +1372,35 @@ func _hide_order_source_items(animation: Dictionary, duration: float) -> void:
 		tween.tween_callback(node.hide)
 
 func _play_order_material_fly(animation: Dictionary, duration: float) -> void:
+	if bool(animation.get("materials_played", false)):
+		return
+	animation["materials_played"] = true
 	for source in animation.get("sources", []):
 		var texture: Texture2D = source.get("texture") as Texture2D
-		_play_flying_item(int(source.get("item_id", 0)), source.get("from", Vector2.ZERO), source.get("to", Vector2.ZERO), duration, texture)
+		var target_icon: TextureRect = source.get("target_icon") as TextureRect
+		var from_pos: Vector2 = source.get("from", Vector2.ZERO)
+		if str(source.get("source", "")) == "pouch":
+			from_pos = pouch_zone.get_global_rect().get_center()
+		else:
+			var node: GridItem = source.get("node") as GridItem
+			if is_instance_valid(node):
+				var icon: TextureRect = node.get_node_or_null("IconRect") as TextureRect
+				from_pos = icon.get_global_rect().get_center() if icon else node.get_global_rect().get_center()
+		var fly: TextureRect = _play_flying_item(int(source.get("item_id", 0)), from_pos, source.get("to", Vector2.ZERO), duration, texture, target_icon)
+		if fly != null and is_instance_valid(target_icon):
+			# Preserve the slot's layout while replacing its icon with the flying copy.
+			target_icon.self_modulate.a = 0.0
 
-func _play_flying_item(item_id: int, from_pos: Vector2, to_pos: Vector2, duration: float, texture_override: Texture2D = null) -> void:
+func _play_flying_item(item_id: int, from_pos: Vector2, to_pos: Vector2, duration: float, texture_override: Texture2D = null, target_icon: TextureRect = null) -> TextureRect:
 	var texture: Texture2D = texture_override
 	if texture == null:
 		var item_data: Dictionary = ConfigDatabase.get_item_data(item_id)
 		if item_data.is_empty():
-			return
+			return null
 		var icon_path: String = item_data.get("icon", "")
 		texture = load(icon_path) as Texture2D
 	if texture == null:
-		return
+		return null
 	var fly: TextureRect = TextureRect.new()
 	fly.texture = texture
 	fly.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -1202,11 +1414,23 @@ func _play_flying_item(item_id: int, from_pos: Vector2, to_pos: Vector2, duratio
 	var from_global: Vector2 = from_pos - fly.size / 2.0
 	var to_global: Vector2 = to_pos - fly.size / 2.0
 	fly.global_position = from_global
-	var tween: Tween = create_tween()
+	var tween: Tween = fly.create_tween()
 	tween.set_trans(Tween.TRANS_CUBIC)
 	tween.set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(fly, "global_position", to_global, duration)
+	if is_instance_valid(target_icon):
+		tween.tween_method(func(progress: float):
+			if not is_instance_valid(fly):
+				return
+			if not is_instance_valid(target_icon):
+				fly.queue_free()
+				return
+			var current_target: Vector2 = target_icon.get_global_rect().get_center() - fly.size / 2.0
+			fly.global_position = from_global.lerp(current_target, progress)
+		, 0.0, 1.0, duration)
+	else:
+		tween.tween_property(fly, "global_position", to_global, duration)
 	tween.tween_callback(fly.queue_free)
+	return fly
 
 func _get_order_animation_host() -> Control:
 	var overlay: Control = UIManager.get_layer(UIManager.Layer.OVERLAY)
@@ -1254,6 +1478,8 @@ func _play_flying_texture(texture: Texture2D, from_pos: Vector2, to_pos: Vector2
 	tween.tween_callback(fly.queue_free)
 
 func _on_stage_changed_for_meridian(_level: int, _name: String) -> void:
+	_refresh_activity_entries()
+	_refresh_battle_pass_entry()
 	_refresh_meridian()
 
 func _on_meridian_rejected(reason: String) -> void:
@@ -1308,9 +1534,9 @@ func _create_activity_entry(act: Dictionary) -> Control:
 		"WeeklyActivityEntry":
 			var we := preload("res://scenes/ui/activity/WeeklyActivityEntry.tscn").instantiate() as WeeklyActivityEntry
 			return we
-		"CardCollection", "StairClimb":
+		"CardCollection", "StairClimb", "OrderDuel":
 			var entry := preload("res://scenes/ui/activity/HomeActivityCard.tscn").instantiate() as HomeActivityCard
-			entry.name = "StairClimbEntry" if widget == "StairClimb" else "CardCollectionEntry"
+			entry.name = widget + "Entry"
 			entry.custom_minimum_size = Vector2(176, 160)
 			entry.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			return entry

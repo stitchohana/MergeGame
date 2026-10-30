@@ -313,11 +313,7 @@ def validate_facility_reward_order(
         configured = _as_int(stage.get("cultivation_level"))
         if configured is not None and configured > 0:
             return configured
-        # Legacy 110-stage layout: levels 1-10 had one circulation each and
-        # levels 11+ had ten each.
-        if stage_index <= 9:
-            return stage_index + 1
-        return 11 + (stage_index - 10) // 10
+        raise ValueError(f"home stage {stage_index} requires cultivation_level")
 
     applied_breakthrough_level = 0
     previous_home_level = 0

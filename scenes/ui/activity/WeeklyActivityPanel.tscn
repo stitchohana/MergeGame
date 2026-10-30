@@ -29,6 +29,20 @@ modulate_color = Color(1, 1, 0.9, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBox_focus_empty"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBox_points_bg"]
+bg_color = Color(0.71, 0.70, 0.55, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_points_fill"]
+bg_color = Color(0.24, 0.46, 0.29, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
 [node name="WeeklyActivityPanel" type="Control" unique_id=1952960985]
 layout_mode = 3
 anchors_preset = 15
@@ -56,9 +70,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -300.0
-offset_top = -380.0
+offset_top = -480.0
 offset_right = 300.0
-offset_bottom = 380.0
+offset_bottom = 480.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("3_panel_texture")
@@ -69,25 +83,61 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 72.0
-offset_right = -24.0
-offset_bottom = -20.0
+offset_left = 48.0
+offset_top = 270.0
+offset_right = -48.0
+offset_bottom = -110.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 14
 
-[node name="TitleLabel" type="Label" parent="Panel/VBox" unique_id=1507237923]
-layout_mode = 2
+[node name="TitleLabel" type="Label" parent="Panel" unique_id=1507237923]
+layout_mode = 1
+anchor_right = 1.0
+offset_top = 85.0
+offset_bottom = 145.0
 theme_override_colors/font_color = Color(0.16, 0.29, 0.22, 1)
 theme_override_font_sizes/font_size = 24
 text = "周常任务"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="DayButtons" type="HBoxContainer" parent="Panel/VBox" unique_id=1200963447]
-layout_mode = 2
+[node name="DayButtons" type="HBoxContainer" parent="Panel" unique_id=1200963447]
+layout_mode = 1
+anchor_right = 1.0
+offset_left = 48.0
+offset_top = 180.0
+offset_right = -48.0
+offset_bottom = 238.0
 theme_override_constants/separation = 6
 alignment = 1
+
+[node name="WeeklyPoints" type="VBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Summary" type="Label" parent="Panel/VBox/WeeklyPoints"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.29, 0.22, 1)
+theme_override_font_sizes/font_size = 18
+text = "本周积分 0 / 350"
+
+[node name="Progress" type="ProgressBar" parent="Panel/VBox/WeeklyPoints"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBox_points_bg")
+theme_override_styles/fill = SubResource("StyleBox_points_fill")
+show_percentage = false
+
+[node name="Hint" type="Label" parent="Panel/VBox/WeeklyPoints"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.32, 0.40, 0.30, 1)
+theme_override_font_sizes/font_size = 12
+text = "完成任务自动得积分 · 每周一 05:00 重置"
+
+[node name="Milestones" type="HBoxContainer" parent="Panel/VBox/WeeklyPoints"]
+layout_mode = 2
+theme_override_constants/separation = 8
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Panel/VBox" unique_id=1234444542]
 layout_mode = 2
@@ -108,10 +158,15 @@ text = "暂无任务可显示"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CloseButton" type="Button" parent="Panel/VBox" unique_id=383240704]
+[node name="CloseButton" type="Button" parent="Panel" unique_id=383240704]
 custom_minimum_size = Vector2(160, 52)
-layout_mode = 2
-size_flags_horizontal = 4
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -80.0
+offset_top = 884.0
+offset_right = 80.0
+offset_bottom = 936.0
 theme_override_colors/font_color = Color(1, 0.94, 0.72, 1)
 theme_override_colors/font_pressed_color = Color(0.94, 0.86, 0.64, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 0.84, 1)

@@ -2,14 +2,14 @@
 import json
 
 CARD_COLLECTION_COLUMNS = {
-    "collections": ["collection_id", "activity_id", "name"],
+    "collections": ["collection_id", "activity_id", "name", "duplicate_points_by_star", "exchange_pack_id", "exchange_cost"],
     "card_sets": ["set_id", "collection_id", "name", "rewards"],
     "cards": ["card_id", "set_id", "name", "star", "icon"],
     "packs": ["pack_id", "collection_id", "name", "star", "icon", "card_count", "normal_weights"],
     "source_rewards": ["collection_id", "source_type", "source_id", "min_value", "pack_id", "count", "enabled"],
 }
-INTEGER_FIELDS = {"collection_id", "activity_id", "set_id", "card_id", "star", "pack_id", "card_count", "source_id", "min_value", "count"}
-JSON_FIELDS = {"rewards", "normal_weights"}
+INTEGER_FIELDS = {"collection_id", "activity_id", "set_id", "card_id", "star", "pack_id", "card_count", "source_id", "min_value", "count", "exchange_pack_id", "exchange_cost"}
+JSON_FIELDS = {"rewards", "normal_weights", "duplicate_points_by_star"}
 
 
 def read_card_collection(workbook):

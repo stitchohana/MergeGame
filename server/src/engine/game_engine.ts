@@ -1,15 +1,24 @@
 import { GameState, GridItem, CultivationData, QuestType, TokenType, RewardConfig, BattleMonster, HomeMeridianStageProgress } from "../storage/interface";
 import { QuestEngine } from "./quest_engine";
 import { ActivityEngine } from "./activity_engine";
+import { resolveActivitySettings } from "./activity_settings";
 import { GameConfigTables } from "./config_tables";
+import { GoldenFingerService } from "./golden_finger";
+import { SecretRealmService } from "./secret_realm";
+import { findNearestEmptyCell } from "./grid_search";
 import { deterministicSpawnRoll } from "./spawn_rng";
 import { CardCollectionService } from "./card_collection";
 import { StairClimbService } from "./stair_climb";
+import { OrderDuelService } from "./order_duel";
 import { BattlePassService } from "./battle_pass";
+import { ResourcePurchaseService } from "./resource_purchase";
+import { ShopService } from "./shop";
+import { activitiesUnlocked } from "./activity_access";
+import { WeeklyTaskService } from "./weekly_tasks";
 
 // --- Config types ---
 
-interface ItemDef {
+export interface ItemDef {
   id: number;
   level: number;
   name: string;
@@ -154,15 +163,31 @@ export class GameEngine {
   private rewardsTable = new Map<number, RewardConfig>();
   private homeMeridianDefs: any[] = [];
   questEngine: QuestEngine;
+  weeklyTaskService: WeeklyTaskService;
   activityEngine: ActivityEngine;
   battlePassService: BattlePassService;
   cardCollectionService: CardCollectionService;
   stairClimbService: StairClimbService;
+  orderDuelService: OrderDuelService;
+  resourcePurchaseService: ResourcePurchaseService;
+  shopService: ShopService;
+  goldenFingerService: GoldenFingerService;
+  secretRealmService: SecretRealmService;
+
+  getAllItemDefs(): ItemDef[] { return [...this.itemsById.values()]; }
 
   constructor(configTables: GameConfigTables) {
     this.loadConfigs(configTables);
+    this.shopService = new ShopService(configTables.shop, id => this.getItemData(id), this.recipes);
+    this.resourcePurchaseService = new ResourcePurchaseService(configTables.gameConfig,
+      (state, amount, now) => { this.addStamina(state, amount, now); });
     this.questEngine = new QuestEngine(configTables.quests);
-    this.activityEngine = new ActivityEngine(configTables.activities, configTables.weeklyTasks);
+    this.activityEngine = new ActivityEngine(
+      resolveActivitySettings(configTables.activities, configTables.stairClimb, configTables.orderSupply),
+      configTables.weeklyTasks,
+    );
+    this.weeklyTaskService = new WeeklyTaskService(configTables.weeklyTasks,
+      this.activityEngine.getActivities(), this.questResetHour, this.questEngine.getQuestDefs());
     this.battlePassService = new BattlePassService(
       configTables.battlePass,
       configTables.activities,
@@ -173,8 +198,11 @@ export class GameEngine {
       (state, rewards) => this.applyRewards(state, rewards));
     this.cardCollectionService.bindPackItems([...this.itemsById.values()]);
     this.stairClimbService = new StairClimbService(this.activityEngine.getActivities(), this.cultivationStages);
+    this.orderDuelService = new OrderDuelService(this.activityEngine.getActivities(), configTables.orderDuel);
     this.loadRewards(configTables.rewards);
     this.loadHomeMeridians(configTables.homeMeridians);
+    this.goldenFingerService = new GoldenFingerService(configTables.goldenFinger, this);
+    this.secretRealmService = new SecretRealmService(configTables.secretRealm, this);
   }
 
   // --- Config loading ---
@@ -412,6 +440,18 @@ export class GameEngine {
     };
   }
 
+  private applyHomeCirculationReward(state: GameState, stageIndex: number): RewardConfig {
+    const def = this.homeMeridianDefs[stageIndex];
+    const reward = this._copyRewardConfig(def.circulation_reward ?? {});
+    const ownerLevel = Number(def.cultivation_level ?? 0);
+    // GM advancement can leave earlier circulations unclaimed. Their EXP
+    // belongs to the previous level; facilities and other rewards remain valid.
+    if (ownerLevel > 0 && ownerLevel !== state.cultivation.current_level) {
+      reward.tokens = (reward.tokens ?? []).filter(t => t.token !== TokenType.EXP);
+    }
+    return this.applyRewards(state, reward);
+  }
+
   private _maxUnlockedHomeStageIndex(cultivationLevel: number): number {
     let maxIndex = -1;
     for (let index = 0; index < this.homeMeridianDefs.length; index += 1) {
@@ -420,10 +460,7 @@ export class GameEngine {
         if (configuredLevel <= cultivationLevel) maxIndex = index;
         continue;
       }
-      // Legacy fallback for configs created before cultivation_level was explicit.
-      if (cultivationLevel <= 1) return Math.min(this.homeMeridianDefs.length - 1, 0);
-      if (cultivationLevel <= 10) return Math.min(this.homeMeridianDefs.length - 1, cultivationLevel - 1);
-      return Math.min(this.homeMeridianDefs.length - 1, 9 + (cultivationLevel - 10) * 10);
+      throw new Error("home_meridian_missing_cultivation_level");
     }
     return maxIndex;
   }
@@ -559,9 +596,7 @@ export class GameEngine {
       return { ok: false, reason: "circulation_not_ready" };
     }
 
-    const rewardsApplied: RewardConfig = def.circulation_reward
-      ? this.applyRewards(state, def.circulation_reward)
-      : { tokens: [], items: [] };
+    const rewardsApplied = this.applyHomeCirculationReward(state, stageIndex);
     const launchersRefreshed = this.refreshBoardLaunchers(state);
     stageProgress.circulation_completed = true;
     this.syncBreakthroughOrder(state);
@@ -642,9 +677,7 @@ export class GameEngine {
       if (normalizedProgress.lit.every(isLit => isLit)) {
         normalizedProgress.circulation_completed = true;
         completedStages += 1;
-        if (def.circulation_reward) {
-          this.applyRewards(state, def.circulation_reward);
-        }
+        this.applyHomeCirculationReward(state, stageIndex);
       }
     }
 
@@ -685,16 +718,7 @@ export class GameEngine {
       return { acupoints: state.meridian_acupoints };
     }
     if (fixedOrderWaves.length > 0) {
-      // Saves created before meridian_fixed_wave_pending existed can already
-      // be sitting between waves: an empty list with an advanced cursor. Treat
-      // that shape as pending as well so merely reopening the board cannot
-      // reveal the next tutorial wave.
-      const fixedCursor = Number(state.meridian_fixed_order_cursor ?? 0);
-      if (state.meridian_fixed_wave_pending === true
-        || (state.meridian_fixed_wave_pending === undefined && fixedCursor > 0)) {
-        state.meridian_fixed_wave_pending = true;
-        return { acupoints: [] };
-      }
+      if (state.meridian_fixed_wave_pending === true) return { acupoints: [] };
       this._tryRevealFixedOrders(state, t);
       return { acupoints: state.meridian_acupoints || [] };
     }
@@ -797,9 +821,7 @@ export class GameEngine {
         const usedConfigIndexes = new Set<number>();
         state.meridian_acupoints = activeFixedOrders.map((order: any) => {
           // Match by item IDs so completing fixed orders out of sequence does
-          // not make refresh re-introduce an already completed order.  If an
-          // old save no longer matches the latest config, keep its current
-          // order rather than guessing a wave position.
+          // not make refresh re-introduce an already completed order.
           let sourceOrder: any = order;
           if (canReuseLatestConfig) {
             const matchingIndex = activeWave!.findIndex((fixedOrder: any, index: number) =>
@@ -812,6 +834,9 @@ export class GameEngine {
             }
           }
           const refreshed = this._genFixedAcupoint(sourceOrder);
+          if (order.order_supply_completed_counts) {
+            refreshed.order_supply_completed_counts = { ...order.order_supply_completed_counts };
+          }
           if (!refreshed.fixed_order_rewards && threshold?.acupoint_rewards && refreshed.total_value > 0) {
             refreshed.rewards = this._scaleRewardConfig(threshold.acupoint_rewards, refreshed.total_value);
           }
@@ -879,8 +904,7 @@ export class GameEngine {
         .filter((wave: any[]) => wave.length > 0);
     }
 
-    // A historical flat array is still interpreted as one wave.
-    return [configured.filter((order) => order !== null && order !== undefined)];
+    throw new Error("invalid_fixed_order_waves");
   }
 
   private _tryRevealFixedOrders(state: GameState, threshold: any): boolean {
@@ -1007,7 +1031,7 @@ export class GameEngine {
 
   private _genFixedAcupoint(fixedOrder: any): any {
     // A fixed order normally contains one item, so config can use the clearer
-    // singular item_id.  Keep item_ids/array forms for multi-item and legacy data.
+    // singular item_id; multi-item definitions use item_ids.
     let configuredIds: unknown;
     if (Array.isArray(fixedOrder)) {
       configuredIds = fixedOrder;
@@ -1072,7 +1096,6 @@ export class GameEngine {
   private registerProductionUnlock(state: GameState, itemId: number): boolean {
     const itemDef = this.getItemData(itemId);
     if (!itemDef || (!this.isLauncher(itemDef) && itemDef.type !== 2)) return false;
-    state.unlocked_production_item_ids = state.unlocked_production_item_ids || [];
     if (state.unlocked_production_item_ids.includes(itemId)) return false;
     state.unlocked_production_item_ids.push(itemId);
     state.unlocked_production_item_ids.sort((a, b) => a - b);
@@ -1082,7 +1105,6 @@ export class GameEngine {
   /** All confirmed acquisitions share the same persisted discovery history. */
   recordItemDiscovery(state: GameState, itemId: number): boolean {
     if (!Number.isInteger(itemId) || itemId <= 0 || !this.getItemData(itemId)) return false;
-    state.crafted_item_ids ??= [];
     if (state.crafted_item_ids.includes(itemId)) return false;
     state.crafted_item_ids.push(itemId);
     return true;
@@ -1093,87 +1115,11 @@ export class GameEngine {
       return { ok: false, reason: "item_not_found" };
     }
     if (!state.crafted_item_ids?.includes(itemId)) return { ok: false, reason: "item_locked" };
-    const claimed = state.item_catalog_claimed_ids ?? [];
+    const claimed = state.item_catalog_claimed_ids;
     if (claimed.includes(itemId)) return { ok: true, already_claimed: true, reward_stamina: 0 };
     this.addStamina(state, 1);
     state.item_catalog_claimed_ids = [...claimed, itemId].sort((a, b) => a - b);
     return { ok: true, already_claimed: false, reward_stamina: 1 };
-  }
-
-  /** Seed legacy saves from items already owned, without triggering client notifications. */
-  initializeItemDiscoveries(state: GameState): boolean {
-    const previous = Array.isArray(state.crafted_item_ids) ? state.crafted_item_ids : [];
-    const normalized = [...new Set(previous.filter(id => Number.isInteger(id) && id > 0 && this.getItemData(id)))];
-    let changed = !Array.isArray(state.crafted_item_ids) || normalized.length !== previous.length;
-    state.crafted_item_ids = normalized;
-    for (const grid of [state.grid, state.saved_grid, state.battle_grid]) {
-      for (const item of grid || []) {
-        changed = this.recordItemDiscovery(state, item.id) || changed;
-        for (const stored of item.craft?._craft_stored || []) {
-          changed = this.recordItemDiscovery(state, Number(stored.id)) || changed;
-        }
-        for (const stored of item.storage?.items || []) {
-          changed = this.recordItemDiscovery(state, Number(stored.id)) || changed;
-        }
-      }
-    }
-    for (const reward of state.pending_rewards || []) {
-      if (reward.kind !== "card_pack") changed = this.recordItemDiscovery(state, reward.id) || changed;
-    }
-    for (const entry of state.pouch || []) {
-      const itemId = typeof entry === "number" ? entry : entry.id;
-      changed = this.recordItemDiscovery(state, itemId) || changed;
-      if (entry && typeof entry === "object") {
-        const item = entry as Exclude<GameState["pouch"][number], number>;
-        for (const stored of [...(item.craft?._craft_stored ?? []), ...(item.storage?.items ?? [])]) {
-          changed = this.recordItemDiscovery(state, Number(stored.id)) || changed;
-        }
-      }
-    }
-    if (changed) state.crafted_item_ids.sort((a, b) => a - b);
-    return changed;
-  }
-
-  /** Backfill the unlock history for old saves and initialize new saves. */
-  initializeProductionUnlocks(state: GameState): boolean {
-    const previousIds: unknown[] = Array.isArray(state.unlocked_production_item_ids)
-      ? state.unlocked_production_item_ids
-      : [];
-    const normalizedIds = [...new Set(previousIds.filter((id): id is number => Number.isInteger(id)))];
-    let changed = !Array.isArray(state.unlocked_production_item_ids) || normalizedIds.length !== previousIds.length;
-    state.unlocked_production_item_ids = normalizedIds;
-
-    const grids: GridItem[][] = [];
-    if (Array.isArray(state.grid)) grids.push(state.grid);
-    if (state.saved_grid) grids.push(state.saved_grid);
-    if (state.battle_grid) grids.push(state.battle_grid);
-    for (const grid of grids) {
-      for (const item of grid) {
-        changed = this.registerProductionUnlock(state, item.id) || changed;
-        for (const stored of item.craft?._craft_stored || []) {
-          changed = this.registerProductionUnlock(state, Number(stored.id ?? 0)) || changed;
-        }
-        for (const stored of item.storage?.items || []) {
-          changed = this.registerProductionUnlock(state, Number(stored.id ?? 0)) || changed;
-        }
-      }
-    }
-    for (const reward of state.pending_rewards || []) {
-      if (reward.kind !== "card_pack") changed = this.registerProductionUnlock(state, reward.id) || changed;
-    }
-    for (const entry of (state.pouch || []) as unknown[]) {
-      const itemId: number = typeof entry === "number"
-        ? entry
-        : Number((entry as { id?: unknown }).id ?? 0);
-      if (itemId > 0) changed = this.registerProductionUnlock(state, itemId) || changed;
-      if (entry && typeof entry === "object") {
-        const item = entry as Exclude<GameState["pouch"][number], number>;
-        for (const stored of [...(item.craft?._craft_stored ?? []), ...(item.storage?.items ?? [])]) {
-          changed = this.registerProductionUnlock(state, Number(stored.id)) || changed;
-        }
-      }
-    }
-    return changed;
   }
 
   getUnlockedOrderPool(state: GameState): number[] {
@@ -1313,44 +1259,10 @@ export class GameEngine {
     return { ids, weights };
   }
 
-  repairInvalidMeridianOrders(state: GameState): boolean {
-    if (this.getRequiredBreakthroughItems(
-      state.cultivation.current_level,
-      state.cultivation.current_exp,
-    ).length > 0) {
-      return this.syncBreakthroughOrder(state);
-    }
-    if (!Array.isArray(state.meridian_acupoints) || state.meridian_acupoints.length === 0) return false;
-
-    const threshold = this._findMeridianThreshold(state.cultivation.current_level);
-    if (this._getFixedOrderWaves(threshold).length > 0) return false;
-
-    const pool = this.getUnlockedOrderPool(state);
-    if (pool.length === 0) {
-      state.meridian_acupoints = [];
-      console.log("[engine] Cleared random meridian orders because the active board has no craftable candidates");
-      return true;
-    }
-    const allowedIds = new Set(pool);
-    const hasInvalidOrder = state.meridian_acupoints.some((order: any) =>
-      !Array.isArray(order?.item_ids)
-      || order.item_ids.some((itemId: unknown) => !allowedIds.has(Number(itemId))));
-    if (!hasInvalidOrder) return false;
-
-    this.generateMeridianRequirements(state);
-    console.log("[engine] Replaced meridian orders containing items outside the current stage pool");
-    return true;
-  }
-
   private loadInitialSetup(data: any): void {
-    // Support both old flat format and new board-type format
-    if (data.items) {
-      this.initialSetups.set(0, data.items);
-    } else {
-      for (const key of Object.keys(data)) {
-        const boardKey: number = key === "battle" ? 1 : 0;
-        this.initialSetups.set(boardKey, data[key].items || []);
-      }
+    if (!data.main || !Array.isArray(data.main.items)) throw new Error("invalid_initial_setup");
+    for (const key of ["main", "battle"]) {
+      if (data[key]) this.initialSetups.set(key === "battle" ? 1 : 0, data[key].items);
     }
   }
 
@@ -1402,7 +1314,7 @@ export class GameEngine {
     return Math.min(16, 13 + Math.max(0, level - 16));
   }
 
-  getOrderSupplyMaterials(itemId: number, cultivationLevel = 1): number[] {
+  getOrderSupplyMaterials(itemId: number, cultivationLevel = 1, limitToRequiredLevel = true): number[] {
     const materials = new Set<number>();
     const visiting = new Set<number>();
     const targetLevel = this.getOrderSupplyMaterialLevel(cultivationLevel);
@@ -1417,19 +1329,39 @@ export class GameEngine {
         return;
       }
       if (item.type !== 0) return;
-      const base = this.getItemByLevel(0, targetLevel, item.group_id);
+      // Higher-tier materials cannot be split back into a lower-level requirement.
+      // Apply the cap to recipe leaves as well as directly requested materials.
+      const materialLevel = limitToRequiredLevel ? Math.min(targetLevel, item.level) : targetLevel;
+      const base = this.getItemByLevel(0, materialLevel, item.group_id);
       if (base && !this.recipes.some(candidate => candidate.result === base.id)) materials.add(base.id);
     };
     visit(itemId);
     return [...materials];
   }
 
+  private countOrderSupplyAvailableItems(state: GameState, itemId: number): number {
+    let count = 0;
+    for (const item of state.grid) {
+      if (!item.immovable && item.id === itemId) count++;
+      count += (item.storage?.items ?? []).filter(stored => stored.id === itemId).length;
+      if (this.getItemData(item.id)?.type !== 2 || !item.craft) continue;
+      const craft = item.craft;
+      if ([TableState.CRAFTING, TableState.READY].includes(craft._craft_state)) {
+        if (Number(craft._craft_result_id || craft._craft_recipe?.result || 0) === itemId) count++;
+      } else {
+        count += (craft._craft_stored ?? []).filter(stored => Number(stored.id) === itemId).length;
+      }
+    }
+    count += (state.pouch ?? []).filter(item => this.getStoredItemId(item) === itemId).length;
+    count += (state.pending_rewards).filter(item => item.kind !== "card_pack" && item.id === itemId).length;
+    return count;
+  }
+
   getMissingOrderSupplyMaterials(state: GameState): number[] {
     const targets = new Map<number, number>();
     for (const order of state.meridian_acupoints ?? []) {
       if (order.completed || (order as any).breakthrough_order) continue;
-      const ids: number[] = Array.isArray((order as any).item_ids)
-        ? (order as any).item_ids : Array.from({ length: order.count }, () => order.item_id);
+      const ids = order.item_ids;
       for (const id of ids) targets.set(id, (targets.get(id) ?? 0) + 1);
     }
     const available = new Map<number, number>();
@@ -1447,7 +1379,7 @@ export class GameEngine {
         for (const stored of craft._craft_stored ?? []) addAvailable(Number(stored.id));
       }
     }
-    for (const reward of state.pending_rewards ?? []) {
+    for (const reward of state.pending_rewards) {
       if (reward.kind !== "card_pack") addAvailable(reward.id);
     }
 
@@ -1470,27 +1402,29 @@ export class GameEngine {
     };
     const remaining = new Map<number, number>();
     for (const [id, count] of targets) {
-      remaining.set(id, this.recipes.some(recipe => recipe.result === id)
-        ? this.consumeAvailableOrderItems(available, id, count) : count);
+      remaining.set(id, this.consumeAvailableOrderItems(available, id, count));
     }
     for (const [id, count] of remaining) expand(id, count, new Set<number>());
 
     const deficits = new Set<number>();
-    const consumeMaterial = (id: number, count: number): void => {
+    const consumeMaterial = (id: number, count: number): boolean => {
       const missing = this.consumeAvailableOrderItems(available, id, count);
-      if (missing <= 0) return;
+      if (missing <= 0) return false;
       const item = this.getItemData(id)!;
       const previous = item.level > 1 ? this.getItemByLevel(0, item.level - 1, item.group_id) : null;
       if (previous && !this.recipes.some(recipe => recipe.result === previous.id)) {
-        consumeMaterial(previous.id, missing * 2);
-      } else {
-        for (const material of this.getOrderSupplyMaterials(id, state.cultivation.current_level)) deficits.add(material);
+        return consumeMaterial(previous.id, missing * 2);
       }
+      return true;
     };
     const demands = [...ordinary].sort(([a], [b]) => this.getItemData(b)!.level - this.getItemData(a)!.level);
-    for (const [id, count] of demands) consumeMaterial(id, count);
-    return [...new Set([...targets.keys()].flatMap(id => this.getOrderSupplyMaterials(id, state.cultivation.current_level)))]
-      .filter(id => deficits.has(id));
+    for (const [id, count] of demands) {
+      if (consumeMaterial(id, count)) deficits.add(id);
+    }
+    // Keep the original missing requirement's level; recursive inventory checks
+    // reach level one even when the actual order needs a higher-level material.
+    return [...new Set([...ordinary.keys()].filter(id => deficits.has(id))
+      .flatMap(id => this.getOrderSupplyMaterials(id, state.cultivation.current_level)))];
   }
 
   getCultivationConfig(): CultivationConfig | null {
@@ -1506,6 +1440,7 @@ export class GameEngine {
   }
 
   getCultivationStaminaMultiplierCap(state: GameState): number {
+    if (!activitiesUnlocked(state)) return 1;
     const currentLevel = Math.max(1, Number(state.cultivation?.current_level ?? 1));
     const realmCaps = [
       { realm: "元婴", cap: 32 },
@@ -1520,6 +1455,7 @@ export class GameEngine {
   }
 
   getStaminaMultiplierState(state: GameState, now = Date.now()): StaminaMultiplierState {
+    if (!activitiesUnlocked(state)) return { maxMultiplier: 1, expiresAt: 0, remainingSeconds: 0 };
     const expiresAt = Math.max(0, Number(state.stamina_multiplier_expires_at ?? 0));
     const configuredMax = Math.max(1, Number(state.stamina_multiplier_max ?? 1));
     const isActive = expiresAt > now && this.isPowerOfTwo(configuredMax);
@@ -1552,6 +1488,10 @@ export class GameEngine {
   }
 
   refreshStaminaMultiplierFromBalance(state: GameState, now = Date.now()): StaminaMultiplierState {
+    if (!activitiesUnlocked(state)) {
+      this.tickStaminaMultiplier(state, now);
+      return this.getStaminaMultiplierState(state, now);
+    }
     const triggered = Math.min(
       this.getTriggeredStaminaMultiplier(state.stamina),
       this.getCultivationStaminaMultiplierCap(state),
@@ -1605,21 +1545,29 @@ export class GameEngine {
 
   private getOutstandingOrderItemCounts(state: GameState): Map<number, number> {
     const orderTargets = new Map<number, number>();
-    const addRequired = (itemId: number): void => {
-      if (itemId > 0) orderTargets.set(itemId, (orderTargets.get(itemId) ?? 0) + 1);
-    };
     for (const order of state.meridian_acupoints ?? []) {
       if ((order as any)?.completed === true) continue;
-      const configuredIds: unknown = Array.isArray((order as any)?.item_ids)
-        ? (order as any).item_ids
-        : (order as any)?.items;
-      if (!Array.isArray(configuredIds)) continue;
+      const configuredIds = order.item_ids;
       for (const entry of configuredIds) {
-        addRequired(Number(entry && typeof entry === "object" ? (entry as any).item_id : entry));
+        const itemId = entry;
+        const count = 1;
+        if (!Number.isSafeInteger(itemId) || !Number.isSafeInteger(count) || count <= 0) continue;
+        if (itemId > 0) orderTargets.set(itemId, (orderTargets.get(itemId) ?? 0) + count);
       }
     }
 
     const available = new Map<number, number>();
+    const requiredRecipeIds = new Set<number>();
+    const visitedProducts = new Set<number>();
+    const collectRecipes = (itemId: number): void => {
+      if (visitedProducts.has(itemId)) return;
+      visitedProducts.add(itemId);
+      for (const recipe of this.recipes.filter(recipe => recipe.result === itemId)) {
+        requiredRecipeIds.add(recipe.id);
+        for (const ingredientId of recipe.ingredients) collectRecipes(ingredientId);
+      }
+    };
+    for (const itemId of orderTargets.keys()) collectRecipes(itemId);
     const addAvailable = (itemId: number): void => {
       if (itemId > 0) available.set(itemId, (available.get(itemId) ?? 0) + 1);
     };
@@ -1629,8 +1577,10 @@ export class GameEngine {
         if (gridItem.immovable !== true) addAvailable(gridItem.id);
         continue;
       }
-      for (const stored of gridItem.craft?._craft_stored ?? []) {
-        addAvailable(Number(stored?.id ?? 0));
+      if (this.tableSupportsOrderMaterials(gridItem, requiredRecipeIds)) {
+        for (const stored of gridItem.craft?._craft_stored ?? []) {
+          addAvailable(Number(stored?.id ?? 0));
+        }
       }
       const craftState = gridItem.craft?._craft_state;
       if (craftState !== TableState.CRAFTING && craftState !== TableState.READY) continue;
@@ -1648,6 +1598,25 @@ export class GameEngine {
       );
     }
     return outstanding;
+  }
+
+  private tableSupportsOrderMaterials(table: GridItem, requiredRecipeIds: Set<number>): boolean {
+    const storedCounts = new Map<number, number>();
+    for (const stored of table.craft?._craft_stored ?? []) {
+      storedCounts.set(stored.id, (storedCounts.get(stored.id) ?? 0) + 1);
+    }
+    const state = table.craft?._craft_state;
+    const activeRecipe = table.craft?._craft_recipe as Partial<RecipeDef> | undefined;
+    return this.getRecipesForTable(table.id).some(recipe => {
+      if (!requiredRecipeIds.has(recipe.id)) return false;
+      if ((state === TableState.CRAFTING || state === TableState.READY)
+        && (activeRecipe?.id ? activeRecipe.id !== recipe.id : activeRecipe?.result !== recipe.result)) {
+        return false;
+      }
+      const ingredientCounts = new Map<number, number>();
+      for (const id of recipe.ingredients) ingredientCounts.set(id, (ingredientCounts.get(id) ?? 0) + 1);
+      return [...storedCounts].every(([id, count]) => count <= (ingredientCounts.get(id) ?? 0));
+    });
   }
 
   private consumeAvailableOrderItems(
@@ -1693,6 +1662,7 @@ export class GameEngine {
     boosted: ItemDef,
     requestedMultiplier: number,
     maxStaminaUnits: number,
+    launcherData?: ItemDef,
   ): { output: { item: ItemDef; staminaUnits: number }; orderPriority: boolean } {
     if (requestedMultiplier <= 1 || boosted.level <= base.level) {
       return {
@@ -1700,22 +1670,20 @@ export class GameEngine {
         orderPriority: false,
       };
     }
+    const spawnSources = this.getLauncherSpawnSources(launcherData);
     const candidates: Array<{ item: ItemDef; count: number; staminaUnits: number }> = [];
     for (const [itemId, count] of this.getOutstandingOrderItemCounts(state)) {
       if (count <= 0) continue;
       const candidate = this.getItemData(itemId);
-      if (!candidate
-        || candidate.type !== base.type
-        || candidate.group_id !== base.group_id
-        || candidate.level >= boosted.level) continue;
-      const reachable = this.getItemByLevel(base.type, candidate.level, base.group_id);
-      if (reachable?.id === candidate.id) {
+      if (!candidate) continue;
+      const staminaUnits = this.getOrderCandidateMultiplier(
+        candidate, base, boosted.level, requestedMultiplier, spawnSources,
+      );
+      if (staminaUnits > 0) {
         candidates.push({
           item: candidate,
           count,
-          staminaUnits: candidate.level <= base.level
-            ? 1
-            : 2 ** (candidate.level - base.level),
+          staminaUnits,
         });
       }
     }
@@ -1734,9 +1702,69 @@ export class GameEngine {
     };
   }
 
+  private getLauncherSpawnSources(launcherData?: ItemDef): ItemDef[] {
+    if (!launcherData) return [];
+    const sourceIds = [
+      ...(launcherData.spawns ?? []).map(spawn => spawn.id),
+      ...(launcherData.fixed_spawns ?? []),
+    ];
+    return sourceIds
+      .map(id => this.getItemData(id))
+      .filter((item): item is ItemDef => Boolean(item));
+  }
+
+  private getOrderCandidateMultiplier(
+    candidate: ItemDef,
+    base: ItemDef,
+    boostedLevel: number,
+    requestedMultiplier: number,
+    spawnSources: ItemDef[],
+  ): number {
+    if (spawnSources.length > 0) {
+      let bestMultiplier = 0;
+      for (const source of spawnSources) {
+        if (source.type !== candidate.type || source.group_id !== candidate.group_id) continue;
+        let candidateMultiplier = 0;
+        if (candidate.id === source.id) {
+          candidateMultiplier = 1;
+        } else if (candidate.level > source.level) {
+          candidateMultiplier = 2 ** (candidate.level - source.level);
+          if (candidateMultiplier > requestedMultiplier) continue;
+          if (this.upgradeSpawnResult(source, candidateMultiplier)?.id !== candidate.id) continue;
+        }
+        if (candidateMultiplier > 0
+          && (bestMultiplier === 0 || candidateMultiplier < bestMultiplier)) {
+          bestMultiplier = candidateMultiplier;
+        }
+      }
+      if (bestMultiplier > 0 && bestMultiplier < requestedMultiplier) return bestMultiplier;
+      // Preserve the historical same-chain fallback for launchers whose
+      // runtime table only exposes a higher-level roll (for example a
+      // breakthrough book launcher). Cross-group candidates still require an
+      // explicit source in the launcher table.
+      if (candidate.type === base.type
+        && candidate.group_id === base.group_id
+        && candidate.level < boostedLevel) {
+        return candidate.level <= base.level
+          ? 1
+          : 2 ** (candidate.level - base.level);
+      }
+      return 0;
+    }
+
+    if (candidate.type !== base.type
+      || candidate.group_id !== base.group_id
+      || candidate.level >= boostedLevel) return 0;
+    const reachable = this.getItemByLevel(base.type, candidate.level, base.group_id);
+    if (reachable?.id !== candidate.id) return 0;
+    return candidate.level <= base.level
+      ? 1
+      : 2 ** (candidate.level - base.level);
+  }
+
   _nextUid(state: GameState): number {
-    state.uid_counter = (state.uid_counter ?? 0) + 1;
-    return state.uid_counter!;
+    state.uid_counter = state.uid_counter + 1;
+    return state.uid_counter;
   }
 
   getRechargeTime(itemId: number): number {
@@ -1749,27 +1777,33 @@ export class GameEngine {
     return col >= 0 && col < this.GRID_COLS && row >= 0 && row < this.GRID_ROWS;
   }
 
-  tickStamina(state: GameState): void {
-    const now = Date.now();
+  // Settle elapsed time on the server, including time while the client was closed.
+  // Return whether the recovered balance/anchor needs to be persisted.
+  tickStamina(state: GameState, now = Date.now()): boolean {
     if (state.stamina >= this.staminaConfig.max) {
       state.last_stamina_tick = now;
-      return;
+      return false;
     }
     const intervalMs = this.staminaConfig.regenInterval * 1000;
-    while (now - state.last_stamina_tick >= intervalMs) {
-      if (state.stamina >= this.staminaConfig.max) {
-        state.last_stamina_tick = now;
-        break;
-      }
-      this.addStamina(state, this.staminaConfig.regenAmount, now);
-      state.last_stamina_tick += intervalMs;
+    if (!Number.isFinite(state.last_stamina_tick) || state.last_stamina_tick > now) {
+      state.last_stamina_tick = now;
+      return true;
     }
-    state.stamina = Math.min(state.stamina, this.staminaConfig.max);
+    if (intervalMs <= 0 || this.staminaConfig.regenAmount <= 0) return false;
+    const ticks = Math.floor((now - state.last_stamina_tick) / intervalMs);
+    if (ticks <= 0) return false;
+    const amount = Math.min(this.staminaConfig.max - state.stamina, ticks * this.staminaConfig.regenAmount);
+    this.addStamina(state, amount, now);
+    // Keep the partial interval below cap; time spent at cap cannot be banked.
+    state.last_stamina_tick = state.stamina >= this.staminaConfig.max
+      ? now : state.last_stamina_tick + ticks * intervalMs;
+    return true;
   }
 
-  getRegenRemainingMs(state: GameState): number {
+  getRegenRemainingMs(state: GameState, now = Date.now()): number {
+    if (state.stamina >= this.staminaConfig.max) return 0;
     const nextTick = state.last_stamina_tick + this.staminaConfig.regenInterval * 1000;
-    return Math.max(0, nextTick - Date.now());
+    return Math.max(0, nextTick - now);
   }
 
   private isLauncher(itemDef: ItemDef | null): boolean {
@@ -1840,24 +1874,8 @@ export class GameEngine {
     startCol: number,
     startRow: number
   ): { col: number; row: number } | null {
-    const visited = new Set<string>();
-    const queue: [number, number][] = [[startCol, startRow]];
-    visited.add(this.posKey(startCol, startRow));
-
-    while (queue.length > 0) {
-      const [c, r] = queue.shift()!;
-      const key = this.posKey(c, r);
-      if (!grid.has(key)) return { col: c, row: r };
-
-      for (const [nc, nr] of this.getNeighbors(c, r)) {
-        const nk = this.posKey(nc, nr);
-        if (!visited.has(nk)) {
-          visited.add(nk);
-          queue.push([nc, nr]);
-        }
-      }
-    }
-    return null;
+    return findNearestEmptyCell(this.GRID_COLS, this.GRID_ROWS, startCol, startRow,
+      (col, row) => !grid.has(this.posKey(col, row)));
   }
 
   findEmptyPos(grid: GridItem[]): { col: number; row: number } | null {
@@ -1902,6 +1920,18 @@ export class GameEngine {
       rewards = resolved;
     }
 
+    // Activity currencies and card packs are disabled during the novice period.
+    if (!activitiesUnlocked(state)) {
+      const activityTokens = new Set(this.battlePassService.getDefinitions().map(pass => pass.points_token_id));
+      rewards = {
+        tokens: (rewards.tokens ?? []).filter(t => !activityTokens.has(t.token)),
+        items: (rewards.items ?? []).filter(ri => {
+          const item = this.getItemData(ri.id);
+          return !(item?.type === 5 && item.effect_type === CardCollectionService.EFFECT_TYPE);
+        }),
+      };
+    }
+
     // Validate configured pack counts before crediting any part of the reward.
     for (const ri of rewards.items ?? []) {
       const item = this.getItemData(ri.id);
@@ -1943,7 +1973,6 @@ export class GameEngine {
 
     // Item rewards -> pending_rewards
     if (rewards.items) {
-      state.pending_rewards = state.pending_rewards || [];
       for (const ri of rewards.items) {
         const itemData = this.getItemData(ri.id);
         const name = itemData?.name ?? `#${ri.id}`;
@@ -1978,6 +2007,7 @@ export class GameEngine {
   createInitialState(boardType: number = 0): GameState {
     const now = Date.now();
     const state: GameState = {
+      storage_revision: 0,
       grid: [],
       pouch: [],
       pouch_capacity: this.pouchConfig.initialSlots,
@@ -2004,6 +2034,7 @@ export class GameEngine {
       spawn_seed: this.createSpawnSeed(),
       spawn_sequence: 0,
       spawn_history: [],
+      item_catalog_claimed_ids: [],
       crafted_item_ids: [],
       unlocked_production_item_ids: [],
     };
@@ -2013,7 +2044,7 @@ export class GameEngine {
     for (const entry of setup) {
       const itemDef = this.getItemData(entry.id);
       if (itemDef) {
-        state.uid_counter = (state.uid_counter ?? 0) + 1;
+        state.uid_counter = state.uid_counter + 1;
         const gitem: GridItem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
         if ((entry as any).immovable) gitem.immovable = true;
         if (this.isLauncher(itemDef)) {
@@ -2035,7 +2066,7 @@ export class GameEngine {
   }
 
 
-  switchBoard(state: GameState, boardType: string, battleMapId?: number, battleStage?: number): { ok: true; newVersion: number } | { ok: false; reason: string } {
+  switchBoard(state: GameState, boardType: number, battleMapId?: number, battleStage?: number): { ok: true; newVersion: number } | { ok: false; reason: string } {
     if (boardType === state.board_type) {
       state.version += 1;
       return { ok: true, newVersion: state.version };
@@ -2074,7 +2105,7 @@ export class GameEngine {
     for (const entry of setup) {
       const itemDef = this.getItemData(entry.id);
       if (itemDef) {
-        state.uid_counter = (state.uid_counter ?? 0) + 1;
+        state.uid_counter = state.uid_counter + 1;
         const gitem: GridItem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
         if ((entry as any).immovable) gitem.immovable = true;
         if (this.isLauncher(itemDef)) {
@@ -2199,6 +2230,8 @@ export class GameEngine {
       return { ok: false, reason: result.reason };
     }
 
+    const supplyAvailableBefore = this.countOrderSupplyAvailableItems(state, result.resultItem.id);
+    const rewindBefore = this.goldenFingerService.snapshot(state);
     const actualFromKey = this.posKey(result.fromItem.col, result.fromItem.row);
     const actualToKey = this.posKey(result.toItem.col, result.toItem.row);
     const fromId = result.fromItem.id;
@@ -2233,7 +2266,8 @@ export class GameEngine {
     console.log(`[engine] merge: ${fromName}x2 -> ${mergedName} | grid=${state.grid.length}/63 | v${state.version}`);
 
     this.questEngine.incrementQuestProgress(state, QuestType.MERGE, 1, this);
-    this.activityEngine.recordOrderSupplyAction(state, mergedItem.id);
+    this.activityEngine.recordOrderSupplyAction(state, mergedItem.id, supplyAvailableBefore);
+    this.goldenFingerService.capture(state, rewindBefore, "合并");
 
     return {
       ok: true,
@@ -2258,7 +2292,8 @@ export class GameEngine {
     requestedMultiplier = 1,
   ): SpawnSuccess
     | { ok: false; reason: string } {
-    const sequence = state.spawn_sequence ?? 0;
+    const sequence = state.spawn_sequence;
+    const rewindBefore = this.goldenFingerService.snapshot(state);
     if (expectedSequence !== undefined && expectedSequence !== sequence) {
       return { ok: false, reason: "spawn_sequence_mismatch" };
     }
@@ -2310,7 +2345,7 @@ export class GameEngine {
       const spawns = launcherData.spawns;
       if (!spawns || !spawns.length) return { ok: false, reason: "no_spawns" };
       const totalWeight: number = spawns.reduce((sum: number, s: any) => sum + s.weight, 0);
-      let roll = deterministicSpawnRoll(state.spawn_seed ?? 1, sequence, launcherItem.uid ?? 0, totalWeight);
+      let roll = deterministicSpawnRoll(state.spawn_seed, sequence, launcherItem.uid ?? 0, totalWeight);
       rolledId = spawns[0].id;
       for (const s of spawns) {
         if (roll < s.weight) { rolledId = s.id; break; }
@@ -2327,7 +2362,7 @@ export class GameEngine {
       ? Math.floor(state.stamina / baseStaminaCost)
       : requestedMultiplier;
     const spawnPlan = this.getOrderPrioritySpawnPlan(
-      state, baseSpawnResult, boostedSpawnResult, requestedMultiplier, maxStaminaUnits,
+      state, baseSpawnResult, boostedSpawnResult, requestedMultiplier, maxStaminaUnits, launcherData,
     );
 
     const target = this.findNearestEmpty(map, launcherCol, launcherRow);
@@ -2389,6 +2424,7 @@ export class GameEngine {
       const stageAtk = (stage as any)?.atk ?? 0;
       newItem.atk_base = stageAtk + (launcherData.value ?? 0);
     }
+    const supplyAvailableBefore = this.countOrderSupplyAvailableItems(state, newItem.id);
     state.grid.push(newItem);
     this.registerProductionUnlock(state, newItem.id);
     this.recordItemDiscovery(state, newItem.id);
@@ -2408,7 +2444,8 @@ export class GameEngine {
     console.log(`[engine] spawn: launcher #${launcherItem.id} -> ${spawnedItems.map(item => `${item.name}(#${item.id})`).join(", ")} | units=${spentStaminaUnits}/${requestedMultiplier} refund=${staminaRefund} order_priority=${spawnPlan.orderPriority} | v${state.version}`);
 
     this.questEngine.incrementQuestProgress(state, QuestType.SPAWN, spawnedItems.length, this);
-    this.activityEngine.recordOrderSupplyAction(state, newItem.id);
+    this.activityEngine.recordOrderSupplyAction(state, newItem.id, supplyAvailableBefore);
+    this.goldenFingerService.capture(state, rewindBefore, "生成");
 
     return {
       ok: true,
@@ -2521,6 +2558,15 @@ export class GameEngine {
     const allowedRecipes = this.getRecipesForTable(tableItem.id);
     const matched = this.matchRecipe(craft._craft_stored, allowedRecipes);
     craft._craft_recipe = (matched as unknown as Record<string, unknown>) ?? {};
+    if (craft._craft_stored.length === 0) {
+      // Removing the last ingredient leaves an empty table. Keep the state
+      // consistent with the stored materials so clients do not render the
+      // HAS_ITEMS badge after the authoritative sync.
+      craft._craft_state = TableState.IDLE;
+      craft._craft_recipe = {};
+    } else {
+      craft._craft_state = TableState.HAS_ITEMS;
+    }
 
     return { ok: true, removed_id: ingredientId, removed_uid: newUid, table_col: tableCol, table_row: tableRow, target_col: targetCol, target_row: targetRow, newVersion: state.version };
   }
@@ -2577,13 +2623,14 @@ export class GameEngine {
     if (!tableItem?.craft) return { ok: false, reason: "table_not_found" };
     const craft = tableItem.craft;
 
+    const supplyAvailableBefore = this.countOrderSupplyAvailableItems(state, validation.recipe.result);
     craft._craft_state = TableState.CRAFTING;
     craft._craft_progress = 0;
     craft._craft_stored = [];
     craft._craft_result_id = validation.recipe.result;
     craft._craft_start_time = Date.now();
     state.version += 1;
-    this.activityEngine.recordOrderSupplyAction(state, validation.recipe.result);
+    this.activityEngine.recordOrderSupplyAction(state, validation.recipe.result, supplyAvailableBefore);
 
     const resultItem = this.getItemData(validation.recipe.result);
     const resultName = resultItem?.name ?? `#${validation.recipe.result}`;
@@ -2720,12 +2767,13 @@ export class GameEngine {
     // Place result item on grid near the table
     const map = this.gridToMap(state.grid);
     const target = this.findNearestEmpty(map, tableItem.col, tableItem.row);
+    // A failed retrieval must preserve the completed craft, UID sequence and
+    // quest progress so the player can retry after freeing a cell.
+    if (!target) return { ok: false, reason: "no_empty_cell" };
     const craftUid = this._nextUid(state);
-    if (target) {
-      state.grid.push({ uid: craftUid, id: resultId, col: target.col, row: target.row });
-      this.registerProductionUnlock(state, resultId);
-      this.recordItemDiscovery(state, resultId);
-    }
+    state.grid.push({ uid: craftUid, id: resultId, col: target.col, row: target.row });
+    this.registerProductionUnlock(state, resultId);
+    this.recordItemDiscovery(state, resultId);
 
     // Clear craft state
     delete tableItem.craft;
@@ -2855,7 +2903,7 @@ export class GameEngine {
     const seen = new Set<number>();
     const result: Array<Omit<GridItem, "col" | "row"> & { col?: number; row?: number }> = [];
     for (const raw of [...(state.grid ?? []), ...(state.pouch ?? [])]) {
-      const item = typeof raw === "number" ? { id: raw } : raw;
+      const item = raw;
       if (item.uid && seen.has(item.uid)) continue;
       if (item.uid) seen.add(item.uid);
       result.push(item);
@@ -2864,7 +2912,6 @@ export class GameEngine {
   }
 
   private getStoredItemId(entry: unknown): number {
-    if (typeof entry === "number") return entry;
     if (!entry || typeof entry !== "object") return 0;
     return Number((entry as { id?: unknown }).id ?? 0);
   }
@@ -2965,6 +3012,7 @@ export class GameEngine {
     };
 
     state.cultivation = newCultivation;
+    this.weeklyTaskService.ensureProgress(state);
     state.meridian_acupoints = [];
     const rewardId = this.getStageBreakthroughReward(level);
     const rewards = rewardId > 0 ? this.applyRewards(state, rewardId) : { tokens: [], items: [] };
@@ -2973,7 +3021,9 @@ export class GameEngine {
 
     const stageName = nextStage?.name ?? `stage_${nextLevel}`;
     console.log(`[engine] breakthrough: -> ${stageName} | consumed=${JSON.stringify([...requiredCounts])} | qi=${newCultivation.max_qi} | v${state.version}`);
-    this.questEngine.incrementQuestProgress(state, QuestType.BREAKTHROUGH, 1, this);
+    // The breakthrough that exits the novice phase is itself a novice action;
+    // subsequent breakthroughs are tracked normally.
+    if (level >= 2) this.questEngine.incrementQuestProgress(state, QuestType.BREAKTHROUGH, 1, this);
     return { ok: true, newCultivation, rewards };
   }
 
@@ -3104,23 +3154,10 @@ export class GameEngine {
     return { ok: true, cultivation: state.cultivation };
   }
 
-  ensurePouchCapacity(state: GameState): boolean {
-    const capacity = Number.isSafeInteger(state.pouch_capacity) && state.pouch_capacity! > 0
-      ? state.pouch_capacity! : this.pouchConfig.initialSlots;
-    const normalized = Math.max(capacity, this.pouchConfig.initialSlots, state.pouch?.length ?? 0);
-    const count = Number.isSafeInteger(state.pouch_unlock_count) && state.pouch_unlock_count! >= 0
-      ? state.pouch_unlock_count! : 0;
-    const changed = state.pouch_capacity !== normalized || state.pouch_unlock_count !== count;
-    state.pouch_capacity = normalized;
-    state.pouch_unlock_count = count;
-    return changed;
-  }
-
   getPouchState(state: GameState): { pouch_capacity: number; pouch_next_unlock_cost: number } {
-    this.ensurePouchCapacity(state);
     return {
-      pouch_capacity: state.pouch_capacity!,
-      pouch_next_unlock_cost: this.pouchConfig.unlockCostBase + state.pouch_unlock_count! * this.pouchConfig.unlockCostIncrement,
+      pouch_capacity: state.pouch_capacity,
+      pouch_next_unlock_cost: this.pouchConfig.unlockCostBase + state.pouch_unlock_count * this.pouchConfig.unlockCostIncrement,
     };
   }
 
@@ -3133,8 +3170,8 @@ export class GameEngine {
     }
     if (state.spirit_stones < cost) return { ok: false, reason: "insufficient_stones" };
     state.spirit_stones -= cost;
-    state.pouch_capacity! += 1;
-    state.pouch_unlock_count! += 1;
+    state.pouch_capacity += 1;
+    state.pouch_unlock_count += 1;
     state.version += 1;
     return { ok: true, cost };
   }
@@ -3442,8 +3479,7 @@ export class GameEngine {
     if (req.breakthrough_order === true) {
       return { ok: false, reason: "breakthrough_confirmation_required" };
     }
-    const requiredIds: number[] = Array.isArray((req as any).item_ids)
-      ? [...(req as any).item_ids] : Array.from({ length: req.count }, () => req.item_id);
+    const requiredIds = [...req.item_ids];
     requiredIds.sort((a, b) => a - b);
     if (requiredIds.length === 0 || itemIds.length !== requiredIds.length || [...itemIds].sort((a, b) => a - b).some((id, i) => id !== requiredIds[i])) {
       return { ok: false, reason: "invalid_order_items" };
@@ -3462,12 +3498,11 @@ export class GameEngine {
       }
       const pouchIndex = (state.pouch ?? []).findIndex((entry, i) =>
         !pouchToRemove.includes(i) && this.getStoredItemId(entry) === reqItemId
-        && (typeof entry === "number" || (entry.immovable !== true
-          && (!entry.uid || !consumedUids.has(entry.uid)))));
+        && entry.immovable !== true && !consumedUids.has(entry.uid));
       if (pouchIndex < 0) return { ok: false, reason: "insufficient_items" };
       pouchToRemove.push(pouchIndex);
       const stored = state.pouch[pouchIndex];
-      if (typeof stored !== "number" && stored.uid) consumedUids.add(stored.uid);
+      consumedUids.add(stored.uid);
     }
 
     if (state.cultivation.current_qi >= state.cultivation.max_qi) {
@@ -3495,7 +3530,8 @@ export class GameEngine {
       : (totalValue > 0 && threshold?.acupoint_rewards
         ? this._scaleRewardConfig(threshold.acupoint_rewards, totalValue)
         : undefined);
-    const cardPackReward = this.cardCollectionService.getSourceRewardConfig("order", 0, totalValue);
+    const cardPackReward = activitiesUnlocked(state)
+      ? this.cardCollectionService.getSourceRewardConfig("order", 0, totalValue) : {};
     if (cardPackReward.items?.length) {
       orderRewards ??= { tokens: [], items: [] };
       orderRewards.items ??= [];
@@ -3552,6 +3588,8 @@ export class GameEngine {
     }
 
     this.battlePassService.awardOrderPoints(state, totalValue, requestId);
+    this.secretRealmService.awardOrder(state);
+    this.orderDuelService.awardOrderPoints(state, requiredIds.reduce((sum, id) => sum + (this.getItemData(id)?.value ?? 0), 0));
     this.stairClimbService.awardOrderPoints(state, requiredIds.reduce((sum, id) => sum + (this.getItemData(id)?.value ?? 0), 0));
     if (requestId) state.card_collection_order_requests = [...(state.card_collection_order_requests ?? []), requestId].slice(-128);
     return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, rewards: rewardsApplied, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, pouch: state.pouch, ...this.getPouchState(state), cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, battle_pass_progress: this.battlePassService.ensureProgress(state) };
@@ -3618,6 +3656,7 @@ export class GameEngine {
   // --- Shop ---
 
   sellItem(state: GameState, uid: number): { ok: true; stones: number } | { ok: false; reason: string } {
+    const rewindBefore = this.goldenFingerService.snapshot(state);
     const item = state.grid.find(i => i.uid === uid);
     if (!item) return { ok: false, reason: "item_not_found" };
     const itemId = item.id;
@@ -3640,19 +3679,24 @@ export class GameEngine {
     console.log(`[engine] sell: ${itemName} (uid=${uid}) -> +${price} stones | total=${state.spirit_stones}`);
 
     this.questEngine.incrementQuestProgress(state, QuestType.SELL, 1, this);
+    this.goldenFingerService.capture(state, rewindBefore, "出售");
 
     return { ok: true, stones: state.spirit_stones };
   }
 
-  buyItem(state: GameState, itemId: number, targetCol: number, targetRow: number): { ok: true; uid: number; stones: number } | { ok: false; reason: string } {
+  buyItem(state: GameState, itemId: number, targetCol: number, targetRow: number, expectedRevision?: number, now = Date.now()): { ok: true; uid: number; stones: number } | { ok: false; reason: string } {
+    this.shopService.ensure(state, now);
+    if (expectedRevision !== undefined && state.shop!.revision !== expectedRevision) return { ok: false, reason: "shop_changed" };
+    const offer = state.shop!.items.find(item => item.id === itemId);
+    if (!offer) return { ok: false, reason: "not_in_shop" };
+    if (offer.purchased >= this.shopService.purchaseLimit) return { ok: false, reason: "purchase_limit_reached" };
+    if (!Number.isSafeInteger(targetCol) || !Number.isSafeInteger(targetRow)) return { ok: false, reason: "out_of_bounds" };
     if (!this.isInBounds(targetCol, targetRow)) return { ok: false, reason: "out_of_bounds" };
     const targetKey = this.posKey(targetCol, targetRow);
     if (state.grid.some(i => this.posKey(i.col, i.row) === targetKey)) return { ok: false, reason: "target_occupied" };
 
-    const price = this.getBuyPrice(itemId);
+    const price = offer.price;
     if (price <= 0) return { ok: false, reason: "cannot_buy" };
-
-    if (!this.shopConfig.shopItems.some((s: any) => s.id === itemId)) return { ok: false, reason: "not_in_shop" };
 
     if (state.spirit_stones < price) return { ok: false, reason: "insufficient_stones" };
 
@@ -3660,6 +3704,7 @@ export class GameEngine {
     if (!itemData) return { ok: false, reason: "item_data_not_found" };
 
     state.spirit_stones -= price;
+    offer.purchased++;
     const buyUid = this._nextUid(state);
     state.grid.push({ uid: buyUid, id: itemId, col: targetCol, row: targetRow });
     this.registerProductionUnlock(state, itemId);

@@ -18,6 +18,15 @@ func setup(quest: Dictionary, progress: Dictionary) -> void:
 	for child in rewards_container.get_children():
 		child.queue_free()
 	_display_rewards(quest)
+	var points: int = int(quest.get("weekly_points", 0))
+	if points > 0:
+		var points_label := Label.new()
+		points_label.name = "TaskPoints"
+		points_label.text = "+%d 积分" % points
+		points_label.tooltip_text = "领取任务奖励时获得积分"
+		points_label.add_theme_font_size_override("font_size", 12)
+		points_label.add_theme_color_override("font_color", Color(0.30, 0.42, 0.22))
+		rewards_container.add_child(points_label)
 
 	var current: int = int(progress.get("current_count", 0))
 	var target: int = maxi(1, int(quest.get("target_count", 1)))

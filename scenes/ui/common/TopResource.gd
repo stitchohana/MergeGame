@@ -1,5 +1,7 @@
 class_name TopResource extends Control
 
+signal add_pressed()
+
 @export var icon_texture: Texture2D
 @export var show_regen_timer: bool = true
 
@@ -12,6 +14,7 @@ var _value_tween: Tween = null
 var _value_pulse_tween: Tween = null
 
 func _ready() -> void:
+	$AddButton.pressed.connect(func(): add_pressed.emit())
 	if icon_texture:
 		$Icon.texture = icon_texture
 	regen_timer_label.visible = show_regen_timer

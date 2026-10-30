@@ -3,6 +3,7 @@ extends Node
 
 func _ready() -> void:
 	await get_tree().process_frame
+	CultivationService.current_level = 2
 	GameState.stamina_multiplier_max = 1
 	GameState.stamina_multiplier_selected = 1
 	GameState.stamina_multiplier_expires_at = 0
@@ -79,6 +80,21 @@ func _ready() -> void:
 	var filled_order_plan: Dictionary = launcher_controller._get_order_priority_spawn(5001, 4)
 	assert(int((filled_order_plan.get("item", {}) as Dictionary).get("id", 0)) == 5003)
 	assert(int(filled_order_plan.get("multiplier", 0)) == 4)
+	# The spring launcher can roll crystal sand (group 12) while the order
+	# asks for level-one spring water (group 11). Priority must inspect the
+	# launcher's complete spawn table instead of only the rolled group.
+	GridManager.init_grid(Constants.BoardType.MAIN)
+	GameState.meridian_acupoints = [{
+		"item_ids": [9001],
+		"items": [{"item_id": 9001}],
+		"completed": false,
+	}]
+	var spring_plan: Dictionary = launcher_controller._get_order_priority_spawn(
+		10001, 4, ConfigDatabase.get_item_data(12008)
+	)
+	assert(int((spring_plan.get("item", {}) as Dictionary).get("id", 0)) == 9001)
+	assert(int(spring_plan.get("multiplier", 0)) == 1)
+	assert(bool(spring_plan.get("order_priority", false)))
 	GridManager.init_grid(Constants.BoardType.MAIN)
 	GameState.meridian_acupoints = [{
 		"item_ids": [14101],
@@ -129,9 +145,19 @@ func _ready() -> void:
 	crafting_table["_craft_recipe"] = {}
 	crafting_table["_craft_result_id"] = -1
 	assert(GridManager.add_item(crafting_table, Vector2i(0, 0)))
+	# Keep nested-recipe coverage independent of the live recipe table.
+	var original_recipes: Array = ConfigDatabase.get_recipes()
+	ConfigDatabase._items_data["_recipes"] = [
+		{"id": 32, "result": 27081, "ingredients": [27002, 9004]},
+		{"id": 2, "result": 27002, "ingredients": [5002, 9002]},
+	]
+	var original_table_recipes: Array = ConfigDatabase.get_recipes_for_item(17001)
+	ConfigDatabase._recipes_by_table[17001] = ConfigDatabase._items_data["_recipes"]
 	var stored_intermediate_outstanding: Dictionary = (
 		launcher_controller._get_outstanding_order_item_counts()
 	)
+	ConfigDatabase._items_data["_recipes"] = original_recipes
+	ConfigDatabase._recipes_by_table[17001] = original_table_recipes
 	assert(not stored_intermediate_outstanding.has(27002))
 	assert(not stored_intermediate_outstanding.has(5002))
 	assert(not stored_intermediate_outstanding.has(9002))

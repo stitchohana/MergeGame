@@ -36,6 +36,10 @@ func _on_show_toast(message: String) -> void:
 func _on_kicked() -> void:
 	push_warning("Connection lost; returning to login")
 	UIManager.clear_all_screens()
+	# An interrupted scene's loading timer must finish before auto-login can
+	# replace the login page with the authoritative home state.
+	while SceneTransitionManager._is_loading:
+		await get_tree().process_frame
 	var login := preload("res://scenes/screens/LoginScreen.tscn").instantiate()
 	UIManager.push_screen(login)
 

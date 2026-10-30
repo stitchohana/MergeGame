@@ -6,11 +6,12 @@ const engine = new GameEngine({
   ...gameConfigTables,
   cultivation: {
     stages: [
-      { name: "起始", exp: 30, max_qi: 1000, breakthrough_items: [
+      { ...gameConfigTables.cultivation.stages[0], exp: 30, max_qi: 1000, breakthrough_items: [
         { item_id: 5001, count: 2 },
         { item_id: 5002, count: 1 },
       ] },
-      { name: "下一层", exp: 999, max_qi: 2000 },
+      { ...gameConfigTables.cultivation.stages[1], exp: 999, max_qi: 2000 },
+      ...gameConfigTables.cultivation.stages.slice(2),
     ],
   },
 });

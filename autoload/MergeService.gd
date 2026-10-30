@@ -19,32 +19,33 @@ func _ready() -> void:
 	CloudService.merge_confirmed.connect(_on_merge_confirmed)
 	CloudService.merge_rejected.connect(_on_merge_rejected)
 
-func can_merge(item_a_data: Dictionary, item_b_data: Dictionary) -> bool:
+func can_merge(item_a_data: Dictionary, item_b_data: Dictionary, next_lookup: Callable = Callable()) -> bool:
+	if not _same_merge_identity(item_a_data, item_b_data):
+		return false
+	if get_next_item(item_a_data, next_lookup).is_empty():
+		return false
+	return not _has_craft_materials(item_a_data) and not _has_craft_materials(item_b_data)
+
+func _same_merge_identity(item_a_data: Dictionary, item_b_data: Dictionary) -> bool:
 	if item_a_data.is_empty() or item_b_data.is_empty():
 		return false
 	if item_a_data.get("group_id", 0) != item_b_data.get("group_id", 0):
 		return false
 	if item_a_data.get("id", 0) != item_b_data.get("id", 0):
 		return false
-	var type: int = item_a_data.get("type", 0)
-	var level: int = item_a_data.get("level", 0)
-	var gid: int = item_a_data.get("group_id", 0)
-	var next: Dictionary = ConfigDatabase.get_next_level(type, level, gid)
-	if next.is_empty():
-		return false
-	return not is_merge_blocked_by_craft_materials(item_a_data, item_b_data)
+	return true
+
+# Alternative boards provide their config lookup while retaining the same merge
+# predicate. Main-board callers keep the existing ConfigDatabase behavior.
+func get_next_item(item_data: Dictionary, next_lookup: Callable = Callable()) -> Dictionary:
+	if next_lookup.is_valid():
+		return next_lookup.call(item_data)
+	return ConfigDatabase.get_next_level(int(item_data.get("type", 0)), int(item_data.get("level", 0)), int(item_data.get("group_id", 0)))
 
 func is_merge_blocked_by_craft_materials(item_a_data: Dictionary, item_b_data: Dictionary) -> bool:
-	if item_a_data.is_empty() or item_b_data.is_empty():
+	if not _same_merge_identity(item_a_data, item_b_data):
 		return false
-	if item_a_data.get("group_id", 0) != item_b_data.get("group_id", 0):
-		return false
-	if item_a_data.get("id", 0) != item_b_data.get("id", 0):
-		return false
-	var type: int = int(item_a_data.get("type", 0))
-	var level: int = int(item_a_data.get("level", 0))
-	var gid: int = int(item_a_data.get("group_id", 0))
-	var next: Dictionary = ConfigDatabase.get_next_level(type, level, gid)
+	var next: Dictionary = get_next_item(item_a_data)
 	if next.is_empty():
 		return false
 	return _has_craft_materials(item_a_data) or _has_craft_materials(item_b_data)
@@ -69,11 +70,7 @@ func try_merge(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 		merge_failed.emit("merge_pending")
 		return false
 
-	var next_item: Dictionary = ConfigDatabase.get_next_level(
-		item_a.get("type", 0) as int,
-		item_a.get("level", 0) as int,
-		item_a.get("group_id", 0) as int
-	)
+	var next_item: Dictionary = get_next_item(item_a)
 	if next_item.is_empty():
 		merge_failed.emit("Cannot merge")
 		return false

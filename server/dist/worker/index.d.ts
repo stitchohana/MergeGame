@@ -6,6 +6,7 @@ export interface Env {
     MAINTENANCE_MODE?: string;
 }
 declare const _default: {
+    scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void>;
     fetch(request: Request, env: Env): Promise<Response>;
 };
 export default _default;

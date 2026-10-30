@@ -12,6 +12,11 @@ var _result: VBoxContainer
 var _reveal_tween: Tween
 var _result_data: Dictionary = {}
 var _card_grids: Array[GridContainer] = []
+var _points_label: Label
+var _exchange_button: Button
+var _countdown: Label
+var _last_countdown_second: int = -1
+var _last_time_active: bool = false
 
 
 func _ready() -> void:
@@ -38,6 +43,9 @@ func _ready() -> void:
 	var close: Button = _button("关闭")
 	close.pressed.connect(func() -> void: UIManager.hide_popup(self))
 	header.add_child(close)
+	_countdown = _label("", 17, Color("eed5a3"))
+	_countdown.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	layout.add_child(_countdown)
 	_summary = _label("收集山海万象 · 集齐卡组获得厚礼", 17)
 	_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	layout.add_child(_summary)
@@ -64,6 +72,66 @@ func _ready() -> void:
 	CloudService.card_collection_rejected.connect(_on_rejected)
 	resized.connect(_resize_grids)
 	_refresh()
+	_update_countdown()
+	_last_time_active = _is_active()
+
+
+func _process(_delta: float) -> void:
+	if not is_visible_in_tree():
+		return
+	var second: int = int(Time.get_unix_time_from_system())
+	if second == _last_countdown_second:
+		return
+	_last_countdown_second = second
+	_update_countdown()
+	var active: bool = _is_active()
+	if active != _last_time_active:
+		_last_time_active = active
+		_refresh()
+
+
+func _activity_definition() -> Dictionary:
+	for activity: Dictionary in GameState.activity_defs:
+		if int(activity.get("id", 0)) == _activity_id:
+			return activity
+	return {}
+
+
+func _activity_timestamp(value: String) -> int:
+	if value.is_empty():
+		return 0
+	# Godot parses the wall time but does not apply an ISO 8601 timezone offset.
+	var zone_index: int = maxi(value.find("+", 10), value.find("-", 10))
+	var offset: int = 0
+	if zone_index >= 0:
+		var zone: String = value.substr(zone_index + 1).replace(":", "")
+		offset = (int(zone.left(2)) * 3600 + int(zone.substr(2, 2)) * 60) * (1 if value[zone_index] == "+" else -1)
+		value = value.left(zone_index)
+	return int(Time.get_unix_time_from_datetime_string(value.trim_suffix("Z"))) - offset
+
+
+func _update_countdown(now: int = -1) -> void:
+	if not is_instance_valid(_countdown):
+		return
+	if now < 0:
+		now = int(Time.get_unix_time_from_system())
+	var activity: Dictionary = _activity_definition()
+	var end_time: int = _activity_timestamp(str(activity.get("end_time", "")))
+	var start_time: int = _activity_timestamp(str(activity.get("start_time", "")))
+	if end_time > 0 and now >= end_time:
+		_countdown.text = "活动已结束"
+	elif start_time > now:
+		_countdown.text = "距活动开始：" + _duration_text(start_time - now)
+	elif not bool(activity.get("active", false)):
+		_countdown.text = "活动暂未开放"
+	elif end_time > 0:
+		_countdown.text = "活动剩余：" + _duration_text(end_time - now)
+	else:
+		_countdown.text = "长期开放"
+
+
+func _duration_text(seconds: int) -> String:
+	return "%d天 %02d:%02d:%02d" % [seconds / 86400, (seconds % 86400) / 3600, (seconds % 3600) / 60, seconds % 60]
 
 
 func setup(activity_id: int) -> void:
@@ -79,15 +147,17 @@ func _on_state(_data: Dictionary) -> void:
 
 
 func _is_active() -> bool:
-	for activity: Dictionary in GameState.activity_defs:
-		if int(activity.get("id", 0)) == _activity_id:
-			return bool(activity.get("active", false))
-	return false
+	var activity: Dictionary = _activity_definition()
+	var now: int = int(Time.get_unix_time_from_system())
+	var start_time: int = _activity_timestamp(str(activity.get("start_time", "")))
+	var end_time: int = _activity_timestamp(str(activity.get("end_time", "")))
+	return bool(activity.get("active", false)) and (start_time <= now) and (end_time <= 0 or now < end_time)
 
 
 func _refresh() -> void:
 	if not is_node_ready():
 		return
+	_update_countdown()
 	if _reveal_tween and _reveal_tween.is_valid():
 		_reveal_tween.kill()
 	_card_grids.clear()
@@ -102,6 +172,7 @@ func _refresh() -> void:
 	_retry.visible = not CloudService.card_collection_request.is_empty()
 	_retry.disabled = CloudService.card_collection_busy
 	_status.text = "正在结算，请稍候…" if CloudService.card_collection_busy else ("上次操作未确认，请重试以恢复结果" if busy else ("完成任务、提交订单、运转周天获得卡包，在物品暂存区点击开启" if active else "活动当前不可参与，已收集卡片会保留"))
+	_build_exchange_controls(busy)
 	_body.add_child(_label("珍藏图鉴", 21, Color("eed5a3")))
 	var total: int = 0
 	var collected: int = 0
@@ -139,20 +210,23 @@ func _refresh() -> void:
 func _on_confirmed(data: Dictionary) -> void:
 	if int(data.get("collection_id", 0)) != collection_id:
 		return
-	if not data.has("cards"):
+	if not data.has("cards") and not bool(data.get("exchanged", false)):
 		EventBus.show_toast.emit("卡组奖励到账：" + _reward_text(data.get("rewards", {})))
 	_refresh()
 
 
 func _on_rejected(reason: String) -> void:
 	_refresh()
-	var messages: Dictionary = {"pack_not_found": "当前卡包已不在暂存区，正在同步", "insufficient_packs": "暂存区没有可开启的卡包", "activity_inactive": "活动当前不可参与", "state_conflict": "进度已更新，正在同步", "already_claimed": "奖励已领取", "set_incomplete": "卡组尚未集齐", "pending_operation": "请先重试上次操作", "save_failed": "保存未完成，请重试"}
+	var messages: Dictionary = {"pack_not_found": "当前卡包已不在暂存区，正在同步", "insufficient_packs": "暂存区没有可开启的卡包", "insufficient_points": "集卡积分不足", "exchange_unavailable": "当前收藏暂不支持兑换", "activity_inactive": "活动当前不可参与", "state_conflict": "进度已更新，正在同步", "already_claimed": "奖励已领取", "set_incomplete": "卡组尚未集齐", "pending_operation": "请先重试上次操作", "save_failed": "保存未完成，请重试"}
 	_status.text = str(messages.get(reason, "操作未确认，请检查网络后重试"))
 
 
 func _build_result(data: Dictionary) -> void:
 	_result = VBoxContainer.new()
 	_body.add_child(_result)
+	var points_gained: int = int(data.get("duplicate_points_gained", 0))
+	if points_gained > 0:
+		_result.add_child(_label("重复卡获得集卡积分：+%d" % points_gained, 17, Color("eed5a3")))
 	var completed_sets: Array = data.get("completed_sets", [])
 	if not completed_sets.is_empty():
 		var names: PackedStringArray = []
@@ -182,6 +256,36 @@ func _build_result(data: Dictionary) -> void:
 			tile.modulate.a = 1.0
 	)
 	_result.add_child(skip)
+
+
+func _build_exchange_controls(busy: bool) -> void:
+	var collection: Dictionary = {}
+	for entry: Dictionary in ConfigDatabase.card_collection.get("collections", []):
+		if int(entry.collection_id) == collection_id:
+			collection = entry
+	var progress: Dictionary = GameState.get_card_collection_progress(collection_id)
+	var points: int = int(progress.get("duplicate_points", 0))
+	var total: int = int(progress.get("total_duplicate_points", 0))
+	_points_label = _label("集卡积分：%d · 累计获得：%d" % [points, total], 20, Color("eed5a3"))
+	_points_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_body.add_child(_points_label)
+	var rates: Array = collection.get("duplicate_points_by_star", [1, 2, 3, 4, 5])
+	var descriptions: PackedStringArray = []
+	for index: int in range(rates.size()):
+		descriptions.append("%d星 +%d" % [index + 1, int(rates[index])])
+	var rule: Label = _label("重复卡返积分：" + " / ".join(descriptions), 14, Color("a9bdb5"))
+	rule.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_body.add_child(rule)
+	var cost: int = int(collection.get("exchange_cost", 200))
+	var pack_id: int = int(collection.get("exchange_pack_id", 0))
+	_exchange_button = _button("兑换5星卡包 · %d积分" % cost)
+	_exchange_button.disabled = busy or not _is_active() or pack_id <= 0 or points < cost
+	_exchange_button.tooltip_text = "兑换一个5星卡包，放入物品暂存区"
+	_exchange_button.pressed.connect(func() -> void:
+		CloudService.submit_card_collection("exchange", collection_id, 0)
+		_refresh()
+	)
+	_body.add_child(_exchange_button)
 
 
 func _card_tile(card: Dictionary, count: int, badge: String = "") -> Control:

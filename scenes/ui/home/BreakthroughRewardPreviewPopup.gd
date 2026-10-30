@@ -21,17 +21,6 @@ func _ready() -> void:
 		setup_for_stage_index(pending_stage_index)
 
 
-func setup_for_current_level() -> void:
-	setup_for_current_stage()
-
-
-func setup_for_level(level: int) -> void:
-	# Backward-compatible entry point for callers that only know cultivation
-	# level. The gift now previews the corresponding home-meridian cycle reward.
-	var stages: Array = _get_home_meridian_defs()
-	setup_for_stage_index(_get_home_stage_index_for_level(level, stages.size()))
-
-
 func setup_for_current_stage() -> void:
 	var stages: Array = _get_home_meridian_defs()
 	setup_for_stage_index(_get_current_home_stage_index(stages))

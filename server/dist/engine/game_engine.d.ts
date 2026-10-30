@@ -2,7 +2,16 @@ import { GameState, GridItem, CultivationData, RewardConfig, BattleMonster } fro
 import { QuestEngine } from "./quest_engine";
 import { ActivityEngine } from "./activity_engine";
 import { GameConfigTables } from "./config_tables";
-interface ItemDef {
+import { GoldenFingerService } from "./golden_finger";
+import { SecretRealmService } from "./secret_realm";
+import { CardCollectionService } from "./card_collection";
+import { StairClimbService } from "./stair_climb";
+import { OrderDuelService } from "./order_duel";
+import { BattlePassService } from "./battle_pass";
+import { ResourcePurchaseService } from "./resource_purchase";
+import { ShopService } from "./shop";
+import { WeeklyTaskService } from "./weekly_tasks";
+export interface ItemDef {
     id: number;
     level: number;
     name: string;
@@ -119,6 +128,8 @@ export declare class GameEngine {
         launcherStoneCostPerMinute: number;
     };
     questResetHour: number;
+    private orderRecipeProductProbability;
+    private pouchConfig;
     private shopConfig;
     private meridianThresholds;
     private meridianOrderLevelRanges;
@@ -127,7 +138,17 @@ export declare class GameEngine {
     private rewardsTable;
     private homeMeridianDefs;
     questEngine: QuestEngine;
+    weeklyTaskService: WeeklyTaskService;
     activityEngine: ActivityEngine;
+    battlePassService: BattlePassService;
+    cardCollectionService: CardCollectionService;
+    stairClimbService: StairClimbService;
+    orderDuelService: OrderDuelService;
+    resourcePurchaseService: ResourcePurchaseService;
+    shopService: ShopService;
+    goldenFingerService: GoldenFingerService;
+    secretRealmService: SecretRealmService;
+    getAllItemDefs(): ItemDef[];
     constructor(configTables: GameConfigTables);
     private loadConfigs;
     private loadGameConfig;
@@ -146,6 +167,7 @@ export declare class GameEngine {
     private _copyRewardConfig;
     getHomeMeridianDefs(): any[];
     private _getAcupointReward;
+    private applyHomeCirculationReward;
     private _maxUnlockedHomeStageIndex;
     private hasReadyHomeMeridianCirculation;
     lightHomeAcupoint(state: GameState, stageIndex: number, acupointIndex: number): {
@@ -213,17 +235,26 @@ export declare class GameEngine {
     private _genFixedAcupoint;
     private isOrderCandidate;
     private registerProductionUnlock;
-    /** Backfill the unlock history for old saves and initialize new saves. */
-    initializeProductionUnlocks(state: GameState): boolean;
-    private getUnlockedOrderPool;
+    /** All confirmed acquisitions share the same persisted discovery history. */
+    recordItemDiscovery(state: GameState, itemId: number): boolean;
+    claimItemCatalogReward(state: GameState, itemId: number): {
+        ok: boolean;
+        reason?: string;
+        already_claimed?: boolean;
+        reward_stamina?: number;
+    };
+    getUnlockedOrderPool(state: GameState): number[];
     private getUnlockedOrderPoolWithWeights;
-    repairInvalidMeridianOrders(state: GameState): boolean;
     private loadInitialSetup;
     getItemData(id: number): ItemDef | null;
     getItemByLevel(type: number, level: number, groupId?: number): ItemDef | null;
     getNextLevel(type: number, level: number, groupId?: number): ItemDef | null;
     rollSpawn(launcherId: number): ItemDef | null;
     getRecipesForTable(tableId: number): RecipeDef[];
+    getOrderSupplyMaterialLevel(cultivationLevel: number): number;
+    getOrderSupplyMaterials(itemId: number, cultivationLevel?: number, limitToRequiredLevel?: boolean): number[];
+    private countOrderSupplyAvailableItems;
+    getMissingOrderSupplyMaterials(state: GameState): number[];
     getCultivationConfig(): CultivationConfig | null;
     getInitialSetup(boardType?: number): {
         id: number;
@@ -242,14 +273,17 @@ export declare class GameEngine {
     private isPowerOfTwo;
     private upgradeSpawnResult;
     private getOutstandingOrderItemCounts;
+    private tableSupportsOrderMaterials;
     private consumeAvailableOrderItems;
     private addRecipeMaterialRequirements;
     private getOrderPrioritySpawnPlan;
+    private getLauncherSpawnSources;
+    private getOrderCandidateMultiplier;
     _nextUid(state: GameState): number;
     getRechargeTime(itemId: number): number;
     isInBounds(col: number, row: number): boolean;
-    tickStamina(state: GameState): void;
-    getRegenRemainingMs(state: GameState): number;
+    tickStamina(state: GameState, now?: number): boolean;
+    getRegenRemainingMs(state: GameState, now?: number): number;
     private isLauncher;
     enrichGridWithRechargeRemaining(grid: any[]): void;
     tickLauncherRecharge(state: GameState): void;
@@ -270,7 +304,7 @@ export declare class GameEngine {
     applyRewards(state: GameState, rewards: RewardConfig | number): RewardConfig;
     createInitialState(boardType?: number): GameState;
     createSpawnSeed(): number;
-    switchBoard(state: GameState, boardType: string, battleMapId?: number, battleStage?: number): {
+    switchBoard(state: GameState, boardType: number, battleMapId?: number, battleStage?: number): {
         ok: true;
         newVersion: number;
     } | {
@@ -343,6 +377,7 @@ export declare class GameEngine {
         ok: false;
         reason: string;
     };
+    finishBoardCrafting(state: GameState): number;
     executeCraftSpeedup(state: GameState, tableCol: number, tableRow: number): {
         ok: true;
         cost: number;
@@ -375,6 +410,11 @@ export declare class GameEngine {
         reason: string;
     };
     private matchRecipe;
+    /** Physical instances owned on the active board or in the shared pouch.
+     * Keep references so timers update stored instances as well. Nested materials
+     * are prediction inputs only and cannot be submitted directly as order items.
+     */
+    private getInventoryItems;
     private getStoredItemId;
     getStageBreakthroughItems(level: number): {
         item_id: number;
@@ -412,16 +452,28 @@ export declare class GameEngine {
         ok: false;
         reason: string;
     };
-    pouchDeposit(state: GameState, uid: number): {
+    getPouchState(state: GameState): {
+        pouch_capacity: number;
+        pouch_next_unlock_cost: number;
+    };
+    pouchUnlock(state: GameState, expectedCapacity: number): {
         ok: true;
-        pouch: number[];
+        cost: number;
     } | {
         ok: false;
         reason: string;
     };
-    pouchWithdraw(state: GameState, itemId: number, col: number, row: number): {
+    pouchDeposit(state: GameState, uid: number): {
         ok: true;
-        pouch: number[];
+        pouch: GameState["pouch"];
+    } | {
+        ok: false;
+        reason: string;
+    };
+    pouchWithdraw(state: GameState, uid: number, col: number, row: number): {
+        ok: true;
+        pouch: GameState["pouch"];
+        item: GridItem;
         col: number;
         row: number;
     } | {
@@ -478,13 +530,15 @@ export declare class GameEngine {
         ok: false;
         reason: string;
     };
-    completeMeridianAcupoint(state: GameState, index: number, itemIds: number[]): {
+    completeMeridianAcupoint(state: GameState, index: number, itemIds: number[], requestId?: string): {
         ok: true;
         newVersion: number;
         meridian_acupoints: any[];
+        rewards: RewardConfig;
         qi_gained: number;
         qi_full: boolean;
         grid: any[];
+        pouch: GameState["pouch"];
         cultivation: any;
         spirit_stones: number;
         stamina: number;
@@ -517,7 +571,7 @@ export declare class GameEngine {
         ok: false;
         reason: string;
     };
-    buyItem(state: GameState, itemId: number, targetCol: number, targetRow: number): {
+    buyItem(state: GameState, itemId: number, targetCol: number, targetRow: number, expectedRevision?: number, now?: number): {
         ok: true;
         uid: number;
         stones: number;

@@ -18,8 +18,8 @@ async function main() {
     await router.handle({ method: "POST", path, body, headers: { authorization: `Bearer ${token}` }, query: {} }, response);
     return { status: response.statusCode, data: await response.toResponse().json() as any };
   }
-  const order = (id: number, extra = {}) => ({ item_id: id, name: "test", count: 1, completed: false, ...extra });
-  const state = engine.createInitialState();
+  const order = (id: number, extra = {}) => ({ item_ids: [id], name: "test", completed: false, ...extra });
+  const state = engine.createInitialState(); state.cultivation.current_level = 2;
   // One result matches two orders but only counts once, without submitting either.
   state.meridian_acupoints = [order(5002), order(5002, { item_ids: [5002, 9002] })];
   state.grid = [0, 1, 2, 3].map(col => ({ id: 5001, uid: engine._nextUid(state), col, row: 0 }));
@@ -40,7 +40,7 @@ async function main() {
 
   // Completed orders, breakthrough placeholders and unrelated results don't count.
   for (const orders of [[], [order(9002)], [order(5002, { completed: true })], [order(5002, { breakthrough_order: true })]]) {
-    const unrelated = engine.createInitialState();
+    const unrelated = engine.createInitialState(); unrelated.cultivation.current_level = 2;
     unrelated.meridian_acupoints = orders;
     unrelated.grid = [0, 1].map(col => ({ id: 5001, uid: engine._nextUid(unrelated), col, row: 0 }));
     assert.equal(engine.executeMerge(unrelated, 0, 0, 1, 0).ok, true);

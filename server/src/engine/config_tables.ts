@@ -1,5 +1,10 @@
 export interface GameConfigTables {
+  secretRealm?: unknown;
+  goldenFinger?: unknown;
   activities: unknown;
+  stairClimb: unknown;
+  orderSupply: unknown;
+  orderDuel?: unknown;
   battlePass: unknown;
   cardCollection?: unknown;
 	cultivation: unknown;

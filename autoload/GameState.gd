@@ -59,6 +59,11 @@ signal battle_pass_changed(progress: Dictionary)
 
 
 func sync_stamina_multiplier(data: Dictionary) -> void:
+	var cultivation: Dictionary = data.get("cultivation", {})
+	var level: int = int(cultivation.get("current_level", CultivationService.current_level))
+	if level < 2:
+		_reset_stamina_multiplier()
+		return
 	if not data.has("stamina_multiplier_max"):
 		return
 	var now_ms: int = int(Time.get_unix_time_from_system() * 1000.0)
@@ -84,6 +89,9 @@ func sync_stamina_multiplier(data: Dictionary) -> void:
 
 
 func select_stamina_multiplier(multiplier: int) -> void:
+	if CultivationService.current_level < 2:
+		_reset_stamina_multiplier()
+		return
 	if expire_stamina_multiplier_if_needed():
 		return
 	if multiplier < 1 or multiplier > stamina_multiplier_max or not _is_power_of_two(multiplier):
@@ -96,17 +104,25 @@ func select_stamina_multiplier(multiplier: int) -> void:
 
 
 func expire_stamina_multiplier_if_needed() -> bool:
+	if CultivationService.current_level < 2:
+		return _reset_stamina_multiplier()
 	if stamina_multiplier_max <= 1:
 		return false
 	var now_ms: int = int(Time.get_unix_time_from_system() * 1000.0)
 	if stamina_multiplier_expires_at > now_ms:
 		return false
+	return _reset_stamina_multiplier()
+
+
+func _reset_stamina_multiplier() -> bool:
+	var changed: bool = stamina_multiplier_max != 1 or stamina_multiplier_selected != 1 or stamina_multiplier_expires_at != 0 or stamina_multiplier_manual
 	stamina_multiplier_max = 1
 	stamina_multiplier_selected = 1
 	stamina_multiplier_expires_at = 0
 	stamina_multiplier_manual = false
-	stamina_multiplier_changed.emit(1, 1, 0)
-	return true
+	if changed:
+		stamina_multiplier_changed.emit(1, 1, 0)
+	return changed
 
 
 func get_stamina_multiplier_remaining_seconds() -> float:

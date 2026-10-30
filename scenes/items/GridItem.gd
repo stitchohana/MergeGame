@@ -143,8 +143,14 @@ func _update_status_icons() -> void:
 	if status_idle_icon:
 		var is_crafting_table: bool = _item_type() == Constants.ItemType.CRAFTING
 		var craft_state: int = int(item_data.get("_craft_state", 0))
+		var stored_variant: Variant = item_data.get("_craft_stored", [])
+		var has_stored_materials: bool = stored_variant is Array and not (stored_variant as Array).is_empty()
 		status_idle_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.IDLE
-		status_loaded_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.HAS_ITEMS
+		# The loaded badge is meaningful only when the table actually contains
+		# material.
+		status_loaded_icon.visible = is_crafting_table \
+			and craft_state == CraftingService.TableState.HAS_ITEMS \
+			and has_stored_materials
 		status_working_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.CRAFTING
 		status_ready_icon.visible = is_crafting_table and craft_state == CraftingService.TableState.READY
 

@@ -2,8 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.grantCurrentOrderItems = grantCurrentOrderItems;
 exports.refreshAllOrders = refreshAllOrders;
+exports.clearBoardItems = clearBoardItems;
+exports.mergeAllBoardItems = mergeAllBoardItems;
+exports.claimAllPendingItems = claimAllPendingItems;
 exports.createGMRouter = createGMRouter;
 const http_1 = require("../worker/http");
+const game_engine_1 = require("../engine/game_engine");
 const auth_1 = require("../middleware/auth");
 const queue_1 = require("./queue");
 function grantCurrentOrderItems(state, engine) {
@@ -79,13 +83,97 @@ function grantCurrentOrderItems(state, engine) {
             gridItem.last_charge_time = Date.now();
         }
         mainGrid.push(gridItem);
+        engine.registerProductionUnlock(state, orderItem.id);
+        engine.recordItemDiscovery(state, orderItem.id);
     }
-    engine.initializeProductionUnlocks(state);
     state.version += 1;
     return { grantedCount: orderItems.length, itemCounts, mainGrid };
 }
 function refreshAllOrders(state, engine) {
     return engine.refreshMeridianRequirements(state);
+}
+function clearBoardItems(state, engine) {
+    let removedCount = 0;
+    // The active board and cached boards can share an array. Process each once
+    // and retain its identity so every reference sees the same cleared state.
+    const grids = new Set([state.grid, state.saved_grid, state.battle_grid]);
+    for (const grid of grids) {
+        if (!grid)
+            continue;
+        for (let index = grid.length - 1; index >= 0; index -= 1) {
+            const definition = engine.getItemData(grid[index].id);
+            if (definition && (definition.type === 1 || definition.type === 2
+                || (definition.spawns?.length ?? 0) > 0 || (definition.max_charges ?? 0) > 0))
+                continue;
+            grid.splice(index, 1);
+            removedCount += 1;
+        }
+    }
+    if (removedCount > 0)
+        state.version += 1;
+    return removedCount;
+}
+function mergeAllBoardItems(state, engine) {
+    const grid = state.grid;
+    let mergedCount = 0;
+    while (true) {
+        // Full tables and ongoing/finished crafts own items that executeMerge
+        // would discard. Leave them intact, even if another empty table matches.
+        const candidates = grid.filter(item => {
+            const definition = engine.getItemData(item.id);
+            return definition && engine.isInBounds(item.col, item.row)
+                && engine.getNextLevel(definition.type, definition.level, definition.group_id)
+                && !(item.storage?.items?.length)
+                && !(item.craft?._craft_stored?.length)
+                && item.craft?._craft_state !== game_engine_1.TableState.CRAFTING
+                && item.craft?._craft_state !== game_engine_1.TableState.READY;
+        });
+        let pair;
+        for (const source of candidates) {
+            // Locked tutorial items can be merge targets, but cannot be dragged.
+            if (source.immovable)
+                continue;
+            const target = candidates.find(item => item !== source && item.id === source.id
+                && engine.validateMerge(state, source.col, source.row, item.col, item.row).valid);
+            if (target) {
+                pair = [source, target];
+                break;
+            }
+        }
+        if (!pair)
+            break;
+        const [source, target] = pair;
+        const result = engine.executeMerge(state, source.col, source.row, target.col, target.row);
+        if (!result.ok)
+            throw new Error(`GM board merge failed: ${result.reason}`);
+        // executeMerge replaces state.grid. Preserve aliases to cached boards.
+        grid.splice(0, grid.length, ...state.grid);
+        state.grid = grid;
+        mergedCount += 1;
+    }
+    return mergedCount;
+}
+function claimAllPendingItems(state, engine) {
+    const pending = Array.isArray(state.pending_rewards) ? state.pending_rewards : [];
+    const itemUids = pending.filter(reward => reward.kind !== "card_pack").map(reward => reward.uid);
+    let claimedCount = 0;
+    let skippedCount = 0;
+    for (const uid of itemUids) {
+        const result = engine.questEngine.claimPendingReward(state, uid, engine);
+        if (result.ok)
+            claimedCount += 1;
+        else
+            skippedCount += 1;
+        if (!result.ok && result.reason === "board_full")
+            break;
+    }
+    if (claimedCount > 0)
+        state.version += 1;
+    return {
+        claimedCount,
+        remainingCount: state.pending_rewards.filter(reward => reward.kind !== "card_pack").length,
+        skippedCount,
+    };
 }
 function createGMRouter(storage, engine, jwtSecret, gmKey) {
     const router = new http_1.Router();
@@ -107,7 +195,7 @@ function createGMRouter(storage, engine, jwtSecret, gmKey) {
                 return;
             }
             const userId = req.auth.userId;
-            const { cmd, amount, item_id, col, row } = req.body;
+            const { cmd, amount, item_id, col, row, level } = req.body;
             // Use shared queue to prevent race conditions with game ops
             await (0, queue_1.enqueue)(userId, async () => {
                 const state = await storage.loadState(userId);
@@ -115,6 +203,7 @@ function createGMRouter(storage, engine, jwtSecret, gmKey) {
                     res.status(404).json({ error: "user_not_found" });
                     return;
                 }
+                const knownItemIds = new Set(state.crafted_item_ids);
                 engine.tickStamina(state);
                 engine.tickLauncherRecharge(state);
                 let msg = "ok";
@@ -141,13 +230,45 @@ function createGMRouter(storage, engine, jwtSecret, gmKey) {
                         msg = `Stones now: ${state.spirit_stones}`;
                         break;
                     }
-                    case "set_stamina": {
-                        const amt = parseInt(amount, 10);
-                        if (isNaN(amt) || amt < 0) {
+                    case "add_battle_pass_points": {
+                        const amt = amount;
+                        if (!Number.isSafeInteger(amt) || amt <= 0) {
                             res.status(400).json({ error: "invalid_amount" });
                             return;
                         }
-                        state.stamina = Math.min(amt, engine.staminaConfig.max);
+                        const passes = engine.battlePassService.getDefinitions();
+                        if (passes.length !== 1) {
+                            res.status(400).json({ error: "battle_pass_not_configured" });
+                            return;
+                        }
+                        const activityId = passes[0].activity_id;
+                        const progress = engine.battlePassService.ensureProgress(state);
+                        const total = progress[activityId].points + amt;
+                        if (!Number.isSafeInteger(total)) {
+                            res.status(400).json({ error: "invalid_amount" });
+                            return;
+                        }
+                        progress[activityId].points = total;
+                        gmResult = { battle_pass_progress: progress };
+                        msg = `Battle pass ${activityId} points now: ${total}`;
+                        break;
+                    }
+                    case "set_stamina": {
+                        const amt = parseInt(amount, 10);
+                        if (!Number.isSafeInteger(amt) || amt < 0) {
+                            res.status(400).json({ error: "invalid_amount" });
+                            return;
+                        }
+                        if (amt > state.stamina)
+                            engine.addStamina(state, amt - state.stamina);
+                        else
+                            state.stamina = amt;
+                        const multiplier = engine.getStaminaMultiplierState(state);
+                        gmResult = {
+                            stamina: state.stamina,
+                            stamina_multiplier_max: multiplier.maxMultiplier,
+                            stamina_multiplier_expires_at: multiplier.expiresAt,
+                        };
                         msg = `Stamina set to ${state.stamina}`;
                         break;
                     }
@@ -222,7 +343,20 @@ function createGMRouter(storage, engine, jwtSecret, gmKey) {
                             gitem.last_charge_time = Date.now();
                         }
                         state.grid.push(gitem);
+                        engine.registerProductionUnlock(state, iid);
+                        engine.recordItemDiscovery(state, iid);
                         msg = `Added #${iid} at (${emptyCol},${emptyRow}) uid=${uid}`;
+                        break;
+                    }
+                    case "add_secret_realm_swords": {
+                        const result = engine.secretRealmService.gmGrantSwords(state, level, amount);
+                        if (!result.ok) {
+                            res.status(400).json({ error: result.reason });
+                            return;
+                        }
+                        gmResult = { granted_count: result.granted_count, sword_level: result.sword_level,
+                            secret_realm: engine.secretRealmService.view(state) };
+                        msg = `已添加 ${amount} 把 ${level} 级飞剑到秘境暂存`;
                         break;
                     }
                     case "reset_launcher_cd": {
@@ -240,6 +374,30 @@ function createGMRouter(storage, engine, jwtSecret, gmKey) {
                     case "clear_grid": {
                         state.grid = [];
                         msg = "Grid cleared";
+                        break;
+                    }
+                    case "clear_board_items": {
+                        const removedCount = clearBoardItems(state, engine);
+                        gmResult = { removed_count: removedCount };
+                        msg = `已清理所有棋盘共 ${removedCount} 件物品，保留发射器和制作台`;
+                        break;
+                    }
+                    case "merge_all_board_items": {
+                        const mergedCount = mergeAllBoardItems(state, engine);
+                        gmResult = { merged_count: mergedCount, remaining_count: state.grid.length, grid: state.grid };
+                        msg = `当前棋盘已合成 ${mergedCount} 次，剩余 ${state.grid.length} 件物品`;
+                        break;
+                    }
+                    case "claim_all_pending_items": {
+                        const result = claimAllPendingItems(state, engine);
+                        gmResult = {
+                            claimed_count: result.claimedCount,
+                            remaining_count: result.remainingCount,
+                            skipped_count: result.skippedCount,
+                            grid: state.grid,
+                            pending_rewards: state.pending_rewards,
+                        };
+                        msg = `已领取 ${result.claimedCount} 件暂存物品，剩余 ${result.remainingCount} 件`;
                         break;
                     }
                     case "activate_home_acupoints": {
@@ -292,12 +450,13 @@ function createGMRouter(storage, engine, jwtSecret, gmKey) {
                         break;
                     }
                     default:
-                        res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp", "add_stones", "set_stamina", "set_qi", "levelup", "breakthrough", "add_item", "reset_launcher_cd", "clear_grid", "activate_home_acupoints", "grant_order_items", "refresh_orders", "refresh_all_orders"] });
+                        res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp", "add_stones", "add_battle_pass_points", "set_stamina", "set_qi", "levelup", "breakthrough", "add_item", "add_secret_realm_swords", "reset_launcher_cd", "clear_grid", "clear_board_items", "merge_all_board_items", "claim_all_pending_items", "activate_home_acupoints", "grant_order_items", "refresh_orders", "refresh_all_orders"] });
                         return;
                 }
+                const newlyDiscoveredItemIds = state.crafted_item_ids.filter(id => !knownItemIds.has(id));
                 await storage.saveState(userId, state);
                 console.log(`[gm] ${userId}: ${cmd} — ${msg}`);
-                res.json({ ok: true, msg, ...gmResult });
+                res.json({ ok: true, msg, storage_revision: state.storage_revision, newly_discovered_item_ids: newlyDiscoveredItemIds, ...gmResult });
             });
         }
         catch (e) {

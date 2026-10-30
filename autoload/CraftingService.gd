@@ -47,6 +47,95 @@ func _stop_craft_timer(table_item: Dictionary) -> void:
 
 # --- Public API ---
 
+func get_required_order_recipe_ids(only_outstanding: bool = false) -> Dictionary:
+	var required_ids: Dictionary = {}
+	var visited: Dictionary = {}
+	var available_counts: Dictionary = _get_order_product_counts() if only_outstanding else {}
+	for order_variant: Variant in GameState.meridian_acupoints:
+		if not order_variant is Dictionary:
+			continue
+		var order: Dictionary = order_variant as Dictionary
+		if bool(order.get("completed", false)):
+			continue
+		var targets: Array = order.get("item_ids", []) as Array
+		for target: Variant in targets:
+			var item_id: int = int(target)
+			# A finished or started product covers one requested copy. Keep this
+			# separate from visited: two orders can still need another copy.
+			var available: int = int(available_counts.get(item_id, 0))
+			if available > 0:
+				available_counts[item_id] = available - 1
+				continue
+			_collect_order_recipe_ids(item_id, required_ids, visited)
+	return required_ids
+
+
+func _get_order_product_counts() -> Dictionary:
+	var counts: Dictionary = {}
+	for entry: Dictionary in GridManager.get_inventory_items():
+		var item: Dictionary = entry.get("data", {}) as Dictionary
+		var item_id: int = int(item.get("id", 0))
+		if int(item.get("type", 0)) == Constants.ItemType.CRAFTING:
+			var state: int = int(item.get("_craft_state", TableState.IDLE))
+			if state != TableState.CRAFTING and state != TableState.READY:
+				continue
+			item_id = int(item.get("_craft_result_id", 0))
+			if item_id <= 0:
+				var recipe: Dictionary = item.get("_craft_recipe", {}) as Dictionary
+				item_id = int(recipe.get("result", 0))
+		if item_id > 0:
+			counts[item_id] = int(counts.get(item_id, 0)) + 1
+	return counts
+
+
+func _collect_order_recipe_ids(item_id: int, required_ids: Dictionary, visited: Dictionary) -> void:
+	if item_id <= 0 or visited.has(item_id):
+		return
+	visited[item_id] = true
+	for recipe: Dictionary in ConfigDatabase.get_recipes_for_result(item_id):
+		required_ids[int(recipe.get("id", 0))] = true
+		for ingredient: Variant in recipe.get("ingredients", []):
+			_collect_order_recipe_ids(int(ingredient), required_ids, visited)
+
+
+func get_recipe_dependency_ids(result_id: int) -> Dictionary:
+	var required_ids: Dictionary = {}
+	_collect_order_recipe_ids(result_id, required_ids, {})
+	return required_ids
+
+
+func table_supports_order_materials(table_item: Dictionary, required_ids: Dictionary) -> bool:
+	# Materials in an unrelated or incompatible table cannot satisfy this order.
+	var stored_counts: Dictionary = {}
+	for stored: Dictionary in table_item.get("_craft_stored", []):
+		var item_id: int = int(stored.get("id", 0))
+		stored_counts[item_id] = int(stored_counts.get(item_id, 0)) + 1
+	var state: int = int(table_item.get("_craft_state", TableState.IDLE))
+	var active_recipe: Dictionary = table_item.get("_craft_recipe", {}) as Dictionary
+	for recipe: Dictionary in ConfigDatabase.get_recipes_for_item(int(table_item.get("id", 0))):
+		var recipe_id: int = int(recipe.get("id", 0))
+		if not required_ids.has(recipe_id):
+			continue
+		if state == TableState.CRAFTING or state == TableState.READY:
+			var active_id: int = int(active_recipe.get("id", 0))
+			if (active_id > 0 and active_id != recipe_id) or (
+				active_id <= 0 and int(active_recipe.get("result", 0)) != int(recipe.get("result", 0))
+			):
+				continue
+		var ingredient_counts: Dictionary = {}
+		for ingredient: Variant in recipe.get("ingredients", []):
+			var item_id: int = int(ingredient)
+			ingredient_counts[item_id] = int(ingredient_counts.get(item_id, 0)) + 1
+		var compatible: bool = true
+		for item_id: Variant in stored_counts:
+			if int(stored_counts[item_id]) > int(ingredient_counts.get(item_id, 0)):
+				compatible = false
+				break
+		if compatible:
+			return true
+	return false
+
+
 func add_ingredient(table_item: Dictionary, ingredient_data: Dictionary) -> bool:
 	_init_craft_data(table_item)
 	# An authoritative sync can replace a stale local craft snapshot while an

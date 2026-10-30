@@ -9,8 +9,13 @@ import json, re, sys
 from pathlib import Path
 from openpyxl import load_workbook
 from card_collection_table import read_card_collection
+from golden_finger_table import read_golden_finger, validate_cultivation
+from secret_realm_table import read_secret_realm
+from weekly_tasks_table import read_weekly_tasks
+from activity_settings_table import read_activity_settings, validate_activity_settings, validate_order_duel
 
 from facility_reward_validation import validate_facility_reward_order
+from crafting_reward_budget import validate_facility_merge_budgets
 from home_meridian_progression import SPIRIT_STONE_MINE_ID, validate_home_progression
 from recipe_validation import (
     validate_no_duplicate_ingredients,
@@ -82,25 +87,7 @@ def parse_int_list(v, sep=";"):
 def parse_ingredient_list(v):
     if v is None or v == "":
         return []
-    import re
-    result = []
-    for part in str(v).split(";"):
-        part = part.strip()
-        if not part:
-            continue
-        # Handle dict-like: {'id': 1002, 'count': 3} or JSON: {"id": 1002, "count": 3}
-        if part.startswith("{"):
-            m = re.search(r"['\"]id['\"]\s*:\s*(\d+)", part)
-            if m:
-                result.append(int(m.group(1)))
-            continue
-        # Handle id:count format: 1002:3
-        if ":" in part:
-            iid, _ = part.split(":", 1)
-            result.append(int(iid.strip()))
-            continue
-        result.append(int(part))
-    return result
+    return [int(part.strip()) for part in str(v).split(";") if part.strip()]
 
 
 def parse_dict_list(v, key1="id", key2="weight", sep=";"):
@@ -176,30 +163,13 @@ def parse_fixed_orders(v):
             item_id = int(entry)
             return {"item_ids": [item_id]}
 
-        # A nested list is the wave-aware form:
-        # [[{"item_id": 5003}], [{"item_id": 5004}]]
-        # Keep the old flat list form (including [[5003], [5004]]) valid and
-        # treat it as one wave.
-        is_wave_config = any(
-            isinstance(entry, list)
-            and any(
-                isinstance(order, dict)
-                or (isinstance(order, list) and any(isinstance(value, (dict, list)) for value in order))
-                for order in entry
-            )
-            for entry in parsed
-        )
-        if is_wave_config:
-            waves = []
-            for wave in parsed:
-                parsed_wave = [order for entry in wave if (order := parse_order(entry))]
-                if parsed_wave:
-                    waves.append(parsed_wave)
-            return waves
-
-        result = [order for entry in parsed if (order := parse_order(entry))]
-        return result
-    return [{"item_ids": [int(x.strip())]} for x in text.split(";") if x.strip()]
+        # Current JSON uses compact wave objects or nested lists of orders.
+        if all(isinstance(wave, dict) and isinstance(wave.get("item_ids"), list) for wave in parsed):
+            return [parse_order(wave) for wave in parsed]
+        if all(isinstance(wave, list) for wave in parsed):
+            return [[parse_order(entry) for entry in wave] for wave in parsed]
+        raise ValueError("fixed_orders must contain wave objects or nested order lists")
+    raise ValueError("fixed_orders must use JSON waves or item_ids:{...} shorthand")
 
 
 def read_rows(ws):
@@ -243,50 +213,6 @@ def read_recipe_definitions():
         })
     validate_no_duplicate_ingredients(recipes)
     return recipes
-
-
-def derive_recipe_product_levels(base_levels, product_ids, recipes):
-    """Return each recipe product's max required material level."""
-    recipes_by_result = {}
-    for recipe in recipes:
-        recipes_by_result.setdefault(recipe["result"], []).append(recipe)
-
-    cache = {}
-
-    def resolve(item_id, visiting=None):
-        if item_id in cache:
-            return cache[item_id]
-        if item_id in base_levels and item_id not in product_ids:
-            cache[item_id] = base_levels[item_id]
-            return cache[item_id]
-        if item_id not in product_ids:
-            # The recipe source uses 220xx as virtual references to a pill
-            # tier even though those intermediate items are not item rows.
-            if 22000 < item_id < 22100:
-                cache[item_id] = item_id - 22000
-                return cache[item_id]
-            return None
-
-        if visiting is None:
-            visiting = set()
-        if item_id in visiting:
-            return None
-        visiting.add(item_id)
-        ingredient_levels = []
-        for recipe in recipes_by_result.get(item_id, []):
-            ingredient_levels.extend(
-                resolve(ingredient_id, visiting)
-                for ingredient_id in recipe.get("ingredients", [])
-            )
-        visiting.remove(item_id)
-
-        level = max(ingredient_levels) if ingredient_levels and all(
-            value is not None for value in ingredient_levels
-        ) else None
-        cache[item_id] = level
-        return level
-
-    return {item_id: resolve(item_id) for item_id in product_ids}
 
 
 # ─── items ─────────────────────────────────────────────────
@@ -344,21 +270,11 @@ for row in read_rows(wb["items_crafting"]):
 # Read items_recipe_product sheet if it exists
 if "items_recipe_product" in [ws.title for ws in wb.worksheets]:
     recipe_product_rows = read_rows(wb["items_recipe_product"])
-    recipe_product_ids = {parse_int(row["id"]) for row in recipe_product_rows}
-    base_levels = {}
-    for item in [*regular, *launcher, *crafting]:
-        if item["id"] not in recipe_product_ids and item.get("level") is not None:
-            base_levels[item["id"]] = item["level"]
-    recipe_product_levels = derive_recipe_product_levels(
-        base_levels, recipe_product_ids, recipe_definitions
-    )
     for row in recipe_product_rows:
         item_id = parse_int(row["id"])
-        # The workbook is the source of truth.  Derivation remains a fallback
-        # for legacy sheets that predate the explicit level column values.
         recipe_level = parse_int(row.get("level"))
         if recipe_level is None:
-            recipe_level = recipe_product_levels.get(item_id)
+            raise ValueError(f"item {item_id} requires an explicit level")
         item = {"id": item_id,
                 "level": recipe_level,
                 "name": row["name"], "icon": normalized_item_icon(row),
@@ -481,14 +397,6 @@ def unflatten(rows):
         target[parts[-1]] = v
     return result
 game_config = unflatten(read_rows(wb["game_config"]))
-# Migrate workbooks created before speedup billing switched from seconds to
-# minutes. The current design is one spirit stone per started minute.
-if "craft_speedup_stone_cost_per_second" in game_config:
-    game_config.pop("craft_speedup_stone_cost_per_second")
-    game_config.setdefault("craft_speedup_stone_cost_per_minute", 1)
-if "launcher_speedup_stone_cost_per_second" in game_config:
-    game_config.pop("launcher_speedup_stone_cost_per_second")
-    game_config.setdefault("launcher_speedup_stone_cost_per_minute", 1)
 save_json("game_config.json", game_config)
 
 # ─── recipes ───────────────────────────────────────────────
@@ -551,7 +459,12 @@ wb = open_book("shop")
 items_list = []
 for row in read_rows(wb["shop"]):
     items_list.append({"id": parse_int(row["id"]), "price": parse_int(row["price"])})
-save_json("shop.json", {"items": items_list})
+shop_settings = {"refresh_cost": 100}
+if "settings" in wb.sheetnames:
+    for row in read_rows(wb["settings"]):
+        if row.get("key") == "refresh_cost":
+            shop_settings["refresh_cost"] = parse_int(row.get("value")) or 100
+save_json("shop.json", {**shop_settings, "items": items_list})
 
 # ─── expedition ────────────────────────────────────────────
 print("Building expedition.json...")
@@ -628,6 +541,7 @@ save_json("quests.json", {"quests": quests})
 
 # ─── activities ────────────────────────────────────────────
 print("Building activities.json...")
+save_json("secret_realm.json", read_secret_realm(open_book("secret_realm")))
 save_json("card_collection.json", read_card_collection(open_book("card_collection")))
 wb = open_book("activities")
 activities = []
@@ -643,7 +557,16 @@ for row in read_rows(wb["activities"]):
     if row.get("config"):
         act["config"] = json.loads(row["config"])
     activities.append(act)
+stair_climb = read_activity_settings(open_book("stair_climb"), "stair_climb")
+order_supply = read_activity_settings(open_book("order_supply"), "order_supply")
+order_duel = read_activity_settings(open_book("order_duel"), "order_duel")
+validate_order_duel(activities, order_duel)
+validate_activity_settings(activities, stair_climb, order_supply)
 save_json("activities.json", {"activities": activities})
+save_json("stair_climb.json", stair_climb)
+save_json("order_supply.json", order_supply)
+save_json("order_duel.json", order_duel)
+save_json("golden_finger.json", validate_cultivation(read_golden_finger(open_book("golden_finger")), stages))
 
 # ─── battle_pass ────────────────────────────────────────────
 print("Building battle_pass.json...")
@@ -670,14 +593,7 @@ save_json("battle_pass.json", {"passes": list(passes_by_activity.values())})
 # ─── weekly_tasks ───────────────────────────────────────────
 print("Building weekly_tasks.json...")
 wb = open_book("weekly_tasks")
-tasks_by_activity = {}
-for row in read_rows(wb["weekly_tasks"]):
-    aid = row["activity_id"]
-    if aid not in tasks_by_activity:
-        tasks_by_activity[aid] = {"activity_id": parse_int(aid), "daily_quests": []}
-    tasks_by_activity[aid]["daily_quests"].append(parse_int_list(row["quests"]))
-weekly_tasks = list(tasks_by_activity.values())
-save_json("weekly_tasks.json", {"weekly_tasks": weekly_tasks})
+save_json("weekly_tasks.json", read_weekly_tasks(wb))
 
 # ─── home_meridians ────────────────────────────────────────
 print("Building home_meridians.json...")
@@ -721,7 +637,8 @@ validate_home_progression(home_stages, stages, rewards, {"regular": regular, "la
 
 
 def validate_facility_rewards():
-    """Validate the staged facility rewards after the schema migration."""
+    """Validate the current staged facility rewards."""
+    validate_facility_merge_budgets(home_stages, {"crafting": crafting, "launcher": launcher}, setup, stages, rewards)
     validate_facility_reward_order(
         home_stages,
         {"regular": regular, "launcher": launcher, "crafting": crafting, "effect": effect_items},

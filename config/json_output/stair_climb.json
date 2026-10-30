@@ -1,0 +1,91 @@
+{
+  "settings": [
+    {
+      "activity_id": 6,
+      "group_size": 20,
+      "bot_min_minutes": 30.0,
+      "bot_max_minutes": 90.0,
+      "order_points_ratio": 0.1,
+      "bot_order_value": 100.0
+    }
+  ],
+  "rewards": [
+    {
+      "activity_id": 6,
+      "min_rank": 1,
+      "max_rank": 1,
+      "stamina": 300,
+      "spirit_stones": 3000
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 2,
+      "max_rank": 2,
+      "stamina": 275,
+      "spirit_stones": 2750
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 3,
+      "max_rank": 3,
+      "stamina": 250,
+      "spirit_stones": 2500
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 4,
+      "max_rank": 4,
+      "stamina": 225,
+      "spirit_stones": 2250
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 5,
+      "max_rank": 5,
+      "stamina": 200,
+      "spirit_stones": 2000
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 6,
+      "max_rank": 6,
+      "stamina": 175,
+      "spirit_stones": 1750
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 7,
+      "max_rank": 7,
+      "stamina": 150,
+      "spirit_stones": 1500
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 8,
+      "max_rank": 8,
+      "stamina": 125,
+      "spirit_stones": 1250
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 9,
+      "max_rank": 9,
+      "stamina": 100,
+      "spirit_stones": 1000
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 10,
+      "max_rank": 10,
+      "stamina": 75,
+      "spirit_stones": 750
+    },
+    {
+      "activity_id": 6,
+      "min_rank": 11,
+      "max_rank": 20,
+      "stamina": 50,
+      "spirit_stones": 500
+    }
+  ]
+}

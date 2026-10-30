@@ -45,6 +45,16 @@ func _ready() -> void:
 	CraftingService.table_state_changed.emit(stale, CraftingService.TableState.READY)
 	_assert_empty(EMPTY_POS)
 
+	# A malformed/legacy snapshot may report HAS_ITEMS after its stored list
+	# was emptied. The loaded badge must still stay hidden for an empty table.
+	var malformed: Dictionary = GridManager.get_item(EMPTY_POS) as Dictionary
+	malformed["_craft_state"] = CraftingService.TableState.HAS_ITEMS
+	malformed["_craft_stored"] = []
+	_view._on_craft_visual_update(malformed, CraftingService.TableState.HAS_ITEMS)
+	assert(not _node_at(EMPTY_POS).status_loaded_icon.visible)
+	malformed["_craft_state"] = CraftingService.TableState.IDLE
+	_view._on_craft_visual_update(malformed, CraftingService.TableState.IDLE)
+
 	# Completion, movement, and retrieval update only the active instance.
 	var active: Dictionary = GridManager.get_item(ACTIVE_POS) as Dictionary
 	CraftingService.complete_craft_now(active)

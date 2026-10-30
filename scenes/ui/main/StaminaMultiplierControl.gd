@@ -10,6 +10,7 @@ var _refresh_accumulator: float = 0.0
 func _ready() -> void:
 	multiplier_menu.get_popup().id_pressed.connect(_on_multiplier_selected)
 	GameState.stamina_multiplier_changed.connect(_on_multiplier_changed)
+	CultivationService.stage_changed.connect(func(_level: int, _name: String) -> void: _refresh())
 	_refresh()
 
 
@@ -32,8 +33,9 @@ func _on_multiplier_selected(multiplier: int) -> void:
 func _refresh() -> void:
 	GameState.expire_stamina_multiplier_if_needed()
 	var max_multiplier: int = GameState.stamina_multiplier_max
-	visible = max_multiplier > 1
+	visible = CultivationService.current_level >= 2 and max_multiplier > 1
 	if not visible:
+		multiplier_menu.get_popup().hide()
 		_displayed_max = 0
 		return
 	if _displayed_max != max_multiplier:

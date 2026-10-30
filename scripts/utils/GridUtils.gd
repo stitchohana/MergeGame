@@ -1,6 +1,23 @@
 extends RefCounted
 class_name GridUtils
 
+
+# Screen coordinates; deterministic ties match server/grid_search.ts.
+static func find_nearest_empty(from_pos: Vector2i, cols: int, rows: int, is_empty: Callable) -> Vector2i:
+	var visited: Dictionary = {from_pos: true}
+	var queue: Array[Vector2i] = [from_pos]
+	var head: int = 0
+	while head < queue.size():
+		var current: Vector2i = queue[head]
+		head += 1
+		if is_empty.call(current):
+			return current
+		for neighbor: Vector2i in [current + Vector2i.RIGHT, current + Vector2i.LEFT, current + Vector2i.DOWN, current + Vector2i.UP]:
+			if is_in_bounds(neighbor, cols, rows) and not visited.has(neighbor):
+				visited[neighbor] = true
+				queue.append(neighbor)
+	return Vector2i(-1, -1)
+
 # Check if two grid positions are neighbors (4-directional)
 static func is_neighbor(a: Vector2i, b: Vector2i) -> bool:
 	var diff := a - b

@@ -5,7 +5,7 @@ func _ready() -> void:
 
 func _run() -> void:
 	var previous_orders: Array = GameState.meridian_acupoints.duplicate(true)
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27002}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27002], "completed": false, "items": [{"item_id": 27002}]}]
 	var item_scene: PackedScene = load("res://scenes/items/GridItem.tscn") as PackedScene
 	assert(item_scene != null)
 	var item: GridItem = item_scene.instantiate() as GridItem
@@ -43,20 +43,22 @@ func _run() -> void:
 	var unrelated_hint_result: Dictionary = controller.call("get_ingredient_hint_debug", forge_table, 9002) as Dictionary
 	assert(not bool(unrelated_hint_result.get("accepted", false)))
 	assert(str(unrelated_hint_result.get("reason", "")) == "ingredient_not_in_required_recipes")
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27081}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27081], "completed": false, "items": [{"item_id": 27081}]}]
 	var recursive_recipe_ids: Dictionary = controller.call("_get_required_recipe_ids") as Dictionary
 	assert(recursive_recipe_ids.has(32))
 	assert(recursive_recipe_ids.has(81))
-	assert(recursive_recipe_ids.has(2))
+	# The current recipe table uses ordinary materials for both 27081 paths;
+	# there is no nested 27002 recipe to include here.
+	assert(not recursive_recipe_ids.has(2))
 	var requirement_probe: GameScreen = GameScreen.new()
 	var recursive_required_ids: Dictionary = {}
 	requirement_probe.call("_collect_recipe_material_ids", 27081, recursive_required_ids, {})
 	assert(not recursive_required_ids.has(27081))
-	assert(recursive_required_ids.has(27002))
+	assert(not recursive_required_ids.has(27002))
 	assert(recursive_required_ids.has(5002))
-	assert(recursive_required_ids.has(9002))
+	assert(recursive_required_ids.has(3002))
 	requirement_probe.free()
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27002}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27002], "completed": false, "items": [{"item_id": 27002}]}]
 
 	item.queue_free()
 	await get_tree().process_frame
@@ -83,14 +85,14 @@ func _run() -> void:
 	var stored_board_table: Dictionary = grid_manager.call("get_item", Vector2i(3, 3)) as Dictionary
 	stored_board_table["_craft_state"] = CraftingService.TableState.HAS_ITEMS
 	stored_board_table["_craft_stored"] = [{"id": 27002, "uid": 900004}]
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27081}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27081], "completed": false, "items": [{"item_id": 27081}]}]
 	var reserved_recipe_ids: Dictionary = controller.call("_get_required_recipe_ids") as Dictionary
 	assert(reserved_recipe_ids.has(32))
 	assert(reserved_recipe_ids.has(81))
-	assert(reserved_recipe_ids.has(2))
+	assert(not reserved_recipe_ids.has(2))
 	stored_board_table["_craft_state"] = CraftingService.TableState.READY
 	stored_board_table["_craft_stored"] = []
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27002}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27002], "completed": false, "items": [{"item_id": 27002}]}]
 
 	var grid_scene: PackedScene = load("res://scenes/grid/GridView.tscn") as PackedScene
 	var grid_view: GridView = grid_scene.instantiate() as GridView
@@ -103,23 +105,23 @@ func _run() -> void:
 	var table_node: GridItem = item_nodes.get("3,3") as GridItem
 	var forge_table_node: GridItem = item_nodes.get("4,3") as GridItem
 	assert(source_node != null and second_source_node != null and intermediate_node != null and table_node != null and forge_table_node != null)
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27081}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27081], "completed": false, "items": [{"item_id": 27081}]}]
 	var recursive_screen_probe: GameScreen = GameScreen.new()
 	recursive_screen_probe.grid_view = grid_view
 	recursive_screen_probe.call("_refresh_required_indicators")
-	assert(intermediate_node.is_required())
-	assert(source_node.is_required())
+	assert(not intermediate_node.is_required())
+	assert(not source_node.is_required())
 	assert(second_source_node.is_required())
 	assert(grid_manager.call("add_item", order_product_item, Vector2i(6, 2)))
 	await get_tree().process_frame
 	var order_product_node: GridItem = (grid_view.get("_item_nodes") as Dictionary).get("6,2") as GridItem
 	assert(order_product_node != null)
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27081}, {"item_id": 27081}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27081, 27081], "completed": false, "items": [{"item_id": 27081}, {"item_id": 27081}]}]
 	recursive_screen_probe.call("_refresh_required_indicators")
-	assert(intermediate_node.is_required())
-	assert(source_node.is_required())
+	assert(not intermediate_node.is_required())
+	assert(not source_node.is_required())
 	assert(second_source_node.is_required())
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27081}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27081], "completed": false, "items": [{"item_id": 27081}]}]
 	recursive_screen_probe.call("_refresh_required_indicators")
 	assert(order_product_node.is_required())
 	assert(not intermediate_node.is_required())
@@ -141,19 +143,19 @@ func _run() -> void:
 	recursive_screen_probe.call("_refresh_required_indicators")
 	assert(not intermediate_node.is_required())
 	assert(not source_node.is_required())
-	assert(not second_source_node.is_required())
+	assert(second_source_node.is_required())
 	# One stored material satisfies only one active order. A second order that
 	# needs the same material must keep the remaining board item highlighted.
 	stored_board_table["_craft_state"] = CraftingService.TableState.HAS_ITEMS
 	stored_board_table["_craft_stored"] = [{"id": 9002, "uid": 900004}]
 	GameState.meridian_acupoints = [
-		{"completed": false, "items": [{"item_id": 28036}]},
+		{"item_ids": [28036], "completed": false, "items": [{"item_id": 28036}]},
 	]
 	recursive_screen_probe.call("_refresh_required_indicators")
-	assert(not source_node.is_required())
+	assert(source_node.is_required())
 	GameState.meridian_acupoints = [
-		{"completed": false, "items": [{"item_id": 28036}]},
-		{"completed": false, "items": [{"item_id": 28018}]},
+		{"item_ids": [28036], "completed": false, "items": [{"item_id": 28036}]},
+		{"item_ids": [28018], "completed": false, "items": [{"item_id": 28018}]},
 	]
 	recursive_screen_probe.call("_refresh_required_indicators")
 	assert(source_node.is_required())
@@ -162,17 +164,20 @@ func _run() -> void:
 	stored_board_table["_craft_state"] = CraftingService.TableState.IDLE
 	stored_board_table["_craft_stored"] = []
 	GameState.meridian_acupoints = [
-		{"completed": false, "items": [{"item_id": 27002}]},
-		{"completed": false, "items": [{"item_id": 27054}]},
+		{"item_ids": [27002], "completed": false, "items": [{"item_id": 27002}]},
+		{"item_ids": [27054], "completed": false, "items": [{"item_id": 27054}]},
 	]
 	recursive_screen_probe.call("_refresh_required_indicators")
 	assert(intermediate_node.is_required())
 	assert(not source_node.is_required())
 	assert(not second_source_node.is_required())
 	recursive_screen_probe.free()
-	stored_board_table["_craft_state"] = CraftingService.TableState.READY
+	# The click hint needs an outstanding product, not the 27002 already owned
+	# above. Removing that copy makes this a real missing-product scenario.
+	stored_board_table["_craft_state"] = CraftingService.TableState.IDLE
 	stored_board_table["_craft_stored"] = []
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27002}]}]
+	grid_manager.call("remove_item", Vector2i(5, 2))
+	GameState.meridian_acupoints = [{"item_ids": [27002], "completed": false, "items": [{"item_id": 27002}]}]
 	source_node.set_required(true)
 	var click_position := Vector2(Constants.CELL_STEP + Constants.CELL_SIZE * 0.5, Constants.CELL_STEP * 2 + Constants.CELL_SIZE * 0.5)
 	var press := InputEventMouseButton.new()
@@ -187,6 +192,25 @@ func _run() -> void:
 	grid_view._input(release)
 	assert(table_node.craft_hint_bubble.visible)
 	assert(not forge_table_node.craft_hint_bubble.visible)
+	var water3: Dictionary = (config_database.call("get_item_data", 9003) as Dictionary).duplicate(true)
+	water3["_uid"] = 900008
+	assert(grid_manager.call("add_item", water3, Vector2i(0, 2)))
+	recursive_screen_probe = GameScreen.new()
+	recursive_screen_probe.grid_view = grid_view
+	GameState.meridian_acupoints = [{"item_ids": [27003], "completed": false, "items": [{"item_id": 27003}]}]
+	recursive_screen_probe.call("_refresh_required_indicators")
+	var water3_node: GridItem = (grid_view.get("_item_nodes") as Dictionary).get("0,2") as GridItem
+	assert(not water3_node.is_required())
+	grid_view._show_crafting_hints(water3, Vector2i(0, 2), false)
+	assert(not table_node.craft_hint_bubble.visible)
+	assert(not forge_table_node.craft_hint_bubble.visible)
+	GameState.meridian_acupoints = [{"item_ids": [28003], "completed": false, "items": [{"item_id": 28003}]}]
+	recursive_screen_probe.call("_refresh_required_indicators")
+	assert(water3_node.is_required())
+	grid_view._show_crafting_hints(water3, Vector2i(0, 2), false)
+	assert(not table_node.craft_hint_bubble.visible)
+	assert(forge_table_node.craft_hint_bubble.visible)
+	recursive_screen_probe.free()
 	GameState.meridian_acupoints = previous_orders
 
 	print("CRAFT_HINT_SMOKE_OK visible=true click_trigger=true unrelated_table_hidden=true table=17001 ingredient=9002")

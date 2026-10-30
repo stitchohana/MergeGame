@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { GameEngine } from "../src/engine/game_engine";
 import { gameConfigTables } from "../src/worker/config_data";
+import { deterministicSpawnRoll } from "../src/engine/spawn_rng";
 
 const engine = new GameEngine(gameConfigTables);
 
@@ -23,7 +24,7 @@ for (const [stamina, expected] of [
 }
 
 for (const [cultivationLevel, expected] of [
-  [1, 4],  // Mortal uses the Qi Refining cap.
+  [1, 1],  // Novice players cannot trigger stamina multipliers.
   [2, 4], [10, 4],   // Qi Refining
   [11, 8], [13, 8],  // Foundation Establishment
   [14, 16], [16, 16], // Golden Core
@@ -48,6 +49,25 @@ for (const [cultivationLevel, stamina, expected] of [
     `cultivation level ${cultivationLevel}, stamina ${stamina}`,
   );
 }
+
+const novice = stateAt(400, 1);
+const noBoost = { maxMultiplier: 1, expiresAt: 0, remainingSeconds: 0 };
+assert.deepEqual(engine.addStamina(novice, 400, 1_000), noBoost);
+assert.equal(novice.stamina, 800, "novice stamina rewards still apply");
+novice.stamina_multiplier_max = 4;
+novice.stamina_multiplier_expires_at = Date.now() + 3_600_000;
+assert.deepEqual(engine.getStaminaMultiplierState(novice), noBoost, "legacy novice boost is never usable");
+novice.grid = [{ uid: 100, id: 11001, col: 0, row: 0, charges: 5 }];
+assert.deepEqual(engine.executeSpawn(novice, 0, 0, 0, 4), { ok: false, reason: "stamina_multiplier_not_active" });
+assert.equal(engine.tickStaminaMultiplier(novice), true);
+assert.equal(novice.stamina_multiplier_max, 1);
+assert.equal(novice.stamina_multiplier_expires_at, 0);
+const singleSpawn = engine.executeSpawn(novice, 0, 0, 0, 1);
+assert.ok(singleSpawn.ok);
+if (singleSpawn.ok) assert.equal(singleSpawn.staminaCost, 1);
+novice.cultivation.current_level = 2;
+assert.deepEqual(engine.getStaminaMultiplierState(novice), noBoost, "unlock does not restore a novice timer");
+assert.equal(engine.addStamina(novice, 1).maxMultiplier, 4, "new stamina gains work normally after unlock");
 
 const legacyHighMultiplier = stateAt(3_200, 2);
 legacyHighMultiplier.stamina_multiplier_max = 32;
@@ -164,6 +184,63 @@ if (normalSpawnAfterOrderFilled.ok) {
   assert.equal(normalSpawnAfterOrderFilled.staminaRefund, 0);
 }
 
+const springLauncher = engine.getItemData(12008)!;
+const originalSpringSpawns = springLauncher.spawns;
+springLauncher.spawns = [{ id: 9001, weight: 1 }, { id: 10001, weight: 1 }];
+const springPriorityState = stateAt(400);
+springPriorityState.grid = [{ uid: 155, id: 12008, col: 0, row: 0, charges: 5 }];
+springPriorityState.uid_counter = 155;
+springPriorityState.spawn_sequence = 0;
+springPriorityState.meridian_acupoints = [{
+  item_ids: [9001], items: [{ item_id: 9001 }], completed: false,
+}];
+let springSeed = 1;
+while (deterministicSpawnRoll(springSeed, 0, 155, 2) !== 1) springSeed++;
+springPriorityState.spawn_seed = springSeed;
+engine.refreshStaminaMultiplierFromBalance(springPriorityState);
+const springPrioritySpawn = engine.executeSpawn(springPriorityState, 0, 0, 0, 4);
+springLauncher.spawns = originalSpringSpawns;
+assert.equal(springPrioritySpawn.ok, true);
+if (springPrioritySpawn.ok) {
+  assert.equal(springPrioritySpawn.spawnedId, 9001);
+  assert.equal(springPrioritySpawn.staminaMultiplier, 1);
+  assert.equal(springPrioritySpawn.staminaCost, 1);
+  assert.equal(springPrioritySpawn.orderPriority, true);
+}
+
+// Water put in a forge cannot satisfy an alchemy order or disable priority.
+const misplacedMaterialState = stateAt(400);
+misplacedMaterialState.grid = [
+  { uid: 156, id: 12008, col: 0, row: 0, charges: 5 },
+  { uid: 157, id: 18002, col: 1, row: 0, craft: {
+    _craft_state: 1, _craft_stored: [{ id: 9001 }], _craft_recipe: {},
+  } },
+];
+misplacedMaterialState.uid_counter = 157;
+misplacedMaterialState.spawn_seed = springSeed;
+misplacedMaterialState.spawn_sequence = 0;
+misplacedMaterialState.meridian_acupoints = [{
+  item_ids: [27001], items: [{ item_id: 27001 }], completed: false,
+}];
+const outstandingMisplaced = (engine as any).getOutstandingOrderItemCounts(misplacedMaterialState);
+assert.equal(outstandingMisplaced.get(9001), 1);
+// The same material in a compatible furnace does satisfy the demand.
+misplacedMaterialState.grid[1].id = 17002;
+assert.equal((engine as any).getOutstandingOrderItemCounts(misplacedMaterialState).has(9001), false);
+misplacedMaterialState.grid[1].craft._craft_stored.push({ id: 3001 });
+assert.equal((engine as any).getOutstandingOrderItemCounts(misplacedMaterialState).get(9001), 1);
+misplacedMaterialState.grid[1].id = 18002;
+misplacedMaterialState.grid[1].craft._craft_stored = [{ id: 9001 }];
+misplacedMaterialState.grid.push({ uid: 158, id: 5001, col: 2, row: 0 });
+engine.refreshStaminaMultiplierFromBalance(misplacedMaterialState);
+const misplacedMaterialSpawn = engine.executeSpawn(misplacedMaterialState, 0, 0, 0, 4);
+assert.equal(misplacedMaterialSpawn.ok, true);
+if (misplacedMaterialSpawn.ok) {
+  assert.equal(misplacedMaterialSpawn.spawnedId, 9001);
+  assert.equal(misplacedMaterialSpawn.staminaCost, 1);
+  assert.equal(misplacedMaterialSpawn.orderPriority, true);
+}
+
 const lowestOrderLevelState = stateAt(400);
 lowestOrderLevelState.grid = [{ uid: 160, id: 11001, col: 0, row: 0, charges: 5 }];
 lowestOrderLevelState.uid_counter = 160;
@@ -238,7 +315,7 @@ if (breakthroughOrderSpawn.ok) {
 const unrelatedRollState = stateAt(400);
 unrelatedRollState.grid = [{ uid: 181, id: 16001, col: 0, row: 0, charges: 5 }];
 unrelatedRollState.uid_counter = 181;
-unrelatedRollState.spawn_seed = 2; // Rolls group 13; the order requires group 14.
+unrelatedRollState.spawn_seed = 2;
 unrelatedRollState.spawn_sequence = 0;
 unrelatedRollState.meridian_acupoints = [{
   item_ids: [14101],
@@ -248,7 +325,12 @@ unrelatedRollState.meridian_acupoints = [{
   breakthrough_level: 2,
 }];
 engine.refreshStaminaMultiplierFromBalance(unrelatedRollState);
+// Only group 13 is available here; group 14 must not be prioritized.
+const unrelatedLauncher = engine.getItemData(16001)!;
+const originalUnrelatedSpawns = unrelatedLauncher.spawns;
+unrelatedLauncher.spawns = [{ id: 13101, weight: 1 }];
 const unrelatedRollSpawn = engine.executeSpawn(unrelatedRollState, 0, 0, 0, 4);
+unrelatedLauncher.spawns = originalUnrelatedSpawns;
 assert.equal(unrelatedRollSpawn.ok, true);
 if (unrelatedRollSpawn.ok) {
   assert.equal(unrelatedRollSpawn.spawnedId, 13103);
@@ -302,9 +384,19 @@ storedIntermediateState.grid = [{
     _craft_result_id: -1,
   },
 }];
+// Keep nested-recipe coverage independent of the live recipe table.
+const originalRecipes = (engine as any).recipes;
+(engine as any).recipes = [
+  { id: 32, result: 27081, ingredients: [27002, 9004] },
+  { id: 2, result: 27002, ingredients: [5002, 9002] },
+];
+const originalTableRecipes = (engine as any).recipesByTable.get(17001);
+(engine as any).recipesByTable.set(17001, (engine as any).recipes);
 const storedIntermediateOutstanding = (engine as any).getOutstandingOrderItemCounts(
   storedIntermediateState,
 ) as Map<number, number>;
+(engine as any).recipes = originalRecipes;
+(engine as any).recipesByTable.set(17001, originalTableRecipes);
 assert.equal(storedIntermediateOutstanding.has(27002), false);
 assert.equal(storedIntermediateOutstanding.has(5002), false);
 assert.equal(storedIntermediateOutstanding.has(9002), false);
@@ -351,4 +443,28 @@ assert.deepEqual(engine.executeSpawn(battleState, 0, 0, 0, 2), {
   reason: "stamina_multiplier_not_applicable",
 });
 
-console.log("STAMINA_MULTIPLIER_SMOKE_OK thresholds=true realm_caps=true normalization=true refresh=true spawn_upgrade=true order_priority=true refund=true cap=true restrictions=true");
+// Repeated current-schema order slots must be prioritized independently.
+for (const order of [{ item_ids: [9001, 9001], completed: false }]) {
+  const state = stateAt(400);
+  state.grid = [{uid: 600, id: 12004, col: 0, row: 0, charges: 5}];
+  state.uid_counter = 600;
+  state.meridian_acupoints = [order];
+  const launcher = engine.getItemData(12004)!;
+  const totalWeight = launcher.spawns!.reduce((total, spawn) => total + spawn.weight, 0);
+  let seed = 1;
+  while (deterministicSpawnRoll(seed, 0, 600, totalWeight) < launcher.spawns![0].weight) seed++;
+  state.spawn_seed = seed;
+  state.spawn_sequence = 0;
+  engine.refreshStaminaMultiplierFromBalance(state);
+  for (let sequence = 0; sequence < 3; sequence++) {
+    const result = engine.executeSpawn(state, 0, 0, sequence, 4);
+    assert.ok(result.ok);
+    if (!result.ok) throw new Error(result.reason);
+    assert.equal(result.orderPriority, sequence < 2);
+    assert.equal(result.staminaCost, sequence < 2 ? 1 : 4);
+    assert.equal(result.staminaRefund, sequence < 2 ? 3 : 0);
+    if (sequence < 2) assert.equal(result.spawnedId, 9001);
+  }
+}
+
+console.log("STAMINA_MULTIPLIER_SMOKE_OK thresholds=true realm_caps=true normalization=true refresh=true spawn_upgrade=true order_priority=true refund=true cap=true restrictions=true duplicate_order_counts=true");

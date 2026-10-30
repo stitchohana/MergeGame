@@ -11,7 +11,7 @@ activity.enabled = true;
 activity.start_time = "2026-09-22T00:00:00Z";
 activity.end_time = "2999-01-01T00:00:00Z";
 const service = new BattlePassService(config, activities, gameConfigTables.tokens, gameConfigTables.gameConfig);
-const state: any = { spirit_stones: 700, pending_rewards: [] };
+const state: any = { cultivation: { current_level: 2 }, spirit_stones: 700, pending_rewards: [] };
 const start = Date.parse(activity.start_time);
 const end = Date.parse(activity.end_time);
 
@@ -25,14 +25,8 @@ assert.equal(service.awardOrderPoints(state, 100, "", start - 1), false);
 assert.equal(service.awardOrderPoints(state, 100, "", end), false);
 
 const engine = new GameEngine({ ...gameConfigTables, activities });
-const completedOrderState: any = engine.createInitialState();
-completedOrderState.meridian_acupoints = [{
-  item_id: 5001,
-  name: "测试订单",
-  count: 1,
-  completed: false,
-  total_value: 200,
-}];
+const completedOrderState: any = engine.createInitialState(); completedOrderState.cultivation.current_level = 2;
+completedOrderState.meridian_acupoints = [{ item_ids: [5001], name: "测试订单", completed: false, total_value: 200 }];
 completedOrderState.grid.push({ uid: completedOrderState.uid_counter + 1, id: 5001, col: 6, row: 8 });
 const completedOrder = engine.completeMeridianAcupoint(completedOrderState, 0, [5001], "order-test-once");
 assert.equal(completedOrder.ok, true);

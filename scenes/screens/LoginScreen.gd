@@ -85,6 +85,13 @@ func _on_state_loaded_for_skip(state: Dictionary) -> void:
 
 func _on_state_load_failed(reason: String) -> void:
 	_disconnect_state_signals()
+	if CloudService.session_restore_required:
+		CloudService.online = false
+		CloudService.clear_token()
+		login_btn.disabled = false
+		_set_progress(0.0)
+		_status("存档加载失败，请重新登录: " + reason)
+		return
 	if CloudService.token.is_empty():
 		login_btn.disabled = false
 		_status("加载失败: " + reason)

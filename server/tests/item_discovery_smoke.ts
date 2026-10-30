@@ -12,15 +12,6 @@ assert.equal(engine.recordItemDiscovery(initial, 3004), true);
 assert.equal(engine.recordItemDiscovery(initial, 3004), false);
 assert.equal(initial.crafted_item_ids.filter(id => id === 3004).length, 1);
 
-const legacy = engine.createInitialState();
-legacy.crafted_item_ids = [1002, 1002];
-legacy.grid = [{ uid: 1, id: 13002, col: 0, row: 0 }];
-legacy.pending_rewards = [{ uid: 2, id: 3004, name: "白石髓" }];
-legacy.pouch = [{ uid: 3, id: 3001 }];
-assert.equal(engine.initializeItemDiscoveries(legacy), true);
-for (const id of [1002, 13002, 3004, 3001]) assert(legacy.crafted_item_ids.includes(id));
-assert.equal(engine.initializeItemDiscoveries(legacy), false);
-
 const spawned = engine.createInitialState();
 spawned.grid = [{ uid: 1, id: 11001, col: 0, row: 0, charges: 5 }];
 spawned.crafted_item_ids = [11001];

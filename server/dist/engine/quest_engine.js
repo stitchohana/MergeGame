@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuestEngine = void 0;
 const interface_1 = require("../storage/interface");
+const reset_period_1 = require("./reset_period");
+const activity_access_1 = require("./activity_access");
 class QuestEngine {
     quests = [];
     constructor(data) {
@@ -26,42 +28,23 @@ class QuestEngine {
             target_count: q.target_count,
             auto_reward: q.auto_reward,
             reset_cycle: q.reset_cycle ?? interface_1.ResetCycle.NEVER,
+            weekly_points: engine.weeklyTaskService.questPoints(q.id),
             rewards: typeof q.rewards === "number" ? engine.getRewardConfig(q.rewards) ?? q.rewards : q.rewards
         }));
     }
     checkAndResetQuests(state, resetHour) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return false;
         const now = Date.now();
         const lastReset = state.quest_last_reset ?? 0;
-        if (lastReset <= 0) {
-            state.quest_last_reset = now;
+        if (lastReset <= 0)
             return false;
-        }
-        // Adjust both timestamps by resetHour: a day starts at resetHour, not midnight
-        const adjustMs = resetHour * 3600000;
-        const lastAdjusted = new Date(lastReset - adjustMs);
-        const nowAdjusted = new Date(now - adjustMs);
-        let resetDaily = false;
-        let resetWeekly = false;
-        // Daily: different adjusted day
-        if (lastAdjusted.getFullYear() !== nowAdjusted.getFullYear() ||
-            lastAdjusted.getMonth() !== nowAdjusted.getMonth() ||
-            lastAdjusted.getDate() !== nowAdjusted.getDate()) {
-            resetDaily = true;
-        }
-        // Weekly: different ISO week (week containing Jan 4)
-        // getDay() returns 0=Sun..6=Sat, converted to 1=Mon..7=Sun via `|| 7`.
-        const getISOWeek = (d) => {
-            const dayOfWeek = d.getDay() || 7; // Mon=1..Sun=7
-            const jan4 = new Date(d.getFullYear(), 0, 4);
-            const jan4Day = jan4.getDay() || 7;
-            const daysSinceJan4 = (d.getTime() - jan4.getTime()) / 86400000;
-            return Math.floor((daysSinceJan4 + jan4Day + 3) / 7);
-        };
-        if (lastAdjusted.getFullYear() !== nowAdjusted.getFullYear() ||
-            getISOWeek(lastAdjusted) !== getISOWeek(nowAdjusted)) {
-            resetWeekly = true;
-        }
-        let didReset = false;
+        const last = (0, reset_period_1.getResetPeriod)(lastReset, resetHour);
+        const current = (0, reset_period_1.getResetPeriod)(now, resetHour);
+        const resetDaily = current.day > last.day;
+        const resetWeekly = current.week > last.week;
+        if (!resetDaily && !resetWeekly)
+            return false;
         for (const q of this.quests) {
             if (!q.reset_cycle || q.reset_cycle === interface_1.ResetCycle.NEVER)
                 continue;
@@ -74,38 +57,29 @@ class QuestEngine {
                 p.current_count = 0;
                 p.completed = false;
                 p.claimed = false;
-                didReset = true;
                 console.log(`[quest] #${q.id} "${q.name}" reset (cycle=${q.reset_cycle})`);
             }
         }
         state.quest_last_reset = now;
-        return didReset;
+        return true; // The period timestamp changed, even if progress was absent.
     }
     initQuestProgress(state) {
-        state.quest_progress = state.quest_progress || {};
-        let modified = false;
-        state.pending_rewards = state.pending_rewards || [];
-        // Lazily add missing quest entries (supports new quests added to config later)
-        for (const q of this.quests) {
-            // One-time migration: if quest is no longer auto_reward, reset claimed state
-            if (!state.quests_initialized && !q.auto_reward && state.quest_progress[q.id]?.claimed) {
-                state.quest_progress[q.id].claimed = false;
-                modified = true;
-                console.log(`[quest] #${q.id} migrated: auto_reward disabled, reset claimed`);
-            }
-            if (!state.quest_progress[q.id]) {
-                state.quest_progress[q.id] = { current_count: 0, completed: false, claimed: false };
-                modified = true;
-            }
-        }
-        if (!state.quests_initialized) {
-            state.quests_initialized = true;
-            return true;
-        }
-        return false;
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return false;
+        if (state.quest_progress)
+            return false;
+        state.quest_progress = Object.fromEntries(this.quests.map(q => [q.id, {
+                current_count: 0, completed: false, claimed: false,
+            }]));
+        state.quest_last_reset = Date.now();
+        return true;
     }
     incrementQuestProgress(state, type, count, engine) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return;
         this.initQuestProgress(state);
+        this.checkAndResetQuests(state, engine.questResetHour);
+        engine.weeklyTaskService.ensureProgress(state);
         for (const q of this.quests) {
             if (q.type !== type)
                 continue;
@@ -119,15 +93,19 @@ class QuestEngine {
                 if (q.auto_reward) {
                     engine.applyRewards(state, q.rewards);
                     p.claimed = true;
+                    engine.weeklyTaskService.awardTaskReward(state, q.id);
                     console.log(`[quest] #${q.id} auto-reward distributed`);
                 }
             }
         }
     }
     claimQuestReward(state, questId, engine) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return { ok: false, reason: "activity_locked" };
         const q = this.quests.find(q => q.id === questId);
         if (!q)
             return { ok: false, reason: "quest_not_found" };
+        this.checkAndResetQuests(state, engine.questResetHour);
         const p = state.quest_progress?.[questId];
         if (!p)
             return { ok: false, reason: "quest_not_started" };
@@ -139,14 +117,16 @@ class QuestEngine {
             return { ok: false, reason: "auto_reward_quest" };
         engine.applyRewards(state, q.rewards);
         p.claimed = true;
+        engine.weeklyTaskService.awardTaskReward(state, q.id);
         console.log(`[quest] #${q.id} "${q.name}" claimed`);
         return { ok: true, rewards: q.rewards };
     }
     claimPendingReward(state, uid, engine) {
-        state.pending_rewards = state.pending_rewards || [];
         const idx = state.pending_rewards.findIndex(r => r.uid === uid);
         if (idx < 0)
             return { ok: false, reason: "reward_not_found" };
+        if (state.pending_rewards[idx].kind === "card_pack")
+            return { ok: false, reason: "card_pack_open_required" };
         // Server finds empty cell
         const map = engine.buildGridMap(state.grid);
         const target = engine.findEmptyByRow(map);

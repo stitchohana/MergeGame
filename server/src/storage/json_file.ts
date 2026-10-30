@@ -3,8 +3,23 @@ import * as path from "path";
 import { IStorage, User, GameState, LeaderboardEntry } from "./interface";
 import { defaultGameState } from "./memory";
 import type { StairClimbRegistry } from "../engine/stair_climb";
+import type { DuelRegistry } from "../engine/order_duel";
 
 export class JsonFileStorage implements IStorage {
+  async loadOrderDuel(eventId: string): Promise<DuelRegistry | null> {
+    const file = path.join(this.dir, `order-duel-${encodeURIComponent(eventId)}.json`);
+    return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : null;
+  }
+
+  async saveOrderDuel(registry: DuelRegistry): Promise<void> {
+    const file = path.join(this.dir, `order-duel-${encodeURIComponent(registry.event_id)}.json`);
+    const saved = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : null;
+    if ((saved?.revision ?? 0) !== registry.revision) throw new Error("state_conflict");
+    const next = { ...registry, revision: registry.revision + 1 };
+    fs.writeFileSync(file + ".tmp", JSON.stringify(next));
+    fs.renameSync(file + ".tmp", file);
+    registry.revision = next.revision;
+  }
   private dir: string;
   private usersFile: string;
   private statesDir: string;
@@ -18,14 +33,10 @@ export class JsonFileStorage implements IStorage {
 
   private readUsers(): Map<string, User> {
     const map = new Map<string, User>();
-    try {
-      if (fs.existsSync(this.usersFile)) {
-        const data = JSON.parse(fs.readFileSync(this.usersFile, "utf-8"));
-        for (const u of data.users || []) {
-          map.set(u.userId, u);
-        }
-      }
-    } catch { /* ignore */ }
+    if (fs.existsSync(this.usersFile)) {
+      const data = JSON.parse(fs.readFileSync(this.usersFile, "utf-8"));
+      for (const u of data.users) map.set(u.userId, u);
+    }
     return map;
   }
 
@@ -87,21 +98,16 @@ export class JsonFileStorage implements IStorage {
   }
 
   async loadState(userId: string): Promise<GameState | null> {
-    try {
-      const filePath = this.statePath(userId);
-      if (fs.existsSync(filePath)) {
-        return JSON.parse(fs.readFileSync(filePath, "utf-8"));
-      }
-    } catch { /* ignore */ }
-    return null;
+    const filePath = this.statePath(userId);
+    return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, "utf-8")) : null;
   }
 
   async saveState(userId: string, state: GameState): Promise<void> {
     const file = this.statePath(userId);
-    const revision = state.storage_revision ?? 0;
+    const revision = state.storage_revision;
     // The local server serializes player operations; keep the same revision contract as D1.
     const stored = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : null;
-    if ((stored?.storage_revision ?? 0) !== revision) throw new Error("state_conflict");
+    if ((stored ? stored.storage_revision : 0) !== revision) throw new Error("state_conflict");
     const pending = file + ".tmp";
     fs.writeFileSync(pending, JSON.stringify({ ...state, storage_revision: revision + 1 }, null, 2));
     fs.renameSync(pending, file);

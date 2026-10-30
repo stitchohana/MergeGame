@@ -4,8 +4,19 @@ class_name ConfirmPopup extends BasePopup
 @onready var message_label: Label = $Panel/VBox/MessageLabel
 @onready var confirm_btn: Button = $Panel/VBox/BtnBox/ConfirmButton
 @onready var cancel_btn: Button = $Panel/VBox/BtnBox/CancelButton
+# Specialized confirmation scenes may omit the merge warning's optional checkbox.
+@onready var skip_today_checkbox: CheckBox = get_node_or_null("Panel/VBox/SkipTodayCheckBox") as CheckBox
 
 var _on_confirmed: Callable = Callable()
+
+
+func show_skip_today_option() -> void:
+	if skip_today_checkbox == null:
+		return
+	skip_today_checkbox.button_pressed = false
+	skip_today_checkbox.show()
+	$Panel.offset_top = -160.0
+	$Panel.offset_bottom = 160.0
 
 
 func setup(title: String, message: String, on_confirmed: Callable) -> void:

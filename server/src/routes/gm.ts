@@ -1,6 +1,6 @@
 import { Router, WorkerRequest as Request, WorkerResponse as Response } from "../worker/http";
 import { GameState, IStorage } from "../storage/interface";
-import { GameEngine } from "../engine/game_engine";
+import { GameEngine, TableState } from "../engine/game_engine";
 import { createAuthRequired } from "../middleware/auth";
 import { enqueue } from "./queue";
 
@@ -95,14 +95,93 @@ export function grantCurrentOrderItems(state: GameState, engine: GameEngine): Gr
       gridItem.last_charge_time = Date.now();
     }
     mainGrid.push(gridItem);
+    engine.registerProductionUnlock(state, orderItem.id);
+    engine.recordItemDiscovery(state, orderItem.id);
   }
-  engine.initializeProductionUnlocks(state);
+
   state.version += 1;
   return { grantedCount: orderItems.length, itemCounts, mainGrid };
 }
 
 export function refreshAllOrders(state: GameState, engine: GameEngine): RefreshAllOrdersResult {
   return engine.refreshMeridianRequirements(state);
+}
+
+export function clearBoardItems(state: GameState, engine: GameEngine): number {
+  let removedCount = 0;
+  // The active board and cached boards can share an array. Process each once
+  // and retain its identity so every reference sees the same cleared state.
+  const grids = new Set([state.grid, state.saved_grid, state.battle_grid]);
+  for (const grid of grids) {
+    if (!grid) continue;
+    for (let index = grid.length - 1; index >= 0; index -= 1) {
+      const definition = engine.getItemData(grid[index].id);
+      if (definition && (definition.type === 1 || definition.type === 2
+        || (definition.spawns?.length ?? 0) > 0 || (definition.max_charges ?? 0) > 0)) continue;
+      grid.splice(index, 1);
+      removedCount += 1;
+    }
+  }
+  if (removedCount > 0) state.version += 1;
+  return removedCount;
+}
+
+export function mergeAllBoardItems(state: GameState, engine: GameEngine): number {
+  const grid = state.grid;
+  let mergedCount = 0;
+  while (true) {
+    // Full tables and ongoing/finished crafts own items that executeMerge
+    // would discard. Leave them intact, even if another empty table matches.
+    const candidates = grid.filter(item => {
+      const definition = engine.getItemData(item.id);
+      return definition && engine.isInBounds(item.col, item.row)
+        && engine.getNextLevel(definition.type, definition.level, definition.group_id)
+        && !(item.storage?.items?.length)
+        && !(item.craft?._craft_stored?.length)
+        && item.craft?._craft_state !== TableState.CRAFTING
+        && item.craft?._craft_state !== TableState.READY;
+    });
+    let pair: [typeof grid[number], typeof grid[number]] | undefined;
+    for (const source of candidates) {
+      // Locked tutorial items can be merge targets, but cannot be dragged.
+      if (source.immovable) continue;
+      const target = candidates.find(item => item !== source && item.id === source.id
+        && engine.validateMerge(state, source.col, source.row, item.col, item.row).valid);
+      if (target) { pair = [source, target]; break; }
+    }
+    if (!pair) break;
+    const [source, target] = pair;
+    const result = engine.executeMerge(state, source.col, source.row, target.col, target.row);
+    if (!result.ok) throw new Error(`GM board merge failed: ${result.reason}`);
+    // executeMerge replaces state.grid. Preserve aliases to cached boards.
+    grid.splice(0, grid.length, ...state.grid);
+    state.grid = grid;
+    mergedCount += 1;
+  }
+  return mergedCount;
+}
+
+export function claimAllPendingItems(state: GameState, engine: GameEngine): {
+  claimedCount: number;
+  remainingCount: number;
+  skippedCount: number;
+} {
+  const pending = Array.isArray(state.pending_rewards) ? state.pending_rewards : [];
+  const itemUids = pending.filter(reward => reward.kind !== "card_pack").map(reward => reward.uid);
+  let claimedCount = 0;
+  let skippedCount = 0;
+  for (const uid of itemUids) {
+    const result = engine.questEngine.claimPendingReward(state, uid, engine);
+    if (result.ok) claimedCount += 1;
+    else skippedCount += 1;
+    if (!result.ok && result.reason === "board_full") break;
+  }
+  if (claimedCount > 0) state.version += 1;
+  return {
+    claimedCount,
+    remainingCount: state.pending_rewards.filter(reward => reward.kind !== "card_pack").length,
+    skippedCount,
+  };
 }
 
 export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret: string, gmKey: string): Router {
@@ -129,14 +208,13 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
       }
 
       const userId = req.auth!.userId;
-      const { cmd, amount, item_id, col, row } = req.body;
+      const { cmd, amount, item_id, col, row, level } = req.body;
 
       // Use shared queue to prevent race conditions with game ops
       await enqueue(userId, async () => {
         const state = await storage.loadState(userId);
         if (!state) { res.status(404).json({ error: "user_not_found" }); return; }
 
-        engine.initializeItemDiscoveries(state);
         const knownItemIds = new Set(state.crafted_item_ids);
 
         engine.tickStamina(state);
@@ -241,7 +319,17 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
               gitem.last_charge_time = Date.now();
             }
             state.grid.push(gitem);
+            engine.registerProductionUnlock(state, iid);
+            engine.recordItemDiscovery(state, iid);
             msg = `Added #${iid} at (${emptyCol},${emptyRow}) uid=${uid}`;
+            break;
+          }
+          case "add_secret_realm_swords": {
+            const result = engine.secretRealmService.gmGrantSwords(state, level, amount);
+            if (!result.ok) { res.status(400).json({ error: result.reason }); return; }
+            gmResult = { granted_count: result.granted_count, sword_level: result.sword_level,
+              secret_realm: engine.secretRealmService.view(state) };
+            msg = `已添加 ${amount} 把 ${level} 级飞剑到秘境暂存`;
             break;
           }
           case "reset_launcher_cd": {
@@ -259,6 +347,30 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
           case "clear_grid": {
             state.grid = [];
             msg = "Grid cleared";
+            break;
+          }
+          case "clear_board_items": {
+            const removedCount = clearBoardItems(state, engine);
+            gmResult = { removed_count: removedCount };
+            msg = `已清理所有棋盘共 ${removedCount} 件物品，保留发射器和制作台`;
+            break;
+          }
+          case "merge_all_board_items": {
+            const mergedCount = mergeAllBoardItems(state, engine);
+            gmResult = { merged_count: mergedCount, remaining_count: state.grid.length, grid: state.grid };
+            msg = `当前棋盘已合成 ${mergedCount} 次，剩余 ${state.grid.length} 件物品`;
+            break;
+          }
+          case "claim_all_pending_items": {
+            const result = claimAllPendingItems(state, engine);
+            gmResult = {
+              claimed_count: result.claimedCount,
+              remaining_count: result.remainingCount,
+              skipped_count: result.skippedCount,
+              grid: state.grid,
+              pending_rewards: state.pending_rewards,
+            };
+            msg = `已领取 ${result.claimedCount} 件暂存物品，剩余 ${result.remainingCount} 件`;
             break;
           }
           case "activate_home_acupoints": {
@@ -306,15 +418,14 @@ export function createGMRouter(storage: IStorage, engine: GameEngine, jwtSecret:
             break;
           }
           default:
-            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","add_battle_pass_points","set_stamina","set_qi","levelup","breakthrough","add_item","reset_launcher_cd","clear_grid","activate_home_acupoints","grant_order_items","refresh_orders","refresh_all_orders"] });
+            res.status(400).json({ error: "unknown_cmd", cmds: ["add_exp","add_stones","add_battle_pass_points","set_stamina","set_qi","levelup","breakthrough","add_item","add_secret_realm_swords","reset_launcher_cd","clear_grid","clear_board_items","merge_all_board_items","claim_all_pending_items","activate_home_acupoints","grant_order_items","refresh_orders","refresh_all_orders"] });
             return;
         }
 
-        engine.initializeItemDiscoveries(state);
         const newlyDiscoveredItemIds = state.crafted_item_ids.filter(id => !knownItemIds.has(id));
         await storage.saveState(userId, state);
         console.log(`[gm] ${userId}: ${cmd} — ${msg}`);
-        res.json({ ok: true, msg, newly_discovered_item_ids: newlyDiscoveredItemIds, ...gmResult });
+        res.json({ ok: true, msg, storage_revision: state.storage_revision, newly_discovered_item_ids: newlyDiscoveredItemIds, ...gmResult });
       });
     } catch (e: any) {
       console.error("[gm] error:", e);

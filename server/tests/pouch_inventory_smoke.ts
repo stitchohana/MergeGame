@@ -45,11 +45,6 @@ async function main() {
     assert.equal(engine.completeMeridianAcupoint(state, 0, failure === "wrong_items" ? [5001, 6001] : [5001, 5001]).ok, false);
     assert.deepEqual(state, before, failure + " must not partially consume inventory");
   }
-  const legacy = makeState([5001, 5001]);
-  legacy.pouch = [5001, 5001, 6001];
-  assert.equal(engine.completeMeridianAcupoint(legacy, 0, [5001, 5001]).ok, true);
-  assert.deepEqual(legacy.pouch, [6001]);
-
   const full = makeState([5001]);
   full.grid = Array.from({ length: 63 }, (_, i) => ({ uid: 100 + i, id: 6001, col: i % 7, row: Math.floor(i / 7) }));
   full.pouch = [{ uid: 199, id: 5001 }];

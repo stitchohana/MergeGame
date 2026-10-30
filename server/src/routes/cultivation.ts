@@ -40,10 +40,10 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       await storage.saveState(userId, state);
       console.log(`[cult] new player ${userId}, init with ${state.grid.length} items`);
     } else {
-      engine.tickStamina(state);
+      const staminaRecovered = engine.tickStamina(state);
       const multiplierExpired = engine.tickStaminaMultiplier(state);
       engine.tickLauncherRecharge(state);
-      if (engine.tickCraftingState(state) || multiplierExpired) {
+      if (engine.tickCraftingState(state) || multiplierExpired || staminaRecovered) {
         await storage.saveState(userId, state);
       }
     }
@@ -63,7 +63,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
     res.json({
       ok: true,
       cultivation: state.cultivation,
-      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
+      quest_progress: state.quest_progress, weekly_task_progress: engine.weeklyTaskService.publicProgress(state), card_collection_progress: engine.cardCollectionService.publicProgress(state),
       meridian_acupoints: state.meridian_acupoints || [],
       storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
     });
@@ -83,7 +83,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       ok: true,
       stamina: result.stamina,
       max_stamina: result.max_stamina,
-      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
+      quest_progress: state.quest_progress, weekly_task_progress: engine.weeklyTaskService.publicProgress(state), card_collection_progress: engine.cardCollectionService.publicProgress(state),
       storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
       ...staminaMultiplierResponse(state),
     });
@@ -103,7 +103,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       ok: true,
       amount: result.amount,
       spirit_stones: result.spiritStones,
-      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
+      quest_progress: state.quest_progress, weekly_task_progress: engine.weeklyTaskService.publicProgress(state), card_collection_progress: engine.cardCollectionService.publicProgress(state),
       storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
     });
   }));
@@ -134,7 +134,7 @@ export function createCultivationRouter(storage: IStorage, engine: GameEngine, j
       stamina: state.stamina,
       ...staminaMultiplierResponse(state),
       storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
-      quest_progress: state.quest_progress, card_collection_progress: engine.cardCollectionService.publicProgress(state),
+      quest_progress: state.quest_progress, weekly_task_progress: engine.weeklyTaskService.publicProgress(state), card_collection_progress: engine.cardCollectionService.publicProgress(state),
       meridian_acupoints: state.meridian_acupoints || [],
     });
   }));

@@ -1,6 +1,6 @@
 """Shared progression rules for the home-meridian circulations."""
 
-from collections import Counter
+from collections import Counter, defaultdict
 from typing import Any, Mapping, Sequence
 
 
@@ -12,7 +12,7 @@ CIRCULATIONS_BY_LEVEL = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 35, 38, 41, 44, 48, 51,
 SPIRIT_STONE_MINE_ID = 25001
 MINE_ONLY_REWARD_ID = 313
 MINE_FAMILY = SPIRIT_STONE_MINE_ID // 100
-QI_FACILITY_FAMILIES = frozenset({110, 120, 130, 150, 170, 180})
+QI_FACILITY_FAMILIES = frozenset({110, 120, 130, 150, 160, 170, 180})
 FOUNDATION_FACILITY_FAMILIES_BY_LEVEL = {
     11: QI_FACILITY_FAMILIES | {140, 210},
     12: QI_FACILITY_FAMILIES | {140, 210, 230, 200},
@@ -35,7 +35,10 @@ EARLY_STAGE_QI_COST = [5, 126, 210, 262, 315, 377, 440, 440, 587, 587]
 # circulation reward. Keep the per-level totals here for balance checks.
 # These are the existing total EXP budgets for 凡人 and 练气.  The generator
 # distributes each total across that level's new circulation count.
-EARLY_STAGE_TOTAL_EXP = [12, 48, 80, 104, 128, 228, 264, 300, 348, 384]
+# Each circulation at a cultivation level grants one uniform integer amount.
+# Totals are rounded to the nearest whole average when the old budget was not
+# divisible by that level's circulation count.
+EARLY_STAGE_TOTAL_EXP = [12, 48, 80, 105, 126, 231, 264, 297, 350, 385]
 
 
 def _as_int(value: Any, default: int = 0) -> int:
@@ -104,7 +107,6 @@ def validate_facility_reward_schedule(
 
     family_by_realm = {"qi": set(), "foundation": set(), "gold": set(), "nascent": set()}
     family_by_level = {level: set() for level in range(1, 21)}
-    level16_families = set()
     for stage_index, stage in enumerate(home_stages):
         cultivation_level = _as_int(stage.get("cultivation_level"))
         realm = (
@@ -141,8 +143,6 @@ def validate_facility_reward_schedule(
                     raise ValueError(
                         f"筑基阶段 {cultivation_level} 周天 {stage_index} 提前发放设施族群 {family}"
                     )
-            if cultivation_level >= 17 and facility_level == 16:
-                level16_families.add(item_id // 100)
 
     missing_qi = sorted(QI_FACILITY_FAMILIES - family_by_realm["qi"])
     if missing_qi:
@@ -157,9 +157,6 @@ def validate_facility_reward_schedule(
     missing_foundation = sorted(families - family_by_realm["foundation"])
     if missing_foundation:
         raise ValueError(f"筑基期未覆盖设施族群: {missing_foundation}")
-    missing_level16 = sorted(families - level16_families)
-    if missing_level16:
-        raise ValueError(f"元婴期未发放16级设施: {missing_level16}")
 
 
 def validate_home_progression(
@@ -184,6 +181,7 @@ def validate_home_progression(
     counts = Counter()
     previous_level = 0
     exp_by_level = Counter()
+    exp_values_by_level = defaultdict(set)
     for stage_index, stage in enumerate(home_stages):
         level = _as_int(stage.get("cultivation_level"))
         if level < 1 or level > len(cultivation_stages):
@@ -201,11 +199,13 @@ def validate_home_progression(
                 f"home circulation {stage_index} must not configure acupoint_exp"
             )
         counts[level] += 1
-        exp_by_level[level] += reward_token_amount(
+        stage_exp = reward_token_amount(
             stage.get("circulation_reward"),
             4,
             rewards,
         )
+        exp_by_level[level] += stage_exp
+        exp_values_by_level[level].add(stage_exp)
         reward_config = stage.get("circulation_reward")
         if isinstance(reward_config, int) and rewards is not None:
             reward_config = rewards.get(str(reward_config), {})
@@ -224,9 +224,9 @@ def validate_home_progression(
                 if type(count) is not int or count <= 0:
                     raise ValueError(f"home circulation {stage_index} has invalid card pack count")
         facility_rewards = [item for item in reward_items if _as_int(item.get("id")) not in pack_ids]
-        if len(facility_rewards) != expected_facility_count:
+        if (level == 1 and len(facility_rewards) != expected_facility_count) or len(facility_rewards) > expected_facility_count:
             raise ValueError(
-                f"home circulation {stage_index} must grant exactly "
+                f"home circulation {stage_index} exceeds or violates tutorial limit of "
                 f"{expected_facility_count} facilities, got {reward_items}"
             )
         for facility in facility_rewards:
@@ -255,6 +255,10 @@ def validate_home_progression(
             raise ValueError(
                 f"home circulations at cultivation level {level} grant {exp_by_level[level]} EXP, "
                 f"but cultivation requires {expected_exp}"
+            )
+        if len(exp_values_by_level.get(level, set())) != 1:
+            raise ValueError(
+                f"home circulations at cultivation level {level} must grant uniform EXP"
             )
     if items is not None:
         validate_facility_reward_schedule(home_stages, items)

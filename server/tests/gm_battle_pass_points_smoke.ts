@@ -25,6 +25,7 @@ class MemoryStorage extends SharedStorage {
 async function main(): Promise<void> {
   const engine = new GameEngine(gameConfigTables);
   const state = engine.createInitialState();
+  state.cultivation.current_level = 2;
   state.battle_pass_progress = {
     4: { points: 10, premium_unlocked: true, free_claimed_levels: [1], premium_claimed_levels: [], period_key: engine.battlePassService.getPeriodKey() },
   };

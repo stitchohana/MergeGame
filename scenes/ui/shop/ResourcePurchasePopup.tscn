@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/common/ConfirmPopup.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scenes/ui/shop/ResourcePurchasePopup.gd" id="2_script"]
+
+[node name="ResourcePurchasePopup" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+close_on_click_outside = false
+
+[node name="Panel" parent="." index="1"]
+offset_top = -135.0
+offset_bottom = 135.0
+
+[node name="ConfirmButton" parent="Panel/VBox/BtnBox" index="0"]
+custom_minimum_size = Vector2(155, 48)

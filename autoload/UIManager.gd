@@ -169,6 +169,11 @@ func hide_popup(popup: BasePopup) -> void:
 	_active_popups.erase(popup)
 	_update_input_gating()
 	input_blocked_changed.emit(is_input_blocked())
+	# Popups are owned by UIManager. Release the node after its close animation
+	# so repeated open/close actions do not accumulate hidden controls, timers,
+	# tweens, and signal connections in the scene tree.
+	if is_instance_valid(popup) and not popup.is_queued_for_deletion():
+		popup.queue_free()
 
 
 func hide_top_popup() -> void:

@@ -13,19 +13,56 @@ const defaultCultivation = {
 function defaultGameState() {
     const now = Date.now();
     return {
+        storage_revision: 0,
         grid: [],
+        pouch_capacity: 7,
+        pouch_unlock_count: 0,
+        board_type: 0,
+        uid_counter: 0,
+        stamina_multiplier_max: 1,
+        stamina_multiplier_expires_at: 0,
+        spawn_seed: 1,
+        spawn_sequence: 0,
+        spawn_history: [],
+        unlocked_production_item_ids: [],
+        item_catalog_claimed_ids: [],
         pouch: [],
         cultivation: { ...defaultCultivation },
         stamina: 100,
         max_stamina: 100,
         last_stamina_tick: now,
         spirit_stones: 0,
-        pending_rewards: []
+        pending_rewards: [],
+        version: 0,
+        crafted_item_ids: []
     };
 }
 class MemoryStorage {
+    duels = new Map();
+    async loadOrderDuel(eventId) {
+        return structuredClone(this.duels.get(eventId) ?? null);
+    }
+    async saveOrderDuel(registry) {
+        if ((this.duels.get(registry.event_id)?.revision ?? 0) !== registry.revision)
+            throw new Error("state_conflict");
+        registry.revision++;
+        this.duels.set(registry.event_id, structuredClone(registry));
+    }
     users = new Map();
     states = new Map();
+    stairClimb = new Map();
+    async listStairClimbCandidates(level) {
+        return [...this.states].filter(([, state]) => state.cultivation.current_level === level).map(([id]) => id);
+    }
+    async loadStairClimb(eventId) {
+        return structuredClone(this.stairClimb.get(eventId) ?? null);
+    }
+    async saveStairClimb(registry) {
+        if ((this.stairClimb.get(registry.event_id)?.revision ?? 0) !== registry.revision)
+            throw new Error("state_conflict");
+        registry.revision++;
+        this.stairClimb.set(registry.event_id, structuredClone(registry));
+    }
     async findUser(deviceId) {
         for (const u of this.users.values()) {
             if (u.deviceId === deviceId)
@@ -43,10 +80,14 @@ class MemoryStorage {
         return user;
     }
     async loadState(userId) {
-        return this.states.get(userId) ?? null;
+        return structuredClone(this.states.get(userId) ?? null);
     }
     async saveState(userId, state) {
-        this.states.set(userId, state);
+        const revision = state.storage_revision;
+        if ((this.states.has(userId) ? this.states.get(userId).storage_revision : 0) !== revision)
+            throw new Error("state_conflict");
+        state.storage_revision = revision + 1;
+        this.states.set(userId, structuredClone(state));
     }
     async getLeaderboard(limit) {
         const entries = [];

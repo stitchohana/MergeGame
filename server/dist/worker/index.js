@@ -49,6 +49,9 @@ function mountedRouter(pathname, storage, env) {
     return null;
 }
 exports.default = {
+    async scheduled(_controller, env, ctx) {
+        ctx.waitUntil(engine.stairClimbService.settleBatch(new d1_1.D1Storage(env.DB), (state, reward) => engine.applyRewards(state, reward)));
+    },
     async fetch(request, env) {
         const corsOrigin = allowedOrigin(request, env.CORS_ORIGIN);
         if (request.method === "OPTIONS") {

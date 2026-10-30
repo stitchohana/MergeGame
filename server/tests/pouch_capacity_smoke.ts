@@ -37,17 +37,6 @@ async function main() {
   assert.equal(state.grid[0].uid, 4);
   assert.ok(!state.pouch.some((p: any) => p.uid === 4));
 
-  const legacy = structuredClone(state);
-  delete legacy.pouch_capacity;
-  delete legacy.pouch_unlock_count;
-  assert.equal(engine.ensurePouchCapacity(legacy), true);
-  assert.equal(legacy.pouch_capacity, 7);
-  legacy.pouch.push({ uid: 99, id: 5001 }, { uid: 100, id: 5001 });
-  delete legacy.pouch_capacity;
-  engine.ensurePouchCapacity(legacy);
-  assert.equal(legacy.pouch_capacity, 9);
-  assert.equal(engine.getPouchState(legacy).pouch_next_unlock_cost, 100);
-
   const custom = new GameEngine({ ...gameConfigTables, gameConfig: {
     ...gameConfigTables.gameConfig, pouch: { initial_slots: "3", unlock_cost_base: "25", unlock_cost_increment: "10" },
   } });

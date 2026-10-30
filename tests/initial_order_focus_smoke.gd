@@ -12,9 +12,9 @@ func _ready() -> void:
 	assert(screen._is_initial_game_load, "Wait for delayed orders before focusing")
 
 	var orders: Array = [
-		{"items": [{"item_id": 5002}], "completed": false},
-		{"items": [{"item_id": 9002}, {"item_id": 10002}], "completed": false},
-		{"items": [{"item_id": 10002}], "completed": false},
+		{"item_ids": [5002], "items": [{"item_id": 5002}], "completed": false},
+		{"item_ids": [9002, 10002], "items": [{"item_id": 9002}, {"item_id": 10002}], "completed": false},
+		{"item_ids": [10002], "items": [{"item_id": 10002}], "completed": false},
 	]
 	screen._on_state_loaded_for_orders({"meridian_acupoints": orders})
 	await _wait_for_layout()

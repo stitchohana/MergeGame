@@ -85,7 +85,7 @@ func try_spawn(grid_pos: Vector2i, launcher_uid: int, launcher_config: Dictionar
 		launcher_config, effective_charges, GameState.spawn_seed, sequence, launcher_uid
 	)
 	var spawn_plan: Dictionary = _get_order_priority_spawn(
-		base_predicted_id, stamina_multiplier
+		base_predicted_id, stamina_multiplier, launcher_config
 	)
 	var predicted_item: Dictionary = spawn_plan.get("item", {}) as Dictionary
 	var applied_multiplier: int = int(spawn_plan.get("multiplier", stamina_multiplier))
@@ -127,7 +127,8 @@ func try_spawn(grid_pos: Vector2i, launcher_uid: int, launcher_config: Dictionar
 
 func _get_order_priority_spawn(
 	base_item_id: int,
-	requested_multiplier: int
+	requested_multiplier: int,
+	launcher_config: Dictionary = {}
 ) -> Dictionary:
 	var boosted: Dictionary = ConfigDatabase.get_upgraded_item_for_multiplier(
 		base_item_id, requested_multiplier
@@ -139,10 +140,8 @@ func _get_order_priority_spawn(
 			"multiplier": requested_multiplier,
 			"order_priority": false,
 		}
-	var base_level: int = int(base.get("level", 0))
 	var boosted_level: int = int(boosted.get("level", 0))
-	var base_type: int = int(base.get("type", 0))
-	var base_group: int = int(base.get("group_id", 0))
+	var spawn_sources: Array[Dictionary] = _get_launcher_spawn_sources(launcher_config)
 	var best_item: Dictionary = {}
 	var best_multiplier: int = requested_multiplier
 	for item_id_variant: Variant in _get_outstanding_order_item_counts().keys():
@@ -151,21 +150,11 @@ func _get_order_priority_spawn(
 		if candidate.is_empty():
 			continue
 		var candidate_level: int = int(candidate.get("level", 0))
-		if (
-			int(candidate.get("type", 0)) != base_type
-			or int(candidate.get("group_id", 0)) != base_group
-			or candidate_level >= boosted_level
-		):
-			continue
-		var reachable: Dictionary = ConfigDatabase.get_item_by_level(
-			base_type, candidate_level, base_group
+		var candidate_multiplier: int = _get_order_candidate_multiplier(
+			candidate, base, boosted_level, requested_multiplier, spawn_sources
 		)
-		if int(reachable.get("id", 0)) != item_id:
+		if candidate_multiplier <= 0:
 			continue
-		var candidate_multiplier: int = (
-			1 if candidate_level <= base_level
-			else 1 << (candidate_level - base_level)
-		)
 		if (
 			best_item.is_empty()
 			or candidate_level < int(best_item.get("level", 0))
@@ -189,6 +178,87 @@ func _get_order_priority_spawn(
 	}
 
 
+func _get_launcher_spawn_sources(launcher_config: Dictionary) -> Array[Dictionary]:
+	var sources: Array[Dictionary] = []
+	if launcher_config.is_empty():
+		return sources
+	for spawn_variant: Variant in launcher_config.get("spawns", []):
+		if not spawn_variant is Dictionary:
+			continue
+		var spawn_id: int = int((spawn_variant as Dictionary).get("id", 0))
+		var source: Dictionary = ConfigDatabase.get_item_data(spawn_id)
+		if not source.is_empty():
+			sources.append(source)
+	for fixed_variant: Variant in launcher_config.get("fixed_spawns", []):
+		var source: Dictionary = ConfigDatabase.get_item_data(int(fixed_variant))
+		if not source.is_empty():
+			sources.append(source)
+	return sources
+
+
+func _get_order_candidate_multiplier(
+	candidate: Dictionary,
+	base: Dictionary,
+	boosted_level: int,
+	requested_multiplier: int,
+	spawn_sources: Array[Dictionary]
+) -> int:
+	var candidate_id: int = int(candidate.get("id", 0))
+	var candidate_level: int = int(candidate.get("level", 0))
+	if not spawn_sources.is_empty():
+		var best_multiplier: int = 0
+		for source: Dictionary in spawn_sources:
+			if int(source.get("type", 0)) != int(candidate.get("type", 0)) \
+				or int(source.get("group_id", 0)) != int(candidate.get("group_id", 0)):
+				continue
+			var source_level: int = int(source.get("level", 0))
+			var candidate_multiplier: int = 0
+			if candidate_id == int(source.get("id", 0)):
+				candidate_multiplier = 1
+			elif candidate_level > source_level:
+				candidate_multiplier = 1 << (candidate_level - source_level)
+				if candidate_multiplier > requested_multiplier:
+					continue
+				var reachable: Dictionary = ConfigDatabase.get_upgraded_item_for_multiplier(
+					int(source.get("id", 0)), candidate_multiplier
+				)
+				if int(reachable.get("id", 0)) != candidate_id:
+					continue
+			if candidate_multiplier > 0 and (
+				best_multiplier == 0 or candidate_multiplier < best_multiplier
+			):
+				best_multiplier = candidate_multiplier
+		if best_multiplier > 0 and best_multiplier < requested_multiplier:
+			return best_multiplier
+		# Preserve the historical same-chain fallback for launchers whose
+		# runtime table only exposes a higher-level roll. Cross-group candidates
+		# still require an explicit source in the launcher table.
+		if (
+			int(candidate.get("type", 0)) == int(base.get("type", 0))
+			and int(candidate.get("group_id", 0)) == int(base.get("group_id", 0))
+			and candidate_level < boosted_level
+		):
+			var base_level: int = int(base.get("level", 0))
+			return 1 if candidate_level <= base_level else 1 << (candidate_level - base_level)
+		return 0
+
+	var base_level: int = int(base.get("level", 0))
+	var base_type: int = int(base.get("type", 0))
+	var base_group: int = int(base.get("group_id", 0))
+	if (
+		int(candidate.get("type", 0)) != base_type
+		or int(candidate.get("group_id", 0)) != base_group
+		or candidate_level >= boosted_level
+	):
+		return 0
+	var reachable: Dictionary = ConfigDatabase.get_item_by_level(
+		base_type, candidate_level, base_group
+	)
+	if int(reachable.get("id", 0)) != candidate_id:
+		return 0
+	return 1 if candidate_level <= base_level else 1 << (candidate_level - base_level)
+
+
 func _get_outstanding_order_item_counts() -> Dictionary:
 	var order_targets: Dictionary = {}
 	for order_variant: Variant in GameState.meridian_acupoints:
@@ -198,13 +268,12 @@ func _get_outstanding_order_item_counts() -> Dictionary:
 		if bool(order.get("completed", false)):
 			continue
 		var configured: Array = order.get("item_ids", []) as Array
-		if configured.is_empty():
-			configured = order.get("items", []) as Array
 		for entry: Variant in configured:
-			var item_id: int = int((entry as Dictionary).get("item_id", 0)) if entry is Dictionary else int(entry)
+			var item_id: int = int(entry)
 			if item_id > 0:
 				order_targets[item_id] = int(order_targets.get(item_id, 0)) + 1
 	var available: Dictionary = {}
+	var required_recipe_ids: Dictionary = CraftingService.get_required_order_recipe_ids()
 	for grid_entry: Dictionary in GridManager.get_inventory_items():
 		var item: Dictionary = grid_entry.get("data", {}) as Dictionary
 		var item_id: int = int(item.get("id", 0))
@@ -212,11 +281,12 @@ func _get_outstanding_order_item_counts() -> Dictionary:
 			if not bool(item.get("immovable", false)):
 				_add_available_order_item(available, item_id)
 			continue
-		for stored_variant: Variant in item.get("_craft_stored", []):
-			if stored_variant is Dictionary:
-				_add_available_order_item(
-					available, int((stored_variant as Dictionary).get("id", 0))
-				)
+		if CraftingService.table_supports_order_materials(item, required_recipe_ids):
+			for stored_variant: Variant in item.get("_craft_stored", []):
+				if stored_variant is Dictionary:
+					_add_available_order_item(
+						available, int((stored_variant as Dictionary).get("id", 0))
+					)
 		var craft_state: int = int(item.get("_craft_state", CraftingService.TableState.IDLE))
 		if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
 			var result_id: int = int(item.get("_craft_result_id", 0))

@@ -1,5 +1,6 @@
 import { IStorage, User, GameState, LeaderboardEntry } from "./interface";
 import type { StairClimbRegistry } from "../engine/stair_climb";
+import type { DuelRegistry } from "../engine/order_duel";
 
 const defaultCultivation = {
   current_level: 1,
@@ -13,7 +14,19 @@ const defaultCultivation = {
 export function defaultGameState(): GameState {
   const now = Date.now();
   return {
+    storage_revision: 0,
     grid: [],
+    pouch_capacity: 7,
+    pouch_unlock_count: 0,
+    board_type: 0,
+    uid_counter: 0,
+    stamina_multiplier_max: 1,
+    stamina_multiplier_expires_at: 0,
+    spawn_seed: 1,
+    spawn_sequence: 0,
+    spawn_history: [],
+    unlocked_production_item_ids: [],
+    item_catalog_claimed_ids: [],
     pouch: [],
     cultivation: { ...defaultCultivation },
     stamina: 100,
@@ -27,6 +40,17 @@ export function defaultGameState(): GameState {
 }
 
 export class MemoryStorage implements IStorage {
+  private duels = new Map<string, DuelRegistry>();
+
+  async loadOrderDuel(eventId: string): Promise<DuelRegistry | null> {
+    return structuredClone(this.duels.get(eventId) ?? null);
+  }
+
+  async saveOrderDuel(registry: DuelRegistry): Promise<void> {
+    if ((this.duels.get(registry.event_id)?.revision ?? 0) !== registry.revision) throw new Error("state_conflict");
+    registry.revision++;
+    this.duels.set(registry.event_id, structuredClone(registry));
+  }
   private users = new Map<string, User>();
   private states = new Map<string, GameState>();
   private stairClimb = new Map<string, StairClimbRegistry>();
@@ -67,8 +91,8 @@ export class MemoryStorage implements IStorage {
   }
 
   async saveState(userId: string, state: GameState): Promise<void> {
-    const revision = state.storage_revision ?? 0;
-    if ((this.states.get(userId)?.storage_revision ?? 0) !== revision) throw new Error("state_conflict");
+    const revision = state.storage_revision;
+    if ((this.states.has(userId) ? this.states.get(userId)!.storage_revision : 0) !== revision) throw new Error("state_conflict");
     state.storage_revision = revision + 1;
     this.states.set(userId, structuredClone(state));
   }

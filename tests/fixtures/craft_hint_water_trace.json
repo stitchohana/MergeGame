@@ -1,0 +1,439 @@
+{
+  "description": "Replay of 3rd-level water hint trace with loaded sword forges and one remaining empty alchemy furnace.",
+  "orders": [
+    {
+      "completed": false,
+      "item_ids": [
+        27052.0,
+        1501.0
+      ],
+      "items": [
+        {
+          "item_id": 27052.0,
+          "name": "润脉丸",
+          "value": 30.0
+        },
+        {
+          "item_id": 1501.0,
+          "name": "青白玉",
+          "value": 4.0
+        }
+      ],
+      "name": "润脉丸, 青白玉",
+      "order_supply_completed_counts": {
+        "27052": 1.0
+      },
+      "rewards": {
+        "items": [],
+        "tokens": [
+          {
+            "amount": 34.0,
+            "token": 2.0
+          }
+        ]
+      },
+      "total_value": 34.0
+    },
+    {
+      "completed": false,
+      "item_ids": [
+        27081.0,
+        27001.0
+      ],
+      "items": [
+        {
+          "item_id": 27081.0,
+          "name": "聚灵玄丹",
+          "value": 36.0
+        },
+        {
+          "item_id": 27001.0,
+          "name": "清息散",
+          "value": 3.0
+        }
+      ],
+      "name": "聚灵玄丹, 清息散",
+      "rewards": {
+        "items": [],
+        "tokens": [
+          {
+            "amount": 39.0,
+            "token": 2.0
+          }
+        ]
+      },
+      "total_value": 39.0
+    },
+    {
+      "completed": false,
+      "item_ids": [
+        27051.0,
+        27004.0
+      ],
+      "items": [
+        {
+          "item_id": 27051.0,
+          "name": "回息散",
+          "value": 12.0
+        },
+        {
+          "item_id": 27004.0,
+          "name": "培炁丹",
+          "value": 38.0
+        }
+      ],
+      "name": "回息散, 培炁丹",
+      "rewards": {
+        "items": [],
+        "tokens": [
+          {
+            "amount": 50.0,
+            "token": 2.0
+          }
+        ]
+      },
+      "total_value": 50.0
+    },
+    {
+      "completed": false,
+      "item_ids": [
+        28003.0,
+        27033.0,
+        1004.0,
+        27002.0
+      ],
+      "items": [
+        {
+          "item_id": 28003.0,
+          "name": "月银剑",
+          "value": 107.0
+        },
+        {
+          "item_id": 27033.0,
+          "name": "培神大丹",
+          "value": 191.0
+        },
+        {
+          "item_id": 1004.0,
+          "name": "玉蟾芝",
+          "value": 20.0
+        },
+        {
+          "item_id": 27002.0,
+          "name": "抱元丸",
+          "value": 8.0
+        }
+      ],
+      "name": "月银剑, 培神大丹, 玉蟾芝, 抱元丸",
+      "order_supply_completed_counts": {
+        "1004": 1.0,
+        "27033": 1.0
+      },
+      "rewards": {
+        "items": [],
+        "tokens": [
+          {
+            "amount": 326.0,
+            "token": 2.0
+          }
+        ]
+      },
+      "total_value": 326.0
+    },
+    {
+      "completed": false,
+      "item_ids": [
+        14101.0,
+        27003.0,
+        27054.0,
+        27006.0
+      ],
+      "items": [
+        {
+          "item_id": 14101.0,
+          "name": "清息吐纳篇",
+          "value": 3.0
+        },
+        {
+          "item_id": 27003.0,
+          "name": "固真粉",
+          "value": 11.0
+        },
+        {
+          "item_id": 27054.0,
+          "name": "玉津丹",
+          "value": 204.0
+        },
+        {
+          "item_id": 27006.0,
+          "name": "黄庭丹",
+          "value": 178.0
+        }
+      ],
+      "name": "清息吐纳篇, 固真粉, 玉津丹, 黄庭丹",
+      "rewards": {
+        "items": [],
+        "tokens": [
+          {
+            "amount": 396.0,
+            "token": 2.0
+          }
+        ]
+      },
+      "total_value": 396.0
+    }
+  ],
+  "available_counts": {
+    "1004": 1,
+    "1005": 1,
+    "1504": 3,
+    "1505": 1,
+    "2001": 1,
+    "2002": 1,
+    "2004": 1,
+    "3003": 1,
+    "4003": 1,
+    "4004": 2,
+    "5005": 1,
+    "5006": 1,
+    "6002": 6,
+    "6004": 3,
+    "9002": 1,
+    "9003": 3,
+    "9004": 4,
+    "10002": 1,
+    "10003": 1,
+    "10005": 1,
+    "10006": 1,
+    "11004": 1,
+    "11005": 1,
+    "12002": 1,
+    "12003": 1,
+    "12005": 1,
+    "13002": 1,
+    "13003": 1,
+    "13004": 1,
+    "14102": 1,
+    "14103": 1,
+    "15005": 1,
+    "16001": 1,
+    "25001": 1,
+    "25003": 1,
+    "27033": 1,
+    "27052": 1
+  },
+  "tables": [
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 18002,
+      "initialized": true,
+      "pos": "(5, 8)",
+      "result_id": -1,
+      "state": 1,
+      "stored": [
+        {
+          "id": 9003,
+          "uid": 4646
+        },
+        {
+          "id": 4003,
+          "uid": 4672
+        },
+        {
+          "id": 2004,
+          "uid": 4684
+        }
+      ],
+      "uid": 725
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 17001,
+      "initialized": true,
+      "pos": "(0, 8)",
+      "result_id": -1,
+      "state": 1,
+      "stored": [
+        {
+          "id": 6002,
+          "uid": 4575
+        },
+        {
+          "id": 9004,
+          "uid": 4622
+        }
+      ],
+      "uid": 47
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 17002,
+      "initialized": true,
+      "pos": "(0, 7)",
+      "result_id": -1,
+      "state": 1,
+      "stored": [
+        {
+          "id": 3002,
+          "uid": 4624
+        }
+      ],
+      "uid": 1159
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 17002,
+      "initialized": true,
+      "pos": "(1, 7)",
+      "result_id": -1,
+      "state": 1,
+      "stored": [
+        {
+          "id": 9002,
+          "uid": 4576
+        }
+      ],
+      "uid": 726
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 17002,
+      "initialized": true,
+      "pos": "(2, 7)",
+      "result_id": -1,
+      "state": 1,
+      "stored": [
+        {
+          "id": 6004,
+          "uid": 4637
+        }
+      ],
+      "uid": 4635
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 17003,
+      "initialized": true,
+      "pos": "(1, 8)",
+      "result_id": -1,
+      "state": 1,
+      "stored": [
+        {
+          "id": 5003,
+          "uid": 4574
+        }
+      ],
+      "uid": 2794
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 18002,
+      "initialized": true,
+      "pos": "(6, 8)",
+      "result_id": -1,
+      "state": 1,
+      "stored": [
+        {
+          "id": 9003,
+          "uid": 4651
+        }
+      ],
+      "uid": 1158
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 18002,
+      "initialized": true,
+      "pos": "(4, 7)",
+      "result_id": -1,
+      "state": 0,
+      "stored": [],
+      "uid": 4634
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 18002,
+      "initialized": true,
+      "pos": "(5, 7)",
+      "result_id": -1,
+      "state": 0,
+      "stored": [],
+      "uid": 4266
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 18003,
+      "initialized": true,
+      "pos": "(6, 7)",
+      "result_id": -1,
+      "state": 0,
+      "stored": [],
+      "uid": 2795
+    },
+    {
+      "active_recipe": {
+        "id": 0,
+        "ingredients": [],
+        "result": 0
+      },
+      "id": 17002,
+      "initialized": true,
+      "pos": "(2, 8)",
+      "result_id": -1,
+      "state": 0,
+      "stored": [],
+      "uid": 4267
+    }
+  ],
+  "source": {
+    "board_type": 0,
+    "event": "request",
+    "frame": 790,
+    "ingredient_id": 9003,
+    "ingredient_uid": 4691,
+    "ms": 16500,
+    "persistent": true,
+    "seq": 1,
+    "source_pos": "(3, 7)"
+  }
+}

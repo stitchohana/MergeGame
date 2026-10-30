@@ -1,5 +1,12 @@
 export interface GameConfigTables {
+    secretRealm?: unknown;
+    goldenFinger?: unknown;
     activities: unknown;
+    stairClimb: unknown;
+    orderSupply: unknown;
+    orderDuel?: unknown;
+    battlePass: unknown;
+    cardCollection?: unknown;
     cultivation: unknown;
     expedition: unknown;
     gameConfig: unknown;
@@ -12,4 +19,5 @@ export interface GameConfigTables {
     rewards: unknown;
     shop: unknown;
     weeklyTasks: unknown;
+    tokens: unknown;
 }

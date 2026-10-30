@@ -14,6 +14,7 @@ var _fly_node: TextureRect = null
 
 func _ready() -> void:
 	RewardManager.pending_rewards_changed.connect(_refresh)
+	CultivationService.stage_changed.connect(func(_level: int, _name: String) -> void: _refresh(0))
 	CloudService.pending_reward_claimed.connect(_on_claimed)
 	CloudService.pending_reward_claimed_rejected.connect(_on_claim_rejected)
 	claim_button.pressed.connect(_on_claim_button_pressed)
@@ -26,7 +27,7 @@ func setup(grid: Control) -> void:
 	grid_view = grid
 
 func _refresh(_count: int) -> void:
-	var rewards: Array = RewardManager.pending_rewards
+	var rewards: Array = _available_rewards()
 	count_label.text = str(rewards.size())
 	count_badge.visible = not rewards.is_empty()
 	if rewards.is_empty():
@@ -52,13 +53,16 @@ func _refresh(_count: int) -> void:
 func _on_claim_button_pressed() -> void:
 	if RequirementList.is_scroll_click_cancelled(self):
 		return
-	if _claim_pending or RewardManager.pending_rewards.is_empty():
+	var rewards: Array = _available_rewards()
+	if _claim_pending or rewards.is_empty():
 		return
-	var reward: Dictionary = RewardManager.pending_rewards[0]
+	var reward: Dictionary = rewards[0]
 	var uid: int = int(reward.get("uid", -1))
 	if uid < 0:
 		return
 	if str(reward.get("kind", "item")) == "card_pack":
+		if not ActivityManager.is_unlocked():
+			return
 		var popup := preload("res://scenes/ui/activity/CardPackOpeningPopup.tscn").instantiate()
 		UIManager.show_popup(popup)
 		popup.setup_pack(reward)
@@ -69,6 +73,12 @@ func _on_claim_button_pressed() -> void:
 	_pending_fly_texture = item_icon.texture
 	claim_button.disabled = true
 	RewardManager.claim_pending_reward(uid)
+
+
+func _available_rewards() -> Array:
+	if ActivityManager.is_unlocked():
+		return RewardManager.pending_rewards
+	return RewardManager.pending_rewards.filter(func(reward: Dictionary) -> bool: return str(reward.get("kind", "item")) != "card_pack")
 
 func _on_claimed(result: Dictionary) -> void:
 	if not _claim_pending:

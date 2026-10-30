@@ -1,4 +1,5 @@
 import type { ActivityDef, GameState, IStorage, RewardConfig } from "../storage/interface";
+import { activitiesUnlocked } from "./activity_access";
 
 export interface StairClimbReward { min_rank: number; max_rank: number; stamina: number; spirit_stones: number }
 export interface StairClimbScore {
@@ -53,6 +54,7 @@ export class StairClimbService {
   reward(rank: number): StairClimbReward { return this.config.rewards.find(r => rank >= r.min_rank && rank <= r.max_rank)!; }
 
   async enroll(storage: IStorage, userId: string, state: GameState, now = Date.now()): Promise<boolean> {
+    if (!activitiesUnlocked(state)) return false;
     if (!this.isActive(now) || this.score(state)) return false;
     for (let attempt = 0; attempt < 8; attempt++) {
       const registry = await storage.loadStairClimb(this.eventId) ?? { event_id: this.eventId, revision: 0, groups: [] };
@@ -86,6 +88,7 @@ export class StairClimbService {
   }
 
   awardOrderPoints(state: GameState, orderValue: number, now = Date.now()): boolean {
+    if (!activitiesUnlocked(state)) return false;
     const score = this.score(state);
     if (!this.isActive(now) || !score || score.settlement) return false;
     const gained = this.orderPoints(orderValue);
@@ -141,6 +144,7 @@ export class StairClimbService {
 
   /** Caller persists currency and settlement marker in the same version-checked save. */
   async settlePlayer(storage: IStorage, userId: string, state: GameState, apply: (r: RewardConfig) => unknown, now = Date.now(), frozen?: StairClimbGroup): Promise<boolean> {
+    if (!activitiesUnlocked(state)) return false;
     if (!this.activity || now < this.end + this.settlementDelayMs || this.score(state)?.settlement) return false;
     const registry = frozen ? null : await storage.loadStairClimb(this.eventId);
     const enrolled = frozen ?? registry?.groups.find(g => g.members.some(m => !m.bot && m.id === userId));
@@ -159,6 +163,7 @@ export class StairClimbService {
   }
 
   async view(storage: IStorage, userId: string, state: GameState, now = Date.now()) {
+    if (!activitiesUnlocked(state)) return { status: "locked", rows: [] };
     if (!this.activity) return { status: "unavailable", rows: [] };
     const registry = await storage.loadStairClimb(this.eventId);
     const group = registry?.groups.find(g => g.members.some(m => !m.bot && m.id === userId));
@@ -187,6 +192,7 @@ export class StairClimbService {
     for (const member of group.members.filter(m => !m.bot && !group.paid_members?.includes(m.id)).slice(0, 5)) {
       const state = await storage.loadState(member.id);
       if (!state) continue;
+      if (!activitiesUnlocked(state)) continue;
       try {
         if (await this.settlePlayer(storage, member.id, state, r => apply(state, r), now, group)) await storage.saveState(member.id, state);
         paid.push(member.id);

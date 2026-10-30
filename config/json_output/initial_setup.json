@@ -2,42 +2,6 @@
   "main": {
     "items": [
       {
-        "id": 11002,
-        "col": 1,
-        "row": 1,
-        "immovable": true
-      },
-      {
-        "id": 12002,
-        "col": 1,
-        "row": 3,
-        "immovable": true
-      },
-      {
-        "id": 11003,
-        "col": 5,
-        "row": 1,
-        "immovable": true
-      },
-      {
-        "id": 12003,
-        "col": 5,
-        "row": 3,
-        "immovable": true
-      },
-      {
-        "id": 11001,
-        "col": 1,
-        "row": 7,
-        "immovable": true
-      },
-      {
-        "id": 12001,
-        "col": 5,
-        "row": 7,
-        "immovable": true
-      },
-      {
         "id": 11001,
         "col": 3,
         "row": 7,
@@ -62,12 +26,6 @@
         "immovable": true
       },
       {
-        "id": 5004,
-        "col": 0,
-        "row": 6,
-        "immovable": true
-      },
-      {
         "id": 9001,
         "col": 2,
         "row": 0,
@@ -83,12 +41,6 @@
         "id": 9003,
         "col": 2,
         "row": 4,
-        "immovable": true
-      },
-      {
-        "id": 9004,
-        "col": 2,
-        "row": 6,
         "immovable": true
       }
     ]

@@ -1,4 +1,5 @@
 import { ActivityCycle, ActivityDef, BattlePassProgress, GameState, RewardConfig } from "../storage/interface";
+import { activitiesUnlocked } from "./activity_access";
 
 export interface BattlePassTier {
   level: number;
@@ -115,6 +116,7 @@ export class BattlePassService {
   }
 
   ensureProgress(state: GameState, now = Date.now()): Record<number, BattlePassProgress> {
+    if (!activitiesUnlocked(state)) return {};
     state.battle_pass_progress ??= {};
     const periodKey = this.getPeriodKey(now);
     for (const activityId of this.passes.keys()) {
@@ -125,11 +127,6 @@ export class BattlePassService {
           state.battle_pass_progress[activityId] = newProgress(periodKey);
           continue;
         }
-        current.points = Math.max(0, Math.floor(Number(current.points) || 0));
-        current.premium_unlocked = current.premium_unlocked === true;
-        current.free_claimed_levels = Array.isArray(current.free_claimed_levels) ? current.free_claimed_levels : [];
-        current.premium_claimed_levels = Array.isArray(current.premium_claimed_levels) ? current.premium_claimed_levels : [];
-        if (this.isMonthly(activityId)) current.period_key = periodKey;
       }
     }
     return state.battle_pass_progress;
@@ -145,6 +142,7 @@ export class BattlePassService {
   }
 
   awardOrderPoints(state: GameState, totalValue: number, requestId = "", now = Date.now()): boolean {
+    if (!activitiesUnlocked(state)) return false;
     state.battle_pass_order_requests ??= [];
     if (requestId && state.battle_pass_order_requests.includes(requestId)) return false;
     if (requestId) {
@@ -165,6 +163,7 @@ export class BattlePassService {
   }
 
   unlock(state: GameState, activityId: number, now = Date.now()): BattlePassResponse {
+    if (!activitiesUnlocked(state)) return { ok: false, reason: "activity_locked" };
     const pass = this.passes.get(activityId);
     if (!pass) return { ok: false, reason: "invalid_activity" };
     if (!this.isActive(activityId, now)) return { ok: false, reason: "activity_inactive" };
@@ -184,6 +183,7 @@ export class BattlePassService {
     applyRewards: (rewards: RewardConfig) => RewardConfig,
     now = Date.now(),
   ): BattlePassResponse {
+    if (!activitiesUnlocked(state)) return { ok: false, reason: "activity_locked" };
     const pass = this.passes.get(activityId);
     if (!pass) return { ok: false, reason: "invalid_activity" };
     if (!this.isActive(activityId, now)) return { ok: false, reason: "activity_inactive" };
@@ -201,6 +201,7 @@ export class BattlePassService {
   }
 
   settleExpired(state: GameState, applyRewards: (rewards: RewardConfig) => RewardConfig, now = Date.now()): boolean {
+    if (!activitiesUnlocked(state)) return false;
     let changed = false;
     const progress = this.ensureProgress(state, now);
     for (const pass of this.passes.values()) {

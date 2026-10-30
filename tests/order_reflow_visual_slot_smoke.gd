@@ -7,10 +7,10 @@ func _ready() -> void:
 	await get_tree().process_frame
 
 	var requirements: Array = [
-		{"items": [{"item_id": 5001}], "completed": false},
-		{"items": [{"item_id": 5002}], "completed": false},
-		{"items": [{"item_id": 5003}], "completed": false},
-		{"items": [{"item_id": 5004}], "completed": false},
+		{"item_ids": [5001], "items": [{"item_id": 5001}], "completed": false},
+		{"item_ids": [5002], "items": [{"item_id": 5002}], "completed": false},
+		{"item_ids": [5003], "items": [{"item_id": 5003}], "completed": false},
+		{"item_ids": [5004], "items": [{"item_id": 5004}], "completed": false},
 	]
 	# The second visual card is display index 0 because index 1 is available.
 	requirement_list.set_requirements(requirements, {0: 0, 1: 2, 2: 0, 3: 0})

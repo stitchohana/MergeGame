@@ -24,6 +24,7 @@ func _ready() -> void:
 	ConfigDatabase._rewards_data = {}
 	ConfigDatabase._home_meridian_stages = [{
 		"name": "测试周天",
+		"cultivation_level": 1,
 		"circulation_reward": {
 			"items": [
 				{"id": 20002, "count": 1},

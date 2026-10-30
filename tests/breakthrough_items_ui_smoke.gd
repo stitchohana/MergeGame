@@ -9,6 +9,55 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 
+	# Server refreshes must show the manual breakthrough button even when
+	# Qi layer three has no configured breakthrough materials.
+	CloudService.online = false
+	CultivationService.current_level = 4
+	CultivationService.current_exp = ConfigDatabase.get_stage_exp(4) - 1
+	var defs: Array = ConfigDatabase.get_home_meridian_stages().duplicate(true)
+	var completed_progress: Array = []
+	for index in range(defs.size()):
+		var def: Dictionary = defs[index]
+		if int(def.get("cultivation_level", 0)) != 4:
+			continue
+		var lit: Array = []
+		lit.resize(int(def.get("acupoints", 0)))
+		lit.fill(true)
+		completed_progress.append({"stage": index, "lit": lit, "circulation_completed": true})
+	var authoritative_cultivation: Dictionary = {
+		"current_level": 4, "current_exp": ConfigDatabase.get_stage_exp(4),
+		"total_exp": 244, "current_qi": 100, "max_qi": 6000,
+	}
+	home._home_defs = defs.duplicate(true)
+	home._home_progress = completed_progress.duplicate(true)
+	home._refresh_breakthrough_btn()
+	var breakthrough_btn: Button = home.get_node("BreakthroughBtn") as Button
+	assert(not breakthrough_btn.visible)
+	# Keep a stale pending circulation locally: the refreshed progress must be
+	# applied before cultivation signals decide whether breakthrough is ready.
+	home._home_progress[-1]["circulation_completed"] = false
+	home._on_state_loaded({
+		"home_meridian_defs": defs,
+		"home_meridian_progress": completed_progress.duplicate(true),
+		"cultivation": authoritative_cultivation,
+	})
+	assert(CultivationService.current_level == 4)
+	assert(CultivationService.current_exp == ConfigDatabase.get_stage_exp(4))
+	assert(breakthrough_btn.visible)
+	assert(CultivationService.get_required_breakthrough_items().is_empty())
+	# The last circulation and its animation still gate manual breakthrough.
+	home._home_progress[-1]["circulation_completed"] = false
+	home._refresh_breakthrough_btn()
+	assert(not breakthrough_btn.visible)
+	home._home_progress[-1]["circulation_completed"] = true
+	home._circulation_animating = true
+	home._refresh_breakthrough_btn()
+	assert(not breakthrough_btn.visible)
+	home._circulation_animating = false
+	home._refresh_breakthrough_btn()
+	assert(breakthrough_btn.visible)
+	home._home_progress = []
+
 	var original_cultivation_config: Dictionary = ConfigDatabase._cultivation_config.duplicate(true)
 	ConfigDatabase._cultivation_config = {
 		"stages": [{
@@ -49,6 +98,11 @@ func _ready() -> void:
 	assert(confirm_popup.title_label.text == "突破确认")
 	assert(confirm_popup is BreakthroughConfirmPopup)
 	var breakthrough_popup: BreakthroughConfirmPopup = confirm_popup as BreakthroughConfirmPopup
+	assert(breakthrough_popup.skip_today_checkbox == null)
+	var panel: Control = breakthrough_popup.get_node("Panel") as Control
+	var panel_offsets: Vector2 = Vector2(panel.offset_top, panel.offset_bottom)
+	breakthrough_popup.show_skip_today_option()
+	assert(Vector2(panel.offset_top, panel.offset_bottom) == panel_offsets)
 	assert(breakthrough_popup.rewards_container.get_child_count() == 1)
 	var first_reward_card: VBoxContainer = breakthrough_popup.rewards_container.get_child(0) as VBoxContainer
 	var first_reward_widget: ItemWidget = first_reward_card.get_node("ItemWidget") as ItemWidget

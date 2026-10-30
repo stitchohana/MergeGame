@@ -23,6 +23,7 @@ func setup_pack(reward: Dictionary) -> void:
 func _refresh() -> void:
 	if not is_node_ready():
 		return
+	_update_countdown()
 	if _reveal_tween and _reveal_tween.is_valid():
 		_reveal_tween.kill()
 	_card_grids.clear()
@@ -40,6 +41,7 @@ func _refresh() -> void:
 	var star: int = clampi(int(pack_def.get("star", 1)), 1, 5)
 	_summary.text = str(selected_reward.get("name", "卡包"))
 	_status.text = "正在开启，请稍候…" if CloudService.card_collection_busy else ("上次操作未确认，请重试以恢复结果" if busy else "卡包从物品暂存区开启，卡片自动收入仙册")
+	_build_exchange_controls(busy)
 	var hero := PanelContainer.new()
 	hero.add_theme_stylebox_override("panel", _style(Color("203a3d"), STAR_COLORS[star - 1], 24))
 	_body.add_child(hero)
@@ -94,6 +96,9 @@ func _open_pack(all_packs: bool) -> void:
 
 
 func _on_confirmed(data: Dictionary) -> void:
+	if bool(data.get("exchanged", false)):
+		_refresh()
+		return
 	if not visible or not data.has("cards"):
 		return
 	_result_data = data

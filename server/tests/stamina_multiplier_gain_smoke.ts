@@ -27,6 +27,7 @@ async function main(): Promise<void> {
   activity.end_time = "2999-01-01T00:00:00Z";
   const engine = new GameEngine(tables);
   const state = engine.createInitialState();
+  state.cultivation.current_level = 2;
   state.stamina = 190;
   state.battle_pass_progress = {
     4: { points: 10, premium_unlocked: false, free_claimed_levels: [], premium_claimed_levels: [], period_key: engine.battlePassService.getPeriodKey() },

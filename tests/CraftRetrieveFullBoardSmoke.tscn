@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource path="res://tests/craft_retrieve_full_board_smoke.gd" type="Script" id="1"]
+
+[node name="CraftRetrieveFullBoardSmoke" type="Node"]
+script = ExtResource("1")

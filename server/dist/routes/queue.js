@@ -11,10 +11,13 @@ function enqueue(userId, fn) {
         // prev rejected: log and reset the queue so future ops aren't blocked
         console.error(`[queue] prev promise rejected for ${userId}:`, err);
         return fn();
-    }).catch((err) => {
+    });
+    const settled = next.catch((err) => {
         console.error(`[queue] handler error for ${userId}:`, err);
         // Don't re-throw — queue must stay healthy for subsequent requests
     });
-    userQueues.set(userId, next);
+    userQueues.set(userId, settled);
+    void settled.then(() => { if (userQueues.get(userId) === settled)
+        userQueues.delete(userId); });
     return next;
 }

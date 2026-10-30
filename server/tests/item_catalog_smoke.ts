@@ -19,10 +19,10 @@ async function main() {
   const engine = new GameEngine(gameConfigTables);
   const storage = new TestStorage();
   const state = engine.createInitialState();
+  state.cultivation.current_level = 2;
   state.stamina = 199;
   engine.recordItemDiscovery(state, 1001);
   engine.recordItemDiscovery(state, 1002);
-  delete state.item_catalog_claimed_ids; // Legacy save, all discovered items remain claimable.
   await storage.saveState("catalog", state);
   const secret = "item-catalog-test-secret";
   const token = await signToken({ userId: "catalog", deviceId: "catalog" }, secret);
@@ -32,7 +32,7 @@ async function main() {
     await router.handle({ method, path, body, headers: { authorization: "Bearer " + token }, query: {} }, res);
     return { status: res.statusCode, data: await res.toResponse().json() as any };
   }
-  await request("/state", {}, "GET"); // Complete existing migrations before failure injection.
+  await request("/state", {}, "GET"); // Initialize unlocked activities before failure injection.
   assert.deepEqual((await request("/state", {}, "GET")).data.item_catalog_claimed_ids, []);
   for (const item_id of ["1001", null, 0, -1, 1.5]) {
     assert.equal((await request("/item_catalog/claim", { item_id })).data.error, "invalid_params");

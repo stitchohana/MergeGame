@@ -2,6 +2,7 @@ extends Node
 
 
 func _ready() -> void:
+	CultivationService.current_level = 2
 	var screen := preload("res://scenes/screens/GameScreen.gd").new() as GameScreen
 	var activity: Dictionary = {"widget": "StairClimb", "active": true, "enabled": true,
 		"start_time": "2020-01-01T00:00:00Z", "end_time": "2099-01-01T00:00:00Z",

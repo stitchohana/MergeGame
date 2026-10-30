@@ -1,0 +1,14 @@
+{
+  "artifacts": [
+    {"id":"basin","name":"聚宝盆","unlock_level":2,"unlock_label":"练气一层","daily_free":1,"daily_buy_limit":2,"base_cost":100,"cost_increment":100,"description":"将一件低级材料拖入聚宝盆，飞出同一合成链中当前境界最高级物品 ×2。优先放入棋盘，空位不足时自动暂存。"},
+    {"id":"furnace","name":"万象炉","unlock_level":4,"unlock_label":"练气三层","daily_free":3,"daily_buy_limit":5,"base_cost":100,"cost_increment":100,"description":"将一件物品拖入万象炉，选择同级且已解锁的其他物品，一换一后飞入棋盘。"},
+    {"id":"sand","name":"太虚时砂","unlock_level":6,"unlock_label":"练气五层","daily_free":1,"daily_buy_limit":2,"base_cost":100,"cost_increment":100,"description":"立即完成一次制作或发射器冷却，或在 60 秒内撤销最近一次可逆的合并、生成、出售。两种模式共用次数。"}
+  ],
+  "realms": [
+    {"cultivation_min":1,"cultivation_max":10,"level_cap":4},
+    {"cultivation_min":11,"cultivation_max":13,"level_cap":8},
+    {"cultivation_min":14,"cultivation_max":16,"level_cap":12},
+    {"cultivation_min":17,"cultivation_max":20,"level_cap":16}
+  ],
+  "settings": [{"reset_hour":5,"rewind_seconds":60}]
+}

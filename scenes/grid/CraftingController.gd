@@ -42,7 +42,7 @@ func setup_button(parent: Node) -> void:
 
 # --- Called by GridView ---
 
-func get_ingredient_hint_debug(table_item: Dictionary, ingredient_id: int) -> Dictionary:
+func get_ingredient_hint_debug(table_item: Dictionary, ingredient_id: int, recipe_hints: Variant = null) -> Dictionary:
 	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
 	var table_id: int = table_item.get("id", 0) as int
 	var allowed_recipes: Array = ConfigDatabase.get_recipes_for_item(table_id)
@@ -51,6 +51,11 @@ func get_ingredient_hint_debug(table_item: Dictionary, ingredient_id: int) -> Di
 	var required_recipe_ids: Dictionary = _get_required_recipe_ids()
 	if required_recipe_ids.is_empty():
 		return {"accepted": false, "reason": "no_active_order_recipes", "state": craft_state, "recipe_count": allowed_recipes.size(), "stored_count": CraftingService.get_stored_items(table_item).size()}
+	if recipe_hints != null:
+		var assigned_recipe: Dictionary = preload("res://scripts/utils/CraftingRecipeHints.gd").get_table_recipe(table_item, recipe_hints)
+		if assigned_recipe.is_empty():
+			return {"accepted": false, "reason": "no_assigned_recipe", "state": craft_state, "recipe_count": 0, "stored_count": CraftingService.get_stored_items(table_item).size()}
+		allowed_recipes = [assigned_recipe]
 	var stored: Array = CraftingService.get_stored_items(table_item)
 	var ingredient_in_required_recipe: bool = false
 	for recipe_variant: Variant in allowed_recipes:
@@ -72,30 +77,7 @@ func get_ingredient_hint_debug(table_item: Dictionary, ingredient_id: int) -> Di
 	return {"accepted": false, "reason": reject_reason, "state": craft_state, "recipe_count": allowed_recipes.size(), "stored_count": stored.size(), "required_recipe_count": required_recipe_ids.size()}
 
 func _get_required_recipe_ids() -> Dictionary:
-	var required_recipe_ids: Dictionary = {}
-	var visited_item_ids: Dictionary = {}
-	for order_variant: Variant in GameState.meridian_acupoints:
-		var order: Dictionary = order_variant as Dictionary
-		if bool(order.get("completed", false)):
-			continue
-		for item_variant: Variant in order.get("items", []):
-			var item: Dictionary = item_variant as Dictionary
-			_collect_required_recipe_ids(int(item.get("item_id", 0)), required_recipe_ids, visited_item_ids)
-	return required_recipe_ids
-
-func _collect_required_recipe_ids(item_id: int, required_recipe_ids: Dictionary, visited_item_ids: Dictionary) -> void:
-	if item_id <= 0 or visited_item_ids.has(item_id):
-		return
-	visited_item_ids[item_id] = true
-	for recipe_variant: Variant in ConfigDatabase.get_recipes_for_result(item_id):
-		if not recipe_variant is Dictionary:
-			continue
-		var recipe: Dictionary = recipe_variant as Dictionary
-		var recipe_id: int = int(recipe.get("id", 0))
-		if recipe_id > 0:
-			required_recipe_ids[recipe_id] = true
-		for ingredient_variant: Variant in recipe.get("ingredients", []):
-			_collect_required_recipe_ids(int(ingredient_variant), required_recipe_ids, visited_item_ids)
+	return CraftingService.get_required_order_recipe_ids(true)
 
 func _recipe_accepts_stored_and_new(ingredients: Array, stored: Array, ingredient_id: int) -> bool:
 	var available_counts: Dictionary = {}
@@ -154,12 +136,7 @@ func get_ingredient_acceptance_debug(table_item: Dictionary, ingredient_id: int)
 
 func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Vector2i, ingredient_id: int, drag_item_data: Dictionary) -> bool:
 	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
-	print("[PlayerAction] craft_drop_begin table_id=", int(table_item.get("id", 0)),
-		" table_uid=", int(table_item.get("_uid", 0)), " table_pos=", table_pos,
-		" source_pos=", src_pos, " ingredient_id=", ingredient_id,
-		" state=", craft_state, " stored=", CraftingService.get_stored_items(table_item))
 	if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
-		print("[PlayerAction] craft_drop_reject reason=table_busy")
 		craft_rejected.emit("snap_back")
 		return false
 
@@ -175,9 +152,6 @@ func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Ve
 		if valid:
 			break
 	if not valid:
-		print("[PlayerAction] craft_drop_reject reason=ingredient_not_in_table_recipes",
-			" table_id=", table_id, " ingredient_id=", ingredient_id,
-			" allowed_recipe_count=", allowed_recipes.size())
 		craft_rejected.emit("此材料无法放入")
 		return false
 
@@ -185,8 +159,6 @@ func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Ve
 	var stored: Array = CraftingService.get_stored_items(table_item)
 	for s in stored:
 		if s.get("id", 0) == ingredient_id:
-			print("[PlayerAction] craft_drop_reject reason=ingredient_already_stored",
-				" ingredient_id=", ingredient_id)
 			craft_rejected.emit("该材料已放入")
 			return false
 
@@ -215,13 +187,9 @@ func try_add_ingredient(table_pos: Vector2i, table_item: Dictionary, src_pos: Ve
 			if can_match:
 				break
 		if not can_match:
-			print("[PlayerAction] craft_drop_reject reason=incompatible_with_stored",
-				" ingredient_id=", ingredient_id, " stored=", stored)
 			craft_rejected.emit("无法与已有材料形成配方")
 			return false
 
-	print("[PlayerAction] craft_drop_accept table_id=", table_id,
-		" ingredient_id=", ingredient_id, " allowed_recipe_count=", allowed_recipes.size())
 	craft_add_queued.emit(src_pos, table_pos, ingredient_id)
 	item_accepted_for_craft.emit("%d,%d" % [src_pos.x, src_pos.y], src_pos)
 	CraftingService.add_ingredient(table_item, drag_item_data)
@@ -233,11 +201,11 @@ func try_retrieve(table_item: Dictionary, table_pos: Vector2i) -> void:
 		return
 	var craft_state: int = table_item.get("_craft_state", CraftingService.TableState.IDLE)
 	if craft_state != CraftingService.TableState.READY:
-		print("[PlayerAction] craft_retrieve_skip reason=not_ready state=", craft_state,
-			" table_uid=", int(table_item.get("_uid", 0)))
 		return
 	if _craft_retrieve_pending:
-		print("[PlayerAction] craft_retrieve_skip reason=request_pending")
+		return
+	if GridManager.is_grid_full():
+		craft_rejected.emit("棋盘已满，无法取出制作结果")
 		return
 	_craft_retrieve_pending = true
 	_craft_table_item = table_item
@@ -321,6 +289,9 @@ func _on_craft_retrieve_confirmed(result: Dictionary) -> void:
 func _on_craft_retrieve_rejected(reason: String) -> void:
 	_craft_retrieve_pending = false
 	_craft_table_item = {}
+	if reason == "no_empty_cell":
+		craft_rejected.emit("棋盘已满，无法取出制作结果")
+		return
 	craft_rejected.emit("取件失败：" + reason)
 
 var _craft_start_pending: bool = false

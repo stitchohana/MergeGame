@@ -41,7 +41,7 @@ func sync_state(state: Dictionary) -> void:
 	pouch_updated.emit(items)
 
 func _apply_capacity(state: Dictionary) -> void:
-	capacity = maxi(items.size(), int(state.get("pouch_capacity", capacity)))
+	capacity = int(state.get("pouch_capacity", capacity))
 	next_unlock_cost = int(state.get("pouch_next_unlock_cost", next_unlock_cost))
 
 func unlock_slot() -> void:

@@ -16,6 +16,8 @@ var _tokens_data: Dictionary = {}
 var _weekly_tasks: Dictionary = {}
 var _battle_passes: Dictionary = {}
 var card_collection: Dictionary = {}
+var golden_finger: Dictionary = {}
+var secret_realm: Dictionary = {}
 var _recipes_by_table: Dictionary = {}  # table_id -> Array[recipe]
 
 func _ready() -> void:
@@ -35,6 +37,8 @@ func load_all() -> void:
 	_load_weekly_tasks("res://config/json_output/weekly_tasks.json")
 	_load_battle_passes("res://config/json_output/battle_pass.json")
 	card_collection = _load_json("res://config/json_output/card_collection.json")
+	golden_finger = _load_json("res://config/json_output/golden_finger.json")
+	secret_realm = _load_json("res://config/json_output/secret_realm.json")
 
 func _load_json(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -489,12 +493,8 @@ func get_max_unlocked_home_meridian_stage_index(cultivation_level: int) -> int:
 			if configured_level <= cultivation_level:
 				max_index = index
 			continue
-		# Keep compatibility with legacy home configs without explicit levels.
-		if cultivation_level <= 1:
-			return 0
-		if cultivation_level <= 10:
-			return mini(_home_meridian_stages.size() - 1, cultivation_level - 1)
-		return mini(_home_meridian_stages.size() - 1, 9 + (cultivation_level - 10) * 10)
+		push_error("Home meridian config requires cultivation_level")
+		return -1
 	return max_index
 
 
@@ -524,3 +524,10 @@ func _load_battle_passes(path: String) -> void:
 
 func get_battle_pass(activity_id: int) -> Dictionary:
 	return _battle_passes.get(activity_id, {})
+
+
+func get_activity_token_ids() -> Array[int]:
+	var result: Array[int] = []
+	for pass_def: Dictionary in _battle_passes.values():
+		result.append(int(pass_def.get("points_token_id", 0)))
+	return result

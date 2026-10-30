@@ -3,6 +3,8 @@ extends Node
 
 func _ready() -> void:
 	await get_tree().process_frame
+	# Activity UI fixtures must pass the existing cultivation-level unlock gate.
+	CultivationService.current_level = 2
 	ActivityManager.stair_climb_received_ticks = Time.get_ticks_msec()
 	var tiers: Array = []
 	for rank: int in range(1, 11):

@@ -34,10 +34,13 @@ async function main() {
   assert.deepEqual(engine.getOrderSupplyMaterials(5006, 1), [5001]);
   assert.deepEqual(engine.getOrderSupplyMaterials(5006, 4), [5002]);
   assert.deepEqual(engine.getOrderSupplyMaterials(5006, 10), [5005]);
+  assert.deepEqual(engine.getOrderSupplyMaterials(5001, 4), [5001]);
+  assert.deepEqual(engine.getOrderSupplyMaterials(5002, 4), [5002]);
+  assert.deepEqual(engine.getOrderSupplyMaterials(27001, 4), [5001, 9001]);
   // Supply resolves high-level items and crafted products into level-one merge materials.
   const claimMaterials = (rewardEngine: GameEngine, itemIds: number[], gridIds: number[] = [],
     setup: (state: GameState) => void = () => {}) => {
-    const rewardState = rewardEngine.createInitialState();
+    const rewardState = rewardEngine.createInitialState(); rewardState.cultivation.current_level = 2;
     rewardState.meridian_acupoints = [{ item_id: itemIds[0], name: "materials", count: itemIds.length,
       item_ids: itemIds, completed: false } as any];
     rewardState.grid = gridIds.map((id, col) => ({ id, uid: rewardEngine._nextUid(rewardState), col, row: 0 }));
@@ -50,11 +53,22 @@ async function main() {
     assert.equal(rewardState.activity_progress![7].current_count, 0);
     assert.ok(claim.spawned_items.every(item => {
       const def = rewardEngine.getItemData(item.id)!;
-      return def.type === 0 && def.level === rewardEngine.getOrderSupplyMaterialLevel(rewardState.cultivation.current_level);
+      return def.type === 0 && def.level <= rewardEngine.getOrderSupplyMaterialLevel(rewardState.cultivation.current_level);
     }));
     return claim.spawned_items.map(item => item.id);
   };
   assert.deepEqual(claimMaterials(engine, [5006]), [5001, 5001, 5001]);
+  // A realm's supply tier must never upgrade a lower-level order requirement.
+  const midRealm = (s: GameState) => { s.cultivation.current_level = 4; };
+  assert.deepEqual(claimMaterials(engine, [5001], [], midRealm), [5001, 5001, 5001]);
+  assert.deepEqual(claimMaterials(engine, [5001], [5001], midRealm), [5001, 5001, 5001]);
+  assert.deepEqual(claimMaterials(engine, [5002], [], midRealm), [5002, 5002, 5002]);
+  assert.deepEqual(claimMaterials(engine, [5001, 5002], [5002], midRealm), [5001, 5001, 5001]);
+  assert.deepEqual(claimMaterials(engine, [5001, 5002], [5001], midRealm), [5002, 5002, 5002]);
+  assert.deepEqual(claimMaterials(engine, [27001], [5001], midRealm), [9001, 9001, 9001]);
+  assert.deepEqual(claimMaterials(engine, [27002], [5001, 5001], midRealm), [9002, 9002, 9002]);
+  assert.deepEqual(claimMaterials(engine, [27001], [27001], midRealm), [5001, 9001, 5001]);
+  assert.deepEqual(claimMaterials(engine, [27001], [5001, 9001], midRealm), [5001, 9001, 5001]);
   assert.deepEqual(claimMaterials(engine, [27004]), [5001, 1001, 9001]);
   assert.deepEqual(claimMaterials(engine, [27004], [27004]), [5001, 1001, 9001]);
   assert.deepEqual(claimMaterials(engine, [27004, 1006], [27004]), [1001, 1001, 1001]);
@@ -90,34 +104,38 @@ async function main() {
   // When every recipe input is sufficient, fall back to the current order chains.
   assert.deepEqual(claimMaterials(engine, [27002], [5001, 5001, 9001, 9001]), [5001, 9001, 5001]);
   assert.deepEqual(claimMaterials(engine, [27004], [5004, 1002]), [9001, 9001, 9001]);
-  assert.deepEqual(claimMaterials(engine, [27004], [5004, 1002], s => { s.cultivation.current_level = 11; }), [9006, 9006, 9006]);
+  assert.deepEqual(claimMaterials(engine, [27004], [5004, 1002], s => { s.cultivation.current_level = 11; }), [9003, 9003, 9003]);
   assert.deepEqual(claimMaterials(nested, [27004], [5001, 1002]), [9001, 9001, 9001]);
-  const shortageState = engine.createInitialState();
+  const shortageState = engine.createInitialState(); shortageState.cultivation.current_level = 2;
   shortageState.grid = [{ id: 5001, uid: 1000, col: 0, row: 0 }];
   shortageState.meridian_acupoints = [
-    { item_id: 27001, name: "live", count: 1, completed: false },
-    { item_id: 1006, name: "submitted", count: 1, completed: true },
-    { item_id: 5001, name: "breakthrough", count: 1, completed: false, breakthrough_order: true } as any,
+    { item_ids: [27001], name: "live", completed: false },
+    { item_ids: [1006], name: "submitted", completed: true },
+    { item_ids: [5001], name: "breakthrough", completed: false, breakthrough_order: true } as any,
   ];
   const beforeShortage = structuredClone(shortageState);
   assert.deepEqual(engine.getMissingOrderSupplyMaterials(shortageState), [9001]);
   assert.deepEqual(shortageState, beforeShortage, "shortage calculation must not consume saved inventory");
-  const fallback = engine.createInitialState();
-  fallback.meridian_acupoints = [];
-  engine.activityEngine.initProgress(fallback);
-  fallback.activity_progress![7].current_count = 5;
-  const fallbackClaim = engine.activityEngine.claimOrderSupply(fallback, 7, 0, engine);
-  assert.equal(fallbackClaim.ok, true);
-  if (fallbackClaim.ok) assert.ok(fallbackClaim.spawned_items.every(item => {
-    const def = engine.getItemData(item.id)!;
-    return def.type === 0 && def.level === 1;
-  }));
-  const state = engine.createInitialState();
+  for (const cultivationLevel of [2, 4, 11]) {
+    const fallback = engine.createInitialState(); fallback.cultivation.current_level = 2;
+    fallback.cultivation.current_level = cultivationLevel;
+    fallback.meridian_acupoints = [];
+    engine.activityEngine.initProgress(fallback);
+    engine.activityEngine.initProgress(fallback);
+    fallback.activity_progress![7].current_count = 5;
+    const fallbackClaim = engine.activityEngine.claimOrderSupply(fallback, 7, 0, engine);
+    assert.equal(fallbackClaim.ok, true);
+    if (fallbackClaim.ok) assert.ok(fallbackClaim.spawned_items.every(item => {
+      const def = engine.getItemData(item.id)!;
+      return def.type === 0 && def.level === engine.getOrderSupplyMaterialLevel(cultivationLevel);
+    }));
+  }
+  const state = engine.createInitialState(); state.cultivation.current_level = 2;
   assert.equal(engine.activityEngine.isActive(engine.activityEngine.getActivities().find(a => a.id === 7)!), true);
   assert.equal(engine.completeMeridianAcupoint(state, 999, [5001]).ok, false);
   assert.equal(state.activity_progress?.[7]?.current_count ?? 0, 0);
   for (let i = 0; i < 6; i++) {
-    state.meridian_acupoints = [{ item_id: 5001, name: "test", count: 1, completed: false }];
+    state.meridian_acupoints = [{ item_ids: [5001], name: "test", completed: false }];
     state.cultivation.current_qi = 0;
     state.grid = [{ id: 5001, uid: engine._nextUid(state), col: 0, row: 0 }];
     assert.equal(engine.completeMeridianAcupoint(state, 0, [5001], `supply-order-${i}`).ok, true);
@@ -126,7 +144,7 @@ async function main() {
     assert.equal(state.activity_progress?.[7]?.current_count ?? 0, 0);
   }
   for (let i = 0; i < 6; i++) {
-    state.meridian_acupoints = [{ item_id: 5002, name: "test", count: 1, completed: false }];
+    state.meridian_acupoints = [{ item_ids: [5002], name: "test", completed: false }];
     state.grid = [0, 1].map(col => ({ id: 5001, uid: engine._nextUid(state), col, row: 0 }));
     assert.equal(engine.executeMerge(state, 0, 0, 1, 0).ok, true);
     assert.equal(state.activity_progress![7].current_count, Math.min(5, i + 1));
@@ -171,7 +189,7 @@ async function main() {
   assert.equal((await request("/state", {}, "GET")).data.activity_progress[7].current_count, 0);
   reloaded = (await storage.loadState("supply"))!;
 
-  for (let i = 0; i < 5; i++) engine.activityEngine.recordOrderSupplyAction(reloaded, 5006);
+  reloaded.activity_progress![7].current_count = 5;
   const originalPending = structuredClone(reloaded.pending_rewards);
   reloaded.grid = Array.from({ length: 63 }, (_, i) => ({ id: 1001, uid: engine._nextUid(reloaded), col: i % 7, row: Math.floor(i / 7) }));
   await storage.saveState("supply", reloaded);
@@ -193,7 +211,7 @@ async function main() {
   assert.equal((await request(path, { ...body, expected_claim_count: 1 })).data.error, "main_board_required");
   reloaded = (await storage.loadState("supply"))!;
   reloaded.board_type = 0;
-  for (let i = 0; i < 5; i++) engine.activityEngine.recordOrderSupplyAction(reloaded, 5006);
+  reloaded.activity_progress![7].current_count = 5;
   await storage.saveState("supply", reloaded);
   assert.equal((await request(path, body)).data.error, "already_claimed");
   const partialClaim = await request(path, { ...body, expected_claim_count: 2 });
@@ -220,8 +238,8 @@ async function main() {
 
   // Claim completes all in-progress tables atomically, without retrieving their output.
   reloaded = (await storage.loadState("supply"))!;
-  reloaded.meridian_acupoints = [{ item_id: 5001, name: "test", count: 1, completed: false }];
-  for (let i = 0; i < 5; i++) engine.activityEngine.recordOrderSupplyAction(reloaded, 5001);
+  reloaded.meridian_acupoints = [{ item_ids: [5001], name: "test", completed: false }];
+  reloaded.activity_progress![7].current_count = 5;
   const recipe = config.recipes.recipes[0];
   const craftStates = [TableState.CRAFTING, TableState.CRAFTING, TableState.HAS_ITEMS, TableState.READY];
   reloaded.grid = craftStates.map((craftState, col) => ({ id: 17001, uid: engine._nextUid(reloaded), col, row: 0,
@@ -251,8 +269,8 @@ async function main() {
   assert.equal((await storage.loadState("supply"))!.activity_progress![7].current_count, 0);
 
   const disabled = new GameEngine({ ...config, activities: { activities: gameConfigTables.activities.activities.map(activity => ({ ...activity, enabled: activity.id === 7 ? false : activity.enabled })) } });
-  const inactive = disabled.createInitialState();
-  inactive.meridian_acupoints = [{ item_id: 5001, name: "test", count: 1, completed: false }];
+  const inactive = disabled.createInitialState(); inactive.cultivation.current_level = 2;
+  inactive.meridian_acupoints = [{ item_ids: [5001], name: "test", completed: false }];
   disabled.activityEngine.recordOrderSupplyAction(inactive, 5001);
   assert.equal(inactive.activity_progress?.[7]?.current_count ?? 0, 0);
   assert.equal(disabled.activityEngine.claimOrderSupply(inactive, 7, 0, disabled).ok, false);

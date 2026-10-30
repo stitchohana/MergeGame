@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "npm run worker:check",
+    "build": "tsc -p tsconfig.json --noCheck && npm run worker:check",
     "start": "node dist/index.js",
     "worker:dev": "wrangler dev --config wrangler.toml --local",
     "worker:deploy": "wrangler deploy --config wrangler.toml",

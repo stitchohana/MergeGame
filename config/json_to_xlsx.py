@@ -13,8 +13,13 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from card_collection_table import CARD_COLLECTION_COLUMNS, card_collection_rows
+from activity_settings_table import ACTIVITY_SETTINGS_COLUMNS, activity_settings_rows, validate_activity_settings, validate_order_duel
+from golden_finger_table import write_golden_finger, validate_cultivation
+from secret_realm_table import SECRET_REALM_COLUMNS, secret_realm_rows
+from weekly_tasks_table import WEEKLY_COLUMNS, weekly_task_rows
 
 from facility_reward_validation import validate_facility_reward_order
+from crafting_reward_budget import validate_facility_merge_budgets
 from home_meridian_progression import validate_home_progression
 from recipe_validation import (
     validate_no_duplicate_ingredients,
@@ -350,6 +355,8 @@ data = json.load(open(JSON_DIR / "shop.json", encoding="utf-8"))
 wb = new_book()
 ws = wb.create_sheet("shop")
 add_sheet(ws, ["id","price"], [[it["id"], it["price"]] for it in data["items"]])
+ws = wb.create_sheet("settings")
+add_sheet(ws, ["key", "value"], [["refresh_cost", data.get("refresh_cost", 100)]])
 save(wb, "shop")
 
 # ════════════════════════════════════════════════════════════
@@ -426,8 +433,19 @@ save(wb, "quests")
 #  activities.xlsx
 # ════════════════════════════════════════════════════════════
 print("Building activities.xlsx...")
+secret_realm = json.load(open(JSON_DIR / "secret_realm.json", encoding="utf-8"))
+secret_realm_book = new_book()
+for sheet_name, columns in SECRET_REALM_COLUMNS.items():
+    secret_sheet = secret_realm_book.create_sheet(sheet_name)
+    add_sheet(secret_sheet, columns, secret_realm_rows(secret_realm, sheet_name))
+save(secret_realm_book, "secret_realm")
 build_card_collection()
 data = json.load(open(JSON_DIR / "activities.json", encoding="utf-8"))
+stair_climb = json.load(open(JSON_DIR / "stair_climb.json", encoding="utf-8"))
+order_supply = json.load(open(JSON_DIR / "order_supply.json", encoding="utf-8"))
+order_duel = json.load(open(JSON_DIR / "order_duel.json", encoding="utf-8"))
+validate_order_duel(data["activities"], order_duel)
+validate_activity_settings(data["activities"], stair_climb, order_supply)
 wb = new_book()
 h = ["id","name","cycle","start_time","end_time","widget","enabled","config"]
 r = []
@@ -439,6 +457,15 @@ for a in data["activities"]:
 ws = wb.create_sheet("activities")
 add_sheet(ws, h, r)
 save(wb, "activities")
+write_golden_finger(validate_cultivation(json.load(open(JSON_DIR / "golden_finger.json", encoding="utf-8")),
+    json.load(open(JSON_DIR / "cultivation.json", encoding="utf-8"))["stages"]), OUT / "golden_finger.xlsx")
+
+for name, settings in (("stair_climb", stair_climb), ("order_supply", order_supply), ("order_duel", order_duel)):
+    wb = new_book()
+    for sheet_name, columns in ACTIVITY_SETTINGS_COLUMNS[name].items():
+        ws = wb.create_sheet(sheet_name)
+        add_sheet(ws, columns, activity_settings_rows(settings, name, sheet_name))
+    save(wb, name)
 
 # ════════════════════════════════════════════════════════════
 #  battle_pass.xlsx
@@ -466,13 +493,10 @@ save(wb, "battle_pass")
 print("Building weekly_tasks.xlsx...")
 data = json.load(open(JSON_DIR / "weekly_tasks.json", encoding="utf-8"))
 wb = new_book()
-h = ["activity_id","day","quests"]
-r = []
-for wt in data["weekly_tasks"]:
-    for day_idx, quests in enumerate(wt.get("daily_quests", []), 1):
-        r.append([wt.get("activity_id",""), day_idx, join_list(quests)])
-ws = wb.create_sheet("weekly_tasks")
-add_sheet(ws, h, r)
+weekly_rows = weekly_task_rows(data)
+for sheet_name, headers in WEEKLY_COLUMNS.items():
+    ws = wb.create_sheet(sheet_name)
+    add_sheet(ws, headers, weekly_rows[sheet_name])
 save(wb, "weekly_tasks")
 
 # ════════════════════════════════════════════════════════════
@@ -485,6 +509,8 @@ recipes_for_facility_validation = json.load(open(JSON_DIR / "recipes.json", enco
 setup_for_facility_validation = json.load(open(JSON_DIR / "initial_setup.json", encoding="utf-8"))
 rewards_for_facility_validation = json.load(open(JSON_DIR / "rewards.json", encoding="utf-8")).get("rewards", {})
 cultivation_for_home_validation = json.load(open(JSON_DIR / "cultivation.json", encoding="utf-8"))["stages"]
+validate_facility_merge_budgets(data["stages"], items_for_facility_validation, setup_for_facility_validation,
+                               cultivation_for_home_validation, rewards_for_facility_validation)
 validate_home_progression(
     data["stages"],
     cultivation_for_home_validation,

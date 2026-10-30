@@ -11,6 +11,7 @@ var _activity: Dictionary = {}
 func _ready() -> void:
 	pressed.connect(_on_pressed)
 	GameState.card_collection_changed.connect(_refresh_collection_badge)
+	ActivityManager.order_duel_updated.connect(_refresh_duel_badge)
 
 
 func setup(activity: Dictionary) -> void:
@@ -31,7 +32,22 @@ func setup(activity: Dictionary) -> void:
 		activity_mark.text = "梯"
 		status_label.text = "● 比拼中" if bool(activity.get("active", false)) else "查看结算"
 		tooltip_text = "完成订单累积积分，查看本组排名与奖励"
+	if widget == "SecretRealm":
+		activity_mark.text = "秘"
+		status_label.text = "合剑探雾 · 挑战首领"
+		tooltip_text = "主棋盘订单获补给，合成揭雾探索剑墟"
 	_refresh_collection_badge()
+	_refresh_duel_badge()
+
+
+func _refresh_duel_badge() -> void:
+	if str(_activity.get("widget", "")) != "OrderDuel":
+		return
+	activity_mark.text = "战"
+	var data: Dictionary = ActivityManager.order_duel
+	var states: Dictionary = {"playing": "● 对战中", "matching": "匹配道友中", "lost": "再战 / 休息", "resting": "点击参战"}
+	status_label.text = str(states.get(str(data.get("status", "resting")), "点击参战"))
+	tooltip_text = "完成订单率先达标获胜，累计胜利积分领取十档奖励"
 
 
 func _refresh_collection_badge() -> void:
@@ -46,6 +62,16 @@ func _on_pressed() -> void:
 		return
 	var activity_id: int = int(_activity.get("id", 0))
 	var widget: String = str(_activity.get("widget", ""))
+	if widget == "SecretRealm":
+		var realm_panel := preload("res://scenes/ui/activity/SecretRealmPanel.tscn").instantiate()
+		UIManager.show_popup(realm_panel)
+		realm_panel.setup(activity_id)
+		return
+	if widget == "OrderDuel":
+		var duel_panel := preload("res://scenes/ui/activity/OrderDuelPanel.tscn").instantiate()
+		UIManager.show_popup(duel_panel)
+		duel_panel.setup(activity_id)
+		return
 	if widget == "StairClimb":
 		var stair_panel := preload("res://scenes/ui/activity/StairClimbPanel.tscn").instantiate()
 		UIManager.show_popup(stair_panel)

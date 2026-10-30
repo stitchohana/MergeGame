@@ -33,14 +33,16 @@ from home_meridian_progression import (
     early_stage_exp,
     validate_home_progression,
 )
+from crafting_reward_budget import (
+    budget_crafting_rewards, budget_facility_rewards,
+    validate_facility_merge_budgets,
+)
 
 
 BASE = Path(__file__).parent
 JSON_DIR = BASE / "json_output"
-# The previous Qi distribution is used only to calculate the compression
-# boost for facility rewards.  The removed circulations are represented by
-# higher-level facilities rather than being back-filled later.
-LEGACY_CIRCULATIONS_BY_LEVEL = [3, 6, 10, 13, 16, 19, 22, 25, 29, 32]
+# Reference weights used to calculate facility reward levels.
+FACILITY_REWARD_REFERENCE_COUNTS = [3, 6, 10, 13, 16, 19, 22, 25, 29, 32]
 def read_json(name: str) -> Any:
     with open(JSON_DIR / name, encoding="utf-8") as handle:
         return json.load(handle)
@@ -59,19 +61,13 @@ def as_int(value: Any, default: int = 0) -> int:
         return default
 
 
-def legacy_level_for_stage(stage_index: int) -> int:
-    if stage_index <= 9:
-        return stage_index + 1
-    return 11 + (stage_index - 10) // 10
-
-
 def group_existing_stages(
     home_stages: Sequence[Mapping[str, Any]],
     cultivation_count: int,
 ) -> List[List[Mapping[str, Any]]]:
     groups: List[List[Mapping[str, Any]]] = [[] for _ in range(cultivation_count)]
     for stage_index, stage in enumerate(home_stages):
-        level = as_int(stage.get("cultivation_level"), legacy_level_for_stage(stage_index))
+        level = as_int(stage.get("cultivation_level"))
         if level < 1 or level > cultivation_count:
             raise ValueError(f"home stage {stage_index} has invalid cultivation level {level}")
         groups[level - 1].append(stage)
@@ -121,6 +117,20 @@ def distribute_total(total: int, parts: int) -> List[int]:
             index = min(parts - 1, math.floor((remainder_index + 0.5) * parts / remainder))
             values[index] += 1
     return values
+
+
+def distribute_uniform(total: int, parts: int) -> List[int]:
+    """Use one rounded integer average for every circulation.
+
+    Cultivation EXP is intentionally uniform within a level.  When the old
+    level budget was not divisible by its circulation count, the level total
+    is rounded to the nearest achievable integer total by the caller's
+    cultivation EXP budget.
+    """
+    if total < 0 or parts <= 0:
+        raise ValueError(f"cannot distribute total={total} across parts={parts}")
+    amount = math.floor(total / parts + 0.5)
+    return [amount] * parts
 
 
 def reward_token_total(stages: Sequence[Mapping[str, Any]], token_id: int) -> int:
@@ -174,10 +184,13 @@ def build_expanded_stages(
 
         if level <= len(EARLY_STAGE_NODES_PER_CIRCULATION):
             target_exp = early_stage_exp(level, target_count)
-            cultivation_stages[level - 1]["exp"] = target_exp
         else:
             target_exp = as_int(cultivation_stages[level - 1].get("exp"))
-        circulation_exp = target_exp
+        # A level uses one integer EXP value per circulation. Round the old
+        # average and update the level budget to the resulting achievable sum.
+        circulation_exp = math.floor(target_exp / len(level_stages) + 0.5)
+        target_exp = circulation_exp * len(level_stages)
+        cultivation_stages[level - 1]["exp"] = target_exp
 
         token_totals: Dict[int, int] = defaultdict(int)
         for old_stage in old_stages:
@@ -194,7 +207,8 @@ def build_expanded_stages(
         token_totals[3] = reward_token_total(old_stages, 3)
 
         distributed_tokens = {
-            token_id: distribute_total(amount, len(level_stages))
+            token_id: (distribute_uniform(amount, len(level_stages)) if token_id == 4
+                       else distribute_total(amount, len(level_stages)))
             for token_id, amount in token_totals.items()
             if amount > 0
         }
@@ -314,9 +328,9 @@ def facility_reward_schedule(
                 ordinal * (cap - start) / (family_total - 1)
             )
             if 2 <= cultivation_level <= 10:
-                legacy_count = LEGACY_CIRCULATIONS_BY_LEVEL[cultivation_level - 1]
+                reference_count = FACILITY_REWARD_REFERENCE_COUNTS[cultivation_level - 1]
                 current_count = CIRCULATIONS_BY_LEVEL[cultivation_level - 1]
-                compression_boost = math.floor(math.log2(legacy_count / current_count))
+                compression_boost = math.floor(math.log2(reference_count / current_count))
                 reward_level = min(cap, reward_level + compression_boost)
             rewards.append({"id": levels[(family, reward_level)], "count": 1})
         schedule.append(rewards)
@@ -542,8 +556,18 @@ def main() -> None:
         {"id": 17001, "count": 1},
     ]
 
+    facility_ids = {int(item["id"]) for section in ("launcher", "crafting") for item in items[section]}
+    extra_rewards = {
+        stage["name"]: [deepcopy(item) for item in iter_reward_items(stage.get("circulation_reward"), rewards["rewards"])
+                        if int(item["id"]) not in facility_ids]
+        for stage in home["stages"]
+    }
     for stage, facilities in zip(expanded_stages, facility_schedule):
-        stage["circulation_reward"]["items"] = facilities
+        stage["circulation_reward"]["items"] = facilities + extra_rewards.get(stage["name"], [])
+
+    crafting_budget = budget_crafting_rewards(expanded_stages, items, setup, cultivation_stages, rewards["rewards"])
+    launcher_budget = budget_facility_rewards(expanded_stages, items, setup, cultivation_stages, rewards["rewards"], ("launcher",))
+    validate_facility_merge_budgets(expanded_stages, items, setup, cultivation_stages, rewards["rewards"])
 
     validate_facility_reward_order(
         expanded_stages,
@@ -568,11 +592,15 @@ def main() -> None:
         "total_circulations": len(expanded_stages),
         "circulations_by_level": CIRCULATIONS_BY_LEVEL,
         "facility_units": sum(
-            len(stage["circulation_reward"].get("items", []))
+            sum(int(item["id"]) in facility_ids for item in stage["circulation_reward"].get("items", []))
             for stage in expanded_stages
         ),
         "facility_families": 13,
-        "breakthroughs_with_mine": len(cultivation_stages) - 1,
+        "breakthroughs_with_mine": sum(any(int(item["id"]) // 100 == 250
+            for item in rewards["rewards"][str(stage["breakthrough_reward_id"])].get("items", []))
+            for stage in cultivation_stages[:-1]),
+        "crafting_budget": crafting_budget,
+        "launcher_budget": launcher_budget,
     }, ensure_ascii=False, indent=2))
 
 

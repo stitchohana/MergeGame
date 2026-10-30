@@ -44,12 +44,10 @@ func _run() -> void:
 	GridManager.init_grid()
 	StoragePouch.restore_from_server([{"uid": 3, "id": 5001, "immovable": true}])
 	assert(screen._get_requirement_priority(order) == 0)
-	StoragePouch.restore_from_server([5001, 5001])
-	assert(screen._check_can_complete(order), "Legacy pouch entries count separately")
 
 	var recipe: Dictionary = ConfigDatabase.get_recipes_for_result(27001)[0] as Dictionary
 	GridManager.populate_from_server([{"uid": 10, "id": 5001, "col": 0, "row": 0}])
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27001}]}]
+	GameState.meridian_acupoints = [{"completed": false, "item_ids": [27001], "items": [{"item_id": 27001}]}]
 	StoragePouch.restore_from_server([{"uid": 11, "id": 27001}])
 	screen._refresh_required_indicators()
 	var material: GridItem = screen.grid_view._item_nodes["0,0"] as GridItem

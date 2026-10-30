@@ -1,5 +1,7 @@
 import { GameState, ActivityDef, ActivityCycle, GridItem, RewardConfig } from "../storage/interface";
 import type { GameEngine } from "./game_engine";
+import { getResetPeriod } from "./reset_period";
+import { activitiesUnlocked } from "./activity_access";
 
 export class ActivityEngine {
   private activities: ActivityDef[] = [];
@@ -35,12 +37,7 @@ export class ActivityEngine {
   getCurrentDay(activityId: number, resetHour: number): number {
     const quests = this.weeklyTasks.get(activityId);
     if (!quests) return 0;
-    const rawNow = new Date();
-    const now = new Date(rawNow.getTime() - resetHour * 3600000);
-    let dow = now.getDay();
-    const converted = dow === 0 ? 6 : dow - 1;
-    console.log(`[activity] getCurrentDay: local=${rawNow.toLocaleString()} adjusted=${now.toLocaleString()} rawDow=${dow} converted=${converted} resetHour=${resetHour}`);
-    return Math.min(converted, quests.length - 1);
+    return Math.min(getResetPeriod(Date.now(), resetHour).weekday, quests.length - 1);
   }
 
   isActive(a: ActivityDef): boolean {
@@ -67,6 +64,7 @@ export class ActivityEngine {
   }
 
   initProgress(state: GameState): void {
+    if (!activitiesUnlocked(state)) return;
     state.activity_progress = state.activity_progress || {};
     for (const a of this.activities) {
       if (!state.activity_progress[a.id]) {
@@ -75,12 +73,34 @@ export class ActivityEngine {
     }
   }
 
-  recordOrderSupplyAction(state: GameState, itemId: number): void {
-    if (!(state.meridian_acupoints ?? []).some(order => {
-      if (order.completed || (order as any).breakthrough_order) return false;
-      const ids: number[] = (order as any).item_ids;
-      return Array.isArray(ids) ? ids.includes(itemId) : order.item_id === itemId && order.count > 0;
-    })) return;
+  recordOrderSupplyAction(state: GameState, itemId: number, availableBefore = 0): void {
+    if (!activitiesUnlocked(state)) return;
+    const matching = (state.meridian_acupoints ?? []).flatMap(order => {
+      if (order.completed || (order as any).breakthrough_order) return [];
+      const ids = order.item_ids;
+      const required = ids.filter(id => id === itemId).length;
+      return required > 0 ? [{ order, required }] : [];
+    });
+    if (!matching.length) return;
+    // Completion belongs to an order slot, and survives supply claims and
+    // moving/selling its product. Existing inventory covers slots without points.
+    let credited = 0;
+    for (const { order, required } of matching) {
+      order.order_supply_completed_counts ??= {};
+      const count = Math.min(required, Math.max(0, order.order_supply_completed_counts[itemId] ?? 0));
+      order.order_supply_completed_counts[itemId] = count;
+      credited += count;
+    }
+    let existing = Math.max(0, availableBefore - credited);
+    for (const { order, required } of matching) {
+      const counts = order.order_supply_completed_counts!;
+      const covered = Math.min(existing, required - counts[itemId]);
+      counts[itemId] += covered;
+      existing -= covered;
+    }
+    const slot = matching.find(({ order, required }) => order.order_supply_completed_counts![itemId] < required);
+    if (!slot) return;
+    slot.order.order_supply_completed_counts![itemId]++;
     this.initProgress(state);
     for (const activity of this.activities) {
       if (activity.widget !== "OrderSupply" || !this.isActive(activity)) continue;
@@ -94,6 +114,7 @@ export class ActivityEngine {
   claimOrderSupply(state: GameState, activityId: number, expectedClaimCount: number, engine: GameEngine):
     { ok: true; rewards: RewardConfig; spawned_items: GridItem[]; pending_rewards_added: number; crafts_completed: number } | { ok: false; reason: string }
   {
+    if (!activitiesUnlocked(state)) return { ok: false, reason: "activity_locked" };
     const activity = this.activities.find(a => a.id === activityId && a.widget === "OrderSupply");
     if (!activity) return { ok: false, reason: "invalid_activity" };
     if (!this.isActive(activity)) return { ok: false, reason: "activity_inactive" };
@@ -117,20 +138,18 @@ export class ActivityEngine {
     const required: number[] = [];
     for (const order of state.meridian_acupoints ?? []) {
       if (order.completed || (order as any).breakthrough_order) continue;
-      const ids: number[] = Array.isArray((order as any).item_ids)
-        ? (order as any).item_ids : Array.from({ length: order.count }, () => order.item_id);
+      const ids = order.item_ids;
       required.push(...ids.filter(id => [0, 4].includes(engine.getItemData(id)?.type ?? -1)));
     }
     const cultivationLevel = Number(state.cultivation?.current_level ?? 1);
     let candidates = engine.getMissingOrderSupplyMaterials(state);
     if (!candidates.length) candidates = [...new Set(required.flatMap(id => engine.getOrderSupplyMaterials(id, cultivationLevel)))];
     if (!candidates.length) candidates = [...new Set(engine.getUnlockedOrderPool(state)
-      .flatMap(id => engine.getOrderSupplyMaterials(id, cultivationLevel)))];
+      .flatMap(id => engine.getOrderSupplyMaterials(id, cultivationLevel, false)))];
     if (!candidates.length) return { ok: false, reason: "no_order_materials" };
     const rewards: RewardConfig = { items: [] };
     const spawned: GridItem[] = [];
     let pendingRewardsAdded = 0;
-    state.pending_rewards ??= [];
     for (let i = 0; i < rewardCount; i++) {
       const id = candidates[i % candidates.length];
       engine.recordItemDiscovery(state, id);
@@ -162,6 +181,7 @@ export class ActivityEngine {
   }
 
   checkAndReset(state: GameState, resetHour: number): void {
+    if (!activitiesUnlocked(state)) return;
     const now = Date.now();
     state.activity_progress = state.activity_progress || {};
     for (const a of this.activities) {
@@ -196,23 +216,16 @@ export class ActivityEngine {
 
   private isNewPeriod(lastTime: number, now: number, resetHour: number, period: string): boolean {
     if (lastTime <= 0) return true;
-    const adjustMs = resetHour * 3600000;
-    const last = new Date(lastTime - adjustMs);
-    const cur = new Date(now - adjustMs);
+    const last = getResetPeriod(lastTime, resetHour);
+    const cur = getResetPeriod(now, resetHour);
     if (period === "day") {
-      return last.getDate() !== cur.getDate() || last.getMonth() !== cur.getMonth() || last.getFullYear() !== cur.getFullYear();
+      return cur.day > last.day;
     }
     if (period === "week") {
-      const getWeek = (d: Date) => {
-        const jan4 = new Date(d.getFullYear(), 0, 4);
-        const jan4Day = jan4.getDay() || 7;
-        const days = (d.getTime() - jan4.getTime()) / 86400000;
-        return Math.floor((days + jan4Day + 3) / 7);
-      };
-      return last.getFullYear() !== cur.getFullYear() || getWeek(last) !== getWeek(cur);
+      return cur.week > last.week;
     }
     if (period === "month") {
-      return last.getMonth() !== cur.getMonth() || last.getFullYear() !== cur.getFullYear();
+      return cur.month > last.month;
     }
     return false;
   }

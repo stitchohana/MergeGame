@@ -4,7 +4,19 @@ exports.GameEngine = exports.TableState = void 0;
 const interface_1 = require("../storage/interface");
 const quest_engine_1 = require("./quest_engine");
 const activity_engine_1 = require("./activity_engine");
+const activity_settings_1 = require("./activity_settings");
+const golden_finger_1 = require("./golden_finger");
+const secret_realm_1 = require("./secret_realm");
+const grid_search_1 = require("./grid_search");
 const spawn_rng_1 = require("./spawn_rng");
+const card_collection_1 = require("./card_collection");
+const stair_climb_1 = require("./stair_climb");
+const order_duel_1 = require("./order_duel");
+const battle_pass_1 = require("./battle_pass");
+const resource_purchase_1 = require("./resource_purchase");
+const shop_1 = require("./shop");
+const activity_access_1 = require("./activity_access");
+const weekly_tasks_1 = require("./weekly_tasks");
 // --- Item Table (enum variants for lookups) ---
 var TableState;
 (function (TableState) {
@@ -35,6 +47,8 @@ class GameEngine {
     };
     speedupConfig = { craftStoneCostPerMinute: 1, launcherStoneCostPerMinute: 1 };
     questResetHour = 0;
+    orderRecipeProductProbability = 0.8;
+    pouchConfig = { initialSlots: 7, unlockCostBase: 100, unlockCostIncrement: 50 };
     shopConfig = { shopItems: [], sellPrices: {}, buyPrices: {} };
     meridianThresholds = [];
     meridianOrderLevelRanges = [];
@@ -43,13 +57,33 @@ class GameEngine {
     rewardsTable = new Map();
     homeMeridianDefs = [];
     questEngine;
+    weeklyTaskService;
     activityEngine;
+    battlePassService;
+    cardCollectionService;
+    stairClimbService;
+    orderDuelService;
+    resourcePurchaseService;
+    shopService;
+    goldenFingerService;
+    secretRealmService;
+    getAllItemDefs() { return [...this.itemsById.values()]; }
     constructor(configTables) {
         this.loadConfigs(configTables);
+        this.shopService = new shop_1.ShopService(configTables.shop, id => this.getItemData(id), this.recipes);
+        this.resourcePurchaseService = new resource_purchase_1.ResourcePurchaseService(configTables.gameConfig, (state, amount, now) => { this.addStamina(state, amount, now); });
         this.questEngine = new quest_engine_1.QuestEngine(configTables.quests);
-        this.activityEngine = new activity_engine_1.ActivityEngine(configTables.activities, configTables.weeklyTasks);
+        this.activityEngine = new activity_engine_1.ActivityEngine((0, activity_settings_1.resolveActivitySettings)(configTables.activities, configTables.stairClimb, configTables.orderSupply), configTables.weeklyTasks);
+        this.weeklyTaskService = new weekly_tasks_1.WeeklyTaskService(configTables.weeklyTasks, this.activityEngine.getActivities(), this.questResetHour, this.questEngine.getQuestDefs());
+        this.battlePassService = new battle_pass_1.BattlePassService(configTables.battlePass, configTables.activities, configTables.tokens, configTables.gameConfig);
+        this.cardCollectionService = new card_collection_1.CardCollectionService(configTables.cardCollection, this.activityEngine.getActivities(), undefined, (state, rewards) => this.applyRewards(state, rewards));
+        this.cardCollectionService.bindPackItems([...this.itemsById.values()]);
+        this.stairClimbService = new stair_climb_1.StairClimbService(this.activityEngine.getActivities(), this.cultivationStages);
+        this.orderDuelService = new order_duel_1.OrderDuelService(this.activityEngine.getActivities(), configTables.orderDuel);
         this.loadRewards(configTables.rewards);
         this.loadHomeMeridians(configTables.homeMeridians);
+        this.goldenFingerService = new golden_finger_1.GoldenFingerService(configTables.goldenFinger, this);
+        this.secretRealmService = new secret_realm_1.SecretRealmService(configTables.secretRealm, this);
     }
     // --- Config loading ---
     loadConfigs(configTables) {
@@ -78,6 +112,20 @@ class GameEngine {
                 console.log(`[engine] Stamina config: max=${this.staminaConfig.max} cost=${this.staminaConfig.spawnCost} regen=${this.staminaConfig.regenAmount}/${this.staminaConfig.regenInterval}s`);
             }
             this.questResetHour = data.reset_hour ?? 0;
+            const pouch = data.pouch ?? {};
+            const positiveInteger = (value, fallback) => {
+                const parsed = Number(value);
+                return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : fallback;
+            };
+            this.pouchConfig = {
+                initialSlots: positiveInteger(pouch.initial_slots, 7),
+                unlockCostBase: positiveInteger(pouch.unlock_cost_base, 100),
+                unlockCostIncrement: positiveInteger(pouch.unlock_cost_increment, 50),
+            };
+            const recipeProductProbability = Number(data.orders?.recipe_product_probability ?? 0.8);
+            this.orderRecipeProductProbability = Number.isFinite(recipeProductProbability)
+                ? Math.min(1, Math.max(0, recipeProductProbability))
+                : 0.8;
             const craftSpeedupRate = Number(data.craft_speedup_stone_cost_per_minute ?? 1);
             const launcherSpeedupRate = Number(data.launcher_speedup_stone_cost_per_minute ?? 1);
             this.speedupConfig = {
@@ -256,6 +304,17 @@ class GameEngine {
             items: [],
         };
     }
+    applyHomeCirculationReward(state, stageIndex) {
+        const def = this.homeMeridianDefs[stageIndex];
+        const reward = this._copyRewardConfig(def.circulation_reward ?? {});
+        const ownerLevel = Number(def.cultivation_level ?? 0);
+        // GM advancement can leave earlier circulations unclaimed. Their EXP
+        // belongs to the previous level; facilities and other rewards remain valid.
+        if (ownerLevel > 0 && ownerLevel !== state.cultivation.current_level) {
+            reward.tokens = (reward.tokens ?? []).filter(t => t.token !== interface_1.TokenType.EXP);
+        }
+        return this.applyRewards(state, reward);
+    }
     _maxUnlockedHomeStageIndex(cultivationLevel) {
         let maxIndex = -1;
         for (let index = 0; index < this.homeMeridianDefs.length; index += 1) {
@@ -265,12 +324,7 @@ class GameEngine {
                     maxIndex = index;
                 continue;
             }
-            // Legacy fallback for configs created before cultivation_level was explicit.
-            if (cultivationLevel <= 1)
-                return Math.min(this.homeMeridianDefs.length - 1, 0);
-            if (cultivationLevel <= 10)
-                return Math.min(this.homeMeridianDefs.length - 1, cultivationLevel - 1);
-            return Math.min(this.homeMeridianDefs.length - 1, 9 + (cultivationLevel - 10) * 10);
+            throw new Error("home_meridian_missing_cultivation_level");
         }
         return maxIndex;
     }
@@ -385,9 +439,7 @@ class GameEngine {
         if (!stageProgress.lit.every(isLit => isLit)) {
             return { ok: false, reason: "circulation_not_ready" };
         }
-        const rewardsApplied = def.circulation_reward
-            ? this.applyRewards(state, def.circulation_reward)
-            : { tokens: [], items: [] };
+        const rewardsApplied = this.applyHomeCirculationReward(state, stageIndex);
         const launchersRefreshed = this.refreshBoardLaunchers(state);
         stageProgress.circulation_completed = true;
         this.syncBreakthroughOrder(state);
@@ -458,9 +510,7 @@ class GameEngine {
             if (normalizedProgress.lit.every(isLit => isLit)) {
                 normalizedProgress.circulation_completed = true;
                 completedStages += 1;
-                if (def.circulation_reward) {
-                    this.applyRewards(state, def.circulation_reward);
-                }
+                this.applyHomeCirculationReward(state, stageIndex);
             }
         }
         if (activated > 0) {
@@ -498,16 +548,8 @@ class GameEngine {
             return { acupoints: state.meridian_acupoints };
         }
         if (fixedOrderWaves.length > 0) {
-            // Saves created before meridian_fixed_wave_pending existed can already
-            // be sitting between waves: an empty list with an advanced cursor. Treat
-            // that shape as pending as well so merely reopening the board cannot
-            // reveal the next tutorial wave.
-            const fixedCursor = Number(state.meridian_fixed_order_cursor ?? 0);
-            if (state.meridian_fixed_wave_pending === true
-                || (state.meridian_fixed_wave_pending === undefined && fixedCursor > 0)) {
-                state.meridian_fixed_wave_pending = true;
+            if (state.meridian_fixed_wave_pending === true)
                 return { acupoints: [] };
-            }
             this._tryRevealFixedOrders(state, t);
             return { acupoints: state.meridian_acupoints || [] };
         }
@@ -584,9 +626,7 @@ class GameEngine {
                 const usedConfigIndexes = new Set();
                 state.meridian_acupoints = activeFixedOrders.map((order) => {
                     // Match by item IDs so completing fixed orders out of sequence does
-                    // not make refresh re-introduce an already completed order.  If an
-                    // old save no longer matches the latest config, keep its current
-                    // order rather than guessing a wave position.
+                    // not make refresh re-introduce an already completed order.
                     let sourceOrder = order;
                     if (canReuseLatestConfig) {
                         const matchingIndex = activeWave.findIndex((fixedOrder, index) => !usedConfigIndexes.has(index)
@@ -597,6 +637,9 @@ class GameEngine {
                         }
                     }
                     const refreshed = this._genFixedAcupoint(sourceOrder);
+                    if (order.order_supply_completed_counts) {
+                        refreshed.order_supply_completed_counts = { ...order.order_supply_completed_counts };
+                    }
                     if (!refreshed.fixed_order_rewards && threshold?.acupoint_rewards && refreshed.total_value > 0) {
                         refreshed.rewards = this._scaleRewardConfig(threshold.acupoint_rewards, refreshed.total_value);
                     }
@@ -658,8 +701,7 @@ class GameEngine {
             })
                 .filter((wave) => wave.length > 0);
         }
-        // A historical flat array is still interpreted as one wave.
-        return [configured.filter((order) => order !== null && order !== undefined)];
+        throw new Error("invalid_fixed_order_waves");
     }
     _tryRevealFixedOrders(state, threshold) {
         const fixedOrderWaves = this._getFixedOrderWaves(threshold);
@@ -735,22 +777,29 @@ class GameEngine {
         let totalValue = 0;
         const available = [...pool];
         for (let j = 0; j < numTypes && available.length > 0; j++) {
-            const availableWeights = available.map(itemId => {
+            const recipeProducts = available.filter(itemId => this.getItemData(itemId)?.type === 4);
+            const ordinaryItems = available.filter(itemId => this.getItemData(itemId)?.type !== 4);
+            // Select the category first so its probability is independent of pool
+            // size and source weights. Exhausted categories fall back to the other.
+            const candidates = recipeProducts.length > 0 && ordinaryItems.length > 0
+                ? (Math.random() < this.orderRecipeProductProbability ? recipeProducts : ordinaryItems)
+                : available;
+            const availableWeights = candidates.map(itemId => {
                 const weight = Number(weights?.get(itemId) ?? 1);
                 return Number.isFinite(weight) && weight > 0 ? weight : 1;
             });
             const totalWeight = availableWeights.reduce((sum, weight) => sum + weight, 0);
             let roll = Math.random() * totalWeight;
-            let idx = available.length - 1;
-            for (let candidateIndex = 0; candidateIndex < available.length; candidateIndex++) {
+            let idx = candidates.length - 1;
+            for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex++) {
                 roll -= availableWeights[candidateIndex];
                 if (roll < 0) {
                     idx = candidateIndex;
                     break;
                 }
             }
-            const itemId = available[idx];
-            available.splice(idx, 1);
+            const itemId = candidates[idx];
+            available.splice(available.indexOf(itemId), 1);
             const itemData = this.getItemData(itemId);
             const name = itemData?.name ?? `#${itemId}`;
             const value = itemData?.value ?? 0;
@@ -763,7 +812,7 @@ class GameEngine {
     }
     _genFixedAcupoint(fixedOrder) {
         // A fixed order normally contains one item, so config can use the clearer
-        // singular item_id.  Keep item_ids/array forms for multi-item and legacy data.
+        // singular item_id; multi-item definitions use item_ids.
         let configuredIds;
         if (Array.isArray(fixedOrder)) {
             configuredIds = fixedOrder;
@@ -830,50 +879,33 @@ class GameEngine {
         const itemDef = this.getItemData(itemId);
         if (!itemDef || (!this.isLauncher(itemDef) && itemDef.type !== 2))
             return false;
-        state.unlocked_production_item_ids = state.unlocked_production_item_ids || [];
         if (state.unlocked_production_item_ids.includes(itemId))
             return false;
         state.unlocked_production_item_ids.push(itemId);
         state.unlocked_production_item_ids.sort((a, b) => a - b);
         return true;
     }
-    /** Backfill the unlock history for old saves and initialize new saves. */
-    initializeProductionUnlocks(state) {
-        const previousIds = Array.isArray(state.unlocked_production_item_ids)
-            ? state.unlocked_production_item_ids
-            : [];
-        const normalizedIds = [...new Set(previousIds.filter((id) => Number.isInteger(id)))];
-        let changed = !Array.isArray(state.unlocked_production_item_ids) || normalizedIds.length !== previousIds.length;
-        state.unlocked_production_item_ids = normalizedIds;
-        const grids = [];
-        if (Array.isArray(state.grid))
-            grids.push(state.grid);
-        if (state.saved_grid)
-            grids.push(state.saved_grid);
-        if (state.battle_grid)
-            grids.push(state.battle_grid);
-        for (const grid of grids) {
-            for (const item of grid) {
-                changed = this.registerProductionUnlock(state, item.id) || changed;
-                for (const stored of item.craft?._craft_stored || []) {
-                    changed = this.registerProductionUnlock(state, Number(stored.id ?? 0)) || changed;
-                }
-                for (const stored of item.storage?.items || []) {
-                    changed = this.registerProductionUnlock(state, Number(stored.id ?? 0)) || changed;
-                }
-            }
+    /** All confirmed acquisitions share the same persisted discovery history. */
+    recordItemDiscovery(state, itemId) {
+        if (!Number.isInteger(itemId) || itemId <= 0 || !this.getItemData(itemId))
+            return false;
+        if (state.crafted_item_ids.includes(itemId))
+            return false;
+        state.crafted_item_ids.push(itemId);
+        return true;
+    }
+    claimItemCatalogReward(state, itemId) {
+        if (!Number.isSafeInteger(itemId) || itemId <= 0 || !this.getItemData(itemId)) {
+            return { ok: false, reason: "item_not_found" };
         }
-        for (const reward of state.pending_rewards || []) {
-            changed = this.registerProductionUnlock(state, reward.id) || changed;
-        }
-        for (const entry of (state.pouch || [])) {
-            const itemId = typeof entry === "number"
-                ? entry
-                : Number(entry.id ?? 0);
-            if (itemId > 0)
-                changed = this.registerProductionUnlock(state, itemId) || changed;
-        }
-        return changed;
+        if (!state.crafted_item_ids?.includes(itemId))
+            return { ok: false, reason: "item_locked" };
+        const claimed = state.item_catalog_claimed_ids;
+        if (claimed.includes(itemId))
+            return { ok: true, already_claimed: true, reward_stamina: 0 };
+        this.addStamina(state, 1);
+        state.item_catalog_claimed_ids = [...claimed, itemId].sort((a, b) => a - b);
+        return { ok: true, already_claimed: false, reward_stamina: 1 };
     }
     getUnlockedOrderPool(state) {
         return this.getUnlockedOrderPoolWithWeights(state).ids;
@@ -909,10 +941,9 @@ class GameEngine {
                 ? `group:${itemDef.group_id}`
                 : `item:${itemId}`;
         };
-        // Random orders must be producible by facilities currently on the active
-        // board. Historical unlocks are intentionally excluded: a facility that
-        // was merged, sold, or moved off the board cannot produce new orders.
-        const productionIds = [...new Set((state.grid || [])
+        // Owned facilities can produce new orders after being withdrawn from the
+        // pouch. Historical facilities that were sold/consumed remain excluded.
+        const productionIds = [...new Set(this.getInventoryItems(state)
                 .map(item => Number(item.id))
                 .filter((itemId) => {
                 const production = this.getItemData(itemId);
@@ -1006,40 +1037,12 @@ class GameEngine {
         }
         return { ids, weights };
     }
-    repairInvalidMeridianOrders(state) {
-        if (this.getRequiredBreakthroughItems(state.cultivation.current_level, state.cultivation.current_exp).length > 0) {
-            return this.syncBreakthroughOrder(state);
-        }
-        if (!Array.isArray(state.meridian_acupoints) || state.meridian_acupoints.length === 0)
-            return false;
-        const threshold = this._findMeridianThreshold(state.cultivation.current_level);
-        if (this._getFixedOrderWaves(threshold).length > 0)
-            return false;
-        const pool = this.getUnlockedOrderPool(state);
-        if (pool.length === 0) {
-            state.meridian_acupoints = [];
-            console.log("[engine] Cleared random meridian orders because the active board has no craftable candidates");
-            return true;
-        }
-        const allowedIds = new Set(pool);
-        const hasInvalidOrder = state.meridian_acupoints.some((order) => !Array.isArray(order?.item_ids)
-            || order.item_ids.some((itemId) => !allowedIds.has(Number(itemId))));
-        if (!hasInvalidOrder)
-            return false;
-        this.generateMeridianRequirements(state);
-        console.log("[engine] Replaced meridian orders containing items outside the current stage pool");
-        return true;
-    }
     loadInitialSetup(data) {
-        // Support both old flat format and new board-type format
-        if (data.items) {
-            this.initialSetups.set(0, data.items);
-        }
-        else {
-            for (const key of Object.keys(data)) {
-                const boardKey = key === "battle" ? 1 : 0;
-                this.initialSetups.set(boardKey, data[key].items || []);
-            }
+        if (!data.main || !Array.isArray(data.main.items))
+            throw new Error("invalid_initial_setup");
+        for (const key of ["main", "battle"]) {
+            if (data[key])
+                this.initialSetups.set(key === "battle" ? 1 : 0, data[key].items);
         }
     }
     // --- Config queries ---
@@ -1076,6 +1079,152 @@ class GameEngine {
     getRecipesForTable(tableId) {
         return this.recipesByTable.get(tableId) || [];
     }
+    getOrderSupplyMaterialLevel(cultivationLevel) {
+        const level = Math.max(1, Math.floor(Number(cultivationLevel) || 1));
+        // Each realm has three phases. Supply uses the corresponding basic
+        // material tier: 练气 1–3, 筑基 5–7, 金丹 9–11, 元婴 13–15.
+        // 练气有九层，按前三层、 中三层、后三层对应前中后期；
+        // 后续境界各有前中后三期，分别使用 5–7、9–11、13–15 级材料。
+        if (level <= 9)
+            return 1 + Math.floor((level - 1) / 3);
+        if (level <= 12)
+            return 5 + (level - 10);
+        if (level <= 15)
+            return 9 + (level - 13);
+        return Math.min(16, 13 + Math.max(0, level - 16));
+    }
+    getOrderSupplyMaterials(itemId, cultivationLevel = 1, limitToRequiredLevel = true) {
+        const materials = new Set();
+        const visiting = new Set();
+        const targetLevel = this.getOrderSupplyMaterialLevel(cultivationLevel);
+        const visit = (id) => {
+            const item = this.getItemData(id);
+            if (!item || visiting.has(id))
+                return;
+            const recipe = this.recipes.find(candidate => candidate.result === id);
+            if (recipe) {
+                visiting.add(id);
+                for (const ingredientId of recipe.ingredients)
+                    visit(ingredientId);
+                visiting.delete(id);
+                return;
+            }
+            if (item.type !== 0)
+                return;
+            // Higher-tier materials cannot be split back into a lower-level requirement.
+            // Apply the cap to recipe leaves as well as directly requested materials.
+            const materialLevel = limitToRequiredLevel ? Math.min(targetLevel, item.level) : targetLevel;
+            const base = this.getItemByLevel(0, materialLevel, item.group_id);
+            if (base && !this.recipes.some(candidate => candidate.result === base.id))
+                materials.add(base.id);
+        };
+        visit(itemId);
+        return [...materials];
+    }
+    countOrderSupplyAvailableItems(state, itemId) {
+        let count = 0;
+        for (const item of state.grid) {
+            if (!item.immovable && item.id === itemId)
+                count++;
+            count += (item.storage?.items ?? []).filter(stored => stored.id === itemId).length;
+            if (this.getItemData(item.id)?.type !== 2 || !item.craft)
+                continue;
+            const craft = item.craft;
+            if ([TableState.CRAFTING, TableState.READY].includes(craft._craft_state)) {
+                if (Number(craft._craft_result_id || craft._craft_recipe?.result || 0) === itemId)
+                    count++;
+            }
+            else {
+                count += (craft._craft_stored ?? []).filter(stored => Number(stored.id) === itemId).length;
+            }
+        }
+        count += (state.pouch ?? []).filter(item => this.getStoredItemId(item) === itemId).length;
+        count += (state.pending_rewards).filter(item => item.kind !== "card_pack" && item.id === itemId).length;
+        return count;
+    }
+    getMissingOrderSupplyMaterials(state) {
+        const targets = new Map();
+        for (const order of state.meridian_acupoints ?? []) {
+            if (order.completed || order.breakthrough_order)
+                continue;
+            const ids = order.item_ids;
+            for (const id of ids)
+                targets.set(id, (targets.get(id) ?? 0) + 1);
+        }
+        const available = new Map();
+        const addAvailable = (id) => {
+            if (this.getItemData(id))
+                available.set(id, (available.get(id) ?? 0) + 1);
+        };
+        for (const item of this.getInventoryItems(state)) {
+            if (!item.immovable)
+                addAvailable(item.id);
+            for (const stored of item.storage?.items ?? [])
+                addAvailable(stored.id);
+            const craft = item.craft;
+            if (this.getItemData(item.id)?.type !== 2 || !craft)
+                continue;
+            if ([TableState.CRAFTING, TableState.READY].includes(craft._craft_state)) {
+                addAvailable(Number(craft._craft_result_id || craft._craft_recipe?.result || 0));
+            }
+            else {
+                for (const stored of craft._craft_stored ?? [])
+                    addAvailable(Number(stored.id));
+            }
+        }
+        for (const reward of state.pending_rewards) {
+            if (reward.kind !== "card_pack")
+                addAvailable(reward.id);
+        }
+        // Reserve existing order products before expanding recipes. Aggregate
+        // ordinary demands so one inventory item cannot satisfy two orders.
+        const ordinary = new Map();
+        const expand = (id, count, visiting) => {
+            if (count <= 0 || visiting.has(id))
+                return;
+            const item = this.getItemData(id);
+            if (!item)
+                return;
+            const recipe = this.recipes.find(candidate => candidate.result === id);
+            if (!recipe) {
+                if (item.type === 0)
+                    ordinary.set(id, (ordinary.get(id) ?? 0) + count);
+                return;
+            }
+            const missing = this.consumeAvailableOrderItems(available, id, count);
+            visiting.add(id);
+            for (const ingredient of recipe.ingredients)
+                expand(ingredient, missing, visiting);
+            visiting.delete(id);
+        };
+        const remaining = new Map();
+        for (const [id, count] of targets) {
+            remaining.set(id, this.consumeAvailableOrderItems(available, id, count));
+        }
+        for (const [id, count] of remaining)
+            expand(id, count, new Set());
+        const deficits = new Set();
+        const consumeMaterial = (id, count) => {
+            const missing = this.consumeAvailableOrderItems(available, id, count);
+            if (missing <= 0)
+                return false;
+            const item = this.getItemData(id);
+            const previous = item.level > 1 ? this.getItemByLevel(0, item.level - 1, item.group_id) : null;
+            if (previous && !this.recipes.some(recipe => recipe.result === previous.id)) {
+                return consumeMaterial(previous.id, missing * 2);
+            }
+            return true;
+        };
+        const demands = [...ordinary].sort(([a], [b]) => this.getItemData(b).level - this.getItemData(a).level);
+        for (const [id, count] of demands) {
+            if (consumeMaterial(id, count))
+                deficits.add(id);
+        }
+        // Keep the original missing requirement's level; recursive inventory checks
+        // reach level one even when the actual order needs a higher-level material.
+        return [...new Set([...ordinary.keys()].filter(id => deficits.has(id))
+                .flatMap(id => this.getOrderSupplyMaterials(id, state.cultivation.current_level)))];
+    }
     getCultivationConfig() {
         return this.cultivation;
     }
@@ -1086,6 +1235,8 @@ class GameEngine {
         return this.getItemData(itemId)?.max_charges ?? 3;
     }
     getCultivationStaminaMultiplierCap(state) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return 1;
         const currentLevel = Math.max(1, Number(state.cultivation?.current_level ?? 1));
         const realmCaps = [
             { realm: "元婴", cap: 32 },
@@ -1100,6 +1251,8 @@ class GameEngine {
         return 4;
     }
     getStaminaMultiplierState(state, now = Date.now()) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state))
+            return { maxMultiplier: 1, expiresAt: 0, remainingSeconds: 0 };
         const expiresAt = Math.max(0, Number(state.stamina_multiplier_expires_at ?? 0));
         const configuredMax = Math.max(1, Number(state.stamina_multiplier_max ?? 1));
         const isActive = expiresAt > now && this.isPowerOfTwo(configuredMax);
@@ -1130,6 +1283,10 @@ class GameEngine {
         return this.refreshStaminaMultiplierFromBalance(state, now);
     }
     refreshStaminaMultiplierFromBalance(state, now = Date.now()) {
+        if (!(0, activity_access_1.activitiesUnlocked)(state)) {
+            this.tickStaminaMultiplier(state, now);
+            return this.getStaminaMultiplierState(state, now);
+        }
         const triggered = Math.min(this.getTriggeredStaminaMultiplier(state.stamina), this.getCultivationStaminaMultiplierCap(state));
         if (triggered > 1) {
             const active = this.getStaminaMultiplierState(state, now);
@@ -1181,36 +1338,49 @@ class GameEngine {
     }
     getOutstandingOrderItemCounts(state) {
         const orderTargets = new Map();
-        const addRequired = (itemId) => {
-            if (itemId > 0)
-                orderTargets.set(itemId, (orderTargets.get(itemId) ?? 0) + 1);
-        };
         for (const order of state.meridian_acupoints ?? []) {
             if (order?.completed === true)
                 continue;
-            const configuredIds = Array.isArray(order?.item_ids)
-                ? order.item_ids
-                : order?.items;
-            if (!Array.isArray(configuredIds))
-                continue;
+            const configuredIds = order.item_ids;
             for (const entry of configuredIds) {
-                addRequired(Number(entry && typeof entry === "object" ? entry.item_id : entry));
+                const itemId = entry;
+                const count = 1;
+                if (!Number.isSafeInteger(itemId) || !Number.isSafeInteger(count) || count <= 0)
+                    continue;
+                if (itemId > 0)
+                    orderTargets.set(itemId, (orderTargets.get(itemId) ?? 0) + count);
             }
         }
         const available = new Map();
+        const requiredRecipeIds = new Set();
+        const visitedProducts = new Set();
+        const collectRecipes = (itemId) => {
+            if (visitedProducts.has(itemId))
+                return;
+            visitedProducts.add(itemId);
+            for (const recipe of this.recipes.filter(recipe => recipe.result === itemId)) {
+                requiredRecipeIds.add(recipe.id);
+                for (const ingredientId of recipe.ingredients)
+                    collectRecipes(ingredientId);
+            }
+        };
+        for (const itemId of orderTargets.keys())
+            collectRecipes(itemId);
         const addAvailable = (itemId) => {
             if (itemId > 0)
                 available.set(itemId, (available.get(itemId) ?? 0) + 1);
         };
-        for (const gridItem of state.grid) {
+        for (const gridItem of this.getInventoryItems(state)) {
             const itemDef = this.getItemData(gridItem.id);
             if (itemDef?.type !== 2) {
                 if (gridItem.immovable !== true)
                     addAvailable(gridItem.id);
                 continue;
             }
-            for (const stored of gridItem.craft?._craft_stored ?? []) {
-                addAvailable(Number(stored?.id ?? 0));
+            if (this.tableSupportsOrderMaterials(gridItem, requiredRecipeIds)) {
+                for (const stored of gridItem.craft?._craft_stored ?? []) {
+                    addAvailable(Number(stored?.id ?? 0));
+                }
             }
             const craftState = gridItem.craft?._craft_state;
             if (craftState !== TableState.CRAFTING && craftState !== TableState.READY)
@@ -1219,14 +1389,31 @@ class GameEngine {
                 || gridItem.craft?._craft_recipe?.result
                 || 0));
         }
-        for (const pouchEntry of state.pouch) {
-            addAvailable(this.getStoredItemId(pouchEntry));
-        }
         const outstanding = new Map();
         for (const [itemId, requiredCount] of orderTargets) {
             this.addRecipeMaterialRequirements(itemId, requiredCount, outstanding, available, new Set());
         }
         return outstanding;
+    }
+    tableSupportsOrderMaterials(table, requiredRecipeIds) {
+        const storedCounts = new Map();
+        for (const stored of table.craft?._craft_stored ?? []) {
+            storedCounts.set(stored.id, (storedCounts.get(stored.id) ?? 0) + 1);
+        }
+        const state = table.craft?._craft_state;
+        const activeRecipe = table.craft?._craft_recipe;
+        return this.getRecipesForTable(table.id).some(recipe => {
+            if (!requiredRecipeIds.has(recipe.id))
+                return false;
+            if ((state === TableState.CRAFTING || state === TableState.READY)
+                && (activeRecipe?.id ? activeRecipe.id !== recipe.id : activeRecipe?.result !== recipe.result)) {
+                return false;
+            }
+            const ingredientCounts = new Map();
+            for (const id of recipe.ingredients)
+                ingredientCounts.set(id, (ingredientCounts.get(id) ?? 0) + 1);
+            return [...storedCounts].every(([id, count]) => count <= (ingredientCounts.get(id) ?? 0));
+        });
     }
     consumeAvailableOrderItems(available, itemId, count) {
         const consumed = Math.min(count, available.get(itemId) ?? 0);
@@ -1256,31 +1443,27 @@ class GameEngine {
         }
         visiting.delete(itemId);
     }
-    getOrderPrioritySpawnPlan(state, base, boosted, requestedMultiplier, maxStaminaUnits) {
+    getOrderPrioritySpawnPlan(state, base, boosted, requestedMultiplier, maxStaminaUnits, launcherData) {
         if (requestedMultiplier <= 1 || boosted.level <= base.level) {
             return {
                 output: { item: boosted, staminaUnits: requestedMultiplier },
                 orderPriority: false,
             };
         }
+        const spawnSources = this.getLauncherSpawnSources(launcherData);
         const candidates = [];
         for (const [itemId, count] of this.getOutstandingOrderItemCounts(state)) {
             if (count <= 0)
                 continue;
             const candidate = this.getItemData(itemId);
-            if (!candidate
-                || candidate.type !== base.type
-                || candidate.group_id !== base.group_id
-                || candidate.level >= boosted.level)
+            if (!candidate)
                 continue;
-            const reachable = this.getItemByLevel(base.type, candidate.level, base.group_id);
-            if (reachable?.id === candidate.id) {
+            const staminaUnits = this.getOrderCandidateMultiplier(candidate, base, boosted.level, requestedMultiplier, spawnSources);
+            if (staminaUnits > 0) {
                 candidates.push({
                     item: candidate,
                     count,
-                    staminaUnits: candidate.level <= base.level
-                        ? 1
-                        : 2 ** (candidate.level - base.level),
+                    staminaUnits,
                 });
             }
         }
@@ -1298,8 +1481,67 @@ class GameEngine {
             orderPriority: false,
         };
     }
+    getLauncherSpawnSources(launcherData) {
+        if (!launcherData)
+            return [];
+        const sourceIds = [
+            ...(launcherData.spawns ?? []).map(spawn => spawn.id),
+            ...(launcherData.fixed_spawns ?? []),
+        ];
+        return sourceIds
+            .map(id => this.getItemData(id))
+            .filter((item) => Boolean(item));
+    }
+    getOrderCandidateMultiplier(candidate, base, boostedLevel, requestedMultiplier, spawnSources) {
+        if (spawnSources.length > 0) {
+            let bestMultiplier = 0;
+            for (const source of spawnSources) {
+                if (source.type !== candidate.type || source.group_id !== candidate.group_id)
+                    continue;
+                let candidateMultiplier = 0;
+                if (candidate.id === source.id) {
+                    candidateMultiplier = 1;
+                }
+                else if (candidate.level > source.level) {
+                    candidateMultiplier = 2 ** (candidate.level - source.level);
+                    if (candidateMultiplier > requestedMultiplier)
+                        continue;
+                    if (this.upgradeSpawnResult(source, candidateMultiplier)?.id !== candidate.id)
+                        continue;
+                }
+                if (candidateMultiplier > 0
+                    && (bestMultiplier === 0 || candidateMultiplier < bestMultiplier)) {
+                    bestMultiplier = candidateMultiplier;
+                }
+            }
+            if (bestMultiplier > 0 && bestMultiplier < requestedMultiplier)
+                return bestMultiplier;
+            // Preserve the historical same-chain fallback for launchers whose
+            // runtime table only exposes a higher-level roll (for example a
+            // breakthrough book launcher). Cross-group candidates still require an
+            // explicit source in the launcher table.
+            if (candidate.type === base.type
+                && candidate.group_id === base.group_id
+                && candidate.level < boostedLevel) {
+                return candidate.level <= base.level
+                    ? 1
+                    : 2 ** (candidate.level - base.level);
+            }
+            return 0;
+        }
+        if (candidate.type !== base.type
+            || candidate.group_id !== base.group_id
+            || candidate.level >= boostedLevel)
+            return 0;
+        const reachable = this.getItemByLevel(base.type, candidate.level, base.group_id);
+        if (reachable?.id !== candidate.id)
+            return 0;
+        return candidate.level <= base.level
+            ? 1
+            : 2 ** (candidate.level - base.level);
+    }
     _nextUid(state) {
-        state.uid_counter = (state.uid_counter ?? 0) + 1;
+        state.uid_counter = state.uid_counter + 1;
         return state.uid_counter;
     }
     getRechargeTime(itemId) {
@@ -1309,26 +1551,35 @@ class GameEngine {
     isInBounds(col, row) {
         return col >= 0 && col < this.GRID_COLS && row >= 0 && row < this.GRID_ROWS;
     }
-    tickStamina(state) {
-        const now = Date.now();
+    // Settle elapsed time on the server, including time while the client was closed.
+    // Return whether the recovered balance/anchor needs to be persisted.
+    tickStamina(state, now = Date.now()) {
         if (state.stamina >= this.staminaConfig.max) {
             state.last_stamina_tick = now;
-            return;
+            return false;
         }
         const intervalMs = this.staminaConfig.regenInterval * 1000;
-        while (now - state.last_stamina_tick >= intervalMs) {
-            if (state.stamina >= this.staminaConfig.max) {
-                state.last_stamina_tick = now;
-                break;
-            }
-            this.addStamina(state, this.staminaConfig.regenAmount, now);
-            state.last_stamina_tick += intervalMs;
+        if (!Number.isFinite(state.last_stamina_tick) || state.last_stamina_tick > now) {
+            state.last_stamina_tick = now;
+            return true;
         }
-        state.stamina = Math.min(state.stamina, this.staminaConfig.max);
+        if (intervalMs <= 0 || this.staminaConfig.regenAmount <= 0)
+            return false;
+        const ticks = Math.floor((now - state.last_stamina_tick) / intervalMs);
+        if (ticks <= 0)
+            return false;
+        const amount = Math.min(this.staminaConfig.max - state.stamina, ticks * this.staminaConfig.regenAmount);
+        this.addStamina(state, amount, now);
+        // Keep the partial interval below cap; time spent at cap cannot be banked.
+        state.last_stamina_tick = state.stamina >= this.staminaConfig.max
+            ? now : state.last_stamina_tick + ticks * intervalMs;
+        return true;
     }
-    getRegenRemainingMs(state) {
+    getRegenRemainingMs(state, now = Date.now()) {
+        if (state.stamina >= this.staminaConfig.max)
+            return 0;
         const nextTick = state.last_stamina_tick + this.staminaConfig.regenInterval * 1000;
-        return Math.max(0, nextTick - Date.now());
+        return Math.max(0, nextTick - now);
     }
     isLauncher(itemDef) {
         if (!itemDef)
@@ -1360,7 +1611,7 @@ class GameEngine {
     }
     tickLauncherRecharge(state) {
         const now = Date.now();
-        for (const item of state.grid) {
+        for (const item of this.getInventoryItems(state)) {
             const itemDef = this.getItemData(item.id);
             if (!this.isLauncher(itemDef))
                 continue;
@@ -1398,23 +1649,7 @@ class GameEngine {
         return result;
     }
     findNearestEmpty(grid, startCol, startRow) {
-        const visited = new Set();
-        const queue = [[startCol, startRow]];
-        visited.add(this.posKey(startCol, startRow));
-        while (queue.length > 0) {
-            const [c, r] = queue.shift();
-            const key = this.posKey(c, r);
-            if (!grid.has(key))
-                return { col: c, row: r };
-            for (const [nc, nr] of this.getNeighbors(c, r)) {
-                const nk = this.posKey(nc, nr);
-                if (!visited.has(nk)) {
-                    visited.add(nk);
-                    queue.push([nc, nr]);
-                }
-            }
-        }
-        return null;
+        return (0, grid_search_1.findNearestEmptyCell)(this.GRID_COLS, this.GRID_ROWS, startCol, startRow, (col, row) => !grid.has(this.posKey(col, row)));
     }
     findEmptyPos(grid) {
         const occupied = new Set();
@@ -1453,6 +1688,27 @@ class GameEngine {
             }
             rewards = resolved;
         }
+        // Activity currencies and card packs are disabled during the novice period.
+        if (!(0, activity_access_1.activitiesUnlocked)(state)) {
+            const activityTokens = new Set(this.battlePassService.getDefinitions().map(pass => pass.points_token_id));
+            rewards = {
+                tokens: (rewards.tokens ?? []).filter(t => !activityTokens.has(t.token)),
+                items: (rewards.items ?? []).filter(ri => {
+                    const item = this.getItemData(ri.id);
+                    return !(item?.type === 5 && item.effect_type === card_collection_1.CardCollectionService.EFFECT_TYPE);
+                }),
+            };
+        }
+        // Validate configured pack counts before crediting any part of the reward.
+        for (const ri of rewards.items ?? []) {
+            const item = this.getItemData(ri.id);
+            if (item?.type === 5 && item.effect_type === card_collection_1.CardCollectionService.EFFECT_TYPE && (!Number.isSafeInteger(ri.count) || ri.count < 0)) {
+                throw new Error(`card_collection: invalid reward count for item ${ri.id}`);
+            }
+            if (item?.type === 5 && item.effect_type === card_collection_1.CardCollectionService.EFFECT_TYPE && !this.cardCollectionService.config.packs.some(pack => pack.pack_id === item.effect_value)) {
+                throw new Error(`card_collection: unknown pack ${item.effect_value} for item ${ri.id}`);
+            }
+        }
         // Token rewards — directly credited
         if (rewards.tokens) {
             for (const t of rewards.tokens) {
@@ -1482,11 +1738,18 @@ class GameEngine {
         }
         // Item rewards -> pending_rewards
         if (rewards.items) {
-            state.pending_rewards = state.pending_rewards || [];
             for (const ri of rewards.items) {
                 const itemData = this.getItemData(ri.id);
                 const name = itemData?.name ?? `#${ri.id}`;
+                if (itemData?.type === 5 && itemData.effect_type === card_collection_1.CardCollectionService.EFFECT_TYPE) {
+                    if (ri.count > 0)
+                        this.cardCollectionService.awardPack(state, itemData.effect_value, ri.count);
+                    result.items.push({ id: ri.id, count: ri.count });
+                    continue;
+                }
                 this.registerProductionUnlock(state, ri.id);
+                if (ri.count > 0)
+                    this.recordItemDiscovery(state, ri.id);
                 for (let i = 0; i < ri.count; i++) {
                     state.pending_rewards.push({
                         uid: this._nextUid(state),
@@ -1507,8 +1770,11 @@ class GameEngine {
     createInitialState(boardType = 0) {
         const now = Date.now();
         const state = {
+            storage_revision: 0,
             grid: [],
             pouch: [],
+            pouch_capacity: this.pouchConfig.initialSlots,
+            pouch_unlock_count: 0,
             cultivation: {
                 current_level: 1,
                 current_exp: 0,
@@ -1527,9 +1793,11 @@ class GameEngine {
             board_type: boardType,
             uid_counter: 0,
             pending_rewards: [],
+            battle_pass_progress: {},
             spawn_seed: this.createSpawnSeed(),
             spawn_sequence: 0,
             spawn_history: [],
+            item_catalog_claimed_ids: [],
             crafted_item_ids: [],
             unlocked_production_item_ids: [],
         };
@@ -1538,7 +1806,7 @@ class GameEngine {
         for (const entry of setup) {
             const itemDef = this.getItemData(entry.id);
             if (itemDef) {
-                state.uid_counter = (state.uid_counter ?? 0) + 1;
+                state.uid_counter = state.uid_counter + 1;
                 const gitem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
                 if (entry.immovable)
                     gitem.immovable = true;
@@ -1548,6 +1816,7 @@ class GameEngine {
                 }
                 state.grid.push(gitem);
                 this.registerProductionUnlock(state, entry.id);
+                this.recordItemDiscovery(state, entry.id);
                 itemNames.push(`${itemDef.name}(#${entry.id})@(${entry.col},${entry.row})${gitem.immovable ? " [immovable]" : ""}`);
             }
         }
@@ -1568,7 +1837,7 @@ class GameEngine {
             if (battleStage !== undefined)
                 state.battle_stage = battleStage;
             state.saved_grid = state.grid;
-            if (state.battle_grid && state.battle_grid.length > 0) {
+            if (state.battle_grid) {
                 state.grid = state.battle_grid;
                 state.battle_grid = undefined;
                 console.log(`[engine] board switched to battle: restored ${state.grid.length} battle items, saved ${state.saved_grid.length} main items | v${state.version}`);
@@ -1581,7 +1850,7 @@ class GameEngine {
         }
         else {
             state.battle_grid = state.grid;
-            state.grid = state.saved_grid && state.saved_grid.length > 0
+            state.grid = state.saved_grid
                 ? state.saved_grid
                 : this._buildInitialGrid(0, state);
             state.saved_grid = undefined;
@@ -1598,7 +1867,7 @@ class GameEngine {
         for (const entry of setup) {
             const itemDef = this.getItemData(entry.id);
             if (itemDef) {
-                state.uid_counter = (state.uid_counter ?? 0) + 1;
+                state.uid_counter = state.uid_counter + 1;
                 const gitem = { uid: state.uid_counter, id: entry.id, col: entry.col, row: entry.row };
                 if (entry.immovable)
                     gitem.immovable = true;
@@ -1608,6 +1877,7 @@ class GameEngine {
                 }
                 grid.push(gitem);
                 this.registerProductionUnlock(state, entry.id);
+                this.recordItemDiscovery(state, entry.id);
             }
         }
         return grid;
@@ -1694,6 +1964,8 @@ class GameEngine {
             console.log(`[engine] merge rejected: ${result.reason} | from=(${fromCol},${fromRow}) to=(${toCol},${toRow})`);
             return { ok: false, reason: result.reason };
         }
+        const supplyAvailableBefore = this.countOrderSupplyAvailableItems(state, result.resultItem.id);
+        const rewindBefore = this.goldenFingerService.snapshot(state);
         const actualFromKey = this.posKey(result.fromItem.col, result.fromItem.row);
         const actualToKey = this.posKey(result.toItem.col, result.toItem.row);
         const fromId = result.fromItem.id;
@@ -1713,16 +1985,15 @@ class GameEngine {
         }
         state.grid.push(mergedItem);
         this.registerProductionUnlock(state, mergedItem.id);
-        state.crafted_item_ids ??= [];
-        if (!state.crafted_item_ids.includes(mergedItem.id)) {
-            state.crafted_item_ids.push(mergedItem.id);
-        }
+        this.recordItemDiscovery(state, mergedItem.id);
         state.version += 1;
         const mergedName = result.resultItem.name;
         const fromItem = this.getItemData(fromId);
         const fromName = fromItem?.name ?? `#${fromId}`;
         console.log(`[engine] merge: ${fromName}x2 -> ${mergedName} | grid=${state.grid.length}/63 | v${state.version}`);
         this.questEngine.incrementQuestProgress(state, interface_1.QuestType.MERGE, 1, this);
+        this.activityEngine.recordOrderSupplyAction(state, mergedItem.id, supplyAvailableBefore);
+        this.goldenFingerService.capture(state, rewindBefore, "合并");
         return {
             ok: true,
             newVersion: state.version,
@@ -1737,7 +2008,8 @@ class GameEngine {
     }
     // --- Launcher spawn ---
     executeSpawn(state, launcherCol, launcherRow, expectedSequence, requestedMultiplier = 1) {
-        const sequence = state.spawn_sequence ?? 0;
+        const sequence = state.spawn_sequence;
+        const rewindBefore = this.goldenFingerService.snapshot(state);
         if (expectedSequence !== undefined && expectedSequence !== sequence) {
             return { ok: false, reason: "spawn_sequence_mismatch" };
         }
@@ -1787,7 +2059,7 @@ class GameEngine {
             if (!spawns || !spawns.length)
                 return { ok: false, reason: "no_spawns" };
             const totalWeight = spawns.reduce((sum, s) => sum + s.weight, 0);
-            let roll = (0, spawn_rng_1.deterministicSpawnRoll)(state.spawn_seed ?? 1, sequence, launcherItem.uid ?? 0, totalWeight);
+            let roll = (0, spawn_rng_1.deterministicSpawnRoll)(state.spawn_seed, sequence, launcherItem.uid ?? 0, totalWeight);
             rolledId = spawns[0].id;
             for (const s of spawns) {
                 if (roll < s.weight) {
@@ -1807,7 +2079,7 @@ class GameEngine {
         const maxStaminaUnits = !isBattle && !launcherData.no_cost
             ? Math.floor(state.stamina / baseStaminaCost)
             : requestedMultiplier;
-        const spawnPlan = this.getOrderPrioritySpawnPlan(state, baseSpawnResult, boostedSpawnResult, requestedMultiplier, maxStaminaUnits);
+        const spawnPlan = this.getOrderPrioritySpawnPlan(state, baseSpawnResult, boostedSpawnResult, requestedMultiplier, maxStaminaUnits, launcherData);
         const target = this.findNearestEmpty(map, launcherCol, launcherRow);
         if (!target)
             return { ok: false, reason: "no_empty_cell" };
@@ -1864,8 +2136,10 @@ class GameEngine {
             const stageAtk = stage?.atk ?? 0;
             newItem.atk_base = stageAtk + (launcherData.value ?? 0);
         }
+        const supplyAvailableBefore = this.countOrderSupplyAvailableItems(state, newItem.id);
         state.grid.push(newItem);
         this.registerProductionUnlock(state, newItem.id);
+        this.recordItemDiscovery(state, newItem.id);
         const spawnedItems = [{
                 uid: newItem.uid ?? 0,
                 id: spawnResult.id,
@@ -1880,6 +2154,8 @@ class GameEngine {
         const firstSpawn = spawnedItems[0];
         console.log(`[engine] spawn: launcher #${launcherItem.id} -> ${spawnedItems.map(item => `${item.name}(#${item.id})`).join(", ")} | units=${spentStaminaUnits}/${requestedMultiplier} refund=${staminaRefund} order_priority=${spawnPlan.orderPriority} | v${state.version}`);
         this.questEngine.incrementQuestProgress(state, interface_1.QuestType.SPAWN, spawnedItems.length, this);
+        this.activityEngine.recordOrderSupplyAction(state, newItem.id, supplyAvailableBefore);
+        this.goldenFingerService.capture(state, rewindBefore, "生成");
         return {
             ok: true,
             spawnedUid: firstSpawn.uid,
@@ -1957,6 +2233,16 @@ class GameEngine {
         const allowedRecipes = this.getRecipesForTable(tableItem.id);
         const matched = this.matchRecipe(craft._craft_stored, allowedRecipes);
         craft._craft_recipe = matched ?? {};
+        if (craft._craft_stored.length === 0) {
+            // Removing the last ingredient leaves an empty table. Keep the state
+            // consistent with the stored materials so clients do not render the
+            // HAS_ITEMS badge after the authoritative sync.
+            craft._craft_state = TableState.IDLE;
+            craft._craft_recipe = {};
+        }
+        else {
+            craft._craft_state = TableState.HAS_ITEMS;
+        }
         return { ok: true, removed_id: ingredientId, removed_uid: newUid, table_col: tableCol, table_row: tableRow, target_col: targetCol, target_row: targetRow, newVersion: state.version };
     }
     // --- Crafting ---
@@ -1996,16 +2282,32 @@ class GameEngine {
         if (!tableItem?.craft)
             return { ok: false, reason: "table_not_found" };
         const craft = tableItem.craft;
+        const supplyAvailableBefore = this.countOrderSupplyAvailableItems(state, validation.recipe.result);
         craft._craft_state = TableState.CRAFTING;
         craft._craft_progress = 0;
         craft._craft_stored = [];
         craft._craft_result_id = validation.recipe.result;
         craft._craft_start_time = Date.now();
         state.version += 1;
+        this.activityEngine.recordOrderSupplyAction(state, validation.recipe.result, supplyAvailableBefore);
         const resultItem = this.getItemData(validation.recipe.result);
         const resultName = resultItem?.name ?? `#${validation.recipe.result}`;
         console.log(`[engine] craft start: "${validation.recipe.name}" -> ${resultName} | time=${validation.recipe.craft_time}s | v${state.version}`);
         return { ok: true, newVersion: state.version, recipe: validation.recipe };
+    }
+    finishBoardCrafting(state) {
+        let completed = 0;
+        for (const item of state.grid) {
+            const craft = item.craft;
+            if (this.getItemData(item.id)?.type !== 2 || craft?._craft_state !== TableState.CRAFTING)
+                continue;
+            if (!this.getItemData(craft._craft_result_id))
+                continue;
+            craft._craft_state = TableState.READY;
+            craft._craft_progress = 1;
+            completed++;
+        }
+        return completed;
     }
     executeCraftSpeedup(state, tableCol, tableRow) {
         const tableItem = state.grid.find((item) => item.col === tableCol && item.row === tableRow);
@@ -2101,11 +2403,14 @@ class GameEngine {
         // Place result item on grid near the table
         const map = this.gridToMap(state.grid);
         const target = this.findNearestEmpty(map, tableItem.col, tableItem.row);
+        // A failed retrieval must preserve the completed craft, UID sequence and
+        // quest progress so the player can retry after freeing a cell.
+        if (!target)
+            return { ok: false, reason: "no_empty_cell" };
         const craftUid = this._nextUid(state);
-        if (target) {
-            state.grid.push({ uid: craftUid, id: resultId, col: target.col, row: target.row });
-            this.registerProductionUnlock(state, resultId);
-        }
+        state.grid.push({ uid: craftUid, id: resultId, col: target.col, row: target.row });
+        this.registerProductionUnlock(state, resultId);
+        this.recordItemDiscovery(state, resultId);
         // Clear craft state
         delete tableItem.craft;
         state.version += 1;
@@ -2200,9 +2505,24 @@ class GameEngine {
         return null;
     }
     // --- Cultivation ---
+    /** Physical instances owned on the active board or in the shared pouch.
+     * Keep references so timers update stored instances as well. Nested materials
+     * are prediction inputs only and cannot be submitted directly as order items.
+     */
+    getInventoryItems(state) {
+        const seen = new Set();
+        const result = [];
+        for (const raw of [...(state.grid ?? []), ...(state.pouch ?? [])]) {
+            const item = raw;
+            if (item.uid && seen.has(item.uid))
+                continue;
+            if (item.uid)
+                seen.add(item.uid);
+            result.push(item);
+        }
+        return result;
+    }
     getStoredItemId(entry) {
-        if (typeof entry === "number")
-            return entry;
         if (!entry || typeof entry !== "object")
             return 0;
         return Number(entry.id ?? 0);
@@ -2306,6 +2626,7 @@ class GameEngine {
             last_tick_time: state.cultivation.last_tick_time,
         };
         state.cultivation = newCultivation;
+        this.weeklyTaskService.ensureProgress(state);
         state.meridian_acupoints = [];
         const rewardId = this.getStageBreakthroughReward(level);
         const rewards = rewardId > 0 ? this.applyRewards(state, rewardId) : { tokens: [], items: [] };
@@ -2313,7 +2634,10 @@ class GameEngine {
         state.version += 1;
         const stageName = nextStage?.name ?? `stage_${nextLevel}`;
         console.log(`[engine] breakthrough: -> ${stageName} | consumed=${JSON.stringify([...requiredCounts])} | qi=${newCultivation.max_qi} | v${state.version}`);
-        this.questEngine.incrementQuestProgress(state, interface_1.QuestType.BREAKTHROUGH, 1, this);
+        // The breakthrough that exits the novice phase is itself a novice action;
+        // subsequent breakthroughs are tracked normally.
+        if (level >= 2)
+            this.questEngine.incrementQuestProgress(state, interface_1.QuestType.BREAKTHROUGH, 1, this);
         return { ok: true, newCultivation, rewards };
     }
     executeTryBreakthrough(state, uid, level, exp) {
@@ -2374,7 +2698,7 @@ class GameEngine {
     tickCraftingState(state) {
         const now = Date.now();
         let changed = false;
-        for (const item of state.grid) {
+        for (const item of this.getInventoryItems(state)) {
             if (!item.craft || item.craft._craft_state !== TableState.CRAFTING)
                 continue;
             const recipe = item.craft._craft_recipe;
@@ -2414,19 +2738,44 @@ class GameEngine {
         this.questEngine.incrementQuestProgress(state, interface_1.QuestType.ANY_ITEM_CONSUME, 1, this);
         return { ok: true, cultivation: state.cultivation };
     }
+    getPouchState(state) {
+        return {
+            pouch_capacity: state.pouch_capacity,
+            pouch_next_unlock_cost: this.pouchConfig.unlockCostBase + state.pouch_unlock_count * this.pouchConfig.unlockCostIncrement,
+        };
+    }
+    pouchUnlock(state, expectedCapacity) {
+        const info = this.getPouchState(state);
+        if (expectedCapacity !== info.pouch_capacity)
+            return { ok: false, reason: "state_conflict" };
+        const cost = info.pouch_next_unlock_cost;
+        if (!Number.isSafeInteger(cost) || !Number.isSafeInteger(info.pouch_capacity + 1)) {
+            return { ok: false, reason: "pouch_limit_reached" };
+        }
+        if (state.spirit_stones < cost)
+            return { ok: false, reason: "insufficient_stones" };
+        state.spirit_stones -= cost;
+        state.pouch_capacity += 1;
+        state.pouch_unlock_count += 1;
+        state.version += 1;
+        return { ok: true, cost };
+    }
     pouchDeposit(state, uid) {
         const idx = state.grid.findIndex((g) => g.uid === uid);
         if (idx < 0)
             return { ok: false, reason: "item_not_found" };
-        const itemId = state.grid[idx].id;
+        if (state.pouch.length >= this.getPouchState(state).pouch_capacity)
+            return { ok: false, reason: "pouch_full" };
+        const { col: _col, row: _row, ...stored } = state.grid[idx];
+        const itemId = stored.id;
         state.grid.splice(idx, 1);
-        state.pouch.push({ uid, id: itemId });
+        state.pouch.push({ ...stored, uid });
         state.version += 1;
         console.log(`[engine] pouch deposit: #${itemId} (uid=${uid}) | pouch=${state.pouch.length} items | v${state.version}`);
         return { ok: true, pouch: state.pouch };
     }
-    pouchWithdraw(state, itemId, col, row) {
-        const idx = state.pouch.findIndex((p) => p.id === itemId);
+    pouchWithdraw(state, uid, col, row) {
+        const idx = state.pouch.findIndex((p) => p.uid === uid);
         if (idx < 0)
             return { ok: false, reason: "item_not_in_pouch" };
         if (!this.isInBounds(col, row))
@@ -2434,11 +2783,13 @@ class GameEngine {
         if (state.grid.some((g) => g.col === col && g.row === row))
             return { ok: false, reason: "cell_occupied" };
         const entry = state.pouch[idx];
+        const itemId = entry.id;
         state.pouch.splice(idx, 1);
-        state.grid.push({ uid: entry.uid, id: itemId, col, row });
+        const item = { ...entry, col, row };
+        state.grid.push(item);
         state.version += 1;
         console.log(`[engine] pouch withdraw: #${itemId} uid=${entry.uid} at (${col},${row}) | pouch=${state.pouch.length} items | v${state.version}`);
-        return { ok: true, pouch: state.pouch, col, row };
+        return { ok: true, pouch: state.pouch, item, col, row };
     }
     initBattleMonsters(state) {
         if (!state.battle_monsters || state.battle_monsters.length > 0)
@@ -2545,6 +2896,7 @@ class GameEngine {
                     if (emptyPos) {
                         state.grid.push({ uid: this._nextUid(state), id: lootId, col: emptyPos.col, row: emptyPos.row });
                         this.registerProductionUnlock(state, lootId);
+                        this.recordItemDiscovery(state, lootId);
                         loot.push(lootId);
                     }
                 }
@@ -2682,29 +3034,44 @@ class GameEngine {
         return { ok: true, newVersion: state.version, pushed_col: pushedCol, pushed_row: pushedRow, from_col: fromCol, from_row: fromRow, to_col: toCol, to_row: toRow };
     }
     // --- Meridian ---
-    completeMeridianAcupoint(state, index, itemIds) {
+    completeMeridianAcupoint(state, index, itemIds, requestId = "") {
         if (!state.meridian_acupoints || index < 0 || index >= state.meridian_acupoints.length) {
             return { ok: false, reason: "invalid_index" };
         }
+        if (!Number.isInteger(index))
+            return { ok: false, reason: "invalid_index" };
+        if (requestId && state.card_collection_order_requests?.includes(requestId))
+            return { ok: false, reason: "already_completed" };
         const req = state.meridian_acupoints[index];
         if (req.completed)
             return { ok: false, reason: "already_completed" };
         if (req.breakthrough_order === true) {
             return { ok: false, reason: "breakthrough_confirmation_required" };
         }
-        // Consume one of each required item from grid
+        const requiredIds = [...req.item_ids];
+        requiredIds.sort((a, b) => a - b);
+        if (requiredIds.length === 0 || itemIds.length !== requiredIds.length || [...itemIds].sort((a, b) => a - b).some((id, i) => id !== requiredIds[i])) {
+            return { ok: false, reason: "invalid_order_items" };
+        }
         const toRemove = [];
+        const pouchToRemove = [];
+        const consumedUids = new Set();
         for (const reqItemId of itemIds) {
-            let found = false;
-            for (let i = 0; i < state.grid.length; i++) {
-                if (!toRemove.includes(i) && state.grid[i].id === reqItemId && state.grid[i].immovable !== true) {
-                    toRemove.push(i);
-                    found = true;
-                    break;
-                }
+            const gridIndex = state.grid.findIndex((item, i) => !toRemove.includes(i) && item.id === reqItemId && item.immovable !== true
+                && (!item.uid || !consumedUids.has(item.uid)));
+            if (gridIndex >= 0) {
+                toRemove.push(gridIndex);
+                if (state.grid[gridIndex].uid)
+                    consumedUids.add(state.grid[gridIndex].uid);
+                continue;
             }
-            if (!found)
+            const pouchIndex = (state.pouch ?? []).findIndex((entry, i) => !pouchToRemove.includes(i) && this.getStoredItemId(entry) === reqItemId
+                && entry.immovable !== true && !consumedUids.has(entry.uid));
+            if (pouchIndex < 0)
                 return { ok: false, reason: "insufficient_items" };
+            pouchToRemove.push(pouchIndex);
+            const stored = state.pouch[pouchIndex];
+            consumedUids.add(stored.uid);
         }
         if (state.cultivation.current_qi >= state.cultivation.max_qi) {
             return { ok: false, reason: "qi_full" };
@@ -2713,6 +3080,8 @@ class GameEngine {
         for (const idx of toRemove.sort((a, b) => b - a)) {
             state.grid.splice(idx, 1);
         }
+        for (const idx of pouchToRemove.sort((a, b) => b - a))
+            state.pouch.splice(idx, 1);
         req.completed = true;
         state.version += 1;
         // Order reward — scale by total item value
@@ -2721,11 +3090,18 @@ class GameEngine {
         let qiGained = 0;
         let qiFull = false;
         let rewardsApplied = { tokens: [], items: [] };
-        const orderRewards = req.fixed_order_rewards
+        let orderRewards = req.fixed_order_rewards
             ? this._copyRewardConfig(req.rewards || {})
             : (totalValue > 0 && threshold?.acupoint_rewards
                 ? this._scaleRewardConfig(threshold.acupoint_rewards, totalValue)
                 : undefined);
+        const cardPackReward = (0, activity_access_1.activitiesUnlocked)(state)
+            ? this.cardCollectionService.getSourceRewardConfig("order", 0, totalValue) : {};
+        if (cardPackReward.items?.length) {
+            orderRewards ??= { tokens: [], items: [] };
+            orderRewards.items ??= [];
+            orderRewards.items.push(...cardPackReward.items);
+        }
         if (orderRewards) {
             const qiBefore = state.cultivation.current_qi;
             const r = this.applyRewards(state, orderRewards);
@@ -2768,7 +3144,13 @@ class GameEngine {
             }
             console.log(`[engine] meridian fixed order #${index} completed, next wave deferred until circulation`);
         }
-        return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina };
+        this.battlePassService.awardOrderPoints(state, totalValue, requestId);
+        this.secretRealmService.awardOrder(state);
+        this.orderDuelService.awardOrderPoints(state, requiredIds.reduce((sum, id) => sum + (this.getItemData(id)?.value ?? 0), 0));
+        this.stairClimbService.awardOrderPoints(state, requiredIds.reduce((sum, id) => sum + (this.getItemData(id)?.value ?? 0), 0));
+        if (requestId)
+            state.card_collection_order_requests = [...(state.card_collection_order_requests ?? []), requestId].slice(-128);
+        return { ok: true, newVersion: state.version, meridian_acupoints: state.meridian_acupoints, rewards: rewardsApplied, qi_gained: qiGained, qi_full: qiFull, grid: state.grid, pouch: state.pouch, ...this.getPouchState(state), cultivation: state.cultivation, spirit_stones: state.spirit_stones, stamina: state.stamina, battle_pass_progress: this.battlePassService.ensureProgress(state) };
     }
     // --- Storage ---
     initStorage(item) {
@@ -2825,6 +3207,7 @@ class GameEngine {
     }
     // --- Shop ---
     sellItem(state, uid) {
+        const rewindBefore = this.goldenFingerService.snapshot(state);
         const item = state.grid.find(i => i.uid === uid);
         if (!item)
             return { ok: false, reason: "item_not_found" };
@@ -2844,28 +3227,39 @@ class GameEngine {
         const itemName = data.name ?? ("#" + item.id);
         console.log(`[engine] sell: ${itemName} (uid=${uid}) -> +${price} stones | total=${state.spirit_stones}`);
         this.questEngine.incrementQuestProgress(state, interface_1.QuestType.SELL, 1, this);
+        this.goldenFingerService.capture(state, rewindBefore, "出售");
         return { ok: true, stones: state.spirit_stones };
     }
-    buyItem(state, itemId, targetCol, targetRow) {
+    buyItem(state, itemId, targetCol, targetRow, expectedRevision, now = Date.now()) {
+        this.shopService.ensure(state, now);
+        if (expectedRevision !== undefined && state.shop.revision !== expectedRevision)
+            return { ok: false, reason: "shop_changed" };
+        const offer = state.shop.items.find(item => item.id === itemId);
+        if (!offer)
+            return { ok: false, reason: "not_in_shop" };
+        if (offer.purchased >= this.shopService.purchaseLimit)
+            return { ok: false, reason: "purchase_limit_reached" };
+        if (!Number.isSafeInteger(targetCol) || !Number.isSafeInteger(targetRow))
+            return { ok: false, reason: "out_of_bounds" };
         if (!this.isInBounds(targetCol, targetRow))
             return { ok: false, reason: "out_of_bounds" };
         const targetKey = this.posKey(targetCol, targetRow);
         if (state.grid.some(i => this.posKey(i.col, i.row) === targetKey))
             return { ok: false, reason: "target_occupied" };
-        const price = this.getBuyPrice(itemId);
+        const price = offer.price;
         if (price <= 0)
             return { ok: false, reason: "cannot_buy" };
-        if (!this.shopConfig.shopItems.some((s) => s.id === itemId))
-            return { ok: false, reason: "not_in_shop" };
         if (state.spirit_stones < price)
             return { ok: false, reason: "insufficient_stones" };
         const itemData = this.getItemData(itemId);
         if (!itemData)
             return { ok: false, reason: "item_data_not_found" };
         state.spirit_stones -= price;
+        offer.purchased++;
         const buyUid = this._nextUid(state);
         state.grid.push({ uid: buyUid, id: itemId, col: targetCol, row: targetRow });
         this.registerProductionUnlock(state, itemId);
+        this.recordItemDiscovery(state, itemId);
         state.version += 1;
         console.log(`[engine] buy: ${itemData.name} at (${targetCol},${targetRow}) -> -${price} stones | total=${state.spirit_stones}`);
         return { ok: true, uid: buyUid, stones: state.spirit_stones };

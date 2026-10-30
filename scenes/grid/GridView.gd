@@ -6,9 +6,10 @@ const LauncherControllerClass := preload("res://scenes/grid/LauncherController.g
 const CraftingControllerClass := preload("res://scenes/grid/CraftingController.gd")
 const ACTION_SYNC_SCREEN_SCENE := preload("res://scenes/screens/ActionSyncScreen.tscn")
 const CONFIRM_POPUP_SCENE := preload("res://scenes/ui/common/ConfirmPopup.tscn")
+const MergeWarningPreferencesClass := preload("res://scripts/utils/MergeWarningPreferences.gd")
+const DragController := preload("res://scenes/grid/BoardDragController.gd")
 const CELL_SIZE := Constants.CELL_SIZE
 const CELL_STEP := Constants.CELL_STEP
-const DRAG_THRESHOLD := 10.0  # pixels before drag starts
 const CLICK_CRAFT_HINT_DURATION := 3.0
 const IDLE_MERGE_HINT_DELAY := 8.0
 const IDLE_MERGE_HINT_DISTANCE := 12.0
@@ -23,6 +24,8 @@ signal item_clicked(item_data: Dictionary, grid_pos: Vector2i)
 signal pill_dropped_outside(item_data: Dictionary, drop_position: Vector2)
 signal item_use_requested(item_data: Dictionary, grid_pos: Vector2i)
 signal action_sync_cancelled()
+signal basin_drop_requested(uid: int)
+signal furnace_drop_requested(uid: int)
 
 var _item_nodes: Dictionary = {}  # "col,row" -> GridItem
 
@@ -31,9 +34,8 @@ var _drag_source_pos: Vector2i = Vector2i(-1, -1)
 var _drag_item_data: Dictionary = {}
 
 var _press_start_pos: Vector2i = Vector2i(-1, -1)
-var _press_screen_pos: Vector2 = Vector2.ZERO
 var _pressed_item: Dictionary = {}
-var _pressed_has_moved: bool = false
+var _drag_gesture := DragController.new()
 var _craft_hint_nodes: Array[GridItem] = []
 var _craft_hint_token: int = 0
 var _idle_elapsed: float = 0.0
@@ -48,6 +50,10 @@ var _is_launcher_spawning: bool = false
 var _selected_key: String = ""
 var _skip_anims: bool = false
 var _pouch_zone: Control = null
+var _basin_zone: Control = null
+var _furnace_zone: Control = null
+var _externally_hidden_uids: Dictionary = {}
+var _pending_pouch_deposit_uid: int = 0
 var _launcher_ctrl: Node = null
 
 var _merge_in_flight: bool = false
@@ -68,6 +74,23 @@ var _pending_storage_storage_pos: Vector2i = Vector2i(-1, -1)
 
 func set_pouch_zone(zone: Control) -> void:
 	_pouch_zone = zone
+
+func set_basin_zone(zone: Control) -> void:
+	_basin_zone = zone
+
+func set_furnace_zone(zone: Control) -> void:
+	_furnace_zone = zone
+
+# Keep transaction/flight visibility stable through authoritative board rebuilds.
+func set_item_hidden(uid: int, hidden: bool) -> void:
+	if hidden:
+		_externally_hidden_uids[uid] = true
+	else:
+		_externally_hidden_uids.erase(uid)
+	var pos: Vector2i = GridManager.find_pos_by_uid(uid)
+	var item: GridItem = _item_nodes.get("%d,%d" % [pos.x, pos.y]) as GridItem
+	if is_instance_valid(item):
+		item.visible = not hidden
 
 func set_skip_animations(skip: bool) -> void:
 	_skip_anims = skip
@@ -105,6 +128,8 @@ func _try_finish_action_sync_barrier() -> void:
 
 func _cancel_action_sync_waiters(message: String) -> void:
 	_action_sync_waiters.clear()
+	if StoragePouch._pending_deposit_uid != _pending_pouch_deposit_uid:
+		_restore_pending_pouch_item()
 	_hide_action_sync_screen()
 	action_sync_cancelled.emit()
 	if not message.is_empty():
@@ -237,26 +262,22 @@ func _input(event: InputEvent) -> void:
 			var item = GridManager.get_item(cell_pos)
 			if item == null:
 				return
+			if _pending_pouch_deposit_uid > 0 and int(item.get("_uid", 0)) == _pending_pouch_deposit_uid:
+				return
 			_press_start_pos = cell_pos
-			_press_screen_pos = local_pos
 			_pressed_item = item
-			_pressed_has_moved = false
-		elif _is_dragging:
+			_drag_gesture.press(local_pos)
+			return
+		var release: int = _drag_gesture.release(_is_dragging)
+		if release == DragController.Release.DROP:
 			_finish_drag(cell_pos)
-		elif _pressed_has_moved == false and not _pressed_item.is_empty():
+		elif release == DragController.Release.CLICK and not _pressed_item.is_empty():
 			_select_item(_press_start_pos)
-			print("[PlayerAction] craft_hint_click item_id=", int(_pressed_item.get("id", 0)),
-				" source_pos=", _press_start_pos)
 			_show_crafting_hints(_pressed_item, _press_start_pos, false)
 			item_clicked.emit(_pressed_item, _press_start_pos)
 
 			if _pressed_item.get("type", 0) == Constants.ItemType.CRAFTING:
 				var cstate: int = _pressed_item.get("_craft_state", CraftingService.TableState.IDLE)
-				if cstate == CraftingService.TableState.READY:
-					_request_craft_retrieve(_pressed_item, _press_start_pos)
-					_pressed_item = {}
-					return
-				item_clicked.emit(_pressed_item, _press_start_pos)
 				if cstate == CraftingService.TableState.HAS_ITEMS:
 					var recipe: Dictionary = _pressed_item.get("_craft_recipe", {})
 					if not recipe.is_empty():
@@ -271,16 +292,15 @@ func _input(event: InputEvent) -> void:
 
 	elif event is InputEventMouseMotion:
 		var local_pos := _to_local(event.position)
-		if _is_dragging:
+		var motion: int = _drag_gesture.motion(local_pos, _is_dragging)
+		if motion == DragController.Motion.FOLLOW:
 
 			var drag_key := "%d,%d" % [_drag_source_pos.x, _drag_source_pos.y]
 			var drag_node = _item_nodes.get(drag_key)
 			if drag_node and is_instance_valid(drag_node):
-				drag_node.position = _to_local(get_viewport().get_mouse_position()) - Vector2(CELL_STEP * 0.5, CELL_STEP * 0.5)
-		elif not _pressed_item.is_empty() and not _pressed_has_moved:
-			if local_pos.distance_to(_press_screen_pos) > DRAG_THRESHOLD:
-				_pressed_has_moved = true
-				_start_drag(_press_start_pos)
+				DragController.follow(drag_node, local_pos, CELL_STEP)
+		elif motion == DragController.Motion.START and not _pressed_item.is_empty():
+			_start_drag(_press_start_pos)
 
 func _reset_board_idle() -> void:
 	_idle_elapsed = 0.0
@@ -511,7 +531,6 @@ func _start_drag(pos: Vector2i) -> void:
 	_drag_source_pos = pos
 	_drag_item_data = item
 	_is_dragging = true
-	print("[PlayerAction] drag_start item_id=", int(item.get("id", 0)), " source_pos=", pos)
 	_show_crafting_hints(item, pos, true)
 	var drag_key := "%d,%d" % [pos.x, pos.y]
 	var drag_node = _item_nodes.get(drag_key)
@@ -529,6 +548,10 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		drag_node.z_index = 0
 	_pressed_item = {}
 	call_deferred("_finalize_action_sync")
+	if _try_basin_drop(get_global_mouse_position()):
+		return
+	if _try_furnace_drop(get_global_mouse_position()):
+		return
 	if _pouch_zone and _pouch_zone.visible and Rect2(_pouch_zone.global_position, _pouch_zone.size).has_point(get_global_mouse_position()):
 		if _drag_item_data.get("_pending_spawn", false) or _drag_item_data.get("_optimistic_action", false):
 			_snap_back()
@@ -545,6 +568,10 @@ func _finish_drag(target_pos: Vector2i) -> void:
 
 	var target = GridManager.get_item(target_pos)
 	if target != null:
+		if _pending_pouch_deposit_uid > 0 and int(target.get("_uid", 0)) == _pending_pouch_deposit_uid:
+			_snap_back()
+
+			return
 		_merge_failed_is_push = false
 		if _try_optimistic_merge(_drag_source_pos, target_pos):
 			return
@@ -568,6 +595,29 @@ func _finish_drag(target_pos: Vector2i) -> void:
 		else:
 			_snap_back()
 
+func _try_basin_drop(drop_position: Vector2) -> bool:
+	if not is_instance_valid(_basin_zone) or not _basin_zone.is_visible_in_tree() or not _basin_zone.get_global_rect().has_point(drop_position):
+		return false
+	# The top button must not also interpret the drag release as an introduction click.
+	get_viewport().set_input_as_handled()
+	_snap_back_to(_drag_source_pos, false)
+	if _drag_item_data.get("_pending_spawn", false) or _drag_item_data.get("_optimistic_action", false):
+		EventBus.show_toast.emit("物品正在同步，请稍后拖入聚宝盆")
+		return true
+	basin_drop_requested.emit(int(_drag_item_data.get("_uid", 0)))
+	return true
+
+func _try_furnace_drop(drop_position: Vector2) -> bool:
+	if not is_instance_valid(_furnace_zone) or not _furnace_zone.is_visible_in_tree() or not _furnace_zone.get_global_rect().has_point(drop_position):
+		return false
+	get_viewport().set_input_as_handled()
+	_snap_back_to(_drag_source_pos, false)
+	if _drag_item_data.get("_pending_spawn", false) or _drag_item_data.get("_optimistic_action", false):
+		EventBus.show_toast.emit("物品正在同步，请稍后拖入万象炉")
+		return true
+	furnace_drop_requested.emit(int(_drag_item_data.get("_uid", 0)))
+	return true
+
 func _try_optimistic_merge(
 	from_pos: Vector2i,
 	to_pos: Vector2i,
@@ -583,14 +633,10 @@ func _try_optimistic_merge(
 			EventBus.show_toast.emit("无法合成")
 			return true
 		return false
-	var next_item: Dictionary = ConfigDatabase.get_next_level(
-		from_item.get("type", 0) as int,
-		from_item.get("level", 0) as int,
-		from_item.get("group_id", 0) as int
-	)
+	var next_item: Dictionary = MergeService.get_next_item(from_item as Dictionary)
 	if next_item.is_empty():
 		return false
-	if not skip_realm_warning and CultivationService.is_item_level_above_current_realm(
+	if not skip_realm_warning and not MergeWarningPreferencesClass.is_suppressed_today() and CultivationService.is_item_level_above_current_realm(
 		int(next_item.get("level", 0))
 	):
 		_snap_back_to(from_pos)
@@ -634,6 +680,8 @@ func _show_over_realm_merge_confirmation(
 ) -> void:
 	var popup: ConfirmPopup = CONFIRM_POPUP_SCENE.instantiate() as ConfirmPopup
 	UIManager.show_popup(popup)
+	popup.hide_animation_finished.connect(popup.queue_free)
+	popup.show_skip_today_option()
 	var result_name: String = str(result_item.get("name", "该物品"))
 	var result_level: int = int(result_item.get("level", 0))
 	var realm_label: String = CultivationService.get_current_realm_label()
@@ -643,7 +691,10 @@ func _show_over_realm_merge_confirmation(
 		"合成后将获得%s（%d级），超出当前%s的物品等级上限（%d级），是否继续合成？" % [
 			result_name, result_level, realm_label, level_cap,
 		],
-		func(): _confirm_over_realm_merge(from_pos, to_pos, from_uid, to_uid)
+		func():
+			if popup.skip_today_checkbox.button_pressed:
+				MergeWarningPreferencesClass.suppress_today()
+			_confirm_over_realm_merge(from_pos, to_pos, from_uid, to_uid)
 	)
 
 
@@ -735,17 +786,36 @@ func _place_dragged_item(target_pos: Vector2i) -> void:
 	})
 
 func _do_pouch_deposit() -> void:
-	_snap_back()
 	if _drag_item_data.is_empty():
 		return
 	var item_id: int = _drag_item_data.get("id", 0)
 	if item_id <= 0:
 		return
 	if StoragePouch:
+		if _pending_pouch_deposit_uid > 0 or StoragePouch._pending_deposit_uid > 0:
+			_snap_back_to(_drag_source_pos, false)
+			EventBus.show_toast.emit("正在存入物品，请稍候")
+			return
 		var uid: int = int(_drag_item_data.get("_uid", 0))
+		if uid <= 0:
+			_snap_back_to(_drag_source_pos, false)
+			return
+		_pending_pouch_deposit_uid = uid
+		var item_node: GridItem = _item_nodes.get(_grid_key(_drag_source_pos)) as GridItem
+		if item_node != null and is_instance_valid(item_node):
+			item_node.hide()
 		run_after_action_sync(func(): StoragePouch.deposit(uid))
 
+func _restore_pending_pouch_item() -> void:
+	var pos: Vector2i = GridManager.find_pos_by_uid(_pending_pouch_deposit_uid)
+	_pending_pouch_deposit_uid = 0
+	var item_node: GridItem = _item_nodes.get(_grid_key(pos)) as GridItem
+	if item_node != null and is_instance_valid(item_node):
+		item_node.position = Vector2(pos.x * CELL_STEP, pos.y * CELL_STEP)
+		item_node.show()
+
 func _on_pouch_deposit_rejected(reason: String) -> void:
+	_restore_pending_pouch_item()
 	match reason:
 		"pouch_full": EventBus.show_toast.emit("储物袋已满，请取出物品或解锁更多格子")
 		"request_in_flight": EventBus.show_toast.emit("正在存入物品，请稍候")
@@ -787,13 +857,12 @@ func _on_merge_failed(_reason: String) -> void:
 func _snap_back() -> void:
 	_snap_back_to(_drag_source_pos)
 
-func _snap_back_to(pos: Vector2i) -> void:
+func _snap_back_to(pos: Vector2i, animate: bool = true) -> void:
 	var key := "%d,%d" % [pos.x, pos.y]
 	var item_node = _item_nodes.get(key)
 	if item_node and is_instance_valid(item_node):
 		var target := Vector2(pos.x * CELL_STEP, pos.y * CELL_STEP)
-		var tween := create_tween()
-		tween.tween_property(item_node, "position", target, 0.2)
+		DragController.snap_back(item_node, target, animate)
 
 # --- Item Visual Management ---
 
@@ -805,6 +874,10 @@ func _on_item_added(item_data: Dictionary, pos: Vector2i) -> void:
 	if layer:
 		layer.add_child(item)
 	item.setup(item_data, pos, CELL_STEP)
+	if _externally_hidden_uids.has(int(item_data.get("_uid", 0))):
+		item.hide()
+	if _pending_pouch_deposit_uid > 0 and int(item_data.get("_uid", 0)) == _pending_pouch_deposit_uid:
+		item.hide()
 	if GameState.current_board_type != Constants.BoardType.MAIN:
 		item.set_required(false)
 	if not _is_launcher_spawning and not _skip_anims and not GridManager._skip_anims:
@@ -821,6 +894,12 @@ func _try_start_launcher_cd(item_data: Dictionary) -> void:
 func _on_item_removed(item_data: Dictionary, pos: Vector2i) -> void:
 	_reset_board_idle()
 	var key := "%d,%d" % [pos.x, pos.y]
+	if _pending_pouch_deposit_uid > 0 and int(item_data.get("_uid", 0)) == _pending_pouch_deposit_uid:
+		_pending_pouch_deposit_uid = 0
+		_remove_item_node(pos)
+		if key == _selected_key:
+			_selected_key = ""
+		return
 	if key == _selected_key:
 		_selected_key = ""
 	var node = _item_nodes.get(key)
@@ -845,8 +924,7 @@ func _on_item_moved(item_data: Dictionary, from_pos: Vector2i, to_pos: Vector2i)
 		if _skip_anims:
 			node.position = target
 		else:
-			var tween := create_tween()
-			tween.tween_property(node, "position", target, 0.15)
+			DragController.slide(node, target)
 	else:
 		_sync_all_items()
 
@@ -874,8 +952,8 @@ func _on_items_swapped(_item_a: Dictionary, _item_b: Dictionary, pos_a: Vector2i
 		node_b.position = target_b
 	else:
 		var tween: Tween = create_tween().set_parallel(true)
-		tween.tween_property(node_a, "position", target_a, 0.15)
-		tween.tween_property(node_b, "position", target_b, 0.15)
+		DragController.slide(node_a, target_a, tween)
+		DragController.slide(node_b, target_b, tween)
 
 func _on_grid_updated() -> void:
 	_reset_board_idle()
@@ -898,6 +976,10 @@ func _sync_all_items() -> void:
 		var item := grid_item_scene.instantiate()
 		layer.add_child(item)
 		item.setup(entry.data, entry.pos, CELL_STEP)
+		if _externally_hidden_uids.has(int(entry.data.get("_uid", 0))):
+			item.hide()
+		if _pending_pouch_deposit_uid > 0 and int(entry.data.get("_uid", 0)) == _pending_pouch_deposit_uid:
+			item.hide()
 		_item_nodes["%d,%d" % [entry.pos.x, entry.pos.y]] = item
 		_try_start_launcher_cd(entry.data)
 
@@ -927,9 +1009,15 @@ func _show_crafting_hints(item_data: Dictionary, source_pos: Vector2i, persisten
 	var source_key: String = "%d,%d" % [source_pos.x, source_pos.y]
 	var source_node: GridItem = _item_nodes.get(source_key) as GridItem
 	var source_valid: bool = source_node != null and is_instance_valid(source_node)
-	var source_required: bool = source_valid and source_node.is_required()
 	if not source_valid:
 		return
+	# Requirement badges are refreshed deferred after board/order mutations. A
+	# click can arrive before that deferred pass, so refresh the owning screen
+	# synchronously before deciding whether this material has a live demand.
+	var owner: Node = get_parent()
+	if owner != null and owner.has_method("_refresh_required_indicators"):
+		owner.call("_refresh_required_indicators")
+	var source_required: bool = source_node.is_required()
 	if not source_required:
 		return
 	var ingredient_id: int = int(item_data.get("id", 0))
@@ -937,18 +1025,58 @@ func _show_crafting_hints(item_data: Dictionary, source_pos: Vector2i, persisten
 	if ingredient_id <= 0 or ingredient_icon == null:
 		return
 
+	var recipe_hints: Array[Dictionary] = preload("res://scripts/utils/CraftingRecipeHints.gd").build_assignments({}, [], ingredient_id)
+	var hint_candidates: Array[Dictionary] = []
 	for entry: Dictionary in GridManager.get_all_items():
 		var table_item: Dictionary = entry.get("data", {}) as Dictionary
 		if int(table_item.get("type", -1)) != Constants.ItemType.CRAFTING:
 			continue
+		if bool(table_item.get("immovable", false)):
+			continue
 		var table_pos: Vector2i = entry.get("pos", Vector2i(-1, -1)) as Vector2i
-		var acceptance: Dictionary = _craft_ctrl.get_ingredient_hint_debug(table_item, ingredient_id)
+		var acceptance: Dictionary = _craft_ctrl.get_ingredient_hint_debug(table_item, ingredient_id, recipe_hints)
 		if not bool(acceptance.get("accepted", false)):
+			continue
+		var craft_state: int = int(table_item.get("_craft_state", CraftingService.TableState.IDLE))
+		if craft_state == CraftingService.TableState.CRAFTING or craft_state == CraftingService.TableState.READY:
 			continue
 		var table_key: String = "%d,%d" % [table_pos.x, table_pos.y]
 		var table_node: GridItem = _item_nodes.get(table_key) as GridItem
 		if table_node == null or not is_instance_valid(table_node):
 			continue
+		var stored: Array = CraftingService.get_stored_items(table_item)
+		# Complete a loaded recipe before starting another table. If none can
+		# finish, prefer compatible loaded tables, then fall back to empty ones.
+		var priority: int = 0
+		if not stored.is_empty():
+			priority = 1
+			var recipe_id: int = int(acceptance.get("recipe_id", 0))
+			for recipe_variant: Variant in ConfigDatabase.get_recipes_for_item(int(table_item.get("id", 0))):
+				var recipe: Dictionary = recipe_variant as Dictionary
+				if int(recipe.get("id", 0)) == recipe_id:
+					var ingredients: Array = recipe.get("ingredients", [])
+					if stored.size() + 1 == ingredients.size():
+						priority = 2
+					break
+		hint_candidates.append({"node": table_node, "priority": priority,
+			"recipe_id": int(acceptance.get("recipe_id", 0))})
+
+	if hint_candidates.is_empty():
+		return
+	var highest_priority: int = 0
+	for candidate: Dictionary in hint_candidates:
+		highest_priority = maxi(highest_priority, int(candidate.get("priority", 0)))
+	var shown_recipe_ids: Dictionary = {}
+	for candidate: Dictionary in hint_candidates:
+		if int(candidate.get("priority", 0)) != highest_priority:
+			continue
+		var recipe_id: int = int(candidate.get("recipe_id", 0))
+		if shown_recipe_ids.has(recipe_id):
+			continue
+		# Keep one destination per recipe. Board order breaks equal-priority
+		# ties consistently, so identical tables do not repeat the same hint.
+		shown_recipe_ids[recipe_id] = true
+		var table_node: GridItem = candidate.get("node") as GridItem
 		table_node.show_crafting_hint(ingredient_icon)
 		_craft_hint_nodes.append(table_node)
 
@@ -1062,7 +1190,10 @@ func _on_craft_retrieve_ready(result_id: int, result_uid: int, table_pos: Vector
 		return
 	var spawn_pos := GridManager.find_nearest_empty(table_pos)
 	if spawn_pos == Vector2i(-1, -1):
-		EventBus.show_toast.emit("棋盘已满，无法取出制作结果")
+		# The server already placed this result. Concurrent local actions may
+		# have filled the last cell; reconcile instead of losing its visual.
+		CloudService.fetch_state()
+		EventBus.show_toast.emit("棋盘状态已变化，正在同步制作结果")
 		return
 	var new_item: Dictionary = result_data.duplicate(true)
 	new_item["_uid"] = result_uid
@@ -1271,7 +1402,10 @@ func _on_launcher_spawn_failed(reason: String, prediction: Dictionary) -> void:
 		" client_spawn_sequence=", GameState.spawn_sequence)
 	call_deferred("_flush_spawn_action_batch")
 	_rollback_spawn_prediction(prediction)
-	if reason in ["no_charges", "no_more_fixed_spawns", "insufficient_stamina",
+	if reason == "insufficient_stamina":
+		EventBus.show_toast.emit(_spawn_error_text(reason))
+		return
+	if reason in ["no_charges", "no_more_fixed_spawns",
 			"insufficient_qi", "request_queue_full", "item_immovable", "no_empty_cell"]:
 		return
 	_action_sync_needed = false
@@ -1492,6 +1626,10 @@ func _select_item(pos: Vector2i) -> void:
 		var item: Variant = GridManager.get_item(pos)
 		if item != null:
 			if item.get("_pending_spawn", false) or item.get("_optimistic_action", false):
+				return
+			if int(item.get("type", 0)) == Constants.ItemType.CRAFTING:
+				if int(item.get("_craft_state", CraftingService.TableState.IDLE)) == CraftingService.TableState.READY:
+					_request_craft_retrieve(item as Dictionary, pos)
 				return
 			if item.get("immovable") == true:
 				EventBus.show_toast.emit("该物品无法使用")

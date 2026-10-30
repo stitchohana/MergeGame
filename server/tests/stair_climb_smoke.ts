@@ -19,7 +19,8 @@ async function main() {
   const activity = activities.activities.find((a: any) => a.widget === "StairClimb");
   const start = Date.parse(activity.start_time), end = Date.parse(activity.end_time);
   assert.equal(end - start, 3 * 86400000);
-  assert.equal(activity.config.order_points_ratio, 0.1);
+  assert.equal(gameConfigTables.stairClimb.settings[0].order_points_ratio, 0.1);
+  assert.equal("config" in activity, false);
   const engine = new GameEngine({ ...gameConfigTables, activities });
   const service = engine.stairClimbService;
   assert.equal(service.isActive(start - 1), false);
@@ -30,9 +31,9 @@ async function main() {
   assert.equal(service.orderPoints(116), 11);
   assert.equal(service.orderPoints(0), 0);
   assert.equal(service.orderPoints(NaN), 0);
-  const config2: any = structuredClone(activities.activities);
-  config2.find((a: any) => a.id === 6).config.order_points_ratio = 0.25;
-  assert.equal(new StairClimbService(config2, engine.cultivationStages).orderPoints(100), 25);
+  const config2 = structuredClone(gameConfigTables.stairClimb);
+  config2.settings[0].order_points_ratio = 0.25;
+  assert.equal(new GameEngine({ ...gameConfigTables, activities, stairClimb: config2 }).stairClimbService.orderPoints(100), 25);
   for (let rank = 1; rank < 10; rank++) {
     assert.ok(service.reward(rank).stamina > service.reward(rank + 1).stamina);
     assert.ok(service.reward(rank).spirit_stones > service.reward(rank + 1).spirit_stones);
@@ -41,8 +42,14 @@ async function main() {
 
   const storage = new MemoryStorage();
   const quiet = console.log; console.log = () => {};
-  for (let i = 0; i < 25; i++) { const s = engine.createInitialState(); await storage.saveState('same-' + i, s); }
-  const other = engine.createInitialState(); other.cultivation.current_level = 2; await storage.saveState('other', other);
+  // Activity participants must have reached the activity unlock level.
+  const createParticipant = () => {
+    const state = engine.createInitialState();
+    state.cultivation.current_level = 2;
+    return state;
+  };
+  for (let i = 0; i < 25; i++) { const s = createParticipant(); await storage.saveState('same-' + i, s); }
+  const other = createParticipant(); other.cultivation.current_level = 3; await storage.saveState('other', other);
   console.log = quiet;
   const p0 = (await storage.loadState('same-0'))!;
   const p1 = (await storage.loadState('same-1'))!;
@@ -57,7 +64,7 @@ async function main() {
   const offlineId = registry.groups[0].members.find(m => m.id !== 'same-0' && m.id !== 'same-1')!.id;
   const offline = (await storage.loadState(offlineId))!;
   await service.enroll(storage, 'other', other, start); await storage.saveState('other', other);
-  const otherGroup = (await storage.loadStairClimb(service.eventId))!.groups.find(g => g.realm === 2)!;
+  const otherGroup = (await storage.loadStairClimb(service.eventId))!.groups.find(g => g.realm === 3)!;
   assert.equal(otherGroup.members.filter(m => m.bot).length, 19);
   const before = await service.rows(storage, otherGroup, start);
   const after = await service.rows(storage, otherGroup, start + 7200000);
@@ -90,7 +97,7 @@ async function main() {
   assert.equal(p0.stamina, balance.stamina + service.reward(service.score(p0)!.settlement!.rank).stamina);
   assert.ok(p0.stamina > p0.max_stamina); // Never discard stamina above natural regeneration cap.
   assert.equal(await service.settlePlayer(storage, 'same-0', p0, r => apply(p0, r), end + 60000), false);
-  const restarted = new StairClimbService(activities.activities, engine.cultivationStages);
+  const restarted = new StairClimbService(engine.activityEngine.getActivities(), engine.cultivationStages);
   for (let i = 0; i < 15; i++) await restarted.settleBatch(storage, apply, end + 60000);
   const paidOffline = (await storage.loadState(offlineId))!;
   assert.ok(restarted.score(paidOffline)?.settlement); // Selected offline players receive ordinary prize.
@@ -102,7 +109,7 @@ async function main() {
   const dir = mkdtempSync(join(tmpdir(), 'stair-climb-'));
   try {
     const files = new JsonFileStorage(dir); const u = await files.createUser('test-device');
-    const state = engine.createInitialState(); await files.saveState(u.userId, state);
+    const state = createParticipant(); await files.saveState(u.userId, state);
     await service.enroll(files, u.userId, state, start); await files.saveState(u.userId, state);
     const freshFiles = new JsonFileStorage(dir);
     assert.equal((await freshFiles.loadStairClimb(service.eventId))!.groups.length, 1);
@@ -112,15 +119,15 @@ async function main() {
 
   // Run actual D1 SQL against SQLite and independent storage instances.
   const db = new DatabaseSync(':memory:');
-  db.exec('CREATE TABLE game_states (user_id TEXT PRIMARY KEY, state_json TEXT NOT NULL, updated_at INTEGER)');
-  db.exec(readFileSync('migrations/0002_stair_climb.sql', 'utf8'));
+  db.exec(readFileSync('schema.sql', 'utf8'));
+  db.exec("INSERT INTO users (user_id, device_id, created_at) VALUES ('left', 'left', '2026-10-28'), ('right', 'right', '2026-10-28')");
   const adapter = { prepare(sql: string) { return { bind(...args: any[]) { return {
     async first() { return db.prepare(sql).get(...args) ?? null; },
     async all() { return { results: db.prepare(sql).all(...args) }; },
     async run() { return { meta: { changes: Number(db.prepare(sql).run(...args).changes) } }; },
   }; } }; } };
   const left = new D1Storage(adapter as any), right = new D1Storage(adapter as any);
-  const l = engine.createInitialState(), r = engine.createInitialState();
+  const l = createParticipant(), r = createParticipant();
   await left.saveState('left', l); await right.saveState('right', r);
   await Promise.all([service.enroll(left, 'left', l, start), service.enroll(right, 'right', r, start)]);
   assert.equal((await left.loadStairClimb(service.eventId))!.groups.length, 1);
@@ -156,7 +163,7 @@ async function main() {
     }
     const routeStorage = new FailureStorage();
     const routeEngine = new GameEngine({ ...gameConfigTables, activities });
-    const ready = routeEngine.createInitialState(); await routeStorage.saveState('route', ready);
+    const ready = routeEngine.createInitialState(); ready.cultivation.current_level = 2; await routeStorage.saveState('route', ready);
     const router = createGameRouter(routeStorage, routeEngine, 'stair-test');
     const token = await signToken({ userId: 'route', deviceId: 'test' }, 'stair-test');
     async function request(path: string, body: any = {}, method = 'POST') {
@@ -166,24 +173,24 @@ async function main() {
     }
     assert.equal((await request('/stair_climb', {}, 'GET')).data.stair_climb.rows.length, 20);
     const order = (await routeStorage.loadState('route'))!;
-    order.grid.push({ uid: 9999, id: 1006, col: 6, row: 8 }, { uid: 9998, id: 1006, col: 5, row: 8 });
-    order.meridian_acupoints = [{ item_id: 1006, name: 'test', count: 2, completed: false, total_value: 999999 } as any];
+    order.grid.push({ uid: 9999, id: 5004, col: 6, row: 8 }, { uid: 9998, id: 5004, col: 5, row: 8 });
+    order.meridian_acupoints = [{ item_ids: [5004, 5004], name: 'test', completed: false, total_value: 999999 } as any];
     await routeStorage.saveState('route', order);
     routeStorage.fail = true;
-    assert.equal((await request('/meridian/complete', { index: 0, item_ids: [1006, 1006], request_id: 'value-order' })).status, 500);
-    assert.equal(routeStorage.failedPoints, 23);
+    assert.equal((await request('/meridian/complete', { index: 0, item_ids: [5004, 5004], request_id: 'value-order' })).status, 500);
+    assert.equal(routeStorage.failedPoints, 4);
     assert.equal(routeStorage.failedCompleted, true);
     const failedOrder = (await routeStorage.loadState('route'))!;
     assert.equal(routeEngine.stairClimbService.score(failedOrder)!.points, 0);
     assert.equal(failedOrder.meridian_acupoints?.[0]?.completed, false);
     assert.equal(failedOrder.grid.filter(i => i.uid === 9999 || i.uid === 9998).length, 2);
     assert.equal(failedOrder.card_collection_order_requests?.includes('value-order') ?? false, false);
-    const done = await request('/meridian/complete', { index: 0, item_ids: [1006, 1006], request_id: 'value-order' });
+    const done = await request('/meridian/complete', { index: 0, item_ids: [5004, 5004], request_id: 'value-order' });
     assert.equal(done.status, 200);
-    assert.equal(done.data.stair_climb_progress[service.eventId].points, 23); // Actual values 116 + 116, never stale order metadata.
-    assert.equal((await request('/meridian/complete', { index: 0, item_ids: [1006, 1006], request_id: 'value-order' })).status, 400);
-    assert.equal(routeEngine.stairClimbService.score((await routeStorage.loadState('route'))!)!.points, 23);
-    assert.equal((await request('/meridian/complete', { index: 99, item_ids: [1006] })).status, 400);
+    assert.equal(done.data.stair_climb_progress[service.eventId].points, 4); // Actual values 20 + 20, never stale order metadata.
+    assert.equal((await request('/meridian/complete', { index: 0, item_ids: [5004, 5004], request_id: 'value-order' })).status, 400);
+    assert.equal(routeEngine.stairClimbService.score((await routeStorage.loadState('route'))!)!.points, 4);
+    assert.equal((await request('/meridian/complete', { index: 99, item_ids: [5004] })).status, 400);
     Date.now = () => end + 30000;
     const beforePayout = (await routeStorage.loadState('route'))!;
     routeStorage.failSettlement = true;

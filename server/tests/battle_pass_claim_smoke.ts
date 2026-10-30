@@ -29,7 +29,7 @@ activity.enabled = true;
 activity.start_time = "2026-09-22T00:00:00Z";
 activity.end_time = "2999-01-01T00:00:00Z";
 const engine = new GameEngine(tables);
-const state = engine.createInitialState();
+const state = engine.createInitialState(); state.cultivation.current_level = 2;
 state.spirit_stones = 800;
 state.stamina = 40;
 state.battle_pass_progress = {

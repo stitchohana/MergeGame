@@ -1,4 +1,6 @@
 class_name ItemDetailPanel extends BaseHUD
+
+const RecipeHints = preload("res://scripts/utils/CraftingRecipeHints.gd")
 signal material_clicked(uid: int, item_id: int)
 signal material_source_requested(item_id: int)
 
@@ -28,8 +30,13 @@ var _output_item_id: int = 0
 var _pending_speedup: String = ""
 var _pending_speedup_uid: int = -1
 var _displayed_speedup_cost: int = 0
+var _material_drag_pointer: int = -2  # -2: inactive, -1: mouse, >= 0: touch.
+var _material_drag_start: Vector2 = Vector2.ZERO
+var _material_drag_start_scroll: int = 0
+var _material_drag_moved: bool = false
 
 const PREVIEW_GHOST_ALPHA: float = 0.35
+const MATERIAL_DRAG_THRESHOLD: float = 8.0
 
 func _ready() -> void:
 	clear()
@@ -52,6 +59,61 @@ func _ready() -> void:
 	GameState.spirit_stones_changed.connect(_on_spirit_stones_changed)
 	if not EventBus.launcher_charge_changed.is_connected(_on_launcher_charge_changed):
 		EventBus.launcher_charge_changed.connect(_on_launcher_charge_changed)
+
+func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree() or not materials_container.is_visible_in_tree() or UIManager.is_input_blocked():
+		_reset_material_drag()
+		return
+	var pointer: int = -1
+	var pointer_position: Vector2
+	var pressed: bool = false
+	var released: bool = false
+	if event is InputEventMouseButton:
+		if event.button_index != MOUSE_BUTTON_LEFT:
+			return
+		pointer_position = event.position
+		pressed = event.pressed
+		released = not event.pressed
+	elif event is InputEventMouseMotion:
+		pointer_position = event.position
+	elif event is InputEventScreenTouch:
+		pointer = event.index
+		pointer_position = event.position
+		pressed = event.pressed
+		released = not event.pressed
+	elif event is InputEventScreenDrag:
+		pointer = event.index
+		pointer_position = event.position
+	else:
+		return
+	if pressed:
+		if _material_drag_pointer != -2 or not materials_container.get_global_rect().has_point(pointer_position):
+			return
+		_material_drag_pointer = pointer
+		_material_drag_start = pointer_position
+		_material_drag_start_scroll = materials_container.scroll_horizontal
+		_material_drag_moved = false
+		return
+	if _material_drag_pointer != pointer:
+		return
+	if _material_drag_start.distance_to(pointer_position) >= MATERIAL_DRAG_THRESHOLD:
+		_material_drag_moved = true
+	if released:
+		_material_drag_pointer = -2
+		# Keep the click guard until buttons process this release event.
+		call_deferred("_reset_material_drag")
+		return
+	if _material_drag_moved:
+		materials_container.scroll_horizontal = _material_drag_start_scroll + roundi(
+			_material_drag_start.x - pointer_position.x
+		)
+		get_viewport().set_input_as_handled()
+
+
+func _reset_material_drag() -> void:
+	_material_drag_pointer = -2
+	_material_drag_moved = false
+
 
 func show_item(item_data: Dictionary, grid_pos: Vector2i = Vector2i(-1, -1)) -> void:
 	if item_data.is_empty():
@@ -136,7 +198,7 @@ func _refresh_materials() -> void:
 	if state == CraftingService.TableState.READY:
 		_stop_countdown_timer()
 		_hide_speedup_button()
-		status_label.text = "制作完成！点击取出"
+		status_label.text = "制作完成！再次点击制作台取出"
 		status_label.show()
 		materials_label.hide()
 		materials_container.hide()
@@ -175,7 +237,7 @@ func _populate_materials(items: Array) -> void:
 	var matching_recipe: Dictionary = _find_order_recipe(items)
 	if matching_recipe.is_empty():
 		return
-	_show_output_slot_for_recipe(matching_recipe, "candidate_recipe")
+	_show_output_slot_for_recipe(matching_recipe)
 	var stored_counts: Dictionary = _count_stored_item_ids(items)
 	var has_ghost_material: bool = false
 	for ingredient_variant in matching_recipe.get("ingredients", []):
@@ -191,172 +253,33 @@ func _populate_materials(items: Array) -> void:
 	_set_output_slot_ghost(has_ghost_material)
 
 func _count_stored_item_ids(items: Array) -> Dictionary:
-	var counts: Dictionary = {}
-	for item_variant in items:
-		var item: Dictionary = item_variant as Dictionary
-		var item_id: int = int(item.get("id", 0))
-		counts[item_id] = int(counts.get(item_id, 0)) + 1
-	return counts
+	return RecipeHints._count_stored_item_ids(items)
 
 func _count_board_available_item_ids() -> Dictionary:
-	return GridManager.get_inventory_item_counts(false, false)
+	return RecipeHints._count_board_available_item_ids()
 
 
 func _clear_material_slots() -> void:
+	_reset_material_drag()
 	materials_container.scroll_horizontal = 0
 	for child in materials_row.get_children():
 		materials_row.remove_child(child)
 		child.queue_free()
 
-func _count_recipe_ingredients(ingredients: Array) -> Dictionary:
-	var counts: Dictionary = {}
-	for ingredient_variant in ingredients:
-		var ingredient_id: int = int(ingredient_variant)
-		counts[ingredient_id] = int(counts.get(ingredient_id, 0)) + 1
-	return counts
-
-func _get_active_order_item_ids() -> Dictionary:
-	var order_item_ids: Dictionary = {}
-	for item_id_variant: Variant in _get_active_order_item_counts().keys():
-		order_item_ids[item_id_variant] = true
-	return order_item_ids
-
 func _get_active_order_item_counts() -> Dictionary:
-	var order_item_counts: Dictionary = {}
-	for order_index: int in range(GameState.meridian_acupoints.size()):
-		var order_variant: Variant = GameState.meridian_acupoints[order_index]
-		var order: Dictionary = order_variant as Dictionary
-		if bool(order.get("completed", false)):
-			continue
-		var configured: Array = order.get("item_ids", []) as Array
-		if configured.is_empty():
-			configured = order.get("items", []) as Array
-		for item_variant: Variant in configured:
-			var item_id: int = (
-				int((item_variant as Dictionary).get("item_id", 0))
-				if item_variant is Dictionary
-				else int(item_variant)
-			)
-			if item_id > 0:
-				order_item_counts[item_id] = int(order_item_counts.get(item_id, 0)) + 1
-	return order_item_counts
+	return RecipeHints._get_active_order_item_counts()
 
 func _get_order_recipe_demand_counts(order_counts: Dictionary, board_counts: Dictionary) -> Dictionary:
-	var demand_counts: Dictionary = {}
-	var expanded_counts: Dictionary = {}
-	for item_id_variant: Variant in order_counts.keys():
-		_expand_order_recipe_demand(int(item_id_variant), int(order_counts[item_id_variant]),
-			demand_counts, expanded_counts, board_counts, {})
-	return demand_counts
+	return RecipeHints._get_order_recipe_demand_counts(order_counts, board_counts)
 
-func _expand_order_recipe_demand(item_id: int, count: int, demand_counts: Dictionary,
-		expanded_counts: Dictionary, board_counts: Dictionary, path: Dictionary) -> void:
-	if item_id <= 0 or count <= 0 or path.has(item_id):
-		return
-	demand_counts[item_id] = int(demand_counts.get(item_id, 0)) + count
-	var shortage: int = maxi(0, int(demand_counts[item_id]) - int(board_counts.get(item_id, 0)))
-	var to_expand: int = shortage - int(expanded_counts.get(item_id, 0))
-	if to_expand <= 0:
-		return
-	expanded_counts[item_id] = shortage
-	var ingredient_demands: Dictionary = {}
-	for recipe_variant: Variant in ConfigDatabase.get_recipes_for_result(item_id):
-		if not recipe_variant is Dictionary:
-			continue
-		var recipe_counts: Dictionary = _count_recipe_ingredients((recipe_variant as Dictionary).get("ingredients", []))
-		for ingredient_id_variant: Variant in recipe_counts.keys():
-			var ingredient_id: int = int(ingredient_id_variant)
-			ingredient_demands[ingredient_id] = maxi(
-				int(ingredient_demands.get(ingredient_id, 0)), int(recipe_counts[ingredient_id]))
-	var next_path: Dictionary = path.duplicate()
-	next_path[item_id] = true
-	for ingredient_id_variant: Variant in ingredient_demands.keys():
-		_expand_order_recipe_demand(int(ingredient_id_variant),
-			to_expand * int(ingredient_demands[ingredient_id_variant]), demand_counts,
-			expanded_counts, board_counts, next_path)
-
-func _get_order_recipe_target_ids() -> Dictionary:
-	var target_ids: Dictionary = _get_active_order_item_ids()
-	var visited_item_ids: Dictionary = {}
-	for item_id_variant: Variant in target_ids.keys():
-		_collect_order_recipe_target_ids(
-			int(item_id_variant), target_ids, visited_item_ids
-		)
-	return target_ids
-
-func _collect_order_recipe_target_ids(
-	item_id: int,
-	target_ids: Dictionary,
-	visited_item_ids: Dictionary
-) -> void:
-	if item_id <= 0 or visited_item_ids.has(item_id):
-		return
-	visited_item_ids[item_id] = true
-	var result_recipes: Array = ConfigDatabase.get_recipes_for_result(item_id)
-	for recipe_variant: Variant in result_recipes:
-		if not recipe_variant is Dictionary:
-			continue
-		var recipe: Dictionary = recipe_variant as Dictionary
-		for ingredient_variant: Variant in recipe.get("ingredients", []):
-			var ingredient_id: int = int(ingredient_variant)
-			var ingredient_recipes: Array = ConfigDatabase.get_recipes_for_result(ingredient_id)
-			if ingredient_recipes.is_empty():
-				continue
-			target_ids[ingredient_id] = true
-			_collect_order_recipe_target_ids(
-				ingredient_id, target_ids, visited_item_ids
-			)
 
 func _find_order_recipe(items: Array) -> Dictionary:
-	var active_order_counts: Dictionary = _get_active_order_item_counts()
-	var active_order_item_ids: Dictionary = {}
-	for item_id_variant: Variant in active_order_counts.keys():
-		active_order_item_ids[item_id_variant] = true
-	var order_target_ids: Dictionary = _get_order_recipe_target_ids()
-	var has_order_filter: bool = not order_target_ids.is_empty()
-	var stored_counts: Dictionary = _count_stored_item_ids(items)
-	var board_counts: Dictionary = _count_board_available_item_ids()
-	var demand_counts: Dictionary = _get_order_recipe_demand_counts(active_order_counts, board_counts)
-	var best_recipe: Dictionary = {}
-	var best_order_priority: int = 2147483647
-	var fewest_missing: int = 2147483647
-	for recipe_variant in _current_recipes:
-		var recipe: Dictionary = recipe_variant as Dictionary
-		var result_id: int = int(recipe.get("result", 0))
-		if has_order_filter and not order_target_ids.has(result_id):
-			continue
-		if int(board_counts.get(result_id, 0)) >= maxi(1, int(demand_counts.get(result_id, 0))):
-			continue
-		var recipe_ingredients: Array = recipe.get("ingredients", [])
-		var required_counts: Dictionary = _count_recipe_ingredients(recipe_ingredients)
-		var compatible: bool = true
-		for item_id_variant in stored_counts.keys():
-			var item_id: int = int(item_id_variant)
-			if int(stored_counts[item_id]) > int(required_counts.get(item_id, 0)):
-				compatible = false
-				break
-		if not compatible:
-			continue
-		var available_counts: Dictionary = stored_counts.duplicate()
-		for board_item_id_variant in board_counts.keys():
-			var board_item_id: int = int(board_item_id_variant)
-			available_counts[board_item_id] = int(available_counts.get(board_item_id, 0)) + int(board_counts[board_item_id])
-		var missing: int = 0
-		for ingredient_variant in recipe_ingredients:
-			var ingredient_id: int = int(ingredient_variant)
-			var available: int = int(available_counts.get(ingredient_id, 0))
-			if available > 0:
-				available_counts[ingredient_id] = available - 1
-			else:
-				missing += 1
-		var order_priority: int = 0
-		if has_order_filter and not active_order_item_ids.has(result_id):
-			order_priority = 1
-		if order_priority < best_order_priority or (order_priority == best_order_priority and missing < fewest_missing):
-			best_order_priority = order_priority
-			fewest_missing = missing
-			best_recipe = recipe
-	return best_recipe
+	if _current_item_data.is_empty():
+		return RecipeHints.choose_recipe(items, _current_recipes)
+	var assignments: Array[Dictionary] = RecipeHints.build_assignments(_current_item_data, items)
+	var recipe: Dictionary = RecipeHints.get_table_recipe(_current_item_data, assignments)
+	return recipe
+
 
 func _build_material_icon(item_data: Dictionary, uid: int, ghost: bool = false) -> ItemWidget:
 	var entry: ItemWidget = preload("res://scenes/ui/common/ItemWidget.tscn").instantiate() as ItemWidget
@@ -367,22 +290,28 @@ func _build_material_icon(item_data: Dictionary, uid: int, ghost: bool = false) 
 		entry.modulate = Color(1, 1, 1, PREVIEW_GHOST_ALPHA)
 		entry.self_modulate = Color.WHITE
 
-	if ghost:
-		entry.pressed.connect(func(): material_source_requested.emit(int(item_data.get("id", 0))))
-	else:
-		entry.pressed.connect(func(): material_clicked.emit(uid, int(item_data.get("id", 0))))
+	entry.pressed.connect(_on_material_icon_pressed.bind(uid, int(item_data.get("id", 0)), ghost))
 	entry.call_deferred("_update_visuals")
 	return entry
+
+func _on_material_icon_pressed(uid: int, item_id: int, ghost: bool) -> void:
+	if _material_drag_moved or UIManager.is_input_blocked():
+		return
+	if ghost:
+		material_source_requested.emit(item_id)
+	else:
+		material_clicked.emit(uid, item_id)
+
 
 func _refresh_output_slot() -> void:
 	var recipe: Dictionary = CraftingService.get_current_recipe(_current_item_data)
 	var result_id: int = int(recipe.get("result", _current_item_data.get("_craft_result_id", 0)))
-	_show_output_slot_for_result(result_id, "active_recipe")
+	_show_output_slot_for_result(result_id)
 
-func _show_output_slot_for_recipe(recipe: Dictionary, reason: String) -> void:
-	_show_output_slot_for_result(int(recipe.get("result", 0)), reason)
+func _show_output_slot_for_recipe(recipe: Dictionary) -> void:
+	_show_output_slot_for_result(int(recipe.get("result", 0)))
 
-func _show_output_slot_for_result(result_id: int, _reason: String) -> void:
+func _show_output_slot_for_result(result_id: int) -> void:
 	if result_id <= 0:
 		_hide_output_slot()
 		return
@@ -540,6 +469,13 @@ func _on_table_state_changed(table_item: Dictionary, _state: int) -> void:
 	var current_uid: int = int(_current_item_data.get("_uid", 0))
 	var changed_uid: int = int(table_item.get("_uid", -1))
 	if current_uid <= 0 or current_uid != changed_uid:
+		# Another table's output can satisfy the currently previewed recipe.
+		# Re-rank candidates while the selected table is still loading materials.
+		var current_state: int = int(_current_item_data.get("_craft_state", CraftingService.TableState.IDLE))
+		if int(_current_item_data.get("type", 0)) == Constants.ItemType.CRAFTING and (
+			current_state == CraftingService.TableState.IDLE or current_state == CraftingService.TableState.HAS_ITEMS
+		):
+			_refresh_materials()
 		return
 	# The signal payload can be a stale dictionary copy. Refresh from the grid
 	# before reading _craft_state/_craft_end_time, otherwise the panel may stop

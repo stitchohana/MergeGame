@@ -73,6 +73,7 @@ func _on_cultivation_exp_changed(current_exp: int, exp_to_next: int) -> void:
 
 
 func _on_cultivation_stage_changed(_level: int, stage_name: String) -> void:
+	_refresh_activity_lists()
 	realm_label.text = stage_name
 	_update_exp_display(CultivationService.current_exp, CultivationService.get_exp_to_next_level())
 	_refresh_breakthrough_btn()
@@ -116,6 +117,12 @@ func _on_state_loaded(state: Dictionary) -> void:
 	if state.has("home_meridian_progress"):
 		_home_progress = state.home_meridian_progress
 		GameState.home_meridian_progress = _home_progress.duplicate(true)
+	# A home-state refresh must also replace the cached EXP used by the
+	# breakthrough button. Sync progress first so EXP signals see the current
+	# circulation gate rather than an older, still-ready circulation.
+	var cultivation: Dictionary = state.get("cultivation", {})
+	if not cultivation.is_empty():
+		CultivationService.deserialize(cultivation)
 	_refresh_activity_lists()
 	_refresh_cultivation_info()
 	_refresh_display()

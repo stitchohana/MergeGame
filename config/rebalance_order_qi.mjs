@@ -72,15 +72,6 @@ function updateReward219(sheet) {
   let orderRewardRow = -1;
   for (let row = 1; row < rows.length; row += 1) {
     const rewardId = Number(rows[row][rewardColumn]);
-    if ([1, 2, ORDER_REWARD_ID].includes(rewardId)) {
-      // These rewards are token-only. Clear the legacy numeric placeholder
-      // that some XLSX exports left in the item column.
-      sheet.getCell(row, itemColumn).values = [[""]];
-    }
-    if (rewardId >= 301 && rewardId <= 313) {
-      // Breakthrough rewards are item-only; clear the matching token placeholder.
-      sheet.getCell(row, tokenColumn).values = [[""]];
-    }
     if (rewardId === ORDER_REWARD_ID) {
       orderRewardRow = row;
       sheet.getCell(row, tokenColumn).values = [[`2:${ORDER_QI_PER_VALUE}`]];

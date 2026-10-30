@@ -1,21 +1,22 @@
 import type { ActivityDef, GameState, RewardConfig } from "../storage/interface";
+import { activitiesUnlocked } from "./activity_access";
 
-export interface CollectionDef { collection_id: number; activity_id: number; name: string }
+export interface CollectionDef { collection_id: number; activity_id: number; name: string; duplicate_points_by_star?: number[]; exchange_pack_id?: number; exchange_cost?: number }
 export interface CardSetDef { set_id: number; collection_id: number; name: string; rewards: RewardConfig }
 export interface CardDef { card_id: number; set_id: number; name: string; star: number; icon: string }
 export interface PackDef { pack_id: number; collection_id: number; name: string; star: number; icon: string; card_count: number; normal_weights: number[] }
 export interface SourceReward { collection_id: number; source_type: "order" | "circulation"; source_id?: number; min_value: number; pack_id: number; count: number; enabled: boolean }
 export interface CardCollectionConfig { collections: CollectionDef[]; card_sets: CardSetDef[]; cards: CardDef[]; packs: PackDef[]; source_rewards: SourceReward[] }
-export interface DrawnCard { card_id: number; star: number; is_new: boolean; count: number; gained?: number }
-export interface CardOperationResult { ok: true; collection_id: number; pack_id?: number; set_id?: number; cards?: DrawnCard[]; rewards?: RewardConfig; opened_packs?: number; completed_sets?: { collection_id: number; set_id: number }[] }
+export interface DrawnCard { card_id: number; star: number; is_new: boolean; count: number; gained?: number; duplicate_points?: number }
+export interface CardOperationResult { ok: true; collection_id: number; pack_id?: number; set_id?: number; cards?: DrawnCard[]; rewards?: RewardConfig; opened_packs?: number; completed_sets?: { collection_id: number; set_id: number }[]; duplicate_points_gained?: number; exchanged?: boolean; points_spent?: number }
 export interface CollectionProgress {
-  /** Legacy counters, migrated to pending_rewards; never used for new awards. */
-  packs: Record<number, number>;
   cards: Record<number, number>;
   claimed_sets: number[];
   opened_count: number;
+  duplicate_points: number;
+  total_duplicate_points: number;
+  exchange_count: number;
   last_open?: CardOperationResult;
-  recent_operations: { request_id: string; signature: string; result: CardOperationResult }[];
 }
 type Failure = { ok: false; reason: string };
 const positive = (value: number) => Number.isSafeInteger(value) && value > 0;
@@ -37,7 +38,15 @@ export class CardCollectionService {
       const ids = rows.map(row => (row as unknown as Record<string, number>)[key]);
       require(ids.every(positive) && new Set(ids).size === ids.length, `invalid/duplicate ${key}`);
     }
-    for (const c of collections) require(this.activities.some(a => a.id === c.activity_id), "unknown activity");
+    for (const c of collections) {
+      require(this.activities.some(a => a.id === c.activity_id), "unknown activity");
+      c.duplicate_points_by_star ??= [1, 2, 3, 4, 5];
+      require(Array.isArray(c.duplicate_points_by_star) && c.duplicate_points_by_star.length === 5 && c.duplicate_points_by_star.every(positive), "invalid duplicate points");
+      c.exchange_cost ??= 200;
+      c.exchange_pack_id ??= packs.find(p => p.collection_id === c.collection_id && p.star === 5)?.pack_id;
+      require(positive(c.exchange_cost), "invalid exchange cost");
+      if (c.exchange_pack_id !== undefined) require(packs.some(p => p.pack_id === c.exchange_pack_id && p.collection_id === c.collection_id && p.star === 5), "invalid exchange pack");
+    }
     for (const s of card_sets) {
       require(collections.some(c => c.collection_id === s.collection_id), "unknown collection");
       require(cards.some(c => c.set_id === s.set_id), "empty set");
@@ -102,12 +111,12 @@ export class CardCollectionService {
   }
 
   awardPack(state: GameState, packId: number, count: number): void {
+    if (!activitiesUnlocked(state)) return;
     const pack = this.config.packs.find(p => p.pack_id === packId);
     if (!pack || !positive(count)) throw new Error("card_collection: invalid pack reward");
     const item = this.packItems.get(packId);
-    state.pending_rewards ??= [];
     for (let i = 0; i < count; i++) {
-      state.uid_counter = (state.uid_counter ?? 0) + 1;
+      state.uid_counter = state.uid_counter + 1;
       state.pending_rewards.push({ uid: state.uid_counter, id: item?.id ?? pack.pack_id, name: item?.name ?? pack.name, kind: "card_pack", collection_id: pack.collection_id, pack_id: packId, icon: item?.icon || pack.icon });
     }
   }
@@ -120,15 +129,17 @@ export class CardCollectionService {
 
   ensureProgress(state: GameState): Record<number, CollectionProgress> {
     state.card_collection_progress ??= {};
-    for (const c of this.config.collections) state.card_collection_progress[c.collection_id] ??= { packs: {}, cards: {}, claimed_sets: [], opened_count: 0, recent_operations: [] };
+    for (const c of this.config.collections) state.card_collection_progress[c.collection_id] ??= { cards: {}, claimed_sets: [], opened_count: 0, duplicate_points: 0, total_duplicate_points: 0, exchange_count: 0 };
     return state.card_collection_progress;
   }
 
   publicProgress(state: GameState) {
-    return Object.fromEntries(Object.entries(this.ensureProgress(state)).map(([id, p]) => [id, { revision: state.storage_revision ?? 0, cards: p.cards, claimed_sets: p.claimed_sets, opened_count: p.opened_count, last_open: p.last_open }]));
+    if (!activitiesUnlocked(state)) return {};
+    return Object.fromEntries(Object.entries(this.ensureProgress(state)).map(([id, p]) => [id, { revision: state.storage_revision, cards: p.cards, claimed_sets: p.claimed_sets, opened_count: p.opened_count, last_open: p.last_open, duplicate_points: p.duplicate_points, total_duplicate_points: p.total_duplicate_points, exchange_count: p.exchange_count }]));
   }
 
   awardSource(state: GameState, source: SourceReward["source_type"], sourceId: number, value: number): void {
+    if (!activitiesUnlocked(state)) return;
     for (const rule of this.sourceRules(source, sourceId, value)) {
       this.awardPack(state, rule.pack_id, rule.count);
     }
@@ -143,37 +154,6 @@ export class CardCollectionService {
     const value = this.random();
     if (!Number.isFinite(value) || value < 0 || value >= 1) throw new Error("invalid_random_value");
     return value;
-  }
-
-  private replay(p: CollectionProgress, requestId: string, signature: string): CardOperationResult | Failure | undefined {
-    const previous = p.recent_operations.find(r => r.request_id === requestId);
-    return previous ? (previous.signature === signature ? structuredClone(previous.result) : { ok: false, reason: "request_mismatch" }) : undefined;
-  }
-
-  private remember(p: CollectionProgress, requestId: string, signature: string, result: CardOperationResult): CardOperationResult {
-    p.recent_operations.push({ request_id: requestId, signature, result: structuredClone(result) });
-    p.recent_operations = p.recent_operations.slice(-32);
-    return result;
-  }
-
-  /** Convert the former per-collection counters into durable pending reward entries once. */
-  migratePacksToPending(state: GameState): boolean {
-    const progress = this.ensureProgress(state);
-    let changed = false;
-    state.pending_rewards ??= [];
-    for (const c of this.config.collections) {
-      const p = progress[c.collection_id];
-      for (const [packKey, rawCount] of Object.entries(p.packs ?? {})) {
-        const count = Number(rawCount);
-        const packId = Number(packKey);
-        const pack = this.config.packs.find(item => item.collection_id === c.collection_id && item.pack_id === packId);
-        if (!pack || !positive(count)) continue;
-        this.awardPack(state, pack.pack_id, count);
-        p.packs[packId] = 0;
-        changed = true;
-      }
-    }
-    return changed;
   }
 
   private drawPack(collectionId: number, pack: PackDef, p: CollectionProgress): DrawnCard[] {
@@ -191,12 +171,16 @@ export class CardCollectionService {
     }
     return drawn.map(card => {
       const count = (p.cards[card.card_id] ?? 0) + 1;
+      const points = count > 1 ? this.config.collections.find(c => c.collection_id === collectionId)!.duplicate_points_by_star![card.star - 1] : 0;
+      p.duplicate_points += points;
+      p.total_duplicate_points += points;
       p.cards[card.card_id] = count;
-      return { card_id: card.card_id, star: card.star, is_new: count === 1, count };
+      return { card_id: card.card_id, star: card.star, is_new: count === 1, count, duplicate_points: points };
     });
   }
 
   openPending(state: GameState, collectionId: number, selectedUid: number, openAll: boolean, requestId: string, expectedOpened: number): CardOperationResult | Failure {
+    if (!activitiesUnlocked(state)) return { ok: false, reason: "activity_locked" };
     if (!requestId?.trim() || requestId.length > 100 || !positive(selectedUid) || !Number.isSafeInteger(expectedOpened) || expectedOpened < 0) return { ok: false, reason: "invalid_params" };
     const p = this.ensureProgress(state)[collectionId];
     if (!p) return { ok: false, reason: "pack_not_found" };
@@ -205,7 +189,7 @@ export class CardCollectionService {
     const previous = receipts.find(r => r.request_id === requestId);
     if (previous) return previous.signature === signature ? structuredClone(previous.result) : { ok: false, reason: "request_mismatch" };
     if (expectedOpened !== p.opened_count) return { ok: false, reason: "state_conflict" };
-    const pending = state.pending_rewards ?? [];
+    const pending = state.pending_rewards;
     // Even all-open is anchored to the selected UID, so an evicted retry cannot spend newly awarded packs.
     if (!pending.some(r => r.kind === "card_pack" && r.uid === selectedUid && r.collection_id === collectionId)) return { ok: false, reason: "pack_not_found" };
     const candidates = pending.filter(r => r.kind === "card_pack" && (openAll || r.uid === selectedUid));
@@ -224,7 +208,7 @@ export class CardCollectionService {
       const cards = this.drawPack(pack.collection_id, pack, current);
       for (const card of cards) {
         const prior = aggregated.get(card.card_id);
-        aggregated.set(card.card_id, { ...card, gained: (prior?.gained ?? 0) + 1, is_new: card.is_new || !!prior?.is_new });
+        aggregated.set(card.card_id, { ...card, gained: (prior?.gained ?? 0) + 1, is_new: card.is_new || !!prior?.is_new, duplicate_points: (prior?.duplicate_points ?? 0) + (card.duplicate_points ?? 0) });
       }
       current.opened_count++;
     });
@@ -248,6 +232,7 @@ export class CardCollectionService {
       rewards = this.applySetRewards(rewardedState, { tokens: [...tokens].map(([token, amount]) => ({ token, amount })) });
     }
     const result: CardOperationResult = { ok: true, collection_id: collectionId, pack_id: packs.length === 1 ? packs[0].pack_id : undefined, cards: [...aggregated.values()], opened_packs: packs.length,
+      duplicate_points_gained: [...aggregated.values()].reduce((sum, card) => sum + (card.duplicate_points ?? 0), 0),
       ...(completedSets.length ? { rewards, completed_sets: completedSets.map(set => ({ collection_id: set.collection_id, set_id: set.set_id })) } : {}) };
     for (const pack of packs) progress[pack.collection_id].last_open = result;
     if (rewardedState) {
@@ -264,19 +249,33 @@ export class CardCollectionService {
     return result;
   }
 
-  claim(state: GameState, collectionId: number, setId: number, requestId: string, apply: (reward: RewardConfig) => RewardConfig): CardOperationResult | Failure {
-    if (!requestId || requestId.length > 100) return { ok: false, reason: "invalid_params" };
-    const set = this.config.card_sets.find(s => s.set_id === setId && s.collection_id === collectionId);
-    if (!set) return { ok: false, reason: "set_not_found" };
+  exchange(state: GameState, collectionId: number, requestId: string, expectedExchange: number): CardOperationResult | Failure {
+    if (!activitiesUnlocked(state)) return { ok: false, reason: "activity_locked" };
+    if (!positive(collectionId) || !requestId?.trim() || requestId.length > 100 || !Number.isSafeInteger(expectedExchange) || expectedExchange < 0) return { ok: false, reason: "invalid_params" };
+    const collection = this.config.collections.find(c => c.collection_id === collectionId);
+    if (!collection?.exchange_pack_id) return { ok: false, reason: "exchange_unavailable" };
     const p = this.ensureProgress(state)[collectionId];
-    const signature = `claim:${setId}`;
-    const replay = this.replay(p, requestId, signature);
-    if (replay) return replay;
+    const signature = `exchange:${collectionId}:${expectedExchange}`;
+    const receipts = state.card_pack_operations ?? [];
+    const previous = receipts.find(r => r.request_id === requestId);
+    if (previous) return previous.signature === signature ? structuredClone(previous.result) : { ok: false, reason: "request_mismatch" };
     if (!this.isActive(collectionId)) return { ok: false, reason: "activity_inactive" };
-    if (p.claimed_sets.includes(setId)) return { ok: false, reason: "already_claimed" };
-    if (!this.config.cards.filter(c => c.set_id === setId).every(c => p.cards[c.card_id] > 0)) return { ok: false, reason: "set_incomplete" };
-    const rewards = apply(set.rewards);
-    p.claimed_sets.push(setId); state.version++;
-    return this.remember(p, requestId, signature, { ok: true, collection_id: collectionId, set_id: setId, rewards });
+    if (expectedExchange !== p.exchange_count) return { ok: false, reason: "state_conflict" };
+    const cost = collection.exchange_cost!;
+    if (p.duplicate_points! < cost) return { ok: false, reason: "insufficient_points" };
+    // Queue insertion, points and replay marker commit together; awarding failure leaves the original intact.
+    const working = structuredClone(state);
+    const next = working.card_collection_progress![collectionId];
+    next.duplicate_points! -= cost;
+    next.exchange_count!++;
+    this.awardPack(working, collection.exchange_pack_id, 1);
+    const result: CardOperationResult = { ok: true, collection_id: collectionId, pack_id: collection.exchange_pack_id, exchanged: true, points_spent: cost };
+    working.card_pack_operations = [...receipts, { request_id: requestId, signature, result: structuredClone(result) }].slice(-32);
+    working.version++;
+    const originalProgress = state.card_collection_progress!;
+    Object.assign(p, next);
+    Object.assign(state, working);
+    state.card_collection_progress = originalProgress;
+    return result;
   }
 }

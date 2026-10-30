@@ -3,7 +3,16 @@
     {
       "collection_id": 1,
       "activity_id": 5,
-      "name": "万象仙册"
+      "name": "万象仙册",
+      "duplicate_points_by_star": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "exchange_pack_id": 5,
+      "exchange_cost": 200
     }
   ],
   "card_sets": [
@@ -32,11 +41,11 @@
         "tokens": [
           {
             "token": 3,
-            "amount": 500
+            "amount": 400
           },
           {
             "token": 1,
-            "amount": 2000
+            "amount": 1500
           }
         ]
       }
@@ -49,11 +58,164 @@
         "tokens": [
           {
             "token": 3,
-            "amount": 800
+            "amount": 500
+          },
+          {
+            "token": 1,
+            "amount": 2000
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 4,
+      "collection_id": 1,
+      "name": "灵境初探",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 600
+          },
+          {
+            "token": 1,
+            "amount": 2500
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 5,
+      "collection_id": 1,
+      "name": "灵脉寻踪",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 700
           },
           {
             "token": 1,
             "amount": 3000
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 6,
+      "collection_id": 1,
+      "name": "云海秘藏",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 800
+          },
+          {
+            "token": 1,
+            "amount": 3500
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 7,
+      "collection_id": 1,
+      "name": "太虚奇境",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 900
+          },
+          {
+            "token": 1,
+            "amount": 4000
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 8,
+      "collection_id": 1,
+      "name": "星河古域",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 1000
+          },
+          {
+            "token": 1,
+            "amount": 4500
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 9,
+      "collection_id": 1,
+      "name": "万古仙痕",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 1100
+          },
+          {
+            "token": 1,
+            "amount": 5000
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 10,
+      "collection_id": 1,
+      "name": "天门神藏",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 1200
+          },
+          {
+            "token": 1,
+            "amount": 5500
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 11,
+      "collection_id": 1,
+      "name": "混沌秘录",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 1300
+          },
+          {
+            "token": 1,
+            "amount": 6000
+          }
+        ]
+      }
+    },
+    {
+      "set_id": 12,
+      "collection_id": 1,
+      "name": "大道真章",
+      "rewards": {
+        "tokens": [
+          {
+            "token": 3,
+            "amount": 1400
+          },
+          {
+            "token": 1,
+            "amount": 6500
           }
         ]
       }
@@ -85,14 +247,42 @@
       "card_id": 104,
       "set_id": 1,
       "name": "玄水蛟龙",
-      "star": 4,
+      "star": 1,
       "icon": ""
     },
     {
       "card_id": 105,
       "set_id": 1,
       "name": "九尾天狐",
-      "star": 5,
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 116,
+      "set_id": 1,
+      "name": "山海灵踪·灵印6",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 117,
+      "set_id": 1,
+      "name": "山海灵踪·灵印7",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 118,
+      "set_id": 1,
+      "name": "山海灵踪·灵印8",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 119,
+      "set_id": 1,
+      "name": "山海灵踪·灵印9",
+      "star": 3,
       "icon": ""
     },
     {
@@ -120,14 +310,42 @@
       "card_id": 109,
       "set_id": 2,
       "name": "紫霄剑",
-      "star": 4,
+      "star": 1,
       "icon": ""
     },
     {
       "card_id": 110,
       "set_id": 2,
       "name": "太虚仙镜",
-      "star": 5,
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 120,
+      "set_id": 2,
+      "name": "洞天仙物·灵印6",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 121,
+      "set_id": 2,
+      "name": "洞天仙物·灵印7",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 122,
+      "set_id": 2,
+      "name": "洞天仙物·灵印8",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 123,
+      "set_id": 2,
+      "name": "洞天仙物·灵印9",
+      "star": 3,
       "icon": ""
     },
     {
@@ -155,13 +373,608 @@
       "card_id": 114,
       "set_id": 3,
       "name": "星河宫阙",
-      "star": 4,
+      "star": 2,
       "icon": ""
     },
     {
       "card_id": 115,
       "set_id": 3,
       "name": "九霄天门",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 124,
+      "set_id": 3,
+      "name": "九霄奇珍·灵印6",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 125,
+      "set_id": 3,
+      "name": "九霄奇珍·灵印7",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 126,
+      "set_id": 3,
+      "name": "九霄奇珍·灵印8",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 127,
+      "set_id": 3,
+      "name": "九霄奇珍·灵印9",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 128,
+      "set_id": 4,
+      "name": "灵境初探·灵印1",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 129,
+      "set_id": 4,
+      "name": "灵境初探·灵印2",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 130,
+      "set_id": 4,
+      "name": "灵境初探·灵印3",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 131,
+      "set_id": 4,
+      "name": "灵境初探·灵印4",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 132,
+      "set_id": 4,
+      "name": "灵境初探·灵印5",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 133,
+      "set_id": 4,
+      "name": "灵境初探·灵印6",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 134,
+      "set_id": 4,
+      "name": "灵境初探·灵印7",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 135,
+      "set_id": 4,
+      "name": "灵境初探·灵印8",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 136,
+      "set_id": 4,
+      "name": "灵境初探·灵印9",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 137,
+      "set_id": 5,
+      "name": "灵脉寻踪·灵印1",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 138,
+      "set_id": 5,
+      "name": "灵脉寻踪·灵印2",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 139,
+      "set_id": 5,
+      "name": "灵脉寻踪·灵印3",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 140,
+      "set_id": 5,
+      "name": "灵脉寻踪·灵印4",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 141,
+      "set_id": 5,
+      "name": "灵脉寻踪·灵印5",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 142,
+      "set_id": 5,
+      "name": "灵脉寻踪·灵印6",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 143,
+      "set_id": 5,
+      "name": "灵脉寻踪·灵印7",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 144,
+      "set_id": 5,
+      "name": "灵脉寻踪·灵印8",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 145,
+      "set_id": 5,
+      "name": "灵脉寻踪·灵印9",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 146,
+      "set_id": 6,
+      "name": "云海秘藏·灵印1",
+      "star": 1,
+      "icon": ""
+    },
+    {
+      "card_id": 147,
+      "set_id": 6,
+      "name": "云海秘藏·灵印2",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 148,
+      "set_id": 6,
+      "name": "云海秘藏·灵印3",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 149,
+      "set_id": 6,
+      "name": "云海秘藏·灵印4",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 150,
+      "set_id": 6,
+      "name": "云海秘藏·灵印5",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 151,
+      "set_id": 6,
+      "name": "云海秘藏·灵印6",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 152,
+      "set_id": 6,
+      "name": "云海秘藏·灵印7",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 153,
+      "set_id": 6,
+      "name": "云海秘藏·灵印8",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 154,
+      "set_id": 6,
+      "name": "云海秘藏·灵印9",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 155,
+      "set_id": 7,
+      "name": "太虚奇境·灵印1",
+      "star": 2,
+      "icon": ""
+    },
+    {
+      "card_id": 156,
+      "set_id": 7,
+      "name": "太虚奇境·灵印2",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 157,
+      "set_id": 7,
+      "name": "太虚奇境·灵印3",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 158,
+      "set_id": 7,
+      "name": "太虚奇境·灵印4",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 159,
+      "set_id": 7,
+      "name": "太虚奇境·灵印5",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 160,
+      "set_id": 7,
+      "name": "太虚奇境·灵印6",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 161,
+      "set_id": 7,
+      "name": "太虚奇境·灵印7",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 162,
+      "set_id": 7,
+      "name": "太虚奇境·灵印8",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 163,
+      "set_id": 7,
+      "name": "太虚奇境·灵印9",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 164,
+      "set_id": 8,
+      "name": "星河古域·灵印1",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 165,
+      "set_id": 8,
+      "name": "星河古域·灵印2",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 166,
+      "set_id": 8,
+      "name": "星河古域·灵印3",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 167,
+      "set_id": 8,
+      "name": "星河古域·灵印4",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 168,
+      "set_id": 8,
+      "name": "星河古域·灵印5",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 169,
+      "set_id": 8,
+      "name": "星河古域·灵印6",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 170,
+      "set_id": 8,
+      "name": "星河古域·灵印7",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 171,
+      "set_id": 8,
+      "name": "星河古域·灵印8",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 172,
+      "set_id": 8,
+      "name": "星河古域·灵印9",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 173,
+      "set_id": 9,
+      "name": "万古仙痕·灵印1",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 174,
+      "set_id": 9,
+      "name": "万古仙痕·灵印2",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 175,
+      "set_id": 9,
+      "name": "万古仙痕·灵印3",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 176,
+      "set_id": 9,
+      "name": "万古仙痕·灵印4",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 177,
+      "set_id": 9,
+      "name": "万古仙痕·灵印5",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 178,
+      "set_id": 9,
+      "name": "万古仙痕·灵印6",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 179,
+      "set_id": 9,
+      "name": "万古仙痕·灵印7",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 180,
+      "set_id": 9,
+      "name": "万古仙痕·灵印8",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 181,
+      "set_id": 9,
+      "name": "万古仙痕·灵印9",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 182,
+      "set_id": 10,
+      "name": "天门神藏·灵印1",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 183,
+      "set_id": 10,
+      "name": "天门神藏·灵印2",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 184,
+      "set_id": 10,
+      "name": "天门神藏·灵印3",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 185,
+      "set_id": 10,
+      "name": "天门神藏·灵印4",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 186,
+      "set_id": 10,
+      "name": "天门神藏·灵印5",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 187,
+      "set_id": 10,
+      "name": "天门神藏·灵印6",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 188,
+      "set_id": 10,
+      "name": "天门神藏·灵印7",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 189,
+      "set_id": 10,
+      "name": "天门神藏·灵印8",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 190,
+      "set_id": 10,
+      "name": "天门神藏·灵印9",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 191,
+      "set_id": 11,
+      "name": "混沌秘录·灵印1",
+      "star": 3,
+      "icon": ""
+    },
+    {
+      "card_id": 192,
+      "set_id": 11,
+      "name": "混沌秘录·灵印2",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 193,
+      "set_id": 11,
+      "name": "混沌秘录·灵印3",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 194,
+      "set_id": 11,
+      "name": "混沌秘录·灵印4",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 195,
+      "set_id": 11,
+      "name": "混沌秘录·灵印5",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 196,
+      "set_id": 11,
+      "name": "混沌秘录·灵印6",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 197,
+      "set_id": 11,
+      "name": "混沌秘录·灵印7",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 198,
+      "set_id": 11,
+      "name": "混沌秘录·灵印8",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 199,
+      "set_id": 11,
+      "name": "混沌秘录·灵印9",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 200,
+      "set_id": 12,
+      "name": "大道真章·灵印1",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 201,
+      "set_id": 12,
+      "name": "大道真章·灵印2",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 202,
+      "set_id": 12,
+      "name": "大道真章·灵印3",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 203,
+      "set_id": 12,
+      "name": "大道真章·灵印4",
+      "star": 4,
+      "icon": ""
+    },
+    {
+      "card_id": 204,
+      "set_id": 12,
+      "name": "大道真章·灵印5",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 205,
+      "set_id": 12,
+      "name": "大道真章·灵印6",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 206,
+      "set_id": 12,
+      "name": "大道真章·灵印7",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 207,
+      "set_id": 12,
+      "name": "大道真章·灵印8",
+      "star": 5,
+      "icon": ""
+    },
+    {
+      "card_id": 208,
+      "set_id": 12,
+      "name": "大道真章·灵印9",
       "star": 5,
       "icon": ""
     }

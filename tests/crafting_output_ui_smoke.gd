@@ -50,14 +50,14 @@ func _ready() -> void:
 	assert(detail_panel.materials_row.get_child_count() == 2)
 	var fallback_ghost: ItemWidget = detail_panel.materials_row.get_child(1) as ItemWidget
 	assert(is_equal_approx(fallback_ghost.modulate.a, 0.35))
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": RESULT_ID}]}]
+	GameState.meridian_acupoints = [{"item_ids": [RESULT_ID], "completed": false, "items": [{"item_id": RESULT_ID}]}]
 	detail_panel._refresh_materials()
 	await get_tree().process_frame
 	assert(detail_panel.materials_row.get_child_count() == 2)
 	var ghost_slot: ItemWidget = detail_panel.materials_row.get_child(1) as ItemWidget
 	assert(is_equal_approx(ghost_slot.modulate.a, 0.35))
 	assert(ghost_slot.item_data.get("id", 0) == 9002)
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27081}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27081], "completed": false, "items": [{"item_id": 27081}]}]
 	detail_panel._refresh_materials()
 	detail_panel._refresh_materials()
 	await get_tree().process_frame
@@ -124,7 +124,7 @@ func _ready() -> void:
 	var board_product: Dictionary = ConfigDatabase.get_item_data(27002).duplicate(true)
 	board_product["_uid"] = 990010
 	assert(GridManager.add_item(board_product, Vector2i(0, 0)))
-	GameState.meridian_acupoints = [{"completed": false, "items": [{"item_id": 27081}]}]
+	GameState.meridian_acupoints = [{"item_ids": [27081], "completed": false, "items": [{"item_id": 27081}]}]
 	table_data["_craft_state"] = CraftingService.TableState.HAS_ITEMS
 	table_data["_craft_recipe"] = board_recipe
 	table_data["_craft_stored"] = [{"id": 9004, "uid": 990011}]

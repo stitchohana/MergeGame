@@ -2118,7 +2118,7 @@
       "name": "青灵枝",
       "icon": "res://assets/items/icons_simple/1101.png",
       "group_id": 36,
-      "describe": "青灵枝是灵木一脉的1级材料。",
+      "describe": "青灵枝生于青篱灵田，枝梢泛着清润青光。",
       "type": 0,
       "value": 1,
       "sell_price": 3
@@ -2129,7 +2129,7 @@
       "name": "云纹木",
       "icon": "res://assets/items/icons_simple/1102.png",
       "group_id": 36,
-      "describe": "云纹木是灵木一脉的2级材料。",
+      "describe": "云纹木木纹如云，折面隐约流转浅白纹路。",
       "type": 0,
       "value": 3,
       "sell_price": 10
@@ -2140,7 +2140,7 @@
       "name": "赤霞杉",
       "icon": "res://assets/items/icons_simple/1103.png",
       "group_id": 36,
-      "describe": "赤霞杉是灵木一脉的3级材料。",
+      "describe": "赤霞杉树脂带着赤霞，针叶间常有暖光。",
       "type": 0,
       "value": 8,
       "sell_price": 25
@@ -2151,7 +2151,7 @@
       "name": "月桂灵木",
       "icon": "res://assets/items/icons_simple/1104.png",
       "group_id": 36,
-      "describe": "月桂灵木是灵木一脉的4级材料。",
+      "describe": "月桂灵木桂香清冷，木心映着淡淡月华。",
       "type": 0,
       "value": 20,
       "sell_price": 60
@@ -2162,7 +2162,7 @@
       "name": "雷击桃木",
       "icon": "res://assets/items/icons_simple/1105.png",
       "group_id": 36,
-      "describe": "雷击桃木是灵木一脉的5级材料。",
+      "describe": "雷击桃木经雷火淬过，纹理间残留细碎电芒。",
       "type": 0,
       "value": 48,
       "sell_price": 140
@@ -2173,7 +2173,7 @@
       "name": "玄冰梧桐",
       "icon": "res://assets/items/icons_simple/1106.png",
       "group_id": 36,
-      "describe": "玄冰梧桐是灵木一脉的6级材料。",
+      "describe": "玄冰梧桐枝干覆着薄霜，触之寒意直入掌心。",
       "type": 0,
       "value": 116,
       "sell_price": 300
@@ -2184,7 +2184,7 @@
       "name": "地脉沉香",
       "icon": "res://assets/items/icons_simple/1107.png",
       "group_id": 36,
-      "describe": "地脉沉香是灵木一脉的7级材料。",
+      "describe": "地脉沉香根系扎入地脉，木屑散出厚重土息。",
       "type": 0,
       "value": 279,
       "sell_price": 700
@@ -2195,7 +2195,7 @@
       "name": "星辉紫檀",
       "icon": "res://assets/items/icons_simple/1108.png",
       "group_id": 36,
-      "describe": "星辉紫檀是灵木一脉的8级材料。",
+      "describe": "星辉紫檀木色深紫，年轮间点缀着星辉。",
       "type": 0,
       "value": 670,
       "sell_price": 1500
@@ -2206,7 +2206,7 @@
       "name": "龙血古木",
       "icon": "res://assets/items/icons_simple/1109.png",
       "group_id": 36,
-      "describe": "龙血古木是灵木一脉的9级材料。",
+      "describe": "龙血古木树心凝着龙血般的赤纹，久置不褪。",
       "type": 0,
       "value": 1608,
       "sell_price": 3500
@@ -2217,7 +2217,7 @@
       "name": "凤栖神木",
       "icon": "res://assets/items/icons_simple/1110.png",
       "group_id": 36,
-      "describe": "凤栖神木是灵木一脉的10级材料。",
+      "describe": "凤栖神木枝叶舒展如凤羽，木香中带着暖霞。",
       "type": 0,
       "value": 3860,
       "sell_price": 8000
@@ -2228,7 +2228,7 @@
       "name": "九幽冥木",
       "icon": "res://assets/items/icons_simple/1111.png",
       "group_id": 36,
-      "describe": "九幽冥木是灵木一脉的11级材料。",
+      "describe": "九幽冥木色泽幽黑，断面浮起九道暗纹。",
       "type": 0,
       "value": 9264,
       "sell_price": 18000
@@ -2239,7 +2239,7 @@
       "name": "扶桑阳木",
       "icon": "res://assets/items/icons_simple/1112.png",
       "group_id": 36,
-      "describe": "扶桑阳木是灵木一脉的12级材料。",
+      "describe": "扶桑阳木木心温热，日光下透出金红光泽。",
       "type": 0,
       "value": 22234,
       "sell_price": 40000
@@ -2250,7 +2250,7 @@
       "name": "建木灵芯",
       "icon": "res://assets/items/icons_simple/1113.png",
       "group_id": 36,
-      "describe": "建木灵芯是灵木一脉的13级材料。",
+      "describe": "建木灵芯藏于古木深处，青金色木炁缓缓流动。",
       "type": 0,
       "value": 53362,
       "sell_price": 90000
@@ -2261,7 +2261,7 @@
       "name": "菩提道木",
       "icon": "res://assets/items/icons_simple/1114.png",
       "group_id": 36,
-      "describe": "菩提道木是灵木一脉的14级材料。",
+      "describe": "菩提道木枝节天然结成道纹，靠近时心神清明。",
       "type": 0,
       "value": 128069,
       "sell_price": 200000
@@ -2272,7 +2272,7 @@
       "name": "鸿蒙祖木",
       "icon": "res://assets/items/icons_simple/1115.png",
       "group_id": 36,
-      "describe": "鸿蒙祖木是灵木一脉的15级材料。",
+      "describe": "鸿蒙祖木木质厚重，树纹间交织着清浊二气。",
       "type": 0,
       "value": 307366,
       "sell_price": 450000
@@ -2283,7 +2283,7 @@
       "name": "世界树心",
       "icon": "res://assets/items/icons_simple/1116.png",
       "group_id": 36,
-      "describe": "世界树心是灵木一脉的16级材料。",
+      "describe": "世界树心晶莹如琥珀，内部仿佛容纳万象枝脉。",
       "type": 0,
       "value": 737679,
       "sell_price": 1000000
@@ -2294,7 +2294,7 @@
       "name": "松露灵脂",
       "icon": "res://assets/items/icons_simple/1201.png",
       "group_id": 37,
-      "describe": "松露灵脂是灵脂一脉的1级材料。",
+      "describe": "松露灵脂凝自松根露珠，清香中带着山野湿气。",
       "type": 0,
       "value": 3,
       "sell_price": 3
@@ -2305,7 +2305,7 @@
       "name": "青檀脂",
       "icon": "res://assets/items/icons_simple/1202.png",
       "group_id": 37,
-      "describe": "青檀脂是灵脂一脉的2级材料。",
+      "describe": "青檀脂色泽青润，轻触便有檀香萦绕。",
       "type": 0,
       "value": 8,
       "sell_price": 10
@@ -2316,7 +2316,7 @@
       "name": "赤枫脂",
       "icon": "res://assets/items/icons_simple/1203.png",
       "group_id": 37,
-      "describe": "赤枫脂是灵脂一脉的3级材料。",
+      "describe": "赤枫脂如融化的晚霞，温热时泛起红光。",
       "type": 0,
       "value": 20,
       "sell_price": 25
@@ -2327,7 +2327,7 @@
       "name": "月桂凝脂",
       "icon": "res://assets/items/icons_simple/1204.png",
       "group_id": 37,
-      "describe": "月桂凝脂是灵脂一脉的4级材料。",
+      "describe": "月桂凝脂清凉细腻，表面映着一层月白。",
       "type": 0,
       "value": 48,
       "sell_price": 60
@@ -2338,7 +2338,7 @@
       "name": "桃木雷脂",
       "icon": "res://assets/items/icons_simple/1205.png",
       "group_id": 37,
-      "describe": "桃木雷脂是灵脂一脉的5级材料。",
+      "describe": "桃木雷脂带着桃木清香，偶尔迸出细小电花。",
       "type": 0,
       "value": 116,
       "sell_price": 140
@@ -2349,7 +2349,7 @@
       "name": "冰梧寒脂",
       "icon": "res://assets/items/icons_simple/1206.png",
       "group_id": 37,
-      "describe": "冰梧寒脂是灵脂一脉的6级材料。",
+      "describe": "冰梧寒脂脂体寒凝如冰，瓶壁常结薄霜。",
       "type": 0,
       "value": 279,
       "sell_price": 300
@@ -2360,7 +2360,7 @@
       "name": "沉香地髓",
       "icon": "res://assets/items/icons_simple/1207.png",
       "group_id": 37,
-      "describe": "沉香地髓是灵脂一脉的7级材料。",
+      "describe": "沉香地髓浓稠沉静，散发沉香与土脉气息。",
       "type": 0,
       "value": 670,
       "sell_price": 700
@@ -2371,7 +2371,7 @@
       "name": "紫檀星脂",
       "icon": "res://assets/items/icons_simple/1208.png",
       "group_id": 37,
-      "describe": "紫檀星脂是灵脂一脉的8级材料。",
+      "describe": "紫檀星脂色深如夜，星点在其中缓缓游动。",
       "type": 0,
       "value": 1608,
       "sell_price": 1500
@@ -2382,7 +2382,7 @@
       "name": "龙血木脂",
       "icon": "res://assets/items/icons_simple/1209.png",
       "group_id": 37,
-      "describe": "龙血木脂是灵脂一脉的9级材料。",
+      "describe": "龙血木脂色泽赤红，凝结后宛如一滴龙血。",
       "type": 0,
       "value": 3860,
       "sell_price": 3500
@@ -2393,7 +2393,7 @@
       "name": "凤栖香脂",
       "icon": "res://assets/items/icons_simple/1210.png",
       "group_id": 37,
-      "describe": "凤栖香脂是灵脂一脉的10级材料。",
+      "describe": "凤栖香脂香气暖润，流动时映出凤羽般的金光。",
       "type": 0,
       "value": 9264,
       "sell_price": 8000
@@ -2404,7 +2404,7 @@
       "name": "九幽玄脂",
       "icon": "res://assets/items/icons_simple/1211.png",
       "group_id": 37,
-      "describe": "九幽玄脂是灵脂一脉的11级材料。",
+      "describe": "九幽玄脂幽暗深沉，光照下隐约可见九重纹理。",
       "type": 0,
       "value": 22234,
       "sell_price": 18000
@@ -2415,7 +2415,7 @@
       "name": "扶桑日脂",
       "icon": "res://assets/items/icons_simple/1212.png",
       "group_id": 37,
-      "describe": "扶桑日脂是灵脂一脉的12级材料。",
+      "describe": "扶桑日脂温烈，表面常浮着金色火纹。",
       "type": 0,
       "value": 53362,
       "sell_price": 40000
@@ -2426,7 +2426,7 @@
       "name": "建木玉脂",
       "icon": "res://assets/items/icons_simple/1213.png",
       "group_id": 37,
-      "describe": "建木玉脂是灵脂一脉的13级材料。",
+      "describe": "建木玉脂清透，内里有木纹般的青影。",
       "type": 0,
       "value": 128069,
       "sell_price": 90000
@@ -2437,7 +2437,7 @@
       "name": "菩提心脂",
       "icon": "res://assets/items/icons_simple/1214.png",
       "group_id": 37,
-      "describe": "菩提心脂是灵脂一脉的14级材料。",
+      "describe": "菩提心脂澄澈宁静，靠近时能闻到淡淡檀香。",
       "type": 0,
       "value": 307366,
       "sell_price": 200000
@@ -2448,7 +2448,7 @@
       "name": "鸿蒙源脂",
       "icon": "res://assets/items/icons_simple/1215.png",
       "group_id": 37,
-      "describe": "鸿蒙源脂是灵脂一脉的15级材料。",
+      "describe": "鸿蒙源脂分呈清浊二色，彼此交缠不散。",
       "type": 0,
       "value": 737679,
       "sell_price": 450000
@@ -2459,7 +2459,7 @@
       "name": "太初神脂",
       "icon": "res://assets/items/icons_simple/1216.png",
       "group_id": 37,
-      "describe": "太初神脂是灵脂一脉的16级材料。",
+      "describe": "太初神脂厚重温润，表面浮着天地初开的微光。",
       "type": 0,
       "value": 1770430,
       "sell_price": 1000000
@@ -2470,7 +2470,7 @@
       "name": "青鳞灵鱼",
       "icon": "res://assets/items/icons_simple/1301.png",
       "group_id": 38,
-      "describe": "青鳞灵鱼是灵鱼一脉的1级材料。",
+      "describe": "青鳞灵鱼鳞片青亮，游动时拖出一线灵光。",
       "type": 0,
       "value": 1,
       "sell_price": 3
@@ -2481,7 +2481,7 @@
       "name": "银须鲫",
       "icon": "res://assets/items/icons_simple/1302.png",
       "group_id": 38,
-      "describe": "银须鲫是灵鱼一脉的2级材料。",
+      "describe": "银须鲫须发如银，鳞面映着细碎水光。",
       "type": 0,
       "value": 3,
       "sell_price": 10
@@ -2492,7 +2492,7 @@
       "name": "赤尾鲤",
       "icon": "res://assets/items/icons_simple/1303.png",
       "group_id": 38,
-      "describe": "赤尾鲤是灵鱼一脉的3级材料。",
+      "describe": "赤尾鲤尾鳍赤红，跃出水面时仿佛带起霞火。",
       "type": 0,
       "value": 8,
       "sell_price": 25
@@ -2503,7 +2503,7 @@
       "name": "月纹鳜",
       "icon": "res://assets/items/icons_simple/1304.png",
       "group_id": 38,
-      "describe": "月纹鳜是灵鱼一脉的4级材料。",
+      "describe": "月纹鳜鱼身月纹清晰，夜间会泛出柔和白光。",
       "type": 0,
       "value": 20,
       "sell_price": 60
@@ -2514,7 +2514,7 @@
       "name": "雷鳍鲶",
       "icon": "res://assets/items/icons_simple/1305.png",
       "group_id": 38,
-      "describe": "雷鳍鲶是灵鱼一脉的5级材料。",
+      "describe": "雷鳍鲶背鳍藏有雷纹，摆尾时水面传来细微震响。",
       "type": 0,
       "value": 48,
       "sell_price": 140
@@ -2525,7 +2525,7 @@
       "name": "冰魄鲑",
       "icon": "res://assets/items/icons_simple/1306.png",
       "group_id": 38,
-      "describe": "冰魄鲑是灵鱼一脉的6级材料。",
+      "describe": "冰魄鲑鱼鳞透白如冰，周身常绕着寒雾。",
       "type": 0,
       "value": 116,
       "sell_price": 300
@@ -2536,7 +2536,7 @@
       "name": "地脉鳅",
       "icon": "res://assets/items/icons_simple/1307.png",
       "group_id": 38,
-      "describe": "地脉鳅是灵鱼一脉的7级材料。",
+      "describe": "地脉鳅身形细长，鳞下隐有土黄色地脉纹。",
       "type": 0,
       "value": 279,
       "sell_price": 700
@@ -2547,7 +2547,7 @@
       "name": "星斑鲷",
       "icon": "res://assets/items/icons_simple/1308.png",
       "group_id": 38,
-      "describe": "星斑鲷是灵鱼一脉的8级材料。",
+      "describe": "星斑鲷通体银蓝，斑点如夜空星辰。",
       "type": 0,
       "value": 670,
       "sell_price": 1500
@@ -2558,7 +2558,7 @@
       "name": "龙须鲤",
       "icon": "res://assets/items/icons_simple/1309.png",
       "group_id": 38,
-      "describe": "龙须鲤是灵鱼一脉的9级材料。",
+      "describe": "龙须鲤鱼须修长如龙须，鳞片间流动着淡淡金光。",
       "type": 0,
       "value": 1608,
       "sell_price": 3500
@@ -2569,7 +2569,7 @@
       "name": "凤尾锦鲤",
       "icon": "res://assets/items/icons_simple/1310.png",
       "group_id": 38,
-      "describe": "凤尾锦鲤是灵鱼一脉的10级材料。",
+      "describe": "凤尾锦鲤尾鳍舒展如羽，游动时映出绚丽霞色。",
       "type": 0,
       "value": 3860,
       "sell_price": 8000
@@ -2580,7 +2580,7 @@
       "name": "九幽玄鱼",
       "icon": "res://assets/items/icons_simple/1311.png",
       "group_id": 38,
-      "describe": "九幽玄鱼是灵鱼一脉的11级材料。",
+      "describe": "九幽玄鱼鱼身幽黑，九道暗纹随水波明灭。",
       "type": 0,
       "value": 9264,
       "sell_price": 18000
@@ -2591,7 +2591,7 @@
       "name": "扶桑金鲤",
       "icon": "res://assets/items/icons_simple/1312.png",
       "group_id": 38,
-      "describe": "扶桑金鲤是灵鱼一脉的12级材料。",
+      "describe": "扶桑金鲤鳞片灿金，游过水面会留下暖红光痕。",
       "type": 0,
       "value": 22234,
       "sell_price": 40000
@@ -2602,7 +2602,7 @@
       "name": "建木游龙",
       "icon": "res://assets/items/icons_simple/1313.png",
       "group_id": 38,
-      "describe": "建木游龙是灵鱼一脉的13级材料。",
+      "describe": "建木游龙鱼身修长似龙，鳞脊生有青色木纹。",
       "type": 0,
       "value": 53362,
       "sell_price": 90000
@@ -2613,7 +2613,7 @@
       "name": "菩提慧鱼",
       "icon": "res://assets/items/icons_simple/1314.png",
       "group_id": 38,
-      "describe": "菩提慧鱼是灵鱼一脉的14级材料。",
+      "describe": "菩提慧鱼额心一点灵光，游近时令人神思澄明。",
       "type": 0,
       "value": 128069,
       "sell_price": 200000
@@ -2624,7 +2624,7 @@
       "name": "鸿蒙鲲苗",
       "icon": "res://assets/items/icons_simple/1315.png",
       "group_id": 38,
-      "describe": "鸿蒙鲲苗是灵鱼一脉的15级材料。",
+      "describe": "鸿蒙鲲苗虽是幼鲲，背鳍已能卷起清浊水潮。",
       "type": 0,
       "value": 307366,
       "sell_price": 450000
@@ -2635,7 +2635,7 @@
       "name": "太初神鲲",
       "icon": "res://assets/items/icons_simple/1316.png",
       "group_id": 38,
-      "describe": "太初神鲲是灵鱼一脉的16级材料。",
+      "describe": "太初神鲲体内仿佛藏着无边水域，鳞光随气机变化。",
       "type": 0,
       "value": 737679,
       "sell_price": 1000000
@@ -2646,7 +2646,7 @@
       "name": "清水灵珠",
       "icon": "res://assets/items/icons_simple/1401.png",
       "group_id": 39,
-      "describe": "清水灵珠是灵珠一脉的1级材料。",
+      "describe": "清水灵珠珠体清透如泉，轻晃时内有水纹荡漾。",
       "type": 0,
       "value": 3,
       "sell_price": 3
@@ -2657,7 +2657,7 @@
       "name": "青波珠",
       "icon": "res://assets/items/icons_simple/1402.png",
       "group_id": 39,
-      "describe": "青波珠是灵珠一脉的2级材料。",
+      "describe": "青波珠珠面泛着青色波光，触手清凉。",
       "type": 0,
       "value": 8,
       "sell_price": 10
@@ -2668,7 +2668,7 @@
       "name": "赤潮珠",
       "icon": "res://assets/items/icons_simple/1403.png",
       "group_id": 39,
-      "describe": "赤潮珠是灵珠一脉的3级材料。",
+      "describe": "赤潮珠珠心赤红，光泽如潮汐起伏。",
       "type": 0,
       "value": 20,
       "sell_price": 25
@@ -2679,7 +2679,7 @@
       "name": "月华珠",
       "icon": "res://assets/items/icons_simple/1404.png",
       "group_id": 39,
-      "describe": "月华珠是灵珠一脉的4级材料。",
+      "describe": "月华珠月华凝于珠中，夜色下清辉不散。",
       "type": 0,
       "value": 48,
       "sell_price": 60
@@ -2690,7 +2690,7 @@
       "name": "雷鸣珠",
       "icon": "res://assets/items/icons_simple/1405.png",
       "group_id": 39,
-      "describe": "雷鸣珠是灵珠一脉的5级材料。",
+      "describe": "雷鸣珠珠内封着细小雷弧，靠近便有低鸣。",
       "type": 0,
       "value": 116,
       "sell_price": 140
@@ -2701,7 +2701,7 @@
       "name": "玄冰珠",
       "icon": "res://assets/items/icons_simple/1406.png",
       "group_id": 39,
-      "describe": "玄冰珠是灵珠一脉的6级材料。",
+      "describe": "玄冰珠由冰魄凝成，寒气沿珠面缓缓流动。",
       "type": 0,
       "value": 279,
       "sell_price": 300
@@ -2712,7 +2712,7 @@
       "name": "地泉珠",
       "icon": "res://assets/items/icons_simple/1407.png",
       "group_id": 39,
-      "describe": "地泉珠是灵珠一脉的7级材料。",
+      "describe": "地泉珠中仿佛藏着一眼地泉，土金色光泽沉静厚重。",
       "type": 0,
       "value": 670,
       "sell_price": 700
@@ -2723,7 +2723,7 @@
       "name": "星澜珠",
       "icon": "res://assets/items/icons_simple/1408.png",
       "group_id": 39,
-      "describe": "星澜珠是灵珠一脉的8级材料。",
+      "describe": "星澜珠聚起星辉澜纹，转动时满珠星点闪烁。",
       "type": 0,
       "value": 1608,
       "sell_price": 1500
@@ -2734,7 +2734,7 @@
       "name": "龙涎珠",
       "icon": "res://assets/items/icons_simple/1409.png",
       "group_id": 39,
-      "describe": "龙涎珠是灵珠一脉的9级材料。",
+      "describe": "龙涎珠珠心凝着龙涎，淡金光芒如游龙盘旋。",
       "type": 0,
       "value": 3860,
       "sell_price": 3500
@@ -2745,7 +2745,7 @@
       "name": "凤泪珠",
       "icon": "res://assets/items/icons_simple/1410.png",
       "group_id": 39,
-      "describe": "凤泪珠是灵珠一脉的10级材料。",
+      "describe": "凤泪珠晶莹温润，光下泛起凤羽般的赤金。",
       "type": 0,
       "value": 9264,
       "sell_price": 8000
@@ -2756,7 +2756,7 @@
       "name": "九幽玄珠",
       "icon": "res://assets/items/icons_simple/1411.png",
       "group_id": 39,
-      "describe": "九幽玄珠是灵珠一脉的11级材料。",
+      "describe": "九幽玄珠珠色深幽，内里九重暗环层层相套。",
       "type": 0,
       "value": 22234,
       "sell_price": 18000
@@ -2767,7 +2767,7 @@
       "name": "扶桑日珠",
       "icon": "res://assets/items/icons_simple/1412.png",
       "group_id": 39,
-      "describe": "扶桑日珠是灵珠一脉的12级材料。",
+      "describe": "扶桑日珠珠光炽烈如朝阳，表面流动着金红日纹。",
       "type": 0,
       "value": 53362,
       "sell_price": 40000
@@ -2778,7 +2778,7 @@
       "name": "建木碧珠",
       "icon": "res://assets/items/icons_simple/1413.png",
       "group_id": 39,
-      "describe": "建木碧珠是灵珠一脉的13级材料。",
+      "describe": "建木碧珠珠中生有木脉纹，灵气沿纹路循环。",
       "type": 0,
       "value": 128069,
       "sell_price": 90000
@@ -2789,7 +2789,7 @@
       "name": "菩提心珠",
       "icon": "res://assets/items/icons_simple/1414.png",
       "group_id": 39,
-      "describe": "菩提心珠是灵珠一脉的14级材料。",
+      "describe": "菩提心珠珠心澄净，静观片刻便觉杂念渐消。",
       "type": 0,
       "value": 307366,
       "sell_price": 200000
@@ -2800,7 +2800,7 @@
       "name": "鸿蒙源珠",
       "icon": "res://assets/items/icons_simple/1415.png",
       "group_id": 39,
-      "describe": "鸿蒙源珠是灵珠一脉的15级材料。",
+      "describe": "鸿蒙源珠珠内清浊二气相依旋转，始终不相混。",
       "type": 0,
       "value": 737679,
       "sell_price": 450000
@@ -2811,7 +2811,7 @@
       "name": "太初神珠",
       "icon": "res://assets/items/icons_simple/1416.png",
       "group_id": 39,
-      "describe": "太初神珠是灵珠一脉的16级材料。",
+      "describe": "太初神珠五色微光交汇，仿佛映出天地初始的轮廓。",
       "type": 0,
       "value": 1770430,
       "sell_price": 1000000
@@ -2822,7 +2822,7 @@
       "name": "青白玉",
       "icon": "res://assets/items/icons_simple/1501.png",
       "group_id": 40,
-      "describe": "青白玉是玉石一脉的1级材料。",
+      "describe": "青白玉玉质青白温润，握在手中有淡淡凉意。",
       "type": 0,
       "value": 4,
       "sell_price": 3
@@ -2833,7 +2833,7 @@
       "name": "云纹玉",
       "icon": "res://assets/items/icons_simple/1502.png",
       "group_id": 40,
-      "describe": "云纹玉是玉石一脉的2级材料。",
+      "describe": "云纹玉玉面云纹舒卷，随光线变幻深浅。",
       "type": 0,
       "value": 10,
       "sell_price": 10
@@ -2844,7 +2844,7 @@
       "name": "赤霞玉",
       "icon": "res://assets/items/icons_simple/1503.png",
       "group_id": 40,
-      "describe": "赤霞玉是玉石一脉的3级材料。",
+      "describe": "赤霞玉玉中藏着赤霞，转动时如晚云流动。",
       "type": 0,
       "value": 24,
       "sell_price": 25
@@ -2855,7 +2855,7 @@
       "name": "月华玉",
       "icon": "res://assets/items/icons_simple/1504.png",
       "group_id": 40,
-      "describe": "月华玉是玉石一脉的4级材料。",
+      "describe": "月华玉玉色皎洁，夜间会映出柔和月光。",
       "type": 0,
       "value": 58,
       "sell_price": 60
@@ -2866,7 +2866,7 @@
       "name": "雷纹玉",
       "icon": "res://assets/items/icons_simple/1505.png",
       "group_id": 40,
-      "describe": "雷纹玉是玉石一脉的5级材料。",
+      "describe": "雷纹玉表面交织雷纹，指尖触碰便有麻意。",
       "type": 0,
       "value": 140,
       "sell_price": 140
@@ -2877,7 +2877,7 @@
       "name": "玄冰玉",
       "icon": "res://assets/items/icons_simple/1506.png",
       "group_id": 40,
-      "describe": "玄冰玉是玉石一脉的6级材料。",
+      "describe": "玄冰玉玉质清寒如冰，内里封着细碎霜花。",
       "type": 0,
       "value": 336,
       "sell_price": 300
@@ -2888,7 +2888,7 @@
       "name": "地髓玉",
       "icon": "res://assets/items/icons_simple/1507.png",
       "group_id": 40,
-      "describe": "地髓玉是玉石一脉的7级材料。",
+      "describe": "地髓玉玉髓厚重，纹理仿佛山根与地脉交错。",
       "type": 0,
       "value": 807,
       "sell_price": 700
@@ -2899,7 +2899,7 @@
       "name": "星辉玉",
       "icon": "res://assets/items/icons_simple/1508.png",
       "group_id": 40,
-      "describe": "星辉玉是玉石一脉的8级材料。",
+      "describe": "星辉玉玉心点点星辉，暗处仍能映出微光。",
       "type": 0,
       "value": 1937,
       "sell_price": 1500
@@ -2910,7 +2910,7 @@
       "name": "龙血玉",
       "icon": "res://assets/items/icons_simple/1509.png",
       "group_id": 40,
-      "describe": "龙血玉是玉石一脉的9级材料。",
+      "describe": "龙血玉玉色深红，内部凝着蜿蜒龙血纹。",
       "type": 0,
       "value": 4649,
       "sell_price": 3500
@@ -2921,7 +2921,7 @@
       "name": "凤栖玉",
       "icon": "res://assets/items/icons_simple/1510.png",
       "group_id": 40,
-      "describe": "凤栖玉是玉石一脉的10级材料。",
+      "describe": "凤栖玉玉面金红相间，纹理舒展如凤羽。",
       "type": 0,
       "value": 11158,
       "sell_price": 8000
@@ -2932,7 +2932,7 @@
       "name": "九幽玄玉",
       "icon": "res://assets/items/icons_simple/1511.png",
       "group_id": 40,
-      "describe": "九幽玄玉是玉石一脉的11级材料。",
+      "describe": "九幽玄玉玉质幽黑，九道玄纹从中心向外延伸。",
       "type": 0,
       "value": 26780,
       "sell_price": 18000
@@ -2943,7 +2943,7 @@
       "name": "扶桑阳玉",
       "icon": "res://assets/items/icons_simple/1512.png",
       "group_id": 40,
-      "describe": "扶桑阳玉是玉石一脉的12级材料。",
+      "describe": "扶桑阳玉玉中蕴着暖阳，握久后掌心微温。",
       "type": 0,
       "value": 64272,
       "sell_price": 40000
@@ -2954,7 +2954,7 @@
       "name": "建木碧玉",
       "icon": "res://assets/items/icons_simple/1513.png",
       "group_id": 40,
-      "describe": "建木碧玉是玉石一脉的13级材料。",
+      "describe": "建木碧玉透出青色木纹，灵气如枝脉分叉。",
       "type": 0,
       "value": 154253,
       "sell_price": 90000
@@ -2965,7 +2965,7 @@
       "name": "菩提心玉",
       "icon": "res://assets/items/icons_simple/1514.png",
       "group_id": 40,
-      "describe": "菩提心玉是玉石一脉的14级材料。",
+      "describe": "菩提心玉玉心清宁，靠近时仿佛能听见木叶轻响。",
       "type": 0,
       "value": 370208,
       "sell_price": 200000
@@ -2976,7 +2976,7 @@
       "name": "鸿蒙源玉",
       "icon": "res://assets/items/icons_simple/1515.png",
       "group_id": 40,
-      "describe": "鸿蒙源玉是玉石一脉的15级材料。",
+      "describe": "鸿蒙源玉玉内清浊云气交叠，颜色随光线缓缓变幻。",
       "type": 0,
       "value": 888500,
       "sell_price": 450000
@@ -2987,7 +2987,7 @@
       "name": "太初神玉",
       "icon": "res://assets/items/icons_simple/1516.png",
       "group_id": 40,
-      "describe": "太初神玉是玉石一脉的16级材料。",
+      "describe": "太初神玉温润无瑕，内部隐约浮现初生天地的微光。",
       "type": 0,
       "value": 2132400,
       "sell_price": 1000000
@@ -7747,7 +7747,7 @@
       "group_id": 21,
       "max_charges": 15,
       "recharge_time": 1800,
-      "describe": "浅砂矿口以河砂与碎岩筑成，矿壁留有新凿出的浅痕，并有四分之一概率产出玉石。",
+      "describe": "浅砂矿口以河砂与碎岩筑成，矿壁留有新凿出的浅痕。",
       "type": "1",
       "spawns": [
         {
@@ -7772,7 +7772,7 @@
       "group_id": 21,
       "max_charges": 20,
       "recharge_time": 2400,
-      "describe": "乌铁矿井立于溪谷缓坡，井下回声沉闷如钟，并有四分之一概率产出玉石。",
+      "describe": "乌铁矿井立于溪谷缓坡，井下回声沉闷如钟。",
       "type": "1",
       "spawns": [
         {
@@ -7809,7 +7809,7 @@
       "group_id": 21,
       "max_charges": 25,
       "recharge_time": 3000,
-      "describe": "匠人取月银石柱建成月银矿洞，洞顶在月夜泛出银辉，并有四分之一概率产出玉石。",
+      "describe": "匠人取月银石柱建成月银矿洞，洞顶在月夜泛出银辉。",
       "type": "1",
       "spawns": [
         {
@@ -7846,7 +7846,7 @@
       "group_id": 21,
       "max_charges": 30,
       "recharge_time": 3600,
-      "describe": "传闻白金矿脉旧址在云崖石台，金脉沿岩层纵横生长，并有四分之一概率产出玉石。",
+      "describe": "传闻白金矿脉旧址在云崖石台，金脉沿岩层纵横生长。",
       "type": "1",
       "spawns": [
         {
@@ -7883,7 +7883,7 @@
       "group_id": 21,
       "max_charges": 35,
       "recharge_time": 4200,
-      "describe": "寒谷背阴处所见的冰陨深井由冰陨石与寒木构成，井口吐出的风带着冰屑，并有四分之一概率产出玉石。",
+      "describe": "寒谷背阴处所见的冰陨深井由冰陨石与寒木构成，井口吐出的风带着冰屑。",
       "type": "1",
       "spawns": [
         {
@@ -7920,7 +7920,7 @@
       "group_id": 21,
       "max_charges": 40,
       "recharge_time": 4800,
-      "describe": "地火晶窟以地火岩与赤铜筑成，晶窟深处常有红光跃动，并有四分之一概率产出玉石。",
+      "describe": "地火晶窟以地火岩与赤铜筑成，晶窟深处常有红光跃动。",
       "type": "1",
       "spawns": [
         {
@@ -7957,7 +7957,7 @@
       "group_id": 21,
       "max_charges": 45,
       "recharge_time": 5400,
-      "describe": "青罡玉坑立于苍梧秘境，玉壁内云纹缓缓迁移，并有四分之一概率产出玉石。",
+      "describe": "青罡玉坑立于苍梧秘境，玉壁内云纹缓缓迁移。",
       "type": "1",
       "spawns": [
         {
@@ -7994,7 +7994,7 @@
       "group_id": 21,
       "max_charges": 50,
       "recharge_time": 6000,
-      "describe": "匠人取雷极砂砖建成雷极砂场，砂层摩擦时传来细雷，并有四分之一概率产出玉石。",
+      "describe": "匠人取雷极砂砖建成雷极砂场，砂层摩擦时传来细雷。",
       "type": "1",
       "spawns": [
         {
@@ -8043,7 +8043,7 @@
       "group_id": 21,
       "max_charges": 55,
       "recharge_time": 6600,
-      "describe": "传闻坤髓矿府旧址在坤元地脉，地脉气息沿矿壁缓缓升起，并有四分之一概率产出玉石。",
+      "describe": "传闻坤髓矿府旧址在坤元地脉，地脉气息沿矿壁缓缓升起。",
       "type": "1",
       "spawns": [
         {
@@ -8092,7 +8092,7 @@
       "group_id": 21,
       "max_charges": 60,
       "recharge_time": 7200,
-      "describe": "星落天原所见的星陨矿坑由星陨铁与天河砂构成，夜间矿壁会映出群星轨迹，并有四分之一概率产出玉石。",
+      "describe": "星落天原所见的星陨矿坑由星陨铁与天河砂构成，夜间矿壁会映出群星轨迹。",
       "type": "1",
       "spawns": [
         {
@@ -8141,7 +8141,7 @@
       "group_id": 21,
       "max_charges": 65,
       "recharge_time": 7800,
-      "describe": "太虚玉窟以紫府玉与烟霞木筑成，紫色云烟常在矿壁周围盘旋，并有四分之一概率产出玉石。",
+      "describe": "太虚玉窟以紫府玉与烟霞木筑成，紫色云烟常在矿壁周围盘旋。",
       "type": "1",
       "spawns": [
         {
@@ -8190,7 +8190,7 @@
       "group_id": 21,
       "max_charges": 70,
       "recharge_time": 8400,
-      "describe": "九幽铁渊立于九曲地宫，矿壁依九曲方位层层展开，并有四分之一概率产出玉石。",
+      "describe": "九幽铁渊立于九曲地宫，矿壁依九曲方位层层展开。",
       "type": "1",
       "spawns": [
         {
@@ -8247,7 +8247,7 @@
       "group_id": 21,
       "max_charges": 75,
       "recharge_time": 9000,
-      "describe": "匠人取涅火晶与赤金建成日精金脉，赤金纹路随天火明灭不定，并有四分之一概率产出玉石。",
+      "describe": "匠人取涅火晶与赤金建成日精金脉，赤金纹路随天火明灭不定。",
       "type": "1",
       "spawns": [
         {
@@ -8308,7 +8308,7 @@
       "group_id": 21,
       "max_charges": 80,
       "recharge_time": 9600,
-      "describe": "传闻月魄玉山旧址在龙眠古渊，矿壁上隐约盘着龙形云气，并有四分之一概率产出玉石。",
+      "describe": "传闻月魄玉山旧址在龙眠古渊，矿壁上隐约盘着龙形云气。",
       "type": "1",
       "spawns": [
         {
@@ -8369,7 +8369,7 @@
       "group_id": 21,
       "max_charges": 85,
       "recharge_time": 10200,
-      "describe": "凤栖神木所见的天河砂海由凤羽晶与梧桐神木构成，高处常有凤鸟虚影掠过，并有四分之一概率产出玉石。",
+      "describe": "凤栖神木所见的天河砂海由凤羽晶与梧桐神木构成，高处常有凤鸟虚影掠过。",
       "type": "1",
       "spawns": [
         {
@@ -8430,7 +8430,7 @@
       "group_id": 21,
       "max_charges": 90,
       "recharge_time": 10800,
-      "describe": "鸿蒙晶域以太初晶与鸿蒙母金筑成，近看矿壁仿佛隔着太初雾海，并有四分之一概率产出玉石。",
+      "describe": "鸿蒙晶域以太初晶与鸿蒙母金筑成，近看矿壁仿佛隔着太初雾海。",
       "type": "1",
       "spawns": [
         {

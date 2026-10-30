@@ -1,0 +1,470 @@
+{
+  "description": "Relevant outstanding recipes from RequireTrace seq 17: preview picks recipe 32 but require used 81. Retains actual table UIDs, materials, positions and pouch; excludes covered unrelated orders and their active tables.",
+  "orders": [
+    {
+      "completed": false,
+      "items": [
+        {
+          "item_id": 27081
+        },
+        {
+          "item_id": 27004
+        },
+        {
+          "item_id": 27082
+        }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "assigned_recipe": {
+        "id": 4,
+        "ingredients": [
+          5004,
+          1002,
+          9003
+        ],
+        "result": 27004
+      },
+      "id": 17001,
+      "immovable": false,
+      "name": "陶纹药炉",
+      "pos": "(0, 8)",
+      "state": 1,
+      "stored": [
+        {
+          "id": 9003,
+          "uid": 5049
+        },
+        {
+          "id": 1002,
+          "uid": 5119
+        }
+      ],
+      "uid": 47
+    },
+    {
+      "assigned_recipe": {
+        "id": 82,
+        "ingredients": [
+          5004,
+          9004,
+          3004
+        ],
+        "result": 27082
+      },
+      "id": 17003,
+      "immovable": false,
+      "name": "赤铜云炉",
+      "pos": "(1, 8)",
+      "state": 1,
+      "stored": [
+        {
+          "id": 3004,
+          "uid": 5051
+        },
+        {
+          "id": 9004,
+          "uid": 5086
+        }
+      ],
+      "uid": 2794
+    },
+    {
+      "assigned_recipe": {
+        "id": 32,
+        "ingredients": [
+          5002,
+          9004
+        ],
+        "result": 27081
+      },
+      "id": 17002,
+      "immovable": false,
+      "name": "青砖丹灶",
+      "pos": "(2, 7)",
+      "state": 1,
+      "stored": [
+        {
+          "id": 5002,
+          "uid": 5135
+        }
+      ],
+      "uid": 4635
+    },
+    {
+      "assigned_recipe": {},
+      "id": 18002,
+      "immovable": false,
+      "name": "松炭锻炉",
+      "pos": "(5, 7)",
+      "state": 0,
+      "stored": [],
+      "uid": 4266
+    },
+    {
+      "assigned_recipe": {},
+      "id": 18003,
+      "immovable": false,
+      "name": "赤铜锻台",
+      "pos": "(6, 7)",
+      "state": 0,
+      "stored": [],
+      "uid": 2795
+    },
+    {
+      "assigned_recipe": {},
+      "id": 18002,
+      "immovable": false,
+      "name": "松炭锻炉",
+      "pos": "(5, 8)",
+      "state": 0,
+      "stored": [],
+      "uid": 725
+    },
+    {
+      "assigned_recipe": {},
+      "id": 18002,
+      "immovable": false,
+      "name": "松炭锻炉",
+      "pos": "(6, 8)",
+      "state": 0,
+      "stored": [],
+      "uid": 1158
+    }
+  ],
+  "board": [
+    {
+      "id": 25001,
+      "uid": 2609,
+      "pos": "0,0",
+      "immovable": false
+    },
+    {
+      "id": 16001,
+      "uid": 46,
+      "pos": "1,0",
+      "immovable": false
+    },
+    {
+      "id": 14103,
+      "uid": 3846,
+      "pos": "2,0",
+      "immovable": false
+    },
+    {
+      "id": 2001,
+      "uid": 2820,
+      "pos": "3,0",
+      "immovable": false
+    },
+    {
+      "id": 14103,
+      "uid": 5091,
+      "pos": "4,0",
+      "immovable": false
+    },
+    {
+      "id": 13005,
+      "uid": 5064,
+      "pos": "5,0",
+      "immovable": false
+    },
+    {
+      "id": 11005,
+      "uid": 3193,
+      "pos": "6,0",
+      "immovable": false
+    },
+    {
+      "id": 25003,
+      "uid": 1350,
+      "pos": "0,1",
+      "immovable": false
+    },
+    {
+      "id": 1506,
+      "uid": 4775,
+      "pos": "1,1",
+      "immovable": false
+    },
+    {
+      "id": 5005,
+      "uid": 4374,
+      "pos": "2,1",
+      "immovable": false
+    },
+    {
+      "id": 13104,
+      "uid": 5031,
+      "pos": "3,1",
+      "immovable": false
+    },
+    {
+      "id": 10006,
+      "uid": 4402,
+      "pos": "4,1",
+      "immovable": false
+    },
+    {
+      "id": 15005,
+      "uid": 4386,
+      "pos": "5,1",
+      "immovable": false
+    },
+    {
+      "id": 12005,
+      "uid": 1919,
+      "pos": "6,1",
+      "immovable": false
+    },
+    {
+      "id": 1503,
+      "uid": 4850,
+      "pos": "0,2",
+      "immovable": false
+    },
+    {
+      "id": 6003,
+      "uid": 4925,
+      "pos": "1,2",
+      "immovable": false
+    },
+    {
+      "id": 1007,
+      "uid": 5035,
+      "pos": "2,2",
+      "immovable": false
+    },
+    {
+      "id": 13105,
+      "uid": 5002,
+      "pos": "3,2",
+      "immovable": false
+    },
+    {
+      "id": 5006,
+      "uid": 4352,
+      "pos": "4,2",
+      "immovable": false
+    },
+    {
+      "id": 9003,
+      "uid": 5085,
+      "pos": "5,2",
+      "immovable": false
+    },
+    {
+      "id": 4004,
+      "uid": 4296,
+      "pos": "6,2",
+      "immovable": false
+    },
+    {
+      "id": 1504,
+      "uid": 4692,
+      "pos": "0,3",
+      "immovable": false
+    },
+    {
+      "id": 10004,
+      "uid": 4952,
+      "pos": "1,3",
+      "immovable": false
+    },
+    {
+      "id": 6001,
+      "uid": 4700,
+      "pos": "2,3",
+      "immovable": false
+    },
+    {
+      "id": 3004,
+      "uid": 4916,
+      "pos": "3,3",
+      "immovable": false
+    },
+    {
+      "id": 6003,
+      "uid": 4903,
+      "pos": "4,3",
+      "immovable": false
+    },
+    {
+      "id": 3004,
+      "uid": 4918,
+      "pos": "5,3",
+      "immovable": false
+    },
+    {
+      "id": 2004,
+      "uid": 5029,
+      "pos": "6,3",
+      "immovable": false
+    },
+    {
+      "id": 6004,
+      "uid": 5040,
+      "pos": "0,4",
+      "immovable": false
+    },
+    {
+      "id": 6003,
+      "uid": 5014,
+      "pos": "1,4",
+      "immovable": false
+    },
+    {
+      "id": 6004,
+      "uid": 5038,
+      "pos": "2,4",
+      "immovable": false
+    },
+    {
+      "id": 4004,
+      "uid": 4986,
+      "pos": "3,4",
+      "immovable": false
+    },
+    {
+      "id": 9004,
+      "uid": 5089,
+      "pos": "4,4",
+      "immovable": false
+    },
+    {
+      "id": 2002,
+      "uid": 5026,
+      "pos": "5,4",
+      "immovable": false
+    },
+    {
+      "id": 10005,
+      "uid": 4584,
+      "pos": "6,4",
+      "immovable": false
+    },
+    {
+      "id": 9004,
+      "uid": 5076,
+      "pos": "0,5",
+      "immovable": false
+    },
+    {
+      "id": 9004,
+      "uid": 5077,
+      "pos": "1,5",
+      "immovable": false
+    },
+    {
+      "id": 9004,
+      "uid": 5090,
+      "pos": "2,5",
+      "immovable": false
+    },
+    {
+      "id": 10001,
+      "uid": 5101,
+      "pos": "3,5",
+      "immovable": false
+    },
+    {
+      "id": 4003,
+      "uid": 4985,
+      "pos": "4,5",
+      "immovable": false
+    },
+    {
+      "id": 5003,
+      "uid": 5111,
+      "pos": "5,5",
+      "immovable": false
+    },
+    {
+      "id": 3003,
+      "uid": 5116,
+      "pos": "6,5",
+      "immovable": false
+    },
+    {
+      "id": 10003,
+      "uid": 4989,
+      "pos": "0,6",
+      "immovable": false
+    },
+    {
+      "id": 9004,
+      "uid": 5134,
+      "pos": "2,6",
+      "immovable": false
+    },
+    {
+      "id": 10003,
+      "uid": 5122,
+      "pos": "3,6",
+      "immovable": false
+    },
+    {
+      "id": 1003,
+      "uid": 5117,
+      "pos": "6,6",
+      "immovable": false
+    },
+    {
+      "id": 9004,
+      "uid": 5078,
+      "pos": "3,8",
+      "immovable": false
+    },
+    {
+      "id": 9004,
+      "uid": 5080,
+      "pos": "4,8",
+      "immovable": false
+    }
+  ],
+  "pouch": [
+    {
+      "id": 11003.0,
+      "uid": 5057.0
+    },
+    {
+      "charges": 30.0,
+      "id": 12004.0,
+      "last_charge_time": 1792551308601.0,
+      "uid": 5062.0
+    },
+    {
+      "charges": 20.0,
+      "id": 13002.0,
+      "uid": 4272.0
+    },
+    {
+      "charges": 30.0,
+      "id": 11004.0,
+      "uid": 4276.0
+    },
+    {
+      "charges": 20.0,
+      "id": 12002.0,
+      "uid": 4273.0
+    },
+    {
+      "id": 15003.0,
+      "uid": 5056.0
+    },
+    {
+      "id": 27052.0,
+      "uid": 5065.0
+    },
+    {
+      "id": 27033.0,
+      "uid": 5107.0
+    },
+    {
+      "id": 27054.0,
+      "uid": 5106.0
+    }
+  ]
+}

@@ -9,7 +9,7 @@ func _ready() -> void:
 	var requirement_list: RequirementList = preload("res://scenes/ui/meridian/RequirementList.tscn").instantiate() as RequirementList
 	add_child(requirement_list)
 	await get_tree().process_frame
-	requirement_list.set_requirements([{"items": [{"item_id": 5002}], "completed": false}])
+	requirement_list.set_requirements([{"item_ids": [5002], "items": [{"item_id": 5002}], "completed": false}])
 	assert(requirement_list._can_activate_acupoint())
 	var battle_pass: BattlePassEntry = requirement_list.container.get_node("BattlePassEntry") as BattlePassEntry
 	battle_pass.setup({"id": 4, "name": "Battle pass"})

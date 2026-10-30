@@ -26,7 +26,7 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [node name="WeeklyTaskSlot" type="Control"]
-custom_minimum_size = Vector2(0, 110)
+custom_minimum_size = Vector2(0, 132)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_gd")
@@ -51,10 +51,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 22
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 22
 
 [node name="Column" type="VBoxContainer" parent="Content"]
 layout_mode = 2

@@ -1,4 +1,9 @@
 import activities from "../../../config/json_output/activities.json";
+import secretRealm from "../../../config/json_output/secret_realm.json";
+import goldenFinger from "../../../config/json_output/golden_finger.json";
+import stairClimb from "../../../config/json_output/stair_climb.json";
+import orderSupply from "../../../config/json_output/order_supply.json";
+import orderDuel from "../../../config/json_output/order_duel.json";
 import cardCollection from "../../../config/json_output/card_collection.json";
 import battlePass from "../../../config/json_output/battle_pass.json";
 import cultivation from "../../../config/json_output/cultivation.json";
@@ -17,7 +22,12 @@ import tokens from "../../../config/json_output/tokens.json";
 import type { GameConfigTables } from "../engine/config_tables";
 
 export const gameConfigTables = {
+  secretRealm,
+  goldenFinger,
 	activities,
+	stairClimb,
+	orderSupply,
+	orderDuel,
 	battlePass,
 	cardCollection,
 	cultivation,

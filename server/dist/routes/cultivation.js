@@ -12,8 +12,10 @@ function op(handler) {
         }
         catch (err) {
             console.error("[cult] op error:", err);
-            if (!res.headersSent)
-                res.status(500).json({ error: "internal_error" });
+            if (!res.headersSent) {
+                const conflict = err instanceof Error && err.message === "state_conflict";
+                res.status(conflict ? 409 : 500).json({ error: conflict ? "state_conflict" : "internal_error" });
+            }
         }
     };
 }
@@ -36,10 +38,10 @@ function createCultivationRouter(storage, engine, jwtSecret) {
             console.log(`[cult] new player ${userId}, init with ${state.grid.length} items`);
         }
         else {
-            engine.tickStamina(state);
+            const staminaRecovered = engine.tickStamina(state);
             const multiplierExpired = engine.tickStaminaMultiplier(state);
             engine.tickLauncherRecharge(state);
-            if (engine.tickCraftingState(state) || multiplierExpired) {
+            if (engine.tickCraftingState(state) || multiplierExpired || staminaRecovered) {
                 await storage.saveState(userId, state);
             }
         }
@@ -62,8 +64,9 @@ function createCultivationRouter(storage, engine, jwtSecret) {
         res.json({
             ok: true,
             cultivation: state.cultivation,
-            quest_progress: state.quest_progress,
+            quest_progress: state.quest_progress, weekly_task_progress: engine.weeklyTaskService.publicProgress(state), card_collection_progress: engine.cardCollectionService.publicProgress(state),
             meridian_acupoints: state.meridian_acupoints || [],
+            storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
         });
     }));
     // POST /api/cultivation/consume-stamina
@@ -84,7 +87,8 @@ function createCultivationRouter(storage, engine, jwtSecret) {
             ok: true,
             stamina: result.stamina,
             max_stamina: result.max_stamina,
-            quest_progress: state.quest_progress,
+            quest_progress: state.quest_progress, weekly_task_progress: engine.weeklyTaskService.publicProgress(state), card_collection_progress: engine.cardCollectionService.publicProgress(state),
+            storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
             ...staminaMultiplierResponse(state),
         });
     }));
@@ -106,7 +110,8 @@ function createCultivationRouter(storage, engine, jwtSecret) {
             ok: true,
             amount: result.amount,
             spirit_stones: result.spiritStones,
-            quest_progress: state.quest_progress,
+            quest_progress: state.quest_progress, weekly_task_progress: engine.weeklyTaskService.publicProgress(state), card_collection_progress: engine.cardCollectionService.publicProgress(state),
+            storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
         });
     }));
     // POST /api/cultivation/breakthrough
@@ -132,8 +137,8 @@ function createCultivationRouter(storage, engine, jwtSecret) {
             spirit_stones: state.spirit_stones,
             stamina: state.stamina,
             ...staminaMultiplierResponse(state),
-            pending_rewards: state.pending_rewards,
-            quest_progress: state.quest_progress,
+            storage_revision: state.storage_revision, pending_rewards: state.pending_rewards,
+            quest_progress: state.quest_progress, weekly_task_progress: engine.weeklyTaskService.publicProgress(state), card_collection_progress: engine.cardCollectionService.publicProgress(state),
             meridian_acupoints: state.meridian_acupoints || [],
         });
     }));

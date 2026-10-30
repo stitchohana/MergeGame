@@ -6,6 +6,8 @@ class_name TopBar extends BaseHUD
 @onready var gm_btn: Button = $GMButton
 
 var _regen_remaining: float = 0.0
+var _regen_sync_due: bool = false
+var _regen_retry_remaining: float = 0.0
 var _qi_updates_suppressed: bool = false
 
 
@@ -15,6 +17,9 @@ func _open_gm() -> void:
 
 
 func _ready() -> void:
+	stamina_resource.add_pressed.connect(_open_resource_purchase.bind("stamina"))
+	qi_resource.add_pressed.connect(_open_resource_purchase.bind("qi"))
+	stones_resource.add_pressed.connect(_open_shop)
 	_update_qi()
 	_update_stamina()
 	_update_stones()
@@ -27,6 +32,8 @@ func _ready() -> void:
 
 
 func _reset_regen() -> void:
+	_regen_sync_due = false
+	_regen_retry_remaining = 0.0
 	if GameState.stamina >= GameState.max_stamina:
 		_regen_remaining = 0.0
 	elif GameState.regen_remaining_ms > 0:
@@ -41,13 +48,13 @@ func _process(delta: float) -> void:
 		_regen_remaining -= delta
 		if _regen_remaining <= 0:
 			_regen_remaining = 0
-			if GameState.stamina < GameState.max_stamina:
-				GameState.stamina += int(ConfigDatabase.get_game_config("stamina.regen_amount", 1))
-				GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
-			# Clear stale ms so _reset_regen uses full interval
-			GameState.regen_remaining_ms = 0.0
-			_reset_regen()
+			_regen_sync_due = GameState.stamina < GameState.max_stamina
 		_update_regen_timer()
+	if _regen_sync_due:
+		_regen_retry_remaining -= delta
+		if _regen_retry_remaining <= 0:
+			_regen_retry_remaining = 5.0
+			CloudService.refresh_stamina()
 	GameState.regen_remaining_ms = _regen_remaining * 1000.0
 
 
@@ -86,3 +93,18 @@ func _update_stamina() -> void:
 
 func _update_regen_timer() -> void:
 	stamina_resource.set_regen_timer(_regen_remaining)
+
+
+func _open_resource_purchase(resource: String) -> void:
+	if UIManager.is_input_blocked():
+		return
+	var popup: ResourcePurchasePopup = preload("res://scenes/ui/shop/ResourcePurchasePopup.tscn").instantiate() as ResourcePurchasePopup
+	popup.resource = resource
+	UIManager.show_popup(popup)
+
+
+func _open_shop() -> void:
+	if UIManager.is_input_blocked():
+		return
+	var shop: ShopPopup = preload("res://scenes/ui/shop/ShopPopup.tscn").instantiate() as ShopPopup
+	UIManager.show_popup(shop)

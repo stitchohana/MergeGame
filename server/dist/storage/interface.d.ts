@@ -1,3 +1,10 @@
+import type { StairClimbProgress, StairClimbRegistry } from "../engine/stair_climb";
+import type { DuelProgress, DuelRegistry } from "../engine/order_duel";
+import type { CollectionProgress, CardOperationResult } from "../engine/card_collection";
+import type { ResourcePurchaseProgress, ResourcePurchaseReceipt } from "../engine/resource_purchase";
+import type { ShopProgress } from "../engine/shop";
+import type { GoldenFingerState } from "../engine/golden_finger";
+import type { RealmProgress } from "../engine/secret_realm";
 export declare enum TokenType {
     SPIRIT_STONES = 1,// 灵石
     QI = 2,// 灵力
@@ -19,8 +26,11 @@ export interface ActivityDef {
     id: number;
     name: string;
     cycle: number;
+    widget?: string;
+    enabled?: boolean;
     start_time?: string;
     end_time?: string;
+    config?: Record<string, unknown>;
 }
 export interface WeeklyTask {
     activity_id: number;
@@ -30,6 +40,8 @@ export interface ActivityProgress {
     completed: boolean;
     claimed: boolean;
     last_reset?: number;
+    current_count?: number;
+    claim_count?: number;
 }
 export declare enum QuestType {
     MERGE = 1,
@@ -46,6 +58,10 @@ export interface PendingReward {
     uid: number;
     id: number;
     name: string;
+    kind?: "item" | "card_pack";
+    collection_id?: number;
+    pack_id?: number;
+    icon?: string;
 }
 export interface RewardToken {
     token: number;
@@ -58,6 +74,14 @@ export interface RewardItem {
 export interface RewardConfig {
     tokens?: RewardToken[];
     items?: RewardItem[];
+}
+export interface BattlePassProgress {
+    points: number;
+    premium_unlocked: boolean;
+    free_claimed_levels: number[];
+    premium_claimed_levels: number[];
+    /** China Standard Time calendar month, for example 2026-10. */
+    period_key?: string;
 }
 export interface HomeMeridianStageProgress {
     stage: number;
@@ -106,8 +130,25 @@ export interface CultivationData {
     last_tick_time: number;
 }
 export interface GameState {
+    secret_realm?: RealmProgress;
+    golden_finger?: GoldenFingerState;
+    shop?: ShopProgress;
+    resource_purchase_progress?: ResourcePurchaseProgress;
+    resource_purchase_operations?: ResourcePurchaseReceipt[];
+    storage_revision: number;
+    card_collection_progress?: Record<number, CollectionProgress>;
+    card_collection_order_requests?: string[];
+    card_pack_operations?: {
+        request_id: string;
+        signature: string;
+        result: CardOperationResult;
+    }[];
     grid: GridItem[];
-    pouch: number[];
+    pouch: Array<Omit<GridItem, "col" | "row"> & {
+        uid: number;
+    }>;
+    pouch_capacity: number;
+    pouch_unlock_count: number;
     cultivation: CultivationData;
     stamina: number;
     max_stamina: number;
@@ -116,8 +157,8 @@ export interface GameState {
     stamina_multiplier_expires_at?: number;
     spirit_stones: number;
     version: number;
-    board_type?: number;
-    uid_counter?: number;
+    board_type: number;
+    uid_counter: number;
     saved_grid?: GridItem[];
     battle_grid?: GridItem[];
     battle_map_id?: number;
@@ -127,10 +168,21 @@ export interface GameState {
     battle_player_max_hp?: number;
     meridian_circulations?: number;
     meridian_acupoints?: {
-        item_id: number;
+        item_ids: number[];
         name: string;
-        count: number;
         completed: boolean;
+        items?: {
+            item_id: number;
+            name: string;
+            count: number;
+            value: number;
+            icon: string;
+        }[];
+        total_value?: number;
+        rewards?: RewardConfig;
+        breakthrough_order?: boolean;
+        /** Order slots already covered; retained across supply claims. */
+        order_supply_completed_counts?: Record<number, number>;
     }[];
     meridian_threshold_idx?: number;
     /** Number of fixed orders already revealed in the active threshold's waves. */
@@ -138,17 +190,23 @@ export interface GameState {
     /** Fixed onboarding wave is complete and the next wave must wait for circulation. */
     meridian_fixed_wave_pending?: boolean;
     quest_progress?: Record<number, QuestProgress>;
-    quests_initialized?: boolean;
     quest_last_reset?: number;
+    weekly_task_progress?: Record<number, import("../engine/weekly_tasks").WeeklyTaskProgress>;
     pending_rewards: PendingReward[];
     home_meridian_progress?: HomeMeridianStageProgress[];
     /** Production facilities acquired at least once; kept after merge/consumption. */
-    unlocked_production_item_ids?: number[];
+    unlocked_production_item_ids: number[];
     activity_progress?: Record<number, ActivityProgress>;
-    spawn_seed?: number;
-    spawn_sequence?: number;
-    spawn_history?: SpawnHistoryEntry[];
+    battle_pass_progress?: Record<number, BattlePassProgress>;
+    battle_pass_order_requests?: string[];
+    stair_climb_progress?: StairClimbProgress;
+    order_duel_progress?: DuelProgress;
+    spawn_seed: number;
+    spawn_sequence: number;
+    spawn_history: SpawnHistoryEntry[];
     crafted_item_ids: number[];
+    /** Item discovery rewards already claimed, retained after item consumption. */
+    item_catalog_claimed_ids: number[];
 }
 export interface SpawnHistoryEntry {
     request_id: string;
@@ -174,9 +232,14 @@ export interface LeaderboardEntry {
     updatedAt: string;
 }
 export interface IStorage {
+    loadOrderDuel(eventId: string): Promise<DuelRegistry | null>;
+    saveOrderDuel(registry: DuelRegistry): Promise<void>;
     findUser(deviceId: string): Promise<User | null>;
     createUser(deviceId: string): Promise<User>;
     loadState(userId: string): Promise<GameState | null>;
     saveState(userId: string, state: GameState): Promise<void>;
     getLeaderboard(limit: number): Promise<LeaderboardEntry[]>;
+    listStairClimbCandidates(level: number): Promise<string[]>;
+    loadStairClimb(eventId: string): Promise<StairClimbRegistry | null>;
+    saveStairClimb(registry: StairClimbRegistry): Promise<void>;
 }

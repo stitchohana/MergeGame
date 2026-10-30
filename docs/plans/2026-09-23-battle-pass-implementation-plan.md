@@ -1,3 +1,5 @@
+> 2026-10-28 约定更新：本文中的旧存档/旧格式兼容、历史回填和增量数据库迁移方案已废止。仅支持当前结构；新库统一使用 `server/schema.sql`，功能首次解锁与正常周期结算仍保留。
+
 # 双轨战令活动实施计划
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.

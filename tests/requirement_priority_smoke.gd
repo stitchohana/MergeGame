@@ -90,9 +90,9 @@ func _test_available_order_is_first() -> void:
 	add_child(requirement_list)
 	await get_tree().process_frame
 	var requirements: Array = [
-		{"items": [{"item_id": FIRST_ITEM_ID}], "completed": false},
-		{"items": [{"item_id": SECOND_ITEM_ID}], "completed": false},
-		{"items": [{"item_id": THIRD_ITEM_ID}], "completed": false},
+		{"item_ids": [FIRST_ITEM_ID], "items": [{"item_id": FIRST_ITEM_ID}], "completed": false},
+		{"item_ids": [SECOND_ITEM_ID], "items": [{"item_id": SECOND_ITEM_ID}], "completed": false},
+		{"item_ids": [THIRD_ITEM_ID], "items": [{"item_id": THIRD_ITEM_ID}], "completed": false},
 	]
 	requirement_list.set_requirements(requirements)
 	await get_tree().process_frame

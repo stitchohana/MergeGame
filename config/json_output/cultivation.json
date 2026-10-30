@@ -36,13 +36,13 @@
     },
     {
       "name": "练气三层",
-      "exp": 104,
+      "exp": 105,
       "max_qi": 6000,
       "breakthrough_reward_id": 313
     },
     {
       "name": "练气四层",
-      "exp": 128,
+      "exp": 126,
       "max_qi": 8000,
       "breakthrough_items": [
         {
@@ -54,7 +54,7 @@
     },
     {
       "name": "练气五层",
-      "exp": 228,
+      "exp": 231,
       "max_qi": 10000,
       "breakthrough_reward_id": 313
     },
@@ -72,19 +72,19 @@
     },
     {
       "name": "练气七层",
-      "exp": 300,
+      "exp": 297,
       "max_qi": 15000,
       "breakthrough_reward_id": 313
     },
     {
       "name": "练气八层",
-      "exp": 348,
+      "exp": 350,
       "max_qi": 17000,
       "breakthrough_reward_id": 313
     },
     {
       "name": "练气九层",
-      "exp": 384,
+      "exp": 385,
       "max_qi": 20000,
       "breakthrough_items": [
         {
@@ -96,7 +96,7 @@
     },
     {
       "name": "筑基前期",
-      "exp": 900,
+      "exp": 910,
       "max_qi": 153200,
       "breakthrough_items": [
         {
@@ -108,7 +108,7 @@
     },
     {
       "name": "筑基中期",
-      "exp": 2150,
+      "exp": 2166,
       "max_qi": 200000,
       "breakthrough_items": [
         {
@@ -120,7 +120,7 @@
     },
     {
       "name": "筑基后期",
-      "exp": 3900,
+      "exp": 3895,
       "max_qi": 400000,
       "breakthrough_items": [
         {
@@ -144,7 +144,7 @@
     },
     {
       "name": "金丹中期",
-      "exp": 6300,
+      "exp": 6288,
       "max_qi": 4792200,
       "breakthrough_items": [
         {
@@ -156,7 +156,7 @@
     },
     {
       "name": "金丹后期",
-      "exp": 13600,
+      "exp": 13617,
       "max_qi": 8000000,
       "breakthrough_items": [
         {
@@ -168,7 +168,7 @@
     },
     {
       "name": "元婴前期",
-      "exp": 4700,
+      "exp": 4698,
       "max_qi": 421700300,
       "breakthrough_items": [
         {
@@ -180,7 +180,7 @@
     },
     {
       "name": "元婴中期",
-      "exp": 13700,
+      "exp": 13680,
       "max_qi": 500000000,
       "breakthrough_items": [
         {
@@ -192,7 +192,7 @@
     },
     {
       "name": "元婴后期",
-      "exp": 31000,
+      "exp": 31020,
       "max_qi": 1000000000,
       "breakthrough_items": [
         {
@@ -204,7 +204,7 @@
     },
     {
       "name": "化神前期",
-      "exp": 99999999,
+      "exp": 100000026,
       "max_qi": 454136600
     }
   ]

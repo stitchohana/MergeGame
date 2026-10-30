@@ -238,40 +238,12 @@ func get_occupied_neighbors(pos: Vector2i) -> Array[Vector2i]:
 	return result
 
 func find_nearest_empty(from_pos: Vector2i) -> Vector2i:
-	# BFS from the given position to find the nearest empty cell
-	var visited := {}
-	var queue: Array = [from_pos]
-	visited[hash_pos(from_pos)] = true
-
-	while not queue.is_empty():
-		var current: Vector2i = queue.pop_front()
-		if is_empty(current):
-			return current
-		for n in get_neighbors(current):
-			var h := hash_pos(n)
-			if not visited.has(h):
-				visited[h] = true
-				queue.append(n)
-
-	return Vector2i(-1, -1)  # No empty cell found
+	return GridUtils.find_nearest_empty(from_pos, GRID_COLS, GRID_ROWS, is_empty)
 
 
 func find_nearest_empty_after_removing(removed_pos: Vector2i, from_pos: Vector2i) -> Vector2i:
-	var visited: Dictionary = {}
-	var queue: Array = [from_pos]
-	visited[hash_pos(from_pos)] = true
-
-	while not queue.is_empty():
-		var current: Vector2i = queue.pop_front()
-		if current == removed_pos or is_empty(current):
-			return current
-		for neighbor: Vector2i in get_neighbors(current):
-			var key: int = hash_pos(neighbor)
-			if not visited.has(key):
-				visited[key] = true
-				queue.append(neighbor)
-
-	return Vector2i(-1, -1)
+	return GridUtils.find_nearest_empty(from_pos, GRID_COLS, GRID_ROWS,
+		func(pos: Vector2i) -> bool: return pos == removed_pos or is_empty(pos))
 
 func find_empty_by_row() -> Vector2i:
 	for row in range(GRID_ROWS):
@@ -373,7 +345,7 @@ func get_inventory_items(main_board_only: bool = false) -> Array[Dictionary]:
 		for entry: Dictionary in get_all_items():
 			_append_inventory_item(result, seen_uids, entry.data, entry.pos, "grid")
 	for raw_entry: Variant in StoragePouch.items:
-		var entry: Dictionary = raw_entry if raw_entry is Dictionary else {"id": int(raw_entry)}
+		var entry: Dictionary = raw_entry as Dictionary
 		_append_inventory_item(result, seen_uids, item_data_from_server(entry), Vector2i(-1, -1), "pouch")
 	return result
 

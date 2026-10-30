@@ -33,7 +33,7 @@ const monthEnd = Date.parse("2026-09-30T23:59:59+08:00");
 const monthStart = Date.parse("2026-10-01T00:00:00+08:00");
 assert.equal(service.getPeriodKey(monthEnd), "2026-09");
 assert.equal(service.getPeriodKey(monthStart), "2026-10");
-const boundaryState: any = { battle_pass_progress: {
+const boundaryState: any = { cultivation: { current_level: 2 }, battle_pass_progress: {
   4: { points: 120, premium_unlocked: true, free_claimed_levels: [1], premium_claimed_levels: [1], period_key: "2026-09" },
 } };
 service.ensureProgress(boundaryState, monthEnd);
@@ -49,7 +49,7 @@ assert.deepEqual(boundaryState.battle_pass_progress[4], {
 assert.equal(service.awardOrderPoints(boundaryState, 100, "october-order", monthStart), true);
 assert.equal(boundaryState.battle_pass_progress[4].points, 10);
 
-const monthlyState: any = { battle_pass_progress: {
+const monthlyState: any = { cultivation: { current_level: 2 }, battle_pass_progress: {
   4: { points: 120, premium_unlocked: true, free_claimed_levels: [1], premium_claimed_levels: [1], period_key: "2026-09" },
 } };
 service.ensureProgress(monthlyState, Date.parse("2026-10-08T12:00:00+08:00"));
@@ -76,7 +76,7 @@ activePass.end_time = "2999-01-01T00:00:00Z";
 const doubledRate = new BattlePassService(cloneConfig(), activeActivities, gameConfigTables.tokens, {
   battle_pass: { premium_unlock_cost: 500, points_per_value: 0.2 },
 });
-const rateState: any = { spirit_stones: 500 };
+const rateState: any = { cultivation: { current_level: 2 }, spirit_stones: 500 };
 assert.equal(doubledRate.awardOrderPoints(rateState, 95, "", Date.parse(activePass.start_time)), true);
 assert.equal(rateState.battle_pass_progress[4].points, 19);
 console.log("battle_pass_config_smoke: ok");

@@ -52,6 +52,8 @@ godot4 --path .
 
 ## Development Notes
 
+- **No data migrations:** Only support the current save, protocol, and configuration schemas. Do not add legacy-format conversion, historical data backfills, automatic save repair, or version-specific compensation on load. Initialize complete state when creating a player or first unlocking a feature. Preserve ordinary timers, period resets, and gameplay settlement. Keep database initialization in `server/schema.sql`; do not add incremental migration scripts.
+
 - All items defined in `config/items.json`. To add a new item: add entry to `regular` or `launcher` array with numeric ID.
 - Launcher spawn tables use `spawns: [{id, weight}]` — weights are relative, not percentages.
 - To replace art: set `icon` path in items.json to a texture in `assets/` directory.

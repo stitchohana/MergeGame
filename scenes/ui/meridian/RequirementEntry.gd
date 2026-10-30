@@ -101,6 +101,8 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 		stair_label.add_theme_color_override("font_color", Color("806022"))
 		stair_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		reward_box.add_child(stair_label)
+	set_order_duel_points(int(rewards.get("order_duel_points", 0)))
+	set_secret_realm_swords(rewards.get("secret_realm_swords", []))
 
 	if completed:
 		complete_btn.text = ""
@@ -113,6 +115,53 @@ func _do_setup(items: Array, index: int, completed: bool, rewards: Dictionary) -
 			complete_btn.pressed.disconnect(_on_btn_pressed)
 		complete_btn.pressed.connect(_on_btn_pressed)
 		complete_btn.visible = false
+
+
+func set_order_duel_points(points: int) -> void:
+	var reward_box: HBoxContainer = $RewardRow/RewardBox
+	var label: Label = reward_box.get_node_or_null("OrderDuelPoints") as Label
+	if points <= 0 or bool(_data.get("completed", false)):
+		if label:
+			reward_box.remove_child(label)
+			label.queue_free()
+		return
+	if not label:
+		label = Label.new()
+		label.name = "OrderDuelPoints"
+		label.add_theme_font_size_override("font_size", 14)
+		label.add_theme_color_override("font_color", Color("806022"))
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		reward_box.add_child(label)
+	label.text = "对战 +%d" % points
+	label.tooltip_text = "完成本单获得 %d 对战积分（以本场剩余目标积分为限）" % points
+
+
+func set_secret_realm_swords(drops: Array) -> void:
+	var reward_box: HBoxContainer = $RewardRow/RewardBox
+	var slot: RewardSlot = reward_box.get_node_or_null("SecretRealmSwords") as RewardSlot
+	var total: int = 0
+	var details: PackedStringArray = []
+	for drop: Dictionary in drops:
+		var count: int = int(drop.get("count", 0))
+		if count <= 0:
+			continue
+		total += count
+		for item: Dictionary in ConfigDatabase.secret_realm.get("items", []):
+			if item.get("id", "") == drop.get("id", ""):
+				details.append("%s ×%d" % [item.get("name", "飞剑"), count])
+				break
+	if total <= 0 or bool(_data.get("completed", false)):
+		if slot:
+			reward_box.remove_child(slot)
+			slot.queue_free()
+		return
+	if not slot:
+		slot = _reward_slot_scene.instantiate() as RewardSlot
+		slot.name = "SecretRealmSwords"
+		reward_box.add_child(slot)
+	slot.icon_rect.texture = preload("res://assets/ui/secret_realm/sword.svg")
+	slot.count_label.text = "×%d" % total
+	slot.tooltip_text = "完成本单获得秘境飞剑，进入秘境暂存：\n%s" % "\n".join(details)
 
 
 func set_available(available: bool) -> bool:

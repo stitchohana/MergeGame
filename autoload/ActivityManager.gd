@@ -11,12 +11,42 @@ var stair_climb: Dictionary = {}
 var stair_climb_received_ticks: int = 0
 var _shown_card_set_rewards: Dictionary = {}
 signal stair_climb_updated()
+signal order_duel_updated()
+var order_duel: Dictionary = {}
+var _duel_poll_seconds: float = 0.0
+var _duel_poll_status: String = ""
+
+
+func _process(delta: float) -> void:
+	var status: String = str(order_duel.get("status", ""))
+	if status != _duel_poll_status:
+		_duel_poll_status = status
+		_duel_poll_seconds = 0.0
+	if not CloudService.online or not is_unlocked() or status not in ["matching", "playing"]:
+		_duel_poll_seconds = 0.0
+		return
+	_duel_poll_seconds += delta
+	var interval: float = 1.0 if status == "matching" else 10.0
+	if _duel_poll_seconds < interval:
+		return
+	_duel_poll_seconds = 0.0
+	CloudService.fetch_order_duel()
+
+func is_unlocked() -> bool:
+	return CultivationService.current_level >= 2
 
 
 func _ready() -> void:
 	if not CloudService.state_loaded.is_connected(_on_state_loaded):
 		CloudService.state_loaded.connect(_on_state_loaded)
 	CloudService.card_collection_confirmed.connect(_on_card_collection_confirmed)
+	CloudService.breakthrough_confirmed.connect(_on_breakthrough_confirmed)
+
+
+func _on_breakthrough_confirmed(result: Dictionary) -> void:
+	var cultivation: Dictionary = result.get("cultivation", {})
+	if int(cultivation.get("current_level", 1)) == 2:
+		CloudService.fetch_state()
 
 
 func _on_state_loaded(state: Dictionary) -> void:
@@ -28,9 +58,16 @@ func reset_progress() -> void:
 	defs.clear()
 	progress.clear()
 	_shown_card_set_rewards.clear()
+	order_duel.clear()
+	_duel_poll_seconds = 0.0
+	_duel_poll_status = ""
+	CloudService._order_duel_revision = -1
+	CloudService._order_duel_registry_revision = -1
 
 
 func _on_card_collection_confirmed(data: Dictionary) -> void:
+	if not is_unlocked():
+		return
 	var completed_sets: Array = data.get("completed_sets", [])
 	var rewards: Dictionary = data.get("rewards", {})
 	if not data.has("cards") or completed_sets.is_empty() or rewards.is_empty():
@@ -72,6 +109,8 @@ func sync_state(state: Dictionary) -> void:
 		GameState.activity_progress = progress
 	for activity: Dictionary in defs:
 		activity_updated.emit(int(activity.get("id", 0)))
+	if defs.is_empty():
+		activity_updated.emit(0)
 
 
 func get_progress(activity_id: int) -> Dictionary:
@@ -87,8 +126,10 @@ func is_claimed(activity_id: int) -> bool:
 
 
 func get_active_activities() -> Array:
+	if not is_unlocked():
+		return []
 	var result: Array = []
 	for act in defs:
-		if act.get("active", false) or (act.get("widget", "") == "StairClimb" and act.get("result_available", false)):
+		if act.get("active", false) or (act.get("widget", "") in ["StairClimb", "OrderDuel"] and act.get("result_available", false)):
 			result.append(act)
 	return result

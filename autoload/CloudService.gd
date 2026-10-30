@@ -26,6 +26,9 @@ signal exp_pill_consume_confirmed(result: Dictionary)
 signal exp_pill_consume_rejected(reason: String)
 signal stamina_restore_confirmed(result: Dictionary)
 signal stamina_restore_rejected(reason: String)
+signal stamina_refresh_rejected(reason: String)
+var stamina_refresh_busy: bool = false
+var _stamina_revision: int = -1
 signal spirit_stone_consume_confirmed(result: Dictionary)
 signal spirit_stone_consume_rejected(reason: String)
 signal board_switch_confirmed(result: Dictionary)
@@ -45,6 +48,10 @@ signal order_supply_claim_rejected(reason: String)
 signal battle_pass_action_confirmed(result: Dictionary)
 signal battle_pass_action_rejected(reason: String)
 signal stair_climb_loaded(data: Dictionary)
+signal order_duel_loaded(data: Dictionary)
+signal order_duel_failed(reason: String)
+var _order_duel_revision: int = -1
+var _order_duel_registry_revision: int = -1
 signal stair_climb_failed(reason: String)
 var _stair_climb_revision: int = -1
 signal card_collection_confirmed(result: Dictionary)
@@ -54,6 +61,8 @@ var card_collection_busy: bool = false
 var _card_collection_user_id: String = ""
 signal quest_claim_confirmed(result: Dictionary)
 signal quest_claim_rejected(reason: String)
+signal weekly_claim_confirmed(result: Dictionary)
+signal weekly_claim_rejected(reason: String)
 signal item_catalog_claim_confirmed(result: Dictionary)
 signal item_catalog_claim_rejected(reason: String)
 var item_catalog_claim_pending: int = 0
@@ -76,6 +85,24 @@ signal craft_speedup_rejected(reason: String)
 signal launcher_speedup_confirmed(result: Dictionary)
 signal launcher_speedup_rejected(reason: String)
 signal state_loaded(state: Dictionary)
+signal secret_realm_updated(data: Dictionary)
+signal secret_realm_failed(reason: String)
+signal secret_realm_preview_loaded(data: Dictionary)
+var secret_realm_state: Dictionary = {}
+var secret_realm_revision: int = -1
+var secret_realm_busy: bool = false
+var secret_realm_retry: Dictionary = {}
+signal golden_finger_updated(data: Dictionary)
+signal golden_finger_info(data: Dictionary)
+signal golden_finger_preview(data: Dictionary)
+signal golden_finger_confirmed(data: Dictionary)
+signal golden_finger_failed(reason: String)
+var golden_finger_state: Dictionary = {}
+var golden_finger_version: int = 0
+var golden_finger_revision: int = -1
+var golden_finger_busy: bool = false
+var golden_finger_retry: Dictionary = {}
+var _golden_finger_user: String = ""
 signal state_load_failed(reason: String)
 signal battle_attack_confirmed(result: Dictionary)
 signal battle_attack_rejected(reason: String)
@@ -88,12 +115,23 @@ signal storage_deposit_rejected(reason: String)
 signal sell_confirmed(result: Dictionary)
 signal sell_rejected(reason: String)
 signal shop_items_loaded(items: Array)
+signal shop_updated(data: Dictionary)
+signal shop_failed(reason: String)
+signal shop_refresh_rejected(reason: String)
+var shop_busy: bool = false
 signal buy_confirmed(result: Dictionary)
 signal buy_rejected(reason: String)
+signal resource_purchase_info_loaded(data: Dictionary)
+signal resource_purchase_info_rejected(reason: String)
+signal resource_purchase_confirmed(result: Dictionary)
+signal resource_purchase_rejected(reason: String)
+var resource_purchase_busy: bool = false
 signal gm_exec_confirmed(result: Dictionary)
 signal gm_exec_rejected(reason: String)
 
 var online: bool = false
+var relogin_pending: bool = false
+var session_restore_required: bool = false
 var token: String = ""
 var base_url: String = ""
 
@@ -130,8 +168,17 @@ func _register_endpoint(tag: String, response_cb: Callable,
 	}
 
 func _register_all_endpoints() -> void:
+	_register_endpoint("secret_realm", _on_secret_realm_response, secret_realm_failed, secret_realm_failed, secret_realm_failed)
+	_register_endpoint("secret_realm_preview", _on_secret_realm_preview, secret_realm_failed, secret_realm_failed, secret_realm_failed)
+	secret_realm_failed.connect(_on_secret_realm_error)
+	_register_endpoint("golden_info", _on_golden_info, golden_finger_failed, golden_finger_failed, golden_finger_failed)
+	_register_endpoint("golden_preview", _on_golden_preview, golden_finger_failed, golden_finger_failed, golden_finger_failed)
+	_register_endpoint("golden_action", _on_golden_action, golden_finger_failed, golden_finger_failed, golden_finger_failed)
+	golden_finger_failed.connect(_on_golden_error)
 	_register_endpoint("login", _on_login_response, login_failed, login_failed, login_failed)
 	_register_endpoint("fetch_state", _on_fetch_state_response, state_load_failed, state_load_failed, state_load_failed)
+	_register_endpoint("stamina_refresh", _on_stamina_refresh_response, stamina_refresh_rejected, stamina_refresh_rejected, stamina_refresh_rejected)
+	stamina_refresh_rejected.connect(_on_stamina_refresh_error)
 	_register_endpoint("merge", _on_merge_response, merge_rejected, merge_rejected, merge_rejected)
 	_register_endpoint("spawn", _on_spawn_response, spawn_rejected, spawn_rejected, spawn_rejected)
 	_register_endpoint("push_place", _on_push_place_response, push_place_rejected, push_place_rejected, push_place_rejected)
@@ -151,9 +198,11 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("battle_pass_unlock", _on_battle_pass_response, battle_pass_action_rejected, battle_pass_action_rejected, battle_pass_action_rejected)
 	_register_endpoint("battle_pass_claim", _on_battle_pass_response, battle_pass_action_rejected, battle_pass_action_rejected, battle_pass_action_rejected)
 	_register_endpoint("stair_climb", _on_stair_climb_response, stair_climb_failed, stair_climb_failed, stair_climb_failed)
+	_register_endpoint("order_duel", _on_order_duel_response, order_duel_failed, order_duel_failed, order_duel_failed)
 	_register_endpoint("card_collection", _on_card_collection_response, card_collection_rejected, card_collection_rejected, card_collection_rejected)
 	card_collection_rejected.connect(_on_card_collection_error)
 	_register_endpoint("quest_claim", _on_quest_claim_response, quest_claim_rejected, quest_claim_rejected, quest_claim_rejected)
+	_register_endpoint("weekly_claim", _on_weekly_claim_response, weekly_claim_rejected, weekly_claim_rejected, weekly_claim_rejected)
 	_register_endpoint("item_catalog_claim", _on_item_catalog_claim_response, item_catalog_claim_rejected, item_catalog_claim_rejected, item_catalog_claim_rejected)
 	item_catalog_claim_rejected.connect(_on_item_catalog_claim_error)
 	_register_endpoint("claim_pending_reward", _on_claim_pending_reward_response, pending_reward_claimed_rejected, pending_reward_claimed_rejected, pending_reward_claimed_rejected)
@@ -170,8 +219,15 @@ func _register_all_endpoints() -> void:
 	_register_endpoint("storage_withdraw", _on_storage_withdraw_response, storage_withdraw_rejected, storage_withdraw_rejected, storage_withdraw_rejected)
 	_register_endpoint("storage_deposit", _on_storage_deposit_response, storage_deposit_rejected, storage_deposit_rejected, storage_deposit_rejected)
 	_register_endpoint("sell", _on_sell_response, sell_rejected, sell_rejected, sell_rejected)
-	_register_endpoint("shop_items", _on_shop_items_response)
+	_register_endpoint("shop_items", _on_shop_items_response, shop_failed, shop_failed, shop_failed)
+	_register_endpoint("shop_refresh", _on_shop_refresh_response, shop_refresh_rejected, shop_refresh_rejected, shop_refresh_rejected)
 	_register_endpoint("buy", _on_buy_response, buy_rejected, buy_rejected, buy_rejected)
+	shop_failed.connect(_on_shop_error)
+	shop_refresh_rejected.connect(_on_shop_error)
+	buy_rejected.connect(_on_shop_error)
+	_register_endpoint("resource_purchase_info", _on_resource_purchase_info_response, resource_purchase_info_rejected, resource_purchase_info_rejected, resource_purchase_info_rejected)
+	_register_endpoint("resource_purchase", _on_resource_purchase_response, resource_purchase_rejected, resource_purchase_rejected, resource_purchase_rejected)
+	resource_purchase_rejected.connect(_on_resource_purchase_error)
 	_register_endpoint("gm_exec", _on_gm_exec_response, gm_exec_rejected, gm_exec_rejected, gm_exec_rejected)
 	_register_endpoint("leaderboard", Callable())
 
@@ -208,11 +264,72 @@ func login(device_id: String) -> void:
 	var body := JSON.stringify({"device_id": device_id})
 	_send_request("login", "/api/auth/login", HTTPClient.Method.METHOD_POST, body)
 
+
+func force_relogin() -> void:
+	if relogin_pending:
+		return
+	relogin_pending = true
+	session_restore_required = true
+	online = false
+	clear_token()
+	_request_queue.clear()
+	_query_queue.clear()
+	_active_request.clear()
+	_busy = false
+	_state_request_in_flight = false
+	# Cancel old transports so late replies cannot enter the new login session.
+	if is_instance_valid(_http):
+		_http.request_completed.disconnect(_on_request_completed)
+		_http.cancel_request()
+		_http.queue_free()
+	_setup_http()
+	for context: Dictionary in _query_requests.values():
+		var request_http: HTTPRequest = context.get("http") as HTTPRequest
+		if is_instance_valid(request_http):
+			request_http.cancel_request()
+			request_http.queue_free()
+	_query_requests.clear()
+	secret_realm_state.clear()
+	secret_realm_revision = -1
+	secret_realm_busy = false
+	secret_realm_retry.clear()
+	golden_finger_state.clear()
+	golden_finger_revision = -1
+	golden_finger_version = 0
+	golden_finger_busy = false
+	golden_finger_retry.clear()
+	card_collection_request.clear()
+	card_collection_busy = false
+	_stamina_revision = -1
+	_item_catalog_revision = -1
+	_stair_climb_revision = -1
+	_order_duel_revision = -1
+	_order_duel_registry_revision = -1
+	item_catalog_claim_pending = 0
+	stamina_refresh_busy = false
+	shop_busy = false
+	resource_purchase_busy = false
+	# Let the current response finish before LoginScreen queues auto-login.
+	kicked.emit.call_deferred()
+
 func _on_login_response(data: Dictionary) -> void:
 	token = data.get("token", "")
 	var user: Dictionary = data.get("user", {})
 	var user_id: String = user.get("user_id", "")
 	if not token.is_empty() and not user_id.is_empty():
+		relogin_pending = false
+		if _golden_finger_user != user_id:
+			QuestService.reset_weekly_progress()
+			secret_realm_state.clear()
+			secret_realm_revision = -1
+			secret_realm_busy = false
+			secret_realm_retry.clear()
+			_golden_finger_user = user_id
+			golden_finger_revision = -1
+			golden_finger_version = 0
+			golden_finger_state.clear()
+			golden_finger_retry.clear()
+			golden_finger_busy = false
 		if not _card_collection_user_id.is_empty() and _card_collection_user_id != user_id:
 			card_collection_request.clear()
 			card_collection_busy = false
@@ -223,6 +340,7 @@ func _on_login_response(data: Dictionary) -> void:
 			_stair_climb_revision = -1
 			RewardManager.reset_pending()
 			_item_catalog_revision = -1
+			_stamina_revision = -1
 			item_catalog_claim_pending = 0
 			GameState.set_crafted_item_ids([])
 			GameState.set_item_catalog_claimed_ids([])
@@ -243,11 +361,38 @@ func fetch_state() -> void:
 	_send_authed_request("fetch_state", "/api/game/state", HTTPClient.Method.METHOD_GET)
 
 func _on_fetch_state_response(data: Dictionary) -> void:
+	session_restore_required = false
+	# Refresh cultivation before activity/task listeners evaluate their unlock gate.
+	if data.has("cultivation"):
+		CultivationService.deserialize(data.get("cultivation", {}))
 	if data.has("crafted_item_ids"):
 		GameState.set_crafted_item_ids(data.get("crafted_item_ids", []))
 	GameState.sync_stamina_multiplier(data)
 	_sync_battle_pass_progress(data)
 	state_loaded.emit(data)
+
+
+func refresh_stamina() -> void:
+	if stamina_refresh_busy or not online or _busy or not _request_queue.is_empty():
+		return
+	stamina_refresh_busy = true
+	_send_authed_request("stamina_refresh", "/api/game/stamina/refresh", HTTPClient.Method.METHOD_POST)
+
+
+func _on_stamina_refresh_error(_reason: String) -> void:
+	stamina_refresh_busy = false
+
+
+func _on_stamina_refresh_response(data: Dictionary) -> void:
+	stamina_refresh_busy = false
+	# A later action may already have predicted a stamina spend while waiting.
+	if not _request_queue.is_empty() or int(data.get("storage_revision", -1)) < _stamina_revision:
+		return
+	GameState.stamina = int(data.get("stamina", GameState.stamina))
+	GameState.max_stamina = int(data.get("max_stamina", GameState.max_stamina))
+	GameState.regen_remaining_ms = float(data.get("regen_remaining_ms", 0.0))
+	GameState.sync_stamina_multiplier(data)
+	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 
 # --- Merge ---
 
@@ -494,6 +639,23 @@ func _on_quest_claim_response(data: Dictionary) -> void:
 	else:
 		quest_claim_rejected.emit(data.get("error", "unknown_error"))
 
+
+func submit_weekly_claim(activity_id: int, stage: int, period_key: String) -> void:
+	_send_authed_request("weekly_claim", "/api/game/weekly_tasks/claim", HTTPClient.Method.METHOD_POST,
+		JSON.stringify({"activity_id": activity_id, "stage": stage, "period_key": period_key}))
+
+
+func _on_weekly_claim_response(data: Dictionary) -> void:
+	if not bool(data.get("ok", false)):
+		weekly_claim_rejected.emit(str(data.get("error", "unknown_error")))
+		return
+	GameState.stamina = int(data.get("stamina", GameState.stamina))
+	GameState.max_stamina = int(data.get("max_stamina", GameState.max_stamina))
+	GameState.regen_remaining_ms = float(data.get("regen_remaining_ms", 0.0))
+	GameState.sync_stamina_multiplier(data)
+	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	weekly_claim_confirmed.emit(data)
+
 func _on_home_meridian_light_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		home_meridian_light_confirmed.emit(data)
@@ -649,6 +811,9 @@ func _flush_query_queue() -> void:
 
 func _emit_error(tag: String, error_type: String, reason: String) -> void:
 	_finish_tag(tag)
+	if reason == "state_conflict":
+		force_relogin()
+		return
 	var ep: Dictionary = _endpoints.get(tag, {})
 	var sig: Signal = ep.get(error_type, Signal())
 	if sig.is_null():
@@ -667,6 +832,8 @@ func _send_request(tag: String, path: String, method: int, body: String = "") ->
 	return 0
 
 func _send_authed_request(tag: String, path: String, method: int, body: String = "") -> int:
+	if relogin_pending:
+		return -1
 	var req: Dictionary = {"tag": tag, "path": path, "method": method, "body": body, "authed": true, "retries": 0}
 	if method == HTTPClient.Method.METHOD_GET:
 		if _query_requests.size() >= QUERY_CONCURRENCY:
@@ -726,6 +893,8 @@ func _start_query_request(req: Dictionary) -> void:
 		_flush_query_queue()
 
 func _on_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	if _active_request.is_empty():
+		return
 	var req: Dictionary = _active_request
 	_active_request = {}
 	if result != HTTPRequest.RESULT_SUCCESS:
@@ -748,6 +917,8 @@ func _retry_spawn_request(req: Dictionary) -> bool:
 	return true
 
 func _on_query_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray, query_id: int) -> void:
+	if not _query_requests.has(query_id):
+		return
 	var context: Dictionary = _query_requests.get(query_id, {})
 	_query_requests.erase(query_id)
 	var query_http: HTTPRequest = context.get("http") as HTTPRequest
@@ -758,6 +929,8 @@ func _on_query_request_completed(result: int, response_code: int, _headers: Pack
 	_flush_query_queue()
 
 func _handle_response(tag: String, result: int, response_code: int, body: PackedByteArray) -> void:
+	if relogin_pending and tag != "login":
+		return
 	if result != HTTPRequest.RESULT_SUCCESS:
 		_handle_network_error(tag)
 		return
@@ -769,6 +942,9 @@ func _handle_response(tag: String, result: int, response_code: int, body: Packed
 		return
 
 	var data: Dictionary = json.data
+	if tag != "login" and str(data.get("error", "")) == "state_conflict":
+		force_relogin()
+		return
 
 	if response_code >= 400:
 		var error_msg: String = data.get("error", "request_failed")
@@ -794,17 +970,99 @@ func _finish_tag(tag: String) -> void:
 		_state_request_in_flight = false
 
 func _dispatch_response(tag: String, data: Dictionary) -> void:
+	QuestService.sync_weekly_state(data)
+	_sync_secret_realm(data)
+	_sync_golden_finger(data)
+	if data.has("stamina"):
+		_stamina_revision = maxi(_stamina_revision, int(data.get("storage_revision", -1)))
 	_sync_item_catalog(data)
 	if data.has("activity_progress") or data.has("activity_defs"):
 		ActivityManager.sync_state(data)
 	_sync_card_collection(data, tag)
 	_sync_stair_climb(data)
+	_sync_order_duel(data)
 	if bool(data.get("ok", false)) and tag != "fetch_state" and tag != "login":
 		_register_confirmed_item_discoveries(tag, data)
 	var ep: Dictionary = _endpoints.get(tag, {})
 	var cb: Callable = ep.get("response_cb", Callable())
 	if cb.is_valid():
 		cb.call(data)
+
+
+func _sync_golden_finger(data: Dictionary) -> void:
+	var revision: int = int(data.get("storage_revision", -1))
+	if revision < golden_finger_revision:
+		return
+	golden_finger_revision = revision
+	if not data.has("golden_finger"):
+		return
+	golden_finger_version = int(data.get("version", golden_finger_version))
+	golden_finger_state = data.get("golden_finger", {}).duplicate(true)
+	golden_finger_updated.emit(data)
+
+
+func fetch_golden_finger() -> void:
+	if not online:
+		golden_finger_failed.emit("offline")
+		return
+	_send_authed_request("golden_info", "/api/game/golden_finger", HTTPClient.METHOD_GET)
+
+
+func preview_golden_finger(selection: Dictionary) -> void:
+	if not online:
+		golden_finger_failed.emit("offline")
+		return
+	_send_authed_request("golden_preview", "/api/game/golden_finger/preview", HTTPClient.METHOD_POST, JSON.stringify(selection))
+
+
+func submit_golden_finger(action: String, body: Dictionary) -> void:
+	if golden_finger_busy:
+		return
+	if not online:
+		golden_finger_failed.emit("offline")
+		return
+	golden_finger_busy = true
+	golden_finger_retry = {"action": action, "body": body.duplicate(true)}
+	_send_authed_request("golden_action", "/api/game/golden_finger/" + action, HTTPClient.METHOD_POST, JSON.stringify(body))
+
+
+func _on_golden_info(data: Dictionary) -> void:
+	if int(data.get("storage_revision", -1)) < golden_finger_revision:
+		golden_finger_failed.emit("state_conflict")
+		return
+	golden_finger_info.emit(data)
+
+
+func _on_golden_preview(data: Dictionary) -> void:
+	if int(data.get("storage_revision", -1)) < golden_finger_revision:
+		golden_finger_failed.emit("state_conflict")
+		return
+	golden_finger_preview.emit(data)
+
+
+func _on_golden_error(reason: String) -> void:
+	golden_finger_busy = false
+	if reason not in ["network_error", "timeout", "parse_error", "invalid_response", "internal_error", "save_failed"]:
+		golden_finger_retry.clear()
+
+
+func _on_golden_action(data: Dictionary) -> void:
+	golden_finger_busy = false
+	golden_finger_retry.clear()
+	if int(data.get("storage_revision", -1)) >= golden_finger_revision:
+		for entry: Dictionary in GridManager.get_all_items():
+			CraftingService._stop_craft_timer(entry.data)
+		GridManager.init_grid(GameState.current_board_type)
+		# Artifact outputs have their own flight. A spawn scale tween would move the
+		# target icon while its flight is being measured and played.
+		var previous_skip_anims: bool = GridManager._skip_anims
+		if str(data.get("artifact", "")) in ["basin", "furnace"] and str(data.get("action", "")) == "use":
+			GridManager._skip_anims = true
+		GridManager.populate_from_server(data.get("grid", []))
+		GridManager._skip_anims = previous_skip_anims
+		SaveManager._restore_from_server(data)
+		state_loaded.emit(data)
+	golden_finger_confirmed.emit(data)
 
 
 func _sync_item_catalog(data: Dictionary) -> void:
@@ -862,6 +1120,7 @@ func submit_card_collection(action: String, collection_id: int, target_id: int) 
 		"open_all": action == "open_all",
 		"request_id": Crypto.new().generate_random_bytes(16).hex_encode(),
 		"expected_opened_count": int(progress.get("opened_count", 0)),
+		"expected_exchange_count": int(progress.get("exchange_count", 0)),
 	}
 	retry_card_collection()
 
@@ -876,7 +1135,7 @@ func retry_card_collection() -> void:
 
 func _on_card_collection_error(reason: String) -> void:
 	card_collection_busy = false
-	if reason in ["invalid_params", "pack_not_found", "set_not_found", "insufficient_packs", "activity_inactive", "state_conflict", "already_claimed", "set_incomplete", "request_mismatch"]:
+	if reason in ["invalid_params", "pack_not_found", "set_not_found", "insufficient_packs", "insufficient_points", "exchange_unavailable", "activity_inactive", "state_conflict", "already_claimed", "set_incomplete", "request_mismatch"]:
 		card_collection_request.clear()
 		fetch_state()
 
@@ -893,6 +1152,8 @@ func _on_card_collection_response(data: Dictionary) -> void:
 	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 	card_collection_confirmed.emit(data)
+	if bool(data.get("exchanged", false)):
+		EventBus.show_toast.emit("兑换成功：5星卡包已放入物品暂存区")
 
 
 func _sync_card_collection(data: Dictionary, tag: String) -> void:
@@ -1003,31 +1264,131 @@ func _on_storage_deposit_response(data: Dictionary) -> void:
 # --- Shop ---
 
 func fetch_shop_items() -> void:
+	if shop_busy:
+		return
+	if not online:
+		shop_failed.emit("offline")
+		return
+	shop_busy = true
 	_send_authed_request("shop_items", "/api/game/shop/items", HTTPClient.Method.METHOD_GET)
 
+
+func submit_shop_refresh(revision: int) -> void:
+	if shop_busy:
+		return
+	if not online:
+		shop_refresh_rejected.emit("offline")
+		return
+	shop_busy = true
+	_send_authed_request("shop_refresh", "/api/game/shop/refresh", HTTPClient.Method.METHOD_POST,
+		JSON.stringify({"shop_revision": revision}))
+
+
+func _on_shop_error(_reason: String) -> void:
+	shop_busy = false
+
+
+func _on_shop_refresh_response(data: Dictionary) -> void:
+	shop_busy = false
+	GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+	shop_updated.emit(data)
+	EventBus.show_toast.emit("商品已刷新")
+
+
+func fetch_resource_purchase_info() -> void:
+	if not online:
+		resource_purchase_info_rejected.emit("offline")
+		return
+	_send_authed_request("resource_purchase_info", "/api/game/resources/purchase-info", HTTPClient.Method.METHOD_GET)
+
+
+func _on_resource_purchase_info_response(data: Dictionary) -> void:
+	resource_purchase_info_loaded.emit(data)
+
+
+func submit_resource_purchase(resource: String, expected_count: int, period_key: String, request_id: String) -> void:
+	if resource_purchase_busy:
+		return
+	if not online:
+		resource_purchase_rejected.emit("offline")
+		return
+	resource_purchase_busy = true
+	var body: String = JSON.stringify({"resource": resource, "expected_purchase_count": expected_count,
+		"period_key": period_key, "request_id": request_id})
+	_send_authed_request("resource_purchase", "/api/game/resources/buy", HTTPClient.Method.METHOD_POST, body)
+
+
+func _on_resource_purchase_error(_reason: String) -> void:
+	resource_purchase_busy = false
+
+
+func _on_resource_purchase_response(data: Dictionary) -> void:
+	resource_purchase_busy = false
+	GameState.sync_stamina_multiplier(data)
+	GameState.regen_remaining_ms = float(data.get("regen_remaining_ms", 0.0))
+	GameState.stamina = int(data.get("stamina", GameState.stamina))
+	GameState.max_stamina = int(data.get("max_stamina", GameState.max_stamina))
+	GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+	var cultivation: Dictionary = data.get("cultivation", {})
+	if not cultivation.is_empty():
+		CultivationService.deserialize(cultivation)
+	GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+	resource_purchase_confirmed.emit(data)
+
 func _on_shop_items_response(data: Dictionary) -> void:
+	shop_busy = false
+	if data.has("spirit_stones"):
+		GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 	if data.has("items"):
+		shop_updated.emit(data)
 		shop_items_loaded.emit(data.items)
 
-func submit_buy(item_id: int, target_col: int, target_row: int) -> void:
-	var body := JSON.stringify({"item_id": item_id, "target_col": target_col, "target_row": target_row})
+func submit_buy(item_id: int, target_col: int, target_row: int, revision: int = -1) -> void:
+	if shop_busy:
+		return
+	if not online:
+		buy_rejected.emit("offline")
+		return
+	shop_busy = true
+	var params: Dictionary = {"item_id": item_id, "target_col": target_col, "target_row": target_row}
+	if revision > 0:
+		params["shop_revision"] = revision
+	var body: String = JSON.stringify(params)
 	_send_authed_request("buy", "/api/game/shop/buy", HTTPClient.Method.METHOD_POST, body)
 
-func submit_gm_exec(cmd: String, amount: int, item_id: int = 0, col: int = -1, row: int = -1) -> void:
-	var body := JSON.stringify({"cmd": cmd, "amount": amount, "item_id": item_id, "col": col, "row": row, "gm_key": "dev-gm-key"})
+func submit_gm_exec(cmd: String, amount: int, item_id: int = 0, col: int = -1, row: int = -1, level: int = 0) -> void:
+	var body := JSON.stringify({"cmd": cmd, "amount": amount, "item_id": item_id, "col": col, "row": row, "level": level, "gm_key": "dev-gm-key"})
 	_send_authed_request("gm_exec", "/api/gm/exec", HTTPClient.Method.METHOD_POST, body)
 
 func _on_gm_exec_response(data: Dictionary) -> void:
 	if data.get("ok", false):
 		GameState.sync_stamina_multiplier(data)
 		_sync_battle_pass_progress(data)
+		_sync_secret_realm(data)
 		gm_exec_confirmed.emit(data)
 	else:
 		gm_exec_rejected.emit(data.get("error", "unknown_error"))
 
 func _on_buy_response(data: Dictionary) -> void:
+	shop_busy = false
 	if data.get("ok", false):
+		var item: Dictionary = ConfigDatabase.get_item_data(int(data.get("item_id", 0))).duplicate(true)
+		var uid: int = int(data.get("uid", 0))
+		var pos: Vector2i = Vector2i(int(data.get("target_col", -1)), int(data.get("target_row", -1)))
+		if not item.is_empty() and uid > 0 and GridManager.find_by_uid(uid).is_empty():
+			item["_uid"] = uid
+			if not GridManager.add_item(item, pos):
+				fetch_state()
+		GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+		var shop: Dictionary = data.get("shop", {})
+		if not shop.is_empty():
+			shop_updated.emit(shop)
 		buy_confirmed.emit(data)
+		EventBus.show_toast.emit("购买成功")
 	else:
 		buy_rejected.emit(data.get("error", "unknown"))
 
@@ -1072,6 +1433,59 @@ func fetch_stair_climb() -> void:
 	_send_authed_request("stair_climb", "/api/game/stair_climb", HTTPClient.Method.METHOD_GET)
 
 
+func fetch_order_duel() -> void:
+	# Matching polls every second; keep slow responses from accumulating duplicate queries.
+	for context: Dictionary in _query_requests.values():
+		var request: Dictionary = context.get("request", {})
+		if str(request.get("tag", "")) == "order_duel":
+			return
+	for request: Dictionary in _query_queue:
+		if str(request.get("tag", "")) == "order_duel":
+			return
+	_send_authed_request("order_duel", "/api/game/order_duel", HTTPClient.Method.METHOD_GET)
+
+
+func submit_order_duel(action: String, value: int) -> void:
+	if action not in ["start", "rest", "claim"]:
+		return
+	var body: Dictionary = {"tier": value} if action == "claim" else {"expected_round": value}
+	_send_authed_request("order_duel", "/api/game/order_duel/" + action, HTTPClient.Method.METHOD_POST, JSON.stringify(body))
+
+
+func _sync_order_duel(data: Dictionary) -> void:
+	if not data.has("order_duel"):
+		return
+	if not _order_duel_response_is_current(data):
+		return
+	_order_duel_revision = int(data.get("storage_revision", -1))
+	var view: Dictionary = data.get("order_duel", {})
+	_order_duel_registry_revision = int(view.get("registry_revision", -1))
+	ActivityManager.order_duel = view
+	ActivityManager.order_duel_updated.emit()
+
+
+func _order_duel_response_is_current(data: Dictionary) -> bool:
+	if int(data.get("storage_revision", -1)) < _order_duel_revision:
+		return false
+	var view: Dictionary = data.get("order_duel", {})
+	if str(view.get("event_id", "")) == str(ActivityManager.order_duel.get("event_id", "")):
+		return int(view.get("registry_revision", -1)) >= _order_duel_registry_revision
+	return true
+
+
+func _on_order_duel_response(data: Dictionary) -> void:
+	if not _order_duel_response_is_current(data):
+		order_duel_failed.emit("state_conflict")
+		return
+	if int(data.get("storage_revision", -1)) >= _stamina_revision:
+		GameState.stamina = int(data.get("stamina", GameState.stamina))
+		GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+	GameState.sync_stamina_multiplier(data)
+	order_duel_loaded.emit(ActivityManager.order_duel)
+
+
 func _sync_stair_climb(data: Dictionary) -> void:
 	if not data.has("stair_climb_progress"):
 		return
@@ -1098,3 +1512,70 @@ func _on_stair_climb_response(data: Dictionary) -> void:
 	GameState.spirit_stones_changed.emit(GameState.spirit_stones)
 	ActivityManager.stair_climb_updated.emit()
 	stair_climb_loaded.emit(ActivityManager.stair_climb)
+
+
+func fetch_secret_realm() -> void:
+	if not online:
+		secret_realm_failed.emit("offline")
+		return
+	_send_authed_request("secret_realm", "/api/game/secret_realm", HTTPClient.METHOD_GET)
+
+
+func submit_secret_realm(body: Dictionary) -> void:
+	if secret_realm_busy:
+		return
+	if not online:
+		secret_realm_failed.emit("offline")
+		return
+	secret_realm_busy = true
+	secret_realm_retry = body.duplicate(true)
+	_send_authed_request("secret_realm", "/api/game/secret_realm/action", HTTPClient.METHOD_POST, JSON.stringify(body))
+
+
+func preview_secret_realm_merge(body: Dictionary) -> void:
+	if secret_realm_busy:
+		return
+	if not online:
+		secret_realm_failed.emit("offline")
+		return
+	secret_realm_busy = true
+	_send_authed_request("secret_realm_preview", "/api/game/secret_realm/merge_preview", HTTPClient.METHOD_POST, JSON.stringify(body))
+
+
+func _on_secret_realm_preview(data: Dictionary) -> void:
+	secret_realm_busy = false
+	secret_realm_preview_loaded.emit(data)
+
+
+func _sync_secret_realm(data: Dictionary) -> void:
+	if not data.has("secret_realm") or int(data.get("storage_revision", -1)) < secret_realm_revision:
+		return
+	secret_realm_revision = int(data.get("storage_revision", -1))
+	secret_realm_state = data.get("secret_realm", {}).duplicate(true)
+	if data.get("effects") is Dictionary and data.effects.get("kind", "") in ["merge", "fight"]:
+		secret_realm_state["_effects"] = data.effects.duplicate(true)
+	secret_realm_updated.emit(secret_realm_state)
+
+
+func _on_secret_realm_response(data: Dictionary) -> void:
+	# Only a mutation acknowledgement clears the tracked in-flight request.
+	if data.has("replayed"):
+		secret_realm_busy = false
+		secret_realm_retry.clear()
+	if int(data.get("storage_revision", -1)) >= _stamina_revision:
+		GameState.stamina = int(data.get("stamina", GameState.stamina))
+		GameState.max_stamina = int(data.get("max_stamina", GameState.max_stamina))
+		GameState.spirit_stones = int(data.get("spirit_stones", GameState.spirit_stones))
+		GameState.regen_remaining_ms = float(data.get("regen_remaining_ms", GameState.regen_remaining_ms))
+		GameState.sync_stamina_multiplier(data)
+		GameState.stamina_changed.emit(GameState.stamina, GameState.max_stamina)
+		GameState.spirit_stones_changed.emit(GameState.spirit_stones)
+	secret_realm_updated.emit(secret_realm_state)
+
+
+func _on_secret_realm_error(reason: String) -> void:
+	secret_realm_busy = false
+	if reason == "state_conflict" or (not secret_realm_retry.is_empty() and reason in ["network_error", "timeout", "parse_error", "invalid_response", "internal_error", "save_failed", "offline"]):
+		force_relogin()
+		return
+	secret_realm_retry.clear()

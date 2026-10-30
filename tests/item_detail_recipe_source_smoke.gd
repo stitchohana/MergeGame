@@ -26,7 +26,7 @@ func _run() -> void:
 	assert(popup is RecipeSourcePopup)
 	UIManager.hide_popup(popup)
 	await get_tree().create_timer(0.5).timeout
-	assert(not UIManager._active_popups.has(popup))
+	assert(not is_instance_valid(popup), "Closed popup must be released")
 
 	var source_path: CraftPathView = preload("res://scenes/ui/main/CraftPathView.tscn").instantiate() as CraftPathView
 	add_child(source_path)

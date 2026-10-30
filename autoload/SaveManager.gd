@@ -133,4 +133,4 @@ func delete_save(slot: int) -> void:
 	if has_save(slot):
 		DirAccess.remove_absolute(SAVE_PATH_PREFIX + str(slot) + ".json")
 
-# --- Legacy autosave removed — server is authoritative ---
+# --- Server is authoritative ---

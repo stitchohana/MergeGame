@@ -52,7 +52,7 @@ assert.equal(randomRefresh.preservedBreakthrough, false);
 assert.equal(randomRefresh.fixedOrdersPreserved, false);
 assert.equal(randomRefresh.refreshedCount, randomState.meridian_acupoints.length);
 assert.notEqual(randomState.meridian_acupoints, previousRandomOrders);
-assert.equal(randomState.meridian_acupoints.length, 7);
+assert.equal(randomState.meridian_acupoints.length, gameConfigTables.meridians.thresholds.find(t => t.stage === 2)!.order_count);
 
 const fixedState: any = engine.createInitialState();
 const fixedInitial = engine.generateMeridianRequirements(fixedState).acupoints;

@@ -1,7 +1,7 @@
 "use strict";
-// --- Game data types ---
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuestType = exports.ActivityCycle = exports.ResetCycle = exports.TokenType = void 0;
+// --- Game data types ---
 var TokenType;
 (function (TokenType) {
     TokenType[TokenType["SPIRIT_STONES"] = 1] = "SPIRIT_STONES";
